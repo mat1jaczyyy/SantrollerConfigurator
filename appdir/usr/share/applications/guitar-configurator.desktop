@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Guitar Configurator
-Comment=Application for configuring Ardwiino Guitars
-Exec=/opt/guitar-configurator/bin/guitar-configurator
-Icon=guitar-configurator
-Categories=Utility;
