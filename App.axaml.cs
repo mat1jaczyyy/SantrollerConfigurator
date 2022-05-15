@@ -3,6 +3,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using GuitarConfiguratorSharp.ViewModels;
 using GuitarConfiguratorSharp.Views;
+using ReactiveUI;
+using Splat;
 
 namespace GuitarConfiguratorSharp
 {
@@ -15,10 +17,9 @@ namespace GuitarConfiguratorSharp
 
         public override void OnFrameworkInitializationCompleted()
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                desktop.MainWindow = new MainWindow();
-            }
+            Locator.CurrentMutable.RegisterConstant<IScreen>(new MainWindowViewModel());
+            Locator.CurrentMutable.Register<IViewFor<ConfigViewModel>>(() => new ConfigView());
+            new MainWindow { DataContext = Locator.Current.GetService<IScreen>() }.Show();
 
             base.OnFrameworkInitializationCompleted();
         }
