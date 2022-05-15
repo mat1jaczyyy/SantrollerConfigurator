@@ -17,17 +17,26 @@
         <TrimmableAssembly Include="Avalonia.Themes.Default" />
     </ItemGroup>
     <ItemGroup>
+        <AvaloniaResource Include="Assets\**" />
+    </ItemGroup>
+    <ItemGroup>
         <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="AvaloniaColorPicker" Version="1.1.0" />
+        <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
+        <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
         <PackageReference Include="Device.Net" Version="4.3.0-beta" />
         <PackageReference Include="Device.Net.LibUsb" Version="4.3.0-beta" />
         <PackageReference Include="Hid.Net" Version="4.3.0-beta" />
-        <PackageReference Include="SerialPort.Net" Version="4.3.0-beta" />
         <PackageReference Include="Usb.Net" Version="4.3.0-beta" />
+        <PackageReference Include="SerialPort.Net" Version="4.3.0-beta" />
+        <PackageReference Include="SemanticVersioning" Version="2.0.2" />
+        <PackageReference Include="sharpziplib" Version="1.3.3" />
+        <PackageReference Include="System.Text.Json" Version="6.0.3" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\GuitarConfiguratorSharp\GuitarConfiguratorSharp.csproj" />
+      <Content Include="Assets\Icons\Readme.txt" />
     </ItemGroup>
 </Project>

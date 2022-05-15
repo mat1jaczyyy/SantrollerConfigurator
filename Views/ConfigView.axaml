@@ -3,14 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker"
-             xmlns:viewModels="clr-namespace:GuitarConfiguratorSharp.ViewModels"
              xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="GuitarConfiguratorSharp.Views.MainView"
+             x:Class="GuitarConfiguratorSharp.Views.ConfigView"
              Background="Transparent">
-    <Design.DataContext>
-        <viewModels:MainViewModel />
-    </Design.DataContext>
     <UserControl.Resources>
         <guitarConfiguratorSharp:BitmapAssetValueConverter x:Key="ImageConverter"/>
     </UserControl.Resources>
@@ -72,6 +68,18 @@
                 </StackPanel>
                 </Viewbox>
             </ExperimentalAcrylicBorder>
+            <ExperimentalAcrylicBorder DockPanel.Dock="Bottom" Height="50">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+                <StackPanel>
+                <WrapPanel HorizontalAlignment="Center">
+                <TextBlock Text="Status: " />
+                <TextBlock Text="{Binding Message}" />
+                </WrapPanel>
+                <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress" Value="{Binding Progress}" IsIndeterminate="False" Minimum="0" Maximum="100" Height="30"/>
+                </StackPanel>
+            </ExperimentalAcrylicBorder>
             <ExperimentalAcrylicBorder>
                 <ExperimentalAcrylicBorder.Material>
                     <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
@@ -80,7 +88,7 @@
                     <StackPanel>
                         <TextBlock HorizontalAlignment="Stretch" Margin="20 40 20 20" Text="Controller Bindings" />
                         <WrapPanel>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 0" Text="Button" Width="100" TextAlignment="Center"/>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 0" Text="Input" Width="100" TextAlignment="Center"/>
                             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Pin" Width="50" TextAlignment="Center"/>
                             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Pin&#x0a;Activation&#x0a;Type" Width="100" TextAlignment="Center"/>
                             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Debounce" Width="110" TextAlignment="Center"/>
