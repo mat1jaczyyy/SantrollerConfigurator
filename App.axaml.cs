@@ -19,6 +19,7 @@ namespace GuitarConfiguratorSharp
         {
             Locator.CurrentMutable.RegisterConstant<IScreen>(new MainWindowViewModel());
             Locator.CurrentMutable.Register<IViewFor<ConfigViewModel>>(() => new ConfigView());
+            Locator.CurrentMutable.Register<IViewFor<MainViewModel>>(() => new MainView());
             new MainWindow { DataContext = Locator.Current.GetService<IScreen>() }.Show();
 
             base.OnFrameworkInitializationCompleted();

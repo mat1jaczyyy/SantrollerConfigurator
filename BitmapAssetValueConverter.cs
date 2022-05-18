@@ -21,7 +21,7 @@ public class BitmapAssetValueConverter : IValueConverter
 {
     public static BitmapAssetValueConverter Instance = new BitmapAssetValueConverter();
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value == null)
             return null;
@@ -37,11 +37,11 @@ public class BitmapAssetValueConverter : IValueConverter
             }
             else
             {
-                string assemblyName = Assembly.GetEntryAssembly().GetName().Name;
+                string assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
                 uri = new Uri($"avares://{assemblyName}{rawUri}");
             }
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-            var asset = assets.Open(uri);
+            var asset = assets!.Open(uri);
 
             return new Bitmap(asset);
         }
@@ -49,7 +49,7 @@ public class BitmapAssetValueConverter : IValueConverter
         throw new NotSupportedException();
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         throw new NotSupportedException();
     }

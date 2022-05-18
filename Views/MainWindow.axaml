@@ -10,39 +10,19 @@
         Title="GuitarConfiguratorSharp"
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True">
-        <Panel>
-            <DockPanel HorizontalAlignment="Stretch">
-                <ExperimentalAcrylicBorder DockPanel.Dock="Bottom" Height="50">
-                    <ExperimentalAcrylicBorder.Material>
-                        <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
-                    </ExperimentalAcrylicBorder.Material>
-                    <StackPanel>
-                    <WrapPanel HorizontalAlignment="Center">
-                    <TextBlock Text="Status: " />
-                    <TextBlock Text="{Binding Message}" />
-                    </WrapPanel>
-                    <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress" Value="{Binding Progress}" IsIndeterminate="False" Minimum="0" Maximum="100" Height="30"/>
-                    </StackPanel>
-                </ExperimentalAcrylicBorder>
-                <rxui:RoutedViewHost Router="{Binding Router}">
-                    <rxui:RoutedViewHost.DefaultContent>
-                        <StackPanel Orientation="Horizontal" Margin="15">
-                        <StackPanel.Styles>
-                            <Style Selector="StackPanel > :is(Control)">
-                                <Setter Property="Margin" Value="2"/>
-                            </Style>
-                            <Style Selector="StackPanel > TextBlock">
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                            </Style>
-                        </StackPanel.Styles>
-                        <Button Content="Go next" Command="{Binding GoNext}" />
-                        <Button Content="Go back" Command="{Binding GoBack}" />
-                        <TextBlock Text="{Binding test}" />
-                        <TextBlock Text="blah" />
-                        <TextBlock Text="{Binding Router.NavigationStack.Count}" />
-                    </StackPanel>
-                    </rxui:RoutedViewHost.DefaultContent>
-                </rxui:RoutedViewHost>
+        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <ExperimentalAcrylicBorder DockPanel.Dock="Bottom" Height="50">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+                <StackPanel>
+                <WrapPanel HorizontalAlignment="Center">
+                <TextBlock Text="Status: " />
+                <TextBlock Text="{Binding Message}" />
+                </WrapPanel>
+                <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress" Value="{Binding Progress}" IsIndeterminate="False" Minimum="0" Maximum="100" Height="30"/>
+                </StackPanel>
+            </ExperimentalAcrylicBorder>
+            <rxui:RoutedViewHost Router="{Binding Router}" />
         </DockPanel>
-    </Panel>
 </Window>

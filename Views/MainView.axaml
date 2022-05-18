@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker"
+             xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="GuitarConfiguratorSharp.Views.MainView"
+             Background="Transparent">
+    <UserControl.Resources>
+        <guitarConfiguratorSharp:BitmapAssetValueConverter x:Key="ImageConverter"/>
+    </UserControl.Resources>
+    <Panel>
+        <DockPanel HorizontalAlignment="Stretch">
+            <ExperimentalAcrylicBorder>
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+                <StackPanel>
+                    <TextBlock Text="Test" />
+                    
+                    <Button Content="Configure" Command="{Binding Main.Configure}" />
+                </StackPanel>
+            </ExperimentalAcrylicBorder>
+        </DockPanel>
+    </Panel>
+</UserControl>

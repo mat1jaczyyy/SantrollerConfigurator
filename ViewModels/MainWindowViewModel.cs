@@ -1,21 +1,39 @@
 using System;
 using System.Reactive;
+using DynamicData;
 using GuitarConfiguratorSharp.Utils;
 using ReactiveUI;
+using Device.Net;
+using System.Threading.Tasks;
+using System.Linq;
+using Usb.Net;
+using System.IO;
+using System.Timers;
+#if Windows
+using SerialPort.Net.Windows;
+using Hid.Net.Windows;
+using Usb.Net.Windows;
+using Device.Net.Windows;
+#else
+using Device.Net.LibUsb;
+#endif
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace GuitarConfiguratorSharp.ViewModels
 {
-    public class MainWindowViewModel : ReactiveObject, IScreen
+    public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     {
         // The Router associated with this Screen.
         // Required by the IScreen interface.
         public RoutingState Router { get; } = new RoutingState();
 
-        // The command that navigates a user to first view model.
-        public ReactiveCommand<Unit, IRoutableViewModel> GoNext { get; }
+        public ReactiveCommand<Unit, IRoutableViewModel> Configure { get; }
 
         // The command that navigates a user back.
         public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
+
+        public SourceList<ConfigurableDevice> devices = new SourceList<ConfigurableDevice>();
 
         public double _progress = 0;
 
@@ -45,40 +63,104 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
         }
 
+        private DeviceListener DeviceListener;
+        private PlatformIO pio = new PlatformIO();
+
+        private Timer timer = new Timer();
+
         public MainWindowViewModel()
         {
-            // Manage the routing state. Use the Router.Navigate.Execute
-            // command to navigate to different view models. 
-            //
-            // Note, that the Navigate.Execute method accepts an instance 
-            // of a view model, this allows you to pass parameters to 
-            // your view models, or to reuse existing view models.
-            //
-            GoNext = ReactiveCommand.CreateFromObservable(
+            Configure = ReactiveCommand.CreateFromObservable(
                 () => Router.Navigate.Execute(new ConfigViewModel(this))
             );
+            Router.Navigate.Execute(new MainViewModel(this));
 
-            var pio = new PlatformIO();
-            // TODO: the plan here is that we shove shared stuff into this class (such as handling talking to devices, platformio and all that)
-            // And then this class can just expose the current device we are talking too, and the config screen can grab that and use it when programming
-            // We can have it so that the initial screen also functions as the programming screen, as we have the progress bar on every page now so we don't have to worry.
-            // Whats kinda neat is we can actually let the user start configuring even when we are doing the initial program too, since we will have a "Program" button that is just disabled
-            // If something is going on.
-            // This also means we can put device status in the top left corner again like the old version, and we can do that from here so it persists across versions.
-            if (!pio.ready) {
-                // Show a progress screen that shows what is currently happening
-            }
-            // pio.ProgressChanged += (val, val2, message) => Console.WriteLine($"{val} {val2} {message}");
-            pio.ProgressChanged += (message, val, val2) => {
+            pio.ProgressChanged += (message, val, val2) =>
+            {
                 this.Message = message;
                 this.Progress = val2;
                 Console.WriteLine(message);
             };
-            // pio.TextChanged += (val, a) => Console.WriteLine(val);
-            // pio.PlatformIOReady += () => {
-            //     _ = pio.RunPlatformIO(null,"run","Initial Compile - ",0,0,100);
-            // };
+#if Windows
+                IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateWindowsUsbDeviceFactory()
+            .Aggregate(Arduino.ArduinoDeviceFilter.CreateWindowsUsbDeviceFactory());
+#else
+            IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateLibUsbDeviceFactory()
+            .Aggregate(Arduino.ArduinoDeviceFilter.CreateLibUsbDeviceFactory());
+#endif
+            // TODO: replace this with an actual dropdown on the interface
+            devices.Connect()
+                .ToCollection()
+                .Subscribe(x => Console.WriteLine($"Changed: {string.Join(",", x.Select(up => up.ToString()))}"));
+            // For arduinos and ardwiinos / santrollers, we can just listen for hotplug events
+            DeviceListener = new DeviceListener(factory);
+            DeviceListener.DeviceDisconnected += DevicePoller_DeviceDisconnected;
+            DeviceListener.DeviceInitialized += DevicePoller_DeviceInitialized;
+            timer.Elapsed += DevicePoller_Tick;
+            pio.PlatformIOReady += () => DeviceListener.Start();
+            pio.PlatformIOReady += () => timer.Start();
             _ = pio.InitialisePlatformIO();
         }
+
+        private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
+        {
+            var drives = DriveInfo.GetDrives();
+            var existing = devices.Items.Where(x => x is Pico).Select(x => ((Pico)x).GetPath()).ToHashSet();
+            foreach (var drive in drives)
+            {
+                if (existing.Remove(drive.RootDirectory.FullName))
+                {
+                    continue;
+                }
+                var uf2 = Path.Combine(drive.RootDirectory.FullName, "INFO_UF2.txt");
+                if (drive.IsReady)
+                {
+                    if (File.Exists(uf2) && File.ReadAllText(uf2).Contains("RPI-RP2"))
+                    {
+                        devices.Add(new Pico(drive.RootDirectory.FullName));
+                    }
+                }
+            }
+            devices.Edit(innerList => innerList.RemoveMany(innerList.Where(x => x is Pico && existing.Contains(((Pico)x).GetPath()))));
+        }
+        private void DevicePoller_DeviceInitialized(object? sender, DeviceEventArgs e)
+        {
+#if Windows
+            String product = e.Device.ConnectedDeviceDefinition.ProductName;
+            ushort revision = (ushort)e.Device.ConnectedDeviceDefinition.VersionNumber!;
+#else
+            UsbDevice device = (UsbDevice)e.Device;
+            LibUsbInterfaceManager luim = (LibUsbInterfaceManager)device.UsbInterfaceManager;
+            String product = luim.UsbDevice.Info.ProductString;
+            ushort revision = (ushort)luim.UsbDevice.Info.Descriptor.BcdDevice;
+#endif
+            if (product == "Santroller")
+            {
+                devices.Add(new Santroller(e.Device));
+            }
+            else if (product == "Ardwiino")
+            {
+                devices.Add(new Ardwiino(e.Device));
+            }
+
+            var existing = devices.Items.Where(x => x is Arduino).Select(x => ((Arduino)x).GetSerialPort()).ToHashSet();
+            var ports = pio.GetPorts().Result;
+            devices.AddRange(ports.Where(port => !existing.Contains(port.Port)).Select(port => new Arduino(port)));
+        }
+
+        private void DevicePoller_DeviceDisconnected(object? sender, DeviceEventArgs e)
+        {
+            var ports = pio.GetPorts().Result;
+            var existing = ports.Select(port => port.Port).ToHashSet();
+            devices.Edit(innerList => innerList.RemoveMany(innerList.Where(device => device.IsSameDevice(e.Device) || (device is Arduino && !existing.Contains(((Arduino)device).GetSerialPort())))));
+        }
+        public void Dispose()
+        {
+            DeviceListener.DeviceDisconnected -= DevicePoller_DeviceDisconnected;
+            DeviceListener.DeviceInitialized -= DevicePoller_DeviceInitialized;
+            DeviceListener.Dispose();
+        }
+
+
     }
 }
