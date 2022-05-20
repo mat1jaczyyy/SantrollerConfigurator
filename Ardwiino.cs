@@ -220,7 +220,7 @@ public class Ardwiino : ConfigurableUSBDevice
     {
         if (unmigrateable)
         {
-            return $"Ardwiino - {board} - {cpuFreq} - {version} - config too old to import";
+            return $"Ardwiino - {board} - {cpuFreq} - {version} - {Board.OldArdwiino.name}";
         }
         return $"Ardwiino - {board} - {cpuFreq} - {version}";
     }

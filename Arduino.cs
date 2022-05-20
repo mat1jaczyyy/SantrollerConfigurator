@@ -30,7 +30,9 @@ public class Arduino : ConfigurableDevice
             serial.Open();
             serial.Write("i\x06\n");
             var boardName = serial.ReadTo("\0");
-            this.board = new Board(boardName, $"Ardwiino - {Board.findBoard(boardName).name} - {Board.OldArdwiino.name}", boardName, Board.OldArdwiino.productIDs);
+            serial.Write("i\x04\n");
+            var boardFreq = UInt32.Parse(serial.ReadTo("\0"));
+            this.board = new Board(boardName, $"Ardwiino - {Board.findBoard(boardName).name} - {boardFreq} - pre 4.3.7 - {Board.OldArdwiino.name}", boardName, Board.OldArdwiino.productIDs);
 
         }
         else

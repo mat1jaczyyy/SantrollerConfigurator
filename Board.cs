@@ -16,7 +16,7 @@ public struct Board {
 
     public static readonly Board Generic = new Board("generic", "Generic Serial Device", "generic", new List<uint>{});
     public static readonly Board OldArdwiino = 
-        new Board("ardwiino", "pre 4.3.7 (unable to import config, updating will erase any configuration)", "megaadk", new List<uint>{});
+        new Board("ardwiino", "(unable to import config, updating will erase any configuration)", "megaadk", new List<uint>{});
     public static readonly Board[] Boards = {
         new Board("uno-atmega16u2", "Arduino Uno", "uno-atmega16u2", new List<uint>{0x2FEF}),
         new Board("uno-at90usb82", "Arduino Uno", "uno-at90usb82", new List<uint>{0x2FF7}),
