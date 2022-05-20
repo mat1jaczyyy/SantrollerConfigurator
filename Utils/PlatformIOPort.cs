@@ -10,9 +10,9 @@ namespace GuitarConfiguratorSharp.Utils
     public partial class PlatformIOPort
     {
         private static readonly string VID_PID_PATTERN = "VID:PID=(\\w{4}):(\\w{4})";
-        public string Port { get; set; }
+        public string Port { get; set; } = "";
 
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
 
         public string Hwid { get; set; } = "";
 

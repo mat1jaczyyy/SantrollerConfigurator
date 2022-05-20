@@ -12,7 +12,8 @@ public static class StructTools
             throw new ArgumentException("Not enough data to fill struct. Array length from position: " + (rawData.Length - position) + ", Struct length: " + rawsize);
         IntPtr buffer = Marshal.AllocHGlobal(rawsize);
         Marshal.Copy(rawData, position, buffer, rawsize);
-        T retobj = (T)Marshal.PtrToStructure(buffer, typeof(T));
+        object? t = Marshal.PtrToStructure(buffer, typeof(T));
+        T retobj = (T)Marshal.PtrToStructure(buffer, typeof(T))!;
         Marshal.FreeHGlobal(buffer);
         return retobj;
     }
@@ -36,7 +37,7 @@ public static class StructTools
         var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
         try
         {
-            return Marshal.PtrToStringAnsi(handle.AddrOfPinnedObject());
+            return Marshal.PtrToStringAnsi(handle.AddrOfPinnedObject())!;
         }
         finally
         {
