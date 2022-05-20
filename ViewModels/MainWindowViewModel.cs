@@ -4,11 +4,15 @@ using DynamicData;
 using GuitarConfiguratorSharp.Utils;
 using ReactiveUI;
 using Device.Net;
-using System.Threading.Tasks;
 using System.Linq;
 using Usb.Net;
 using System.IO;
 using System.Timers;
+using HidSharp;
+using HidSharp.Experimental;
+using HidSharp.Reports;
+using HidSharp.Reports.Encodings;
+using HidSharp.Utility;
 #if Windows
 using SerialPort.Net.Windows;
 using Hid.Net.Windows;
@@ -17,8 +21,6 @@ using Device.Net.Windows;
 #else
 using Device.Net.LibUsb;
 #endif
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 
 namespace GuitarConfiguratorSharp.ViewModels
 {
@@ -82,11 +84,9 @@ namespace GuitarConfiguratorSharp.ViewModels
                 Console.WriteLine(message);
             };
 #if Windows
-                IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateWindowsUsbDeviceFactory()
-            .Aggregate(Arduino.ArduinoDeviceFilter.CreateWindowsUsbDeviceFactory());
+            IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateWindowsUsbDeviceFactory();
 #else
-            IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateLibUsbDeviceFactory()
-            .Aggregate(Arduino.ArduinoDeviceFilter.CreateLibUsbDeviceFactory());
+            IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateLibUsbDeviceFactory();
 #endif
             // TODO: replace this with an actual dropdown on the interface
             devices.Connect()
@@ -97,6 +97,7 @@ namespace GuitarConfiguratorSharp.ViewModels
             DeviceListener.DeviceDisconnected += DevicePoller_DeviceDisconnected;
             DeviceListener.DeviceInitialized += DevicePoller_DeviceInitialized;
             timer.Elapsed += DevicePoller_Tick;
+            timer.AutoReset = false;
             pio.PlatformIOReady += () => DeviceListener.Start();
             pio.PlatformIOReady += () => timer.Start();
             _ = pio.InitialisePlatformIO();
@@ -122,37 +123,50 @@ namespace GuitarConfiguratorSharp.ViewModels
                 }
             }
             devices.Edit(innerList => innerList.RemoveMany(innerList.Where(x => x is Pico && existing.Contains(((Pico)x).GetPath()))));
+
+            var existingPorts = devices.Items.Where(x => x is Arduino).Select(x => ((Arduino)x).GetSerialPort()).ToHashSet();
+            var ports = pio.GetPorts().Result;
+            devices.AddRange(ports.Where(port => !existingPorts.Contains(port.Port)).Select(port => new Arduino(port)));
+            var existingSerialPorts = ports.Select(port => port.Port).ToHashSet();
+            devices.Edit(innerList => innerList.RemoveMany(innerList.Where(device => device is Arduino && !existingSerialPorts.Contains(((Arduino)device).GetSerialPort()))));
+            timer.Start();
         }
         private void DevicePoller_DeviceInitialized(object? sender, DeviceEventArgs e)
         {
 #if Windows
             String product = e.Device.ConnectedDeviceDefinition.ProductName;
+            String serial = e.Device.ConnectedDeviceDefinition.SerialNumber;
             ushort revision = (ushort)e.Device.ConnectedDeviceDefinition.VersionNumber!;
 #else
             UsbDevice device = (UsbDevice)e.Device;
             LibUsbInterfaceManager luim = (LibUsbInterfaceManager)device.UsbInterfaceManager;
             String product = luim.UsbDevice.Info.ProductString;
+            String serial = luim.UsbDevice.Info.SerialString;
             ushort revision = (ushort)luim.UsbDevice.Info.Descriptor.BcdDevice;
-#endif
+#endif 
             if (product == "Santroller")
             {
-                devices.Add(new Santroller(e.Device));
+                devices.Add(new Santroller(e.Device, product, serial, revision));
             }
             else if (product == "Ardwiino")
             {
-                devices.Add(new Ardwiino(e.Device));
+                // These guys are so old that we hardcoded a revision since the config tool didn't work the way it does now
+                // They will just show up as a serial device. In theory these old firmwares actually responded to the standard
+                // Arduino programming commands, so doing this will support them for free.
+                if (revision == 0x3122)
+                {
+                    return;
+                }
+                else
+                {
+                    devices.Add(new Ardwiino(e.Device, product, serial, revision));
+                }
             }
-
-            var existing = devices.Items.Where(x => x is Arduino).Select(x => ((Arduino)x).GetSerialPort()).ToHashSet();
-            var ports = pio.GetPorts().Result;
-            devices.AddRange(ports.Where(port => !existing.Contains(port.Port)).Select(port => new Arduino(port)));
         }
 
         private void DevicePoller_DeviceDisconnected(object? sender, DeviceEventArgs e)
         {
-            var ports = pio.GetPorts().Result;
-            var existing = ports.Select(port => port.Port).ToHashSet();
-            devices.Edit(innerList => innerList.RemoveMany(innerList.Where(device => device.IsSameDevice(e.Device) || (device is Arduino && !existing.Contains(((Arduino)device).GetSerialPort())))));
+            devices.Edit(innerList => innerList.RemoveMany(innerList.Where(device => device.IsSameDevice(e.Device))));
         }
         public void Dispose()
         {

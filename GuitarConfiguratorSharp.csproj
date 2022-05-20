@@ -27,11 +27,13 @@
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)" />
         <PackageReference Include="AvaloniaColorPicker" Version="1.1.0" />
+        <PackageReference Include="HidSharp" Version="2.1.0" />
         <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
         <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
         <PackageReference Include="Device.Net" Version="4.3.0-beta" />
         <PackageReference Include="Device.Net.LibUsb" Version="4.3.0-beta" />
         <PackageReference Include="Hid.Net" Version="4.3.0-beta" />
+        <PackageReference Include="System.IO.Ports" Version="6.0.0" />
         <PackageReference Include="Usb.Net" Version="4.3.0-beta" />
         <PackageReference Include="SerialPort.Net" Version="4.3.0-beta" />
         <PackageReference Include="SemanticVersioning" Version="2.0.2" />

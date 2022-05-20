@@ -2,6 +2,7 @@
 using Device.Net;
 using Usb.Net;
 using System;
+using System.IO.Ports;
 using GuitarConfiguratorSharp.Utils;
 
 public class Arduino : ConfigurableDevice
@@ -14,13 +15,28 @@ public class Arduino : ConfigurableDevice
     public Arduino(PlatformIOPort port)
     {
         this.port = port;
-        foreach (var board in Board.Boards) {
-            if (board.productIDs.Contains(port.Pid)) {
+        foreach (var board in Board.Boards)
+        {
+            if (board.productIDs.Contains(port.Pid))
+            {
                 this.board = board;
                 return;
             }
         }
-        this.board = Board.Generic;
+        if (port.Vid == 0x1209 && port.Pid == 0x2882)
+        {
+            this.board = Board.OldArdwiino;
+            System.IO.Ports.SerialPort serial = new System.IO.Ports.SerialPort(port.Port, 115200);
+            serial.Open();
+            serial.Write("i\x06\n");
+            var boardName = serial.ReadTo("\0");
+            this.board = new Board(boardName, $"Ardwiino - {Board.findBoard(boardName).name} - {Board.OldArdwiino.name}", boardName, Board.OldArdwiino.productIDs);
+
+        }
+        else
+        {
+            this.board = Board.Generic;
+        }
     }
 
     public bool IsSameDevice(IDevice device)
@@ -38,10 +54,11 @@ public class Arduino : ConfigurableDevice
         return false;
     }
 
-    public string GetSerialPort() {
+    public string GetSerialPort()
+    {
         return port.Port;
     }
-    
+
     public override String ToString()
     {
         return $"{board.name} ({port.Port})";
