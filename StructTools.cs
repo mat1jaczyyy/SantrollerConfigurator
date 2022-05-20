@@ -12,7 +12,6 @@ public static class StructTools
             throw new ArgumentException("Not enough data to fill struct. Array length from position: " + (rawData.Length - position) + ", Struct length: " + rawsize);
         IntPtr buffer = Marshal.AllocHGlobal(rawsize);
         Marshal.Copy(rawData, position, buffer, rawsize);
-        object? t = Marshal.PtrToStructure(buffer, typeof(T));
         T retobj = (T)Marshal.PtrToStructure(buffer, typeof(T))!;
         Marshal.FreeHGlobal(buffer);
         return retobj;
