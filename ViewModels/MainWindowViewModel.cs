@@ -134,6 +134,8 @@ namespace GuitarConfiguratorSharp.ViewModels
         }
         private void DevicePoller_DeviceInitialized(object? sender, DeviceEventArgs e)
         {
+            // TODO: check this all works on windows
+            // Also, it seems that LibUsbDotNet might even come with some way to install INFs, though if it isnt that easy to use we can just use the standard driver installer for unos.
 #if Windows
             String product = e.Device.ConnectedDeviceDefinition.ProductName;
             String serial = e.Device.ConnectedDeviceDefinition.SerialNumber;

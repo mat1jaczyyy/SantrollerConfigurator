@@ -24,5 +24,6 @@ public class AssetUtils
     {
         await ExtractFile(zip, zipLocation);
         ZipFile.ExtractToDirectory(zipLocation, location);
+        System.IO.File.Delete(zipLocation);
     }
 }
