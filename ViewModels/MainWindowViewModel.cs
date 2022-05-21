@@ -20,6 +20,7 @@ using Usb.Net.Windows;
 using Device.Net.Windows;
 #else
 using Device.Net.LibUsb;
+using LibUsbDotNet.LudnMonoLibUsb;
 #endif
 
 namespace GuitarConfiguratorSharp.ViewModels
@@ -140,11 +141,24 @@ namespace GuitarConfiguratorSharp.ViewModels
 #else
             UsbDevice device = (UsbDevice)e.Device;
             LibUsbInterfaceManager luim = (LibUsbInterfaceManager)device.UsbInterfaceManager;
-            String product = luim.UsbDevice.Info.ProductString;
-            String serial = luim.UsbDevice.Info.SerialString;
-            ushort revision = (ushort)luim.UsbDevice.Info.Descriptor.BcdDevice;
+            String product;
+            String serial;
+            ushort revision;
+            if (luim.UsbDevice is MonoUsbDevice monoUsbDevice)
+            {
+                revision = (ushort)monoUsbDevice.Profile.DeviceDescriptor.BcdDevice;
+                monoUsbDevice.GetString(out product, 0, monoUsbDevice.Profile.DeviceDescriptor.ProductStringIndex);
+                monoUsbDevice.GetString(out serial, 0, monoUsbDevice.Profile.DeviceDescriptor.SerialStringIndex);
+            }
+            else
+            {
+                product = luim.UsbDevice.Info.ProductString;
+                serial = luim.UsbDevice.Info.SerialString;
+                revision = (ushort)luim.UsbDevice.Info.Descriptor.BcdDevice;
+            }
 #endif 
-            if (devices.Items.Any(device => device.IsSameDevice(serial))) {
+            if (devices.Items.Any(device => device.IsSameDevice(serial)))
+            {
                 return;
             }
             if (product == "Santroller")
