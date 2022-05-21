@@ -86,7 +86,7 @@ namespace GuitarConfiguratorSharp.ViewModels
 #if Windows
             IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateWindowsUsbDeviceFactory();
 #else
-            IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateLibUsbDeviceFactory();
+            IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateLibUsbDeviceFactory2();
 #endif
             // TODO: replace this with an actual dropdown on the interface
             devices.Connect()
@@ -144,6 +144,9 @@ namespace GuitarConfiguratorSharp.ViewModels
             String serial = luim.UsbDevice.Info.SerialString;
             ushort revision = (ushort)luim.UsbDevice.Info.Descriptor.BcdDevice;
 #endif 
+            if (devices.Items.Any(device => device.IsSameDevice(serial))) {
+                return;
+            }
             if (product == "Santroller")
             {
                 devices.Add(new Santroller(e.Device, product, serial, revision));

@@ -15,9 +15,9 @@ public class Ardwiino : ConfigurableUSBDevice
 
     private static readonly Version USB_CONTROL_REQUEST_API = new Version(4, 3, 7);
 
-    // On 6.0.0, READ_CONFIG is 59
-    // On 7.0.3, READ_CONFIG is 60
-    // And with 8.0.7 READ_CONFIG is 62 and stays there
+    // On 6.0.0 and above READ_CONFIG is 59
+    // On 7.0.3 and above READ_CONFIG is 60
+    // And with 8.0.7 and above READ_CONFIG is 62
     private const ushort CPU_INFO_COMMAND = 50;
     private const ushort READ_CONFIG_COMMAND = 62;
     private const ushort READ_CONFIG_PRE_8_0_7_COMMAND = 60;

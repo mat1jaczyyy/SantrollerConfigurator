@@ -23,17 +23,19 @@ public class Arduino : ConfigurableDevice
                 return;
             }
         }
+        // Really, really old ardwiinos had a serial protocol that response to a couple of commands for retrieving data.
         if (port.Vid == 0x1209 && port.Pid == 0x2882)
         {
             this.board = Board.OldArdwiino;
             System.IO.Ports.SerialPort serial = new System.IO.Ports.SerialPort(port.Port, 115200);
             serial.Open();
             serial.Write("i\x06\n");
-            var boardName = serial.ReadTo("\0");
+            var boardName = serial.ReadLine().Trim();
+            serial.DiscardInBuffer();
             serial.Write("i\x04\n");
-            var boardFreq = UInt32.Parse(serial.ReadTo("\0"));
-            this.board = new Board(boardName, $"Ardwiino - {Board.findBoard(boardName).name} - {boardFreq} - pre 4.3.7 - {Board.OldArdwiino.name}", boardName, Board.OldArdwiino.productIDs);
-
+            var boardFreqStr = serial.ReadLine().Replace("UL","");
+            var boardFreq = UInt32.Parse(boardFreqStr);
+            this.board = new Board(boardName, $"Ardwiino - {Board.findBoard(boardName).name} - {boardFreq} - pre 4.3.7 {Board.OldArdwiino.name}", boardName, Board.OldArdwiino.productIDs);
         }
         else
         {

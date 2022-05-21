@@ -5,9 +5,12 @@
         <Nullable>enable</Nullable>
         <RootNamespace>GuitarConfiguratorSharp.NetCore</RootNamespace>
         <AvaloniaVersion>0.10.12</AvaloniaVersion>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
         <TrimMode>copyused</TrimMode>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+        <PublishReadyToRun>true</PublishReadyToRun>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">Windows</DefineConstants>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">POSIX</DefineConstants>
     </PropertyGroup>
@@ -43,4 +46,23 @@
     <ItemGroup>
       <Content Include="Assets\Icons\Readme.txt" />
     </ItemGroup>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(RuntimeIdentifier)' == ''" >
+        <Copy
+            SourceFiles="$(TargetDir)\runtimes\unix\lib\net6.0\System.IO.Ports.dll"
+            DestinationFolder="$(TargetDir)"
+            Condition="'$(OS)' != 'Windows_NT' "
+        />
+        <Copy
+            SourceFiles="$(TargetDir)\runtimes\win\lib\net6.0\System.IO.Ports.dll"
+            DestinationFolder="$(TargetDir)"
+            Condition="'$(OS)' == 'Windows_NT' "
+        />
+    </Target>
+    <Target Name="ZipOutputPath" AfterTargets="BeforeBuild">
+        <ZipDirectory
+            SourceDirectory="$(MSBuildProjectDirectory)\firmware"
+            DestinationFile="$(MSBuildProjectDirectory)\Assets\firmware.zip"
+            Overwrite="true"
+        />
+    </Target>
 </Project>
