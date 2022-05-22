@@ -28,6 +28,7 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                    <TextBlock IsVisible="{Binding !Main.MigrationSupported}" Text="The firmware on this device is too old, it's configuration will be erased when upgrading." />
                     <Button Content="Configure" Command="{Binding Main.Configure}" IsEnabled="{Binding Main.ReadyToConfigure}" HorizontalAlignment="Center" />
                 </StackPanel>
             </ExperimentalAcrylicBorder>

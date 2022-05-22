@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Linq;
 public struct Board
 {
     public string ardwiinoName { get; }
@@ -19,14 +20,7 @@ public struct Board
     }
 
     public static readonly Board Generic = new Board("generic", "Generic Serial Device", 0, "generic", new List<uint> { });
-    public static readonly Board OldArdwiino =
-        new Board("generic", "(unable to import config, updating will erase any configuration)", 0, "generic", new List<uint> { });
-    public static readonly Board[] Boards = {
-        new Board("uno-atmega16u2", "Arduino Uno", 0, "uno-atmega16u2", new List<uint>{0x2FEF}),
-        new Board("uno-at90usb82", "Arduino Uno", 0, "uno-at90usb82", new List<uint>{0x2FF7}),
-        new Board("uno", "Arduino Uno", 0, "uno", new List<uint>{0x0043, 0x7523, 0x0001, 0xea60, 0x0243}),
-        new Board("mini", "Arduino Pro Mini 5V", 16000000, "mini", new List<uint>{}),
-        new Board("mini", "Arduino Pro Mini 3.3V", 8000000, "mini", new List<uint>{}),
+    public static readonly Board[] ATMEGA32U4Boards = {
         new Board("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "a-micro", new List<uint>{0x0037, 0x0237}),
         new Board("a-micro", "Arduino Micro", 16000000, "a-micro", new List<uint>{0x8037, 0x8237}),
         new Board("micro", "Arduino Pro Micro 3.3V", 8000000, "micro", new List<uint>{0x9204}),
@@ -35,12 +29,9 @@ public struct Board
         new Board("leonardo", "Arduino Micro / Pro Micro / Leonardo in Bootloader Mode", 16000000, "leonardo", new List<uint>{0x0036}),
         new Board("micro", "Arduino Pro Micro in Bootloader Mode", 8000000, "micro", new List<uint>{0x9203, 0x9207}),
         new Board("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "micro", new List<uint>{0x9205}),
-        new Board("mega2560-atmega16u2", "Arduino Mega 2560", 0, "mega2560-atmega16u2", new List<uint>{0x2FEF}),
-        new Board("mega2560-at90usb82", "Arduino Mega 2560", 0, "mega2560-at90usb82", new List<uint>{0x2FF7}),
-        new Board("mega2560", "Arduino Mega 2560", 0, "mega2560", new List<uint>{0x0010, 0x0042}),
-        new Board("megaadk-atmega16u2", "Arduino Mega ADK", 0, "megaadk-atmega16u2", new List<uint>{0x2FEF}),
-        new Board("megaadk-at90usb82", "Arduino Mega ADK", 0, "megaadk-at90usb82", new List<uint>{0x2FF7}),
-        new Board("megaadk", "Arduino Mega ADK", 0, "megaadk", new List<uint>{0x003f, 0x0044}),
+    };
+
+    public static readonly Board[] RP2040Boards = {
         new Board("pico", "Raspberry PI Pico", 0, "pico", new List<uint>{}),
         new Board("adafruit_feather_rp2040", "Adafruit Feather RP2040", 0, "adafruit_feather_rp2040", new List<uint>{}),
         new Board("adafruit_itsybitsy_rp2040", "Adafruit ItsyBitsy RP2040", 0, "adafruit_itsybitsy_rp2040", new List<uint>{}),
@@ -67,6 +58,29 @@ public struct Board
         new Board("waveshare_rp2040_plus_16mb", "Waveshare RP2040-Plus (16MB)", 0, "waveshare_rp2040_plus_16mb", new List<uint>{}),
         new Board("waveshare_rp2040_zero", "Waveshare RP2040-Zero", 0, "waveshare_rp2040_zero", new List<uint>{})
     };
+
+
+    public static readonly Board[] Boards = new Board[]{
+        new Board("uno-atmega16u2", "Arduino Uno", 0, "uno-atmega16u2", new List<uint>{0x2FEF}),
+        new Board("uno-at90usb82", "Arduino Uno", 0, "uno-at90usb82", new List<uint>{0x2FF7}),
+        new Board("uno", "Arduino Uno", 0, "uno", new List<uint>{0x0043, 0x7523, 0x0001, 0xea60, 0x0243}),
+        new Board("mini", "Arduino Pro Mini 5V", 16000000, "mini", new List<uint>{}),
+        new Board("mini", "Arduino Pro Mini 3.3V", 8000000, "mini", new List<uint>{}),
+        new Board("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "a-micro", new List<uint>{0x0037, 0x0237}),
+        new Board("a-micro", "Arduino Micro", 16000000, "a-micro", new List<uint>{0x8037, 0x8237}),
+        new Board("micro", "Arduino Pro Micro 3.3V", 8000000, "micro", new List<uint>{0x9204}),
+        new Board("micro", "Arduino Pro Micro 5V", 16000000, "micro", new List<uint>{0x9206}),
+        new Board("leonardo", "Arduino Leonardo", 16000000, "leonardo", new List<uint>{0x8036, 0x800c}),
+        new Board("leonardo", "Arduino Micro / Pro Micro / Leonardo in Bootloader Mode", 16000000, "leonardo", new List<uint>{0x0036}),
+        new Board("micro", "Arduino Pro Micro in Bootloader Mode", 8000000, "micro", new List<uint>{0x9203, 0x9207}),
+        new Board("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "micro", new List<uint>{0x9205}),
+        new Board("mega2560-atmega16u2", "Arduino Mega 2560", 0, "mega2560-atmega16u2", new List<uint>{0x2FEF}),
+        new Board("mega2560-at90usb82", "Arduino Mega 2560", 0, "mega2560-at90usb82", new List<uint>{0x2FF7}),
+        new Board("mega2560", "Arduino Mega 2560", 0, "mega2560", new List<uint>{0x0010, 0x0042}),
+        new Board("megaadk-atmega16u2", "Arduino Mega ADK", 0, "megaadk-atmega16u2", new List<uint>{0x2FEF}),
+        new Board("megaadk-at90usb82", "Arduino Mega ADK", 0, "megaadk-at90usb82", new List<uint>{0x2FF7}),
+        new Board("megaadk", "Arduino Mega ADK", 0, "megaadk", new List<uint>{0x003f, 0x0044}),
+    }.Concat(ATMEGA32U4Boards).Concat(RP2040Boards).ToArray();
 
     public static Board findBoard(string ardwiinoName, uint cpuFreq)
     {

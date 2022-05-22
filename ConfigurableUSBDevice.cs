@@ -9,7 +9,7 @@ using Device.Net.LibUsb;
 using LibUsbDotNet.Main;
 #endif
 
-public class ConfigurableUSBDevice : ConfigurableDevice
+public abstract class ConfigurableUSBDevice : ConfigurableDevice
 {
     protected readonly UsbDevice device;
     protected readonly string product;
@@ -23,6 +23,8 @@ public class ConfigurableUSBDevice : ConfigurableDevice
         this.serial = serial;
         this.version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, (version) & 0xf);
     }
+
+    public abstract bool MigrationSupported { get; }
 
     public bool IsSameDevice(IDevice device)
     {

@@ -16,6 +16,9 @@ using HidSharp.Reports;
 using HidSharp.Reports.Encodings;
 using HidSharp.Utility;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 #if Windows
 using SerialPort.Net.Windows;
 using Hid.Net.Windows;
@@ -39,9 +42,11 @@ namespace GuitarConfiguratorSharp.ViewModels
         // The command that navigates a user back.
         public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
-        public AvaloniaList<ConfigurableDevice> Devices {get;} = new AvaloniaList<ConfigurableDevice>();
+        public AvaloniaList<ConfigurableDevice> Devices { get; } = new AvaloniaList<ConfigurableDevice>();
 
         private ConfigurableDevice? _selectedDevice;
+
+        private bool MigrationSupported => SelectedDevice == null || SelectedDevice.MigrationSupported;
 
         public ConfigurableDevice? SelectedDevice
         {
@@ -52,9 +57,10 @@ namespace GuitarConfiguratorSharp.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _selectedDevice, value);
+                this.RaisePropertyChanged("MigrationSupported");
             }
         }
-        
+
 
         private bool _ready = false;
 
@@ -130,6 +136,27 @@ namespace GuitarConfiguratorSharp.ViewModels
                 this.Progress = val2;
                 Console.WriteLine(message);
             };
+            Devices.CollectionChanged += (_, e) =>
+            {
+                if (e.Action == NotifyCollectionChangedAction.Add)
+                {
+                    if (SelectedDevice == null)
+                    {
+                        SelectedDevice = Devices.First();
+                    }
+
+                }
+                if (e.Action == NotifyCollectionChangedAction.Remove)
+                {
+                    if (Devices.Any())
+                    {
+                        if (e.OldItems!.Contains(SelectedDevice))
+                        {
+                            _ = Task.Delay(1).ContinueWith(_ => SelectedDevice = Devices.FirstOrDefault(x => true, null));
+                        }
+                    }
+                }
+            };
 #if Windows
             IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateWindowsUsbDeviceFactory();
 #else
@@ -141,18 +168,22 @@ namespace GuitarConfiguratorSharp.ViewModels
             DeviceListener.DeviceInitialized += DevicePoller_DeviceInitialized;
             timer.Elapsed += DevicePoller_Tick;
             timer.AutoReset = false;
-            pio.PlatformIOReady += () => {
+            pio.PlatformIOReady += () =>
+            {
                 DeviceListener.Start();
                 timer.Start();
                 this.Ready = true;
             };
+            ConfigurableDevice.DeviceInitialised += (dev) => Devices.Add(dev);
             _ = pio.InitialisePlatformIO();
         }
 
+        private List<string> currentDrives = new List<string>();
+        private List<string> currentPorts = new List<string>();
         private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
         {
             var drives = DriveInfo.GetDrives();
-            var currentDrives = Devices.Where(x => x is Pico).Select(x => ((Pico)x).GetPath()).ToHashSet();
+            var currentDrivesSet = currentDrives.ToHashSet();
             foreach (var drive in drives)
             {
                 if (currentDrives.Remove(drive.RootDirectory.FullName))
@@ -164,26 +195,21 @@ namespace GuitarConfiguratorSharp.ViewModels
                 {
                     if (File.Exists(uf2) && File.ReadAllText(uf2).Contains("RPI-RP2"))
                     {
-                        Devices.Add(new Pico(drive.RootDirectory.FullName));
+                        new Pico(drive.RootDirectory.FullName);
                     }
                 }
+                currentDrives.Add(drive.RootDirectory.FullName);
             }
-            Devices.RemoveMany(Devices.Where(x => x is Pico pico && !currentDrives.Contains(pico.GetPath())));
+            // We removed all valid devices above, so anything left in currentDrivesSet is no longer valid
+            Devices.RemoveMany(Devices.Where(x => x is Pico pico && currentDrivesSet.Contains(pico.GetPath())));
+            currentDrives.RemoveMany(currentDrivesSet);
 
-            var existingPorts = Devices.Where(x => x is Arduino).Select(x => ((Arduino)x).GetSerialPort()).ToHashSet();
+            var existingPorts = currentPorts.ToHashSet();
             var ports = pio.GetPorts().Result;
-            Devices.AddRange(ports.Where(port => !existingPorts.Contains(port.Port)).Select(port => new Arduino(port)));
+            currentPorts.AddRange(ports.Where(port => !existingPorts.Contains(port.Port)).Select(port => new Arduino(port).GetSerialPort()));
             var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
-            Devices.RemoveMany(Devices.Where(device => device is Arduino && !currentSerialPorts.Contains(((Arduino)device).GetSerialPort())));
-            if (SelectedDevice is Pico pico && !currentDrives.Contains(pico.GetPath())) {
-                SelectedDevice = null;
-            }
-            if (SelectedDevice is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())) {
-                SelectedDevice = null;
-            }
-            if (SelectedDevice == null) {
-                SelectedDevice = Devices.FirstOrDefault(x=>true, null);
-            }
+            currentPorts.RemoveMany(currentPorts.Where(port => !currentSerialPorts.Contains(port)));
+            Devices.RemoveMany(Devices.Where(device => device is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())));
             ReadyToConfigure = null != SelectedDevice && Ready;
             timer.Start();
         }
@@ -220,7 +246,7 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
             if (product == "Santroller")
             {
-                Devices.Add(new Santroller(e.Device, product, serial, revision));
+                new Santroller(e.Device, product, serial, revision);
             }
             else if (product == "Ardwiino")
             {
@@ -233,23 +259,14 @@ namespace GuitarConfiguratorSharp.ViewModels
                 }
                 else
                 {
-                    Devices.Add(new Ardwiino(e.Device, product, serial, revision));
+                    new Ardwiino(e.Device, product, serial, revision);
                 }
-            }
-            if (SelectedDevice == null) {
-                SelectedDevice = Devices.FirstOrDefault(x=>true, null);
             }
         }
 
         private void DevicePoller_DeviceDisconnected(object? sender, DeviceEventArgs e)
         {
             Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device)));
-            if (SelectedDevice?.IsSameDevice(e.Device) == true) {
-                SelectedDevice = null;
-            }
-            if (SelectedDevice == null) {
-                SelectedDevice = Devices.FirstOrDefault(x=>true, null);
-            }
         }
         public void Dispose()
         {

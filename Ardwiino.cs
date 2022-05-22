@@ -22,7 +22,8 @@ public class Ardwiino : ConfigurableUSBDevice
     private const ushort READ_CONFIG_PRE_8_0_7_COMMAND = 60;
     private const ushort READ_CONFIG_PRE_7_0_3_COMMAND = 59;
     private string boardName;
-    bool unmigrateable = false;
+
+    public override bool MigrationSupported { get; }
 
     public Ardwiino(IDevice device, string product, string serial, ushort version_number) : base(device, product, serial, version_number)
     {
@@ -33,9 +34,11 @@ public class Ardwiino : ConfigurableUSBDevice
             buffer = this.ReadData(7);
             this.board = StructTools.RawDeserializeStr(buffer);
             this.boardName = Board.findBoard(this.board, this.cpuFreq).name;
-            unmigrateable = true;
+            this.MigrationSupported = false;
+            ConfigurableDevice.FinishedInitialising(this);
             return;
         }
+        this.MigrationSupported = true;
         // Version 6.0.0 started at config version 6, so we don't have to support anything earlier than that
         byte[] data = this.ReadData(CPU_INFO_COMMAND);
         if (this.version < OLD_CPU_INFO_VERSION)
@@ -211,17 +214,23 @@ public class Ardwiino : ConfigurableUSBDevice
             var config_old = StructTools.RawDeserialize<Configuration8>(data, 0);
             config.rf = config_old.rf;
         }
-
+        ConfigurableDevice.FinishedInitialising(this);
 
     }
 
     public override String ToString()
     {
-        if (unmigrateable)
-        {
-            return $"Ardwiino - {boardName} - {version} - {Board.OldArdwiino.name}";
-        }
         return $"Ardwiino - {boardName} - {version}";
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
     }
 
     enum GyroOrientation

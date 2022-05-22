@@ -17,7 +17,8 @@ public class Santroller : ConfigurableUSBDevice
         // Note that after we pull initial information, we can actually close or reinitialize the device if needed.
 
     }
-    
+    public override bool MigrationSupported => true;
+
     public override String ToString()
     {
         return $"Santroller";
