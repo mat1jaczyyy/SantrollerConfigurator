@@ -35,7 +35,7 @@ public class Arduino : ConfigurableDevice
             serial.Write("i\x04\n");
             var boardFreqStr = serial.ReadLine().Replace("UL","");
             var boardFreq = UInt32.Parse(boardFreqStr);
-            this.board = new Board(boardName, $"Ardwiino - {Board.findBoard(boardName).name} - {boardFreq} - pre 4.3.7 {Board.OldArdwiino.name}", boardName, Board.OldArdwiino.productIDs);
+            this.board = new Board(boardName, $"Ardwiino - {Board.findBoard(boardName, boardFreq).name} - pre 4.3.7 {Board.OldArdwiino.name}", boardFreq, boardName, Board.OldArdwiino.productIDs);
         }
         else
         {

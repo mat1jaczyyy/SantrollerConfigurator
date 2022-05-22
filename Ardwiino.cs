@@ -1,7 +1,6 @@
 
 using Device.Net;
 using System;
-using System.Text;
 using System.Runtime.InteropServices;
 
 public class Ardwiino : ConfigurableUSBDevice
@@ -33,7 +32,7 @@ public class Ardwiino : ConfigurableUSBDevice
             this.cpuFreq = uint.Parse(StructTools.RawDeserializeStr(buffer));
             buffer = this.ReadData(7);
             this.board = StructTools.RawDeserializeStr(buffer);
-            this.boardName = Board.findBoard(this.board).name;
+            this.boardName = Board.findBoard(this.board, this.cpuFreq).name;
             unmigrateable = true;
             return;
         }
@@ -51,7 +50,7 @@ public class Ardwiino : ConfigurableUSBDevice
             this.cpuFreq = info.cpu_freq;
             this.board = info.board;
         }
-        this.boardName = Board.findBoard(this.board).name;
+        this.boardName = Board.findBoard(this.board, this.cpuFreq).name;
         var read_config = READ_CONFIG_COMMAND;
         if (this.version < new Version(8, 0, 7))
         {
@@ -220,9 +219,9 @@ public class Ardwiino : ConfigurableUSBDevice
     {
         if (unmigrateable)
         {
-            return $"Ardwiino - {board} - {cpuFreq} - {version} - {Board.OldArdwiino.name}";
+            return $"Ardwiino - {boardName} - {version} - {Board.OldArdwiino.name}";
         }
-        return $"Ardwiino - {board} - {cpuFreq} - {version}";
+        return $"Ardwiino - {boardName} - {version}";
     }
 
     enum GyroOrientation
