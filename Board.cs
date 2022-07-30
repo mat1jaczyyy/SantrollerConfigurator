@@ -1,6 +1,9 @@
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfiguratorSharp.Configuration;
+
 public struct Board
 {
     public string ardwiinoName { get; }
@@ -59,28 +62,30 @@ public struct Board
         new Board("waveshare_rp2040_zero", "Waveshare RP2040-Zero", 0, "waveshare_rp2040_zero", new List<uint>{})
     };
 
-
-    public static readonly Board[] Boards = new Board[]{
-        new Board("uno-atmega16u2", "Arduino Uno", 0, "uno-atmega16u2", new List<uint>{0x2FEF}),
-        new Board("uno-at90usb82", "Arduino Uno", 0, "uno-at90usb82", new List<uint>{0x2FF7}),
-        new Board("uno", "Arduino Uno", 0, "uno", new List<uint>{0x0043, 0x7523, 0x0001, 0xea60, 0x0243}),
+    public static readonly Board[] MiniBoards = new Board[]{
         new Board("mini", "Arduino Pro Mini 5V", 16000000, "mini", new List<uint>{}),
         new Board("mini", "Arduino Pro Mini 3.3V", 8000000, "mini", new List<uint>{}),
-        new Board("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "a-micro", new List<uint>{0x0037, 0x0237}),
-        new Board("a-micro", "Arduino Micro", 16000000, "a-micro", new List<uint>{0x8037, 0x8237}),
-        new Board("micro", "Arduino Pro Micro 3.3V", 8000000, "micro", new List<uint>{0x9204}),
-        new Board("micro", "Arduino Pro Micro 5V", 16000000, "micro", new List<uint>{0x9206}),
-        new Board("leonardo", "Arduino Leonardo", 16000000, "leonardo", new List<uint>{0x8036, 0x800c}),
-        new Board("leonardo", "Arduino Micro / Pro Micro / Leonardo in Bootloader Mode", 16000000, "leonardo", new List<uint>{0x0036}),
-        new Board("micro", "Arduino Pro Micro in Bootloader Mode", 8000000, "micro", new List<uint>{0x9203, 0x9207}),
-        new Board("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "micro", new List<uint>{0x9205}),
+        };
+    public static readonly Board[] MegaBoards = new Board[]{
         new Board("mega2560-atmega16u2", "Arduino Mega 2560", 0, "mega2560-atmega16u2", new List<uint>{0x2FEF}),
         new Board("mega2560-at90usb82", "Arduino Mega 2560", 0, "mega2560-at90usb82", new List<uint>{0x2FF7}),
         new Board("mega2560", "Arduino Mega 2560", 0, "mega2560", new List<uint>{0x0010, 0x0042}),
         new Board("megaadk-atmega16u2", "Arduino Mega ADK", 0, "megaadk-atmega16u2", new List<uint>{0x2FEF}),
         new Board("megaadk-at90usb82", "Arduino Mega ADK", 0, "megaadk-at90usb82", new List<uint>{0x2FF7}),
         new Board("megaadk", "Arduino Mega ADK", 0, "megaadk", new List<uint>{0x003f, 0x0044}),
-    }.Concat(ATMEGA32U4Boards).Concat(RP2040Boards).ToArray();
+    };
+    public static readonly Board[] UnoBoards = new Board[]{
+        new Board("uno-atmega16u2", "Arduino Uno", 0, "uno-atmega16u2", new List<uint>{0x2FEF}),
+        new Board("uno-at90usb82", "Arduino Uno", 0, "uno-at90usb82", new List<uint>{0x2FF7}),
+        new Board("uno", "Arduino Uno", 0, "uno", new List<uint>{0x0043, 0x7523, 0x0001, 0xea60, 0x0243}),
+       };
+
+    public static readonly Board[] Boards = UnoBoards
+        .Concat(MiniBoards)
+        .Concat(MegaBoards)
+        .Concat(ATMEGA32U4Boards)
+        .Concat(RP2040Boards)
+        .ToArray();
 
     public static Board findBoard(string ardwiinoName, uint cpuFreq)
     {
@@ -92,5 +97,30 @@ public struct Board
             }
         }
         return Generic;
+    }
+    public static Microcontroller findMicrocontroller(Board board)
+    {
+        if (Board.ATMEGA32U4Boards.Contains(board))
+        {
+            return new Micro();
+        }
+        else if (Board.UnoBoards.Contains(board))
+        {
+            return new Uno();
+        }
+        else if (Board.MegaBoards.Contains(board))
+        {
+            return new Mega();
+        }
+        else if (Board.RP2040Boards.Contains(board))
+        {
+            return new Pico();
+        }
+        else if (Board.MiniBoards.Contains(board))
+        {
+            throw new NotSupportedException("TODO: support mini");
+        }
+        throw new NotSupportedException("Not sure how we got here");
+
     }
 }

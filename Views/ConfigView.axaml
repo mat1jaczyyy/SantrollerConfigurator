@@ -1,126 +1,153 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker"
-             xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="GuitarConfiguratorSharp.Views.ConfigView"
-             Background="Transparent">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker" xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="GuitarConfiguratorSharp.Views.ConfigView" Background="Transparent">
     <UserControl.Resources>
-        <guitarConfiguratorSharp:BitmapAssetValueConverter x:Key="ImageConverter"/>
+        <guitarConfiguratorSharp:BitmapAssetValueConverter x:Key="ImageConverter" />
     </UserControl.Resources>
     <Panel>
         <DockPanel HorizontalAlignment="Stretch">
-            <ExperimentalAcrylicBorder DockPanel.Dock="Bottom">
-                <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
-                </ExperimentalAcrylicBorder.Material>
-                <StackPanel Margin="10">
-                    <Button Content="Write Configuration" Command="{Binding Main.GoBack}" HorizontalAlignment="Right" />
-                    <Button Content="Back" Command="{Binding Main.GoBack}" HorizontalAlignment="Right" />
-                </StackPanel>
-            </ExperimentalAcrylicBorder>
             <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="240">
                 <ExperimentalAcrylicBorder.Material>
                     <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
                 </ExperimentalAcrylicBorder.Material>
-                <Viewbox MaxHeight="500">
-                <StackPanel Margin="0 0 0 40">
-                    <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="20 40 20 0" Text="Emulation Type" />
-                        <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
-                            <ComboBoxItem>Universal</ComboBoxItem>
-                            <ComboBoxItem>XInput</ComboBoxItem>
-                            <ComboBoxItem>Keyboard / Mouse</ComboBoxItem>
-                            <ComboBoxItem>Midi</ComboBoxItem>
-                        </ComboBox>
+                <ScrollViewer VerticalAlignment="Center" Margin="0 50 0 0">
+                    <StackPanel Margin="0 0 0 40">
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Emulation Type" TextAlignment="Center" />
+                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
+                                <ComboBoxItem>Universal</ComboBoxItem>
+                                <ComboBoxItem>XInput</ComboBoxItem>
+                                <ComboBoxItem>Keyboard / Mouse</ComboBoxItem>
+                                <ComboBoxItem>Midi</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type" TextAlignment="Center" />
+                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
+                                <ComboBoxItem>Guitar</ComboBoxItem>
+                                <ComboBoxItem>Gamepad</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Input Type" TextAlignment="Center" />
+                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
+                                <ComboBoxItem>Direct</ComboBoxItem>
+                                <ComboBoxItem>Wii</ComboBoxItem>
+                                <ComboBoxItem>PS2</ComboBoxItem>
+                                <ComboBoxItem>USB Passthrough</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Tilt Type" TextAlignment="Center" />
+                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
+                                <ComboBoxItem>Digital / Mercury</ComboBoxItem>
+                                <ComboBoxItem>MPU-6050</ComboBoxItem>
+                                <ComboBoxItem>Analogue</ComboBoxItem>
+                                <ComboBoxItem>ADXL-3xx</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="LED Type" TextAlignment="Center" />
+                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
+                                <ComboBoxItem>APA102</ComboBoxItem>
+                                <ComboBoxItem>WS2812</ComboBoxItem>
+                                <ComboBoxItem>Inline</ComboBoxItem>
+                                <ComboBoxItem>None</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="LED Open Colour" TextAlignment="Center" />
+                            <colorpicker:ColorButton HorizontalContentAlignment="Stretch" Color="black" HorizontalAlignment="Center" Margin="0 20 0 0"></colorpicker:ColorButton>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Map Left Joystick to DPad" TextAlignment="Center" />
+                            <ToggleSwitch HorizontalContentAlignment="Center" IsChecked="true" HorizontalAlignment="Center"></ToggleSwitch>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Map Start+Select to Home" TextAlignment="Center" />
+                            <ToggleSwitch HorizontalContentAlignment="Center" IsChecked="true" HorizontalAlignment="Center"></ToggleSwitch>
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="20 40 20 0" Text="Controller Type" />
-                        <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
-                            <ComboBoxItem>Guitar</ComboBoxItem>
-                            <ComboBoxItem>Gamepad</ComboBoxItem>
-                        </ComboBox>
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="20 40 20 0" Text="Input Type" />
-                        <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
-                            <ComboBoxItem>Direct</ComboBoxItem>
-                            <ComboBoxItem>Wii</ComboBoxItem>
-                            <ComboBoxItem>PS2</ComboBoxItem>
-                            <ComboBoxItem>USB Passthrough</ComboBoxItem>
-                        </ComboBox>
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="20 40 20 0" Text="Tilt Type" />
-                        <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
-                            <ComboBoxItem>Digital / Mercury</ComboBoxItem>
-                            <ComboBoxItem>MPU-6050</ComboBoxItem>
-                            <ComboBoxItem>Analogue</ComboBoxItem>
-                            <ComboBoxItem>ADXL-3xx</ComboBoxItem>
-                        </ComboBox>
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="20 40 20 0" Text="LED Type" />
-                        <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
-                            <ComboBoxItem>APA102</ComboBoxItem>
-                            <ComboBoxItem>WS2812</ComboBoxItem>
-                            <ComboBoxItem>Inline</ComboBoxItem>
-                            <ComboBoxItem>None</ComboBoxItem>
-                        </ComboBox>
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="20 40 20 0" Text="LED Open Colour" />
-                        <colorpicker:ColorButton HorizontalContentAlignment="Stretch" Color="black" HorizontalAlignment="Center" Width="60" Margin="20 20 20 0"></colorpicker:ColorButton>
-                    </StackPanel>
+                </ScrollViewer>
+            </ExperimentalAcrylicBorder>
+            <ExperimentalAcrylicBorder DockPanel.Dock="Bottom">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+                <StackPanel>
+                    <WrapPanel Margin="10" HorizontalAlignment="Center">
+                        <Button Content="Write Configuration" Command="{Binding Main.GoBack}"  />
+                        <Button Content="Revert device to Arduino" Command="{Binding Main.GoBack}"  />
+                        <Button Content="Configure another device" Command="{Binding Main.GoBack}" />
+                    </WrapPanel>
+                    <WrapPanel HorizontalAlignment="Center">
+                        <TextBlock Text="Status: " />
+                        <TextBlock Text="{Binding Main.Message}" />
+                    </WrapPanel>
+                    <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress" Value="{Binding Main.Progress}" IsIndeterminate="False" Minimum="0" Maximum="100" Height="30" />
                 </StackPanel>
-                </Viewbox>
             </ExperimentalAcrylicBorder>
             <ExperimentalAcrylicBorder>
                 <ExperimentalAcrylicBorder.Material>
                     <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
                 </ExperimentalAcrylicBorder.Material>
-                <Viewbox>
-                    <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="20 40 20 20" Text="Controller Bindings" />
+                <ScrollViewer>
+                    <StackPanel HorizontalAlignment="Center">
+                        <Panel HorizontalAlignment="Stretch" Margin="20 40 20 20" />
                         <WrapPanel>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 0" Text="Input" Width="100" TextAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Pin" Width="50" TextAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Pin&#x0a;Activation&#x0a;Type" Width="100" TextAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Debounce" Width="110" TextAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Calibration" Width="100" TextAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="LED&#x0a;Pressed&#x0a;Colour" Width="60" TextAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="LED&#x0a;Released&#x0a;Colour" Width="60" TextAlignment="Center"/>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Other&#x0a;Settings" Width="80" TextAlignment="Center"/>
+                            <StackPanel>
+                                <WrapPanel>
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 0" Text="Input" Width="75" TextAlignment="Center" />
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Pin" Width="50" TextAlignment="Center" />
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Pin&#x0a;Activation&#x0a;Type" Width="100" TextAlignment="Center" />
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Debounce" Width="110" TextAlignment="Center" />
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="LED&#x0a;Pressed&#x0a;Colour" Width="60" TextAlignment="Center" />
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="LED&#x0a;Released&#x0a;Colour" Width="60" TextAlignment="Center" />
+                                </WrapPanel>
+                                <ItemsControl Items="{Binding Bindings}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <WrapPanel>
+                                                <Image ToolTip.Tip="{Binding Name}" Source="{Binding Image, Converter={StaticResource ImageConverter}}" HorizontalAlignment="Center" Width="75"></Image>
+                                                <Button HorizontalContentAlignment="Center" Content="{Binding Pin}" HorizontalAlignment="Center" Width="50" Margin="20 0 0 0"></Button>
+                                                <ComboBox SelectedIndex="{Binding PinMode}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="100" Margin="20 0 0 0">
+                                                    <ComboBoxItem>VCC</ComboBoxItem>
+                                                    <ComboBoxItem>Floating</ComboBoxItem>
+                                                    <!-- TODO: below are only valid on pico -->
+                                                    <!-- <ComboBoxItem>Ground</ComboBoxItem> --> 
+                                                    <!-- <ComboBoxItem>Bus Keep</ComboBoxItem> -->
+                                                </ComboBox>
+                                                <NumericUpDown Value="{Binding Debounce}" Minimum="0" Maximum="10" VerticalAlignment="Center" Width="110" Margin="20 0 0 0"></NumericUpDown>
+                                                <colorpicker:ColorButton HorizontalContentAlignment="Center" Color="{Binding LedOn}" HorizontalAlignment="Center" Width="60" Margin="20 0 0 0"></colorpicker:ColorButton>
+                                                <colorpicker:ColorButton HorizontalContentAlignment="Center" Color="{Binding LedOff}" HorizontalAlignment="Center" Width="60" Margin="20 0 0 0"></colorpicker:ColorButton>
+                                            </WrapPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <StackPanel Margin="100 0 0 0">
+                                <WrapPanel>
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 0" Text="Input" Width="75" TextAlignment="Center" />
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Pin" Width="50" TextAlignment="Center" />
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="Calibration" Width="100" TextAlignment="Center" />
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="LED&#x0a;Pressed&#x0a;Colour" Width="60" TextAlignment="Center" />
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20 0 0 0" Text="LED&#x0a;Released&#x0a;Colour" Width="60" TextAlignment="Center" />
+                                </WrapPanel>
+                                <ItemsControl Items="{Binding AnalogBindings}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <WrapPanel>
+                                                <Image ToolTip.Tip="{Binding Name}" Source="{Binding Image, Converter={StaticResource ImageConverter}}" HorizontalAlignment="Center" Width="75"></Image>
+                                                <Button HorizontalContentAlignment="Center" Content="{Binding Pin}" HorizontalAlignment="Center" Width="50" Margin="20 0 0 0"></Button>
+                                                <Button Margin="20 0 0 0" HorizontalContentAlignment="Center" VerticalAlignment="Center" Content="Calibrate" Width="100" HorizontalAlignment="Stretch"></Button>
+                                                <colorpicker:ColorButton HorizontalContentAlignment="Center" Color="{Binding LedOn}" HorizontalAlignment="Center" Width="60" Margin="20 0 0 0"></colorpicker:ColorButton>
+                                                <colorpicker:ColorButton HorizontalContentAlignment="Center" Color="{Binding LedOff}" HorizontalAlignment="Center" Width="60" Margin="20 0 0 0"></colorpicker:ColorButton>
+                                            </WrapPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
                         </WrapPanel>
-                        <ItemsControl Items="{Binding Bindings}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <WrapPanel>
-                                        <Image ToolTip.Tip="{Binding Name}" Source="{Binding Image, Converter={StaticResource ImageConverter}}" HorizontalAlignment="Center" Width="100"></Image>
-                                        <Button HorizontalContentAlignment="Center" Content="{Binding Pin}" HorizontalAlignment="Center" Width="50" Margin="20 0 0 0"></Button>
-                                        <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="100" Margin="20 0 0 0">
-                                            <ComboBoxItem>Ground</ComboBoxItem>
-                                            <ComboBoxItem>VCC</ComboBoxItem>
-                                            <ComboBoxItem>Analogue</ComboBoxItem>
-                                        </ComboBox>
-                                        <NumericUpDown Value="{Binding Debounce}" Minimum="0" Maximum="10" VerticalAlignment="Center" Width="110" Margin="20 0 0 0"></NumericUpDown> 
-                                        <Panel Width="100" Margin="20 0 0 0">
-                                            <Button IsVisible="{Binding IsAnalog}" HorizontalContentAlignment="Center" VerticalAlignment="Center" Content="Calibrate" HorizontalAlignment="Stretch"></Button>
-                                        </Panel>
-                                        <colorpicker:ColorButton HorizontalContentAlignment="Center" Color="{Binding LedOn}" HorizontalAlignment="Center" Width="60" Margin="20 0 0 0"></colorpicker:ColorButton>
-                                        <colorpicker:ColorButton HorizontalContentAlignment="Center" Color="{Binding LedOff}" HorizontalAlignment="Center" Width="60" Margin="20 0 0 0"></colorpicker:ColorButton>
-                                        <StackPanel IsVisible="{Binding HasOption}" Width="100" Margin="20 0 0 0">
-                                            <TextBlock HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" Text="{Binding OptionDescription}" ></TextBlock>
-                                            <ToggleSwitch HorizontalContentAlignment="Center" IsChecked="{Binding OptionValue}" HorizontalAlignment="Center"></ToggleSwitch>
-                                        </StackPanel>
-                                    </WrapPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
                     </StackPanel>
-                </Viewbox>
+                </ScrollViewer>
             </ExperimentalAcrylicBorder>
         </DockPanel>
     </Panel>

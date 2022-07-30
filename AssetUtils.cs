@@ -4,6 +4,8 @@ using Avalonia.Platform;
 using System.IO.Compression;
 using System.Threading.Tasks;
 using System.Reflection;
+using System.IO;
+
 public class AssetUtils
 {
     public static async Task ExtractFile(string file, string location)
@@ -25,5 +27,11 @@ public class AssetUtils
         await ExtractFile(zip, zipLocation);
         ZipFile.ExtractToDirectory(zipLocation, location);
         System.IO.File.Delete(zipLocation);
+    }
+
+    public static string GetAppDataFolder()
+    {
+        string folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        return Path.Combine(folder, "SantrollerConfigurator");
     }
 }

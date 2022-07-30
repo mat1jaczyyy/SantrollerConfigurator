@@ -19,6 +19,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 #if Windows
 using SerialPort.Net.Windows;
 using Hid.Net.Windows;
@@ -47,6 +49,9 @@ namespace GuitarConfiguratorSharp.ViewModels
         private ConfigurableDevice? _selectedDevice;
 
         private bool MigrationSupported => SelectedDevice == null || SelectedDevice.MigrationSupported;
+
+        private readonly static string UDEV_FILE = "99-ardwiino.rules";
+        private readonly static string UDEV_PATH = $"/etc/udev/rules.d/{UDEV_FILE}";
 
         public ConfigurableDevice? SelectedDevice
         {
@@ -136,6 +141,7 @@ namespace GuitarConfiguratorSharp.ViewModels
                 this.Progress = val2;
                 Console.WriteLine(message);
             };
+
             Devices.CollectionChanged += (_, e) =>
             {
                 if (e.Action == NotifyCollectionChangedAction.Add)
@@ -174,19 +180,30 @@ namespace GuitarConfiguratorSharp.ViewModels
                 timer.Start();
                 this.Ready = true;
             };
-            ConfigurableDevice.DeviceInitialised += (dev) => Devices.Add(dev);
             _ = pio.InitialisePlatformIO();
+
+            Task.Run(InstallDependancies);
         }
 
         private List<string> currentDrives = new List<string>();
         private List<string> currentPorts = new List<string>();
+
+        private void AddDevice(ConfigurableDevice device)
+        {
+            if (device is Arduino)
+            {
+                _ = Task.Delay(500).ContinueWith(_ => Devices.Add(device));
+            } else {
+                Devices.Add(device);
+            }
+        }
         private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
         {
             var drives = DriveInfo.GetDrives();
             var currentDrivesSet = currentDrives.ToHashSet();
             foreach (var drive in drives)
             {
-                if (currentDrives.Remove(drive.RootDirectory.FullName))
+                if (currentDrivesSet.Remove(drive.RootDirectory.FullName))
                 {
                     continue;
                 }
@@ -195,18 +212,25 @@ namespace GuitarConfiguratorSharp.ViewModels
                 {
                     if (File.Exists(uf2) && File.ReadAllText(uf2).Contains("RPI-RP2"))
                     {
-                        new Pico(drive.RootDirectory.FullName);
+                        AddDevice(new PicoDevice(pio, drive.RootDirectory.FullName));
                     }
                 }
                 currentDrives.Add(drive.RootDirectory.FullName);
             }
             // We removed all valid devices above, so anything left in currentDrivesSet is no longer valid
-            Devices.RemoveMany(Devices.Where(x => x is Pico pico && currentDrivesSet.Contains(pico.GetPath())));
+            Devices.RemoveMany(Devices.Where(x => x is PicoDevice pico && currentDrivesSet.Contains(pico.GetPath())));
             currentDrives.RemoveMany(currentDrivesSet);
 
             var existingPorts = currentPorts.ToHashSet();
             var ports = pio.GetPorts().Result;
-            currentPorts.AddRange(ports.Where(port => !existingPorts.Contains(port.Port)).Select(port => new Arduino(port).GetSerialPort()));
+            foreach (var port in ports) {
+                if (existingPorts.Contains(port.Port)) {
+                    continue;
+                }
+                var arduino = new Arduino(pio, port);
+                AddDevice(arduino);
+                currentPorts.Add(arduino.GetSerialPort());
+            }
             var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
             currentPorts.RemoveMany(currentPorts.Where(port => !currentSerialPorts.Contains(port)));
             Devices.RemoveMany(Devices.Where(device => device is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())));
@@ -215,8 +239,6 @@ namespace GuitarConfiguratorSharp.ViewModels
         }
         private void DevicePoller_DeviceInitialized(object? sender, DeviceEventArgs e)
         {
-            // TODO: check this all works on windows
-            // Also, it seems that LibUsbDotNet might even come with some way to install INFs, though if it isnt that easy to use we can just use the standard driver installer for unos.
 #if Windows
             String product = e.Device.ConnectedDeviceDefinition.ProductName;
             String serial = e.Device.ConnectedDeviceDefinition.SerialNumber;
@@ -246,20 +268,17 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
             if (product == "Santroller")
             {
-                new Santroller(e.Device, product, serial, revision);
+                AddDevice(new Santroller(pio, e.Device, product, serial, revision));
             }
             else if (product == "Ardwiino")
             {
-                // These guys are so old that we hardcoded a revision since the config tool didn't work the way it does now
-                // They will just show up as a serial device. In theory these old firmwares actually responded to the standard
-                // Arduino programming commands, so doing this will support them for free.
-                if (revision == 0x3122)
+                if (revision == Ardwiino.SERIAL_ARDWIINO_REVISION)
                 {
                     return;
                 }
                 else
                 {
-                    new Ardwiino(e.Device, product, serial, revision);
+                    AddDevice(new Ardwiino(pio, e.Device, product, serial, revision));
                 }
             }
         }
@@ -275,6 +294,65 @@ namespace GuitarConfiguratorSharp.ViewModels
             DeviceListener.Dispose();
         }
 
+        public bool CheckDependancies()
+        {
+            // Call check dependancies on startup, and pop up a dialog saying drivers are missing would you like to install if they are missing
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+                ProcessStartInfo info = new ProcessStartInfo(Path.Combine(windowsDir, "sysnative", "pnputil.exe"));
+                info.ArgumentList.Add("-e");
+                info.UseShellExecute = true;
+                info.RedirectStandardOutput = true;
+                var process = Process.Start(info);
+                if (process == null) return false;
+                var output = process.StandardOutput.ReadToEnd();
+                // Check if the driver exists (we install this specific version of the driver so its easiest to check for it.)
+                return output.Contains("Atmel USB Devices") && output.Contains("Atmel Corporation") && output.Contains("10/02/2010 1.2.2.0");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return File.Exists(UDEV_PATH);
+            }
+            return true;
+        }
+
+        public async void InstallDependancies()
+        {
+            if (CheckDependancies()) return;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Use pnputil to install the drivers, utlising runas to run with admin
+                //TODO: Test using SpecialFolder.System instead of windows
+                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+                string appdataFolder = AssetUtils.GetAppDataFolder();
+                string driverZip = Path.Combine(appdataFolder, "drivers.zip");
+                string driverFolder = Path.Combine(appdataFolder, "drivers");
+                await AssetUtils.ExtractZip("dfu.zip", driverZip, driverFolder);
+
+                var info = new ProcessStartInfo(Path.Combine(windowsDir, "sysnative", "pnputil.exe"));
+                info.ArgumentList.AddRange(new string[] { "-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf") });
+                info.UseShellExecute = true;
+                info.Verb = "runas";
+                Process.Start(info);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // Just copy the file to install it, using pkexec for admin
+                string appdataFolder = AssetUtils.GetAppDataFolder();
+                string rules = Path.Combine(appdataFolder, UDEV_FILE);
+                await AssetUtils.ExtractFile(UDEV_FILE, rules);
+                var info = new ProcessStartInfo("pkexec");
+                info.ArgumentList.AddRange(new string[] { "cp", rules, UDEV_PATH });
+                info.UseShellExecute = true;
+                Process.Start(info);
+            }
+            if (!CheckDependancies())
+            {
+                // Pop open a dialog that it failed and to try again
+            }
+        }
 
     }
+
 }

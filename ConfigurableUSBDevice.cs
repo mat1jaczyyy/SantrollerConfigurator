@@ -3,6 +3,7 @@ using Device.Net;
 using Usb.Net;
 using System;
 using GuitarConfiguratorSharp.Utils;
+using GuitarConfiguratorSharp.Configuration;
 
 #if !Windows
 using Device.Net.LibUsb;
@@ -25,6 +26,7 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
     }
 
     public abstract bool MigrationSupported { get; }
+    public abstract DeviceConfiguration? Configuration { get; }
 
     public bool IsSameDevice(IDevice device)
     {
@@ -73,7 +75,7 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
         return tr.BytesTransferred;
 #else
         
-        // TODO: if the libary is every fixed, then we won't need this patch
+        // TODO: if the libary is ever fixed, then we won't need this patch
         LibUsbInterfaceManager luim = (LibUsbInterfaceManager)device.UsbInterfaceManager;
         var sp = new UsbSetupPacket(
             packet.RequestType.ToByte(),

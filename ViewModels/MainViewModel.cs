@@ -8,6 +8,7 @@ using Device.Net.LibUsb;
 using Usb.Net;
 using ReactiveUI;
 using System.ComponentModel;
+using GuitarConfiguratorSharp.Configuration;
 
 namespace GuitarConfiguratorSharp.ViewModels
 {
@@ -18,7 +19,7 @@ namespace GuitarConfiguratorSharp.ViewModels
 
         public IScreen HostScreen { get; }
 
-        public MainWindowViewModel Main { get ;}
+        public MainWindowViewModel Main { get; }
 
         public MainViewModel(MainWindowViewModel screen)
         {

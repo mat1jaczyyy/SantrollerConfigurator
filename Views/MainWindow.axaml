@@ -10,19 +10,5 @@
         Title="GuitarConfiguratorSharp"
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True">
-        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <ExperimentalAcrylicBorder DockPanel.Dock="Bottom" Height="50">
-                <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
-                </ExperimentalAcrylicBorder.Material>
-                <StackPanel>
-                <WrapPanel HorizontalAlignment="Center">
-                <TextBlock Text="Status: " />
-                <TextBlock Text="{Binding Message}" />
-                </WrapPanel>
-                <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress" Value="{Binding Progress}" IsIndeterminate="False" Minimum="0" Maximum="100" Height="30"/>
-                </StackPanel>
-            </ExperimentalAcrylicBorder>
-            <rxui:RoutedViewHost Router="{Binding Router}" />
-        </DockPanel>
+        <rxui:RoutedViewHost Router="{Binding Router}" />
 </Window>
