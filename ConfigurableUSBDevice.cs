@@ -42,10 +42,10 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
         return false;
     }
 
-    public byte[] ReadData(ushort id)
+    public byte[] ReadData(ushort wValue, byte bRequest=1, ushort size=128)
     {
-        byte[] buffer = new byte[64];
-        SetupPacket packet = new SetupPacket(new UsbDeviceRequestType(RequestDirection.In, RequestType.Class, RequestRecipient.Interface), 1, id, 2, (ushort)buffer.Length);
+        byte[] buffer = new byte[size];
+        SetupPacket packet = new SetupPacket(new UsbDeviceRequestType(RequestDirection.In, RequestType.Class, RequestRecipient.Interface), bRequest, wValue, 2, (ushort)buffer.Length);
 #if Windows
         TransferResult tr = device.PerformControlTransferAsync(packet, buffer).Result;
         Array.Resize(ref tr.Data, tr.BytesTransferred);

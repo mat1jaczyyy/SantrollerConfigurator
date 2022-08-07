@@ -49,7 +49,7 @@ public class Ardwiino : ConfigurableUSBDevice
             string board = StructTools.RawDeserializeStr(buffer);
             this.board = Board.findBoard(board, this.cpuFreq);
             this.MigrationSupported = false;
-            _config = new DeviceConfiguration(pio, Board.findMicrocontroller(this.board));
+            _config = new DeviceConfiguration(Board.findMicrocontroller(this.board), this.cpuFreq, this.board.ardwiinoName);
             return;
         }
         this.MigrationSupported = true;
@@ -294,30 +294,7 @@ public class Ardwiino : ConfigurableUSBDevice
                 break;
 
         }
-        if (config.all.main.mapLeftJoystickToDPad > 0)
-        {
-            int plx = config.all.pins.axis![(int)ControllerAxis.XBOX_L_X].pin;
-            int ply = config.all.pins.axis![(int)ControllerAxis.XBOX_L_Y].pin;
-            var scalex = config.axisScale.axis![(int)ControllerAxis.XBOX_L_X];
-            var scaley = config.axisScale.axis![(int)ControllerAxis.XBOX_L_Y];
-            Color onlx = Color.FromRgb(0, 0, 0);
-            Color only = Color.FromRgb(0, 0, 0);
-            Color off = Color.FromRgb(0, 0, 0);
-            if (colors.ContainsKey(plx))
-            {
-                onlx = colors[plx];
-            }
-            if (colors.ContainsKey(ply))
-            {
-                only = colors[ply];
-            }
-            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, new DirectAnalog(plx, new GenericAxis(StandardAxisType.LeftStickX), onlx, off, scalex.multiplier, scalex.offset, scalex.deadzone, false), AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Left), onlx, off));
-            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, new DirectAnalog(plx, new GenericAxis(StandardAxisType.LeftStickX), onlx, off, scalex.multiplier, scalex.offset, scalex.deadzone, false), AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Right), onlx, off));
-            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, new DirectAnalog(ply, new GenericAxis(StandardAxisType.LeftStickY), only, off, scaley.multiplier, scaley.offset, scaley.deadzone, false), AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Down), only, off));
-            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, new DirectAnalog(ply, new GenericAxis(StandardAxisType.LeftStickY), only, off, scaley.multiplier, scaley.offset, scaley.deadzone, false), AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Up), only, off));
-        }
-        // TODO: Generate something for Tilt as well.
-        // TODO: and necks
+        // TODO: Handle necks
         if (config.all.main.inputType == (int)InputControllerType.Direct)
         {
             foreach (int axis in Enum.GetValues(typeof(ControllerAxis)))
@@ -347,7 +324,7 @@ public class Ardwiino : ConfigurableUSBDevice
                 }
                 else
                 {
-                    bindings.Add(new DirectAnalog(pin.pin, new GenericAxis(gen_axis), on, off, scale.multiplier, scale.offset, scale.deadzone, isTrigger));
+                    bindings.Add(new DirectAnalog(pin.pin, new GenericAxis(gen_axis), on, off, scale.multiplier / 1024.0f, (isTrigger ? 0 : 32670) + scale.offset, (isTrigger ? 32768 : 0) +scale.deadzone, isTrigger));
                 }
             }
             foreach (int button in Enum.GetValues(typeof(ControllerButtons)))
@@ -369,14 +346,13 @@ public class Ardwiino : ConfigurableUSBDevice
                 {
                     pinMode = DevicePinMode.Ground;
                 }
-                Console.WriteLine(pinMode);
-                // TODO: combined debounce?
                 var debounce = config.debounce.buttons;
                 if (deviceType == DeviceType.Guitar && (gen_button == StandardButtonType.Up || gen_button == StandardButtonType.Down))
                 {
                     debounce = config.debounce.strum;
                 }
-                bindings.Add(new DirectDigital(pinMode, pin, debounce, new GenericControllerButton(gen_button), on, off));
+                OutputButton output = HAT.Contains(gen_button) ? new GenericControllerHat(gen_button) : new GenericControllerButton(gen_button);
+                bindings.Add(new DirectDigital(pinMode, pin, debounce, output, on, off));
             }
         }
         else if (config.all.main.inputType == (int)InputControllerType.Wii)
@@ -388,8 +364,21 @@ public class Ardwiino : ConfigurableUSBDevice
         {
             // TODO: once we have support for layouts, this will just load some ps2 layout
         }
-        _config = new DeviceConfiguration(pio, controller, bindings, ledType, deviceType, emulationType, rhythmType, tiltType == TiltType.Digital_Mercury);
-        _config.generate();
+        if (config.all.main.mapLeftJoystickToDPad > 0)
+        {
+            var lx = bindings.FilterCast<Binding, Axis>().First(axis => axis.Type.Type == StandardAxisType.LeftStickX);
+            var ly = bindings.FilterCast<Binding, Axis>().First(axis => axis.Type.Type == StandardAxisType.LeftStickY);
+            var onlx = lx.LedOn;
+            var offlx = lx.LedOff;
+            var only = ly.LedOn;
+            var offly = ly.LedOff;
+            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Left), onlx, offlx));
+            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Right), onlx, offlx));
+            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Down), only, offly));
+            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Up), only, offly));
+        }
+        _config = new DeviceConfiguration(controller, this.cpuFreq, board.ardwiinoName, bindings, ledType, deviceType, emulationType, rhythmType, tiltType == TiltType.Digital_Mercury);
+        _config.generate(pio);
     }
 
     public override String ToString()
@@ -496,6 +485,8 @@ public class Ardwiino : ConfigurableUSBDevice
             {ControllerButtons.XBOX_X,StandardButtonType.X},
             {ControllerButtons.XBOX_Y,StandardButtonType.Y}
     };
+
+    private static IEnumerable<StandardButtonType> HAT = new List<StandardButtonType>() { StandardButtonType.Left, StandardButtonType.Right, StandardButtonType.Up, StandardButtonType.Down };
 
     List<StandardButtonType> FRETS = new List<StandardButtonType>() { StandardButtonType.A, StandardButtonType.B, StandardButtonType.X, StandardButtonType.Y, StandardButtonType.LB, StandardButtonType.RB };
     enum GyroOrientationOld : int

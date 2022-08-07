@@ -3,27 +3,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.Configuration;
-
-public struct Board
+namespace GuitarConfiguratorSharp.Configuration
 {
-    public string ardwiinoName { get; }
-    public string name { get; }
-    public string environment { get; }
-
-    public uint cpuFreq { get; }
-    public List<uint> productIDs { get; }
-
-    public Board(string ardwiinoName, string name, uint cpuFreq, string environment, List<uint> productIDs)
+    public struct Board
     {
-        this.ardwiinoName = ardwiinoName;
-        this.name = name;
-        this.environment = environment;
-        this.productIDs = productIDs;
-        this.cpuFreq = cpuFreq;
-    }
+        public string ardwiinoName { get; }
+        public string name { get; }
+        public string environment { get; }
 
-    public static readonly Board Generic = new Board("generic", "Generic Serial Device", 0, "generic", new List<uint> { });
-    public static readonly Board[] ATMEGA32U4Boards = {
+        public uint cpuFreq { get; }
+        public List<uint> productIDs { get; }
+
+        public Board(string ardwiinoName, string name, uint cpuFreq, string environment, List<uint> productIDs)
+        {
+            this.ardwiinoName = ardwiinoName;
+            this.name = name;
+            this.environment = environment;
+            this.productIDs = productIDs;
+            this.cpuFreq = cpuFreq;
+        }
+
+        public static readonly Board Generic = new Board("generic", "Generic Serial Device", 0, "generic", new List<uint> { });
+        public static readonly Board[] ATMEGA32U4Boards = {
         new Board("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "a-micro", new List<uint>{0x0037, 0x0237}),
         new Board("a-micro", "Arduino Micro", 16000000, "a-micro", new List<uint>{0x8037, 0x8237}),
         new Board("micro", "Arduino Pro Micro 3.3V", 8000000, "micro", new List<uint>{0x9204}),
@@ -34,7 +35,7 @@ public struct Board
         new Board("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "micro", new List<uint>{0x9205}),
     };
 
-    public static readonly Board[] RP2040Boards = {
+        public static readonly Board[] RP2040Boards = {
         new Board("pico", "Raspberry PI Pico", 0, "pico", new List<uint>{}),
         new Board("adafruit_feather_rp2040", "Adafruit Feather RP2040", 0, "adafruit_feather_rp2040", new List<uint>{}),
         new Board("adafruit_itsybitsy_rp2040", "Adafruit ItsyBitsy RP2040", 0, "adafruit_itsybitsy_rp2040", new List<uint>{}),
@@ -62,11 +63,11 @@ public struct Board
         new Board("waveshare_rp2040_zero", "Waveshare RP2040-Zero", 0, "waveshare_rp2040_zero", new List<uint>{})
     };
 
-    public static readonly Board[] MiniBoards = new Board[]{
+        public static readonly Board[] MiniBoards = new Board[]{
         new Board("mini", "Arduino Pro Mini 5V", 16000000, "mini", new List<uint>{}),
         new Board("mini", "Arduino Pro Mini 3.3V", 8000000, "mini", new List<uint>{}),
         };
-    public static readonly Board[] MegaBoards = new Board[]{
+        public static readonly Board[] MegaBoards = new Board[]{
         new Board("mega2560-atmega16u2", "Arduino Mega 2560", 0, "mega2560-atmega16u2", new List<uint>{0x2FEF}),
         new Board("mega2560-at90usb82", "Arduino Mega 2560", 0, "mega2560-at90usb82", new List<uint>{0x2FF7}),
         new Board("mega2560", "Arduino Mega 2560", 0, "mega2560", new List<uint>{0x0010, 0x0042}),
@@ -74,53 +75,54 @@ public struct Board
         new Board("megaadk-at90usb82", "Arduino Mega ADK", 0, "megaadk-at90usb82", new List<uint>{0x2FF7}),
         new Board("megaadk", "Arduino Mega ADK", 0, "megaadk", new List<uint>{0x003f, 0x0044}),
     };
-    public static readonly Board[] UnoBoards = new Board[]{
+        public static readonly Board[] UnoBoards = new Board[]{
         new Board("uno-atmega16u2", "Arduino Uno", 0, "uno-atmega16u2", new List<uint>{0x2FEF}),
         new Board("uno-at90usb82", "Arduino Uno", 0, "uno-at90usb82", new List<uint>{0x2FF7}),
         new Board("uno", "Arduino Uno", 0, "uno", new List<uint>{0x0043, 0x7523, 0x0001, 0xea60, 0x0243}),
        };
 
-    public static readonly Board[] Boards = UnoBoards
-        .Concat(MiniBoards)
-        .Concat(MegaBoards)
-        .Concat(ATMEGA32U4Boards)
-        .Concat(RP2040Boards)
-        .ToArray();
+        public static readonly Board[] Boards = UnoBoards
+            .Concat(MiniBoards)
+            .Concat(MegaBoards)
+            .Concat(ATMEGA32U4Boards)
+            .Concat(RP2040Boards)
+            .ToArray();
 
-    public static Board findBoard(string ardwiinoName, uint cpuFreq)
-    {
-        foreach (var board in Boards)
+        public static Board findBoard(string ardwiinoName, uint cpuFreq)
         {
-            if (board.ardwiinoName == ardwiinoName && (cpuFreq == 0 || board.cpuFreq == 0 || board.cpuFreq == cpuFreq))
+            foreach (var board in Boards)
             {
-                return board;
+                if (board.ardwiinoName == ardwiinoName && (cpuFreq == 0 || board.cpuFreq == 0 || board.cpuFreq == cpuFreq))
+                {
+                    return board;
+                }
             }
+            return Generic;
         }
-        return Generic;
-    }
-    public static Microcontroller findMicrocontroller(Board board)
-    {
-        if (Board.ATMEGA32U4Boards.Contains(board))
+        public static Microcontroller findMicrocontroller(Board board)
         {
-            return new Micro();
-        }
-        else if (Board.UnoBoards.Contains(board))
-        {
-            return new Uno();
-        }
-        else if (Board.MegaBoards.Contains(board))
-        {
-            return new Mega();
-        }
-        else if (Board.RP2040Boards.Contains(board))
-        {
-            return new Pico();
-        }
-        else if (Board.MiniBoards.Contains(board))
-        {
-            throw new NotSupportedException("TODO: support mini");
-        }
-        throw new NotSupportedException("Not sure how we got here");
+            if (Board.ATMEGA32U4Boards.Contains(board))
+            {
+                return new Micro();
+            }
+            else if (Board.UnoBoards.Contains(board))
+            {
+                return new Uno();
+            }
+            else if (Board.MegaBoards.Contains(board))
+            {
+                return new Mega();
+            }
+            else if (Board.RP2040Boards.Contains(board))
+            {
+                return new Pico();
+            }
+            else if (Board.MiniBoards.Contains(board))
+            {
+                throw new NotSupportedException("TODO: support mini");
+            }
+            throw new NotSupportedException("Not sure how we got here");
 
+        }
     }
 }

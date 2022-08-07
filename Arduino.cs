@@ -25,7 +25,7 @@ public class Arduino : ConfigurableDevice
             {
                 this.board = board;
                 this.MigrationSupported = true;
-                _config = new DeviceConfiguration(pio, Board.findMicrocontroller(this.board));
+                _config = new DeviceConfiguration(Board.findMicrocontroller(this.board), this.board.cpuFreq, this.board.ardwiinoName);
                 return;
             }
         }
@@ -44,7 +44,7 @@ public class Arduino : ConfigurableDevice
             var boardFreq = UInt32.Parse(boardFreqStr);
             var tmp = Board.findBoard(boardName, boardFreq);
             this.board = new Board(boardName, $"Ardwiino - {tmp.name} - pre 4.3.7", boardFreq, boardName, tmp.productIDs);
-            _config = new DeviceConfiguration(pio, Board.findMicrocontroller(this.board));
+            _config = new DeviceConfiguration(Board.findMicrocontroller(this.board), boardFreq, this.board.ardwiinoName);
         }
         else
         {
