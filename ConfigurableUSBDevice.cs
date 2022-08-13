@@ -26,7 +26,7 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
     }
 
     public abstract bool MigrationSupported { get; }
-    public abstract DeviceConfiguration? Configuration { get; }
+    public abstract DeviceConfiguration Configuration { get; }
 
     public bool IsSameDevice(IDevice device)
     {

@@ -35,7 +35,7 @@ public class Ardwiino : ConfigurableUSBDevice
     public override bool MigrationSupported { get; }
     private DeviceConfiguration _config;
 
-    public override DeviceConfiguration? Configuration => this._config;
+    public override DeviceConfiguration Configuration => this._config;
 
     public const byte NOT_USED = 0xFF;
 
@@ -49,7 +49,7 @@ public class Ardwiino : ConfigurableUSBDevice
             string board = StructTools.RawDeserializeStr(buffer);
             this.board = Board.findBoard(board, this.cpuFreq);
             this.MigrationSupported = false;
-            _config = new DeviceConfiguration(Board.findMicrocontroller(this.board), this.cpuFreq, this.board.ardwiinoName);
+            _config = new DeviceConfiguration(Board.findMicrocontroller(this.board));
             return;
         }
         this.MigrationSupported = true;
@@ -218,7 +218,7 @@ public class Ardwiino : ConfigurableUSBDevice
         Microcontroller controller = Board.findMicrocontroller(board);
         List<Binding> bindings = new List<Binding>();
         Dictionary<int, Color> colors = new Dictionary<int, Color>();
-        foreach (var led in config.all.leds)
+        foreach (var led in config!.all!.leds!)
         {
             if (led.pin != 0)
             {
@@ -309,9 +309,9 @@ public class Ardwiino : ConfigurableUSBDevice
                 var isTrigger = axis == (int)ControllerAxis.XBOX_LT || axis == (int)ControllerAxis.XBOX_RT;
 
                 Color on = Color.FromRgb(0, 0, 0);
-                if (colors.ContainsKey(pin.pin))
+                if (colors.ContainsKey(axis + XBOX_BTN_COUNT))
                 {
-                    on = colors[pin.pin];
+                    on = colors[axis + XBOX_BTN_COUNT];
                 }
                 Color off = Color.FromRgb(0, 0, 0);
                 if (deviceType == DeviceType.Guitar && (ControllerAxis)axis == XBOX_WHAMMY)
@@ -320,11 +320,11 @@ public class Ardwiino : ConfigurableUSBDevice
                 }
                 if (deviceType == DeviceType.Guitar && (ControllerAxis)axis == XBOX_TILT)
                 {
-                    bindings.Add(new DigitalToAnalog(32767, new DirectDigital(DevicePinMode.VCC, pin.pin, config.debounce.buttons, new GenericControllerButton(StandardButtonType.A), on, off), AnalogToDigitalType.Trigger, new GenericAxis(StandardAxisType.RightStickY), on, off, 1, 1, 1, true));
+                    bindings.Add(new DigitalToAnalog(controller, 32767, new DirectDigital(controller, DevicePinMode.VCC, pin.pin, config.debounce.buttons, new GenericControllerButton(StandardButtonType.A), on, off), AnalogToDigitalType.Trigger, new GenericAxis(StandardAxisType.RightStickY), on, off, 1, 1, 1, true));
                 }
                 else
                 {
-                    bindings.Add(new DirectAnalog(pin.pin, new GenericAxis(gen_axis), on, off, scale.multiplier / 1024.0f, (isTrigger ? 0 : 32670) + scale.offset, (isTrigger ? 32768 : 0) +scale.deadzone, isTrigger));
+                    bindings.Add(new DirectAnalog(controller, pin.pin, new GenericAxis(gen_axis), on, off, (scale.multiplier / 1024.0f) * (isTrigger ? 2 : 1) * (pin.inverted > 0 ? -1 : 1), ((isTrigger ? 0 : 32670) + scale.offset) >> 8, ((isTrigger ? 32768 : 0) + scale.deadzone) >> 8, isTrigger));
                 }
             }
             foreach (int button in Enum.GetValues(typeof(ControllerButtons)))
@@ -335,16 +335,16 @@ public class Ardwiino : ConfigurableUSBDevice
                     continue;
                 }
                 Color on = Color.FromRgb(0, 0, 0);
-                if (colors.ContainsKey(pin))
+                if (colors.ContainsKey(button))
                 {
-                    on = colors[pin];
+                    on = colors[button];
                 }
                 Color off = Color.FromRgb(0, 0, 0);
                 var gen_button = BUTTON_TO_STANDARD[(ControllerButtons)button];
                 var pinMode = DevicePinMode.VCC;
                 if (config.all.main.fretLEDMode == 1 && deviceType == DeviceType.Guitar && FRETS.Contains(gen_button))
                 {
-                    pinMode = DevicePinMode.Ground;
+                    pinMode = DevicePinMode.Floating;
                 }
                 var debounce = config.debounce.buttons;
                 if (deviceType == DeviceType.Guitar && (gen_button == StandardButtonType.Up || gen_button == StandardButtonType.Down))
@@ -352,7 +352,7 @@ public class Ardwiino : ConfigurableUSBDevice
                     debounce = config.debounce.strum;
                 }
                 OutputButton output = HAT.Contains(gen_button) ? new GenericControllerHat(gen_button) : new GenericControllerButton(gen_button);
-                bindings.Add(new DirectDigital(pinMode, pin, debounce, output, on, off));
+                bindings.Add(new DirectDigital(controller, pinMode, pin, debounce, output, on, off));
             }
         }
         else if (config.all.main.inputType == (int)InputControllerType.Wii)
@@ -372,12 +372,12 @@ public class Ardwiino : ConfigurableUSBDevice
             var offlx = lx.LedOff;
             var only = ly.LedOn;
             var offly = ly.LedOff;
-            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Left), onlx, offlx));
-            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Right), onlx, offlx));
-            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Down), only, offly));
-            bindings.Add(new AnalogToDigital(config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Up), only, offly));
+            bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Left), onlx, offlx));
+            bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Right), onlx, offlx));
+            bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Down), only, offly));
+            bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Up), only, offly));
         }
-        _config = new DeviceConfiguration(controller, this.cpuFreq, board.ardwiinoName, bindings, ledType, deviceType, emulationType, rhythmType, tiltType == TiltType.Digital_Mercury);
+        _config = new DeviceConfiguration(controller, bindings, ledType, deviceType, emulationType, rhythmType, tiltType == TiltType.Digital_Mercury);
         _config.generate(pio);
     }
 

@@ -13,8 +13,7 @@ using ReactiveUI;
 namespace GuitarConfiguratorSharp.Views
 {
     public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
-    {
-        // TODO: next thing will be to get the bindings.
+    {        
         public ConfigView()
         {
             InitializeComponent();

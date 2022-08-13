@@ -101,6 +101,7 @@ namespace GuitarConfiguratorSharp.Configuration
         }
         public static Microcontroller findMicrocontroller(Board board)
         {
+            // TODO: avr boards should probably rip out the cpu freq
             if (Board.ATMEGA32U4Boards.Contains(board))
             {
                 return new Micro();
