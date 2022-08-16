@@ -1,6 +1,5 @@
 using System;
 using System.Reactive;
-using System.Reactive.Subjects;
 using DynamicData;
 using GuitarConfiguratorSharp.Utils;
 using ReactiveUI;
@@ -10,12 +9,6 @@ using Usb.Net;
 using System.IO;
 using System.Timers;
 using Avalonia.Collections;
-using HidSharp;
-using HidSharp.Experimental;
-using HidSharp.Reports;
-using HidSharp.Reports.Encodings;
-using HidSharp.Utility;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -47,6 +40,7 @@ namespace GuitarConfiguratorSharp.ViewModels
         public AvaloniaList<ConfigurableDevice> Devices { get; } = new AvaloniaList<ConfigurableDevice>();
 
         private ConfigurableDevice? _selectedDevice;
+        private ConfigurableDevice? _disconnectedDevice;
 
         private bool MigrationSupported => SelectedDevice == null || SelectedDevice.MigrationSupported;
 
@@ -63,21 +57,52 @@ namespace GuitarConfiguratorSharp.ViewModels
             {
                 this.RaiseAndSetIfChanged(ref _selectedDevice, value);
                 this.RaisePropertyChanged("MigrationSupported");
+                this.Connected = SelectedDevice != null;
             }
         }
 
 
-        private bool _ready = false;
+        private bool _working = true;
 
-        public bool Ready
+        public bool Working
         {
             get
             {
-                return _ready;
+                return _working;
             }
             set
             {
-                this.RaiseAndSetIfChanged(ref _ready, value);
+                this.RaiseAndSetIfChanged(ref _working, value);
+            }
+        }
+
+
+        private bool _installed = false;
+
+        public bool Installed
+        {
+            get
+            {
+                return _installed;
+            }
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _installed, value);
+            }
+        }
+
+
+        private bool _connected = false;
+
+        public bool Connected
+        {
+            get
+            {
+                return _connected;
+            }
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _connected, value);
             }
         }
 
@@ -124,7 +149,7 @@ namespace GuitarConfiguratorSharp.ViewModels
         }
 
         private DeviceListener DeviceListener;
-        private PlatformIO pio = new PlatformIO();
+        public PlatformIO pio { get; } = new PlatformIO();
 
         private Timer timer = new Timer();
 
@@ -134,6 +159,11 @@ namespace GuitarConfiguratorSharp.ViewModels
                 () => Router.Navigate.Execute(new ConfigViewModel(this))
             );
             Router.Navigate.Execute(new MainViewModel(this));
+
+            pio.TextChanged += (message, clear) =>
+            {
+                Console.WriteLine(message);
+            };
 
             pio.ProgressChanged += (message, val, val2) =>
             {
@@ -174,11 +204,18 @@ namespace GuitarConfiguratorSharp.ViewModels
             DeviceListener.DeviceInitialized += DevicePoller_DeviceInitialized;
             timer.Elapsed += DevicePoller_Tick;
             timer.AutoReset = false;
-            pio.PlatformIOReady += () =>
+            pio.PlatformIOInstalled += () =>
             {
                 DeviceListener.Start();
+                this.Installed = true;
                 timer.Start();
-                this.Ready = true;
+            };
+            // Do something so that working is only set to false once the guitar appears on the host machine again
+            // This will probably involve keeping a copy of the serial number  for the last written to device
+            // So that we know the right device is picked back up.
+            pio.PlatformIOWorking += (working) =>
+            {
+                this.Working = working;
             };
             _ = pio.InitialisePlatformIO();
 
@@ -193,7 +230,9 @@ namespace GuitarConfiguratorSharp.ViewModels
             if (device is Arduino)
             {
                 _ = Task.Delay(500).ContinueWith(_ => Devices.Add(device));
-            } else {
+            }
+            else
+            {
                 Devices.Add(device);
             }
         }
@@ -223,8 +262,10 @@ namespace GuitarConfiguratorSharp.ViewModels
 
             var existingPorts = currentPorts.ToHashSet();
             var ports = pio.GetPorts().Result;
-            foreach (var port in ports) {
-                if (existingPorts.Contains(port.Port)) {
+            foreach (var port in ports)
+            {
+                if (existingPorts.Contains(port.Port))
+                {
                     continue;
                 }
                 var arduino = new Arduino(pio, port);
@@ -234,7 +275,7 @@ namespace GuitarConfiguratorSharp.ViewModels
             var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
             currentPorts.RemoveMany(currentPorts.Where(port => !currentSerialPorts.Contains(port)));
             Devices.RemoveMany(Devices.Where(device => device is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())));
-            ReadyToConfigure = null != SelectedDevice && Ready;
+            ReadyToConfigure = null != SelectedDevice && Installed;
             timer.Start();
         }
         private void DevicePoller_DeviceInitialized(object? sender, DeviceEventArgs e)
@@ -268,7 +309,15 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
             if (product == "Santroller")
             {
-                AddDevice(new Santroller(pio, e.Device, product, serial, revision));
+                var c = new Santroller(pio, e.Device, product, serial, revision);
+                AddDevice(c);
+                if (_disconnectedDevice?.IsSameDevice(serial) == true)
+                {
+                    _selectedDevice = c;
+                    this.Connected = true;
+                    this.Message = "Writing - Done";
+                    this.Progress = 100;
+                }
             }
             else if (product == "Ardwiino")
             {
@@ -286,6 +335,11 @@ namespace GuitarConfiguratorSharp.ViewModels
         private void DevicePoller_DeviceDisconnected(object? sender, DeviceEventArgs e)
         {
             Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device)));
+            if (_selectedDevice?.IsSameDevice(e.Device) == true)
+            {
+                _disconnectedDevice = _selectedDevice;
+                this.Connected = false;
+            }
         }
         public void Dispose()
         {

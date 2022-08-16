@@ -66,8 +66,8 @@
                 </ExperimentalAcrylicBorder.Material>
                 <StackPanel>
                     <WrapPanel Margin="10" HorizontalAlignment="Center">
-                        <Button Content="Write Configuration" Command="{Binding Main.GoBack}" />
-                        <Button Content="Revert device to Arduino" Command="{Binding Main.GoBack}" />
+                        <Button Content="Write Configuration" Command="{Binding Write}" />
+                        <Button Content="Revert device to Arduino" Command="{Binding Reset}" />
                         <Button Content="Configure another device" Command="{Binding Main.GoBack}" />
                     </WrapPanel>
                     <WrapPanel HorizontalAlignment="Center">

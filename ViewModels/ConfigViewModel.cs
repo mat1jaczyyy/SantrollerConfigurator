@@ -10,6 +10,7 @@ using GuitarConfiguratorSharp.Configuration;
 using System.Reactive.Linq;
 using System.Collections.Generic;
 using GuitarConfiguratorSharp.Utils;
+using System.Reactive;
 
 namespace GuitarConfiguratorSharp.ViewModels
 {
@@ -33,6 +34,9 @@ namespace GuitarConfiguratorSharp.ViewModels
 
         private readonly ObservableAsPropertyHelper<DeviceConfiguration> _config;
         public DeviceConfiguration Config => _config.Value;
+
+
+        public ReactiveCommand<Unit, Unit> Write {get;}
 
         public ConfigViewModel(MainWindowViewModel screen)
         {
@@ -58,6 +62,12 @@ namespace GuitarConfiguratorSharp.ViewModels
             _analogToDigitalBindings = this.WhenAnyValue(x => x.Config)
                 .Select(x => x.Bindings.FilterCast<Binding, AnalogToDigital>())
                 .ToProperty(this, x => x.AnalogToDigitalBindings);
+            Write = ReactiveCommand.Create(write, this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected)).ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
+        }
+
+        void write() {
+            Config.generate(Main.pio);
+            Main.pio.RunPlatformIO(Config.MicroController.Board.environment, "run --target upload", "Writing", 0, 0, 90, Main.SelectedDevice).ConfigureAwait(false);
         }
     }
 }

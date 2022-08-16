@@ -43,7 +43,7 @@ public class Arduino : ConfigurableDevice
             var boardFreqStr = serial.ReadLine().Replace("UL", "");
             var boardFreq = UInt32.Parse(boardFreqStr);
             var tmp = Board.findBoard(boardName, boardFreq);
-            this.board = new Board(boardName, $"Ardwiino - {tmp.name} - pre 4.3.7", boardFreq, boardName, tmp.productIDs);
+            this.board = new Board(boardName, $"Ardwiino - {tmp.name} - pre 4.3.7", boardFreq, tmp.environment, tmp.environmentUSB, tmp.productIDs, tmp.hasUSBMCU);
             _config = new DeviceConfiguration(Board.findMicrocontroller(this.board));
         }
         else
@@ -63,7 +63,7 @@ public class Arduino : ConfigurableDevice
         return port == this.port;
     }
 
-    public bool IsSameDevice(string path)
+    public bool IsSameDevice(string serial_or_path)
     {
         return false;
     }
@@ -76,5 +76,15 @@ public class Arduino : ConfigurableDevice
     public override String ToString()
     {
         return $"{board.name} ({port.Port})";
+    }
+
+    public void bootloader()
+    {
+        // Automagically handled by pio
+    }
+
+    public void bootloaderUSB()
+    {
+        // Automagically handled by pio
     }
 }

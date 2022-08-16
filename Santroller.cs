@@ -7,8 +7,6 @@ using System.IO.Compression;
 using System.IO;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Dahomey.Json;
 
 public class Santroller : ConfigurableUSBDevice
 {
@@ -27,6 +25,7 @@ public class Santroller : ConfigurableUSBDevice
         COMMAND_SET_LEDS,
         COMMAND_SET_SP,
     }
+
     public static readonly Guid ControllerGUID = new("DF59037D-7C92-4155-AC12-7D700A313D78");
 
     public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
@@ -37,10 +36,10 @@ public class Santroller : ConfigurableUSBDevice
     {
         try
         {
-            var f_cpu = uint.Parse(Encoding.UTF8.GetString(this.ReadData(0x21, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("L",""));
-            var board = Encoding.UTF8.GetString(this.ReadData(0x21, ((byte)Commands.COMMAND_READ_BOARD), 32)).Replace("\0","");
+            var f_cpu = uint.Parse(Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("L", ""));
+            var board = Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_BOARD), 32)).Replace("\0", "");
             Microcontroller m = Board.findMicrocontroller(Board.findBoard(board, f_cpu));
-            var data = this.ReadData(0x21, ((byte)Commands.COMMAND_READ_CONFIG), 2048);
+            var data = this.ReadData(0, ((byte)Commands.COMMAND_READ_CONFIG), 2048);
             using (var inputStream = new MemoryStream(data))
             {
                 using (var outputStream = new MemoryStream())
@@ -59,6 +58,18 @@ public class Santroller : ConfigurableUSBDevice
         {
             throw new NotImplementedException("Configuration missing from Santroller device, are you sure this is a real santroller device?");
             // TODO: throw a better exception here, and handle this in the gui, so that a device that appears to be missing its config doesn't do something weird.
+        }
+    }
+
+    public override void bootloader()
+    {
+        WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER), new byte[0]);
+    }
+    public override void bootloaderUSB()
+    {
+        if (Configuration.MicroController.Board.hasUSBMCU)
+        {
+            WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER_UNO), new byte[0]);
         }
     }
     public override bool MigrationSupported => true;

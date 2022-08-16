@@ -28,9 +28,13 @@ public class Ardwiino : ConfigurableUSBDevice
     // On 7.0.3 and above READ_CONFIG is 60
     // And with 8.0.7 and above READ_CONFIG is 62
     private const ushort CPU_INFO_COMMAND = 50;
+    private const ushort JUMP_BOOTLOADER_COMMAND = 49;
+    private const ushort JUMP_BOOTLOADER_COMMAND_UNO = 50;
     private const ushort READ_CONFIG_COMMAND = 62;
     private const ushort READ_CONFIG_PRE_8_0_7_COMMAND = 60;
     private const ushort READ_CONFIG_PRE_7_0_3_COMMAND = 59;
+    private const byte REQUEST_HID_GET_REPORT = 0x01;
+    private const byte REQUEST_HID_SET_REPORT = 0x09;
 
     public override bool MigrationSupported { get; }
     private DeviceConfiguration _config;
@@ -43,9 +47,9 @@ public class Ardwiino : ConfigurableUSBDevice
     {
         if (this.version < new Version(6, 0, 0))
         {
-            var buffer = this.ReadData(6);
+            var buffer = this.ReadData(6, REQUEST_HID_GET_REPORT);
             this.cpuFreq = uint.Parse(StructTools.RawDeserializeStr(buffer));
-            buffer = this.ReadData(7);
+            buffer = this.ReadData(7, REQUEST_HID_GET_REPORT);
             string board = StructTools.RawDeserializeStr(buffer);
             this.board = Board.findBoard(board, this.cpuFreq);
             this.MigrationSupported = false;
@@ -54,7 +58,7 @@ public class Ardwiino : ConfigurableUSBDevice
         }
         this.MigrationSupported = true;
         // Version 6.0.0 started at config version 6, so we don't have to support anything earlier than that
-        byte[] data = this.ReadData(CPU_INFO_COMMAND);
+        byte[] data = this.ReadData(CPU_INFO_COMMAND, 1);
         if (this.version < OLD_CPU_INFO_VERSION)
         {
             CpuInfoOld info = StructTools.RawDeserialize<CpuInfoOld>(data, 0);
@@ -100,7 +104,7 @@ public class Ardwiino : ConfigurableUSBDevice
         config.rf.rfInEnabled = 0;
         while (offset < maxSize)
         {
-            var data2 = ReadData((ushort)(read_config + offsetId));
+            var data2 = ReadData((ushort)(read_config + offsetId), REQUEST_HID_GET_REPORT);
             Array.Copy(data2, 0, data, offset, data2.Length);
             offset += data2.Length;
             offsetId++;
@@ -384,6 +388,16 @@ public class Ardwiino : ConfigurableUSBDevice
     public override String ToString()
     {
         return $"Ardwiino - {board.name} - {version}";
+    }
+
+    public override void bootloader()
+    {
+        WriteData(JUMP_BOOTLOADER_COMMAND, REQUEST_HID_SET_REPORT, new byte[0]);
+    }
+
+    public override void bootloaderUSB()
+    {
+        WriteData(JUMP_BOOTLOADER_COMMAND_UNO, REQUEST_HID_SET_REPORT, new byte[0]);
     }
 
     enum GyroOrientation

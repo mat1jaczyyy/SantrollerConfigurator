@@ -28,6 +28,9 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
     public abstract bool MigrationSupported { get; }
     public abstract DeviceConfiguration Configuration { get; }
 
+    public abstract void bootloader();
+    public abstract void bootloaderUSB();
+
     public bool IsSameDevice(IDevice device)
     {
         return this.device == device;
@@ -37,12 +40,12 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
         return false;
     }
 
-    public bool IsSameDevice(string path)
+    public bool IsSameDevice(string serial_or_path)
     {
-        return false;
+        return this.serial == serial_or_path;
     }
 
-    public byte[] ReadData(ushort wValue, byte bRequest=1, ushort size=128)
+    public byte[] ReadData(ushort wValue, byte bRequest, ushort size=128)
     {
         byte[] buffer = new byte[size];
         SetupPacket packet = new SetupPacket(new UsbDeviceRequestType(RequestDirection.In, RequestType.Class, RequestRecipient.Interface), bRequest, wValue, 2, (ushort)buffer.Length);
@@ -67,9 +70,9 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
     }
 
 
-    public uint WriteData(ushort id, byte[] buffer)
+    public uint WriteData(ushort id, byte bRequest, byte[] buffer)
     {
-        SetupPacket packet = new SetupPacket(new UsbDeviceRequestType(RequestDirection.Out, RequestType.Class, RequestRecipient.Interface), 1, id, 2, (ushort)buffer.Length);
+        SetupPacket packet = new SetupPacket(new UsbDeviceRequestType(RequestDirection.Out, RequestType.Class, RequestRecipient.Interface), bRequest, id, 2, (ushort)buffer.Length);
 #if Windows
         TransferResult tr = device.PerformControlTransferAsync(packet, buffer).Result;
         return tr.BytesTransferred;
