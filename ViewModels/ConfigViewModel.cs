@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media;
-using Usb.Net;
 using ReactiveUI;
 using System.ComponentModel;
 using GuitarConfiguratorSharp.Configuration;
@@ -36,7 +35,9 @@ namespace GuitarConfiguratorSharp.ViewModels
         public DeviceConfiguration Config => _config.Value;
 
 
-        public ReactiveCommand<Unit, Unit> Write {get;}
+        public ReactiveCommand<Unit, Unit> Write { get; }
+
+        public ReactiveCommand<Unit, Unit> GoBack { get; }
 
         public ConfigViewModel(MainWindowViewModel screen)
         {
@@ -63,11 +64,21 @@ namespace GuitarConfiguratorSharp.ViewModels
                 .Select(x => x.Bindings.FilterCast<Binding, AnalogToDigital>())
                 .ToProperty(this, x => x.AnalogToDigitalBindings);
             Write = ReactiveCommand.Create(write, this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected)).ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
+            GoBack = ReactiveCommand.CreateFromObservable<Unit, Unit>(Main.GoBack.Execute, this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected)).ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
         }
 
-        void write() {
+        async void write()
+        {
             Config.generate(Main.pio);
-            Main.pio.RunPlatformIO(Config.MicroController.Board.environment, "run --target upload", "Writing", 0, 0, 90, Main.SelectedDevice).ConfigureAwait(false);
+            if (Config.MicroController.Board.hasUSBMCU)
+            {
+                await Main.pio.RunPlatformIO(Config.MicroController.Board.environment+"-usb", "run --target upload", "Writing - USB", 0, 0, 40, Main.SelectedDevice);
+                // await Main.pio.RunPlatformIO(Config.MicroController.Board.environment, "run --target upload", "Writing - Main", 0, 50, 90, Main.SelectedDevice);
+            }
+            else
+            {
+                await Main.pio.RunPlatformIO(Config.MicroController.Board.environment, "run --target upload", "Writing", 0, 0, 90, Main.SelectedDevice);
+            }
         }
     }
 }

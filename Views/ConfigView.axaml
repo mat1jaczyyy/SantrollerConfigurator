@@ -68,13 +68,13 @@
                     <WrapPanel Margin="10" HorizontalAlignment="Center">
                         <Button Content="Write Configuration" Command="{Binding Write}" />
                         <Button Content="Revert device to Arduino" Command="{Binding Reset}" />
-                        <Button Content="Configure another device" Command="{Binding Main.GoBack}" />
+                        <Button Content="Configure another device" Command="{Binding GoBack}" />
                     </WrapPanel>
                     <WrapPanel HorizontalAlignment="Center">
                         <TextBlock Text="Status: " />
                         <TextBlock Text="{Binding Main.Message}" />
                     </WrapPanel>
-                    <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress" Value="{Binding Main.Progress}" IsIndeterminate="False" Minimum="0" Maximum="100" Height="30" />
+                    <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress" Foreground="{Binding Main.ProgressbarColor}" Value="{Binding Main.Progress}" IsIndeterminate="False" Minimum="0" Maximum="100" Height="30" />
                 </StackPanel>
             </ExperimentalAcrylicBorder>
             <ExperimentalAcrylicBorder>

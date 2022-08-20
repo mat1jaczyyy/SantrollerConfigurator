@@ -1,5 +1,4 @@
-
-using Device.Net;
+using LibUsbDotNet;
 using System;
 using GuitarConfiguratorSharp.Utils;
 using GuitarConfiguratorSharp.Configuration;
@@ -28,17 +27,18 @@ public class Santroller : ConfigurableUSBDevice
 
     public static readonly Guid ControllerGUID = new("DF59037D-7C92-4155-AC12-7D700A313D78");
 
-    public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
-        new(0x1209, 0x2882, label: "Santroller",
-            classGuid: ControllerGUID);
+    // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
+    //     new(0x1209, 0x2882, label: "Santroller",
+    //         classGuid: ControllerGUID);
 
-    public Santroller(PlatformIO pio, IDevice device, string product, string serial, ushort revision) : base(device, product, serial, revision)
+    public Santroller(PlatformIO pio, string path, UsbDevice device, string product, string serial, ushort revision) : base(device, path, product, serial, revision)
     {
         try
         {
             var f_cpu = uint.Parse(Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("L", ""));
             var board = Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_BOARD), 32)).Replace("\0", "");
             Microcontroller m = Board.findMicrocontroller(Board.findBoard(board, f_cpu));
+            this.board = m.Board;
             var data = this.ReadData(0, ((byte)Commands.COMMAND_READ_CONFIG), 2048);
             using (var inputStream = new MemoryStream(data))
             {
@@ -61,11 +61,11 @@ public class Santroller : ConfigurableUSBDevice
         }
     }
 
-    public override void bootloader()
+    public override void Bootloader()
     {
         WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER), new byte[0]);
     }
-    public override void bootloaderUSB()
+    public override void BootloaderUSB()
     {
         if (Configuration.MicroController.Board.hasUSBMCU)
         {

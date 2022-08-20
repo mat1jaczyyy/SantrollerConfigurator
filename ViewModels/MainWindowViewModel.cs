@@ -3,9 +3,7 @@ using System.Reactive;
 using DynamicData;
 using GuitarConfiguratorSharp.Utils;
 using ReactiveUI;
-using Device.Net;
 using System.Linq;
-using Usb.Net;
 using System.IO;
 using System.Timers;
 using Avalonia.Collections;
@@ -14,15 +12,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-#if Windows
-using SerialPort.Net.Windows;
-using Hid.Net.Windows;
-using Usb.Net.Windows;
-using Device.Net.Windows;
-#else
-using Device.Net.LibUsb;
-using LibUsbDotNet.LudnMonoLibUsb;
-#endif
+using LibUsbDotNet;
+using LibUsbDotNet.DeviceNotify;
+using LibUsbDotNet.DeviceNotify.Linux;
+using LibUsbDotNet.Main;
+using LibUsbDotNet.DeviceNotify.Info;
 
 namespace GuitarConfiguratorSharp.ViewModels
 {
@@ -91,6 +85,19 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
         }
 
+        private string _progressbarcolor = "PrimaryColor";
+
+        public string ProgressbarColor
+        {
+            get
+            {
+                return _progressbarcolor;
+            }
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _progressbarcolor, value);
+            }
+        }
 
         private bool _connected = false;
 
@@ -148,10 +155,46 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
         }
 
-        private DeviceListener DeviceListener;
+        private IDeviceNotifier DeviceListener;
         public PlatformIO pio { get; } = new PlatformIO();
 
         private Timer timer = new Timer();
+
+        private class RegDeviceNotifyInfo : IUsbDeviceNotifyInfo
+        {
+            private UsbRegistry dev;
+
+            public RegDeviceNotifyInfo(UsbRegistry dev)
+            {
+                this.dev = dev;
+            }
+
+            public UsbSymbolicName SymbolicName => UsbSymbolicName.Parse(dev.SymbolicName);
+
+            public string Name => dev.DevicePath;
+
+            public Guid ClassGuid => dev.DeviceInterfaceGuids[0];
+
+            public int IdVendor => dev.Vid;
+
+            public int IdProduct => dev.Pid;
+
+            public string SerialNumber => dev.Device.Info.SerialString;
+
+            public bool Open(out UsbDevice usbDevice)
+            {
+                usbDevice = dev.Device;
+                return usbDevice.Open();
+            }
+        }
+
+        private class DeviceNotifyArgsRegistry: DeviceNotifyEventArgs {
+            public DeviceNotifyArgsRegistry(UsbRegistry dev) {
+                this.Device = new RegDeviceNotifyInfo(dev);
+                this.DeviceType = DeviceType.DeviceInterface;
+                this.EventType = EventType.DeviceArrival;
+            }
+        }
 
         public MainWindowViewModel()
         {
@@ -165,11 +208,12 @@ namespace GuitarConfiguratorSharp.ViewModels
                 Console.WriteLine(message);
             };
 
+            pio.PlatformIOError += (val) => this.ProgressbarColor = val ? "red" : "PrimaryColor";
+
             pio.ProgressChanged += (message, val, val2) =>
             {
                 this.Message = message;
                 this.Progress = val2;
-                Console.WriteLine(message);
             };
 
             Devices.CollectionChanged += (_, e) =>
@@ -194,20 +238,20 @@ namespace GuitarConfiguratorSharp.ViewModels
                 }
             };
 #if Windows
-            IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateWindowsUsbDeviceFactory();
+
+            DeviceListener = new WindowsDeviceNotifier();
 #else
-            IDeviceFactory factory = Santroller.SantrollerDeviceFilter.CreateLibUsbDeviceFactory2();
+            DeviceListener = new LinuxDeviceNotifier();
 #endif
-            // For arduinos and ardwiinos / santrollers, we can just listen for hotplug events
-            DeviceListener = new DeviceListener(factory);
-            DeviceListener.DeviceDisconnected += DevicePoller_DeviceDisconnected;
-            DeviceListener.DeviceInitialized += DevicePoller_DeviceInitialized;
+            DeviceListener.OnDeviceNotify += OnDeviceNotify;
             timer.Elapsed += DevicePoller_Tick;
             timer.AutoReset = false;
             pio.PlatformIOInstalled += () =>
             {
-                DeviceListener.Start();
                 this.Installed = true;
+                foreach (UsbRegistry dev in UsbDevice.AllDevices) {
+                    OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
+                }
                 timer.Start();
             };
             // Do something so that working is only set to false once the guitar appears on the host machine again
@@ -234,6 +278,10 @@ namespace GuitarConfiguratorSharp.ViewModels
             else
             {
                 Devices.Add(device);
+            }
+            if (_disconnectedDevice != null)
+            {
+                _disconnectedDevice.DeviceAdded(device);
             }
         }
         private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
@@ -278,74 +326,70 @@ namespace GuitarConfiguratorSharp.ViewModels
             ReadyToConfigure = null != SelectedDevice && Installed;
             timer.Start();
         }
-        private void DevicePoller_DeviceInitialized(object? sender, DeviceEventArgs e)
+
+
+        private void OnDeviceNotify(object? sender, DeviceNotifyEventArgs e)
         {
-#if Windows
-            String product = e.Device.ConnectedDeviceDefinition.ProductName;
-            String serial = e.Device.ConnectedDeviceDefinition.SerialNumber;
-            ushort revision = (ushort)e.Device.ConnectedDeviceDefinition.VersionNumber!;
-#else
-            UsbDevice device = (UsbDevice)e.Device;
-            LibUsbInterfaceManager luim = (LibUsbInterfaceManager)device.UsbInterfaceManager;
-            String product;
-            String serial;
-            ushort revision;
-            if (luim.UsbDevice is MonoUsbDevice monoUsbDevice)
+            Console.WriteLine(e.Device.Name);
+            if (e.DeviceType == DeviceType.DeviceInterface)
             {
-                revision = (ushort)monoUsbDevice.Profile.DeviceDescriptor.BcdDevice;
-                monoUsbDevice.GetString(out product, 0, monoUsbDevice.Profile.DeviceDescriptor.ProductStringIndex);
-                monoUsbDevice.GetString(out serial, 0, monoUsbDevice.Profile.DeviceDescriptor.SerialStringIndex);
-            }
-            else
-            {
-                product = luim.UsbDevice.Info.ProductString;
-                serial = luim.UsbDevice.Info.SerialString;
-                revision = (ushort)luim.UsbDevice.Info.Descriptor.BcdDevice;
-            }
-#endif 
-            if (Devices.Any(device => device.IsSameDevice(serial)))
-            {
-                return;
-            }
-            if (product == "Santroller")
-            {
-                var c = new Santroller(pio, e.Device, product, serial, revision);
-                AddDevice(c);
-                if (_disconnectedDevice?.IsSameDevice(serial) == true)
+                if (e.EventType == EventType.DeviceArrival)
                 {
-                    _selectedDevice = c;
-                    this.Connected = true;
-                    this.Message = "Writing - Done";
-                    this.Progress = 100;
-                }
-            }
-            else if (product == "Ardwiino")
-            {
-                if (revision == Ardwiino.SERIAL_ARDWIINO_REVISION)
-                {
-                    return;
+                    var vid = e.Device.IdVendor;
+                    var pid = e.Device.IdProduct;
+                    // If ardwiino / santroller
+                    if (e.Device.Open(out UsbDevice dev))
+                    {
+                        ushort revision = (ushort)dev.Info.Descriptor.BcdDevice;
+                        String product = dev.Info.ProductString;
+                        String serial = dev.Info.SerialString; ;
+                        if (product == "Santroller")
+                        {
+                            var c = new Santroller(pio, e.Device.Name, dev, product, serial, revision);
+                            AddDevice(c);
+                            if (_disconnectedDevice?.IsSameDevice(serial) == true)
+                            {
+                                _selectedDevice = c;
+                                this.Connected = true;
+                                this.Message = "Writing - Done";
+                                this.Progress = 100;
+                            }
+                        }
+                        else if (product == "Ardwiino")
+                        {
+                            if (revision == Ardwiino.SERIAL_ARDWIINO_REVISION)
+                            {
+                                return;
+                            }
+                            else
+                            {
+                                AddDevice(new Ardwiino(pio, e.Device.Name, dev, product, serial, revision));
+                            }
+                        }
+                    }
+
+                    else if (vid == Dfu.DFU_VID && (pid == Dfu.DFU_PID_16U2 || pid == Dfu.DFU_PID_8U2))
+                    {
+                        AddDevice(new Dfu(e));
+                    }
                 }
                 else
                 {
-                    AddDevice(new Ardwiino(pio, e.Device, product, serial, revision));
+                    Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device.Name)));
+                    if (_selectedDevice?.IsSameDevice(e.Device.Name) == true)
+                    {
+                        _disconnectedDevice = _selectedDevice;
+                        this.Connected = false;
+                    }
                 }
             }
         }
 
-        private void DevicePoller_DeviceDisconnected(object? sender, DeviceEventArgs e)
-        {
-            Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device)));
-            if (_selectedDevice?.IsSameDevice(e.Device) == true)
-            {
-                _disconnectedDevice = _selectedDevice;
-                this.Connected = false;
-            }
-        }
         public void Dispose()
         {
-            DeviceListener.DeviceDisconnected -= DevicePoller_DeviceDisconnected;
-            DeviceListener.DeviceInitialized -= DevicePoller_DeviceInitialized;
-            DeviceListener.Dispose();
+            //             DeviceListener.DeviceDisconnected -= DevicePoller_DeviceDisconnected;
+            //             DeviceListener.DeviceInitialized -= DevicePoller_DeviceInitialized;
+            //             DeviceListener.Dispose();
         }
 
         public bool CheckDependancies()

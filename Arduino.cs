@@ -1,14 +1,16 @@
 
-using Device.Net;
+using LibUsbDotNet;
 using System;
 using GuitarConfiguratorSharp.Utils;
 using GuitarConfiguratorSharp.Configuration;
+using System.Threading.Tasks;
+
 public class Arduino : ConfigurableDevice
 {
-    public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
+    // public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
     private PlatformIOPort port;
 
-    private Board board;
+    public Board Board { get; }
 
     public bool MigrationSupported { get; }
 
@@ -23,9 +25,9 @@ public class Arduino : ConfigurableDevice
         {
             if (board.productIDs.Contains(port.Pid))
             {
-                this.board = board;
+                this.Board = board;
                 this.MigrationSupported = true;
-                _config = new DeviceConfiguration(Board.findMicrocontroller(this.board));
+                _config = new DeviceConfiguration(Board.findMicrocontroller(this.Board));
                 return;
             }
         }
@@ -43,19 +45,14 @@ public class Arduino : ConfigurableDevice
             var boardFreqStr = serial.ReadLine().Replace("UL", "");
             var boardFreq = UInt32.Parse(boardFreqStr);
             var tmp = Board.findBoard(boardName, boardFreq);
-            this.board = new Board(boardName, $"Ardwiino - {tmp.name} - pre 4.3.7", boardFreq, tmp.environment, tmp.environmentUSB, tmp.productIDs, tmp.hasUSBMCU);
-            _config = new DeviceConfiguration(Board.findMicrocontroller(this.board));
+            this.Board = new Board(boardName, $"Ardwiino - {tmp.name} - pre 4.3.7", boardFreq, tmp.environment, tmp.productIDs, tmp.hasUSBMCU);
+            _config = new DeviceConfiguration(Board.findMicrocontroller(this.Board));
         }
         else
         {
-            this.board = Board.Generic;
+            this.Board = Board.Generic;
             this.MigrationSupported = true;
         }
-    }
-
-    public bool IsSameDevice(IDevice device)
-    {
-        return false;
     }
 
     public bool IsSameDevice(PlatformIOPort port)
@@ -75,16 +72,26 @@ public class Arduino : ConfigurableDevice
 
     public override String ToString()
     {
-        return $"{board.name} ({port.Port})";
+        return $"{Board.name} ({port.Port})";
     }
 
-    public void bootloader()
+    public void Bootloader()
     {
         // Automagically handled by pio
     }
 
-    public void bootloaderUSB()
+    public void BootloaderUSB()
     {
         // Automagically handled by pio
+    }
+
+    public Task<string?> getUploadPort()
+    {
+        return Task.FromResult((string?)GetSerialPort());
+    }
+
+    public void DeviceAdded(ConfigurableDevice device)
+    {
+
     }
 }
