@@ -90,8 +90,8 @@ public class Arduino : ConfigurableDevice
         return Task.FromResult((string?)GetSerialPort());
     }
 
-    public void DeviceAdded(ConfigurableDevice device)
+    public bool DeviceAdded(ConfigurableDevice device)
     {
-
+        return false;
     }
 }

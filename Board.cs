@@ -83,7 +83,7 @@ namespace GuitarConfiguratorSharp.Configuration
         new Board("uno-at90usb82", "Arduino Uno", 0, "arduino_uno_mega_usb8", new List<uint>{0x2FF7}, true),
         new Board("uno", "Arduino Uno", 0, "arduino_uno", new List<uint>{0x0043, 0x0001, 0x0243}, true),
        };
-        public static readonly Board UsbUpload = new Board("usb", "Arduino Uno / Mega in Firmware Update Mode", 0, "", new List<uint>(0x2883), true);
+        public static readonly Board UsbUpload = new Board("usb", "Arduino Uno / Mega in Firmware Update Mode", 0, "", new List<uint>{0x2883}, true);
 
         public static readonly Board[] Boards = UnoBoards
             .Concat(MiniBoards)
@@ -110,7 +110,7 @@ namespace GuitarConfiguratorSharp.Configuration
             {
                 return new Micro(board);
             }
-            else if (Board.UnoBoards.Contains(board))
+            else if (Board.UnoBoards.Contains(board) || board.ardwiinoName == UsbUpload.ardwiinoName)
             {
                 return new Uno(board);
             }

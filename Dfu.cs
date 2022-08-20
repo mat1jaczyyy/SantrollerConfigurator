@@ -3,7 +3,6 @@ using GuitarConfiguratorSharp.Utils;
 using GuitarConfiguratorSharp.Configuration;
 using System.Threading.Tasks;
 using LibUsbDotNet;
-using System.Collections.Generic;
 using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.Main;
 
@@ -41,50 +40,29 @@ public class Dfu : ConfigurableDevice
 
     public bool IsSameDevice(PlatformIOPort port)
     {
-        throw new NotImplementedException();
+        return false;
     }
 
     public bool IsSameDevice(string serial_or_path)
     {
-        throw new NotImplementedException();
+        return serial_or_path == this.port;
     }
 
-    public void DeviceAdded(ConfigurableDevice device)
+    public bool DeviceAdded(ConfigurableDevice device)
     {
-        throw new NotImplementedException();
+        return false;
     }
 
     public Task<string?> getUploadPort()
     {
-        throw new NotImplementedException();
-    }
-
-    public void ExitBootloader()
-    {
-        Args.Device.Open(out UsbDevice dev);
-        // Initialise the device with https://github.com/dfu-programmer/dfu-programmer/blob/master/src/dfu.c : dfu_device_init
-        // Then, https://github.com/dfu-programmer/dfu-programmer/blob/master/src/atmel.c atmel_start_app_reset
-
-        // UsbCtrlFlags requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
-        // var buffer = new uint[]{};
-
-        // var sp = new UsbSetupPacket(
-        //     ((byte)requestType),
-        //     1,
-        //     wValue,
-        //     2,
-        //     buffer.Length);
-        // device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
-        // return (uint)length;
+        return Task.FromResult((string?)this.port);
     }
 
     public void Bootloader()
     {
-        throw new NotImplementedException();
     }
 
     public void BootloaderUSB()
     {
-        throw new NotImplementedException();
     }
 }

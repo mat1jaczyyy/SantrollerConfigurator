@@ -63,22 +63,13 @@ namespace GuitarConfiguratorSharp.ViewModels
             _analogToDigitalBindings = this.WhenAnyValue(x => x.Config)
                 .Select(x => x.Bindings.FilterCast<Binding, AnalogToDigital>())
                 .ToProperty(this, x => x.AnalogToDigitalBindings);
-            Write = ReactiveCommand.Create(write, this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected)).ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
+            Write = ReactiveCommand.CreateFromTask(write, this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected)).ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
             GoBack = ReactiveCommand.CreateFromObservable<Unit, Unit>(Main.GoBack.Execute, this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected)).ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
         }
 
-        async void write()
+        async Task write()
         {
-            Config.generate(Main.pio);
-            if (Config.MicroController.Board.hasUSBMCU)
-            {
-                await Main.pio.RunPlatformIO(Config.MicroController.Board.environment+"-usb", "run --target upload", "Writing - USB", 0, 0, 40, Main.SelectedDevice);
-                // await Main.pio.RunPlatformIO(Config.MicroController.Board.environment, "run --target upload", "Writing - Main", 0, 50, 90, Main.SelectedDevice);
-            }
-            else
-            {
-                await Main.pio.RunPlatformIO(Config.MicroController.Board.environment, "run --target upload", "Writing", 0, 0, 90, Main.SelectedDevice);
-            }
+            await Main.write(Config);
         }
     }
 }

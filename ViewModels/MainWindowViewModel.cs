@@ -17,6 +17,7 @@ using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
 using LibUsbDotNet.DeviceNotify.Info;
+using GuitarConfiguratorSharp.Configuration;
 
 namespace GuitarConfiguratorSharp.ViewModels
 {
@@ -37,6 +38,8 @@ namespace GuitarConfiguratorSharp.ViewModels
         private ConfigurableDevice? _disconnectedDevice;
 
         private bool MigrationSupported => SelectedDevice == null || SelectedDevice.MigrationSupported;
+
+        private bool writingToUSB = false;
 
         private readonly static string UDEV_FILE = "99-ardwiino.rules";
         private readonly static string UDEV_PATH = $"/etc/udev/rules.d/{UDEV_FILE}";
@@ -141,6 +144,20 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
         }
 
+        internal async Task write(DeviceConfiguration config)
+        {
+            config.generate(pio);
+            if (config.MicroController.Board.hasUSBMCU)
+            {
+                writingToUSB = true;
+                await pio.RunPlatformIO(config.MicroController.Board.environment + "-usb", "run --target upload", "Writing - USB", 0, 0, 40, SelectedDevice);
+            }
+            else
+            {
+                await pio.RunPlatformIO(config.MicroController.Board.environment, "run --target upload", "Writing", 0, 0, 90, SelectedDevice);
+            }
+        }
+
         private string _message = "Connected";
 
         public string Message
@@ -188,8 +205,10 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
         }
 
-        private class DeviceNotifyArgsRegistry: DeviceNotifyEventArgs {
-            public DeviceNotifyArgsRegistry(UsbRegistry dev) {
+        private class DeviceNotifyArgsRegistry : DeviceNotifyEventArgs
+        {
+            public DeviceNotifyArgsRegistry(UsbRegistry dev)
+            {
                 this.Device = new RegDeviceNotifyInfo(dev);
                 this.DeviceType = DeviceType.DeviceInterface;
                 this.EventType = EventType.DeviceArrival;
@@ -249,7 +268,8 @@ namespace GuitarConfiguratorSharp.ViewModels
             pio.PlatformIOInstalled += () =>
             {
                 this.Installed = true;
-                foreach (UsbRegistry dev in UsbDevice.AllDevices) {
+                foreach (UsbRegistry dev in UsbDevice.AllDevices)
+                {
                     OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
                 }
                 timer.Start();
@@ -281,7 +301,36 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
             if (_disconnectedDevice != null)
             {
-                _disconnectedDevice.DeviceAdded(device);
+                if (_disconnectedDevice.DeviceAdded(device))
+                {
+                    if (device is ConfigurableUSBDevice)
+                    {
+                        if (writingToUSB)
+                        {
+                            device.BootloaderUSB();
+                        }
+                        else
+                        {
+                            _selectedDevice = device;
+                            _disconnectedDevice = null;
+                            this.Connected = true;
+
+                            this.Message = "Writing - Done";
+                            this.Progress = 100;
+                        }
+                    }
+                    else if (writingToUSB)
+                    {
+                        writingToUSB = false;
+                        this.Message = "Writing - USB - Done";
+                        this.Progress = 50;
+                        var usbdevice = _disconnectedDevice as ConfigurableUSBDevice;
+                        if (usbdevice != null)
+                        {
+                            pio.RunPlatformIO(usbdevice.Board.environment, "run --target upload", "Writing - Main", 0, 50, 90, device).ConfigureAwait(false);
+                        }
+                    }
+                }
             }
         }
         private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
@@ -330,15 +379,17 @@ namespace GuitarConfiguratorSharp.ViewModels
 
         private void OnDeviceNotify(object? sender, DeviceNotifyEventArgs e)
         {
-            Console.WriteLine(e.Device.Name);
             if (e.DeviceType == DeviceType.DeviceInterface)
             {
                 if (e.EventType == EventType.DeviceArrival)
                 {
                     var vid = e.Device.IdVendor;
                     var pid = e.Device.IdProduct;
-                    // If ardwiino / santroller
-                    if (e.Device.Open(out UsbDevice dev))
+                    if (vid == Dfu.DFU_VID && (pid == Dfu.DFU_PID_16U2 || pid == Dfu.DFU_PID_8U2))
+                    {
+                        AddDevice(new Dfu(e));
+                    }
+                    else if (e.Device.Open(out UsbDevice dev))
                     {
                         ushort revision = (ushort)dev.Info.Descriptor.BcdDevice;
                         String product = dev.Info.ProductString;
@@ -347,13 +398,6 @@ namespace GuitarConfiguratorSharp.ViewModels
                         {
                             var c = new Santroller(pio, e.Device.Name, dev, product, serial, revision);
                             AddDevice(c);
-                            if (_disconnectedDevice?.IsSameDevice(serial) == true)
-                            {
-                                _selectedDevice = c;
-                                this.Connected = true;
-                                this.Message = "Writing - Done";
-                                this.Progress = 100;
-                            }
                         }
                         else if (product == "Ardwiino")
                         {
@@ -366,17 +410,16 @@ namespace GuitarConfiguratorSharp.ViewModels
                                 AddDevice(new Ardwiino(pio, e.Device.Name, dev, product, serial, revision));
                             }
                         }
-                    }
-
-                    else if (vid == Dfu.DFU_VID && (pid == Dfu.DFU_PID_16U2 || pid == Dfu.DFU_PID_8U2))
-                    {
-                        AddDevice(new Dfu(e));
+                        else
+                        {
+                            dev.Close();
+                        }
                     }
                 }
                 else
                 {
                     Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device.Name)));
-                    if (_selectedDevice?.IsSameDevice(e.Device.Name) == true)
+                    if (_disconnectedDevice == null && _selectedDevice is ConfigurableUSBDevice && _selectedDevice?.IsSameDevice(e.Device.Name) == true)
                     {
                         _disconnectedDevice = _selectedDevice;
                         this.Connected = false;

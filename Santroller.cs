@@ -35,10 +35,11 @@ public class Santroller : ConfigurableUSBDevice
     {
         try
         {
-            var f_cpu = uint.Parse(Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("L", ""));
+            var f_cpu_str = Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("L", "").Trim();
+            var f_cpu = uint.Parse(f_cpu_str);
             var board = Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_BOARD), 32)).Replace("\0", "");
             Microcontroller m = Board.findMicrocontroller(Board.findBoard(board, f_cpu));
-            this.board = m.Board;
+            this.Board = m.Board;
             var data = this.ReadData(0, ((byte)Commands.COMMAND_READ_CONFIG), 2048);
             using (var inputStream = new MemoryStream(data))
             {
@@ -54,7 +55,7 @@ public class Santroller : ConfigurableUSBDevice
                 }
             }
         }
-        catch (JsonException)
+        catch (Exception ex) when (ex is JsonException || ex is FormatException)
         {
             throw new NotImplementedException("Configuration missing from Santroller device, are you sure this is a real santroller device?");
             // TODO: throw a better exception here, and handle this in the gui, so that a device that appears to be missing its config doesn't do something weird.

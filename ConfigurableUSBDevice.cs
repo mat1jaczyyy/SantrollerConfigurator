@@ -14,7 +14,7 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
     protected readonly Version version;
     protected readonly string path;
 
-    protected Board board;
+    public Board Board {get; protected set;}
 
     public ConfigurableUSBDevice(UsbDevice device, string path, string product, string serial, ushort version)
     {
@@ -60,7 +60,7 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
     public uint WriteData(ushort wValue, byte bRequest, byte[] buffer)
     {
         UsbCtrlFlags requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
-        
+
 
         var sp = new UsbSetupPacket(
             ((byte)requestType),
@@ -73,9 +73,9 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
     }
     public ConfigurableDevice? BootloaderDevice { get; private set; }
     private TaskCompletionSource<String?>? _bootloaderPath = null;
-    public void DeviceAdded(ConfigurableDevice device)
+    public bool DeviceAdded(ConfigurableDevice device)
     {
-        if (this.board.ardwiinoName.Contains("pico"))
+        if (this.Board.ardwiinoName.Contains("pico"))
         {
             var pico = device as PicoDevice;
             if (pico != null)
@@ -83,7 +83,7 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
                 _bootloaderPath?.SetResult(pico.GetPath());
             }
         }
-        else if (this.board.hasUSBMCU)
+        else if (this.Board.hasUSBMCU)
         {
             var dfu = device as Dfu;
             if (dfu != null && dfu.Board.hasUSBMCU && dfu.Board.environment.Contains("arduino_uno_mega"))
@@ -92,20 +92,22 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
                 _bootloaderPath?.SetResult(dfu.Board.environment);
             }
         }
-    }
-
-    public async Task ExitBootloader()
-    {
-        var dfu = BootloaderDevice as Dfu;
-        if (dfu != null)
+        var other = device as ConfigurableUSBDevice;
+        if (other != null)
         {
-            // await dfu.ExitDFU();
+            return other.path == path;
         }
+        var arduino = device as Arduino;
+        if (arduino != null)
+        {
+            return arduino.Board.ardwiinoName == Board.UsbUpload.ardwiinoName;
+        }
+        return false;
     }
 
     public async Task<string?> getUploadPort()
     {
-        if (this.board.ardwiinoName.Contains("pico") || this.board.hasUSBMCU)
+        if (this.Board.ardwiinoName.Contains("pico") || this.Board.hasUSBMCU)
         {
             _bootloaderPath = new TaskCompletionSource<string?>();
             Bootloader();

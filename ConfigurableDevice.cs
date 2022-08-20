@@ -12,7 +12,7 @@ public interface ConfigurableDevice {
     public void Bootloader();
     public void BootloaderUSB();
 
-    public void DeviceAdded(ConfigurableDevice device);
+    public bool DeviceAdded(ConfigurableDevice device);
 
     public Task<string?> getUploadPort();
 }

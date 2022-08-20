@@ -56,9 +56,9 @@ public class Ardwiino : ConfigurableUSBDevice
                 this.cpuFreq = uint.Parse(StructTools.RawDeserializeStr(buffer));
                 buffer = this.ReadData(7, REQUEST_HID_GET_REPORT);
                 string board = StructTools.RawDeserializeStr(buffer);
-                this.board = Board.findBoard(board, this.cpuFreq);
+                this.Board = Board.findBoard(board, this.cpuFreq);
                 this.MigrationSupported = false;
-                _config = new DeviceConfiguration(Board.findMicrocontroller(this.board));
+                _config = new DeviceConfiguration(Board.findMicrocontroller(this.Board));
                 return;
             }
             this.MigrationSupported = true;
@@ -68,13 +68,13 @@ public class Ardwiino : ConfigurableUSBDevice
             {
                 CpuInfoOld info = StructTools.RawDeserialize<CpuInfoOld>(data, 0);
                 this.cpuFreq = info.cpu_freq;
-                this.board = Board.findBoard(info.board, this.cpuFreq);
+                this.Board = Board.findBoard(info.board, this.cpuFreq);
             }
             else
             {
                 CpuInfo info = StructTools.RawDeserialize<CpuInfo>(data, 0);
                 this.cpuFreq = info.cpu_freq;
-                this.board = Board.findBoard(info.board, this.cpuFreq);
+                this.Board = Board.findBoard(info.board, this.cpuFreq);
             }
             var read_config = READ_CONFIG_COMMAND;
             if (this.version < new Version(8, 0, 7))
@@ -224,7 +224,7 @@ public class Ardwiino : ConfigurableUSBDevice
                 config.pinsSP = config_old.pinsSP;
                 config.rf = config_old.rf;
             }
-            Microcontroller controller = Board.findMicrocontroller(board);
+            Microcontroller controller = Board.findMicrocontroller(Board);
             List<Binding> bindings = new List<Binding>();
             Dictionary<int, Color> colors = new Dictionary<int, Color>();
             foreach (var led in config!.all!.leds!)
@@ -411,7 +411,7 @@ public class Ardwiino : ConfigurableUSBDevice
         {
             return "An ardwiino device had issues reading, please unplug and replug it.";
         }
-        return $"Ardwiino - {board.name} - {version}";
+        return $"Ardwiino - {Board.name} - {version}";
     }
 
     public override void Bootloader()
