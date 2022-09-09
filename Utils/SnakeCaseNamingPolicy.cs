@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using System.Text.Json;
 
-namespace GuitarConfiguratorSharp.Utils
+namespace GuitarConfiguratorSharp.NetCore.Utils
 {
     public class SnakeCaseNamingPolicy : JsonNamingPolicy
     {

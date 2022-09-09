@@ -1,12 +1,13 @@
-
+using System;
+using System.Threading.Tasks;
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Utils;
 using LibUsbDotNet;
 using LibUsbDotNet.Main;
-using System;
-using GuitarConfiguratorSharp.Utils;
-using GuitarConfiguratorSharp.Configuration;
-using System.Threading.Tasks;
 
-public abstract class ConfigurableUSBDevice : ConfigurableDevice
+namespace GuitarConfiguratorSharp.NetCore;
+
+public abstract class ConfigurableUsbDevice : IConfigurableDevice
 {
     protected readonly UsbDevice device;
     protected readonly string product;
@@ -16,7 +17,7 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
 
     public Board Board {get; protected set;}
 
-    public ConfigurableUSBDevice(UsbDevice device, string path, string product, string serial, ushort version)
+    public ConfigurableUsbDevice(UsbDevice device, string path, string product, string serial, ushort version)
     {
         this.device = device;
         this.path = path;
@@ -29,15 +30,15 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
     public abstract DeviceConfiguration Configuration { get; }
 
     public abstract void Bootloader();
-    public abstract void BootloaderUSB();
-    public bool IsSameDevice(PlatformIOPort port)
+    public abstract void BootloaderUsb();
+    public bool IsSameDevice(PlatformIoPort port)
     {
         return false;
     }
 
-    public bool IsSameDevice(string serial_or_path)
+    public bool IsSameDevice(string serialOrPath)
     {
-        return this.serial == serial_or_path || this.path == serial_or_path;
+        return this.serial == serialOrPath || this.path == serialOrPath;
     }
 
     public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
@@ -71,11 +72,11 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
         device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
         return (uint)length;
     }
-    public ConfigurableDevice? BootloaderDevice { get; private set; }
+    public IConfigurableDevice? BootloaderDevice { get; private set; }
     private TaskCompletionSource<String?>? _bootloaderPath = null;
-    public bool DeviceAdded(ConfigurableDevice device)
+    public bool DeviceAdded(IConfigurableDevice device)
     {
-        if (this.Board.ardwiinoName.Contains("pico"))
+        if (this.Board.ArdwiinoName.Contains("pico"))
         {
             var pico = device as PicoDevice;
             if (pico != null)
@@ -83,31 +84,31 @@ public abstract class ConfigurableUSBDevice : ConfigurableDevice
                 _bootloaderPath?.SetResult(pico.GetPath());
             }
         }
-        else if (this.Board.hasUSBMCU)
+        else if (this.Board.HasUsbmcu)
         {
             var dfu = device as Dfu;
-            if (dfu != null && dfu.Board.hasUSBMCU && dfu.Board.environment.Contains("arduino_uno_mega"))
+            if (dfu != null && dfu.Board.HasUsbmcu && dfu.Board.Environment.Contains("arduino_uno_mega"))
             {
                 BootloaderDevice = dfu;
-                _bootloaderPath?.SetResult(dfu.Board.environment);
+                _bootloaderPath?.SetResult(dfu.Board.Environment);
             }
         }
-        var other = device as ConfigurableUSBDevice;
+        var other = device as ConfigurableUsbDevice;
         if (other != null)
         {
-            return other.path == path;
+            return other.serial == serial;
         }
         var arduino = device as Arduino;
         if (arduino != null)
         {
-            return arduino.Board.ardwiinoName == Board.UsbUpload.ardwiinoName;
+            return arduino.Board.ArdwiinoName == Board.UsbUpload.ArdwiinoName;
         }
         return false;
     }
 
-    public async Task<string?> getUploadPort()
+    public async Task<string?> GetUploadPort()
     {
-        if (this.Board.ardwiinoName.Contains("pico") || this.Board.hasUSBMCU)
+        if (this.Board.ArdwiinoName.Contains("pico") || this.Board.HasUsbmcu)
         {
             _bootloaderPath = new TaskCompletionSource<string?>();
             Bootloader();

@@ -1,15 +1,18 @@
-using LibUsbDotNet;
 using System;
-using GuitarConfiguratorSharp.Utils;
-using GuitarConfiguratorSharp.Configuration;
-using System.IO.Compression;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Utils;
+using LibUsbDotNet;
 
-public class Santroller : ConfigurableUSBDevice
+namespace GuitarConfiguratorSharp.NetCore;
+
+public class Santroller : ConfigurableUsbDevice
 {
-    enum Commands : int
+    enum Commands
     {
         COMMAND_REBOOT = 0x30,
         COMMAND_JUMP_BOOTLOADER,
@@ -25,20 +28,20 @@ public class Santroller : ConfigurableUSBDevice
         COMMAND_SET_SP,
     }
 
-    public static readonly Guid ControllerGUID = new("DF59037D-7C92-4155-AC12-7D700A313D78");
+    public static readonly Guid ControllerGuid = new("DF59037D-7C92-4155-AC12-7D700A313D78");
 
     // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
     //     new(0x1209, 0x2882, label: "Santroller",
     //         classGuid: ControllerGUID);
 
-    public Santroller(PlatformIO pio, string path, UsbDevice device, string product, string serial, ushort revision) : base(device, path, product, serial, revision)
+    public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort revision) : base(device, path, product, serial, revision)
     {
         try
         {
-            var f_cpu_str = Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("L", "").Trim();
-            var f_cpu = uint.Parse(f_cpu_str);
+            var fCpuStr = Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("\0", "").Replace("L", "").Trim();
+            var fCpu = uint.Parse(fCpuStr);
             var board = Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_BOARD), 32)).Replace("\0", "");
-            Microcontroller m = Board.findMicrocontroller(Board.findBoard(board, f_cpu));
+            Microcontroller m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
             this.Board = m.Board;
             var data = this.ReadData(0, ((byte)Commands.COMMAND_READ_CONFIG), 2048);
             using (var inputStream = new MemoryStream(data))
@@ -49,13 +52,13 @@ public class Santroller : ConfigurableUSBDevice
                     using (var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress))
                     {
                         decompressor.CopyTo(outputStream);
-                        _config = JsonSerializer.Deserialize<DeviceConfiguration>(Encoding.UTF8.GetString(outputStream.ToArray()), DeviceConfiguration.getJSONOptions(m))!;
-                        _config.generate(pio);
+                        _config = JsonSerializer.Deserialize<DeviceConfiguration>(Encoding.UTF8.GetString(outputStream.ToArray()), DeviceConfiguration.GetJsonOptions(m))!;
+                        _config.Generate(pio);
                     }
                 }
             }
         }
-        catch (Exception ex) when (ex is JsonException || ex is FormatException)
+        catch (Exception ex) when (ex is JsonException || ex is FormatException || ex is InvalidOperationException)
         {
             throw new NotImplementedException("Configuration missing from Santroller device, are you sure this is a real santroller device?");
             // TODO: throw a better exception here, and handle this in the gui, so that a device that appears to be missing its config doesn't do something weird.
@@ -64,19 +67,19 @@ public class Santroller : ConfigurableUSBDevice
 
     public override void Bootloader()
     {
-        WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER), new byte[0]);
+        WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER), Array.Empty<byte>());
     }
-    public override void BootloaderUSB()
+    public override void BootloaderUsb()
     {
-        if (Configuration.MicroController.Board.hasUSBMCU)
+        if (Configuration.MicroController.Board.HasUsbmcu)
         {
-            WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER_UNO), new byte[0]);
+            WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER_UNO), Array.Empty<byte>());
         }
     }
     public override bool MigrationSupported => true;
 
 
-    private DeviceConfiguration _config;
+    private readonly DeviceConfiguration _config;
 
     public override DeviceConfiguration Configuration => _config;
 

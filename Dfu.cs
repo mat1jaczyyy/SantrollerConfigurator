@@ -1,16 +1,16 @@
 using System;
-using GuitarConfiguratorSharp.Utils;
-using GuitarConfiguratorSharp.Configuration;
 using System.Threading.Tasks;
-using LibUsbDotNet;
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Utils;
 using LibUsbDotNet.DeviceNotify;
-using LibUsbDotNet.Main;
 
-public class Dfu : ConfigurableDevice
+namespace GuitarConfiguratorSharp.NetCore;
+
+public class Dfu : IConfigurableDevice
 {
-    public static readonly uint DFU_PID_8U2 = 0x2FF7;
-    public static readonly uint DFU_PID_16U2 = 0x2FEF;
-    public static readonly uint DFU_VID = 0x03eb;
+    public static readonly uint DfuPid8U2 = 0x2FF7;
+    public static readonly uint DfuPid16U2 = 0x2FEF;
+    public static readonly uint DfuVid = 0x03eb;
 
     public Board Board { get; }
 
@@ -18,18 +18,18 @@ public class Dfu : ConfigurableDevice
 
     public DeviceConfiguration? Configuration => null;
 
-    private DeviceNotifyEventArgs Args;
+    private DeviceNotifyEventArgs _args;
 
-    private string port;
+    private readonly string _port;
 
     public Dfu(DeviceNotifyEventArgs args)
     {
-        this.Args = args;
+        this._args = args;
         var pid = args.Device.IdProduct;
-        this.port = args.Device.Name;
+        this._port = args.Device.Name;
         foreach (var board in Board.Boards)
         {
-            if (board.productIDs.Contains((uint)pid) && board.hasUSBMCU)
+            if (board.ProductIDs.Contains((uint)pid) && board.HasUsbmcu)
             {
                 this.Board = board;
                 return;
@@ -38,31 +38,31 @@ public class Dfu : ConfigurableDevice
         throw new InvalidOperationException("Not expected");
     }
 
-    public bool IsSameDevice(PlatformIOPort port)
+    public bool IsSameDevice(PlatformIoPort port)
     {
         return false;
     }
 
-    public bool IsSameDevice(string serial_or_path)
+    public bool IsSameDevice(string serialOrPath)
     {
-        return serial_or_path == this.port;
+        return serialOrPath == this._port;
     }
 
-    public bool DeviceAdded(ConfigurableDevice device)
+    public bool DeviceAdded(IConfigurableDevice device)
     {
         return false;
     }
 
-    public Task<string?> getUploadPort()
+    public Task<string?> GetUploadPort()
     {
-        return Task.FromResult((string?)this.port);
+        return Task.FromResult((string?)this._port);
     }
 
     public void Bootloader()
     {
     }
 
-    public void BootloaderUSB()
+    public void BootloaderUsb()
     {
     }
 }

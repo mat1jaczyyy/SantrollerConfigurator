@@ -1,13 +1,13 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using GuitarConfiguratorSharp.ViewModels;
-using GuitarConfiguratorSharp.Views;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfiguratorSharp.NetCore.Views;
 using ReactiveUI;
 using Splat;
-using System;
 
-namespace GuitarConfiguratorSharp
+namespace GuitarConfiguratorSharp.NetCore
 {
     public partial class App : Application
     {

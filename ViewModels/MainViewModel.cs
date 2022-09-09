@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media;
 using ReactiveUI;
-using System.ComponentModel;
-using GuitarConfiguratorSharp.Configuration;
 
-namespace GuitarConfiguratorSharp.ViewModels
+namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
     public class MainViewModel : ReactiveObject, IRoutableViewModel
     {

@@ -1,6 +1,8 @@
-<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker" xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="GuitarConfiguratorSharp.Views.ConfigView" Background="Transparent">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker" xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp"
+             xmlns:netCore="clr-namespace:GuitarConfiguratorSharp.NetCore"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="GuitarConfiguratorSharp.NetCore.Views.ConfigView" Background="Transparent">
     <UserControl.Resources>
-        <guitarConfiguratorSharp:BindingBitmapConverter x:Key="ImageConverter" />
+        <netCore:BindingBitmapConverter x:Key="ImageConverter" />
     </UserControl.Resources>
     <Panel>
         <DockPanel HorizontalAlignment="Stretch">
@@ -66,7 +68,7 @@
                 </ExperimentalAcrylicBorder.Material>
                 <StackPanel>
                     <WrapPanel Margin="10" HorizontalAlignment="Center">
-                        <Button Content="Write Configuration" Command="{Binding Write}" />
+                        <Button Content="Write Configuration" Command="{Binding WriteConfig}" />
                         <Button Content="Revert device to Arduino" Command="{Binding Reset}" />
                         <Button Content="Configure another device" Command="{Binding GoBack}" />
                     </WrapPanel>

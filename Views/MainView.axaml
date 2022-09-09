@@ -4,11 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker"
              xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp"
+             xmlns:netCore="clr-namespace:GuitarConfiguratorSharp.NetCore"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="GuitarConfiguratorSharp.Views.MainView"
+             x:Class="GuitarConfiguratorSharp.NetCore.Views.MainView"
              Background="Transparent">
     <UserControl.Resources>
-        <guitarConfiguratorSharp:BitmapAssetValueConverter x:Key="ImageConverter"/>
+        <netCore:BitmapAssetValueConverter x:Key="ImageConverter"/>
     </UserControl.Resources>
     <Panel>
         <DockPanel HorizontalAlignment="Stretch">

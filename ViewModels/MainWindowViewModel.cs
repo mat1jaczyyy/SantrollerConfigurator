@@ -1,25 +1,25 @@
 using System;
-using System.Reactive;
-using DynamicData;
-using GuitarConfiguratorSharp.Utils;
-using ReactiveUI;
-using System.Linq;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reactive;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Collections;
-using System.Collections.Specialized;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+using DynamicData;
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Utils;
 using LibUsbDotNet;
 using LibUsbDotNet.DeviceNotify;
+using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
-using LibUsbDotNet.DeviceNotify.Info;
-using GuitarConfiguratorSharp.Configuration;
+using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.ViewModels
+namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     {
@@ -32,19 +32,19 @@ namespace GuitarConfiguratorSharp.ViewModels
         // The command that navigates a user back.
         public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
-        public AvaloniaList<ConfigurableDevice> Devices { get; } = new AvaloniaList<ConfigurableDevice>();
+        public AvaloniaList<IConfigurableDevice> Devices { get; } = new AvaloniaList<IConfigurableDevice>();
 
-        private ConfigurableDevice? _selectedDevice;
-        private ConfigurableDevice? _disconnectedDevice;
+        private IConfigurableDevice? _selectedDevice;
+        private IConfigurableDevice? _disconnectedDevice;
 
         private bool MigrationSupported => SelectedDevice == null || SelectedDevice.MigrationSupported;
 
-        private bool writingToUSB = false;
+        private bool _writingToUsb = false;
 
-        private readonly static string UDEV_FILE = "99-ardwiino.rules";
-        private readonly static string UDEV_PATH = $"/etc/udev/rules.d/{UDEV_FILE}";
+        private readonly static string UdevFile = "99-ardwiino.rules";
+        private readonly static string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
 
-        public ConfigurableDevice? SelectedDevice
+        public IConfigurableDevice? SelectedDevice
         {
             get
             {
@@ -144,20 +144,6 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
         }
 
-        internal async Task write(DeviceConfiguration config)
-        {
-            config.generate(pio);
-            if (config.MicroController.Board.hasUSBMCU)
-            {
-                writingToUSB = true;
-                await pio.RunPlatformIO(config.MicroController.Board.environment + "-usb", "run --target upload", "Writing - USB", 0, 0, 40, SelectedDevice);
-            }
-            else
-            {
-                await pio.RunPlatformIO(config.MicroController.Board.environment, "run --target upload", "Writing", 0, 0, 90, SelectedDevice);
-            }
-        }
-
         private string _message = "Connected";
 
         public string Message
@@ -171,36 +157,49 @@ namespace GuitarConfiguratorSharp.ViewModels
                 this.RaiseAndSetIfChanged(ref _message, value);
             }
         }
+        internal async Task Write(DeviceConfiguration config)
+        {
+            config.Generate(Pio);
+            if (config.MicroController.Board.HasUsbmcu)
+            {
+                _writingToUsb = true;
+                await Pio.RunPlatformIo(config.MicroController.Board.Environment + "-usb", "run --target upload", "Writing - USB", 0, 0, 40, SelectedDevice);
+            }
+            else
+            {
+                await Pio.RunPlatformIo(config.MicroController.Board.Environment, "run --target upload", "Writing", 0, 0, 90, SelectedDevice);
+            }
+        }
 
-        private IDeviceNotifier DeviceListener;
-        public PlatformIO pio { get; } = new PlatformIO();
+        private readonly IDeviceNotifier _deviceListener;
+        public PlatformIo Pio { get; } = new PlatformIo();
 
-        private Timer timer = new Timer();
+        private readonly Timer _timer = new Timer();
 
         private class RegDeviceNotifyInfo : IUsbDeviceNotifyInfo
         {
-            private UsbRegistry dev;
+            private readonly UsbRegistry _dev;
 
             public RegDeviceNotifyInfo(UsbRegistry dev)
             {
-                this.dev = dev;
+                this._dev = dev;
             }
 
-            public UsbSymbolicName SymbolicName => UsbSymbolicName.Parse(dev.SymbolicName);
+            public UsbSymbolicName SymbolicName => UsbSymbolicName.Parse(_dev.SymbolicName);
 
-            public string Name => dev.DevicePath;
+            public string Name => _dev.DevicePath;
 
-            public Guid ClassGuid => dev.DeviceInterfaceGuids[0];
+            public Guid ClassGuid => _dev.DeviceInterfaceGuids[0];
 
-            public int IdVendor => dev.Vid;
+            public int IdVendor => _dev.Vid;
 
-            public int IdProduct => dev.Pid;
+            public int IdProduct => _dev.Pid;
 
-            public string SerialNumber => dev.Device.Info.SerialString;
+            public string SerialNumber => _dev.Device.Info.SerialString;
 
             public bool Open(out UsbDevice usbDevice)
             {
-                usbDevice = dev.Device;
+                usbDevice = _dev.Device;
                 return usbDevice.Open();
             }
         }
@@ -222,14 +221,17 @@ namespace GuitarConfiguratorSharp.ViewModels
             );
             Router.Navigate.Execute(new MainViewModel(this));
 
-            pio.TextChanged += (message, clear) =>
+            Pio.TextChanged += (message, clear) =>
             {
                 Console.WriteLine(message);
             };
 
-            pio.PlatformIOError += (val) => this.ProgressbarColor = val ? "red" : "PrimaryColor";
+            Pio.PlatformIoError += (val) =>
+            {
+                this.ProgressbarColor = val ? "red" : "PrimaryColor";
+            };
 
-            pio.ProgressChanged += (message, val, val2) =>
+            Pio.ProgressChanged += (message, val, val2) =>
             {
                 this.Message = message;
                 this.Progress = val2;
@@ -260,36 +262,36 @@ namespace GuitarConfiguratorSharp.ViewModels
 
             DeviceListener = new WindowsDeviceNotifier();
 #else
-            DeviceListener = new LinuxDeviceNotifier();
+            _deviceListener = new LinuxDeviceNotifier();
 #endif
-            DeviceListener.OnDeviceNotify += OnDeviceNotify;
-            timer.Elapsed += DevicePoller_Tick;
-            timer.AutoReset = false;
-            pio.PlatformIOInstalled += () =>
+            _deviceListener.OnDeviceNotify += OnDeviceNotify;
+            _timer.Elapsed += DevicePoller_Tick;
+            _timer.AutoReset = false;
+            Pio.PlatformIoInstalled += () =>
             {
                 this.Installed = true;
                 foreach (UsbRegistry dev in UsbDevice.AllDevices)
                 {
                     OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
                 }
-                timer.Start();
+                _timer.Start();
             };
             // Do something so that working is only set to false once the guitar appears on the host machine again
             // This will probably involve keeping a copy of the serial number  for the last written to device
             // So that we know the right device is picked back up.
-            pio.PlatformIOWorking += (working) =>
+            Pio.PlatformIoWorking += (working) =>
             {
                 this.Working = working;
             };
-            _ = pio.InitialisePlatformIO();
+            _ = Pio.InitialisePlatformIo();
 
             Task.Run(InstallDependancies);
         }
 
-        private List<string> currentDrives = new List<string>();
-        private List<string> currentPorts = new List<string>();
+        private readonly List<string> _currentDrives = new List<string>();
+        private readonly List<string> _currentPorts = new List<string>();
 
-        private void AddDevice(ConfigurableDevice device)
+        private void AddDevice(IConfigurableDevice device)
         {
             if (device is Arduino)
             {
@@ -303,11 +305,11 @@ namespace GuitarConfiguratorSharp.ViewModels
             {
                 if (_disconnectedDevice.DeviceAdded(device))
                 {
-                    if (device is ConfigurableUSBDevice)
+                    if (device is ConfigurableUsbDevice)
                     {
-                        if (writingToUSB)
+                        if (_writingToUsb)
                         {
-                            device.BootloaderUSB();
+                            device.BootloaderUsb();
                         }
                         else
                         {
@@ -319,15 +321,15 @@ namespace GuitarConfiguratorSharp.ViewModels
                             this.Progress = 100;
                         }
                     }
-                    else if (writingToUSB)
+                    else if (_writingToUsb)
                     {
-                        writingToUSB = false;
+                        _writingToUsb = false;
                         this.Message = "Writing - USB - Done";
                         this.Progress = 50;
-                        var usbdevice = _disconnectedDevice as ConfigurableUSBDevice;
+                        var usbdevice = _disconnectedDevice as ConfigurableUsbDevice;
                         if (usbdevice != null)
                         {
-                            pio.RunPlatformIO(usbdevice.Board.environment, "run --target upload", "Writing - Main", 0, 50, 90, device).ConfigureAwait(false);
+                            Pio.RunPlatformIo(usbdevice.Board.Environment, "run --target upload", "Writing - Main", 0, 50, 90, device).ConfigureAwait(false);
                         }
                     }
                 }
@@ -336,7 +338,7 @@ namespace GuitarConfiguratorSharp.ViewModels
         private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
         {
             var drives = DriveInfo.GetDrives();
-            var currentDrivesSet = currentDrives.ToHashSet();
+            var currentDrivesSet = _currentDrives.ToHashSet();
             foreach (var drive in drives)
             {
                 if (currentDrivesSet.Remove(drive.RootDirectory.FullName))
@@ -348,32 +350,35 @@ namespace GuitarConfiguratorSharp.ViewModels
                 {
                     if (File.Exists(uf2) && File.ReadAllText(uf2).Contains("RPI-RP2"))
                     {
-                        AddDevice(new PicoDevice(pio, drive.RootDirectory.FullName));
+                        AddDevice(new PicoDevice(Pio, drive.RootDirectory.FullName));
                     }
                 }
-                currentDrives.Add(drive.RootDirectory.FullName);
+                _currentDrives.Add(drive.RootDirectory.FullName);
             }
             // We removed all valid devices above, so anything left in currentDrivesSet is no longer valid
             Devices.RemoveMany(Devices.Where(x => x is PicoDevice pico && currentDrivesSet.Contains(pico.GetPath())));
-            currentDrives.RemoveMany(currentDrivesSet);
+            _currentDrives.RemoveMany(currentDrivesSet);
 
-            var existingPorts = currentPorts.ToHashSet();
-            var ports = pio.GetPorts().Result;
-            foreach (var port in ports)
+            var existingPorts = _currentPorts.ToHashSet();
+            var ports = Pio.GetPorts().Result;
+            if (ports != null)
             {
-                if (existingPorts.Contains(port.Port))
+                foreach (var port in ports)
                 {
-                    continue;
+                    if (existingPorts.Contains(port.Port))
+                    {
+                        continue;
+                    }
+                    var arduino = new Arduino(Pio, port);
+                    AddDevice(arduino);
+                    _currentPorts.Add(arduino.GetSerialPort());
                 }
-                var arduino = new Arduino(pio, port);
-                AddDevice(arduino);
-                currentPorts.Add(arduino.GetSerialPort());
+                var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
+                _currentPorts.RemoveMany(_currentPorts.Where(port => !currentSerialPorts.Contains(port)));
+                Devices.RemoveMany(Devices.Where(device => device is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())));
             }
-            var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
-            currentPorts.RemoveMany(currentPorts.Where(port => !currentSerialPorts.Contains(port)));
-            Devices.RemoveMany(Devices.Where(device => device is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())));
             ReadyToConfigure = null != SelectedDevice && Installed;
-            timer.Start();
+            _timer.Start();
         }
 
 
@@ -385,7 +390,7 @@ namespace GuitarConfiguratorSharp.ViewModels
                 {
                     var vid = e.Device.IdVendor;
                     var pid = e.Device.IdProduct;
-                    if (vid == Dfu.DFU_VID && (pid == Dfu.DFU_PID_16U2 || pid == Dfu.DFU_PID_8U2))
+                    if (vid == Dfu.DfuVid && (pid == Dfu.DfuPid16U2 || pid == Dfu.DfuPid8U2))
                     {
                         AddDevice(new Dfu(e));
                     }
@@ -396,7 +401,7 @@ namespace GuitarConfiguratorSharp.ViewModels
                         String serial = dev.Info.SerialString; ;
                         if (product == "Santroller")
                         {
-                            var c = new Santroller(pio, e.Device.Name, dev, product, serial, revision);
+                            var c = new Santroller(Pio, e.Device.Name, dev, product, serial, revision);
                             AddDevice(c);
                         }
                         else if (product == "Ardwiino")
@@ -407,7 +412,7 @@ namespace GuitarConfiguratorSharp.ViewModels
                             }
                             else
                             {
-                                AddDevice(new Ardwiino(pio, e.Device.Name, dev, product, serial, revision));
+                                AddDevice(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
                             }
                         }
                         else
@@ -419,7 +424,7 @@ namespace GuitarConfiguratorSharp.ViewModels
                 else
                 {
                     Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device.Name)));
-                    if (_disconnectedDevice == null && _selectedDevice is ConfigurableUSBDevice && _selectedDevice?.IsSameDevice(e.Device.Name) == true)
+                    if (_disconnectedDevice == null && _selectedDevice is ConfigurableUsbDevice && _selectedDevice?.IsSameDevice(e.Device.Name) == true)
                     {
                         _disconnectedDevice = _selectedDevice;
                         this.Connected = false;
@@ -453,7 +458,7 @@ namespace GuitarConfiguratorSharp.ViewModels
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return File.Exists(UDEV_PATH);
+                return File.Exists(UdevPath);
             }
             return true;
         }
@@ -481,10 +486,10 @@ namespace GuitarConfiguratorSharp.ViewModels
             {
                 // Just copy the file to install it, using pkexec for admin
                 string appdataFolder = AssetUtils.GetAppDataFolder();
-                string rules = Path.Combine(appdataFolder, UDEV_FILE);
-                await AssetUtils.ExtractFile(UDEV_FILE, rules);
+                string rules = Path.Combine(appdataFolder, UdevFile);
+                await AssetUtils.ExtractFile(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
-                info.ArgumentList.AddRange(new string[] { "cp", rules, UDEV_PATH });
+                info.ArgumentList.AddRange(new string[] { "cp", rules, UdevPath });
                 info.UseShellExecute = true;
                 Process.Start(info);
             }

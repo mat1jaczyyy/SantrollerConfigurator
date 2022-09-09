@@ -1,5 +1,8 @@
-using System.Runtime.InteropServices;
 using System;
+using System.Runtime.InteropServices;
+
+namespace GuitarConfiguratorSharp.NetCore;
+
 public static class StructTools
 {
     /// <summary>

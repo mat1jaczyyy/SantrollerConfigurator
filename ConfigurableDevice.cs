@@ -1,18 +1,20 @@
 using System.Threading.Tasks;
-using LibUsbDotNet;
-using GuitarConfiguratorSharp.Configuration;
-using GuitarConfiguratorSharp.Utils;
-public interface ConfigurableDevice {
-    public bool IsSameDevice(PlatformIOPort port);
-    public bool IsSameDevice(string serial_or_path);
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Utils;
+
+namespace GuitarConfiguratorSharp.NetCore;
+
+public interface IConfigurableDevice {
+    public bool IsSameDevice(PlatformIoPort port);
+    public bool IsSameDevice(string serialOrPath);
 
     public bool MigrationSupported { get; }
     public DeviceConfiguration? Configuration {get;}
 
     public void Bootloader();
-    public void BootloaderUSB();
+    public void BootloaderUsb();
 
-    public bool DeviceAdded(ConfigurableDevice device);
+    public bool DeviceAdded(IConfigurableDevice device);
 
-    public Task<string?> getUploadPort();
+    public Task<string?> GetUploadPort();
 }

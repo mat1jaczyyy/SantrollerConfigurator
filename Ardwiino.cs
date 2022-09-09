@@ -1,26 +1,28 @@
-
-using Avalonia.Media;
-using LibUsbDotNet;
-using GuitarConfiguratorSharp.Configuration;
-using GuitarConfiguratorSharp.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Utils;
+using LibUsbDotNet;
 
-public class Ardwiino : ConfigurableUSBDevice
+namespace GuitarConfiguratorSharp.NetCore;
+
+public class Ardwiino : ConfigurableUsbDevice
 {
 
-    private UInt32 cpuFreq;
-    private const int XBOX_BTN_COUNT = 16;
-    private const int XBOX_AXIS_COUNT = 6;
-    private const int XBOX_TRIGGER_COUNT = 2;
+    private readonly UInt32 _cpuFreq;
+    private const int XboxBtnCount = 16;
+    private const int XboxAxisCount = 6;
+    private const int XboxTriggerCount = 2;
 
-    private const ControllerAxis XBOX_WHAMMY = ControllerAxis.XBOX_R_X;
-    private const ControllerAxis XBOX_TILT = ControllerAxis.XBOX_R_Y;
-    private static readonly Version OLD_CPU_INFO_VERSION = new Version(8, 8, 4);
+    private const ControllerAxis XboxWhammy = ControllerAxis.XBOX_R_X;
+    private const ControllerAxis XboxTilt = ControllerAxis.XBOX_R_Y;
+    private static readonly Version OldCpuInfoVersion = new Version(8, 8, 4);
 
-    private static readonly Version USB_CONTROL_REQUEST_API = new Version(4, 3, 7);
+    private static readonly Version UsbControlRequestApi = new Version(4, 3, 7);
 
     public const ushort SERIAL_ARDWIINO_REVISION = 0x3122;
     // public static readonly FilterDeviceDefinition ArdwiinoDeviceFilter = new(label: "Ardwiino", classGuid: Santroller.ControllerGUID);
@@ -28,62 +30,62 @@ public class Ardwiino : ConfigurableUSBDevice
     // On 6.0.0 and above READ_CONFIG is 59
     // On 7.0.3 and above READ_CONFIG is 60
     // And with 8.0.7 and above READ_CONFIG is 62
-    private const ushort CPU_INFO_COMMAND = 50;
-    private const ushort JUMP_BOOTLOADER_COMMAND = 49;
-    private const ushort JUMP_BOOTLOADER_COMMAND_UNO = 50;
-    private const ushort READ_CONFIG_COMMAND = 62;
-    private const ushort READ_CONFIG_PRE_8_0_7_COMMAND = 60;
-    private const ushort READ_CONFIG_PRE_7_0_3_COMMAND = 59;
-    private const byte REQUEST_HID_GET_REPORT = 0x01;
-    private const byte REQUEST_HID_SET_REPORT = 0x09;
+    private const ushort CpuInfoCommand = 50;
+    private const ushort JumpBootloaderCommand = 49;
+    private const ushort JumpBootloaderCommandUno = 50;
+    private const ushort ReadConfigCommand = 62;
+    private const ushort ReadConfigPre807Command = 60;
+    private const ushort ReadConfigPre703Command = 59;
+    private const byte RequestHidGetReport = 0x01;
+    private const byte RequestHidSetReport = 0x09;
 
     public override bool MigrationSupported { get; }
-    private DeviceConfiguration _config;
+    private readonly DeviceConfiguration _config;
 
     public override DeviceConfiguration Configuration => this._config;
 
-    public const byte NOT_USED = 0xFF;
+    private const byte NOT_USED = 0xFF;
 
-    private bool failed = false;
+    private readonly bool _failed = false;
 
-    public Ardwiino(PlatformIO pio, string path, UsbDevice device, string product, string serial, ushort version_number) : base(device, path, product, serial, version_number)
+    public Ardwiino(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort versionNumber) : base(device, path, product, serial, versionNumber)
     {
         try
         {
             if (this.version < new Version(6, 0, 0))
             {
-                var buffer = this.ReadData(6, REQUEST_HID_GET_REPORT);
-                this.cpuFreq = uint.Parse(StructTools.RawDeserializeStr(buffer));
-                buffer = this.ReadData(7, REQUEST_HID_GET_REPORT);
+                var buffer = this.ReadData(6, RequestHidGetReport);
+                this._cpuFreq = uint.Parse(StructTools.RawDeserializeStr(buffer));
+                buffer = this.ReadData(7, RequestHidGetReport);
                 string board = StructTools.RawDeserializeStr(buffer);
-                this.Board = Board.findBoard(board, this.cpuFreq);
+                this.Board = Board.FindBoard(board, this._cpuFreq);
                 this.MigrationSupported = false;
-                _config = new DeviceConfiguration(Board.findMicrocontroller(this.Board));
+                _config = new DeviceConfiguration(Board.FindMicrocontroller(this.Board));
                 return;
             }
             this.MigrationSupported = true;
             // Version 6.0.0 started at config version 6, so we don't have to support anything earlier than that
-            byte[] data = this.ReadData(CPU_INFO_COMMAND, 1);
-            if (this.version < OLD_CPU_INFO_VERSION)
+            byte[] data = this.ReadData(CpuInfoCommand, 1);
+            if (this.version < OldCpuInfoVersion)
             {
                 CpuInfoOld info = StructTools.RawDeserialize<CpuInfoOld>(data, 0);
-                this.cpuFreq = info.cpu_freq;
-                this.Board = Board.findBoard(info.board, this.cpuFreq);
+                this._cpuFreq = info.cpu_freq;
+                this.Board = Board.FindBoard(info.board, this._cpuFreq);
             }
             else
             {
                 CpuInfo info = StructTools.RawDeserialize<CpuInfo>(data, 0);
-                this.cpuFreq = info.cpu_freq;
-                this.Board = Board.findBoard(info.board, this.cpuFreq);
+                this._cpuFreq = info.cpu_freq;
+                this.Board = Board.FindBoard(info.board, this._cpuFreq);
             }
-            var read_config = READ_CONFIG_COMMAND;
+            var readConfig = ReadConfigCommand;
             if (this.version < new Version(8, 0, 7))
             {
-                read_config = READ_CONFIG_PRE_8_0_7_COMMAND;
+                readConfig = ReadConfigPre807Command;
             }
             else if (this.version < new Version(7, 0, 3))
             {
-                read_config = READ_CONFIG_PRE_7_0_3_COMMAND;
+                readConfig = ReadConfigPre703Command;
             }
             data = new byte[Marshal.SizeOf(typeof(ArdwiinoConfiguration))];
             int sizeOfAll = Marshal.SizeOf(typeof(FullArdwiinoConfiguration));
@@ -95,7 +97,7 @@ public class Ardwiino : ConfigurableUSBDevice
             ArdwiinoConfiguration config = new ArdwiinoConfiguration();
             config.neck = new NeckConfig();
             config.axisScale = new AxisScaleConfig();
-            config.axisScale.axis = new AxisScale[XBOX_AXIS_COUNT];
+            config.axisScale.axis = new AxisScale[XboxAxisCount];
             foreach (int axis in Enum.GetValues(typeof(ControllerAxis)))
             {
                 config.axisScale.axis[axis].multiplier = 1;
@@ -109,7 +111,7 @@ public class Ardwiino : ConfigurableUSBDevice
             config.rf.rfInEnabled = 0;
             while (offset < maxSize)
             {
-                var data2 = ReadData((ushort)(read_config + offsetId), REQUEST_HID_GET_REPORT);
+                var data2 = ReadData((ushort)(readConfig + offsetId), RequestHidGetReport);
                 Array.Copy(data2, 0, data, offset, data2.Length);
                 offset += data2.Length;
                 offsetId++;
@@ -179,55 +181,55 @@ public class Ardwiino : ConfigurableUSBDevice
             }
             else if (version > 13)
             {
-                var config_old = StructTools.RawDeserialize<Configuration14>(data, 0);
-                config.axisScale = config_old.axisScale;
-                config.pinsSP = config_old.pinsSP;
-                config.rf = config_old.rf;
-                config.debounce = config_old.debounce;
+                var configOld = StructTools.RawDeserialize<Configuration14>(data, 0);
+                config.axisScale = configOld.axisScale;
+                config.pinsSP = configOld.pinsSP;
+                config.rf = configOld.rf;
+                config.debounce = configOld.debounce;
             }
             else if (version > 12)
             {
-                var config_old = StructTools.RawDeserialize<Configuration13>(data, 0);
-                config.axisScale = config_old.axisScale;
-                config.pinsSP = config_old.pinsSP;
-                config.rf = config_old.rf;
-                config.debounce.buttons = config_old.debounce.buttons;
-                config.debounce.strum = config_old.debounce.strum;
+                var configOld = StructTools.RawDeserialize<Configuration13>(data, 0);
+                config.axisScale = configOld.axisScale;
+                config.pinsSP = configOld.pinsSP;
+                config.rf = configOld.rf;
+                config.debounce.buttons = configOld.debounce.buttons;
+                config.debounce.strum = configOld.debounce.strum;
                 config.debounce.combinedStrum = 0;
             }
             else if (version > 11)
             {
-                var config_old = StructTools.RawDeserialize<Configuration12>(data, 0);
+                var configOld = StructTools.RawDeserialize<Configuration12>(data, 0);
                 foreach (int axis in Enum.GetValues(typeof(ControllerAxis)))
                 {
-                    config.axisScale.axis[axis].multiplier = config_old.axisScale.axis[axis].multiplier;
-                    config.axisScale.axis[axis].offset = config_old.axisScale.axis[axis].offset;
+                    config.axisScale.axis[axis].multiplier = configOld.axisScale.axis[axis].multiplier;
+                    config.axisScale.axis[axis].offset = configOld.axisScale.axis[axis].offset;
                     config.axisScale.axis[axis].deadzone = Int16.MaxValue;
                 }
-                config.pinsSP = config_old.pinsSP;
-                config.rf = config_old.rf;
+                config.pinsSP = configOld.pinsSP;
+                config.rf = configOld.rf;
                 config.debounce.buttons = 5;
                 config.debounce.strum = 20;
                 config.debounce.combinedStrum = 0;
             }
             else if (version > 10)
             {
-                var config_old = StructTools.RawDeserialize<Configuration11>(data, 0);
-                config.axisScale.axis[(int)ControllerAxis.XBOX_R_X].multiplier = config_old.whammy.multiplier;
-                config.axisScale.axis[(int)ControllerAxis.XBOX_R_X].offset = (short)config_old.whammy.offset;
-                config.pinsSP = config_old.pinsSP;
-                config.rf = config_old.rf;
+                var configOld = StructTools.RawDeserialize<Configuration11>(data, 0);
+                config.axisScale.axis[(int)ControllerAxis.XBOX_R_X].multiplier = configOld.whammy.multiplier;
+                config.axisScale.axis[(int)ControllerAxis.XBOX_R_X].offset = (short)configOld.whammy.offset;
+                config.pinsSP = configOld.pinsSP;
+                config.rf = configOld.rf;
             }
             else if (version > 8)
             {
-                var config_old = StructTools.RawDeserialize<Configuration10>(data, 0);
-                config.pinsSP = config_old.pinsSP;
-                config.rf = config_old.rf;
+                var configOld = StructTools.RawDeserialize<Configuration10>(data, 0);
+                config.pinsSP = configOld.pinsSP;
+                config.rf = configOld.rf;
             }
-            Microcontroller controller = Board.findMicrocontroller(Board);
+            Microcontroller controller = Board.FindMicrocontroller(Board);
             List<Binding> bindings = new List<Binding>();
             Dictionary<int, Color> colors = new Dictionary<int, Color>();
-            foreach (var led in config!.all!.leds!)
+            foreach (var led in config.all!.leds!)
             {
                 if (led.pin != 0)
                 {
@@ -247,11 +249,23 @@ public class Ardwiino : ConfigurableUSBDevice
             }
             if ((config.all.main.subType >= (int)SubType.KEYBOARD_GAMEPAD && config.all.main.subType <= (int)SubType.KEYBOARD_ROCK_BAND_DRUMS) || config.all.main.subType == (int)SubType.MOUSE)
             {
-                emulationType = EmulationType.Keyboard_Mouse;
+                emulationType = EmulationType.KeyboardMouse;
             }
             if (config.all.main.subType >= (int)SubType.MIDI_GAMEPAD)
             {
                 emulationType = EmulationType.Midi;
+            }
+            bool xinputOnWindows = false;
+            switch ((SubType)config.all.main.subType)
+            {
+                case SubType.XINPUT_GAMEPAD:
+                case SubType.XINPUT_LIVE_GUITAR:
+                case SubType.XINPUT_ROCK_BAND_DRUMS:
+                case SubType.XINPUT_GUITAR_HERO_DRUMS:
+                case SubType.XINPUT_ROCK_BAND_GUITAR:
+                case SubType.XINPUT_GUITAR_HERO_GUITAR:
+                    xinputOnWindows = true;
+                    break;
             }
             switch ((SubType)config.all.main.subType)
             {
@@ -313,27 +327,27 @@ public class Ardwiino : ConfigurableUSBDevice
                     {
                         continue;
                     }
-                    var gen_axis = AXIS_TO_STANDARD[(ControllerAxis)axis];
+                    var genAxis = _axisToStandard[(ControllerAxis)axis];
                     var scale = config.axisScale.axis[axis];
                     var isTrigger = axis == (int)ControllerAxis.XBOX_LT || axis == (int)ControllerAxis.XBOX_RT;
 
                     Color on = Color.FromRgb(0, 0, 0);
-                    if (colors.ContainsKey(axis + XBOX_BTN_COUNT))
+                    if (colors.ContainsKey(axis + XboxBtnCount))
                     {
-                        on = colors[axis + XBOX_BTN_COUNT];
+                        on = colors[axis + XboxBtnCount];
                     }
                     Color off = Color.FromRgb(0, 0, 0);
-                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxis)axis == XBOX_WHAMMY)
+                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxis)axis == XboxWhammy)
                     {
                         isTrigger = true;
                     }
-                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxis)axis == XBOX_TILT)
+                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxis)axis == XboxTilt)
                     {
                         bindings.Add(new DigitalToAnalog(controller, 32767, new DirectDigital(controller, DevicePinMode.VCC, pin.pin, config.debounce.buttons, new GenericControllerButton(StandardButtonType.A), on, off), AnalogToDigitalType.Trigger, new GenericAxis(StandardAxisType.RightStickY), on, off, 1, 1, 1, true));
                     }
                     else
                     {
-                        bindings.Add(new DirectAnalog(controller, pin.pin, new GenericAxis(gen_axis), on, off, (scale.multiplier / 1024.0f) * (isTrigger ? 2 : 1) * (pin.inverted > 0 ? -1 : 1), ((isTrigger ? 0 : 32670) + scale.offset) >> 8, ((isTrigger ? 32768 : 0) + scale.deadzone) >> 8, isTrigger));
+                        bindings.Add(new DirectAnalog(controller, pin.pin, new GenericAxis(genAxis), on, off, (scale.multiplier / 1024.0f) * (isTrigger ? 2 : 1) * (pin.inverted > 0 ? -1 : 1), ((isTrigger ? 0 : 32670) + scale.offset) >> 8, ((isTrigger ? 32768 : 0) + scale.deadzone) >> 8, isTrigger));
                     }
                 }
                 foreach (int button in Enum.GetValues(typeof(ControllerButtons)))
@@ -349,18 +363,18 @@ public class Ardwiino : ConfigurableUSBDevice
                         on = colors[button];
                     }
                     Color off = Color.FromRgb(0, 0, 0);
-                    var gen_button = BUTTON_TO_STANDARD[(ControllerButtons)button];
+                    var genButton = _buttonToStandard[(ControllerButtons)button];
                     var pinMode = DevicePinMode.VCC;
-                    if (config.all.main.fretLEDMode == 1 && deviceType == DeviceControllerType.Guitar && FRETS.Contains(gen_button))
+                    if (config.all.main.fretLEDMode == 1 && deviceType == DeviceControllerType.Guitar && _frets.Contains(genButton))
                     {
                         pinMode = DevicePinMode.Floating;
                     }
                     var debounce = config.debounce.buttons;
-                    if (deviceType == DeviceControllerType.Guitar && (gen_button == StandardButtonType.Up || gen_button == StandardButtonType.Down))
+                    if (deviceType == DeviceControllerType.Guitar && (genButton == StandardButtonType.Up || genButton == StandardButtonType.Down))
                     {
                         debounce = config.debounce.strum;
                     }
-                    OutputButton output = HAT.Contains(gen_button) ? new GenericControllerHat(gen_button) : new GenericControllerButton(gen_button);
+                    IOutputButton output = new GenericControllerButton(genButton);
                     bindings.Add(new DirectDigital(controller, pinMode, pin, debounce, output, on, off));
                 }
             }
@@ -382,46 +396,46 @@ public class Ardwiino : ConfigurableUSBDevice
                 {
                     var onlx = lx.LedOn;
                     var offlx = lx.LedOff;
-                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Left), onlx, offlx));
-                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Right), onlx, offlx));
+                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Left), onlx, offlx));
+                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Right), onlx, offlx));
 
                 }
                 if (ly != null)
                 {
                     var only = ly.LedOn;
                     var offly = ly.LedOff;
-                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Down), only, offly));
-                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerHat(StandardButtonType.Up), only, offly));
+                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Down), only, offly));
+                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Up), only, offly));
                 }
             }
-            _config = new DeviceConfiguration(controller, bindings, ledType, deviceType, emulationType, rhythmType, tiltType == TiltType.Digital_Mercury);
-            _config.generate(pio);
+            _config = new DeviceConfiguration(controller, bindings, ledType, deviceType, emulationType, rhythmType, tiltType == TiltType.DigitalMercury, xinputOnWindows);
+            _config.Generate(pio);
         }
         catch (ArgumentException)
         {
-            failed = true;
+            _failed = true;
             MigrationSupported = false;
-            _config = new DeviceConfiguration(new Pico(Board.Generic));
+            _config = new DeviceConfiguration(new Pico(Board.Rp2040Boards[0]));
         }
     }
 
     public override String ToString()
     {
-        if (failed)
+        if (_failed)
         {
             return "An ardwiino device had issues reading, please unplug and replug it.";
         }
-        return $"Ardwiino - {Board.name} - {version}";
+        return $"Ardwiino - {Board.Name} - {version}";
     }
 
     public override void Bootloader()
     {
-        WriteData(JUMP_BOOTLOADER_COMMAND, REQUEST_HID_SET_REPORT, new byte[0]);
+        WriteData(JumpBootloaderCommand, RequestHidSetReport, Array.Empty<byte>());
     }
 
-    public override void BootloaderUSB()
+    public override void BootloaderUsb()
     {
-        WriteData(JUMP_BOOTLOADER_COMMAND_UNO, REQUEST_HID_SET_REPORT, new byte[0]);
+        WriteData(JumpBootloaderCommandUno, RequestHidSetReport, Array.Empty<byte>());
     }
 
     enum GyroOrientation
@@ -465,7 +479,7 @@ public class Ardwiino : ConfigurableUSBDevice
         MIDI_ROCK_BAND_DRUMS
     };
 
-    enum ControllerButtons : int
+    enum ControllerButtons
     {
         XBOX_DPAD_UP,
         XBOX_DPAD_DOWN,
@@ -486,7 +500,7 @@ public class Ardwiino : ConfigurableUSBDevice
         XBOX_Y,
     };
 
-    enum ControllerAxis : int
+    enum ControllerAxis
     {
         XBOX_LT,
         XBOX_RT,
@@ -496,7 +510,7 @@ public class Ardwiino : ConfigurableUSBDevice
         XBOX_R_Y
     };
 
-    private static Dictionary<ControllerAxis, StandardAxisType> AXIS_TO_STANDARD = new Dictionary<ControllerAxis, StandardAxisType>() {
+    private static readonly Dictionary<ControllerAxis, StandardAxisType> _axisToStandard = new Dictionary<ControllerAxis, StandardAxisType>() {
         {ControllerAxis.XBOX_L_X,StandardAxisType.LeftStickX},
         {ControllerAxis.XBOX_L_Y,StandardAxisType.LeftStickY},
         {ControllerAxis.XBOX_R_X,StandardAxisType.RightStickX},
@@ -505,29 +519,27 @@ public class Ardwiino : ConfigurableUSBDevice
         {ControllerAxis.XBOX_RT,StandardAxisType.RightTrigger}
     };
 
-    private static Dictionary<ControllerButtons, StandardButtonType> BUTTON_TO_STANDARD = new Dictionary<ControllerButtons, StandardButtonType>(){
-            {ControllerButtons.XBOX_DPAD_UP,StandardButtonType.Up},
-            {ControllerButtons.XBOX_DPAD_DOWN,StandardButtonType.Down},
-            {ControllerButtons.XBOX_DPAD_LEFT,StandardButtonType.Left},
-            {ControllerButtons.XBOX_DPAD_RIGHT,StandardButtonType.Right},
-            {ControllerButtons.XBOX_START,StandardButtonType.Start},
-            {ControllerButtons.XBOX_BACK,StandardButtonType.Select},
-            {ControllerButtons.XBOX_LEFT_STICK,StandardButtonType.LeftStick},
-            {ControllerButtons.XBOX_RIGHT_STICK,StandardButtonType.RightStick},
-            {ControllerButtons.XBOX_LB,StandardButtonType.LB},
-            {ControllerButtons.XBOX_RB,StandardButtonType.RB},
-            {ControllerButtons.XBOX_HOME,StandardButtonType.Home},
-            {ControllerButtons.XBOX_UNUSED,StandardButtonType.Capture},
-            {ControllerButtons.XBOX_A,StandardButtonType.A},
-            {ControllerButtons.XBOX_B,StandardButtonType.B},
-            {ControllerButtons.XBOX_X,StandardButtonType.X},
-            {ControllerButtons.XBOX_Y,StandardButtonType.Y}
+    private static readonly Dictionary<ControllerButtons, StandardButtonType> _buttonToStandard = new Dictionary<ControllerButtons, StandardButtonType>(){
+        {ControllerButtons.XBOX_DPAD_UP,StandardButtonType.Up},
+        {ControllerButtons.XBOX_DPAD_DOWN,StandardButtonType.Down},
+        {ControllerButtons.XBOX_DPAD_LEFT,StandardButtonType.Left},
+        {ControllerButtons.XBOX_DPAD_RIGHT,StandardButtonType.Right},
+        {ControllerButtons.XBOX_START,StandardButtonType.Start},
+        {ControllerButtons.XBOX_BACK,StandardButtonType.Select},
+        {ControllerButtons.XBOX_LEFT_STICK,StandardButtonType.LeftStick},
+        {ControllerButtons.XBOX_RIGHT_STICK,StandardButtonType.RightStick},
+        {ControllerButtons.XBOX_LB,StandardButtonType.LB},
+        {ControllerButtons.XBOX_RB,StandardButtonType.RB},
+        {ControllerButtons.XBOX_HOME,StandardButtonType.Home},
+        {ControllerButtons.XBOX_UNUSED,StandardButtonType.Capture},
+        {ControllerButtons.XBOX_A,StandardButtonType.A},
+        {ControllerButtons.XBOX_B,StandardButtonType.B},
+        {ControllerButtons.XBOX_X,StandardButtonType.X},
+        {ControllerButtons.XBOX_Y,StandardButtonType.Y}
     };
 
-    private static IEnumerable<StandardButtonType> HAT = new List<StandardButtonType>() { StandardButtonType.Left, StandardButtonType.Right, StandardButtonType.Up, StandardButtonType.Down };
-
-    List<StandardButtonType> FRETS = new List<StandardButtonType>() { StandardButtonType.A, StandardButtonType.B, StandardButtonType.X, StandardButtonType.Y, StandardButtonType.LB, StandardButtonType.RB };
-    enum GyroOrientationOld : int
+    readonly List<StandardButtonType> _frets = new List<StandardButtonType>() { StandardButtonType.A, StandardButtonType.B, StandardButtonType.X, StandardButtonType.Y, StandardButtonType.LB, StandardButtonType.RB };
+    enum GyroOrientationOld
     {
         POSITIVE_Z,
         NEGATIVE_Z,
@@ -538,176 +550,176 @@ public class Ardwiino : ConfigurableUSBDevice
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct CpuInfoOld
+    private struct CpuInfoOld
     {
-        public UInt32 cpu_freq;
-        public byte multi;
+        public readonly UInt32 cpu_freq;
+        public readonly byte multi;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 15)]
-        public string board;
+        public readonly string board;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct CpuInfo
+    private struct CpuInfo
     {
-        public UInt32 cpu_freq;
-        public byte multi;
+        public readonly UInt32 cpu_freq;
+        public readonly byte multi;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 30)]
-        public string board;
+        public readonly string board;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Led
+    private struct Led
     {
-        public byte pin;
-        public byte red;
-        public byte green;
-        public byte blue;
+        public readonly byte pin;
+        public readonly byte red;
+        public readonly byte green;
+        public readonly byte blue;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Config
+    private struct Config
     {
-        public byte inputType;
-        public byte subType;
-        public byte tiltType;
-        public byte pollRate;
-        public byte fretLEDMode;
-        public byte mapLeftJoystickToDPad;
-        public byte mapStartSelectToHome;
-        public byte mapNunchukAccelToRightJoy;
-        public UInt32 signature;
-        public UInt32 version;
+        public readonly byte inputType;
+        public readonly byte subType;
+        public readonly byte tiltType;
+        public readonly byte pollRate;
+        public readonly byte fretLEDMode;
+        public readonly byte mapLeftJoystickToDPad;
+        public readonly byte mapStartSelectToHome;
+        public readonly byte mapNunchukAccelToRightJoy;
+        public readonly UInt32 signature;
+        public readonly UInt32 version;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct AnalogPin
+    private struct AnalogPin
     {
-        public byte pin;
+        public readonly byte pin;
         public byte inverted;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Pins
+    private struct Pins
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_BTN_COUNT)]
-        public byte[] pins;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxBtnCount)]
+        public readonly byte[] pins;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_AXIS_COUNT)]
-        public AnalogPin[] axis;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount)]
+        public readonly AnalogPin[] axis;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct AnalogKey
+    private struct AnalogKey
     {
-        public byte neg;
-        public byte pos;
+        public readonly byte neg;
+        public readonly byte pos;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Keys
+    private struct Keys
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_BTN_COUNT + XBOX_TRIGGER_COUNT)]
-        public byte[] pins;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxBtnCount + XboxTriggerCount)]
+        public readonly byte[] pins;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_AXIS_COUNT - XBOX_TRIGGER_COUNT)]
-        public AnalogKey[] axis;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount - XboxTriggerCount)]
+        public readonly AnalogKey[] axis;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct MainConfig
+    private struct MainConfig
     {
-        public byte inputType;
-        public byte subType;
-        public byte tiltType;
-        public byte pollRate;
-        public byte fretLEDMode;
-        public byte mapLeftJoystickToDPad;
-        public byte mapStartSelectToHome;
-        public byte mapNunchukAccelToRightJoy;
-        public UInt32 signature;
-        public UInt32 version;
+        public readonly byte inputType;
+        public readonly byte subType;
+        public readonly byte tiltType;
+        public readonly byte pollRate;
+        public readonly byte fretLEDMode;
+        public readonly byte mapLeftJoystickToDPad;
+        public readonly byte mapStartSelectToHome;
+        public readonly byte mapNunchukAccelToRightJoy;
+        public readonly UInt32 signature;
+        public readonly UInt32 version;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct AxisConfig
+    private struct AxisConfig
     {
-        public byte triggerThreshold;
-        public byte joyThreshold;
-        public byte drumThreshold;
+        public readonly byte triggerThreshold;
+        public readonly byte joyThreshold;
+        public readonly byte drumThreshold;
 
         public byte mpu6050Orientation;
-        public Int16 tiltSensitivity;
+        public readonly Int16 tiltSensitivity;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct MidiConfig
+    private struct MidiConfig
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_AXIS_COUNT + XBOX_BTN_COUNT)]
-        public byte[] type;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_AXIS_COUNT + XBOX_BTN_COUNT)]
-        public byte[] note;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_AXIS_COUNT + XBOX_BTN_COUNT)]
-        public byte[] channel;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount + XboxBtnCount)]
+        public readonly byte[] type;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount + XboxBtnCount)]
+        public readonly byte[] note;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount + XboxBtnCount)]
+        public readonly byte[] channel;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct RFConfig
+    private struct RfConfig
     {
         public byte rfInEnabled;
         public UInt32 id;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct AxisScale
+    private struct AxisScale
     {
         public Int16 multiplier;
         public Int16 offset;
         public Int16 deadzone;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct AxisScale12
+    private struct AxisScale12
     {
-        public Int16 multiplier;
-        public Int16 offset;
+        public readonly Int16 multiplier;
+        public readonly Int16 offset;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Version11AxisWhammyConfig
+    private struct Version11AxisWhammyConfig
     {
-        public byte multiplier;
-        public UInt16 offset;
+        public readonly byte multiplier;
+        public readonly UInt16 offset;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct AxisScaleConfig
+    private struct AxisScaleConfig
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_AXIS_COUNT)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount)]
         public AxisScale[] axis;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct AxisScaleConfig12
+    private struct AxisScaleConfig12
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_AXIS_COUNT)]
-        public AxisScale12[] axis;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount)]
+        public readonly AxisScale12[] axis;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct DebounceConfig13
+    private struct DebounceConfig13
     {
-        public byte buttons;
-        public byte strum;
+        public readonly byte buttons;
+        public readonly byte strum;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct DebounceConfig
+    private struct DebounceConfig
     {
         public byte buttons;
         public byte strum;
         public byte combinedStrum;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct ArdwiinoConfiguration
+    private struct ArdwiinoConfiguration
     {
         public FullArdwiinoConfiguration all;
-        public RFConfig rf;
+        public RfConfig rf;
         public byte pinsSP;
         public AxisScaleConfig axisScale;
         public DebounceConfig debounce;
@@ -715,75 +727,75 @@ public class Ardwiino : ConfigurableUSBDevice
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Configuration14
+    private struct Configuration14
     {
-        public FullArdwiinoConfiguration all;
-        public RFConfig rf;
-        public byte pinsSP;
-        public AxisScaleConfig axisScale;
-        public DebounceConfig debounce;
+        public readonly FullArdwiinoConfiguration all;
+        public readonly RfConfig rf;
+        public readonly byte pinsSP;
+        public readonly AxisScaleConfig axisScale;
+        public readonly DebounceConfig debounce;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Configuration13
+    private struct Configuration13
     {
-        public FullArdwiinoConfiguration all;
-        public RFConfig rf;
-        public byte pinsSP;
-        public AxisScaleConfig axisScale;
-        public DebounceConfig13 debounce;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Configuration12
-    {
-        public FullArdwiinoConfiguration all;
-        public RFConfig rf;
-        public byte pinsSP;
-        public AxisScaleConfig12 axisScale;
+        public readonly FullArdwiinoConfiguration all;
+        public readonly RfConfig rf;
+        public readonly byte pinsSP;
+        public readonly AxisScaleConfig axisScale;
+        public readonly DebounceConfig13 debounce;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Configuration11
+    private struct Configuration12
     {
-        public FullArdwiinoConfiguration all;
-        public RFConfig rf;
-        public byte pinsSP;
-
-        public Version11AxisWhammyConfig whammy;
+        public readonly FullArdwiinoConfiguration all;
+        public readonly RfConfig rf;
+        public readonly byte pinsSP;
+        public readonly AxisScaleConfig12 axisScale;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Configuration10
+    private struct Configuration11
+    {
+        public readonly FullArdwiinoConfiguration all;
+        public readonly RfConfig rf;
+        public readonly byte pinsSP;
+
+        public readonly Version11AxisWhammyConfig whammy;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    private struct Configuration10
     {
 
-        public FullArdwiinoConfiguration all;
-        public RFConfig rf;
-        public byte pinsSP;
+        public readonly FullArdwiinoConfiguration all;
+        public readonly RfConfig rf;
+        public readonly byte pinsSP;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Configuration8
+    private struct Configuration8
     {
-        public FullArdwiinoConfiguration all;
-        public RFConfig rf;
+        public readonly FullArdwiinoConfiguration all;
+        public readonly RfConfig rf;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct NeckConfig
+    private struct NeckConfig
     {
-        bool wtNeck;
-        bool gh5Neck;
-        bool gh5NeckBar;
-        bool wiiNeck;
-        bool ps2Neck;
+        readonly bool wtNeck;
+        readonly bool gh5Neck;
+        readonly bool gh5NeckBar;
+        readonly bool wiiNeck;
+        readonly bool ps2Neck;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct FullArdwiinoConfiguration
+    private struct FullArdwiinoConfiguration
     {
-        public MainConfig main;
-        public Pins pins;
+        public readonly MainConfig main;
+        public readonly Pins pins;
         public AxisConfig axis;
-        public Keys keys;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XBOX_AXIS_COUNT + XBOX_BTN_COUNT)]
-        public Led[] leds;
-        public MidiConfig midi;
+        public readonly Keys keys;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount + XboxBtnCount)]
+        public readonly Led[] leds;
+        public readonly MidiConfig midi;
     }
 }

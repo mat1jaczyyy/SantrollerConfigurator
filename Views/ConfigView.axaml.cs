@@ -1,16 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using System.Linq;
-using Avalonia.LogicalTree;
 using Avalonia.ReactiveUI;
-using GuitarConfiguratorSharp.ViewModels;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
-namespace GuitarConfiguratorSharp.Views
+
+namespace GuitarConfiguratorSharp.NetCore.Views
 {
     public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
     {        

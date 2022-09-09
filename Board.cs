@@ -1,33 +1,34 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.Configuration;
-namespace GuitarConfiguratorSharp.Configuration
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+
+namespace GuitarConfiguratorSharp.NetCore
 {
     public struct Board
     {
-        public string ardwiinoName { get; }
-        public string name { get; }
-        public string environment { get; }
+        public string ArdwiinoName { get; }
+        public string Name { get; }
+        public string Environment { get; }
 
-        public uint cpuFreq { get; }
-        public List<uint> productIDs { get; }
+        public uint CpuFreq { get; }
+        public List<uint> ProductIDs { get; }
 
-        public bool hasUSBMCU { get; }
+        public bool HasUsbmcu { get; }
 
-        public Board(string ardwiinoName, string name, uint cpuFreq, string environment, List<uint> productIDs, bool hasUSBMCU)
+        public Board(string ardwiinoName, string name, uint cpuFreq, string environment, List<uint> productIDs, bool hasUsbmcu)
         {
-            this.ardwiinoName = ardwiinoName;
-            this.name = name;
-            this.environment = environment;
-            this.productIDs = productIDs;
-            this.cpuFreq = cpuFreq;
-            this.hasUSBMCU = hasUSBMCU;
+            this.ArdwiinoName = ardwiinoName;
+            this.Name = name;
+            this.Environment = environment;
+            this.ProductIDs = productIDs;
+            this.CpuFreq = cpuFreq;
+            this.HasUsbmcu = hasUsbmcu;
         }
 
         public static readonly Board Generic = new Board("generic", "Generic Serial Device", 0, "generic", new List<uint> { }, false);
-        public static readonly Board[] ATMEGA32U4Boards = {
+        public static readonly Board[] Atmega32U4Boards = {
         new Board("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "a-micro", new List<uint>{0x0037, 0x0237}, false),
         new Board("a-micro", "Arduino Micro", 16000000, "a-micro", new List<uint>{0x8037, 0x8237}, false),
         new Board("micro", "Arduino Pro Micro 3.3V", 8000000, "sparkfun_promicro_8", new List<uint>{0x9204}, false),
@@ -38,7 +39,7 @@ namespace GuitarConfiguratorSharp.Configuration
         new Board("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "micro", new List<uint>{0x9205}, false),
     };
 
-        public static readonly Board[] RP2040Boards = {
+        public static readonly Board[] Rp2040Boards = {
         new Board("pico", "Raspberry PI Pico", 0, "pico", new List<uint>{}, false),
         new Board("adafruit_feather_rp2040", "Adafruit Feather RP2040", 0, "adafruit_feather_rp2040", new List<uint>{}, false),
         new Board("adafruit_itsybitsy_rp2040", "Adafruit ItsyBitsy RP2040", 0, "adafruit_itsybitsy_rp2040", new List<uint>{}, false),
@@ -88,29 +89,29 @@ namespace GuitarConfiguratorSharp.Configuration
         public static readonly Board[] Boards = UnoBoards
             .Concat(MiniBoards)
             .Concat(MegaBoards)
-            .Concat(ATMEGA32U4Boards)
-            .Concat(RP2040Boards)
+            .Concat(Atmega32U4Boards)
+            .Concat(Rp2040Boards)
             .Concat(new Board[] { UsbUpload })
             .ToArray();
 
-        public static Board findBoard(string ardwiinoName, uint cpuFreq)
+        public static Board FindBoard(string ardwiinoName, uint cpuFreq)
         {
             foreach (var board in Boards)
             {
-                if (board.ardwiinoName == ardwiinoName && (cpuFreq == 0 || board.cpuFreq == 0 || board.cpuFreq == cpuFreq))
+                if (board.ArdwiinoName == ardwiinoName && (cpuFreq == 0 || board.CpuFreq == 0 || board.CpuFreq == cpuFreq))
                 {
                     return board;
                 }
             }
             return Generic;
         }
-        public static Microcontroller findMicrocontroller(Board board)
+        public static Microcontroller FindMicrocontroller(Board board)
         {
-            if (Board.ATMEGA32U4Boards.Contains(board))
+            if (Board.Atmega32U4Boards.Contains(board))
             {
                 return new Micro(board);
             }
-            else if (Board.UnoBoards.Contains(board) || board.ardwiinoName == UsbUpload.ardwiinoName)
+            else if (Board.UnoBoards.Contains(board) || board.ArdwiinoName == UsbUpload.ArdwiinoName)
             {
                 return new Uno(board);
             }
@@ -118,7 +119,7 @@ namespace GuitarConfiguratorSharp.Configuration
             {
                 return new Mega(board);
             }
-            else if (Board.RP2040Boards.Contains(board))
+            else if (Board.Rp2040Boards.Contains(board))
             {
                 return new Pico(board);
             }

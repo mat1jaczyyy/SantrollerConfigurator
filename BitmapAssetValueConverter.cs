@@ -6,7 +6,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
-namespace GuitarConfiguratorSharp;
+namespace GuitarConfiguratorSharp.NetCore;
 
 /// <summary>
 /// <para>
@@ -19,7 +19,7 @@ namespace GuitarConfiguratorSharp;
 /// </summary>
 public class BitmapAssetValueConverter : IValueConverter
 {
-    public static BitmapAssetValueConverter Instance = new BitmapAssetValueConverter();
+    public static BitmapAssetValueConverter instance = new BitmapAssetValueConverter();
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

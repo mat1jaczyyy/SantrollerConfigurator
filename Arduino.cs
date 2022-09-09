@@ -1,33 +1,33 @@
-
-using LibUsbDotNet;
 using System;
-using GuitarConfiguratorSharp.Utils;
-using GuitarConfiguratorSharp.Configuration;
 using System.Threading.Tasks;
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Utils;
 
-public class Arduino : ConfigurableDevice
+namespace GuitarConfiguratorSharp.NetCore;
+
+public class Arduino : IConfigurableDevice
 {
     // public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
-    private PlatformIOPort port;
+    private readonly PlatformIoPort _port;
 
     public Board Board { get; }
 
     public bool MigrationSupported { get; }
 
-    private DeviceConfiguration? _config;
+    private readonly DeviceConfiguration? _config;
 
     public DeviceConfiguration? Configuration => _config;
 
-    public Arduino(PlatformIO pio, PlatformIOPort port)
+    public Arduino(PlatformIo pio, PlatformIoPort port)
     {
-        this.port = port;
+        this._port = port;
         foreach (var board in Board.Boards)
         {
-            if (board.productIDs.Contains(port.Pid))
+            if (board.ProductIDs.Contains(port.Pid))
             {
                 this.Board = board;
                 this.MigrationSupported = true;
-                _config = new DeviceConfiguration(Board.findMicrocontroller(this.Board));
+                _config = new DeviceConfiguration(Board.FindMicrocontroller(this.Board));
                 return;
             }
         }
@@ -44,9 +44,9 @@ public class Arduino : ConfigurableDevice
             serial.Write("i\x04\n");
             var boardFreqStr = serial.ReadLine().Replace("UL", "");
             var boardFreq = UInt32.Parse(boardFreqStr);
-            var tmp = Board.findBoard(boardName, boardFreq);
-            this.Board = new Board(boardName, $"Ardwiino - {tmp.name} - pre 4.3.7", boardFreq, tmp.environment, tmp.productIDs, tmp.hasUSBMCU);
-            _config = new DeviceConfiguration(Board.findMicrocontroller(this.Board));
+            var tmp = Board.FindBoard(boardName, boardFreq);
+            this.Board = new Board(boardName, $"Ardwiino - {tmp.Name} - pre 4.3.7", boardFreq, tmp.Environment, tmp.ProductIDs, tmp.HasUsbmcu);
+            _config = new DeviceConfiguration(Board.FindMicrocontroller(this.Board));
         }
         else
         {
@@ -55,24 +55,24 @@ public class Arduino : ConfigurableDevice
         }
     }
 
-    public bool IsSameDevice(PlatformIOPort port)
+    public bool IsSameDevice(PlatformIoPort port)
     {
-        return port == this.port;
+        return port == this._port;
     }
 
-    public bool IsSameDevice(string serial_or_path)
+    public bool IsSameDevice(string serialOrPath)
     {
         return false;
     }
 
     public string GetSerialPort()
     {
-        return port.Port;
+        return _port.Port;
     }
 
     public override String ToString()
     {
-        return $"{Board.name} ({port.Port})";
+        return $"{Board.Name} ({_port.Port})";
     }
 
     public void Bootloader()
@@ -80,17 +80,17 @@ public class Arduino : ConfigurableDevice
         // Automagically handled by pio
     }
 
-    public void BootloaderUSB()
+    public void BootloaderUsb()
     {
         // Automagically handled by pio
     }
 
-    public Task<string?> getUploadPort()
+    public Task<string?> GetUploadPort()
     {
         return Task.FromResult((string?)GetSerialPort());
     }
 
-    public bool DeviceAdded(ConfigurableDevice device)
+    public bool DeviceAdded(IConfigurableDevice device)
     {
         return false;
     }

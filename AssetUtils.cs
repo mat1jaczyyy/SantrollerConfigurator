@@ -1,10 +1,12 @@
 using System;
+using System.IO;
+using System.IO.Compression;
+using System.Reflection;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Platform;
-using System.IO.Compression;
-using System.Threading.Tasks;
-using System.Reflection;
-using System.IO;
+
+namespace GuitarConfiguratorSharp.NetCore;
 
 public class AssetUtils
 {

@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media;
-using ReactiveUI;
-using System.ComponentModel;
-using GuitarConfiguratorSharp.Configuration;
-using System.Reactive.Linq;
 using System.Collections.Generic;
-using GuitarConfiguratorSharp.Utils;
+using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Utils;
+using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.ViewModels
+namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
     public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
@@ -35,7 +32,7 @@ namespace GuitarConfiguratorSharp.ViewModels
         public DeviceConfiguration Config => _config.Value;
 
 
-        public ReactiveCommand<Unit, Unit> Write { get; }
+        public ReactiveCommand<Unit, Unit> WriteConfig { get; }
 
         public ReactiveCommand<Unit, Unit> GoBack { get; }
 
@@ -44,8 +41,8 @@ namespace GuitarConfiguratorSharp.ViewModels
             Main = screen;
             HostScreen = screen;
             _config = this.WhenAnyValue(x => x.Main.SelectedDevice)
-                .Where(x => x != null && x.GetType().IsAssignableTo(typeof(ConfigurableUSBDevice)))
-                .Select(x => (x as ConfigurableUSBDevice)!.Configuration)
+                .Where(x => x != null && x.GetType().IsAssignableTo(typeof(ConfigurableUsbDevice)))
+                .Select(x => (x as ConfigurableUsbDevice)!.Configuration)
                 .ToProperty(this, x => x.Config);
 
             _bindings = this.WhenAnyValue(x => x.Config)
@@ -63,13 +60,13 @@ namespace GuitarConfiguratorSharp.ViewModels
             _analogToDigitalBindings = this.WhenAnyValue(x => x.Config)
                 .Select(x => x.Bindings.FilterCast<Binding, AnalogToDigital>())
                 .ToProperty(this, x => x.AnalogToDigitalBindings);
-            Write = ReactiveCommand.CreateFromTask(write, this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected)).ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
+            WriteConfig = ReactiveCommand.CreateFromTask(Write, this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected)).ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
             GoBack = ReactiveCommand.CreateFromObservable<Unit, Unit>(Main.GoBack.Execute, this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected)).ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
         }
 
-        async Task write()
+        async Task Write()
         {
-            await Main.write(Config);
+            await Main.Write(Config);
         }
     }
 }
