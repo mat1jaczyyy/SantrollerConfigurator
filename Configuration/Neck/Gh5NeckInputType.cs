@@ -11,3 +11,19 @@ public enum BarButton
     Blue = 8,
     Orange = 16
 }
+
+public enum Gh5NeckInputType 
+{
+    None,
+    Green,
+    Red,
+    Yellow,
+    Blue,
+    Orange,
+    TapGreen,
+    TapRed,
+    TapYellow,
+    TapBlue,
+    TapOrange,
+    TapBar
+}

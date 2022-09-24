@@ -1,6 +1,6 @@
 namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 
-public enum Ps2Axis
+public enum Ps2InputType
 {
     GunconHSync,
     GunconVSync,
@@ -31,5 +31,26 @@ public enum Ps2Axis
     Dualshock2Cross,
     Dualshock2Square,
     Dualshock2L2,
-    Dualshock2R2
+    Dualshock2R2,
+    GuitarGreen,
+    GuitarRed,
+    GuitarYellow,
+    GuitarBlue,
+    GuitarOrange,
+    Select,
+    L3,
+    R3,
+    Start,
+    Up,
+    Right,
+    Down,
+    Left,
+    L2,
+    R2,
+    L1,
+    R1,
+    Triangle,
+    Circle,
+    Cross,
+    Square
 }

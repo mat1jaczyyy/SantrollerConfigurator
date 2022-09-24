@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Utils;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore;
 
@@ -9,12 +10,13 @@ public interface IConfigurableDevice {
     public bool IsSameDevice(string serialOrPath);
 
     public bool MigrationSupported { get; }
-    public DeviceConfiguration? Configuration {get;}
 
     public void Bootloader();
     public void BootloaderUsb();
 
     public bool DeviceAdded(IConfigurableDevice device);
+
+    public void LoadConfiguration(ConfigViewModel model);
 
     public Task<string?> GetUploadPort();
 }

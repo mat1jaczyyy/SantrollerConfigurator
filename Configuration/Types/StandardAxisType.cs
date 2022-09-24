@@ -1,4 +1,5 @@
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Types;
+
 
 public enum StandardAxisType
 {
@@ -11,8 +12,4 @@ public enum StandardAxisType
     AccelerationX,
     AccelerationY,
     AccelerationZ,
-    MouseX,
-    MouseY,
-    ScrollX,
-    ScrollY
 }

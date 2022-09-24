@@ -1,9 +1,8 @@
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 public enum EmulationType
 {
     Universal,
-    XInput,
     KeyboardMouse,
     Midi
 }

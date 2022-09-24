@@ -2,24 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Avalonia.Data;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
+using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
+using GuitarConfiguratorSharp.NetCore.Configuration.Output;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Utils;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using LibUsbDotNet;
+using DigitalToAnalog = GuitarConfiguratorSharp.NetCore.Configuration.Conversions.DigitalToAnalog;
 
 namespace GuitarConfiguratorSharp.NetCore;
 
 public class Ardwiino : ConfigurableUsbDevice
 {
-
-    private readonly UInt32 _cpuFreq;
+    private UInt32 _cpuFreq;
     private const int XboxBtnCount = 16;
     private const int XboxAxisCount = 6;
     private const int XboxTriggerCount = 2;
 
-    private const ControllerAxis XboxWhammy = ControllerAxis.XBOX_R_X;
-    private const ControllerAxis XboxTilt = ControllerAxis.XBOX_R_Y;
+    private const ControllerAxisType XboxWhammy = ControllerAxisType.XBOX_R_X;
+    private const ControllerAxisType XboxTilt = ControllerAxisType.XBOX_R_Y;
     private static readonly Version OldCpuInfoVersion = new Version(8, 8, 4);
 
     private static readonly Version UsbControlRequestApi = new Version(4, 3, 7);
@@ -40,15 +47,41 @@ public class Ardwiino : ConfigurableUsbDevice
     private const byte RequestHidSetReport = 0x09;
 
     public override bool MigrationSupported { get; }
-    private readonly DeviceConfiguration _config;
 
-    public override DeviceConfiguration Configuration => this._config;
-
-    private const byte NOT_USED = 0xFF;
+    private const byte NotUsed = 0xFF;
 
     private readonly bool _failed = false;
 
-    public Ardwiino(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort versionNumber) : base(device, path, product, serial, versionNumber)
+    public Ardwiino(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort versionNumber)
+        : base(device, path, product, serial, versionNumber)
+    {
+        if (this.version < new Version(6, 0, 0))
+        {
+            this.MigrationSupported = false;
+        }
+    }
+
+    public override String ToString()
+    {
+        if (_failed)
+        {
+            return "An ardwiino device had issues reading, please unplug and replug it.";
+        }
+
+        return $"Ardwiino - {Board.Name} - {version}";
+    }
+
+    public override void Bootloader()
+    {
+        WriteData(JumpBootloaderCommand, RequestHidSetReport, Array.Empty<byte>());
+    }
+
+    public override void BootloaderUsb()
+    {
+        WriteData(JumpBootloaderCommandUno, RequestHidSetReport, Array.Empty<byte>());
+    }
+
+    public override void LoadConfiguration(ConfigViewModel model)
     {
         try
         {
@@ -59,11 +92,10 @@ public class Ardwiino : ConfigurableUsbDevice
                 buffer = this.ReadData(7, RequestHidGetReport);
                 string board = StructTools.RawDeserializeStr(buffer);
                 this.Board = Board.FindBoard(board, this._cpuFreq);
-                this.MigrationSupported = false;
-                _config = new DeviceConfiguration(Board.FindMicrocontroller(this.Board));
+                model.SetDefaults(Board.FindMicrocontroller(this.Board));
                 return;
             }
-            this.MigrationSupported = true;
+
             // Version 6.0.0 started at config version 6, so we don't have to support anything earlier than that
             byte[] data = this.ReadData(CpuInfoCommand, 1);
             if (this.version < OldCpuInfoVersion)
@@ -78,6 +110,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 this._cpuFreq = info.cpu_freq;
                 this.Board = Board.FindBoard(info.board, this._cpuFreq);
             }
+
             var readConfig = ReadConfigCommand;
             if (this.version < new Version(8, 0, 7))
             {
@@ -87,6 +120,7 @@ public class Ardwiino : ConfigurableUsbDevice
             {
                 readConfig = ReadConfigPre703Command;
             }
+
             data = new byte[Marshal.SizeOf(typeof(ArdwiinoConfiguration))];
             int sizeOfAll = Marshal.SizeOf(typeof(FullArdwiinoConfiguration));
             int offset = 0;
@@ -98,12 +132,13 @@ public class Ardwiino : ConfigurableUsbDevice
             config.neck = new NeckConfig();
             config.axisScale = new AxisScaleConfig();
             config.axisScale.axis = new AxisScale[XboxAxisCount];
-            foreach (int axis in Enum.GetValues(typeof(ControllerAxis)))
+            foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
             {
                 config.axisScale.axis[axis].multiplier = 1;
                 config.axisScale.axis[axis].offset = Int16.MinValue;
                 config.axisScale.axis[axis].deadzone = Int16.MaxValue;
             }
+
             config.debounce.buttons = 5;
             config.debounce.strum = 20;
             config.debounce.combinedStrum = 0;
@@ -111,7 +146,7 @@ public class Ardwiino : ConfigurableUsbDevice
             config.rf.rfInEnabled = 0;
             while (offset < maxSize)
             {
-                var data2 = ReadData((ushort)(readConfig + offsetId), RequestHidGetReport);
+                var data2 = ReadData((ushort) (readConfig + offsetId), RequestHidGetReport);
                 Array.Copy(data2, 0, data, offset, data2.Length);
                 offset += data2.Length;
                 offsetId++;
@@ -149,33 +184,17 @@ public class Ardwiino : ConfigurableUsbDevice
                     }
                 }
             }
+
             // Patches to all
             if (version < 9)
             {
                 // For versions below version 9, r_x is inverted from how we use it now
-                config.all.pins.axis![((byte)ControllerAxis.XBOX_R_X)].inverted = (byte)(config.all.pins.axis[(int)ControllerAxis.XBOX_R_X].inverted == 0 ? 1 : 0);
+                config.all.pins.axis![((byte) ControllerAxisType.XBOX_R_X)].inverted =
+                    (byte) (config.all.pins.axis[(int) ControllerAxisType.XBOX_R_X].inverted == 0 ? 1 : 0);
             }
-            else if (version < 14)
-            {
-                // version 14 changed mpu6050Orientation from accepting 0-5 to 0-2
-                switch (config.all.axis.mpu6050Orientation)
-                {
-                    case (byte)GyroOrientationOld.NEGATIVE_X:
-                    case (byte)GyroOrientationOld.POSITIVE_X:
-                        config.all.axis.mpu6050Orientation = (byte)GyroOrientation.X;
-                        break;
-                    case (byte)GyroOrientationOld.NEGATIVE_Y:
-                    case (byte)GyroOrientationOld.POSITIVE_Y:
-                        config.all.axis.mpu6050Orientation = (byte)GyroOrientation.Y;
-                        break;
-                    case (byte)GyroOrientationOld.NEGATIVE_Z:
-                    case (byte)GyroOrientationOld.POSITIVE_Z:
-                        config.all.axis.mpu6050Orientation = (byte)GyroOrientation.Z;
-                        break;
-                }
-            }
+
             // Read in the rest of the data, in the format that it is in
-            if (version == 16)
+            if (version == 16 || version == 17)
             {
                 config = StructTools.RawDeserialize<ArdwiinoConfiguration>(data, 0);
             }
@@ -200,12 +219,13 @@ public class Ardwiino : ConfigurableUsbDevice
             else if (version > 11)
             {
                 var configOld = StructTools.RawDeserialize<Configuration12>(data, 0);
-                foreach (int axis in Enum.GetValues(typeof(ControllerAxis)))
+                foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
                 {
                     config.axisScale.axis[axis].multiplier = configOld.axisScale.axis[axis].multiplier;
                     config.axisScale.axis[axis].offset = configOld.axisScale.axis[axis].offset;
                     config.axisScale.axis[axis].deadzone = Int16.MaxValue;
                 }
+
                 config.pinsSP = configOld.pinsSP;
                 config.rf = configOld.rf;
                 config.debounce.buttons = 5;
@@ -215,8 +235,8 @@ public class Ardwiino : ConfigurableUsbDevice
             else if (version > 10)
             {
                 var configOld = StructTools.RawDeserialize<Configuration11>(data, 0);
-                config.axisScale.axis[(int)ControllerAxis.XBOX_R_X].multiplier = configOld.whammy.multiplier;
-                config.axisScale.axis[(int)ControllerAxis.XBOX_R_X].offset = (short)configOld.whammy.offset;
+                config.axisScale.axis[(int) ControllerAxisType.XBOX_R_X].multiplier = configOld.whammy.multiplier;
+                config.axisScale.axis[(int) ControllerAxisType.XBOX_R_X].offset = (short) configOld.whammy.offset;
                 config.pinsSP = configOld.pinsSP;
                 config.rf = configOld.rf;
             }
@@ -226,8 +246,23 @@ public class Ardwiino : ConfigurableUsbDevice
                 config.pinsSP = configOld.pinsSP;
                 config.rf = configOld.rf;
             }
+
+            if (version < 17 && config.all.main.subType > (int) SubType.XINPUT_ARCADE_PAD)
+            {
+                config.all.main.subType += SubType.XINPUT_TURNTABLE - SubType.XINPUT_ARCADE_PAD;
+                if (config.all.main.subType > (int) SubType.PS3_GAMEPAD)
+                {
+                    config.all.main.subType += 2;
+                }
+
+                if (config.all.main.subType > (int) SubType.WII_ROCK_BAND_DRUMS)
+                {
+                    config.all.main.subType += 1;
+                }
+            }
+
             Microcontroller controller = Board.FindMicrocontroller(Board);
-            List<Binding> bindings = new List<Binding>();
+            List<IOutput> bindings = new List<IOutput>();
             Dictionary<int, Color> colors = new Dictionary<int, Color>();
             foreach (var led in config.all!.leds!)
             {
@@ -236,27 +271,31 @@ public class Ardwiino : ConfigurableUsbDevice
                     colors[led.pin - 1] = Color.FromRgb(led.red, led.green, led.blue);
                 }
             }
+
             LedType ledType = LedType.None;
             DeviceControllerType deviceType = DeviceControllerType.Guitar;
             EmulationType emulationType = EmulationType.Universal;
-            InputControllerType inputControllerType = (InputControllerType)config.all.main.inputType;
+            InputControllerType inputControllerType = (InputControllerType) config.all.main.inputType;
             RhythmType rhythmType = RhythmType.GuitarHero;
-            TiltType tiltType = (TiltType)config.all.main.tiltType;
-            TiltOrientation tiltOrientation = (TiltOrientation)config.all.axis.mpu6050Orientation;
             if (config.all.main.fretLEDMode == 2)
             {
                 ledType = LedType.APA102;
             }
-            if ((config.all.main.subType >= (int)SubType.KEYBOARD_GAMEPAD && config.all.main.subType <= (int)SubType.KEYBOARD_ROCK_BAND_DRUMS) || config.all.main.subType == (int)SubType.MOUSE)
+
+            if ((config.all.main.subType >= (int) SubType.KEYBOARD_GAMEPAD &&
+                 config.all.main.subType <= (int) SubType.KEYBOARD_ROCK_BAND_DRUMS) ||
+                config.all.main.subType == (int) SubType.MOUSE)
             {
                 emulationType = EmulationType.KeyboardMouse;
             }
-            if (config.all.main.subType >= (int)SubType.MIDI_GAMEPAD)
+
+            if (config.all.main.subType >= (int) SubType.MIDI_GAMEPAD)
             {
                 emulationType = EmulationType.Midi;
             }
+
             bool xinputOnWindows = false;
-            switch ((SubType)config.all.main.subType)
+            switch ((SubType) config.all.main.subType)
             {
                 case SubType.XINPUT_GAMEPAD:
                 case SubType.XINPUT_LIVE_GUITAR:
@@ -267,8 +306,13 @@ public class Ardwiino : ConfigurableUsbDevice
                     xinputOnWindows = true;
                     break;
             }
-            switch ((SubType)config.all.main.subType)
+
+            switch ((SubType) config.all.main.subType)
             {
+                case SubType.XINPUT_TURNTABLE:
+                case SubType.PS3_TURNTABLE:
+                    deviceType = DeviceControllerType.TurnTable;
+                    break;
                 case SubType.XINPUT_GAMEPAD:
                 case SubType.PS3_GAMEPAD:
                 case SubType.SWITCH_GAMEPAD:
@@ -276,6 +320,23 @@ public class Ardwiino : ConfigurableUsbDevice
                 case SubType.KEYBOARD_GAMEPAD:
                     deviceType = DeviceControllerType.Gamepad;
                     break;
+                case SubType.XINPUT_ARCADE_PAD:
+                    deviceType = DeviceControllerType.ArcadePad;
+                    break;
+                case SubType.XINPUT_WHEEL:
+                    deviceType = DeviceControllerType.Wheel;
+                    break;
+                case SubType.XINPUT_ARCADE_STICK:
+                    deviceType = DeviceControllerType.ArcadeStick;
+                    break;
+                case SubType.XINPUT_FLIGHT_STICK:
+                    deviceType = DeviceControllerType.FlightStick;
+                    break;
+                case SubType.XINPUT_DANCE_PAD:
+                    deviceType = DeviceControllerType.DancePad;
+                    break;
+                case SubType.WII_LIVE_GUITAR:
+                case SubType.PS3_LIVE_GUITAR:
                 case SubType.MIDI_LIVE_GUITAR:
                 case SubType.XINPUT_LIVE_GUITAR:
                 case SubType.KEYBOARD_LIVE_GUITAR:
@@ -315,133 +376,190 @@ public class Ardwiino : ConfigurableUsbDevice
                 default:
                     deviceType = DeviceControllerType.Gamepad;
                     break;
-
             }
-            // TODO: Handle necks
-            if (config.all.main.inputType == (int)InputControllerType.Direct)
+
+            if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
             {
-                foreach (int axis in Enum.GetValues(typeof(ControllerAxis)))
+                List<Tuple<Gh5NeckInputType, StandardButtonType>> neckData = new()
+                {
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Green, StandardButtonType.A),
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Red, StandardButtonType.B),
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Yellow, StandardButtonType.Y),
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Blue, StandardButtonType.X),
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Orange, StandardButtonType.LB),
+                };
+                foreach (var item in neckData)
+                {
+                    bindings.Add(new ControllerButton(new Gh5NeckInput(item.Item1), Color.FromArgb(0, 0, 0, 0),
+                        Color.FromArgb(0, 0, 0, 0), config.debounce.buttons, item.Item2));
+                }
+            }
+
+            if (config.neck.gh5NeckBar != 0)
+            {
+                List<Tuple<Gh5NeckInputType, StandardButtonType>> neckData = new()
+                {
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapGreen, StandardButtonType.A),
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapRed, StandardButtonType.B),
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapYellow, StandardButtonType.Y),
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapBlue, StandardButtonType.X),
+                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapOrange, StandardButtonType.LB),
+                };
+                foreach (var item in neckData)
+                {
+                    bindings.Add(new ControllerButton(new Gh5NeckInput(item.Item1), Color.FromArgb(0, 0, 0, 0),
+                        Color.FromArgb(0, 0, 0, 0), config.debounce.buttons, item.Item2));
+                }
+            }
+
+            if (config.all.main.inputType == (int) InputControllerType.Direct)
+            {
+                foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
                 {
                     var pin = config.all.pins.axis![axis];
-                    if (pin.pin == NOT_USED)
+                    if (pin.pin == NotUsed)
                     {
                         continue;
                     }
-                    var genAxis = _axisToStandard[(ControllerAxis)axis];
+
+                    var genAxis = AxisToStandard[(ControllerAxisType) axis];
                     var scale = config.axisScale.axis[axis];
-                    var isTrigger = axis == (int)ControllerAxis.XBOX_LT || axis == (int)ControllerAxis.XBOX_RT;
+                    var isTrigger = axis == (int) ControllerAxisType.XBOX_LT ||
+                                    axis == (int) ControllerAxisType.XBOX_RT;
 
                     Color on = Color.FromRgb(0, 0, 0);
                     if (colors.ContainsKey(axis + XboxBtnCount))
                     {
                         on = colors[axis + XboxBtnCount];
                     }
+
                     Color off = Color.FromRgb(0, 0, 0);
-                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxis)axis == XboxWhammy)
+                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
                     {
                         isTrigger = true;
                     }
-                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxis)axis == XboxTilt)
+
+                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt)
                     {
-                        bindings.Add(new DigitalToAnalog(controller, 32767, new DirectDigital(controller, DevicePinMode.VCC, pin.pin, config.debounce.buttons, new GenericControllerButton(StandardButtonType.A), on, off), AnalogToDigitalType.Trigger, new GenericAxis(StandardAxisType.RightStickY), on, off, 1, 1, 1, true));
+                        bindings.Add(new ControllerAxis(
+                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp), 32767), on, off, 1, 0,
+                            0, false, StandardAxisType.RightStickY));
                     }
                     else
                     {
-                        bindings.Add(new DirectAnalog(controller, pin.pin, new GenericAxis(genAxis), on, off, (scale.multiplier / 1024.0f) * (isTrigger ? 2 : 1) * (pin.inverted > 0 ? -1 : 1), ((isTrigger ? 0 : 32670) + scale.offset) >> 8, ((isTrigger ? 32768 : 0) + scale.deadzone) >> 8, isTrigger));
+                        var axisMultiplier = (scale.multiplier / 1024.0f) * (isTrigger ? 2 : 1) *
+                                             (pin.inverted > 0 ? -1 : 1);
+                        var axisOffset = ((isTrigger ? 0 : 32670) + scale.offset) >> 8;
+                        var axisDeadzone = ((isTrigger ? 32768 : 0) + scale.deadzone) >> 8;
+                        bindings.Add(new ControllerAxis(new DirectInput(pin.pin, DevicePinMode.Analog), on, off,
+                            axisMultiplier, axisOffset, axisDeadzone, isTrigger, genAxis));
                     }
                 }
+
                 foreach (int button in Enum.GetValues(typeof(ControllerButtons)))
                 {
                     var pin = config.all.pins.pins![button];
-                    if (pin == NOT_USED)
+                    if (pin == NotUsed)
                     {
                         continue;
                     }
+
                     Color on = Color.FromRgb(0, 0, 0);
                     if (colors.ContainsKey(button))
                     {
                         on = colors[button];
                     }
+
                     Color off = Color.FromRgb(0, 0, 0);
-                    var genButton = _buttonToStandard[(ControllerButtons)button];
-                    var pinMode = DevicePinMode.VCC;
-                    if (config.all.main.fretLEDMode == 1 && deviceType == DeviceControllerType.Guitar && _frets.Contains(genButton))
+                    var genButton = ButtonToStandard[(ControllerButtons) button];
+                    var pinMode = DevicePinMode.PullUp;
+                    if (config.all.main.fretLEDMode == 1 && deviceType == DeviceControllerType.Guitar &&
+                        _frets.Contains(genButton))
                     {
                         pinMode = DevicePinMode.Floating;
                     }
+
                     var debounce = config.debounce.buttons;
-                    if (deviceType == DeviceControllerType.Guitar && (genButton == StandardButtonType.Up || genButton == StandardButtonType.Down))
+                    if (deviceType == DeviceControllerType.Guitar &&
+                        (genButton == StandardButtonType.Up || genButton == StandardButtonType.Down))
                     {
                         debounce = config.debounce.strum;
                     }
-                    IOutputButton output = new GenericControllerButton(genButton);
-                    bindings.Add(new DirectDigital(controller, pinMode, pin, debounce, output, on, off));
+
+                    bindings.Add(new ControllerButton(new DirectInput(pin, pinMode), on, off, debounce, genButton));
                 }
             }
-            else if (config.all.main.inputType == (int)InputControllerType.Wii)
+            else if (config.all.main.inputType == (int) InputControllerType.Wii)
             {
                 // TODO: once we have support for layouts, this will just load some wii layout
                 // TODO: respecting "mapAccelToLeftJoy and other possible settings
             }
-            else if (config.all.main.inputType == (int)InputControllerType.PS2)
+            else if (config.all.main.inputType == (int) InputControllerType.PS2)
             {
                 // TODO: once we have support for layouts, this will just load some ps2 layout
             }
+
             // Keyboard / Mouse does not have a joystick
             if (config.all.main.mapLeftJoystickToDPad > 0)
             {
-                var lx = bindings.FilterCast<Binding, Axis>().FirstOrDefault(axis => axis?.Type.Type == StandardAxisType.LeftStickX, null);
-                var ly = bindings.FilterCast<Binding, Axis>().FirstOrDefault(axis => axis?.Type.Type == StandardAxisType.LeftStickY, null);
-                if (lx != null)
+                ControllerAxis? lx = null;
+                ControllerAxis? ly = null;
+                var threshold = config.all.axis.joyThreshold;
+                foreach (var binding in bindings)
+                {
+                    if (binding is ControllerAxis axis)
+                    {
+                        if (axis.Type == StandardAxisType.LeftStickX)
+                        {
+                            lx = axis;
+                        }
+                        else if (axis.Type == StandardAxisType.LeftStickY)
+                        {
+                            ly = axis;
+                        }
+                    }
+                }
+
+                if (lx != null && lx.Input != null)
                 {
                     var onlx = lx.LedOn;
                     var offlx = lx.LedOff;
-                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Left), onlx, offlx));
-                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, lx, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Right), onlx, offlx));
-
+                    bindings.Add(new ControllerButton(
+                        new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyLow, threshold), onlx, offlx,
+                        config.debounce.buttons, StandardButtonType.Left));
+                    bindings.Add(new ControllerButton(
+                        new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyHigh, threshold), onlx, offlx,
+                        config.debounce.buttons, StandardButtonType.Right));
                 }
-                if (ly != null)
+
+                if (ly != null && ly.Input != null)
                 {
                     var only = ly.LedOn;
                     var offly = ly.LedOff;
-                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyLow, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Down), only, offly));
-                    bindings.Add(new AnalogToDigital(controller, config.all.axis.joyThreshold, ly, AnalogToDigitalType.JoyHigh, config.debounce.buttons, new GenericControllerButton(StandardButtonType.Up), only, offly));
+                    bindings.Add(new ControllerButton(
+                        new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold), only, offly,
+                        config.debounce.buttons, StandardButtonType.Up));
+                    bindings.Add(new ControllerButton(
+                        new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold), only, offly,
+                        config.debounce.buttons, StandardButtonType.Down));
                 }
             }
-            _config = new DeviceConfiguration(controller, bindings, ledType, deviceType, emulationType, rhythmType, tiltType == TiltType.DigitalMercury, xinputOnWindows);
-            _config.Generate(pio);
+
+            model.MicroController = controller;
+            model.Bindings.AddRange(bindings);
+            model.LedType = ledType;
+            model.DeviceType = deviceType;
+            model.EmulationType = emulationType;
+            model.RhythmType = rhythmType;
+            model.TiltEnabled = config.all.main.tiltType == 2;
+            model.XInputOnWindows = xinputOnWindows;
         }
         catch (ArgumentException)
         {
-            _failed = true;
-            MigrationSupported = false;
-            _config = new DeviceConfiguration(new Pico(Board.Rp2040Boards[0]));
+            //TODO: do this right
+            throw new IncompleteConfigurationException("Something went wrong");
         }
     }
-
-    public override String ToString()
-    {
-        if (_failed)
-        {
-            return "An ardwiino device had issues reading, please unplug and replug it.";
-        }
-        return $"Ardwiino - {Board.Name} - {version}";
-    }
-
-    public override void Bootloader()
-    {
-        WriteData(JumpBootloaderCommand, RequestHidSetReport, Array.Empty<byte>());
-    }
-
-    public override void BootloaderUsb()
-    {
-        WriteData(JumpBootloaderCommandUno, RequestHidSetReport, Array.Empty<byte>());
-    }
-
-    enum GyroOrientation
-    {
-        X, Y, Z
-    };
 
     enum SubType
     {
@@ -456,6 +574,7 @@ public class Ardwiino : ConfigurableUsbDevice
         XINPUT_ROCK_BAND_GUITAR,
         XINPUT_GUITAR_HERO_GUITAR,
         XINPUT_ARCADE_PAD = 19,
+        XINPUT_TURNTABLE = 23,
         KEYBOARD_GAMEPAD,
         KEYBOARD_GUITAR_HERO_GUITAR,
         KEYBOARD_ROCK_BAND_GUITAR,
@@ -468,8 +587,11 @@ public class Ardwiino : ConfigurableUsbDevice
         PS3_ROCK_BAND_GUITAR,
         PS3_ROCK_BAND_DRUMS,
         PS3_GAMEPAD,
+        PS3_TURNTABLE,
+        PS3_LIVE_GUITAR,
         WII_ROCK_BAND_GUITAR,
         WII_ROCK_BAND_DRUMS,
+        WII_LIVE_GUITAR,
         MOUSE,
         MIDI_GAMEPAD,
         MIDI_GUITAR_HERO_GUITAR,
@@ -500,7 +622,7 @@ public class Ardwiino : ConfigurableUsbDevice
         XBOX_Y,
     };
 
-    enum ControllerAxis
+    enum ControllerAxisType
     {
         XBOX_LT,
         XBOX_RT,
@@ -510,43 +632,42 @@ public class Ardwiino : ConfigurableUsbDevice
         XBOX_R_Y
     };
 
-    private static readonly Dictionary<ControllerAxis, StandardAxisType> _axisToStandard = new Dictionary<ControllerAxis, StandardAxisType>() {
-        {ControllerAxis.XBOX_L_X,StandardAxisType.LeftStickX},
-        {ControllerAxis.XBOX_L_Y,StandardAxisType.LeftStickY},
-        {ControllerAxis.XBOX_R_X,StandardAxisType.RightStickX},
-        {ControllerAxis.XBOX_R_Y,StandardAxisType.RightStickY},
-        {ControllerAxis.XBOX_LT, StandardAxisType.LeftTrigger},
-        {ControllerAxis.XBOX_RT,StandardAxisType.RightTrigger}
-    };
+    private static readonly Dictionary<ControllerAxisType, StandardAxisType> AxisToStandard =
+        new Dictionary<ControllerAxisType, StandardAxisType>()
+        {
+            {ControllerAxisType.XBOX_L_X, StandardAxisType.LeftStickX},
+            {ControllerAxisType.XBOX_L_Y, StandardAxisType.LeftStickY},
+            {ControllerAxisType.XBOX_R_X, StandardAxisType.RightStickX},
+            {ControllerAxisType.XBOX_R_Y, StandardAxisType.RightStickY},
+            {ControllerAxisType.XBOX_LT, StandardAxisType.LeftTrigger},
+            {ControllerAxisType.XBOX_RT, StandardAxisType.RightTrigger}
+        };
 
-    private static readonly Dictionary<ControllerButtons, StandardButtonType> _buttonToStandard = new Dictionary<ControllerButtons, StandardButtonType>(){
-        {ControllerButtons.XBOX_DPAD_UP,StandardButtonType.Up},
-        {ControllerButtons.XBOX_DPAD_DOWN,StandardButtonType.Down},
-        {ControllerButtons.XBOX_DPAD_LEFT,StandardButtonType.Left},
-        {ControllerButtons.XBOX_DPAD_RIGHT,StandardButtonType.Right},
-        {ControllerButtons.XBOX_START,StandardButtonType.Start},
-        {ControllerButtons.XBOX_BACK,StandardButtonType.Select},
-        {ControllerButtons.XBOX_LEFT_STICK,StandardButtonType.LeftStick},
-        {ControllerButtons.XBOX_RIGHT_STICK,StandardButtonType.RightStick},
-        {ControllerButtons.XBOX_LB,StandardButtonType.LB},
-        {ControllerButtons.XBOX_RB,StandardButtonType.RB},
-        {ControllerButtons.XBOX_HOME,StandardButtonType.Home},
-        {ControllerButtons.XBOX_UNUSED,StandardButtonType.Capture},
-        {ControllerButtons.XBOX_A,StandardButtonType.A},
-        {ControllerButtons.XBOX_B,StandardButtonType.B},
-        {ControllerButtons.XBOX_X,StandardButtonType.X},
-        {ControllerButtons.XBOX_Y,StandardButtonType.Y}
-    };
+    private static readonly Dictionary<ControllerButtons, StandardButtonType> ButtonToStandard =
+        new Dictionary<ControllerButtons, StandardButtonType>()
+        {
+            {ControllerButtons.XBOX_DPAD_UP, StandardButtonType.Up},
+            {ControllerButtons.XBOX_DPAD_DOWN, StandardButtonType.Down},
+            {ControllerButtons.XBOX_DPAD_LEFT, StandardButtonType.Left},
+            {ControllerButtons.XBOX_DPAD_RIGHT, StandardButtonType.Right},
+            {ControllerButtons.XBOX_START, StandardButtonType.Start},
+            {ControllerButtons.XBOX_BACK, StandardButtonType.Select},
+            {ControllerButtons.XBOX_LEFT_STICK, StandardButtonType.LeftStick},
+            {ControllerButtons.XBOX_RIGHT_STICK, StandardButtonType.RightStick},
+            {ControllerButtons.XBOX_LB, StandardButtonType.LB},
+            {ControllerButtons.XBOX_RB, StandardButtonType.RB},
+            {ControllerButtons.XBOX_HOME, StandardButtonType.Home},
+            {ControllerButtons.XBOX_UNUSED, StandardButtonType.Capture},
+            {ControllerButtons.XBOX_A, StandardButtonType.A},
+            {ControllerButtons.XBOX_B, StandardButtonType.B},
+            {ControllerButtons.XBOX_X, StandardButtonType.X},
+            {ControllerButtons.XBOX_Y, StandardButtonType.Y}
+        };
 
-    readonly List<StandardButtonType> _frets = new List<StandardButtonType>() { StandardButtonType.A, StandardButtonType.B, StandardButtonType.X, StandardButtonType.Y, StandardButtonType.LB, StandardButtonType.RB };
-    enum GyroOrientationOld
+    readonly List<StandardButtonType> _frets = new List<StandardButtonType>()
     {
-        POSITIVE_Z,
-        NEGATIVE_Z,
-        POSITIVE_Y,
-        NEGATIVE_Y,
-        POSITIVE_X,
-        NEGATIVE_X
+        StandardButtonType.A, StandardButtonType.B, StandardButtonType.X, StandardButtonType.Y, StandardButtonType.LB,
+        StandardButtonType.RB
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -554,14 +675,17 @@ public class Ardwiino : ConfigurableUsbDevice
     {
         public readonly UInt32 cpu_freq;
         public readonly byte multi;
+
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 15)]
         public readonly string board;
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct CpuInfo
     {
         public readonly UInt32 cpu_freq;
         public readonly byte multi;
+
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 30)]
         public readonly string board;
     }
@@ -628,7 +752,7 @@ public class Ardwiino : ConfigurableUsbDevice
     private struct MainConfig
     {
         public readonly byte inputType;
-        public readonly byte subType;
+        public byte subType;
         public readonly byte tiltType;
         public readonly byte pollRate;
         public readonly byte fretLEDMode;
@@ -655,8 +779,10 @@ public class Ardwiino : ConfigurableUsbDevice
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount + XboxBtnCount)]
         public readonly byte[] type;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount + XboxBtnCount)]
         public readonly byte[] note;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount + XboxBtnCount)]
         public readonly byte[] channel;
     }
@@ -667,6 +793,7 @@ public class Ardwiino : ConfigurableUsbDevice
         public byte rfInEnabled;
         public UInt32 id;
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct AxisScale
     {
@@ -674,6 +801,7 @@ public class Ardwiino : ConfigurableUsbDevice
         public Int16 offset;
         public Int16 deadzone;
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct AxisScale12
     {
@@ -694,6 +822,7 @@ public class Ardwiino : ConfigurableUsbDevice
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount)]
         public AxisScale[] axis;
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct AxisScaleConfig12
     {
@@ -715,6 +844,7 @@ public class Ardwiino : ConfigurableUsbDevice
         public byte strum;
         public byte combinedStrum;
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct ArdwiinoConfiguration
     {
@@ -735,6 +865,7 @@ public class Ardwiino : ConfigurableUsbDevice
         public readonly AxisScaleConfig axisScale;
         public readonly DebounceConfig debounce;
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct Configuration13
     {
@@ -767,35 +898,47 @@ public class Ardwiino : ConfigurableUsbDevice
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct Configuration10
     {
-
         public readonly FullArdwiinoConfiguration all;
         public readonly RfConfig rf;
         public readonly byte pinsSP;
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct Configuration8
     {
         public readonly FullArdwiinoConfiguration all;
         public readonly RfConfig rf;
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct NeckConfig
     {
-        readonly bool wtNeck;
-        readonly bool gh5Neck;
-        readonly bool gh5NeckBar;
-        readonly bool wiiNeck;
-        readonly bool ps2Neck;
+        public readonly byte wtNeck;
+        public readonly byte gh5Neck;
+        public readonly byte gh5NeckBar;
+        public readonly byte wiiNeck;
+        public readonly byte ps2Neck;
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct FullArdwiinoConfiguration
     {
-        public readonly MainConfig main;
+        public MainConfig main;
         public readonly Pins pins;
         public AxisConfig axis;
         public readonly Keys keys;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = XboxAxisCount + XboxBtnCount)]
         public readonly Led[] leds;
+
         public readonly MidiConfig midi;
+    }
+
+    public enum InputControllerType
+    {
+        None,
+        Wii,
+        Direct,
+        PS2
     }
 }

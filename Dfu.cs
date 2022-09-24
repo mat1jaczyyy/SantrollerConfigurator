@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Utils;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using LibUsbDotNet.DeviceNotify;
 
 namespace GuitarConfiguratorSharp.NetCore;
@@ -15,8 +16,6 @@ public class Dfu : IConfigurableDevice
     public Board Board { get; }
 
     public bool MigrationSupported => true;
-
-    public DeviceConfiguration? Configuration => null;
 
     private DeviceNotifyEventArgs _args;
 
@@ -51,6 +50,10 @@ public class Dfu : IConfigurableDevice
     public bool DeviceAdded(IConfigurableDevice device)
     {
         return false;
+    }
+
+    public void LoadConfiguration(ConfigViewModel model)
+    {
     }
 
     public Task<string?> GetUploadPort()

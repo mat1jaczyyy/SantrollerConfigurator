@@ -1,4 +1,4 @@
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 public enum StandardButtonType
 {

@@ -6,6 +6,7 @@ using System.Text.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
 using GuitarConfiguratorSharp.NetCore.Utils;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using LibUsbDotNet;
 
 namespace GuitarConfiguratorSharp.NetCore;
@@ -28,6 +29,7 @@ public class Santroller : ConfigurableUsbDevice
         COMMAND_SET_SP,
     }
 
+    public override bool MigrationSupported => true;
     public static readonly Guid ControllerGuid = new("DF59037D-7C92-4155-AC12-7D700A313D78");
 
     // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
@@ -35,6 +37,23 @@ public class Santroller : ConfigurableUsbDevice
     //         classGuid: ControllerGUID);
 
     public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort revision) : base(device, path, product, serial, revision)
+    {
+       
+    }
+
+    public override void Bootloader()
+    {
+        WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER), Array.Empty<byte>());
+    }
+    public override void BootloaderUsb()
+    {
+        if (Board.HasUsbmcu)
+        {
+            WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER_UNO), Array.Empty<byte>());
+        }
+    }
+
+    public override void LoadConfiguration(ConfigViewModel model)
     {
         try
         {
@@ -52,8 +71,9 @@ public class Santroller : ConfigurableUsbDevice
                     using (var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress))
                     {
                         decompressor.CopyTo(outputStream);
-                        _config = JsonSerializer.Deserialize<DeviceConfiguration>(Encoding.UTF8.GetString(outputStream.ToArray()), DeviceConfiguration.GetJsonOptions(m))!;
-                        _config.Generate(pio);
+                        //TODO: how do
+                        // _config = JsonSerializer.Deserialize<DeviceConfiguration>(Encoding.UTF8.GetString(outputStream.ToArray()), DeviceConfiguration.GetJsonOptions(m))!;
+                        // _config.Generate(pio);
                     }
                 }
             }
@@ -64,24 +84,6 @@ public class Santroller : ConfigurableUsbDevice
             // TODO: throw a better exception here, and handle this in the gui, so that a device that appears to be missing its config doesn't do something weird.
         }
     }
-
-    public override void Bootloader()
-    {
-        WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER), Array.Empty<byte>());
-    }
-    public override void BootloaderUsb()
-    {
-        if (Configuration.MicroController.Board.HasUsbmcu)
-        {
-            WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER_UNO), Array.Empty<byte>());
-        }
-    }
-    public override bool MigrationSupported => true;
-
-
-    private readonly DeviceConfiguration _config;
-
-    public override DeviceConfiguration Configuration => _config;
 
     public override String ToString()
     {

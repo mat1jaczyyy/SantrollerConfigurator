@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Utils;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using LibUsbDotNet;
 using LibUsbDotNet.Main;
 
@@ -27,7 +28,6 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     }
 
     public abstract bool MigrationSupported { get; }
-    public abstract DeviceConfiguration Configuration { get; }
 
     public abstract void Bootloader();
     public abstract void BootloaderUsb();
@@ -105,6 +105,8 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         }
         return false;
     }
+
+    public abstract void LoadConfiguration(ConfigViewModel model);
 
     public async Task<string?> GetUploadPort()
     {

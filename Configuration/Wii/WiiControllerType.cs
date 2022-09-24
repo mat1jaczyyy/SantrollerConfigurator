@@ -1,6 +1,6 @@
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 
-public enum WiiController
+public enum WiiControllerType
 {
     Nunchuk,
     ClassicController,

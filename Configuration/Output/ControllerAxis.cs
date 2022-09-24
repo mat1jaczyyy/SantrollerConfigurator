@@ -1,14 +1,12 @@
 using System.Collections.Generic;
-using Dahomey.Json.Attributes;
+using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Output;
 
-[JsonDiscriminator(nameof(GenericAxis))]
-public class GenericAxis : IOutputAxis
+public class ControllerAxis : OutputAxis
 {
-    public StandardAxisType Type { get; }
-    public OutputType OutputType => OutputType.Generic;
-
+    
     public static readonly Dictionary<StandardAxisType, string> Mappings = new Dictionary<StandardAxisType, string>() {
         {StandardAxisType.LeftStickX, "l_x"},
         {StandardAxisType.LeftStickY, "l_y"},
@@ -29,18 +27,20 @@ public class GenericAxis : IOutputAxis
         {StandardAxisType.LeftTrigger, "lt"},
         {StandardAxisType.RightTrigger, "rt"},
     };
-
-    public string Generate(bool xbox)
+    public ControllerAxis(IInput? input, Color ledOn, Color ledOff, float multiplier, int offset, int deadzone, bool trigger, StandardAxisType type) : base(input, ledOn, ledOff, multiplier, offset, deadzone, trigger)
+    {
+        Type = type;
+    }
+    public StandardAxisType Type { get; }
+    public override string Name => Type.ToString();
+    // TODO this
+    public override string Image => Name;
+    public override string GenerateOutput(bool xbox)
     {
         if (xbox)
         {
             return "report->" + MappingsXbox[Type];
         }
         return "report->" + Mappings[Type];
-    }
-
-    public GenericAxis(StandardAxisType type)
-    {
-        Type = type;
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Utils;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore;
 
@@ -11,14 +12,9 @@ public class PicoDevice : IConfigurableDevice
 
     public bool MigrationSupported => true;
 
-    private readonly DeviceConfiguration? _config;
-
-    public DeviceConfiguration? Configuration => _config;
-
     public PicoDevice(PlatformIo pio, string path)
     {
         this._path = path;
-        this._config = new DeviceConfiguration(Board.FindMicrocontroller(Board.FindBoard("pico",0)));
     }
 
     public bool IsSameDevice(PlatformIoPort port)
@@ -52,6 +48,11 @@ public class PicoDevice : IConfigurableDevice
     bool IConfigurableDevice.DeviceAdded(IConfigurableDevice device)
     {
         return false;
+    }
+
+    public void LoadConfiguration(ConfigViewModel model)
+    {
+        model.SetDefaults(Board.FindMicrocontroller(Board.FindBoard("pico",0)));
     }
 
     public Task<string?> GetUploadPort()

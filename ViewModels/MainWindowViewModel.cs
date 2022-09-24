@@ -157,7 +157,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 this.RaiseAndSetIfChanged(ref _message, value);
             }
         }
-        internal async Task Write(DeviceConfiguration config)
+        internal async Task Write(ConfigViewModel config)
         {
             config.Generate(Pio);
             if (config.MicroController.Board.HasUsbmcu)

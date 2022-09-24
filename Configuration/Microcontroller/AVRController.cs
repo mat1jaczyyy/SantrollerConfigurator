@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Utils;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
 
@@ -14,6 +13,7 @@ public abstract class AvrController : Microcontroller
         INPUT_PULLDOWN,
         OUTPUT
     }
+
     public override string GenerateDigitalRead(int pin, bool pullUp)
     {
         // Invert on pullup
@@ -21,19 +21,8 @@ public abstract class AvrController : Microcontroller
         {
             return $"(PIN{GetPort(pin)} & (1 << {GetIndex(pin)})) == 0";
         }
+
         return $"PIN{GetPort(pin)} & (1 << {GetIndex(pin)})";
-    }
-
-    public override string GenerateAnalogRead(int pin, int index, int offset, float multiplier, int deadzone, bool xbox)
-    {
-        var function = xbox ? "adc_xbox" : "adc";
-        return $"{function}({index}, {offset}, {(int)(multiplier * 64)}, {deadzone})";
-    }
-
-    public override string GenerateAnalogTriggerRead(int pin, int index, int offset, float multiplier, int deadzone, bool xbox)
-    {
-        var function = xbox ? "adc_trigger_xbox" : "adc_trigger";
-        return $"{function}({index}, {offset}, {(int)(multiplier * 64)}, {deadzone})";
     }
 
     public abstract int GetIndex(int pin);
@@ -53,11 +42,13 @@ public abstract class AvrController : Microcontroller
             skippedPins.Add(SpiTx);
             skippedPins.Add(SpiSck);
         }
+
         if (i2CEnabled)
         {
             skippedPins.Add(I2CScl);
             skippedPins.Add(I2CSda);
         }
+
         Dictionary<char, int> skippedByPort = new Dictionary<char, int>();
         for (var i = 0; i < PinCount; i++)
         {
@@ -65,6 +56,7 @@ public abstract class AvrController : Microcontroller
             {
                 skippedPins.Add(i);
             }
+
             skippedByPort[GetPort(i)] = 0;
         }
 
@@ -72,35 +64,43 @@ public abstract class AvrController : Microcontroller
         {
             skippedByPort[GetPort(pin)] |= 1 << GetIndex(pin);
         }
-        return "{" + string.Join(", ", skippedByPort.Keys.OrderBy(x => x).Select(x => skippedByPort[x].ToString())) + "}";
+
+        return "{" + string.Join(", ", skippedByPort.Keys.OrderBy(x => x).Select(x => skippedByPort[x].ToString())) +
+               "}";
     }
 
-    public override string GenerateInit(IEnumerable<Binding> bindings)
+    public override string GenerateInit(List<IOutput> bindings)
     {
-        var enumerable = bindings.ToList();
-        IEnumerable<DirectDigital> buttons = enumerable.FilterCast<Binding, DirectDigital>();
-        IEnumerable<DirectAnalog> axes = enumerable.FilterCast<Binding, DirectAnalog>();
         // DDRx 1 = output, 0 = input
         // PORTx input 1= pullup, 0 = floating
         // TODO: outputs (Start power led?)
         Dictionary<char, int> ddrByPort = new Dictionary<char, int>();
         Dictionary<char, int> portByPort = new Dictionary<char, int>();
-        foreach (var button in buttons)
+        foreach (var output in bindings)
         {
-            var port = GetPort(button.Pin);
-            var idx = GetIndex(button.Pin);
-            var currentPort = portByPort.GetValueOrDefault(port, 0);
-            var currentDdr = ddrByPort.GetValueOrDefault(port, 0);
-            if (button.PinMode == DevicePinMode.VCC)
+            if (output.Input?.InnermostInput() is DirectInput direct)
             {
-                currentPort += 1 << idx;
+                if (!direct.IsAnalog())
+                {
+                    var port = GetPort(direct.Pin);
+                    var idx = GetIndex(direct.Pin);
+                    var currentPort = portByPort.GetValueOrDefault(port, 0);
+                    var currentDdr = ddrByPort.GetValueOrDefault(port, 0);
+                    if (direct.PinMode == DevicePinMode.PullUp)
+                    {
+                        currentPort += 1 << idx;
+                    }
+
+                    if (currentPort != 0)
+                    {
+                        portByPort[port] = currentPort;
+                    }
+
+                    ddrByPort[port] = currentDdr;
+                }
             }
-            if (currentPort != 0)
-            {
-                portByPort[port] = currentPort;
-            }
-            ddrByPort[port] = currentDdr;
         }
+
         for (var i = 0; i < PinCount; i++)
         {
             var force = ForcedMode(i);
@@ -119,19 +119,23 @@ public abstract class AvrController : Microcontroller
                         currentDdr |= 1 << idx;
                         break;
                 }
+
                 portByPort[port] = currentPort;
                 ddrByPort[port] = currentDdr;
             }
         }
+
         string ret = "uint8_t oldSREG = SREG;cli();";
         foreach (var port in portByPort)
         {
             ret += $"PORT{port.Key} = {port.Value};";
         }
+
         foreach (var port in ddrByPort)
         {
             ret += $"DDR{port.Key} = {port.Value};";
         }
+
         ret += "SREG = oldSREG;";
         return ret;
     }
@@ -143,30 +147,37 @@ public abstract class AvrController : Microcontroller
         {
             ret += $" / A{pin - PinA0}";
         }
+
         if (pin == SpiCSn)
         {
             ret += $" / SPI CS";
         }
+
         if (pin == SpiRx)
         {
             ret += $" / SPI MISO";
         }
+
         if (pin == SpiTx)
         {
             ret += $" / SPI MOSI";
         }
+
         if (pin == SpiSck)
         {
             ret += $" / SPI CLK";
         }
+
         if (pin == I2CScl)
         {
             ret += $" / I2C SCL";
         }
+
         if (pin == I2CSda)
         {
             ret += $" / I2C SDA";
         }
+
         return ret;
     }
 }

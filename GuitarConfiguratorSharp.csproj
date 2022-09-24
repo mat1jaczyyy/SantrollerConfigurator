@@ -13,6 +13,7 @@
         <PublishReadyToRun>true</PublishReadyToRun>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">Windows</DefineConstants>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">POSIX</DefineConstants>
+        <LangVersion>preview</LangVersion>
     </PropertyGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.

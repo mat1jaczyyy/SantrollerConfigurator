@@ -1,10 +1,11 @@
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
-public enum GhwtTarButton 
+public enum GhWtInputType 
 {
     TapGreen,
     TapRed,
     TapYellow,
     TapBlue,
-    TapOrange
+    TapOrange,
+    TapBar
 }

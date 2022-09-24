@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using GuitarConfiguratorSharp.NetCore.Utils;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
 
@@ -42,16 +41,16 @@ public class Pico : Microcontroller
 
         return $"sio_hw->gpio_in & (1 << {pin})";
     }
-    public override string GenerateAnalogRead(int pin, int index, int offset, float multiplier, int deadzone, bool xbox)
+    public virtual string GenerateAnalogRead(int pin, int index, float multiplier, int deadzone, bool xbox)
     {
         var function = xbox ? "adc_xbox" : "adc";
-        return $"{function}({pin - PinA0}, {offset}, {(int)(multiplier * 64)}, {deadzone})";
+        return $"{function}({pin - PinA0}, [offset], {(int)(multiplier * 64)}, {deadzone})";
     }
 
-    public override string GenerateAnalogTriggerRead(int pin, int index, int offset, float multiplier, int deadzone, bool xbox)
+    public virtual string GenerateAnalogTriggerRead(int pin, int index, float multiplier, int deadzone, bool xbox)
     {
         var function = xbox ? "adc_trigger_xbox" : "adc_trigger";
-        return $"{function}({pin - PinA0}, {offset}, {(int)(multiplier * 64)}, {deadzone})";
+        return $"{function}({pin - PinA0}, [offset], {(int)(multiplier * 64)}, {deadzone})";
     }
 
     public override string GenerateSkip(bool spiEnabled, bool i2CEnabled)
@@ -80,22 +79,26 @@ public class Pico : Microcontroller
         return skip.ToString();
     }
 
-    public override string GenerateInit(IEnumerable<Binding> bindings)
+    public override string GenerateInit(List<IOutput> bindings)
     {
-        IEnumerable<DirectDigital> buttons = bindings.FilterCast<Binding, DirectDigital>();
-        IEnumerable<DirectAnalog> axes = bindings.FilterCast<Binding, DirectAnalog>();
         string ret = "";
-        foreach (var button in buttons)
+        foreach (var output in bindings)
         {
-            bool up = button.PinMode == DevicePinMode.BusKeep || button.PinMode == DevicePinMode.Ground;
-            bool down = button.PinMode == DevicePinMode.BusKeep || button.PinMode == DevicePinMode.VCC;
-            ret += $"gpio_init({button.Pin});";
-            ret += $"gpio_set_dir({button.Pin},false);";
-            ret += $"gpio_set_pulls({button.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
-        }
-        foreach (var axis in axes)
-        {
-            ret += $"adc_gpio_init({axis.Pin});";
+            if (output.Input?.InnermostInput() is DirectInput direct)
+            {
+                if (direct.IsAnalog())
+                {
+                    ret += $"adc_gpio_init({direct.Pin});";
+                }
+                else
+                {
+                    bool up = direct.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
+                    bool down = direct.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
+                    ret += $"gpio_init({direct.Pin});";
+                    ret += $"gpio_set_dir({direct.Pin},false);";
+                    ret += $"gpio_set_pulls({direct.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
+                }
+            }
         }
         return ret;
     }

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Utils;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore;
 
@@ -14,10 +15,6 @@ public class Arduino : IConfigurableDevice
 
     public bool MigrationSupported { get; }
 
-    private readonly DeviceConfiguration? _config;
-
-    public DeviceConfiguration? Configuration => _config;
-
     public Arduino(PlatformIo pio, PlatformIoPort port)
     {
         this._port = port;
@@ -27,7 +24,6 @@ public class Arduino : IConfigurableDevice
             {
                 this.Board = board;
                 this.MigrationSupported = true;
-                _config = new DeviceConfiguration(Board.FindMicrocontroller(this.Board));
                 return;
             }
         }
@@ -46,7 +42,6 @@ public class Arduino : IConfigurableDevice
             var boardFreq = UInt32.Parse(boardFreqStr);
             var tmp = Board.FindBoard(boardName, boardFreq);
             this.Board = new Board(boardName, $"Ardwiino - {tmp.Name} - pre 4.3.7", boardFreq, tmp.Environment, tmp.ProductIDs, tmp.HasUsbmcu);
-            _config = new DeviceConfiguration(Board.FindMicrocontroller(this.Board));
         }
         else
         {
@@ -83,6 +78,11 @@ public class Arduino : IConfigurableDevice
     public void BootloaderUsb()
     {
         // Automagically handled by pio
+    }
+
+    public void LoadConfiguration(ConfigViewModel model)
+    {
+        model.SetDefaults(Board.FindMicrocontroller(this.Board));
     }
 
     public Task<string?> GetUploadPort()
