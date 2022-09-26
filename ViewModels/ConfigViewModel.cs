@@ -7,20 +7,14 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Dahomey.Json;
-using Dahomey.Json.Serialization.Conventions;
+using System.Windows.Input;
+using Avalonia.Collections;
 using GuitarConfiguratorSharp.NetCore.Configuration;
-using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
-using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
-using GuitarConfiguratorSharp.NetCore.Configuration.Output;
-using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
+using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using ReactiveUI;
 
@@ -28,35 +22,116 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
     public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
+        public Interaction<Output, AddInputWindowViewModel?> ShowDialog { get; }
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
 
         public IScreen HostScreen { get; }
 
         public MainWindowViewModel Main { get; }
-    
-        public IEnumerable<DeviceControllerType> DeviceControllerTypes => Enum.GetValues(typeof(DeviceControllerType)).Cast<DeviceControllerType>();
+
+        public IEnumerable<DeviceControllerType> DeviceControllerTypes =>
+            Enum.GetValues(typeof(DeviceControllerType)).Cast<DeviceControllerType>();
+
+        public IEnumerable<RhythmType> RhythmTypes =>
+            Enum.GetValues(typeof(RhythmType)).Cast<RhythmType>();
+
+        public IEnumerable<EmulationType> EmulationTypes =>
+            Enum.GetValues(typeof(EmulationType)).Cast<EmulationType>();
+
+        public bool IsAVR => Main.SelectedDevice?.IsAVR() == true;
         public ReactiveCommand<Unit, Unit> WriteConfig { get; }
 
         public ReactiveCommand<Unit, Unit> GoBack { get; }
 
         public ReactiveCommand<Unit, Unit> Reset { get; }
-        
-        public LedType LedType { get; set; }
-        public bool TiltEnabled { get; set; }
-        public bool XInputOnWindows { get; set; }
-        
-        public bool CombinedDebounce { get; set; }
-        public DeviceControllerType DeviceType { get; set; }
-        public EmulationType EmulationType { get; set; }
-        public RhythmType RhythmType { get; set; }
-        public Configuration.Microcontroller.Microcontroller MicroController { get; set; }
-        public int WtPin { get; set; }
+
+        private LedType _ledType;
+
+        public LedType LedType
+        {
+            get => _ledType;
+            set => this.RaiseAndSetIfChanged(ref _ledType, value);
+        }
+
+        private bool _tiltEnabled;
+
+        public bool TiltEnabled
+        {
+            get => _tiltEnabled;
+            set => this.RaiseAndSetIfChanged(ref _tiltEnabled, value);
+        }
+
+        private bool _xinputOnWindows;
+
+        public bool XInputOnWindows
+        {
+            get => _xinputOnWindows;
+            set => this.RaiseAndSetIfChanged(ref _xinputOnWindows, value);
+        }
+
+        private bool _combinedDebounce;
+
+        public bool CombinedDebounce
+        {
+            get => _combinedDebounce;
+            set => this.RaiseAndSetIfChanged(ref _combinedDebounce, value);
+        }
+
+        private DeviceControllerType _deviceControllerType;
+
+        public DeviceControllerType DeviceType
+        {
+            get => _deviceControllerType;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _deviceControllerType, value);
+                this.RaisePropertyChanged("IsRhythm");
+            }
+        }
+
+        private EmulationType _emulationType;
+
+        public EmulationType EmulationType
+        {
+            get => _emulationType;
+            set
+            {
+                this.SetDefaultBindings();
+                this.RaiseAndSetIfChanged(ref _emulationType, value);
+            }
+        }
+
+        private RhythmType _rhythmType;
+
+        public RhythmType RhythmType
+        {
+            get => _rhythmType;
+            set => this.RaiseAndSetIfChanged(ref _rhythmType, value);
+        }
+
+        private Microcontroller _microController;
+
+        public Microcontroller MicroController
+        {
+            get => _microController;
+            set => this.RaiseAndSetIfChanged(ref _microController, value);
+        }
+
+        private int _wtPin;
+
+        public int WtPin
+        {
+            get => _wtPin;
+            set => this.RaiseAndSetIfChanged(ref _wtPin, value);
+        }
 
 
-        public List<IOutput> Bindings { get; }
+        public AvaloniaList<Output> Bindings { get; }
+        public bool IsRhythm => _deviceControllerType is DeviceControllerType.Drum or DeviceControllerType.Guitar;
 
         public ConfigViewModel(MainWindowViewModel screen)
         {
+            ShowDialog = new Interaction<Output, AddInputWindowViewModel?>();
             Main = screen;
             HostScreen = screen;
 
@@ -66,59 +141,39 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             GoBack = ReactiveCommand.CreateFromObservable<Unit, Unit>(Main.GoBack.Execute,
                 this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected))
                     .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
+            Bindings = new AvaloniaList<Output>();
+            ShowDialogCommand = ReactiveCommand.CreateFromObservable<Output, AddInputWindowViewModel?>((output) => ShowDialog.Handle(output));
         }
+
+        public ICommand ShowDialogCommand { get; }
 
         async Task Write()
         {
+            Generate(Main.Pio);
             await Main.Write(this);
         }
-        //TODO: JSON serialisation for ConfigViewModel
-        // [JsonConstructor]
-        // public DeviceConfiguration(Configuration.Microcontroller.Microcontroller microcontroller,
-        //     List<IOutput> bindings, LedType ledType, DeviceControllerType deviceType, EmulationType emulationType,
-        //     RhythmType rhythmType, bool tiltEnabled, bool xInputOnWindows)
-        // {
-        //     this.Bindings = bindings;
-        //     this.MicroController = microcontroller;
-        //     this.LedType = ledType;
-        //     this.DeviceType = deviceType;
-        //     this.EmulationType = emulationType;
-        //     this.RhythmType = rhythmType;
-        //     this.TiltEnabled = tiltEnabled;
-        //     this.XInputOnWindows = xInputOnWindows;
-        // }
-        //
-        public void SetDefaults(Configuration.Microcontroller.Microcontroller microcontroller)
+
+        public void SetDefaults(Microcontroller microcontroller)
         {
             MicroController = microcontroller;
-            this.Bindings.Clear();
-            this.LedType = LedType.None;
-            this.DeviceType = DeviceControllerType.Gamepad;
-            this.EmulationType = EmulationType.Universal;
-            this.RhythmType = RhythmType.GuitarHero;
-            this.TiltEnabled = false;
-            this.XInputOnWindows = false;
+            LedType = LedType.None;
+            DeviceType = DeviceControllerType.Gamepad;
+            EmulationType = EmulationType.Universal;
+            RhythmType = RhythmType.GuitarHero;
+            TiltEnabled = false;
+            XInputOnWindows = false;
+            SetDefaultBindings();
         }
 
-        public static JsonSerializerOptions GetJsonOptions(Configuration.Microcontroller.Microcontroller? controller)
+        public void SetDefaultBindings()
         {
-            JsonSerializerOptions options = new JsonSerializerOptions();
-            options.Converters.Add(new MicrocontrollerJsonConverter(controller));
-            options.SetupExtensions();
-            DiscriminatorConventionRegistry registry = options.GetDiscriminatorConventionRegistry();
-            registry.RegisterType<DjInput>();
-            registry.RegisterType<Gh5NeckInput>();
-            registry.RegisterType<GhWtTapInput>();
-            registry.RegisterType<AnalogToDigital>();
-            registry.RegisterType<DigitalToAnalog>();
-            registry.RegisterType<ControllerAxis>();
-            registry.RegisterType<ControllerButton>();
-            registry.RegisterType<KeyboardButton>();
-            registry.RegisterType<Ps2Input>();
-            registry.RegisterType<WiiInput>();
-            registry.RegisterType<DirectInput>();
-            return options;
+            Bindings.Clear();
+            if (EmulationType == EmulationType.Universal)
+            {
+                //TODO: this should also add a IOutput for every controller output as well!
+            }
         }
+
 
         public void Generate(PlatformIo pio)
         {
@@ -128,7 +183,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var directInputs = inputs.OfType<DirectInput>().ToList();
             string configFile = Path.Combine(pio.ProjectDir, "include", "config.h");
             var lines = File.ReadAllLines(configFile);
-            var json = JsonSerializer.Serialize(this, GetJsonOptions(MicroController));
+            var json = JsonSerializer.Serialize(this, JsonConfiguration.GetJsonOptions(MicroController));
             var bytes = Encoding.UTF8.GetBytes(json);
             var bytesLine = "";
             var bytesLenLine = "";
@@ -164,12 +219,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
                 if (line.StartsWith("#define ADC_COUNT "))
                 {
-                    lines[i] = $"#define ADC_COUNT {directInputs.Count(input => input.IsAnalog())}";
+                    lines[i] = $"#define ADC_COUNT {directInputs.Count(input => input.IsAnalog)}";
                 }
 
                 if (line.StartsWith("#define DIGITAL_COUNT "))
                 {
-                    lines[i] = $"#define DIGITAL_COUNT {inputs.Count(input => !input.IsAnalog())}";
+                    lines[i] = $"#define DIGITAL_COUNT {inputs.Count(input => !input.IsAnalog)}";
                 }
 
                 if (line.StartsWith("#define LED_TYPE "))
@@ -201,7 +256,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
                 if (line.StartsWith("#define PIN_INIT "))
                 {
-                    lines[i] = $"#define PIN_INIT {MicroController.GenerateInit(Bindings)}";
+                    lines[i] = $"#define PIN_INIT {MicroController.GenerateInit(Bindings.ToList())}";
                 }
 
                 if (MicroController is Pico)
@@ -236,26 +291,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             File.WriteAllLines(configFile, lines);
         }
 
-        public class MicrocontrollerJsonConverter : JsonConverter<Microcontroller>
-        {
-            private readonly Configuration.Microcontroller.Microcontroller? _currentController;
-
-            public MicrocontrollerJsonConverter(Configuration.Microcontroller.Microcontroller? currentController)
-            {
-                _currentController = currentController;
-            }
-
-            public override Configuration.Microcontroller.Microcontroller Read(
-                ref Utf8JsonReader reader,
-                Type typeToConvert,
-                JsonSerializerOptions options) => _currentController!;
-
-            public override void Write(
-                Utf8JsonWriter writer,
-                Configuration.Microcontroller.Microcontroller dateTimeValue,
-                JsonSerializerOptions options) => writer.WriteNullValue();
-        }
-
         public string GenerateTick(bool xbox)
         {
             var inputs = Bindings.Select(binding => binding.Input?.InnermostInput()).OfType<IInput>().ToList();
@@ -267,6 +302,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 index = 1;
             }
+
             foreach (var group in groupedInputs)
             {
                 ret += group.First().Input?.InnermostInput().GenerateAll(xbox, group.Select(output =>
@@ -287,11 +323,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                                 index++;
                             }
                         }
+
                         return new Tuple<IInput, string>(input, generated);
                     }
 
                     throw new IncompleteConfigurationException("Output without Input found!");
-                }).ToList(),MicroController);
+                }).ToList(), MicroController);
             }
 
             return ret;

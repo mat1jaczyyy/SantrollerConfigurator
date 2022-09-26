@@ -9,7 +9,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
-using GuitarConfiguratorSharp.NetCore.Configuration.Output;
+using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -27,9 +27,9 @@ public class Ardwiino : ConfigurableUsbDevice
 
     private const ControllerAxisType XboxWhammy = ControllerAxisType.XBOX_R_X;
     private const ControllerAxisType XboxTilt = ControllerAxisType.XBOX_R_Y;
-    private static readonly Version OldCpuInfoVersion = new Version(8, 8, 4);
+    private static readonly Version OldCpuInfoVersion = new(8, 8, 4);
 
-    private static readonly Version UsbControlRequestApi = new Version(4, 3, 7);
+    private static readonly Version UsbControlRequestApi = new(4, 3, 7);
 
     public const ushort SERIAL_ARDWIINO_REVISION = 0x3122;
     // public static readonly FilterDeviceDefinition ArdwiinoDeviceFilter = new(label: "Ardwiino", classGuid: Santroller.ControllerGUID);
@@ -55,9 +55,30 @@ public class Ardwiino : ConfigurableUsbDevice
     public Ardwiino(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort versionNumber)
         : base(device, path, product, serial, versionNumber)
     {
-        if (this.version < new Version(6, 0, 0))
+        if (version < new Version(6, 0, 0))
         {
-            this.MigrationSupported = false;
+            var buffer = ReadData(6, RequestHidGetReport);
+            _cpuFreq = uint.Parse(StructTools.RawDeserializeStr(buffer));
+            buffer = ReadData(7, RequestHidGetReport);
+            string board = StructTools.RawDeserializeStr(buffer);
+            Board = Board.FindBoard(board, _cpuFreq);
+            MigrationSupported = false;
+            return;
+        }
+        MigrationSupported = true;
+        // Version 6.0.0 started at config version 6, so we don't have to support anything earlier than that
+        byte[] data = ReadData(CpuInfoCommand, 1);
+        if (version < OldCpuInfoVersion)
+        {
+            CpuInfoOld info = StructTools.RawDeserialize<CpuInfoOld>(data, 0);
+            _cpuFreq = info.cpu_freq;
+            Board = Board.FindBoard(info.board, _cpuFreq);
+        }
+        else
+        {
+            CpuInfo info = StructTools.RawDeserialize<CpuInfo>(data, 0);
+            _cpuFreq = info.cpu_freq;
+            Board = Board.FindBoard(info.board, _cpuFreq);
         }
     }
 
@@ -83,34 +104,14 @@ public class Ardwiino : ConfigurableUsbDevice
 
     public override void LoadConfiguration(ConfigViewModel model)
     {
+        if (!MigrationSupported)
+        {
+            model.SetDefaults(Board.FindMicrocontroller(Board));
+            return;
+        }
+
         try
         {
-            if (this.version < new Version(6, 0, 0))
-            {
-                var buffer = this.ReadData(6, RequestHidGetReport);
-                this._cpuFreq = uint.Parse(StructTools.RawDeserializeStr(buffer));
-                buffer = this.ReadData(7, RequestHidGetReport);
-                string board = StructTools.RawDeserializeStr(buffer);
-                this.Board = Board.FindBoard(board, this._cpuFreq);
-                model.SetDefaults(Board.FindMicrocontroller(this.Board));
-                return;
-            }
-
-            // Version 6.0.0 started at config version 6, so we don't have to support anything earlier than that
-            byte[] data = this.ReadData(CpuInfoCommand, 1);
-            if (this.version < OldCpuInfoVersion)
-            {
-                CpuInfoOld info = StructTools.RawDeserialize<CpuInfoOld>(data, 0);
-                this._cpuFreq = info.cpu_freq;
-                this.Board = Board.FindBoard(info.board, this._cpuFreq);
-            }
-            else
-            {
-                CpuInfo info = StructTools.RawDeserialize<CpuInfo>(data, 0);
-                this._cpuFreq = info.cpu_freq;
-                this.Board = Board.FindBoard(info.board, this._cpuFreq);
-            }
-
             var readConfig = ReadConfigCommand;
             if (this.version < new Version(8, 0, 7))
             {
@@ -121,7 +122,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 readConfig = ReadConfigPre703Command;
             }
 
-            data = new byte[Marshal.SizeOf(typeof(ArdwiinoConfiguration))];
+            var data = new byte[Marshal.SizeOf(typeof(ArdwiinoConfiguration))];
             int sizeOfAll = Marshal.SizeOf(typeof(FullArdwiinoConfiguration));
             int offset = 0;
             int offsetId = 0;
@@ -262,7 +263,7 @@ public class Ardwiino : ConfigurableUsbDevice
             }
 
             Microcontroller controller = Board.FindMicrocontroller(Board);
-            List<IOutput> bindings = new List<IOutput>();
+            List<Output> bindings = new List<Output>();
             Dictionary<int, Color> colors = new Dictionary<int, Color>();
             foreach (var led in config.all!.leds!)
             {
@@ -340,8 +341,8 @@ public class Ardwiino : ConfigurableUsbDevice
                 case SubType.MIDI_LIVE_GUITAR:
                 case SubType.XINPUT_LIVE_GUITAR:
                 case SubType.KEYBOARD_LIVE_GUITAR:
-                    deviceType = DeviceControllerType.Guitar;
-                    rhythmType = RhythmType.Live;
+                    deviceType = DeviceControllerType.LiveGuitar;
+                    rhythmType = RhythmType.GuitarHero;
                     break;
                 case SubType.PS3_ROCK_BAND_DRUMS:
                 case SubType.WII_ROCK_BAND_DRUMS:
@@ -390,7 +391,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 };
                 foreach (var item in neckData)
                 {
-                    bindings.Add(new ControllerButton(new Gh5NeckInput(item.Item1), Color.FromArgb(0, 0, 0, 0),
+                    bindings.Add(new ControllerButton(model, new Gh5NeckInput(item.Item1), Color.FromArgb(0, 0, 0, 0),
                         Color.FromArgb(0, 0, 0, 0), config.debounce.buttons, item.Item2));
                 }
             }
@@ -407,7 +408,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 };
                 foreach (var item in neckData)
                 {
-                    bindings.Add(new ControllerButton(new Gh5NeckInput(item.Item1), Color.FromArgb(0, 0, 0, 0),
+                    bindings.Add(new ControllerButton(model, new Gh5NeckInput(item.Item1), Color.FromArgb(0, 0, 0, 0),
                         Color.FromArgb(0, 0, 0, 0), config.debounce.buttons, item.Item2));
                 }
             }
@@ -434,16 +435,17 @@ public class Ardwiino : ConfigurableUsbDevice
                     }
 
                     Color off = Color.FromRgb(0, 0, 0);
-                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
-                    {
-                        isTrigger = true;
-                    }
+                    //TODO: implement this inside of ControllerAxis itself. Maybe we have to pass the devicetype to the constructor?
+                    // if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
+                    // {
+                    //     isTrigger = true;
+                    // }
 
                     if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt)
                     {
-                        bindings.Add(new ControllerAxis(
-                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp), 32767), on, off, 1, 0,
-                            0, false, StandardAxisType.RightStickY));
+                        bindings.Add(new ControllerAxis(model,
+                            new DigitalToAnalog( new DirectInput(pin.pin, DevicePinMode.PullUp, controller), 32767), on, off, 1, 0,
+                            0, StandardAxisType.RightStickY));
                     }
                     else
                     {
@@ -451,8 +453,8 @@ public class Ardwiino : ConfigurableUsbDevice
                                              (pin.inverted > 0 ? -1 : 1);
                         var axisOffset = ((isTrigger ? 0 : 32670) + scale.offset) >> 8;
                         var axisDeadzone = ((isTrigger ? 32768 : 0) + scale.deadzone) >> 8;
-                        bindings.Add(new ControllerAxis(new DirectInput(pin.pin, DevicePinMode.Analog), on, off,
-                            axisMultiplier, axisOffset, axisDeadzone, isTrigger, genAxis));
+                        bindings.Add(new ControllerAxis(model, new DirectInput(pin.pin, DevicePinMode.Analog, controller), on, off,
+                            axisMultiplier, axisOffset, axisDeadzone, genAxis));
                     }
                 }
 
@@ -486,7 +488,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         debounce = config.debounce.strum;
                     }
 
-                    bindings.Add(new ControllerButton(new DirectInput(pin, pinMode), on, off, debounce, genButton));
+                    bindings.Add(new ControllerButton(model,new DirectInput(pin, pinMode, controller), on, off, debounce, genButton));
                 }
             }
             else if (config.all.main.inputType == (int) InputControllerType.Wii)
@@ -524,10 +526,10 @@ public class Ardwiino : ConfigurableUsbDevice
                 {
                     var onlx = lx.LedOn;
                     var offlx = lx.LedOff;
-                    bindings.Add(new ControllerButton(
+                    bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyLow, threshold), onlx, offlx,
                         config.debounce.buttons, StandardButtonType.Left));
-                    bindings.Add(new ControllerButton(
+                    bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyHigh, threshold), onlx, offlx,
                         config.debounce.buttons, StandardButtonType.Right));
                 }
@@ -536,23 +538,23 @@ public class Ardwiino : ConfigurableUsbDevice
                 {
                     var only = ly.LedOn;
                     var offly = ly.LedOff;
-                    bindings.Add(new ControllerButton(
+                    bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold), only, offly,
                         config.debounce.buttons, StandardButtonType.Up));
-                    bindings.Add(new ControllerButton(
+                    bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold), only, offly,
                         config.debounce.buttons, StandardButtonType.Down));
                 }
             }
-
             model.MicroController = controller;
-            model.Bindings.AddRange(bindings);
             model.LedType = ledType;
             model.DeviceType = deviceType;
             model.EmulationType = emulationType;
             model.RhythmType = rhythmType;
             model.TiltEnabled = config.all.main.tiltType == 2;
             model.XInputOnWindows = xinputOnWindows;
+            model.Bindings.Clear();
+            model.Bindings.AddRange(bindings);
         }
         catch (ArgumentException)
         {
@@ -633,7 +635,7 @@ public class Ardwiino : ConfigurableUsbDevice
     };
 
     private static readonly Dictionary<ControllerAxisType, StandardAxisType> AxisToStandard =
-        new Dictionary<ControllerAxisType, StandardAxisType>()
+        new()
         {
             {ControllerAxisType.XBOX_L_X, StandardAxisType.LeftStickX},
             {ControllerAxisType.XBOX_L_Y, StandardAxisType.LeftStickY},
@@ -644,7 +646,7 @@ public class Ardwiino : ConfigurableUsbDevice
         };
 
     private static readonly Dictionary<ControllerButtons, StandardButtonType> ButtonToStandard =
-        new Dictionary<ControllerButtons, StandardButtonType>()
+        new()
         {
             {ControllerButtons.XBOX_DPAD_UP, StandardButtonType.Up},
             {ControllerButtons.XBOX_DPAD_DOWN, StandardButtonType.Down},
@@ -664,7 +666,7 @@ public class Ardwiino : ConfigurableUsbDevice
             {ControllerButtons.XBOX_Y, StandardButtonType.Y}
         };
 
-    readonly List<StandardButtonType> _frets = new List<StandardButtonType>()
+    readonly List<StandardButtonType> _frets = new()
     {
         StandardButtonType.A, StandardButtonType.B, StandardButtonType.X, StandardButtonType.Y, StandardButtonType.LB,
         StandardButtonType.RB

@@ -69,7 +69,7 @@ public abstract class AvrController : Microcontroller
                "}";
     }
 
-    public override string GenerateInit(List<IOutput> bindings)
+    public override string GenerateInit(List<Output> bindings)
     {
         // DDRx 1 = output, 0 = input
         // PORTx input 1= pullup, 0 = floating
@@ -80,7 +80,7 @@ public abstract class AvrController : Microcontroller
         {
             if (output.Input?.InnermostInput() is DirectInput direct)
             {
-                if (!direct.IsAnalog())
+                if (!direct.IsAnalog)
                 {
                     var port = GetPort(direct.Pin);
                     var idx = GetIndex(direct.Pin);

@@ -6,7 +6,7 @@ namespace GuitarConfiguratorSharp.NetCore.Utils
 {
     public class SnakeCaseNamingPolicy : JsonNamingPolicy
     {
-        public static SnakeCaseNamingPolicy Instance { get; } = new SnakeCaseNamingPolicy();
+        public static SnakeCaseNamingPolicy Instance { get; } = new();
 
         internal enum SnakeCaseState
         {

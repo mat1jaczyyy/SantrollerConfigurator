@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using GuitarConfiguratorSharp.NetCore.ViewModels;

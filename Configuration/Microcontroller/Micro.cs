@@ -111,7 +111,7 @@ public class Micro : AvrController
     public override Board Board {get;}
 
     public Micro(Board board) {
-        this.Board = board;
+        Board = board;
     }
     public override int GetIndex(int pin)
     {

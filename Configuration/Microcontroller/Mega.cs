@@ -167,7 +167,7 @@ public class Mega : AvrController
     public override Board Board {get;}
 
     public Mega(Board board) {
-        this.Board = board;
+        Board = board;
     }
 
     public override int GetIndex(int pin)

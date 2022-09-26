@@ -2,16 +2,95 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker"
-             xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp"
              xmlns:netCore="clr-namespace:GuitarConfiguratorSharp.NetCore"
              xmlns:viewModels="clr-namespace:GuitarConfiguratorSharp.NetCore.ViewModels"
-             xmlns:output="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Output"
              xmlns:configuration="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration"
+             xmlns:neck="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Neck"
+             xmlns:conversions="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Conversions"
+             xmlns:dj="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.DJ"
+             xmlns:ps2="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.PS2"
+             xmlns:wii="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Wii"
+             xmlns:output="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Outputs"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
-              x:Class="GuitarConfiguratorSharp.NetCore.Views.ConfigView"
+             x:Class="GuitarConfiguratorSharp.NetCore.Views.ConfigView"
+             x:CompileBindings="True"
              Background="Transparent">
     <UserControl.Resources>
-        <netCore:BindingBitmapConverter x:Key="ImageConverter"/>
+        <netCore:BitmapAssetValueConverter x:Key="ImageConverter" />
+        <netCore:OutputTemplateSelector x:Key="OutputTemplates">
+            <!-- TODO: just need to fully implement one of thse for each input and output, and we are good. -->
+            <DataTemplate DataType="{x:Type neck:Gh5NeckInput}">
+                <WrapPanel>
+                    <TextBlock Text="GH5 Neck Input: "></TextBlock>
+                    <TextBlock Text="{Binding Input}"></TextBlock>
+                </WrapPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type neck:GhWtTapInput}">
+                <WrapPanel>
+                    <TextBlock Text="GH WT Tap Input: "></TextBlock>
+                    <TextBlock Text="{Binding Input}"></TextBlock>
+                    <!-- TODO Add button for picking pin interactivly -->
+                    <NumericUpDown Value="{Binding Pin}" VerticalAlignment="Center"></NumericUpDown>
+                </WrapPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type dj:DjInput}">
+                <WrapPanel>
+                    <TextBlock Text="DJ Controller Input: "></TextBlock>
+                    <TextBlock Text="{Binding Input}"></TextBlock>
+                </WrapPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type ps2:Ps2Input}">
+                <WrapPanel>
+                    <TextBlock Text="PS2 Controller Input: "></TextBlock>
+                    <TextBlock Text="{Binding Input}"></TextBlock>
+                </WrapPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type wii:WiiInput}">
+                <WrapPanel>
+                    <TextBlock Text="Wii Controller Input: "></TextBlock>
+                    <TextBlock Text="{Binding Input}"></TextBlock>
+                </WrapPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type configuration:DirectInput}">
+                <WrapPanel>
+                    <TextBlock Text="Direct Input: "></TextBlock>
+                    <WrapPanel IsVisible="{Binding !IsAnalog}">
+                        <ComboBox SelectedItem="{Binding PinMode}" Items="{Binding DevicePinModes}">
+                        </ComboBox>
+                    </WrapPanel>
+                    <!-- TODO Add button for picking pin interactivly -->
+                    <NumericUpDown Value="{Binding Pin}" VerticalAlignment="Center"></NumericUpDown>
+                </WrapPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputAxis}">
+                <WrapPanel>
+                    <!-- TODO: this would all just be replaced with a "Calibrate" dialog, and possibly some gauges showing the current values -->
+                    <NumericUpDown Value="{Binding Multiplier}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown Value="{Binding Offset}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown Value="{Binding Deadzone}" VerticalAlignment="Center"></NumericUpDown>
+                </WrapPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputButton}"></DataTemplate>
+            <DataTemplate DataType="{x:Type conversions:DigitalToAnalog}">
+                <WrapPanel VerticalAlignment="Stretch">
+                    <NumericUpDown Value="{Binding Value}" VerticalAlignment="Center"></NumericUpDown>
+                    <ContentControl Content="{Binding Child}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                </WrapPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
+                <WrapPanel>
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedItem="{Binding AnalogToDigitalType}" Items="{Binding AnalogToDigitalTypes}">
+                    </ComboBox>
+                    <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
+                    <ContentControl Content="{Binding Child}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                </WrapPanel>
+            </DataTemplate>
+        </netCore:OutputTemplateSelector>
     </UserControl.Resources>
     <Panel>
         <DockPanel HorizontalAlignment="Stretch">
@@ -24,45 +103,32 @@
                         <StackPanel>
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Emulation Type"
                                        TextAlignment="Center" />
-                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
-                                <ComboBoxItem>Universal</ComboBoxItem>
-                                <ComboBoxItem>XInput</ComboBoxItem>
-                                <ComboBoxItem>Keyboard / Mouse</ComboBoxItem>
-                                <ComboBoxItem>Midi</ComboBoxItem>
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedItem="{Binding EmulationType}" Items="{Binding EmulationTypes}">
                             </ComboBox>
                         </StackPanel>
                         <StackPanel>
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type"
                                        TextAlignment="Center" />
                             <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding DeviceControllerType}" Items="{Binding DeviceControllerTypes}"></ComboBox>
+                                      SelectedItem="{Binding DeviceType}" Items="{Binding DeviceControllerTypes}">
+                            </ComboBox>
                         </StackPanel>
-                        <StackPanel>
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Inputs"
+                        <StackPanel IsVisible="{Binding IsRhythm}">
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Rhythm Game Type"
                                        TextAlignment="Center" />
-                            <ToggleButton>Wii</ToggleButton>
-                            <ToggleButton>PS2</ToggleButton>
-                            <ToggleButton>Direct</ToggleButton>
-                            <ToggleButton>GH5 Neck</ToggleButton>
-                            <ToggleButton>WT Neck</ToggleButton>
-                            <ToggleButton>DJ Hero Turntable</ToggleButton>
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedItem="{Binding RhythmType}" Items="{Binding RhythmTypes}">
+                            </ComboBox>
                         </StackPanel>
                         <StackPanel>
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="LED Type"
                                        TextAlignment="Center" />
-                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Margin="20 20 20 0">
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0">
                                 <ComboBoxItem>APA102</ComboBoxItem>
                                 <ComboBoxItem>WS2812</ComboBoxItem>
-                                <ComboBoxItem>Inline</ComboBoxItem>
                                 <ComboBoxItem>None</ComboBoxItem>
                             </ComboBox>
-                        </StackPanel>
-                        <StackPanel>
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="LED Open Colour"
-                                       TextAlignment="Center" />
-                            <colorpicker:ColorButton HorizontalContentAlignment="Stretch" Color="black"
-                                                     HorizontalAlignment="Center" Margin="0 20 0 0">
-                            </colorpicker:ColorButton>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
@@ -93,23 +159,49 @@
                 <ScrollViewer>
                     <StackPanel HorizontalAlignment="Center">
                         <StackPanel HorizontalAlignment="Center">
-                            <ItemsRepeater Items="{Binding Config.Bindings}">
+                            <ItemsRepeater Items="{Binding Bindings}">
                                 <ItemsRepeater.ItemTemplate>
-                                    <netCore:OutputTemplateSelector>
-                                        <DataTemplate DataType="{x:Type output:ControllerButton}"><WrapPanel>
-                                                <Image ToolTip.Tip="{Binding Name}" HorizontalAlignment="Center" Width="75">
-                                                    <Image.Source>
-                                                        <MultiBinding Converter="{StaticResource ImageConverter}">
-                                                            <Binding  Path="$parent[UserControl].DataContext.Config.DeviceType"  />
-                                                            <Binding Path="Image" />
-                                                        </MultiBinding>
-                                                    </Image.Source>
-                                                </Image>
-                                                <ContentControl Content="{Binding Input}"></ContentControl>
-                                                <TextBlock Text="{Binding Image}"></TextBlock>
-                                            </WrapPanel>
-                                        </DataTemplate>
-                                    </netCore:OutputTemplateSelector>
+                                    <DataTemplate DataType="configuration:Output">
+                                        <WrapPanel>
+                                            <Image ToolTip.Tip="{Binding Name}"
+                                                   HorizontalAlignment="Center" Width="75"
+                                                   Source="{Binding Image, Converter={StaticResource ImageConverter}}">
+                                            </Image>
+                                            <!-- <Image ToolTip.Tip="{Binding Name}" -->
+                                            <!--        HorizontalAlignment="Center" Width="75"> -->
+                                            <!--     <Image.Source> -->
+                                            <!--         <MultiBinding -->
+                                            <!--             Converter="{StaticResource ImageConverter}"> -->
+                                            <!--             <Binding -->
+                                            <!--                 Path="$parent[UserControl].DataContext.DeviceType" /> -->
+                                            <!--             <Binding Path="Image" /> -->
+                                            <!--         </MultiBinding> -->
+                                            <!--     </Image.Source> -->
+                                            <!-- </Image> -->
+                                            <ContentControl Content="{Binding Input}"
+                                                            ContentTemplate="{StaticResource OutputTemplates}">
+                                            </ContentControl>
+                                            <Button
+                                                x:CompileBindings="False"
+                                                IsVisible="{Binding Input, Converter={x:Static  ObjectConverters.IsNotNull}}"
+                                                Command="{Binding ClearInput}">
+                                                Clear Input
+                                            </Button>
+                                            <Button
+                                                x:CompileBindings="False"
+                                                IsVisible="{Binding Input, Converter={x:Static  ObjectConverters.IsNull}}"
+                                                Command="{Binding $parent[UserControl].DataContext.ShowDialogCommand}"
+                                                CommandParameter="{Binding}">
+                                                Bind Input
+                                            </Button>
+
+                                            <colorpicker:ColorButton Color="{Binding LedOn}"></colorpicker:ColorButton>
+                                            <colorpicker:ColorButton Color="{Binding LedOff}"></colorpicker:ColorButton>
+                                            <ContentControl Content="{Binding}"
+                                                            ContentTemplate="{StaticResource OutputTemplates}">
+                                            </ContentControl>
+                                        </WrapPanel>
+                                    </DataTemplate>
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
                         </StackPanel>

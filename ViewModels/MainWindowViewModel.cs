@@ -25,14 +25,13 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
     {
         // The Router associated with this Screen.
         // Required by the IScreen interface.
-        public RoutingState Router { get; } = new RoutingState();
-
+        public RoutingState Router { get; } = new();
         public ReactiveCommand<Unit, IRoutableViewModel> Configure { get; }
 
         // The command that navigates a user back.
         public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
-        public AvaloniaList<IConfigurableDevice> Devices { get; } = new AvaloniaList<IConfigurableDevice>();
+        public AvaloniaList<IConfigurableDevice> Devices { get; } = new();
 
         private IConfigurableDevice? _selectedDevice;
         private IConfigurableDevice? _disconnectedDevice;
@@ -54,7 +53,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 this.RaiseAndSetIfChanged(ref _selectedDevice, value);
                 this.RaisePropertyChanged("MigrationSupported");
-                this.Connected = SelectedDevice != null;
+                Connected = SelectedDevice != null;
             }
         }
 
@@ -172,9 +171,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         }
 
         private readonly IDeviceNotifier _deviceListener;
-        public PlatformIo Pio { get; } = new PlatformIo();
+        public PlatformIo Pio { get; } = new();
 
-        private readonly Timer _timer = new Timer();
+        private readonly Timer _timer = new();
 
         private class RegDeviceNotifyInfo : IUsbDeviceNotifyInfo
         {
@@ -182,7 +181,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             public RegDeviceNotifyInfo(UsbRegistry dev)
             {
-                this._dev = dev;
+                _dev = dev;
             }
 
             public UsbSymbolicName SymbolicName => UsbSymbolicName.Parse(_dev.SymbolicName);
@@ -208,9 +207,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         {
             public DeviceNotifyArgsRegistry(UsbRegistry dev)
             {
-                this.Device = new RegDeviceNotifyInfo(dev);
-                this.DeviceType = DeviceType.DeviceInterface;
-                this.EventType = EventType.DeviceArrival;
+                Device = new RegDeviceNotifyInfo(dev);
+                DeviceType = DeviceType.DeviceInterface;
+                EventType = EventType.DeviceArrival;
             }
         }
 
@@ -228,13 +227,13 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             Pio.PlatformIoError += (val) =>
             {
-                this.ProgressbarColor = val ? "red" : "PrimaryColor";
+                ProgressbarColor = val ? "red" : "PrimaryColor";
             };
 
             Pio.ProgressChanged += (message, val, val2) =>
             {
-                this.Message = message;
-                this.Progress = val2;
+                Message = message;
+                Progress = val2;
             };
 
             Devices.CollectionChanged += (_, e) =>
@@ -269,7 +268,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             _timer.AutoReset = false;
             Pio.PlatformIoInstalled += () =>
             {
-                this.Installed = true;
+                Installed = true;
                 foreach (UsbRegistry dev in UsbDevice.AllDevices)
                 {
                     OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
@@ -281,15 +280,15 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             // So that we know the right device is picked back up.
             Pio.PlatformIoWorking += (working) =>
             {
-                this.Working = working;
+                Working = working;
             };
             _ = Pio.InitialisePlatformIo();
 
             Task.Run(InstallDependancies);
         }
 
-        private readonly List<string> _currentDrives = new List<string>();
-        private readonly List<string> _currentPorts = new List<string>();
+        private readonly List<string> _currentDrives = new();
+        private readonly List<string> _currentPorts = new();
 
         private void AddDevice(IConfigurableDevice device)
         {
@@ -315,17 +314,17 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         {
                             _selectedDevice = device;
                             _disconnectedDevice = null;
-                            this.Connected = true;
+                            Connected = true;
 
-                            this.Message = "Writing - Done";
-                            this.Progress = 100;
+                            Message = "Writing - Done";
+                            Progress = 100;
                         }
                     }
                     else if (_writingToUsb)
                     {
                         _writingToUsb = false;
-                        this.Message = "Writing - USB - Done";
-                        this.Progress = 50;
+                        Message = "Writing - USB - Done";
+                        Progress = 50;
                         var usbdevice = _disconnectedDevice as ConfigurableUsbDevice;
                         if (usbdevice != null)
                         {
@@ -427,7 +426,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     if (_disconnectedDevice == null && _selectedDevice is ConfigurableUsbDevice && _selectedDevice?.IsSameDevice(e.Device.Name) == true)
                     {
                         _disconnectedDevice = _selectedDevice;
-                        this.Connected = false;
+                        Connected = false;
                     }
                 }
             }

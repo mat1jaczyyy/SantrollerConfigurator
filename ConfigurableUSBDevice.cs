@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Utils;
@@ -38,7 +39,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public bool IsSameDevice(string serialOrPath)
     {
-        return this.serial == serialOrPath || this.path == serialOrPath;
+        return serial == serialOrPath || path == serialOrPath;
     }
 
     public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
@@ -76,7 +77,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     private TaskCompletionSource<String?>? _bootloaderPath = null;
     public bool DeviceAdded(IConfigurableDevice device)
     {
-        if (this.Board.ArdwiinoName.Contains("pico"))
+        if (Board.ArdwiinoName.Contains("pico"))
         {
             var pico = device as PicoDevice;
             if (pico != null)
@@ -84,7 +85,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
                 _bootloaderPath?.SetResult(pico.GetPath());
             }
         }
-        else if (this.Board.HasUsbmcu)
+        else if (Board.HasUsbmcu)
         {
             var dfu = device as Dfu;
             if (dfu != null && dfu.Board.HasUsbmcu && dfu.Board.Environment.Contains("arduino_uno_mega"))
@@ -110,7 +111,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public async Task<string?> GetUploadPort()
     {
-        if (this.Board.ArdwiinoName.Contains("pico") || this.Board.HasUsbmcu)
+        if (Board.ArdwiinoName.Contains("pico") || Board.HasUsbmcu)
         {
             _bootloaderPath = new TaskCompletionSource<string?>();
             Bootloader();
@@ -122,4 +123,8 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         }
     }
 
+    public bool IsAVR()
+    {
+        return Board.IsAVR();
+    }
 }

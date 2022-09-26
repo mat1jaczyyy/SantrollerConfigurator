@@ -57,12 +57,13 @@ public class Santroller : ConfigurableUsbDevice
     {
         try
         {
-            var fCpuStr = Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("\0", "").Replace("L", "").Trim();
+            var fCpuStr = Encoding.UTF8.GetString(ReadData(0, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("\0", "").Replace("L", "").Trim();
             var fCpu = uint.Parse(fCpuStr);
-            var board = Encoding.UTF8.GetString(this.ReadData(0, ((byte)Commands.COMMAND_READ_BOARD), 32)).Replace("\0", "");
+            var board = Encoding.UTF8.GetString(ReadData(0, ((byte)Commands.COMMAND_READ_BOARD), 32)).Replace("\0", "");
             Microcontroller m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
-            this.Board = m.Board;
-            var data = this.ReadData(0, ((byte)Commands.COMMAND_READ_CONFIG), 2048);
+            Board = m.Board;
+            model.MicroController = m;
+            var data = ReadData(0, ((byte)Commands.COMMAND_READ_CONFIG), 2048);
             using (var inputStream = new MemoryStream(data))
             {
                 using (var outputStream = new MemoryStream())
@@ -71,9 +72,8 @@ public class Santroller : ConfigurableUsbDevice
                     using (var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress))
                     {
                         decompressor.CopyTo(outputStream);
-                        //TODO: how do
-                        // _config = JsonSerializer.Deserialize<DeviceConfiguration>(Encoding.UTF8.GetString(outputStream.ToArray()), DeviceConfiguration.GetJsonOptions(m))!;
-                        // _config.Generate(pio);
+                        var config = JsonSerializer.Deserialize<JsonConfiguration>(Encoding.UTF8.GetString(outputStream.ToArray()), JsonConfiguration.GetJsonOptions(m))!;
+                        config.LoadConfiguration(model);
                     }
                 }
             }

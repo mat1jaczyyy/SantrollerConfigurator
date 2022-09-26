@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Output;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public class MouseButton : OutputButton
 {
@@ -14,14 +15,12 @@ public class MouseButton : OutputButton
         MouseButtonType.Middle
     };
 
-    public MouseButton(IInput? input, Color ledOn, Color ledOff, int debounce, MouseButtonType type) : base(input, ledOn, ledOff, debounce)
+    public MouseButton(ConfigViewModel model, IInput? input, Color ledOn, Color ledOff, int debounce, MouseButtonType type) : base(model, input, ledOn, ledOff, debounce)
     {
         Type = type;
     }
 
     public override string Name => Type.ToString();
-    //TODO: this
-    public override string Image => Name;
     public MouseButtonType Type { get; }
     public override string GenerateIndex(bool xbox)
     {

@@ -5,12 +5,12 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 
 public class WiiInput : IInput
 {
-    public WiiInputType InputType { get; }
+    public WiiInputType Input { get; }
 
-    public WiiControllerType WiiControllerType => AxisToType[InputType];
+    public WiiControllerType WiiControllerType => AxisToType[Input];
 
     private static readonly Dictionary<WiiInputType, WiiControllerType> AxisToType =
-        new Dictionary<WiiInputType, WiiControllerType>()
+        new()
         {
             {WiiInputType.ClassicLeftStickX, WiiControllerType.ClassicController},
             {WiiInputType.ClassicLeftStickY, WiiControllerType.ClassicController},
@@ -106,7 +106,7 @@ public class WiiInput : IInput
             {WiiInputType.UDrawPenClick, WiiControllerType.UDraw}
         };
 
-    private static readonly Dictionary<WiiInputType, string> Mappings = new Dictionary<WiiInputType, string>()
+    private static readonly Dictionary<WiiInputType, string> Mappings = new()
     {
         {WiiInputType.ClassicLeftStickX, "((data[0] & 0x3f) - 32) << 9"},
         {WiiInputType.ClassicLeftStickY, "((data[1] & 0x3f) - 32) << 9"},
@@ -208,7 +208,7 @@ public class WiiInput : IInput
         {WiiInputType.UDrawPenClick, "(( data[5]) & (1 << 2))"}
     };
 
-    private static readonly Dictionary<WiiControllerType, string> CType = new Dictionary<WiiControllerType, string>() {
+    private static readonly Dictionary<WiiControllerType, string> CType = new() {
         {WiiControllerType.ClassicController, "WII_CLASSIC_CONTROLLER"},
         {WiiControllerType.ClassicControllerHighRes, "WII_CLASSIC_CONTROLLER"},
         {WiiControllerType.Nunchuk, "WII_NUNCHUK"},
@@ -221,20 +221,17 @@ public class WiiInput : IInput
         {WiiControllerType.MotionPlus, "WII_MOTION_PLUS"}
     };
 
-    public WiiInput(WiiInputType inputType)
+    public WiiInput(WiiInputType input)
     {
-        InputType = inputType;
+        Input = input;
     }
 
     public string Generate(bool xbox, Microcontroller.Microcontroller controller)
     {
-        return Mappings[this.InputType];
+        return Mappings[Input];
     }
 
-    public bool IsAnalog()
-    {
-        return InputType <= WiiInputType.DrawsomePenPressure;
-    }
+    public bool IsAnalog => Input <= WiiInputType.DrawsomePenPressure;
 
     public bool RequiresSpi()
     {
@@ -256,7 +253,7 @@ public class WiiInput : IInput
             {
                 if (!mappedBindings.ContainsKey(input.WiiControllerType))
                 {
-                    mappedBindings.Add(input.WiiControllerType, new ());
+                    mappedBindings.Add(input.WiiControllerType, new List<string>());
                 }
                 mappedBindings[input.WiiControllerType].Add(binding.Item2);
             }

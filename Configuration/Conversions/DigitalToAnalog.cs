@@ -10,7 +10,7 @@ public class DigitalToAnalog : IInput
 
     public DigitalToAnalog(IInput child, int value)
     {
-        this.Child = child;
+        Child = child;
         Value = value;
     }
 
@@ -23,11 +23,8 @@ public class DigitalToAnalog : IInput
     {
         return Child;
     }
-    
-    public bool IsAnalog()
-    {
-        return Child.IsAnalog();
-    }
+
+    public bool IsAnalog => Child.IsAnalog;
 
     public bool RequiresSpi()
     {

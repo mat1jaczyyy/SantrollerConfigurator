@@ -1,35 +1,15 @@
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
-public interface IOutput
+public abstract class OutputButton : Output
 {
-    public string Name { get; }
-
-    public string Image { get; }
-
-    public IInput? Input { get; set; }
-    public Color LedOn { get; set; }
-    public Color LedOff { get; set; }
-    public string Generate(bool xbox, Microcontroller.Microcontroller microcontroller);
-}
-
-public abstract class OutputButton : IOutput
-{
-    protected OutputButton(IInput? input, Color ledOn, Color ledOff, int debounce)
+    protected OutputButton(ConfigViewModel model, IInput? input, Color ledOn, Color ledOff, int debounce): base(model, input, ledOn, ledOff)
     {
-        Input = input;
-        LedOn = ledOn;
-        LedOff = ledOff;
         Debounce = debounce;
     }
-
-    public abstract string Name { get; }
-    public abstract string Image { get; }
-    public IInput? Input { get; set; }
-    public Color LedOn { get; set; }
-    public Color LedOff { get; set; }
     public int Debounce { get; set; }
     public abstract string GenerateIndex(bool xbox);
 
@@ -38,7 +18,7 @@ public abstract class OutputButton : IOutput
     public abstract bool IsStrum();
 
 
-    public string Generate(bool xbox, Microcontroller.Microcontroller microcontroller)
+    public override string Generate(bool xbox, Microcontroller.Microcontroller microcontroller)
     {
         if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
         var outputVar = GenerateOutput(xbox);

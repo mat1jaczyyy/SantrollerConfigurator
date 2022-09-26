@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Output;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public class ControllerButton : OutputButton
 {
-    public static List<StandardButtonType> order = new List<StandardButtonType>()
+    public static List<StandardButtonType> order = new()
     {
         StandardButtonType.Y,
         StandardButtonType.B,
@@ -24,7 +25,7 @@ public class ControllerButton : OutputButton
         StandardButtonType.Capture
     };
 
-    public static List<StandardButtonType> xboxOrder = new List<StandardButtonType>()
+    public static List<StandardButtonType> xboxOrder = new()
     {
         StandardButtonType.Up,
         StandardButtonType.Down,
@@ -44,7 +45,7 @@ public class ControllerButton : OutputButton
         StandardButtonType.Y
     };
 
-    public static List<StandardButtonType> hatOrder = new List<StandardButtonType>()
+    public static List<StandardButtonType> hatOrder = new()
     {
         StandardButtonType.Up,
         StandardButtonType.Down,
@@ -52,14 +53,12 @@ public class ControllerButton : OutputButton
         StandardButtonType.Right,
     };
 
-    public ControllerButton(IInput? input, Color ledOn, Color ledOff, int debounce, StandardButtonType type) : base(input, ledOn, ledOff, debounce)
+    public ControllerButton(ConfigViewModel model, IInput? input, Color ledOn, Color ledOff, int debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, debounce)
     {
         Type = type;
     }
 
     public override string Name => Type.ToString();
-    //TODO: this
-    public override string Image => Name;
     public StandardButtonType Type { get; }
     public override string GenerateIndex(bool xbox)
     {
@@ -86,7 +85,6 @@ public class ControllerButton : OutputButton
 
     public override bool IsStrum()
     {
-        // TODO: probably want to have some way to check if its actually a guitar?
         return Type is StandardButtonType.Up or StandardButtonType.Down;
     }
 }

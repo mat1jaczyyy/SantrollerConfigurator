@@ -7,14 +7,17 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
 public class GhWtTapInput : IInput
 {
-    private GhWtInputType _inputType;
+    public GhWtInputType Input { get; set; }
+    
+    // TODO this should probably directly link to and control something in ConfigViewModel as it is global and needs to be shared.
+    public int Pin { get; set; }
 
-    public GhWtTapInput(GhWtInputType inputType)
+    public GhWtTapInput(GhWtInputType input)
     {
-        _inputType = inputType;
+        Input = input;
     }
 
-    static readonly Dictionary<int, BarButton> Mappings = new Dictionary<int, BarButton>()
+    static readonly Dictionary<int, BarButton> Mappings = new()
     {
         {0x17, BarButton.Green},
         {0x16, BarButton.Green},
@@ -48,19 +51,16 @@ public class GhWtTapInput : IInput
 
     public string Generate(bool xbox, Microcontroller.Microcontroller controller)
     {
-        if (_inputType == GhWtInputType.TapBar)
+        if (Input == GhWtInputType.TapBar)
         {
             return "lastTap";
         }
 
-        var mappings = MappingByInput[_inputType];
-        return String.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})"));
+        var mappings = MappingByInput[Input];
+        return String.Join(" || ", mappings.Select(mapping => $"(lastTap == {mapping})"));
     }
 
-    public bool IsAnalog()
-    {
-        return _inputType == GhWtInputType.TapBar;
-    }
+    public bool IsAnalog => Input == GhWtInputType.TapBar;
 
     public bool RequiresSpi()
     {

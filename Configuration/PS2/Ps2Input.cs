@@ -5,7 +5,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 
 public class Ps2Input : IInput
 {
-    public Ps2InputType InputType { get; set; }
+    public Ps2InputType Input { get; }
 
     private static readonly List<Ps2InputType> Dualshock2Order = new()
     {
@@ -80,15 +80,17 @@ public class Ps2Input : IInput
         {Ps2InputType.Square, "in[4] >> 7"}
     };
 
-    public string Generate(bool xbox, Microcontroller.Microcontroller controller)
+    public Ps2Input(Ps2InputType input)
     {
-        return Mappings[InputType];
+        Input = input;
     }
 
-    public bool IsAnalog()
+    public string Generate(bool xbox, Microcontroller.Microcontroller controller)
     {
-        return InputType <= Ps2InputType.Dualshock2R2;
+        return Mappings[Input];
     }
+
+    public bool IsAnalog => Input <= Ps2InputType.Dualshock2R2;
 
     public bool RequiresSpi()
     {

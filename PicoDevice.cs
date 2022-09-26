@@ -14,7 +14,7 @@ public class PicoDevice : IConfigurableDevice
 
     public PicoDevice(PlatformIo pio, string path)
     {
-        this._path = path;
+        _path = path;
     }
 
     public bool IsSameDevice(PlatformIoPort port)
@@ -24,7 +24,7 @@ public class PicoDevice : IConfigurableDevice
 
     public bool IsSameDevice(string serialOrPath)
     {
-        return serialOrPath == this._path;
+        return serialOrPath == _path;
     }
 
     public string GetPath()
@@ -34,7 +34,7 @@ public class PicoDevice : IConfigurableDevice
 
     public override String ToString()
     {
-        return $"Pico ({this._path})";
+        return $"Pico ({_path})";
     }
 
     public void Bootloader()
@@ -58,5 +58,10 @@ public class PicoDevice : IConfigurableDevice
     public Task<string?> GetUploadPort()
     {
         return Task.FromResult((string?)_path);
+    }
+
+    public bool IsAVR()
+    {
+        return false;
     }
 }

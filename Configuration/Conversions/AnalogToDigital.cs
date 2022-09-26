@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 
@@ -8,6 +9,8 @@ public class AnalogToDigital : IInput
     public IInput Child { get; }
     public AnalogToDigitalType AnalogToDigitalType { get; set; }
     public int Threshold { get; set; }
+    public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes =>
+        Enum.GetValues(typeof(AnalogToDigitalType)).Cast<AnalogToDigitalType>();
 
     public AnalogToDigital(IInput child, AnalogToDigitalType analogToDigitalType, int threshold)
     {
@@ -34,10 +37,8 @@ public class AnalogToDigital : IInput
     {
         return Child;
     }
-    public bool IsAnalog()
-    {
-        return Child.IsAnalog();
-    }
+
+    public bool IsAnalog => Child.IsAnalog;
 
     public bool RequiresSpi()
     {

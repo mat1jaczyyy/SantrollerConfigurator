@@ -1,21 +1,19 @@
 using System;
 using Avalonia.Input;
 using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Output;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public class KeyboardButton : OutputButton
 {
-    public KeyboardButton(IInput? input, Color ledOn, Color ledOff, int debounce, Key type) : base(input, ledOn, ledOff,
+    public KeyboardButton(ConfigViewModel model, IInput? input, Color ledOn, Color ledOff, int debounce, Key type) : base(model, input, ledOn, ledOff,
         debounce)
     {
         Key = type;
     }
 
     public override string Name => Key.ToString();
-
-    //TODO: this
-    public override string Image => Name;
     public Key Key;
 
     public override string GenerateIndex(bool xbox)

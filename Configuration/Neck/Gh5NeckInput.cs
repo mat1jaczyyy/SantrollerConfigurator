@@ -7,7 +7,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
 public class Gh5NeckInput : IInput
 {
-    private static readonly Dictionary<int, BarButton> Mappings = new Dictionary<int, BarButton>()
+    private static readonly Dictionary<int, BarButton> Mappings = new()
     {
         {0x19, BarButton.Green | BarButton.Yellow},
         {0x1A, BarButton.Yellow},
@@ -43,7 +43,7 @@ public class Gh5NeckInput : IInput
     };
 
 
-    private static readonly List<Gh5NeckInputType> Frets = new List<Gh5NeckInputType>()
+    private static readonly List<Gh5NeckInputType> Frets = new()
     {
         Gh5NeckInputType.Yellow,
         Gh5NeckInputType.Blue,
@@ -55,7 +55,7 @@ public class Gh5NeckInput : IInput
         Gh5NeckInputType.Orange
     };
 
-    private static readonly List<Gh5NeckInputType> Tap = new List<Gh5NeckInputType>()
+    private static readonly List<Gh5NeckInputType> Tap = new()
     {
         Gh5NeckInputType.TapGreen,
         Gh5NeckInputType.TapRed,
@@ -86,24 +86,21 @@ public class Gh5NeckInput : IInput
     public Gh5NeckInputType Input { get; set; }
     public string Generate(bool xbox, Microcontroller.Microcontroller controller)
     {
-        if (Frets.Contains(this.Input))
+        if (Frets.Contains(Input))
         {
-            return $"(fivetar_buttons[0] & {1 << Frets.IndexOf(this.Input)})";
+            return $"(fivetar_buttons[0] & {1 << Frets.IndexOf(Input)})";
         }
 
-        if (this.Input == Gh5NeckInputType.TapBar)
+        if (Input == Gh5NeckInputType.TapBar)
         {
             return "fivetar_buttons[1]";
         }
 
-        var mappings = MappingByInput[this.Input];
+        var mappings = MappingByInput[Input];
         return String.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})"));
     }
 
-    public bool IsAnalog()
-    {
-        return Input == Gh5NeckInputType.TapBar;
-    }
+    public bool IsAnalog => Input == Gh5NeckInputType.TapBar;
 
     public bool RequiresSpi()
     {

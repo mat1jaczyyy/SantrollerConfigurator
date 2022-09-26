@@ -18,7 +18,7 @@ namespace GuitarConfiguratorSharp.NetCore
 
         public override void OnFrameworkInitializationCompleted()
         {
-            if (!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)) throw new System.Exception("Invalid ApplicationLifetime");
+            if (!(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)) throw new Exception("Invalid ApplicationLifetime");
             Locator.CurrentMutable.RegisterConstant<IScreen>(new MainWindowViewModel());
             Locator.CurrentMutable.Register<IViewFor<ConfigViewModel>>(() => new ConfigView());
             Locator.CurrentMutable.Register<IViewFor<MainViewModel>>(() => new MainView());

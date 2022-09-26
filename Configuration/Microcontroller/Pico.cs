@@ -28,7 +28,7 @@ public class Pico : Microcontroller
     public override Board Board {get;}
 
     public Pico(Board board) {
-        this.Board = board;
+        Board = board;
     }
 
     public override string GenerateDigitalRead(int pin, bool pullUp)
@@ -79,14 +79,14 @@ public class Pico : Microcontroller
         return skip.ToString();
     }
 
-    public override string GenerateInit(List<IOutput> bindings)
+    public override string GenerateInit(List<Output> bindings)
     {
         string ret = "";
         foreach (var output in bindings)
         {
             if (output.Input?.InnermostInput() is DirectInput direct)
             {
-                if (direct.IsAnalog())
+                if (direct.IsAnalog)
                 {
                     ret += $"adc_gpio_init({direct.Pin});";
                 }

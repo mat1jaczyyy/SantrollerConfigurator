@@ -17,20 +17,20 @@ public class Arduino : IConfigurableDevice
 
     public Arduino(PlatformIo pio, PlatformIoPort port)
     {
-        this._port = port;
+        _port = port;
         foreach (var board in Board.Boards)
         {
             if (board.ProductIDs.Contains(port.Pid))
             {
-                this.Board = board;
-                this.MigrationSupported = true;
+                Board = board;
+                MigrationSupported = true;
                 return;
             }
         }
         // Really, really old ardwiinos had a serial protocol that response to a couple of commands for retrieving data.
         if (port.Vid == 0x1209 && port.Pid == 0x2882)
         {
-            this.MigrationSupported = false;
+            MigrationSupported = false;
 
             System.IO.Ports.SerialPort serial = new System.IO.Ports.SerialPort(port.Port, 115200);
             serial.Open();
@@ -41,18 +41,18 @@ public class Arduino : IConfigurableDevice
             var boardFreqStr = serial.ReadLine().Replace("UL", "");
             var boardFreq = UInt32.Parse(boardFreqStr);
             var tmp = Board.FindBoard(boardName, boardFreq);
-            this.Board = new Board(boardName, $"Ardwiino - {tmp.Name} - pre 4.3.7", boardFreq, tmp.Environment, tmp.ProductIDs, tmp.HasUsbmcu);
+            Board = new Board(boardName, $"Ardwiino - {tmp.Name} - pre 4.3.7", boardFreq, tmp.Environment, tmp.ProductIDs, tmp.HasUsbmcu);
         }
         else
         {
-            this.Board = Board.Generic;
-            this.MigrationSupported = true;
+            Board = Board.Generic;
+            MigrationSupported = true;
         }
     }
 
     public bool IsSameDevice(PlatformIoPort port)
     {
-        return port == this._port;
+        return port == _port;
     }
 
     public bool IsSameDevice(string serialOrPath)
@@ -82,12 +82,17 @@ public class Arduino : IConfigurableDevice
 
     public void LoadConfiguration(ConfigViewModel model)
     {
-        model.SetDefaults(Board.FindMicrocontroller(this.Board));
+        model.SetDefaults(Board.FindMicrocontroller(Board));
     }
 
     public Task<string?> GetUploadPort()
     {
         return Task.FromResult((string?)GetSerialPort());
+    }
+
+    public bool IsAVR()
+    {
+        return true;
     }
 
     public bool DeviceAdded(IConfigurableDevice device)

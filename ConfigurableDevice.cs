@@ -19,4 +19,6 @@ public interface IConfigurableDevice {
     public void LoadConfiguration(ConfigViewModel model);
 
     public Task<string?> GetUploadPort();
+
+    public bool IsAVR();
 }

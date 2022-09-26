@@ -23,14 +23,14 @@ public class Dfu : IConfigurableDevice
 
     public Dfu(DeviceNotifyEventArgs args)
     {
-        this._args = args;
+        _args = args;
         var pid = args.Device.IdProduct;
-        this._port = args.Device.Name;
+        _port = args.Device.Name;
         foreach (var board in Board.Boards)
         {
             if (board.ProductIDs.Contains((uint)pid) && board.HasUsbmcu)
             {
-                this.Board = board;
+                Board = board;
                 return;
             }
         }
@@ -44,7 +44,7 @@ public class Dfu : IConfigurableDevice
 
     public bool IsSameDevice(string serialOrPath)
     {
-        return serialOrPath == this._port;
+        return serialOrPath == _port;
     }
 
     public bool DeviceAdded(IConfigurableDevice device)
@@ -58,7 +58,12 @@ public class Dfu : IConfigurableDevice
 
     public Task<string?> GetUploadPort()
     {
-        return Task.FromResult((string?)this._port);
+        return Task.FromResult((string?)_port);
+    }
+
+    public bool IsAVR()
+    {
+        return true;
     }
 
     public void Bootloader()

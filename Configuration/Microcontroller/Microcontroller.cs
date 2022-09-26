@@ -9,7 +9,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller
 
         public abstract int GetChannel(int pin);
 
-        public abstract string GenerateInit(List<IOutput> bindings);
+        public abstract string GenerateInit(List<Output> bindings);
         public abstract int SpiRx { get; }
 
         public abstract string GetPin(int pin);

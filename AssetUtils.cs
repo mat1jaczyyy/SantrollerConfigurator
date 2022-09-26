@@ -12,7 +12,7 @@ public class AssetUtils
 {
     public static async Task ExtractFile(string file, string location)
     {
-        using (var f = System.IO.File.OpenWrite(location))
+        using (var f = File.OpenWrite(location))
         {
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
             string assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
@@ -28,7 +28,7 @@ public class AssetUtils
     {
         await ExtractFile(zip, zipLocation);
         ZipFile.ExtractToDirectory(zipLocation, location);
-        System.IO.File.Delete(zipLocation);
+        File.Delete(zipLocation);
     }
 
     public static string GetAppDataFolder()
