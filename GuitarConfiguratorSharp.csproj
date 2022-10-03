@@ -45,7 +45,7 @@
       <Content Include="Assets\Icons\Readme.txt" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Update="Views\AddInputWindow.axaml.cs">
+      <Compile Update="Views\SelectPinWindow.axaml.cs">
         <DependentUpon>AddInputWindow.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>

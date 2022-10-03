@@ -6,7 +6,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public abstract class OutputButton : Output
 {
-    protected OutputButton(ConfigViewModel model, IInput? input, Color ledOn, Color ledOff, int debounce): base(model, input, ledOn, ledOff)
+    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int debounce, string name): base(model, input, ledOn, ledOff, name)
     {
         Debounce = debounce;
     }
@@ -15,22 +15,24 @@ public abstract class OutputButton : Output
 
     public abstract string GenerateOutput(bool xbox);
 
-    public abstract bool IsStrum();
+    public abstract bool IsStrum { get; }
 
 
-    public override string Generate(bool xbox, Microcontroller.Microcontroller microcontroller)
+    public override bool IsCombined => false;
+
+    public override string Generate(bool xbox)
     {
         if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
         var outputVar = GenerateOutput(xbox);
         var outputBit = GenerateIndex(xbox);
         if (Debounce == 0)
         {
-            return $"if (({Input.Generate(xbox, microcontroller)})) {{{outputVar} |= (1 << {outputBit});}}";
+            return $"if (({Input.Generate()})) {{{outputVar} |= (1 << {outputBit});}}";
         }
         else
         {
             return
-                $"if (({Input.Generate(xbox, microcontroller)})) {{debounce[i] = {Debounce};{outputVar} |= (1 << {outputBit});}} else if (debounce[i]) {{ debounce[i]--; {outputVar} |= (1 << {outputBit});}}";
+                $"if (({Input.Generate()})) {{debounce[i] = {Debounce};{outputVar} |= (1 << {outputBit});}} else if (debounce[i]) {{ debounce[i]--; {outputVar} |= (1 << {outputBit});}}";
         }
     }
 }

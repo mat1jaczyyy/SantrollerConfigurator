@@ -4,10 +4,15 @@ using System.Linq;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 
-public class DjInput : IInput
+public class DjInput : Input
 {
+    public DjInput(DjInputType input)
+    {
+        Input = input;
+    }
+
     public DjInputType Input { get; set; }
-    public string Generate(bool xbox, Microcontroller.Microcontroller controller)
+    public override string Generate()
     {
         switch (Input)
         {
@@ -33,25 +38,17 @@ public class DjInput : IInput
         throw new InvalidOperationException("Shouldn't get here!");
     }
 
-    public bool IsAnalog => Input <= DjInputType.RightTurnable;
+    public override bool IsAnalog => Input <= DjInputType.RightTurnable;
 
-    public bool RequiresSpi()
-    {
-        return true;
-    }
-
-    public bool RequiresI2C()
-    {
-        return true;
-    }
-
-    public string GenerateAll(bool xbox, List<Tuple<IInput, string>> bindings,
+    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller.Microcontroller controller)
     {
-        return String.Join("\n", bindings.Select(binding => binding.Item2));
+        Console.WriteLine("yeet");
+        Console.WriteLine(String.Join("\n", bindings.Select(binding => binding.Item2)));
+        return String.Join(";\n", bindings.Select(binding => binding.Item2));
     }
 
-    public IReadOnlyList<string> RequiredDefines()
+    public override IReadOnlyList<string> RequiredDefines()
     {
         return new[] {"INPUT_DJ_TURNTABLE"};
     }

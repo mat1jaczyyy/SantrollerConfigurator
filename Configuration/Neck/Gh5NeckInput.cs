@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
-public class Gh5NeckInput : IInput
+public class Gh5NeckInput : TwiInput
 {
+
     private static readonly Dictionary<int, BarButton> Mappings = new()
     {
         {0x19, BarButton.Green | BarButton.Yellow},
@@ -42,19 +45,6 @@ public class Gh5NeckInput : IInput
         {0xE6, BarButton.Red | BarButton.Yellow},
     };
 
-
-    private static readonly List<Gh5NeckInputType> Frets = new()
-    {
-        Gh5NeckInputType.Yellow,
-        Gh5NeckInputType.Blue,
-        Gh5NeckInputType.Red,
-        Gh5NeckInputType.Green,
-        Gh5NeckInputType.None,
-        Gh5NeckInputType.None,
-        Gh5NeckInputType.None,
-        Gh5NeckInputType.Orange
-    };
-
     private static readonly List<Gh5NeckInputType> Tap = new()
     {
         Gh5NeckInputType.TapGreen,
@@ -78,17 +68,21 @@ public class Gh5NeckInput : IInput
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public Gh5NeckInput(Gh5NeckInputType input)
+    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller.Microcontroller controller): base(controller, "gh5", 100000)
     {
         Input = input;
+        Controller = controller;
     }
 
+    private Microcontroller.Microcontroller Controller { get; }
+
     public Gh5NeckInputType Input { get; set; }
-    public string Generate(bool xbox, Microcontroller.Microcontroller controller)
+
+    public override string Generate()
     {
-        if (Frets.Contains(Input))
+        if (Input <= Gh5NeckInputType.Orange)
         {
-            return $"(fivetar_buttons[0] & {1 << Frets.IndexOf(Input)})";
+            return $"(fivetar_buttons[0] & {1 << ((byte) Input) - ((byte) Gh5NeckInputType.Green)})";
         }
 
         if (Input == Gh5NeckInputType.TapBar)
@@ -100,25 +94,15 @@ public class Gh5NeckInput : IInput
         return String.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})"));
     }
 
-    public bool IsAnalog => Input == Gh5NeckInputType.TapBar;
+    public override bool IsAnalog => Input == Gh5NeckInputType.TapBar;
 
-    public bool RequiresSpi()
-    {
-        return true;
-    }
-
-    public bool RequiresI2C()
-    {
-        return true;
-    }
-
-    public string GenerateAll(bool xbox, List<Tuple<IInput, string>> bindings,
+    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller.Microcontroller controller)
     {
-        return String.Join("\n", bindings.Select(binding => binding.Item2));
+        return String.Join(";\n", bindings.Select(binding => binding.Item2));
     }
 
-    public IReadOnlyList<string> RequiredDefines()
+    public override IReadOnlyList<string> RequiredDefines()
     {
         if (Input <= Gh5NeckInputType.Orange)
         {
@@ -129,5 +113,6 @@ public class Gh5NeckInput : IInput
             return new[] {"INPUT_GH5_NECK", "INPUT_GH5_NECK_TAP_BAR"};
         }
     }
-    
+
+
 }

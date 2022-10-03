@@ -5,7 +5,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
-public class DirectInput : IInput
+public class DirectInput : InputWithPin
 {
     public DirectInput(int pin, DevicePinMode pinMode, Microcontroller.Microcontroller microcontroller)
     {
@@ -28,37 +28,29 @@ public class DirectInput : IInput
         return modes;
     }
 
-    public DevicePinMode PinMode { get; }
+    public override DevicePinMode PinMode { get; }
+
+    protected override Microcontroller.Microcontroller Microcontroller => _microcontroller;
 
     private Microcontroller.Microcontroller _microcontroller;
-    public int Pin { get; }
+    public override int Pin { get; }
 
-    public bool IsAnalog => PinMode == DevicePinMode.Analog;
+    public override bool IsAnalog => PinMode == DevicePinMode.Analog;
 
-    public string Generate(bool xbox, Microcontroller.Microcontroller controller)
+    public override string Generate()
     {
         return IsAnalog
-            ? controller.GenerateAnalogRead(Pin)
-            : controller.GenerateDigitalRead(Pin, PinMode is DevicePinMode.PullUp);
+            ? _microcontroller.GenerateAnalogRead(Pin)
+            : _microcontroller.GenerateDigitalRead(Pin, PinMode is DevicePinMode.PullUp);
     }
 
-    public bool RequiresSpi()
-    {
-        return false;
-    }
-
-    public bool RequiresI2C()
-    {
-        return false;
-    }
-
-    public string GenerateAll(bool xbox, List<Tuple<IInput, string>> bindings,
+    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller.Microcontroller controller)
     {
         return String.Join("\n", bindings.Select(binding => binding.Item2));
     }
 
-    public IReadOnlyList<string> RequiredDefines()
+    public override IReadOnlyList<string> RequiredDefines()
     {
         return new[] {"INPUT_DIRECT"};
     }

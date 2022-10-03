@@ -15,12 +15,11 @@ public class MouseButton : OutputButton
         MouseButtonType.Middle
     };
 
-    public MouseButton(ConfigViewModel model, IInput? input, Color ledOn, Color ledOff, int debounce, MouseButtonType type) : base(model, input, ledOn, ledOff, debounce)
+    public MouseButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int debounce, MouseButtonType type) : base(model, input, ledOn, ledOff, debounce, type.ToString())
     {
         Type = type;
     }
 
-    public override string Name => Type.ToString();
     public MouseButtonType Type { get; }
     public override string GenerateIndex(bool xbox)
     {
@@ -32,8 +31,7 @@ public class MouseButton : OutputButton
         return "report->buttons";
     }
 
-    public override bool IsStrum()
-    {
-        return false;
-    }
+    public override bool IsStrum => false;
+
+    public override bool IsCombined => false;
 }

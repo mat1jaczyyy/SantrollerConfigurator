@@ -2,16 +2,16 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
 
 public class Mega : AvrController
 {
-    public override int SpiRx => 50;
+    protected override int SpiMiso => 50;
 
-    public override int SpiTx => 51;
+    protected override int SpiMosi => 51;
 
-    public override int SpiCSn => 53;
-    public override int SpiSck => 52;
+    protected override int SpiCSn => 53;
+    protected override int SpiSck => 52;
 
-    public override int I2CSda => 20;
+    protected override int I2CSda => 20;
 
-    public override int I2CScl => 21;
+    protected override int I2CScl => 21;
     private readonly int[] _pinInputs = {
         0     , // PE 0 ** 0 ** USART0_RX	
         1     , // PE 1 ** 1 ** USART0_TX	

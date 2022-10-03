@@ -1,9 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 
-public class WiiInput : IInput
+public class WiiInput : Input
 {
     public WiiInputType Input { get; }
 
@@ -18,12 +21,6 @@ public class WiiInput : IInput
             {WiiInputType.ClassicRightStickY, WiiControllerType.ClassicController},
             {WiiInputType.ClassicLeftTrigger, WiiControllerType.ClassicController},
             {WiiInputType.ClassicRightTrigger, WiiControllerType.ClassicController},
-            {WiiInputType.ClassicHiResLeftStickX, WiiControllerType.ClassicControllerHighRes},
-            {WiiInputType.ClassicHiResLeftStickY, WiiControllerType.ClassicControllerHighRes},
-            {WiiInputType.ClassicHiResRightStickX, WiiControllerType.ClassicControllerHighRes},
-            {WiiInputType.ClassicHiResRightStickY, WiiControllerType.ClassicControllerHighRes},
-            {WiiInputType.ClassicHiResLeftTrigger, WiiControllerType.ClassicControllerHighRes},
-            {WiiInputType.ClassicHiResRightTrigger, WiiControllerType.ClassicControllerHighRes},
             {WiiInputType.DjCrossfadeSlider, WiiControllerType.DJ},
             {WiiInputType.DjEffectDial, WiiControllerType.DJ},
             {WiiInputType.DjStickX, WiiControllerType.DJ},
@@ -75,12 +72,15 @@ public class WiiInput : IInput
             {WiiInputType.DjHeroLeftRed, WiiControllerType.DJ},
             {WiiInputType.DjHeroRightBlue, WiiControllerType.DJ},
             {WiiInputType.DjHeroLeftGreen, WiiControllerType.DJ},
+            {WiiInputType.DjHeroLeftAny, WiiControllerType.DJ},
+            {WiiInputType.DjHeroRightAny, WiiControllerType.DJ},
             {WiiInputType.DjHeroEuphoria, WiiControllerType.DJ},
             {WiiInputType.DjHeroRightGreen, WiiControllerType.DJ},
             {WiiInputType.DjHeroLeftBlue, WiiControllerType.DJ},
             {WiiInputType.DrumPlus, WiiControllerType.Drum},
             {WiiInputType.DrumMinus, WiiControllerType.Drum},
             {WiiInputType.DrumKickPedal, WiiControllerType.Drum},
+            {WiiInputType.DrumHiHatPedal, WiiControllerType.Drum},
             {WiiInputType.DrumBlue, WiiControllerType.Drum},
             {WiiInputType.DrumGreen, WiiControllerType.Drum},
             {WiiInputType.DrumYellow, WiiControllerType.Drum},
@@ -117,12 +117,6 @@ public class WiiInput : IInput
         {WiiInputType.ClassicRightStickY, "((data[2] & 0x1f) - 16) << 10"},
         {WiiInputType.ClassicLeftTrigger, "((data[3] >> 5) | ((data[2] & 0x60) >> 2))"},
         {WiiInputType.ClassicRightTrigger, "(data[3] & 0x1f) << 3"},
-        {WiiInputType.ClassicHiResLeftStickX, "(data[0] - 0x80) << 8"},
-        {WiiInputType.ClassicHiResLeftStickY, "(data[2] - 0x80) << 8"},
-        {WiiInputType.ClassicHiResRightStickX, "(data[1] - 0x80) << 8"},
-        {WiiInputType.ClassicHiResRightStickY, "(data[3] - 0x80) << 8"},
-        {WiiInputType.ClassicHiResLeftTrigger, "data[4]"},
-        {WiiInputType.ClassicHiResRightTrigger, "data[5]"},
         {WiiInputType.DjCrossfadeSlider, "(data[2] & 0x1E) >> 1"},
         {WiiInputType.DjEffectDial, "(data[3] & 0xE0) >> 5 | (data[2] & 0x60) >> 2"},
         {WiiInputType.DjStickX, "((data[0] & 0x3F) - 0x20) << 10"},
@@ -171,18 +165,22 @@ public class WiiInput : IInput
         {WiiInputType.ClassicY, "((~data[5]) & (1 << 5))"},
         {WiiInputType.ClassicB, "((~data[5]) & (1 << 6))"},
         {WiiInputType.ClassicZl, "((~data[5]) & (1 << 7))"},
-        {WiiInputType.DjHeroRightRed, "((~data[4]) & (1 << 1))"},
         {WiiInputType.DjHeroPlus, "((~data[4]) & (1 << 2))"},
         {WiiInputType.DjHeroMinus, "((~data[4]) & (1 << 4))"},
-        {WiiInputType.DjHeroLeftRed, "((~data[4]) & (1 << 5))"},
-        {WiiInputType.DjHeroRightBlue, "((~data[5]) & (1 << 2))"},
-        {WiiInputType.DjHeroLeftGreen, "((~data[5]) & (1 << 3))"},
-        {WiiInputType.DjHeroEuphoria, "((~data[5]) & (1 << 4))"},
-        {WiiInputType.DjHeroRightGreen, "((~data[5]) & (1 << 5))"},
         {WiiInputType.DjHeroLeftBlue, "((~data[5]) & (1 << 7))"},
+        {WiiInputType.DjHeroLeftRed, "((~data[4]) & (1 << 5))"},
+        {WiiInputType.DjHeroLeftGreen, "((~data[5]) & (1 << 3))"},
+        {WiiInputType.DjHeroLeftAny, "(((~data[5]) & ((1 << 3)|1 << 7)) | ((~data[4]) & (1 << 5)))"},
+        {WiiInputType.DjHeroRightGreen, "((~data[5]) & (1 << 5))"},
+        {WiiInputType.DjHeroRightRed, "((~data[4]) & (1 << 1))"},
+        {WiiInputType.DjHeroRightBlue, "((~data[5]) & (1 << 2))"},
+        {WiiInputType.DjHeroRightAny, "(((~data[5]) & ((1 << 5)|1 << 2)) | ((~data[4]) & (1 << 1)))"},
+        {WiiInputType.DjHeroEuphoria, "((~data[5]) & (1 << 4))"},
         {WiiInputType.DrumPlus, "((~data[4]) & (1 << 2))"},
         {WiiInputType.DrumMinus, "((~data[4]) & (1 << 4))"},
         {WiiInputType.DrumKickPedal, "((~data[5]) & (1 << 2))"},
+        // TODO
+        {WiiInputType.DrumHiHatPedal, "drumVelocity[DRUM_HIHAT]"},
         {WiiInputType.DrumBlue, "((~data[5]) & (1 << 3))"},
         {WiiInputType.DrumGreen, "((~data[5]) & (1 << 4))"},
         {WiiInputType.DrumYellow, "((~data[5]) & (1 << 5))"},
@@ -208,9 +206,31 @@ public class WiiInput : IInput
         {WiiInputType.UDrawPenClick, "(( data[5]) & (1 << 2))"}
     };
 
+    private static readonly List<string> HiResMapOrder = new()
+    {
+        "data[4]",
+        "data[5]",
+        Mappings[WiiInputType.ClassicLeftStickX],
+        Mappings[WiiInputType.ClassicLeftStickY], 
+        Mappings[WiiInputType.ClassicRightStickX],
+        Mappings[WiiInputType.ClassicRightStickY], 
+        Mappings[WiiInputType.ClassicLeftTrigger],
+        Mappings[WiiInputType.ClassicRightTrigger],
+    };
+    private static readonly Dictionary<string,string> HiResMap = new()
+    {
+        {"data[4]", "data[6]"},
+        {"data[5]", "data[7]"},
+        {Mappings[WiiInputType.ClassicLeftStickX], "(data[0] - 0x80) << 8"},
+        {Mappings[WiiInputType.ClassicLeftStickY], "(data[2] - 0x80) << 8"},
+        {Mappings[WiiInputType.ClassicRightStickX], "(data[1] - 0x80) << 8"},
+        {Mappings[WiiInputType.ClassicRightStickY], "(data[3] - 0x80) << 8"},
+        {Mappings[WiiInputType.ClassicLeftTrigger], "data[4]"},
+        {Mappings[WiiInputType.ClassicRightTrigger], "data[5]"},
+    };
+
     private static readonly Dictionary<WiiControllerType, string> CType = new() {
         {WiiControllerType.ClassicController, "WII_CLASSIC_CONTROLLER"},
-        {WiiControllerType.ClassicControllerHighRes, "WII_CLASSIC_CONTROLLER"},
         {WiiControllerType.Nunchuk, "WII_NUNCHUK"},
         {WiiControllerType.UDraw, "WII_THQ_UDRAW_TABLET"},
         {WiiControllerType.Drawsome, "WII_UBISOFT_DRAWSOME_TABLET"},
@@ -226,24 +246,14 @@ public class WiiInput : IInput
         Input = input;
     }
 
-    public string Generate(bool xbox, Microcontroller.Microcontroller controller)
+    public override string Generate()
     {
         return Mappings[Input];
     }
 
-    public bool IsAnalog => Input <= WiiInputType.DrawsomePenPressure;
+    public override bool IsAnalog => Input <= WiiInputType.DrawsomePenPressure;
 
-    public bool RequiresSpi()
-    {
-        return false;
-    }
-
-    public bool RequiresI2C()
-    {
-        return true;
-    }
-
-    public string GenerateAll(bool xbox, List<Tuple<IInput, string>> bindings,
+    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller.Microcontroller controller)
     {
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
@@ -260,18 +270,41 @@ public class WiiInput : IInput
         }
 
         var ret = "";
+        if (mappedBindings.ContainsKey(WiiControllerType.ClassicController))
+        {
+            var mappings = mappedBindings[WiiControllerType.ClassicController];
+            mappedBindings.Remove(WiiControllerType.ClassicController);
+            var mappings2 = new List<string>();
+            foreach (var mapping in mappings)
+            {
+                var val = mapping;
+                foreach (var key in HiResMapOrder)
+                {
+                    val = mapping.Replace(key, HiResMap[key]);
+                }
+                mappings2.Add(val);
+            }
+            ret += @$"case WII_CLASSIC_CONTROLLER:
+case WII_CLASSIC_CONTROLLER_PRO:
+if (hiRes) {{
+    {String.Join(";\n",mappings2)};
+}} else {{
+    {String.Join(";\n",mappings)};
+}}
+";
+        }
         foreach (var binding in mappedBindings)
         {
             var input = binding.Key;
             var mappings = binding.Value;
             ret += @$"case {CType[input]}:
-    {String.Join('\n',mappings)}
+    {String.Join(";\n",mappings)};
     break;";
         }
         return ret;
     }
 
-    public IReadOnlyList<string> RequiredDefines()
+    public override IReadOnlyList<string> RequiredDefines()
     {
         if (WiiControllerType == WiiControllerType.Drum)
         {
@@ -280,6 +313,10 @@ public class WiiInput : IInput
         if (WiiControllerType == WiiControllerType.Nunchuk)
         {
             return new[] {"INPUT_WII", "INPUT_WII_NUNCHUK"};
+        }
+        if (WiiControllerType == WiiControllerType.ClassicController)
+        {
+            return new[] {"INPUT_WII", "INPUT_WII_CLASSIC"};
         }
         return new[] {"INPUT_WII"};
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
@@ -28,12 +29,11 @@ public class ControllerAxis : OutputAxis
         {StandardAxisType.LeftTrigger, "lt"},
         {StandardAxisType.RightTrigger, "rt"},
     };
-    public ControllerAxis(ConfigViewModel model, IInput? input, Color ledOn, Color ledOff, float multiplier, int offset, int deadzone, StandardAxisType type) : base(model, input, ledOn, ledOff, multiplier, offset, deadzone)
+    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, float multiplier, int offset, int deadzone, StandardAxisType type) : base(model, input, ledOn, ledOff, multiplier, offset, deadzone, type.ToString())
     {
         Type = type;
     }
     public StandardAxisType Type { get; }
-    public override string Name => Type.ToString();
     public override bool Trigger => (model.DeviceType is DeviceControllerType.Guitar && Type is StandardAxisType.RightStickX) || Type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
 
     public override string GenerateOutput(bool xbox)
@@ -44,4 +44,5 @@ public class ControllerAxis : OutputAxis
         }
         return "report->" + Mappings[Type];
     }
+    public override bool IsCombined => false;
 }

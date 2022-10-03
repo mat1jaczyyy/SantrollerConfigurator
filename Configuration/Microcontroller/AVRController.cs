@@ -1,11 +1,20 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
 
 public abstract class AvrController : Microcontroller
 {
     protected abstract int PinA0 { get; }
+    protected abstract int SpiMiso { get; }
+
+    protected abstract int SpiMosi { get; }
+    protected abstract int SpiSck { get; }
+    protected abstract int SpiCSn { get; }
+    protected abstract int I2CSda { get; }
+    protected abstract int I2CScl { get; }
 
     public enum AvrPinMode
     {
@@ -32,18 +41,83 @@ public abstract class AvrController : Microcontroller
 
     public abstract int PinCount { get; }
 
-    public override string GenerateSkip(bool spiEnabled, bool i2CEnabled)
+    public override SpiConfig[] SpiConfigs => _spiConfig == null ? Array.Empty<SpiConfig>() : new SpiConfig[] {_spiConfig};
+    public override TwiConfig[] TwiConfigs => _twiConfig == null ? Array.Empty<TwiConfig>() : new TwiConfig[] {_twiConfig};
+
+    private AvrTwiConfig? _twiConfig;
+    private AvrSpiConfig? _spiConfig;
+    public override SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
+        bool msbfirst,
+        int clock)
+    {
+        if (_spiConfig != null) return null;
+        _spiConfig = new AvrSpiConfig(type, SpiMosi, SpiMiso, SpiSck, cpol, cpha, msbfirst, clock);
+        return _spiConfig;
+    }
+
+    public override TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock)
+    {
+        if (_twiConfig != null) return null;
+        _twiConfig = new AvrTwiConfig(type, I2CSda, I2CScl, clock);
+        return _twiConfig;
+    }
+
+    public override void UnAssignSPIPins(string type)
+    {
+        _spiConfig = null;
+    }
+
+    public override void UnAssignTWIPins(string type)
+    {
+        _twiConfig = null;
+    }
+    
+    public override bool HasConfigurableSpiPins => false;
+    public override bool HasConfigurableTwiPins => false;
+    
+    public override bool TwiPinsFree => _twiConfig == null;
+    public override bool SpiPinsFree => _spiConfig == null;
+
+    public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
+    {
+        if (_spiConfig != null && _spiConfig.Type != type)
+        {
+            return new();
+        }
+        return new()
+        {
+            new (SpiCSn, SpiPinType.CSn),
+            new (SpiMiso, SpiPinType.MISO),
+            new (SpiMosi, SpiPinType.MOSI),
+            new (SpiSck, SpiPinType.SCK),
+        };
+    }
+
+    public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type)
+    {
+        if (_twiConfig != null && _twiConfig.Type != type)
+        {
+            return new();
+        }
+        return new()
+        {
+            new (I2CScl, TwiPinType.SCL),
+            new (I2CSda, TwiPinType.SDA),
+        };
+    }
+
+    public override string GenerateDefinitions()
     {
         List<int> skippedPins = new List<int>();
-        if (spiEnabled)
+        if (_spiConfig != null)
         {
             skippedPins.Add(SpiCSn);
-            skippedPins.Add(SpiRx);
-            skippedPins.Add(SpiTx);
+            skippedPins.Add(SpiMiso);
+            skippedPins.Add(SpiMosi);
             skippedPins.Add(SpiSck);
         }
 
-        if (i2CEnabled)
+        if (_twiConfig != null)
         {
             skippedPins.Add(I2CScl);
             skippedPins.Add(I2CSda);
@@ -65,8 +139,19 @@ public abstract class AvrController : Microcontroller
             skippedByPort[GetPort(pin)] |= 1 << GetIndex(pin);
         }
 
-        return "{" + string.Join(", ", skippedByPort.Keys.OrderBy(x => x).Select(x => skippedByPort[x].ToString())) +
-               "}";
+        var ret = "#define SKIP_MASK_AVR {" + string.Join(", ",
+                            skippedByPort.Keys.OrderBy(x => x).Select(x => skippedByPort[x].ToString())) +
+                        "}";
+        if (_spiConfig != null)
+        {
+            ret += _spiConfig.generate();
+        }
+
+        if (_twiConfig != null)
+        {
+            ret += _twiConfig.Generate();
+        }
+        return ret;
     }
 
     public override string GenerateInit(List<Output> bindings)
@@ -153,12 +238,12 @@ public abstract class AvrController : Microcontroller
             ret += $" / SPI CS";
         }
 
-        if (pin == SpiRx)
+        if (pin == SpiMiso)
         {
             ret += $" / SPI MISO";
         }
 
-        if (pin == SpiTx)
+        if (pin == SpiMosi)
         {
             ret += $" / SPI MOSI";
         }

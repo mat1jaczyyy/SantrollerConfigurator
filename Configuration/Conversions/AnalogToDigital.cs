@@ -4,15 +4,15 @@ using System.Linq;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 
-public class AnalogToDigital : IInput
+public class AnalogToDigital : Input
 {
-    public IInput Child { get; }
+    public Input Child { get; }
     public AnalogToDigitalType AnalogToDigitalType { get; set; }
     public int Threshold { get; set; }
     public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes =>
         Enum.GetValues(typeof(AnalogToDigitalType)).Cast<AnalogToDigitalType>();
 
-    public AnalogToDigital(IInput child, AnalogToDigitalType analogToDigitalType, int threshold)
+    public AnalogToDigital(Input child, AnalogToDigitalType analogToDigitalType, int threshold)
     {
         Child = child;
         AnalogToDigitalType = analogToDigitalType;
@@ -20,43 +20,34 @@ public class AnalogToDigital : IInput
     }
 
 
-    public string Generate(bool xbox, Microcontroller.Microcontroller controller)
+    public override string Generate()
     {
         switch (AnalogToDigitalType)
         {
             case AnalogToDigitalType.Trigger:
             case AnalogToDigitalType.JoyHigh:
-                return $"{Child.Generate(xbox, controller)} > {Threshold}";
+                return $"{Child.Generate()} > {Threshold}";
             case AnalogToDigitalType.JoyLow:
-                return $"{Child.Generate(xbox, controller)} < {-Threshold}";
+                return $"{Child.Generate()} < {-Threshold}";
         }
 
         return "";
     }
-    IInput IInput.InnermostInput()
+
+    public override Input InnermostInput()
     {
         return Child;
     }
 
-    public bool IsAnalog => Child.IsAnalog;
+    public override bool IsAnalog => Child.IsAnalog;
 
-    public bool RequiresSpi()
-    {
-        return Child.RequiresSpi();
-    }
-
-    public bool RequiresI2C()
-    {
-        return Child.RequiresI2C();
-    }
-
-    public string GenerateAll(bool xbox, List<Tuple<IInput, string>> bindings,
+    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller.Microcontroller controller)
     {
         throw new InvalidOperationException("Never call GenerateAll on AnalogToDigital, call it on its children");
     }
 
-    public IReadOnlyList<string> RequiredDefines()
+    public override IReadOnlyList<string> RequiredDefines()
     {
         return Child.RequiredDefines();
     }

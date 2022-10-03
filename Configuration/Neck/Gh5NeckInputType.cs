@@ -14,7 +14,6 @@ public enum BarButton
 
 public enum Gh5NeckInputType 
 {
-    None,
     Green,
     Red,
     Yellow,

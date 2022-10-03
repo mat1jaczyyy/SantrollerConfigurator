@@ -2,16 +2,16 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
 
 public class Micro : AvrController
 {
-    public override int SpiRx => 14;
+    protected override int SpiMiso => 14;
 
-    public override int SpiTx => 16;
+    protected override int SpiMosi => 16;
 
-    public override int SpiCSn => 17;
-    public override int SpiSck => 15;
+    protected override int SpiCSn => 17;
+    protected override int SpiSck => 15;
 
-    public override int I2CSda => 2;
+    protected override int I2CSda => 2;
 
-    public override int I2CScl => 3;
+    protected override int I2CScl => 3;
     private readonly int[] _pinIndex = {
         2, // D0 - PD2
         3,	// D1 - PD3

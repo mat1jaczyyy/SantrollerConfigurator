@@ -36,7 +36,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private IConfigurableDevice? _selectedDevice;
         private IConfigurableDevice? _disconnectedDevice;
 
-        private bool MigrationSupported => SelectedDevice == null || SelectedDevice.MigrationSupported;
+        public bool MigrationSupported => SelectedDevice == null || SelectedDevice.MigrationSupported;
 
         private bool _writingToUsb = false;
 
@@ -158,6 +158,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         }
         internal async Task Write(ConfigViewModel config)
         {
+            if (config.MicroController == null) return;
             config.Generate(Pio);
             if (config.MicroController.Board.HasUsbmcu)
             {

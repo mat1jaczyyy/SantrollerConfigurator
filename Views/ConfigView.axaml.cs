@@ -20,21 +20,21 @@ namespace GuitarConfiguratorSharp.NetCore.Views
         {
             this.WhenActivated(disposables =>
             {
-                disposables(ViewModel!.ShowDialog.RegisterHandler(DoShowDialogAsync));
+                disposables(ViewModel!.ShowPinSelectDialog.RegisterHandler(DoShowDialogAsync));
                 ViewModel!.Main.SelectedDevice!.LoadConfiguration(ViewModel);
             });
             AvaloniaXamlLoader.Load(this);
         }
 
-        private async Task DoShowDialogAsync(InteractionContext<Output, AddInputWindowViewModel?> interaction)
+        private async Task DoShowDialogAsync(InteractionContext<InputWithPin, SelectPinWindowViewModel?> interaction)
         {
-            AddInputWindowViewModel model = new AddInputWindowViewModel(interaction.Input);
-            var dialog = new AddInputWindow
+            SelectPinWindowViewModel model = new SelectPinWindowViewModel(interaction.Input);
+            var dialog = new SelectPinWindow()
             {
                 DataContext = model
             };
             
-            var result = await dialog.ShowDialog<AddInputWindowViewModel?>((Window) this.VisualRoot!);
+            var result = await dialog.ShowDialog<SelectPinWindowViewModel?>((Window) this.VisualRoot!);
             interaction.SetOutput(result);
         }
     }

@@ -275,7 +275,7 @@ public class Ardwiino : ConfigurableUsbDevice
 
             LedType ledType = LedType.None;
             DeviceControllerType deviceType = DeviceControllerType.Guitar;
-            EmulationType emulationType = EmulationType.Universal;
+            EmulationType emulationType = EmulationType.Controller;
             InputControllerType inputControllerType = (InputControllerType) config.all.main.inputType;
             RhythmType rhythmType = RhythmType.GuitarHero;
             if (config.all.main.fretLEDMode == 2)
@@ -391,7 +391,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 };
                 foreach (var item in neckData)
                 {
-                    bindings.Add(new ControllerButton(model, new Gh5NeckInput(item.Item1), Color.FromArgb(0, 0, 0, 0),
+                    bindings.Add(new ControllerButton(model, new Gh5NeckInput(item.Item1, controller), Color.FromArgb(0, 0, 0, 0),
                         Color.FromArgb(0, 0, 0, 0), config.debounce.buttons, item.Item2));
                 }
             }
@@ -408,7 +408,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 };
                 foreach (var item in neckData)
                 {
-                    bindings.Add(new ControllerButton(model, new Gh5NeckInput(item.Item1), Color.FromArgb(0, 0, 0, 0),
+                    bindings.Add(new ControllerButton(model, new Gh5NeckInput(item.Item1, controller), Color.FromArgb(0, 0, 0, 0),
                         Color.FromArgb(0, 0, 0, 0), config.debounce.buttons, item.Item2));
                 }
             }
@@ -435,11 +435,10 @@ public class Ardwiino : ConfigurableUsbDevice
                     }
 
                     Color off = Color.FromRgb(0, 0, 0);
-                    //TODO: implement this inside of ControllerAxis itself. Maybe we have to pass the devicetype to the constructor?
-                    // if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
-                    // {
-                    //     isTrigger = true;
-                    // }
+                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
+                    {
+                        isTrigger = true;
+                    }
 
                     if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt)
                     {

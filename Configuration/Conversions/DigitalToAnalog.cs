@@ -3,46 +3,36 @@ using System.Collections.Generic;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 
-public class DigitalToAnalog : IInput
+public class DigitalToAnalog : Input
 {
-    public IInput Child { get; }
+    public Input Child { get; }
     public int Value { get; set; }
 
-    public DigitalToAnalog(IInput child, int value)
+    public DigitalToAnalog(Input child, int value)
     {
         Child = child;
         Value = value;
     }
 
-    public string Generate(bool xbox, Microcontroller.Microcontroller controller)
+    public override string Generate()
     {
-        return $"{Child.Generate(xbox, controller)} * {Value}";
+        return $"{Child.Generate()} * {Value}";
     }
 
-    IInput IInput.InnermostInput()
+    public override Input InnermostInput()
     {
         return Child;
     }
 
-    public bool IsAnalog => Child.IsAnalog;
+    public override bool IsAnalog => Child.IsAnalog;
 
-    public bool RequiresSpi()
-    {
-        return Child.RequiresSpi();
-    }
-
-    public bool RequiresI2C()
-    {
-        return Child.RequiresI2C();
-    }
-
-    public string GenerateAll(bool xbox, List<Tuple<IInput, string>> bindings,
+    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller.Microcontroller controller)
     {
         throw new InvalidOperationException("Never call GenerateAll on DigitalToAnalog, call it on its children");
     }
 
-    public IReadOnlyList<string> RequiredDefines()
+    public override IReadOnlyList<string> RequiredDefines()
     {
         return Child.RequiredDefines();
     }

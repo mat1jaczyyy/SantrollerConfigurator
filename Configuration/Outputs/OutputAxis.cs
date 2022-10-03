@@ -6,8 +6,8 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public abstract class OutputAxis : Output
 {
-    protected OutputAxis(ConfigViewModel model, IInput? input, Color ledOn, Color ledOff, float multiplier, int offset,
-        int deadzone) : base(model, input, ledOn, ledOff)
+    protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, float multiplier, int offset,
+        int deadzone, string name) : base(model, input, ledOn, ledOff, name)
     {
         Input = input;
         LedOn = ledOn;
@@ -23,10 +23,11 @@ public abstract class OutputAxis : Output
     public abstract bool Trigger { get; }
 
     public abstract string GenerateOutput(bool xbox);
+    public override bool IsCombined => false;
 
-    public override string Generate(bool xbox, Microcontroller.Microcontroller microcontroller)
+    public override string Generate(bool xbox)
     {
         if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
-        return $"{GenerateOutput(xbox)} = {Input.Generate(xbox, microcontroller)}";
+        return $"{GenerateOutput(xbox)} = {Input.Generate()}";
     }
 }

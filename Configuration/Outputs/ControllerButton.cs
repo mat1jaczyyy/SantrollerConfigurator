@@ -53,12 +53,10 @@ public class ControllerButton : OutputButton
         StandardButtonType.Right,
     };
 
-    public ControllerButton(ConfigViewModel model, IInput? input, Color ledOn, Color ledOff, int debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, debounce)
+    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, debounce, type.ToString())
     {
         Type = type;
     }
-
-    public override string Name => Type.ToString();
     public StandardButtonType Type { get; }
     public override string GenerateIndex(bool xbox)
     {
@@ -83,8 +81,7 @@ public class ControllerButton : OutputButton
         return "report->buttons";
     }
 
-    public override bool IsStrum()
-    {
-        return Type is StandardButtonType.Up or StandardButtonType.Down;
-    }
+    public override bool IsStrum => Type is StandardButtonType.Up or StandardButtonType.Down;
+
+    public override bool IsCombined => false;
 }

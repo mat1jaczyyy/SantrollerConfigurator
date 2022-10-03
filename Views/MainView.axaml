@@ -5,8 +5,11 @@
              xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker"
              xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp"
              xmlns:netCore="clr-namespace:GuitarConfiguratorSharp.NetCore"
+             xmlns:viewModels="clr-namespace:GuitarConfiguratorSharp.NetCore.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="GuitarConfiguratorSharp.NetCore.Views.MainView"
+             x:DataType="viewModels:MainViewModel"
+             x:CompileBindings="True"
              Background="Transparent">
     <UserControl.Resources>
         <netCore:BitmapAssetValueConverter x:Key="ImageConverter"/>
@@ -31,10 +34,10 @@
                 </ExperimentalAcrylicBorder.Material>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock Text="Welcome to the Santroller Configuration Tool!" />
-                    <ComboBox x:Name="deviceComboBoxNone" HorizontalAlignment="Stretch" IsEnabled="false" IsVisible="{Binding !Main.Devices.Count}" SelectedIndex="0">
+                    <ComboBox HorizontalAlignment="Stretch" IsEnabled="false" IsVisible="{Binding !Main.Devices.Count}" SelectedIndex="0">
                         <ComboBoxItem>No supported device found</ComboBoxItem>
                     </ComboBox>
-                    <ComboBox x:Name="deviceComboBox" HorizontalAlignment="Stretch" IsVisible="{Binding Main.Devices.Count}" Items="{Binding Main.Devices}" SelectedItem="{Binding Main.SelectedDevice, Mode=TwoWay}">
+                    <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.Devices.Count}" Items="{Binding Main.Devices}" SelectedItem="{Binding Main.SelectedDevice, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding}" />
