@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Collections;
@@ -52,8 +51,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public ICommand WriteConfig { get; }
 
         public ICommand GoBack { get; }
-
-        public ICommand Reset { get; }
 
         private LedType _ledType;
 
@@ -360,6 +357,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             Bindings.Clear();
         }
 
+        public void Reset()
+        {
+            SetDefaultBindings();
+        }
+
         public void AddOutput()
         {
             if (_microController == null) return;
@@ -371,19 +373,19 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         switch (SimpleType)
                         {
                             case Configuration.Types.SimpleType.WiiInputSimple:
-                                Bindings.Add(new WiiCombinedOutput(this));
+                                Bindings.Add(new WiiCombinedOutput(this, _microController));
                                 break;
                             case Configuration.Types.SimpleType.GH5NeckSimple:
                                 Bindings.Add(new GH5CombinedOutput(this, _microController));
                                 break;
                             case Configuration.Types.SimpleType.PS2InputSimple:
-                                Bindings.Add(new PS2CombinedOutput(this, _microController));
+                                Bindings.Add(new Ps2CombinedOutput(this, _microController));
                                 break;
                             case Configuration.Types.SimpleType.WTNeckSimple:
-                                Bindings.Add(new GHWTCombinedOutput(this));
+                                Bindings.Add(new GHWTCombinedOutput(this, _microController));
                                 break;
                             case Configuration.Types.SimpleType.DJTurntableSimple:
-                                Bindings.Add(new DJCombinedOutput(this));
+                                Bindings.Add(new DJCombinedOutput(this, _microController));
                                 break;
                         }
                     }

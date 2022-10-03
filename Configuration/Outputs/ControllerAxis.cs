@@ -34,7 +34,7 @@ public class ControllerAxis : OutputAxis
         Type = type;
     }
     public StandardAxisType Type { get; }
-    public override bool Trigger => (model.DeviceType is DeviceControllerType.Guitar && Type is StandardAxisType.RightStickX) || Type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
+    public override bool Trigger => (Model.DeviceType is DeviceControllerType.Guitar && Type is StandardAxisType.RightStickX) || Type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
 
     public override string GenerateOutput(bool xbox)
     {

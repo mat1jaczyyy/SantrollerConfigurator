@@ -4,9 +4,11 @@ using System.Linq;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 
-public class DjInput : Input
+public class DjInput : TwiInput
 {
-    public DjInput(DjInputType input)
+    public static readonly string DjTwiType = "dj";
+    public static readonly int DjTwiFreq = 250000;
+    public DjInput(DjInputType input, Microcontroller.Microcontroller microcontroller): base(microcontroller, DjTwiType, DjTwiFreq)
     {
         Input = input;
     }

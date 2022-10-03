@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using DynamicData.Kernel;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
@@ -27,7 +29,7 @@ public class Pico : Microcontroller
         return $"sio_hw->gpio_in & (1 << {pin})";
     }
 
-    private readonly Dictionary<int, SpiPinType> _spiTypes = new()
+    public static readonly Dictionary<int, SpiPinType> SpiTypesByPin = new()
     {
         {0, SpiPinType.MISO},
         {1, SpiPinType.CSn},
@@ -51,7 +53,7 @@ public class Pico : Microcontroller
         {15, SpiPinType.MOSI},
     };
 
-    private readonly Dictionary<int, int> _spiPins = new()
+    public static readonly Dictionary<int, int> SpiIndexByPin = new()
     {
         {0, 0},
         {1, 0},
@@ -75,7 +77,7 @@ public class Pico : Microcontroller
         {15, 1},
     };
 
-    private readonly Dictionary<int, int> _twiPins = new()
+    public static readonly Dictionary<int, int> TwiIndexByPin = new()
     {
         {0, 0},
         {1, 0},
@@ -103,7 +105,7 @@ public class Pico : Microcontroller
         {27, 1},
     };
 
-    private readonly Dictionary<int, TwiPinType> _twiTypes = new()
+    public static readonly Dictionary<int, TwiPinType> TwiTypeByPin = new()
     {
         {0, TwiPinType.SDA},
         {1, TwiPinType.SCL},
@@ -131,145 +133,100 @@ public class Pico : Microcontroller
         {27, TwiPinType.SCL},
     };
 
-    private PicoTwiConfig? _twiConfig0;
-    private PicoTwiConfig? _twiConfig1;
-    private PicoSpiConfig? _spiConfig0;
-    private PicoSpiConfig? _spiConfig1;
-
-    public override SpiConfig[] SpiConfigs => new[] {_spiConfig0, _spiConfig1}.Where(s => s != null).Select(s => s!)
-        .Cast<SpiConfig>().ToArray();
-
-    public override TwiConfig[] TwiConfigs => new[] {_twiConfig0, _twiConfig1}.Where(s => s != null).Select(s => s!)
-        .Cast<TwiConfig>().ToArray();
 
     public override SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
         bool msbfirst,
         int clock)
     {
-        int pin = _spiPins[mosi];
-        if (pin != _spiPins[miso] || _spiTypes[mosi] != SpiPinType.MOSI || _spiTypes[miso] != SpiPinType.MISO)
+        int pin = SpiIndexByPin[mosi];
+        if (pin != SpiIndexByPin[miso] || SpiTypesByPin[mosi] != SpiPinType.MOSI || SpiTypesByPin[miso] != SpiPinType.MISO)
         {
             return null;
         }
 
-        if (pin == 0)
+        PicoSpiConfig? config = SpiConfigs.Cast<PicoSpiConfig>().FirstOrDefault(c => c.Type == type);
+        if (config != null)
         {
-            if (_spiConfig0?.Type == type) return _spiConfig0;
-            if (_spiConfig0 != null) return null;
-            _spiConfig0 = new PicoSpiConfig(type, 0, mosi, miso, sck, cpol, cpha, msbfirst, clock);
-            return _spiConfig0;
+            return config;
         }
-
-        if (_spiConfig1?.Type == type) return _spiConfig1;
-        if (_spiConfig1 != null) return null;
-        _spiConfig1 = new PicoSpiConfig(type, 1, mosi, miso, sck, cpol, cpha, msbfirst, clock);
-        return _spiConfig1;
+        config = SpiConfigs.Cast<PicoSpiConfig>().FirstOrDefault(c => c.Index == pin);
+        if (config != null) return null;
+        config = new PicoSpiConfig(type, mosi, miso, sck, cpol, cpha, msbfirst, clock);
+        SpiConfigs.Add(config);
+        return config;
     }
 
     public override TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock)
     {
-        int pin = _twiPins[sda];
-        if (pin != _twiPins[scl] || _twiTypes[sda] != TwiPinType.SDA || _twiTypes[scl] != TwiPinType.SCL)
+        int pin = TwiIndexByPin[sda];
+        if (pin != TwiIndexByPin[scl] || TwiTypeByPin[sda] != TwiPinType.SDA || TwiTypeByPin[scl] != TwiPinType.SCL)
         {
             return null;
         }
 
-        if (pin == 0)
+        PicoTwiConfig? config = TwiConfigs.Cast<PicoTwiConfig>().FirstOrDefault(c => c.Type == type);
+        if (config != null)
         {
-            if (_twiConfig0?.Type == type) return _twiConfig0;
-            if (_twiConfig0 != null) return null;
-            _twiConfig0 = new PicoTwiConfig(type, 0, sda, scl, clock);
-            return _twiConfig0;
+            return config;
         }
-
-        if (_twiConfig1?.Type == type) return _twiConfig0;
-        if (_twiConfig1 != null) return _twiConfig1;
-        _twiConfig1 = new PicoTwiConfig(type, 1, sda, scl, clock);
-        return _twiConfig1;
+        config = TwiConfigs.Cast<PicoTwiConfig>().FirstOrDefault(c => c.Index == pin);
+        if (config != null) return null;
+        config = new PicoTwiConfig(type,  sda, scl, clock);
+        TwiConfigs.Add(config);
+        return config;
     }
 
     public override bool HasConfigurableSpiPins => true;
     public override bool HasConfigurableTwiPins => true;
 
-    public override bool TwiPinsFree => _twiConfig0 == null || _twiConfig1 == null;
-    public override bool SpiPinsFree => _spiConfig0 == null || _spiConfig1 == null;
+    public override bool TwiPinsFree => TwiConfigs.Count < 2;
+    public override bool SpiPinsFree => SpiConfigs.Count < 2;
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
-        var types = _spiTypes.AsEnumerable();
-        if (_spiConfig0 != null && _spiConfig0.Type != type)
+        var types = SpiTypesByPin.AsEnumerable();
+        foreach (var config in SpiConfigs.Cast<PicoSpiConfig>())
         {
-           types = types.Where(s => s.Key != 0).ToDictionary(s => s.Key, s => s.Value);
+            if (config.Type != type)
+            {
+                types = types.Where(s => SpiIndexByPin[s.Key] != config.Index).ToDictionary(s => s.Key, s => s.Value);
+            }   
         }
-        
-        if (_spiConfig1 != null && _spiConfig1.Type != type)
-        {
-            types = types.Where(s => s.Key != 1).ToDictionary(s => s.Key, s => s.Value);
-        }
-
         return types.ToList();
     }
 
     public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type)
     {
-        var types = _twiTypes.AsEnumerable();
-        if (_twiConfig0 != null && _twiConfig0.Type != type)
+        var types = TwiTypeByPin.AsEnumerable();
+        foreach (var config in TwiConfigs.Cast<PicoTwiConfig>())
         {
-            types = types.Where(s => s.Key != 0).ToDictionary(s => s.Key, s => s.Value);
+            if (config.Type != type)
+            {
+                types = types.Where(s => TwiIndexByPin[s.Key] != config.Index).ToDictionary(s => s.Key, s => s.Value);
+            }   
         }
-        
-        if (_twiConfig1 != null && _twiConfig1.Type != type)
-        {
-            types = types.Where(s => s.Key != 1).ToDictionary(s => s.Key, s => s.Value);
-        }
-
         return types.ToList();
     }
 
     public override void UnAssignSPIPins(string type)
     {
-        if (_spiConfig0?.Type == type)
-        {
-            _spiConfig0 = null;
-        }
-        else if (_spiConfig1?.Type == type)
-        {
-            _spiConfig1 = null;
-        }
+        SpiConfigs.AsList().RemoveAll(s => ((PicoSpiConfig)s).Type == type);
     }
 
     public override void UnAssignTWIPins(string type)
     {
-        if (_twiConfig0?.Type == type)
-        {
-            _twiConfig0 = null;
-        }
-        else if (_twiConfig1?.Type == type)
-        {
-            _twiConfig1 = null;
-        }
+        TwiConfigs.AsList().RemoveAll(s => s.Type == type);
     }
 
     public override string GenerateDefinitions()
     {
         List<int> skippedPins = new List<int>();
-        if (_twiConfig0 != null)
+        foreach (var config in SpiConfigs)
         {
-            skippedPins.AddRange(_twiConfig0.GetPins());
+            skippedPins.AddRange(config.GetPins());
         }
-
-        if (_twiConfig1 != null)
+        foreach (var config in TwiConfigs)
         {
-            skippedPins.AddRange(_twiConfig1.GetPins());
-        }
-
-        if (_spiConfig0 != null)
-        {
-            skippedPins.AddRange(_spiConfig0.GetPins());
-        }
-
-        if (_spiConfig1 != null)
-        {
-            skippedPins.AddRange(_spiConfig1.GetPins());
+            skippedPins.AddRange(config.GetPins());
         }
 
         int skip = 0;

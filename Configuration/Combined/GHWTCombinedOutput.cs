@@ -16,22 +16,22 @@ public class GHWTCombinedOutput : Output
     public bool TapEnabled { get; set; }
     public bool MapTapToFrets { get; set; }
 
-    public GHWTCombinedOutput(ConfigViewModel model) : base(model, null, Colors.Transparent, Colors.Transparent, "GHWT")
+    public GHWTCombinedOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller) : base(model, null, Colors.Transparent, Colors.Transparent, "GHWT")
     {
         BindingsTap = new()
         {
-            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapGreen, model.MicroController!), Colors.Green,
+            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapGreen, microcontroller), Colors.Green,
                 Colors.Transparent, 5, StandardButtonType.A),
-            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapRed, model.MicroController!), Colors.Green,
+            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapRed, microcontroller), Colors.Green,
                 Colors.Transparent, 5, StandardButtonType.B),
-            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapYellow, model.MicroController!), Colors.Green,
+            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapYellow, microcontroller), Colors.Green,
                 Colors.Transparent, 5, StandardButtonType.Y),
-            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapBlue, model.MicroController!), Colors.Green,
+            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapBlue, microcontroller), Colors.Green,
                 Colors.Transparent, 5, StandardButtonType.X),
-            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapOrange, model.MicroController!), Colors.Green,
+            new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapOrange, microcontroller), Colors.Green,
                 Colors.Transparent, 5, StandardButtonType.LB),
         };
-        BindingTapBar = new ControllerAxis(model, new GhWtTapInput(GhWtInputType.TapBar, model.MicroController!),
+        BindingTapBar = new ControllerAxis(model, new GhWtTapInput(GhWtInputType.TapBar, microcontroller),
             Colors.Transparent,
             Colors.Transparent, 1, 0, 0, StandardAxisType.RightStickY);
     }

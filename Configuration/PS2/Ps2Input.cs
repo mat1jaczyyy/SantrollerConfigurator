@@ -4,8 +4,13 @@ using System.Linq;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 
-public class Ps2Input : Input
+public class Ps2Input : SpiInput
 {
+    public static readonly string Ps2SpiType = "ps2";
+    public static readonly int Ps2SpiFreq = 500000;
+    public static readonly bool Ps2SpiCpol = true;
+    public static readonly bool Ps2SpiCpha = true;
+    public static readonly bool Ps2SpiMsbFirst = true;
     public Ps2InputType Input { get; }
 
     private static readonly List<Ps2InputType> Dualshock2Order = new()
@@ -141,7 +146,7 @@ public class Ps2Input : Input
         {Ps2ControllerType.Mouse, "PSPROTO_MOUSE"},
     };
 
-    public Ps2Input(Ps2InputType input)
+    public Ps2Input(Ps2InputType input, Microcontroller.Microcontroller microcontroller): base(microcontroller, Ps2SpiType,Ps2SpiFreq,Ps2SpiCpol,Ps2SpiCpha,Ps2SpiMsbFirst)
     {
         Input = input;
     }

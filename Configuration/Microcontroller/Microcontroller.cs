@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Avalonia.Collections;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using ReactiveUI;
 
@@ -14,9 +15,9 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller
         public abstract string GenerateInit(List<Output> bindings);
 
         public abstract string GetPin(int pin);
-        
-        public abstract SpiConfig[] SpiConfigs { get; }
-        public abstract TwiConfig[] TwiConfigs { get; }
+
+        public readonly AvaloniaList<SpiConfig> SpiConfigs = new();
+        public readonly AvaloniaList<TwiConfig> TwiConfigs = new();
         
         // TODO: call the below stuff in Inputs that use i2c or spi, and with APA102 stuff or RF stuff (eventually)
         public abstract SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,

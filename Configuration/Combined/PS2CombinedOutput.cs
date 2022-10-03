@@ -8,7 +8,7 @@ using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
 
-public class PS2CombinedOutput : SpiOutput
+public class Ps2CombinedOutput : SpiOutput
 {
     public static readonly Dictionary<Ps2InputType, StandardButtonType> Buttons = new()
     {
@@ -67,29 +67,29 @@ public class PS2CombinedOutput : SpiOutput
     public bool MapGuitarJoystickToDPad { get; set; }
     public bool MapNunchukAccelerationToRightJoy { get; set; }
 
-    public PS2CombinedOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller) : base(model, microcontroller,"ps2",500000,true,true,true, "PS2")
+    public Ps2CombinedOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller) : base(model, microcontroller,Ps2Input.Ps2SpiType,Ps2Input.Ps2SpiFreq,Ps2Input.Ps2SpiCpol,Ps2Input.Ps2SpiCpha,Ps2Input.Ps2SpiMsbFirst, "PS2")
     {
         foreach (var pair in Buttons)
         {
-            _bindings.Add(new ControllerButton(model, new Ps2Input(pair.Key), Colors.Transparent, Colors.Transparent,
+            _bindings.Add(new ControllerButton(model, new Ps2Input(pair.Key, microcontroller), Colors.Transparent, Colors.Transparent,
                 10,
                 pair.Value));
         }
 
         foreach (var pair in Axis)
         {
-            _bindings.Add(new ControllerAxis(model, new Ps2Input(pair.Key), Colors.Transparent,
+            _bindings.Add(new ControllerAxis(model, new Ps2Input(pair.Key, microcontroller), Colors.Transparent,
                 Colors.Transparent, 1, 0, 0, pair.Value));
         }
 
         _bindings.Add(new ControllerButton(model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI), AnalogToDigitalType.Trigger, 128),
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, microcontroller), AnalogToDigitalType.Trigger, 128),
             Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
         _bindings.Add(new ControllerButton(model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi), AnalogToDigitalType.Trigger, 128),
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, microcontroller), AnalogToDigitalType.Trigger, 128),
             Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
         _bindings.Add(new ControllerButton(model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL), AnalogToDigitalType.Trigger, 240),
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, microcontroller), AnalogToDigitalType.Trigger, 240),
             Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
     }
 

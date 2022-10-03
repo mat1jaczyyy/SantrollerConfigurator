@@ -9,6 +9,8 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
 public class Gh5NeckInput : TwiInput
 {
+    public static readonly string Gh5TwiType = "gh5";
+    public static readonly int Gh5TwiFreq = 100000;
 
     private static readonly Dictionary<int, BarButton> Mappings = new()
     {
@@ -68,7 +70,7 @@ public class Gh5NeckInput : TwiInput
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller.Microcontroller controller): base(controller, "gh5", 100000)
+    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller.Microcontroller controller): base(controller, Gh5TwiType, Gh5TwiFreq)
     {
         Input = input;
         Controller = controller;

@@ -7,24 +7,22 @@ public abstract class TwiConfig: ReactiveObject
     protected int _sda;
     protected int _scl;
     protected int _clock;
-    protected string _definition;
     protected string _type;
 
-    protected TwiConfig(string type, int sda, int scl, int clock, string definition)
+    protected TwiConfig(string type, int sda, int scl, int clock)
     {
         _type = type;
         _sda = sda;
         _scl = scl;
         _clock = clock;
-        _definition = definition;
     }
 
     public string Generate()
     {
         return $@"
-    #define {_definition}_SDA {_sda}
-    #define {_definition}_SCL {_scl}
-    #define {_definition}_CLOCK {_clock}
+    #define {Definition}_SDA {_sda}
+    #define {Definition}_SCL {_scl}
+    #define {Definition}_CLOCK {_clock}
 ";
     }
 
@@ -34,7 +32,9 @@ public abstract class TwiConfig: ReactiveObject
     }
 
     public string Type => _type;
+    public abstract string Definition { get; }
 
+    //TODO: in these setters, update other pins if they don't match up
     public int Sda
     {
         get => _sda;

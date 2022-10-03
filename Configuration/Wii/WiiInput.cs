@@ -6,8 +6,10 @@ using System.Linq;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 
-public class WiiInput : Input
+public class WiiInput : TwiInput
 {
+    public static readonly string WiiTwiType = "wii";
+    public static readonly int WiiTwiFreq = 400000;
     public WiiInputType Input { get; }
 
     public WiiControllerType WiiControllerType => AxisToType[Input];
@@ -241,7 +243,7 @@ public class WiiInput : Input
         {WiiControllerType.MotionPlus, "WII_MOTION_PLUS"}
     };
 
-    public WiiInput(WiiInputType input)
+    public WiiInput(WiiInputType input, Microcontroller.Microcontroller microcontroller): base(microcontroller, WiiTwiType, WiiTwiFreq)
     {
         Input = input;
     }

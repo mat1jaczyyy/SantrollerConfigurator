@@ -8,33 +8,33 @@ using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
 
-public class DJCombinedOutput : Output
+public class DJCombinedOutput : TwiOutput
 {
-    private readonly List<Output> Bindings;
+    private readonly List<Output> _bindings;
 
-    public DJCombinedOutput(ConfigViewModel model) : base(model, null, Colors.Transparent, Colors.Transparent, "DJ")
+    public DJCombinedOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller) : base(model, microcontroller, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ")
     {
-        Bindings = new()
+        _bindings = new()
         {
-            new ControllerButton(model, new DjInput(DjInputType.LeftAny), Colors.Transparent, Colors.Transparent, 5,
+            new ControllerButton(model, new DjInput(DjInputType.LeftAny, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.LB),
-            new ControllerButton(model, new DjInput(DjInputType.LeftGreen), Colors.Transparent, Colors.Transparent, 5,
+            new ControllerButton(model, new DjInput(DjInputType.LeftGreen, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.A),
-            new ControllerButton(model, new DjInput(DjInputType.LeftRed), Colors.Transparent, Colors.Transparent, 5,
+            new ControllerButton(model, new DjInput(DjInputType.LeftRed, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.B),
-            new ControllerButton(model, new DjInput(DjInputType.LeftBlue), Colors.Transparent, Colors.Transparent, 5,
+            new ControllerButton(model, new DjInput(DjInputType.LeftBlue, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.X),
-            new ControllerButton(model, new DjInput(DjInputType.RightAny), Colors.Transparent, Colors.Transparent, 5,
+            new ControllerButton(model, new DjInput(DjInputType.RightAny, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.RB),
-            new ControllerButton(model, new DjInput(DjInputType.RightGreen), Colors.Transparent, Colors.Transparent, 5,
+            new ControllerButton(model, new DjInput(DjInputType.RightGreen, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.A),
-            new ControllerButton(model, new DjInput(DjInputType.RightRed), Colors.Transparent, Colors.Transparent, 5,
+            new ControllerButton(model, new DjInput(DjInputType.RightRed, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.B),
-            new ControllerButton(model, new DjInput(DjInputType.RightBlue), Colors.Transparent, Colors.Transparent, 5,
+            new ControllerButton(model, new DjInput(DjInputType.RightBlue, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.X),
-            new ControllerAxis(model, new DjInput(DjInputType.LeftTurntable), Colors.Transparent, Colors.Transparent, 1,
+            new ControllerAxis(model, new DjInput(DjInputType.LeftTurntable, microcontroller), Colors.Transparent, Colors.Transparent, 1,
                 0, 0, StandardAxisType.LeftStickX),
-            new ControllerAxis(model, new DjInput(DjInputType.RightTurnable), Colors.Transparent, Colors.Transparent, 1,
+            new ControllerAxis(model, new DjInput(DjInputType.RightTurnable, microcontroller), Colors.Transparent, Colors.Transparent, 1,
                 0, 0, StandardAxisType.LeftStickY)
         };
     }
@@ -46,5 +46,5 @@ public class DJCombinedOutput : Output
         return "";
     }
 
-    public override IReadOnlyList<Output> Outputs => Bindings;
+    public override IReadOnlyList<Output> Outputs => _bindings;
 }

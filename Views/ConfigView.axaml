@@ -48,6 +48,12 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="DJ Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                              Items="{Binding AvailableSclPins}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                              Items="{Binding AvailableSdaPins}">
+                    </ComboBox>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type ps2:Ps2Input}">
@@ -60,6 +66,12 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="Wii Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                              Items="{Binding AvailableSclPins}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                              Items="{Binding AvailableSdaPins}">
+                    </ComboBox>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type configuration:DirectInput}">
@@ -130,7 +142,7 @@
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GHWT TapBar Input"></Label>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type combined:PS2CombinedOutput}">
+            <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="PS2 Controller Input"></Label>
                 </StackPanel>
@@ -138,6 +150,12 @@
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="Wii Controller Input"></Label>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                              Items="{Binding AvailableSclPins}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                              Items="{Binding AvailableSdaPins}">
+                    </ComboBox>
                 </StackPanel>
             </DataTemplate>
         </netCore:OutputTemplateSelector>
@@ -229,7 +247,7 @@
                 <StackPanel>
                     <WrapPanel Margin="10" HorizontalAlignment="Center">
                         <Button Content="Write Configuration" Command="{Binding WriteConfig}" />
-                        <Button Content="Revert device to Arduino" Command="{Binding Reset}" />
+                        <Button x:CompileBindings="False" Content="Revert device to Arduino" Command="{Binding Reset}" />
                         <Button Content="Configure another device" Command="{Binding GoBack}" />
                     </WrapPanel>
                     <WrapPanel HorizontalAlignment="Center">

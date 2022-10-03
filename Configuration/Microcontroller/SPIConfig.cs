@@ -8,7 +8,6 @@ public abstract class SpiConfig : ReactiveObject
     private bool _cpha;
     private bool _msbfirst;
     private int _clock;
-    private string _definition;
     private string _type;
 
     private int _mosi;
@@ -17,8 +16,7 @@ public abstract class SpiConfig : ReactiveObject
 
     private int _sck;
 
-    protected SpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, int clock,
-        string definition)
+    protected SpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, int clock)
     {
         _type = type;
         _mosi = mosi;
@@ -28,19 +26,18 @@ public abstract class SpiConfig : ReactiveObject
         _cpha = cpha;
         _msbfirst = msbfirst;
         _clock = clock;
-        _definition = definition;
     }
 
     public string generate()
     {
         return $@"
-    #define {_definition}_MOSI {_mosi}
-    #define {_definition}_MISO {_miso}
-    #define {_definition}_SCK {_sck}
-    #define {_definition}_CPOL {(_cpol ? 1 : 0)}
-    #define {_definition}_CPHA {(_cpha ? 1 : 0)}
-    #define {_definition}_MSBFIRST {(_msbfirst ? 1 : 0)}
-    #define {_definition}_CLOCK {_clock}
+    #define {Definition}_MOSI {_mosi}
+    #define {Definition}_MISO {_miso}
+    #define {Definition}_SCK {_sck}
+    #define {Definition}_CPOL {(_cpol ? 1 : 0)}
+    #define {Definition}_CPHA {(_cpha ? 1 : 0)}
+    #define {Definition}_MSBFIRST {(_msbfirst ? 1 : 0)}
+    #define {Definition}_CLOCK {_clock}
 ";
     }
 
@@ -50,7 +47,10 @@ public abstract class SpiConfig : ReactiveObject
     }
 
     public string Type => _type;
+    
+    public abstract string Definition { get; }
 
+    //TODO: in these setters, update other pins if they don't match up
     public int Mosi
     {
         get => _mosi;

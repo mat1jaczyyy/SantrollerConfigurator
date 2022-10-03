@@ -22,7 +22,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public abstract class Output : ReactiveObject
 {
-    protected ConfigViewModel model;
+    protected readonly ConfigViewModel Model;
 
     private Input? _input;
 
@@ -139,8 +139,8 @@ public abstract class Output : ReactiveObject
         LedOn = ledOn;
         LedOff = ledOff;
         Name = name;
-        this.model = model;
-        _image = this.WhenAnyValue(x => x.model.DeviceType).Select(GetImage).ToProperty(this, x => x.Image);
+        this.Model = model;
+        _image = this.WhenAnyValue(x => x.Model.DeviceType).Select(GetImage).ToProperty(this, x => x.Image);
         _isDj = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.TurntableInput)
             .ToProperty(this, x => x.IsDj);
         _isWii = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.WiiInput)
@@ -151,7 +151,7 @@ public abstract class Output : ReactiveObject
             .ToProperty(this, x => x.IsPs2);
         _isWt = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.WTNeckInput)
             .ToProperty(this, x => x.IsWt);
-        _areLedsEnabled = this.WhenAnyValue(x => x.model.LedType).Select(x => x is LedType.APA102)
+        _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is LedType.APA102)
             .ToProperty(this, x => x.AreLedsEnabled);
     }
 
@@ -167,25 +167,25 @@ public abstract class Output : ReactiveObject
         switch (SelectedInputType)
         {
             case InputType.AnalogPinInput:
-                input = new DirectInput(0, DevicePinMode.Analog, model.MicroController!);
+                input = new DirectInput(0, DevicePinMode.Analog, Model.MicroController!);
                 break;
             case InputType.DigitalPinInput:
-                input = new DirectInput(0, DevicePinMode.PullUp, model.MicroController!);
+                input = new DirectInput(0, DevicePinMode.PullUp, Model.MicroController!);
                 break;
             case InputType.TurntableInput:
-                input = new DjInput(_djInputType);
+                input = new DjInput(_djInputType, Model.MicroController!);
                 break;
             case InputType.GH5NeckInput:
-                input = new Gh5NeckInput(_gh5NeckInputType, model.MicroController!);
+                input = new Gh5NeckInput(_gh5NeckInputType, Model.MicroController!);
                 break;
             case InputType.WTNeckInput:
-                input = new GhWtTapInput(_ghWtInputType, model.MicroController!);
+                input = new GhWtTapInput(_ghWtInputType, Model.MicroController!);
                 break;
             case InputType.WiiInput:
-                input = new WiiInput(_wiiInputType);
+                input = new WiiInput(_wiiInputType, Model.MicroController!);
                 break;
             case InputType.PS2Input:
-                input = new Ps2Input(_ps2InputType);
+                input = new Ps2Input(_ps2InputType, Model.MicroController!);
                 break;
             default:
                 return;

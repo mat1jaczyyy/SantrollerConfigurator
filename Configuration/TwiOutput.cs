@@ -12,40 +12,48 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
 public abstract class TwiOutput : Output
 {
-    protected Microcontroller.Microcontroller Microcontroller;
+    private readonly Microcontroller.Microcontroller _microcontroller;
 
     // ReSharper disable ExplicitCallerInfoArgument
     protected TwiOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller, string twiType,
         int twiFreq, string name) : base(model, null, Colors.Transparent, Colors.Transparent, name)
     {
-        Microcontroller = microcontroller;
-        TwiFreq = twiFreq;
-        TwiType = twiType;
-        var config = microcontroller.GetTwiForType(TwiType);
+        _microcontroller = microcontroller;
+        _twiType = twiType;
+        var config = microcontroller.GetTwiForType(_twiType);
         if (config != null)
         {
             _twiConfig = config;
-            this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(s => this.RaisePropertyChanged("Scl"));
-            this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(s => this.RaisePropertyChanged("Sda"));
-            return;
         }
-
-        var pins = microcontroller.TwiPins(TwiType);
-        if (!pins.Any())
+        else
         {
-            throw new PinUnavailableException("I2C already in use!");
+            var pins = microcontroller.TwiPins(_twiType);
+            if (!pins.Any())
+            {
+                throw new PinUnavailableException("No I2C Pins Available!");
+            }
+
+            var scl = pins.First(pair => pair.Value is TwiPinType.SCL).Key;
+            var sda = pins.First(pair => pair.Value is TwiPinType.SDA).Key;
+            _twiConfig = microcontroller.AssignTwiPins(_twiType, sda, scl, twiFreq)!;
         }
 
-        var scl = pins.First(pair => pair.Value is TwiPinType.SCL).Key;
-        var sda = pins.First(pair => pair.Value is TwiPinType.SDA).Key;
-        _twiConfig = microcontroller.AssignTwiPins(TwiType, sda, scl, TwiFreq)!;
-        this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(s => this.RaisePropertyChanged("Scl"));
-        this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(s => this.RaisePropertyChanged("Sda"));
+       
+        this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged("Scl"));
+        this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged("Sda"));
+        microcontroller.TwiConfigs.CollectionChanged +=
+            (sender, args) =>
+            {
+                var sda2 = Sda;
+                var scl2 = Scl;
+                this.RaisePropertyChanged("AvailableSdaPins");
+                this.RaisePropertyChanged("AvailableSclPins");
+                Sda = sda2;
+                Scl = scl2;
+            };
     }
 
-    public string TwiType;
-
-    public int TwiFreq;
+    private readonly string _twiType;
 
     private readonly TwiConfig _twiConfig;
 
@@ -67,14 +75,14 @@ public abstract class TwiOutput : Output
 
     private List<int> GetSdaPins()
     {
-        return Microcontroller.TwiPins(TwiType)
+        return _microcontroller.TwiPins(_twiType)
             .Where(s => s.Value is TwiPinType.SDA)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetSclPins()
     {
-        return Microcontroller.TwiPins(TwiType)
+        return _microcontroller.TwiPins(_twiType)
             .Where(s => s.Value is TwiPinType.SCL)
             .Select(s => s.Key).ToList();
     }

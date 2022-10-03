@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Collections;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
@@ -41,8 +42,6 @@ public abstract class AvrController : Microcontroller
 
     public abstract int PinCount { get; }
 
-    public override SpiConfig[] SpiConfigs => _spiConfig == null ? Array.Empty<SpiConfig>() : new SpiConfig[] {_spiConfig};
-    public override TwiConfig[] TwiConfigs => _twiConfig == null ? Array.Empty<TwiConfig>() : new TwiConfig[] {_twiConfig};
 
     private AvrTwiConfig? _twiConfig;
     private AvrSpiConfig? _spiConfig;
@@ -52,6 +51,7 @@ public abstract class AvrController : Microcontroller
     {
         if (_spiConfig != null) return null;
         _spiConfig = new AvrSpiConfig(type, SpiMosi, SpiMiso, SpiSck, cpol, cpha, msbfirst, clock);
+        SpiConfigs.Add(_spiConfig);
         return _spiConfig;
     }
 
@@ -59,16 +59,19 @@ public abstract class AvrController : Microcontroller
     {
         if (_twiConfig != null) return null;
         _twiConfig = new AvrTwiConfig(type, I2CSda, I2CScl, clock);
+        TwiConfigs.Add(_twiConfig);
         return _twiConfig;
     }
 
     public override void UnAssignSPIPins(string type)
     {
+        SpiConfigs.Clear();
         _spiConfig = null;
     }
 
     public override void UnAssignTWIPins(string type)
     {
+        TwiConfigs.Clear();
         _twiConfig = null;
     }
     
