@@ -6,7 +6,7 @@ public class AvrTwiConfig : TwiConfig
     {
     }
 
-    public override string Definition => "TWI_";
+    public override string Definition => "TWI";
     protected override void UpdatePins(string field)
     {
     }

@@ -219,14 +219,17 @@ public class Pico : Microcontroller
 
     public override string GenerateDefinitions()
     {
+        string ret = "";
         List<int> skippedPins = new List<int>();
         foreach (var config in SpiConfigs)
         {
             skippedPins.AddRange(config.GetPins());
+            ret += config.Generate();
         }
         foreach (var config in TwiConfigs)
         {
             skippedPins.AddRange(config.GetPins());
+            ret += config.Generate();
         }
 
         int skip = 0;
@@ -238,8 +241,8 @@ public class Pico : Microcontroller
             }
         }
 
-        var skipDef = $"#define SKIP_MASK_PICO {{{skip.ToString()}}}";
-        return skipDef;
+        ret += $"#define SKIP_MASK_PICO {{{skip.ToString()}}}";
+        return ret;
     }
 
     public override string GenerateInit(List<Output> bindings)

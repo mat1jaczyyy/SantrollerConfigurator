@@ -11,7 +11,7 @@ public class PicoSpiConfig: SpiConfig
     }
 
     public int Index => Pico.SpiIndexByPin[Mosi];
-    public override string Definition => $"SPI_{Index}_";
+    public override string Definition => $"SPI_{Index}";
     // ReSharper disable ExplicitCallerInfoArgument
     protected override void UpdatePins(string field)
     {

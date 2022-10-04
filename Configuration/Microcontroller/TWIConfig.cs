@@ -20,9 +20,9 @@ public abstract class TwiConfig: ReactiveObject
     public string Generate()
     {
         return $@"
-    #define {Definition}_SDA {_sda}
-    #define {Definition}_SCL {_scl}
-    #define {Definition}_CLOCK {_clock}
+#define {Definition}_SDA {_sda}
+#define {Definition}_SCL {_scl}
+#define {Definition}_CLOCK {_clock}
 ";
     }
 

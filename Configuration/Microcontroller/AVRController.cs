@@ -147,7 +147,7 @@ public abstract class AvrController : Microcontroller
                         "}";
         if (_spiConfig != null)
         {
-            ret += _spiConfig.generate();
+            ret += _spiConfig.Generate();
         }
 
         if (_twiConfig != null)

@@ -28,16 +28,16 @@ public abstract class SpiConfig : ReactiveObject
         _clock = clock;
     }
 
-    public string generate()
+    public string Generate()
     {
         return $@"
-    #define {Definition}_MOSI {_mosi}
-    #define {Definition}_MISO {_miso}
-    #define {Definition}_SCK {_sck}
-    #define {Definition}_CPOL {(_cpol ? 1 : 0)}
-    #define {Definition}_CPHA {(_cpha ? 1 : 0)}
-    #define {Definition}_MSBFIRST {(_msbfirst ? 1 : 0)}
-    #define {Definition}_CLOCK {_clock}
+#define {Definition}_MOSI {_mosi}
+#define {Definition}_MISO {_miso}
+#define {Definition}_SCK {_sck}
+#define {Definition}_CPOL {(_cpol ? 1 : 0)}
+#define {Definition}_CPHA {(_cpha ? 1 : 0)}
+#define {Definition}_MSBFIRST {(_msbfirst ? 1 : 0)}
+#define {Definition}_CLOCK {_clock}
 ";
     }
 

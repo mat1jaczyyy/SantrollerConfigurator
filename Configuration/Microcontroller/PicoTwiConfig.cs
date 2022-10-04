@@ -12,7 +12,7 @@ public class PicoTwiConfig : TwiConfig
     }
 
     public int Index => Pico.TwiIndexByPin[_sda];
-    public override string Definition => $"TWI_{Index}_";
+    public override string Definition => $"TWI_{Index}";
     // ReSharper disable ExplicitCallerInfoArgument
     protected override void UpdatePins(string field)
     {
