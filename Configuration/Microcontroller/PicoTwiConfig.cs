@@ -24,11 +24,11 @@ public class PicoTwiConfig : TwiConfig
             {
                 case "sda":
                     this.RaiseAndSetIfChanged(ref _scl,
-                        Pico.TwiIndexByPin.OrderBy(x => Math.Abs(x.Key - _sda)).First(x => x.Value == indexSda && x.Key != _sda).Key, "Scl");
+                        Pico.TwiIndexByPin.OrderBy(x => Math.Abs(x.Key - _sda)).First(x => x.Value == indexSda && Pico.TwiTypeByPin[x.Key] == TwiPinType.SCL).Key, "Scl");
                     break;
                 case "scl":
                     this.RaiseAndSetIfChanged(ref _sda,
-                        Pico.TwiIndexByPin.OrderBy(x => Math.Abs(x.Key - _scl)).First(x => x.Value == indexScl && x.Key != _scl).Key, "Sda");
+                        Pico.TwiIndexByPin.OrderBy(x => Math.Abs(x.Key - _scl)).First(x => x.Value == indexScl && Pico.TwiTypeByPin[x.Key] == TwiPinType.SDA).Key, "Sda");
                     break;
             } 
         }

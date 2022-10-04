@@ -24,21 +24,21 @@ public class PicoSpiConfig: SpiConfig
             {
                 case "miso":
                     this.RaiseAndSetIfChanged(ref _mosi,
-                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _miso)).First(x => x.Value == indexMiso && x.Key != _miso).Key, "Mosi");
+                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _miso)).First(x => x.Value == indexMiso && Pico.SpiTypesByPin[x.Key] == SpiPinType.MOSI).Key, "Mosi");
                     this.RaiseAndSetIfChanged(ref _sck,
-                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _miso)).First(x => x.Value == indexMiso && x.Key != _miso && x.Key != _mosi).Key, "Sck");
+                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _miso)).First(x => x.Value == indexMiso && Pico.SpiTypesByPin[x.Key] == SpiPinType.SCK).Key, "Sck");
                     break;
                 case "mosi":
                     this.RaiseAndSetIfChanged(ref _miso,
-                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _mosi)).First(x => x.Value == indexMiso && x.Key != _mosi).Key, "Miso");
+                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _mosi)).First(x => x.Value == indexMiso && Pico.SpiTypesByPin[x.Key] == SpiPinType.MISO).Key, "Miso");
                     this.RaiseAndSetIfChanged(ref _sck,
-                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _mosi)).First(x => x.Value == indexMiso && x.Key != _mosi && x.Key != _miso).Key, "Sck");
+                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _mosi)).First(x => x.Value == indexMiso && Pico.SpiTypesByPin[x.Key] == SpiPinType.SCK).Key, "Sck");
                     break;
                 case "sck":
                     this.RaiseAndSetIfChanged(ref _mosi,
-                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _sck)).First(x => x.Value == indexMiso && x.Key != _sck).Key, "Mosi");
+                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _sck)).First(x => x.Value == indexMiso && Pico.SpiTypesByPin[x.Key] == SpiPinType.MOSI).Key, "Mosi");
                     this.RaiseAndSetIfChanged(ref _miso,
-                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _sck)).First(x => x.Value == indexMiso && x.Key != _mosi && x.Key != _sck).Key, "Miso");
+                        Pico.SpiIndexByPin.OrderBy(x => Math.Abs(x.Key - _sck)).First(x => x.Value == indexMiso && Pico.SpiTypesByPin[x.Key] == SpiPinType.MISO).Key, "Miso");
                     break;
             } 
         }
