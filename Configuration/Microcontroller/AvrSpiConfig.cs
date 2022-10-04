@@ -7,4 +7,7 @@ public class AvrSpiConfig: SpiConfig
     }
 
     public override string Definition => "SPI_";
+    protected override void UpdatePins(string field)
+    {
+    }
 }

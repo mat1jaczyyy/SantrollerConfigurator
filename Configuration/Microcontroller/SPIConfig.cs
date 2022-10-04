@@ -10,11 +10,11 @@ public abstract class SpiConfig : ReactiveObject
     private int _clock;
     private string _type;
 
-    private int _mosi;
+    protected int _mosi;
 
-    private int _miso;
+    protected int _miso;
 
-    private int _sck;
+    protected int _sck;
 
     protected SpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, int clock)
     {
@@ -49,23 +49,35 @@ public abstract class SpiConfig : ReactiveObject
     public string Type => _type;
     
     public abstract string Definition { get; }
+    protected abstract void UpdatePins(string field);
 
-    //TODO: in these setters, update other pins if they don't match up
     public int Mosi
     {
         get => _mosi;
-        set => this.RaiseAndSetIfChanged(ref _mosi, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _mosi, value);
+            UpdatePins("mosi");
+        }
     }
 
     public int Miso
     {
         get => _miso;
-        set => this.RaiseAndSetIfChanged(ref _miso, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _miso, value);
+            UpdatePins("miso");
+        }
     }
 
     public int Sck
     {
         get => _sck;
-        set => this.RaiseAndSetIfChanged(ref _sck, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _sck, value);
+            UpdatePins("sck");
+        }
     }
 }

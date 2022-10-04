@@ -33,18 +33,26 @@ public abstract class TwiConfig: ReactiveObject
 
     public string Type => _type;
     public abstract string Definition { get; }
+    protected abstract void UpdatePins(string field);
 
-    //TODO: in these setters, update other pins if they don't match up
     public int Sda
     {
         get => _sda;
-        set => this.RaiseAndSetIfChanged(ref _sda, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _sda, value);
+            UpdatePins("sda");
+        }
     }
 
     public int Scl
     {
         get => _scl;
-        set => this.RaiseAndSetIfChanged(ref _scl, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _scl, value);
+            UpdatePins("scl");
+        }
     }
 
     public int Clock => _clock;
