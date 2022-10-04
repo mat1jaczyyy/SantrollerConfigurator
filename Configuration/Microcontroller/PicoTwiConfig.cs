@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using ReactiveUI;
 
@@ -23,11 +24,11 @@ public class PicoTwiConfig : TwiConfig
             {
                 case "sda":
                     this.RaiseAndSetIfChanged(ref _scl,
-                        Pico.TwiIndexByPin.First(x => x.Value == indexSda && x.Key != _sda).Key, "Scl");
+                        Pico.TwiIndexByPin.OrderBy(x => Math.Abs(x.Key - _sda)).First(x => x.Value == indexSda && x.Key != _sda).Key, "Scl");
                     break;
                 case "scl":
                     this.RaiseAndSetIfChanged(ref _sda,
-                        Pico.TwiIndexByPin.First(x => x.Value == indexScl && x.Key != _scl).Key, "Sda");
+                        Pico.TwiIndexByPin.OrderBy(x => Math.Abs(x.Key - _scl)).First(x => x.Value == indexScl && x.Key != _scl).Key, "Sda");
                     break;
             } 
         }
