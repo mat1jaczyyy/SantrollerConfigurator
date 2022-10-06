@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 public class GhWtTapInput : InputWithPin
@@ -67,9 +67,9 @@ public class GhWtTapInput : InputWithPin
         return String.Join(" || ", mappings.Select(mapping => $"(lastTap == {mapping})"));
     }
 
-    public override JsonInput GetJson()
+    public override SerializedInput GetJson()
     {
-        return new JsonGhWtInput(Pin, Input);
+        return new SerializedGhWtInput(Pin, Input);
     }
 
     public override bool IsAnalog => Input == GhWtInputType.TapBar;

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 public class DirectInput : InputWithPin
@@ -35,9 +35,9 @@ public class DirectInput : InputWithPin
     private Microcontroller _microcontroller;
     public override int Pin { get; }
 
-    public override JsonInput GetJson()
+    public override SerializedInput GetJson()
     {
-        return new JsonDirectInput(Pin, PinMode);
+        return new SerializedDirectInput(Pin, PinMode);
     }
 
     public override bool IsAnalog => PinMode == DevicePinMode.Analog;

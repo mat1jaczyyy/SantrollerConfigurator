@@ -1,25 +1,25 @@
 using Avalonia.Media;
-using Dahomey.Json.Attributes;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
+using ProtoBuf;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Json;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
-[JsonDiscriminator("ma")]
-public class JsonMouseAxis : JsonOutput
+[ProtoContract(SkipConstructor = true)]
+public class SerializedMouseAxis : SerializedOutput
 {
-    public override JsonInput? Input { get; }
-    public override Color LedOn { get; }
-    public override Color LedOff { get; }
-    public float Multiplier { get; }
-    public int Offset { get; }
-    public int Deadzone { get; }
+    [ProtoMember(1)] public override SerializedInput? Input { get; }
+    [ProtoMember(2)] public override Color LedOn { get; }
+    [ProtoMember(3)] public override Color LedOff { get; }
+    [ProtoMember(4)] public float Multiplier { get; }
+    [ProtoMember(5)] public int Offset { get; }
+    [ProtoMember(6)] public int Deadzone { get; }
 
     public MouseAxisType Type { get; }
 
-    public JsonMouseAxis(JsonInput? input, MouseAxisType type, Color ledOn, Color ledOff, float multiplier, int offset,
+    public SerializedMouseAxis(SerializedInput? input, MouseAxisType type, Color ledOn, Color ledOff, float multiplier, int offset,
         int deadzone)
     {
         Input = input;

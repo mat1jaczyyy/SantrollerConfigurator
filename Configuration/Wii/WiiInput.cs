@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 public class WiiInput : TwiInput
@@ -254,9 +254,9 @@ public class WiiInput : TwiInput
         return Mappings[Input];
     }
 
-    public override JsonInput GetJson()
+    public override SerializedInput GetJson()
     {
-        return new JsonWiiInput(Sda, Scl, Input);
+        return new SerializedWiiInput(Sda, Scl, Input);
     }
 
     public override bool IsAnalog => Input <= WiiInputType.DrawsomePenPressure;

@@ -15,11 +15,13 @@ using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Configuration.Combined;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Utils;
+using ProtoBuf;
+using ProtoBuf.Meta;
 using ReactiveUI;
 using MouseButton = GuitarConfiguratorSharp.NetCore.Configuration.Outputs.MouseButton;
 
@@ -282,23 +284,17 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var inputs = Bindings.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
             string configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
-            var json = JsonSerializer.Serialize(new JsonConfiguration(this), JsonConfiguration.GetJsonOptions(this));
-            Console.WriteLine(json);
-            JsonSerializer.Deserialize(json, typeof(JsonConfiguration), JsonConfiguration.GetJsonOptions(this));
-            var bytes = Encoding.UTF8.GetBytes(json);
             var lines = new List<string>();
             using (var outputStream = new MemoryStream())
             {
                 using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
                 {
-                    compressStream.Write(bytes, 0, bytes.Length);
+                    Serializer.Serialize(compressStream, new SerializedConfiguration(this));
                 }
-
                 lines.Add(
                     $"#define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
                 lines.Add($"#define CONFIGURATION_LEN {outputStream.ToArray().Length}");
             }
-
 
             lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
 
@@ -335,6 +331,17 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public void RemoveOutput(Output output)
         {
+            using (var ms = new MemoryStream())
+            {
+                Console.WriteLine("Protobuf");
+                Serializer.Serialize(ms, new SerializedConfiguration(this));
+                Console.WriteLine(ms.ToArray().Length);
+                using (MemoryStream ms2 = new MemoryStream(ms.ToArray()))
+                {
+                    SerializedConfiguration sco = Serializer.Deserialize<SerializedConfiguration>(ms2);
+                }
+            }
+
             Bindings.Remove(output);
         }
 

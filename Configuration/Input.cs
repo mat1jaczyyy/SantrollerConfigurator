@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
@@ -11,7 +11,7 @@ public abstract class Input: ReactiveObject
     public abstract IReadOnlyList<string> RequiredDefines();
     public abstract string Generate();
 
-    public abstract JsonInput GetJson();
+    public abstract SerializedInput GetJson();
 
     public abstract bool IsAnalog { get; }
 

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -172,9 +172,9 @@ public class WiiCombinedOutput : TwiOutput
         return "";
     }
 
-    public override JsonOutput GetJson()
+    public override SerializedOutput GetJson()
     {
-        return new JsonWiiCombinedOutput(LedOn, LedOff, Sda, Scl, MapTapBarToFrets, MapTapBarToAxis, MapGuitarJoystickToDPad, MapNunchukAccelerationToRightJoy);
+        return new SerializedWiiCombinedOutput(LedOn, LedOff, Sda, Scl, MapTapBarToFrets, MapTapBarToAxis, MapGuitarJoystickToDPad, MapNunchukAccelerationToRightJoy);
     }
 
     public override IReadOnlyList<Output> Outputs => GetBindings();

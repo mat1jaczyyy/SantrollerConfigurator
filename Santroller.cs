@@ -3,11 +3,12 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using LibUsbDotNet;
+using ProtoBuf;
 
 namespace GuitarConfiguratorSharp.NetCore;
 
@@ -66,15 +67,9 @@ public class Santroller : ConfigurableUsbDevice
             var data = ReadData(0, ((byte)Commands.COMMAND_READ_CONFIG), 2048);
             using (var inputStream = new MemoryStream(data))
             {
-                using (var outputStream = new MemoryStream())
+                using (var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress))
                 {
-
-                    using (var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress))
-                    {
-                        decompressor.CopyTo(outputStream);
-                        var config = JsonSerializer.Deserialize<JsonConfiguration>(Encoding.UTF8.GetString(outputStream.ToArray()), JsonConfiguration.GetJsonOptions(model))!;
-                        config.LoadConfiguration(model);
-                    }
+                    Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
                 }
             }
         }

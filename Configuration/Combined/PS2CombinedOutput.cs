@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
@@ -91,9 +91,9 @@ public class Ps2CombinedOutput : SpiOutput
 
     public override bool IsCombined => true;
 
-    public override JsonOutput GetJson()
+    public override SerializedOutput GetJson()
     {
-        return new JsonPs2CombinedOutput(LedOn, LedOff, Miso, Mosi, Sck);
+        return new SerializedPs2CombinedOutput(LedOn, LedOff, Miso, Mosi, Sck);
     }
 
     public override string Generate(bool xbox)

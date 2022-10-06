@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 public class Ps2Input : SpiInput
@@ -162,9 +162,9 @@ public class Ps2Input : SpiInput
         return Mappings[Input];
     }
 
-    public override JsonInput GetJson()
+    public override SerializedInput GetJson()
     {
-        return new JsonPs2Input(Miso, Mosi, Sck, Att, Ack, Input);
+        return new SerializedPs2Input(Miso, Mosi, Sck, Att, Ack, Input);
     }
 
     public override bool IsAnalog => Input <= Ps2InputType.Dualshock2R2;

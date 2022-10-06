@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
@@ -69,9 +69,9 @@ public class GH5CombinedOutput : TwiOutput
 
     public override bool IsCombined => true;
 
-    public override JsonOutput GetJson()
+    public override SerializedOutput GetJson()
     {
-        return new JsonGh5CombinedOutput(LedOn, LedOff, Sda, Scl, FretsEnabled, MapTapBarToFrets, MapTapBarToAxis);
+        return new SerializedGh5CombinedOutput(LedOn, LedOff, Sda, Scl, FretsEnabled, MapTapBarToFrets, MapTapBarToAxis);
     }
 
     public override string Generate(bool xbox)

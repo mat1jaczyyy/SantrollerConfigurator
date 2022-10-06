@@ -10,10 +10,10 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -202,7 +202,7 @@ public abstract class Output : ReactiveObject
     }
 
 
-    public abstract JsonOutput GetJson();
+    public abstract SerializedOutput GetJson();
     private Bitmap? GetImage(DeviceControllerType type)
     {
         string assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;

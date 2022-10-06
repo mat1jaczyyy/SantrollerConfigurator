@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
@@ -34,8 +34,8 @@ public class MouseButton : OutputButton
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;
-    public override JsonOutput GetJson()
+    public override SerializedOutput GetJson()
     {
-        return new JsonMouseButton(Input?.GetJson(), LedOn, LedOff, Debounce, Type);
+        return new SerializedMouseButton(Input?.GetJson(), LedOn, LedOff, Debounce, Type);
     }
 }

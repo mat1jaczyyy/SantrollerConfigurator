@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
@@ -46,9 +46,9 @@ public class GHWTCombinedOutput : Output
 
     public override bool IsCombined => true;
 
-    public override JsonOutput GetJson()
+    public override SerializedOutput GetJson()
     {
-        return new JsonGhwtCombinedOutput(LedOn, LedOff, Pin, MapTapBarToFrets, MapTapBarToAxis);
+        return new SerializedGhwtCombinedOutput(LedOn, LedOff, Pin, MapTapBarToFrets, MapTapBarToAxis);
     }
 
     public override string Generate(bool xbox)

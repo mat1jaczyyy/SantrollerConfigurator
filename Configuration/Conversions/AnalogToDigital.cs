@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 public class AnalogToDigital : Input
@@ -33,9 +33,9 @@ public class AnalogToDigital : Input
         return "";
     }
 
-    public override JsonInput GetJson()
+    public override SerializedInput GetJson()
     {
-        return new JsonAnalogToDigital(Child.GetJson(), AnalogToDigitalType, Threshold);
+        return new SerializedAnalogToDigital(Child.GetJson(), AnalogToDigitalType, Threshold);
     }
 
     public override Input InnermostInput()

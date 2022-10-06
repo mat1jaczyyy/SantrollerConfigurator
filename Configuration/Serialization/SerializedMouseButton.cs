@@ -1,23 +1,22 @@
 using Avalonia.Media;
-using Dahomey.Json.Attributes;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
+using ProtoBuf;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Json;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
-[JsonDiscriminator("mb")]
-public class JsonMouseButton : JsonOutput
+[ProtoContract(SkipConstructor = true)]
+public class SerializedMouseButton : SerializedOutput
 {
-    public override JsonInput? Input { get; }
-    public override Color LedOn { get; }
-    public override Color LedOff { get; }
+    [ProtoMember(1)] public override SerializedInput? Input { get; }
+    [ProtoMember(2)] public override Color LedOn { get; }
+    [ProtoMember(3)] public override Color LedOff { get; }
+    [ProtoMember(4)] public int Debounce { get; }
+    [ProtoMember(5)] public MouseButtonType Type { get; }
 
-    public int Debounce { get; }
-    public MouseButtonType Type { get; }
-
-    public JsonMouseButton(JsonInput? input, Color ledOn, Color ledOff, int debounce, MouseButtonType type)
+    public SerializedMouseButton(SerializedInput? input, Color ledOn, Color ledOff, int debounce, MouseButtonType type)
     {
         Input = input;
         LedOn = ledOn;

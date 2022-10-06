@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
@@ -94,9 +94,9 @@ public class Gh5NeckInput : TwiInput
         return String.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})"));
     }
 
-    public override JsonInput GetJson()
+    public override SerializedInput GetJson()
     {
-        return new JsonGh5NeckInput(Sda, Scl, Input);
+        return new SerializedGh5NeckInput(Sda, Scl, Input);
     }
 
     public override bool IsAnalog => Input == Gh5NeckInputType.TapBar;

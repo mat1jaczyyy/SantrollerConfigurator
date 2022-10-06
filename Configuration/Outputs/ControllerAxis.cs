@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
@@ -44,8 +44,8 @@ public class ControllerAxis : OutputAxis
         return "report->" + Mappings[Type];
     }
     public override bool IsCombined => false;
-    public override JsonOutput GetJson()
+    public override SerializedOutput GetJson()
     {
-        return new JsonControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, Deadzone);
+        return new SerializedControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, Deadzone);
     }
 }

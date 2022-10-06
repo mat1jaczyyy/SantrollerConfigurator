@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
@@ -84,8 +84,8 @@ public class ControllerButton : OutputButton
     public override bool IsStrum => Type is StandardButtonType.Up or StandardButtonType.Down;
 
     public override bool IsCombined => false;
-    public override JsonOutput GetJson()
+    public override SerializedOutput GetJson()
     {
-        return new JsonControllerButton(Input?.GetJson(), LedOn, LedOff, Debounce, Type);
+        return new SerializedControllerButton(Input?.GetJson(), LedOn, LedOff, Debounce, Type);
     }
 }

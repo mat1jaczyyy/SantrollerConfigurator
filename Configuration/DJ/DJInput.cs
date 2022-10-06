@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 public class DjInput : TwiInput
@@ -56,9 +56,9 @@ public class DjInput : TwiInput
         return base.RequiredDefines().Concat(new[] {"INPUT_DJ_TURNTABLE"}).ToList();
     }
 
-    public override JsonInput GetJson()
+    public override SerializedInput GetJson()
     {
-        return new JsonDjInput(Sda, Scl, Input);
+        return new SerializedDjInput(Sda, Scl, Input);
     }
 }
 
