@@ -331,17 +331,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public void RemoveOutput(Output output)
         {
-            using (var ms = new MemoryStream())
-            {
-                Console.WriteLine("Protobuf");
-                Serializer.Serialize(ms, new SerializedConfiguration(this));
-                Console.WriteLine(ms.ToArray().Length);
-                using (MemoryStream ms2 = new MemoryStream(ms.ToArray()))
-                {
-                    SerializedConfiguration sco = Serializer.Deserialize<SerializedConfiguration>(ms2);
-                }
-            }
-
             Bindings.Remove(output);
         }
 
