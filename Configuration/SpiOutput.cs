@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
@@ -12,11 +12,11 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
 public abstract class SpiOutput : Output
 {
-    private readonly Microcontroller.Microcontroller _microcontroller;
+    private readonly Microcontroller _microcontroller;
 
     // ReSharper disable ExplicitCallerInfoArgument
-    protected SpiOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
-        bool cpha, bool msbFirst, string name): base(model, null, Colors.Transparent, Colors.Transparent, name)
+    protected SpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
+        bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null): base(model, null, Colors.Transparent, Colors.Transparent, name)
     {
         _microcontroller = microcontroller;
         SpiType = spiType;
@@ -33,10 +33,14 @@ public abstract class SpiOutput : Output
                 throw new PinUnavailableException("No SPI Pins Available!");
             }
 
-            var miso = pins.First(pair => pair.Value is SpiPinType.MISO).Key;
-            var mosi = pins.First(pair => pair.Value is SpiPinType.MOSI).Key;
-            var sck = pins.First(pair => pair.Value is SpiPinType.SCK).Key;
-            _spiConfig = microcontroller.AssignSpiPins(SpiType, mosi, miso, sck, cpol, cpha, msbFirst, spiFreq)!;
+            if (miso == null || mosi == null || sck == null)
+            {
+                miso = pins.First(pair => pair.Value is SpiPinType.MISO).Key;
+                mosi = pins.First(pair => pair.Value is SpiPinType.MOSI).Key;
+                sck = pins.First(pair => pair.Value is SpiPinType.SCK).Key;
+            }
+
+            _spiConfig = microcontroller.AssignSpiPins(SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha, msbFirst, spiFreq)!;
         }
 
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged("Miso"));
@@ -45,15 +49,15 @@ public abstract class SpiOutput : Output
         microcontroller.TwiConfigs.CollectionChanged +=
             (_, _) =>
             {
-                var mosi = Mosi;
-                var miso = Miso;
-                var sck = Sck;
+                var mosi2 = Mosi;
+                var miso2 = Miso;
+                var sck2 = Sck;
                 this.RaisePropertyChanged("AvailableMosiPins");
                 this.RaisePropertyChanged("AvailableMisoPins");
                 this.RaisePropertyChanged("AvailableSckPins");
-                Mosi = mosi;
-                Miso = miso;
-                Sck = sck;
+                Mosi = mosi2;
+                Miso = miso2;
+                Sck = sck2;
             };
     }
 

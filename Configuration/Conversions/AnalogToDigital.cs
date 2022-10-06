@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-
 public class AnalogToDigital : Input
 {
     public Input Child { get; }
     public AnalogToDigitalType AnalogToDigitalType { get; set; }
     public int Threshold { get; set; }
-    public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes =>
-        Enum.GetValues(typeof(AnalogToDigitalType)).Cast<AnalogToDigitalType>();
+    public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes => Enum.GetValues<AnalogToDigitalType>();
 
     public AnalogToDigital(Input child, AnalogToDigitalType analogToDigitalType, int threshold)
     {
@@ -34,6 +33,11 @@ public class AnalogToDigital : Input
         return "";
     }
 
+    public override JsonInput GetJson()
+    {
+        return new JsonAnalogToDigital(Child.GetJson(), AnalogToDigitalType, Threshold);
+    }
+
     public override Input InnermostInput()
     {
         return Child;
@@ -42,7 +46,7 @@ public class AnalogToDigital : Input
     public override bool IsAnalog => Child.IsAnalog;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller.Microcontroller controller)
+        Microcontroller controller)
     {
         throw new InvalidOperationException("Never call GenerateAll on AnalogToDigital, call it on its children");
     }

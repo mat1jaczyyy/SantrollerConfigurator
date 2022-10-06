@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-
 public class DigitalToAnalog : Input
 {
     public Input Child { get; }
@@ -19,6 +20,11 @@ public class DigitalToAnalog : Input
         return $"{Child.Generate()} * {Value}";
     }
 
+    public override JsonInput GetJson()
+    {
+        return new JsonDigitalToAnalog(Child.GetJson(), Value);
+    }
+
     public override Input InnermostInput()
     {
         return Child;
@@ -27,7 +33,7 @@ public class DigitalToAnalog : Input
     public override bool IsAnalog => Child.IsAnalog;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller.Microcontroller controller)
+        Microcontroller controller)
     {
         throw new InvalidOperationException("Never call GenerateAll on DigitalToAnalog, call it on its children");
     }

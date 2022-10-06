@@ -1,6 +1,6 @@
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public abstract class TwiConfig: ReactiveObject
 {

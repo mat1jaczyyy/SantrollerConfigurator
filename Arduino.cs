@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class PicoTwiConfig : TwiConfig
 {

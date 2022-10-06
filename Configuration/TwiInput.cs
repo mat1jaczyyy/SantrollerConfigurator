@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
 public abstract class TwiInput : Input
 {
-    private readonly Microcontroller.Microcontroller _microcontroller;
+    private readonly Microcontroller _microcontroller;
 
     // ReSharper disable ExplicitCallerInfoArgument
-    protected TwiInput(Microcontroller.Microcontroller microcontroller, string twiType, int twiFreq)
+    protected TwiInput(Microcontroller microcontroller, string twiType, int twiFreq, int? sda, int? scl)
     {
         _microcontroller = microcontroller;
         _twiType = twiType;
@@ -23,15 +23,19 @@ public abstract class TwiInput : Input
         }
         else
         {
-            var pins = microcontroller.TwiPins(_twiType);
-            if (!pins.Any())
+            if (sda == null || scl == null)
             {
-                throw new PinUnavailableException("No I2C Pins Available!");
+                var pins = microcontroller.TwiPins(_twiType);
+                if (!pins.Any())
+                {
+                    throw new PinUnavailableException("No I2C Pins Available!");
+                }
+
+                scl = pins.First(pair => pair.Value is TwiPinType.SCL).Key;
+                sda = pins.First(pair => pair.Value is TwiPinType.SDA).Key;
             }
 
-            var scl = pins.First(pair => pair.Value is TwiPinType.SCL).Key;
-            var sda = pins.First(pair => pair.Value is TwiPinType.SDA).Key;
-            _twiConfig = microcontroller.AssignTwiPins(_twiType, sda, scl, twiFreq)!;
+            _twiConfig = microcontroller.AssignTwiPins(_twiType, sda.Value, scl.Value, twiFreq)!;
         }
 
        
@@ -81,5 +85,10 @@ public abstract class TwiInput : Input
         return _microcontroller.TwiPins(_twiType)
             .Where(s => s.Value is TwiPinType.SCL)
             .Select(s => s.Key).ToList();
+    }
+    
+    public override IReadOnlyList<string> RequiredDefines()
+    {
+        return new[] {$"{_twiType.ToUpper()}_SPI_PORT {_twiConfig.Definition}"};
     }
 }

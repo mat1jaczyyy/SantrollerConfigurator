@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
-
 public class DirectInput : InputWithPin
 {
-    public DirectInput(int pin, DevicePinMode pinMode, Microcontroller.Microcontroller microcontroller)
+    public DirectInput(int pin, DevicePinMode pinMode, Microcontroller microcontroller)
     {
         Pin = pin;
         PinMode = pinMode;
@@ -30,10 +30,15 @@ public class DirectInput : InputWithPin
 
     public override DevicePinMode PinMode { get; }
 
-    protected override Microcontroller.Microcontroller Microcontroller => _microcontroller;
+    protected override Microcontroller Microcontroller => _microcontroller;
 
-    private Microcontroller.Microcontroller _microcontroller;
+    private Microcontroller _microcontroller;
     public override int Pin { get; }
+
+    public override JsonInput GetJson()
+    {
+        return new JsonDirectInput(Pin, PinMode);
+    }
 
     public override bool IsAnalog => PinMode == DevicePinMode.Analog;
 
@@ -45,7 +50,7 @@ public class DirectInput : InputWithPin
     }
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller.Microcontroller controller)
+        Microcontroller controller)
     {
         return String.Join("\n", bindings.Select(binding => binding.Item2));
     }

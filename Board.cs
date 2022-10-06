@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 namespace GuitarConfiguratorSharp.NetCore
 {

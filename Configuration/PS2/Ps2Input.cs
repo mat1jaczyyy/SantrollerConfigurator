@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
-
 public class Ps2Input : SpiInput
 {
     public static readonly string Ps2SpiType = "ps2";
@@ -11,6 +12,9 @@ public class Ps2Input : SpiInput
     public static readonly bool Ps2SpiCpol = true;
     public static readonly bool Ps2SpiCpha = true;
     public static readonly bool Ps2SpiMsbFirst = true;
+    //TODO: Other ps2 pins such as ATT and ACK
+    public int? Ack { get; }
+    public int? Att { get; }
     public Ps2InputType Input { get; }
 
     private static readonly List<Ps2InputType> Dualshock2Order = new()
@@ -146,9 +150,11 @@ public class Ps2Input : SpiInput
         {Ps2ControllerType.Mouse, "PSPROTO_MOUSE"},
     };
 
-    public Ps2Input(Ps2InputType input, Microcontroller.Microcontroller microcontroller): base(microcontroller, Ps2SpiType,Ps2SpiFreq,Ps2SpiCpol,Ps2SpiCpha,Ps2SpiMsbFirst)
+    public Ps2Input(Ps2InputType input, Microcontroller microcontroller, int? miso = null, int? mosi = null, int? sck = null, int? att = null, int? ack = null): base(microcontroller, Ps2SpiType,Ps2SpiFreq,Ps2SpiCpol,Ps2SpiCpha,Ps2SpiMsbFirst, miso, mosi, sck)
     {
         Input = input;
+        Ack = ack;
+        Att = att;
     }
 
     public override string Generate()
@@ -156,10 +162,15 @@ public class Ps2Input : SpiInput
         return Mappings[Input];
     }
 
+    public override JsonInput GetJson()
+    {
+        return new JsonPs2Input(Miso, Mosi, Sck, Att, Ack, Input);
+    }
+
     public override bool IsAnalog => Input <= Ps2InputType.Dualshock2R2;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller.Microcontroller controller)
+        Microcontroller controller)
     {
         Dictionary<Ps2InputType, string> ds2Axis = new();
         Dictionary<Ps2ControllerType, List<string>> mappedBindings = new();
@@ -213,6 +224,7 @@ public class Ps2Input : SpiInput
         }
 
         //TODO: we also need to generate the ps2 init somehow too for this, otherwise it wont work!
+        
         if (!string.IsNullOrEmpty(retDs2))
         {
             var mappings = mappedBindings.GetValueOrDefault(Ps2ControllerType.Dualshock2, new List<string>());
@@ -220,7 +232,7 @@ public class Ps2Input : SpiInput
             mappedBindings[Ps2ControllerType.Dualshock2] = mappings;
         }
 
-        var ret = "";
+        var ret = "switch (ps2ControllerType) {";
         foreach (var binding in mappedBindings)
         {
             var input = binding.Key;
@@ -230,11 +242,11 @@ public class Ps2Input : SpiInput
     break;";
         }
 
-        return ret; 
+        return ret+"}"; 
     }
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return new[] {"INPUT_PS2"};
+        return base.RequiredDefines().Concat(new[] {"INPUT_PS2"}).ToList();
     }
 }

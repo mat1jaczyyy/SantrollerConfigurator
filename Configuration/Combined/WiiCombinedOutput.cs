@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
@@ -97,7 +99,7 @@ public class WiiCombinedOutput : TwiOutput
     private readonly List<Output> _bindings = new();
     private readonly List<Output> _bindingsAcceleration = new();
     private readonly List<Output> _bindingsDPad = new();
-    //TODO: get the gh5 tap bar back together and work out how the hell that one works
+    //TODO: use the tap bar implementation we have in ardwiino, gh5 tap bar works the same way.
     private readonly List<Output> _bindingsFrets = new();
 
     private readonly Output _bindingTap;
@@ -107,9 +109,12 @@ public class WiiCombinedOutput : TwiOutput
     public bool MapGuitarJoystickToDPad { get; set; }
     public bool MapNunchukAccelerationToRightJoy { get; set; }
 
-    public WiiCombinedOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller) : base(model,
-        microcontroller, WiiInput.WiiTwiType, WiiInput.WiiTwiFreq, "Wii")
+    public WiiCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda=null, int? scl=null, bool mapTapBarToFrets = false, bool mapTapBarToAxis = false, bool mapGuitarJoystickToDPad = false, bool mapNunchukAccelerationToRightJoy = false): base(model, microcontroller, WiiInput.WiiTwiType, WiiInput.WiiTwiFreq, "Wii", sda, scl)
     {
+        MapTapBarToFrets = mapTapBarToFrets;
+        MapTapBarToAxis = mapTapBarToAxis;
+        MapGuitarJoystickToDPad = mapGuitarJoystickToDPad;
+        MapNunchukAccelerationToRightJoy = mapNunchukAccelerationToRightJoy;
         foreach (var pair in Buttons)
         {
             _bindings.Add(new ControllerButton(model, new WiiInput(pair.Key, microcontroller), Colors.Transparent, Colors.Transparent, 10,
@@ -167,8 +172,13 @@ public class WiiCombinedOutput : TwiOutput
         return "";
     }
 
-    public override IReadOnlyList<Output> Outputs => GetBindings();
+    public override JsonOutput GetJson()
+    {
+        return new JsonWiiCombinedOutput(LedOn, LedOff, Sda, Scl, MapTapBarToFrets, MapTapBarToAxis, MapGuitarJoystickToDPad, MapNunchukAccelerationToRightJoy);
+    }
 
+    public override IReadOnlyList<Output> Outputs => GetBindings();
+    
     private IReadOnlyList<Output> GetBindings()
     {
         List<Output> outputs = new(_bindings);

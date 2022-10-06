@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using Avalonia.Data;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Configuration.Combined;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
-using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Utils;
@@ -65,6 +63,7 @@ public class Ardwiino : ConfigurableUsbDevice
             MigrationSupported = false;
             return;
         }
+
         MigrationSupported = true;
         // Version 6.0.0 started at config version 6, so we don't have to support anything earlier than that
         byte[] data = ReadData(CpuInfoCommand, 1);
@@ -379,42 +378,28 @@ public class Ardwiino : ConfigurableUsbDevice
                     break;
             }
 
-            if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
-            {
-                List<Tuple<Gh5NeckInputType, StandardButtonType>> neckData = new()
-                {
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Green, StandardButtonType.A),
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Red, StandardButtonType.B),
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Yellow, StandardButtonType.Y),
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Blue, StandardButtonType.X),
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.Orange, StandardButtonType.LB),
-                };
-                foreach (var item in neckData)
-                {
-                    bindings.Add(new ControllerButton(model, new Gh5NeckInput(item.Item1, controller), Color.FromArgb(0, 0, 0, 0),
-                        Color.FromArgb(0, 0, 0, 0), config.debounce.buttons, item.Item2));
-                }
-            }
-
-            if (config.neck.gh5NeckBar != 0)
-            {
-                List<Tuple<Gh5NeckInputType, StandardButtonType>> neckData = new()
-                {
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapGreen, StandardButtonType.A),
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapRed, StandardButtonType.B),
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapYellow, StandardButtonType.Y),
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapBlue, StandardButtonType.X),
-                    new Tuple<Gh5NeckInputType, StandardButtonType>(Gh5NeckInputType.TapOrange, StandardButtonType.LB),
-                };
-                foreach (var item in neckData)
-                {
-                    bindings.Add(new ControllerButton(model, new Gh5NeckInput(item.Item1, controller), Color.FromArgb(0, 0, 0, 0),
-                        Color.FromArgb(0, 0, 0, 0), config.debounce.buttons, item.Item2));
-                }
-            }
+            int sda = 18;
+            int scl = 19;
+            int mosi = 3;
+            int miso = 4;
+            int sck = 6;
 
             if (config.all.main.inputType == (int) InputControllerType.Direct)
             {
+                if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
+                {
+                    var output = new GH5CombinedOutput(model, controller);
+                    output.MapTapBarToFrets = config.neck.gh5NeckBar != 0;
+                    output.Sda = sda;
+                    output.Scl = scl;
+                    bindings.Add(output);
+                }
+
+                if (config.neck.wtNeck != 0)
+                {
+                    bindings.Add(new GHWTCombinedOutput(model, controller));
+                }
+
                 foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
                 {
                     var pin = config.all.pins.axis![axis];
@@ -440,10 +425,11 @@ public class Ardwiino : ConfigurableUsbDevice
                         isTrigger = true;
                     }
 
-                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt)
+                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt && config.all.main.tiltType == 2)
                     {
                         bindings.Add(new ControllerAxis(model,
-                            new DigitalToAnalog( new DirectInput(pin.pin, DevicePinMode.PullUp, controller), 32767), on, off, 1, 0,
+                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, controller), 32767), on,
+                            off, 1, 0,
                             0, StandardAxisType.RightStickY));
                     }
                     else
@@ -452,10 +438,11 @@ public class Ardwiino : ConfigurableUsbDevice
                                              (pin.inverted > 0 ? -1 : 1);
                         var axisOffset = ((isTrigger ? 0 : 32670) + scale.offset) >> 8;
                         var axisDeadzone = ((isTrigger ? 32768 : 0) + scale.deadzone) >> 8;
-                        bindings.Add(new ControllerAxis(model, new DirectInput(pin.pin, DevicePinMode.Analog, controller), on, off,
+                        bindings.Add(new ControllerAxis(model,
+                            new DirectInput(pin.pin, DevicePinMode.Analog, controller), on, off,
                             axisMultiplier, axisOffset, axisDeadzone, genAxis));
                     }
-                }
+                } 
 
                 foreach (int button in Enum.GetValues(typeof(ControllerButtons)))
                 {
@@ -487,19 +474,49 @@ public class Ardwiino : ConfigurableUsbDevice
                         debounce = config.debounce.strum;
                     }
 
-                    bindings.Add(new ControllerButton(model,new DirectInput(pin, pinMode, controller), on, off, debounce, genButton));
+                    bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, controller), on, off,
+                        debounce, genButton));
+                }
+            } else if (config.all.main.tiltType == 2)
+            {
+                if (deviceType == DeviceControllerType.Guitar)
+                {
+                    var pin = config.all.pins.axis![(int) XboxTilt];
+                    if (pin.pin != NotUsed)
+                    {
+                        Color on = Color.FromRgb(0, 0, 0);
+                        if (colors.ContainsKey((int)(XboxTilt + XboxBtnCount)))
+                        {
+                            on = colors[(int)(XboxTilt + XboxBtnCount)];
+                        }
+
+                        Color off = Color.FromRgb(0, 0, 0);
+                        bindings.Add(new ControllerAxis(model,
+                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, controller), 32767), on,
+                            off, 1, 0,
+                            0, StandardAxisType.RightStickY));
+                    }
+
+                    
+                }
+                if (config.all.main.inputType == (int) InputControllerType.Wii)
+                {
+                    var output = new WiiCombinedOutput(model, controller);
+                    output.Scl = scl;
+                    output.Sda = sda;
+                    output.MapNunchukAccelerationToRightJoy = config.all.main.mapNunchukAccelToRightJoy != 0;
+                    bindings.Add(output);
+                }
+                else if (config.all.main.inputType == (int) InputControllerType.PS2)
+                {
+                    var output = new Ps2CombinedOutput(model, controller);
+                    output.Mosi = mosi;
+                    output.Miso = miso;
+                    output.Sck = sck;
+                    bindings.Add(output);
                 }
             }
-            else if (config.all.main.inputType == (int) InputControllerType.Wii)
-            {
-                // TODO: once we have support for layouts, this will just load some wii layout
-                // TODO: respecting "mapAccelToLeftJoy and other possible settings
-            }
-            else if (config.all.main.inputType == (int) InputControllerType.PS2)
-            {
-                // TODO: once we have support for layouts, this will just load some ps2 layout
-            }
-
+           
             // Keyboard / Mouse does not have a joystick
             if (config.all.main.mapLeftJoystickToDPad > 0)
             {
@@ -545,12 +562,12 @@ public class Ardwiino : ConfigurableUsbDevice
                         config.debounce.buttons, StandardButtonType.Down));
                 }
             }
+
             model.MicroController = controller;
             model.LedType = ledType;
             model.DeviceType = deviceType;
             model.EmulationType = emulationType;
             model.RhythmType = rhythmType;
-            model.TiltEnabled = config.all.main.tiltType == 2;
             model.XInputOnWindows = xinputOnWindows;
             model.Bindings.Clear();
             model.Bindings.AddRange(bindings);

@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using Avalonia.Collections;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 {
     public abstract class Microcontroller
     {

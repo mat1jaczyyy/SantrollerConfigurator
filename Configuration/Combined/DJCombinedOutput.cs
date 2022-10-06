@@ -1,18 +1,18 @@
 using System.Collections.Generic;
-using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
-
-public class DJCombinedOutput : TwiOutput
+public class DjCombinedOutput : TwiOutput
 {
     private readonly List<Output> _bindings;
 
-    public DJCombinedOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller) : base(model, microcontroller, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ")
+    public DjCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null) : base(model, microcontroller, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ", sda, scl)
     {
         _bindings = new()
         {
@@ -40,6 +40,11 @@ public class DJCombinedOutput : TwiOutput
     }
 
     public override bool IsCombined => true;
+
+    public override JsonOutput GetJson()
+    {
+        return new JsonDjCombinedOutput(LedOn, LedOff, Sda, Scl);
+    }
 
     public override string Generate(bool xbox)
     {

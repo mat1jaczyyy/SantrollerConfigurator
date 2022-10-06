@@ -17,7 +17,6 @@
              x:CompileBindings="True"
              Background="Transparent">
     <UserControl.Resources>
-        <netCore:BitmapAssetValueConverter x:Key="ImageConverter" />
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
             <DataTemplate DataType="{x:Type neck:Gh5NeckInput}">
                 <StackPanel Orientation="Horizontal">
@@ -119,7 +118,7 @@
                     </ContentControl>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type combined:DJCombinedOutput}">
+            <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
                            Content="DJ Hero Turntable Input">

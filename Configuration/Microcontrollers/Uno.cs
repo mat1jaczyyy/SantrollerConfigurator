@@ -1,4 +1,4 @@
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class Uno : AvrController
 {

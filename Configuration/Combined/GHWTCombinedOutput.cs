@@ -1,23 +1,31 @@
 using System.Collections.Generic;
-using System.Linq;
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
-
 public class GHWTCombinedOutput : Output
 {
     private readonly List<Output> BindingsTap;
     private readonly Output BindingTapBar;
-    public bool TapEnabled { get; set; }
-    public bool MapTapToFrets { get; set; }
+    public bool MapTapBarToAxis { get; set; }
+    public bool MapTapBarToFrets { get; set; }
+    
+    public int Pin { get; set; }
 
-    public GHWTCombinedOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller) : base(model, null, Colors.Transparent, Colors.Transparent, "GHWT")
+    public GHWTCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null, bool mapTapBarToFrets = false, bool mapTapBarToAxis = false) : base(model, null, Colors.Transparent, Colors.Transparent, "GHWT")
     {
+        this.MapTapBarToFrets = mapTapBarToAxis;
+        this.MapTapBarToAxis = mapTapBarToAxis;
+        if (pin.HasValue)
+        {
+            Pin = pin.Value;
+        }
+
         BindingsTap = new()
         {
             new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapGreen, microcontroller), Colors.Green,
@@ -38,6 +46,11 @@ public class GHWTCombinedOutput : Output
 
     public override bool IsCombined => true;
 
+    public override JsonOutput GetJson()
+    {
+        return new JsonGhwtCombinedOutput(LedOn, LedOff, Pin, MapTapBarToFrets, MapTapBarToAxis);
+    }
+
     public override string Generate(bool xbox)
     {
         return "";
@@ -49,12 +62,12 @@ public class GHWTCombinedOutput : Output
     {
         List<Output> outputs = new();
 
-        if (TapEnabled)
+        if (MapTapBarToAxis)
         {
             outputs.Add(BindingTapBar);
         }
 
-        if (MapTapToFrets)
+        if (MapTapBarToFrets)
         {
             outputs.AddRange(BindingsTap);
         }

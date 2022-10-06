@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-
 public class ControllerButton : OutputButton
 {
-    public static List<StandardButtonType> order = new()
+    public static readonly List<StandardButtonType> Order = new()
     {
         StandardButtonType.Y,
         StandardButtonType.B,
@@ -25,7 +25,7 @@ public class ControllerButton : OutputButton
         StandardButtonType.Capture
     };
 
-    public static List<StandardButtonType> xboxOrder = new()
+    public static readonly List<StandardButtonType> XboxOrder = new()
     {
         StandardButtonType.Up,
         StandardButtonType.Down,
@@ -45,7 +45,7 @@ public class ControllerButton : OutputButton
         StandardButtonType.Y
     };
 
-    public static List<StandardButtonType> hatOrder = new()
+    public static readonly List<StandardButtonType> HatOrder = new()
     {
         StandardButtonType.Up,
         StandardButtonType.Down,
@@ -62,19 +62,19 @@ public class ControllerButton : OutputButton
     {
         if (xbox)
         {
-            return xboxOrder.IndexOf(Type).ToString();
+            return XboxOrder.IndexOf(Type).ToString();
         }
 
-        if (hatOrder.Contains(Type))
+        if (HatOrder.Contains(Type))
         {
-            return hatOrder.IndexOf(Type).ToString();
+            return HatOrder.IndexOf(Type).ToString();
         }
-        return order.IndexOf(Type).ToString();
+        return Order.IndexOf(Type).ToString();
     }
 
     public override string GenerateOutput(bool xbox)
     {
-        if (!xbox && hatOrder.Contains(Type))
+        if (!xbox && HatOrder.Contains(Type))
         {
             return "report->hat";
         }
@@ -84,4 +84,8 @@ public class ControllerButton : OutputButton
     public override bool IsStrum => Type is StandardButtonType.Up or StandardButtonType.Down;
 
     public override bool IsCombined => false;
+    public override JsonOutput GetJson()
+    {
+        return new JsonControllerButton(Input?.GetJson(), LedOn, LedOff, Debounce, Type);
+    }
 }

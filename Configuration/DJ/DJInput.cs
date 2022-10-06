@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.DJ;
-
 public class DjInput : TwiInput
 {
     public static readonly string DjTwiType = "dj";
     public static readonly int DjTwiFreq = 250000;
-    public DjInput(DjInputType input, Microcontroller.Microcontroller microcontroller): base(microcontroller, DjTwiType, DjTwiFreq)
+    public DjInput(DjInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null): base(microcontroller, DjTwiType, DjTwiFreq, sda, scl)
     {
         Input = input;
     }
@@ -43,7 +44,7 @@ public class DjInput : TwiInput
     public override bool IsAnalog => Input <= DjInputType.RightTurnable;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller.Microcontroller controller)
+        Microcontroller controller)
     {
         Console.WriteLine("yeet");
         Console.WriteLine(String.Join("\n", bindings.Select(binding => binding.Item2)));
@@ -52,7 +53,12 @@ public class DjInput : TwiInput
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return new[] {"INPUT_DJ_TURNTABLE"};
+        return base.RequiredDefines().Concat(new[] {"INPUT_DJ_TURNTABLE"}).ToList();
+    }
+
+    public override JsonInput GetJson()
+    {
+        return new JsonDjInput(Sda, Scl, Input);
     }
 }
 

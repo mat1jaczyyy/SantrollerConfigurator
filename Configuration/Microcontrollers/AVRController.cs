@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Collections;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public abstract class AvrController : Microcontroller
 {

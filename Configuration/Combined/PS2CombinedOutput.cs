@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
-
 public class Ps2CombinedOutput : SpiOutput
 {
     public static readonly Dictionary<Ps2InputType, StandardButtonType> Buttons = new()
@@ -62,12 +63,7 @@ public class Ps2CombinedOutput : SpiOutput
 
     private readonly List<Output> _bindings = new();
 
-    public bool MapTapBarToFrets { get; set; }
-    public bool MapTapBarToAxis { get; set; }
-    public bool MapGuitarJoystickToDPad { get; set; }
-    public bool MapNunchukAccelerationToRightJoy { get; set; }
-
-    public Ps2CombinedOutput(ConfigViewModel model, Microcontroller.Microcontroller microcontroller) : base(model, microcontroller,Ps2Input.Ps2SpiType,Ps2Input.Ps2SpiFreq,Ps2Input.Ps2SpiCpol,Ps2Input.Ps2SpiCpha,Ps2Input.Ps2SpiMsbFirst, "PS2")
+    public Ps2CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? miso = null, int? mosi = null, int? sck = null) : base(model, microcontroller,Ps2Input.Ps2SpiType,Ps2Input.Ps2SpiFreq,Ps2Input.Ps2SpiCpol,Ps2Input.Ps2SpiCpha,Ps2Input.Ps2SpiMsbFirst, "PS2", miso, mosi, sck)
     {
         foreach (var pair in Buttons)
         {
@@ -94,6 +90,11 @@ public class Ps2CombinedOutput : SpiOutput
     }
 
     public override bool IsCombined => true;
+
+    public override JsonOutput GetJson()
+    {
+        return new JsonPs2CombinedOutput(LedOn, LedOff, Miso, Mosi, Sck);
+    }
 
     public override string Generate(bool xbox)
     {

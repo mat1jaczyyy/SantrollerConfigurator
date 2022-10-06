@@ -1,10 +1,10 @@
 using System;
 using Avalonia.Input;
 using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-
 public class KeyboardButton : OutputButton
 {
     private static readonly int SharedEpSize = 32;
@@ -235,4 +235,8 @@ public class KeyboardButton : OutputButton
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;
+    public override JsonOutput GetJson()
+    {
+        return new JsonKeyboardButton(Input?.GetJson(), LedOn, LedOff, Debounce, Key);
+    }
 }

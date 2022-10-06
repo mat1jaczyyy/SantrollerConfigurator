@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
@@ -19,7 +20,6 @@ using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-
 public abstract class Output : ReactiveObject
 {
     protected readonly ConfigViewModel Model;
@@ -32,6 +32,7 @@ public abstract class Output : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _input, value);
     }
 
+    //TODO: probably want to load these ahead of time and cache, or atleast load them in the background
     private readonly ObservableAsPropertyHelper<Bitmap?> _image;
     public Bitmap? Image => _image.Value;
 
@@ -85,23 +86,17 @@ public abstract class Output : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _ghWtInputType, value);
     }
 
-    public IEnumerable<GhWtInputType> GhWtInputTypes =>
-        Enum.GetValues(typeof(GhWtInputType)).Cast<GhWtInputType>();
+    public IEnumerable<GhWtInputType> GhWtInputTypes => Enum.GetValues<GhWtInputType>();
 
-    public IEnumerable<Gh5NeckInputType> Gh5NeckInputTypes =>
-        Enum.GetValues(typeof(Gh5NeckInputType)).Cast<Gh5NeckInputType>();
+    public IEnumerable<Gh5NeckInputType> Gh5NeckInputTypes => Enum.GetValues<Gh5NeckInputType>();
 
-    public IEnumerable<Ps2InputType> Ps2InputTypes =>
-        Enum.GetValues(typeof(Ps2InputType)).Cast<Ps2InputType>();
+    public IEnumerable<Ps2InputType> Ps2InputTypes => Enum.GetValues<Ps2InputType>();
 
-    public IEnumerable<WiiInputType> WiiInputTypes =>
-        Enum.GetValues(typeof(WiiInputType)).Cast<WiiInputType>();
+    public IEnumerable<WiiInputType> WiiInputTypes => Enum.GetValues<WiiInputType>();
 
-    public IEnumerable<DjInputType> DjInputTypes =>
-        Enum.GetValues(typeof(DjInputType)).Cast<DjInputType>();
+    public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
 
-    public IEnumerable<InputType> InputTypes =>
-        Enum.GetValues(typeof(InputType)).Cast<InputType>();
+    public IEnumerable<InputType> InputTypes => Enum.GetValues<InputType>();
 
     private readonly ObservableAsPropertyHelper<bool> _isDj;
     private readonly ObservableAsPropertyHelper<bool> _isWii;
@@ -133,7 +128,7 @@ public abstract class Output : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _ledOff, value);
     }
 
-    protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, string name)
+    public Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, string name)
     {
         Input = input;
         LedOn = ledOn;
@@ -148,7 +143,7 @@ public abstract class Output : ReactiveObject
         _isGh5 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.GH5NeckInput)
             .ToProperty(this, x => x.IsGh5);
         _isPs2 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.PS2Input)
-            .ToProperty(this, x => x.IsPs2);
+            .ToProperty(this,  x => x.IsPs2);
         _isWt = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.WTNeckInput)
             .ToProperty(this, x => x.IsWt);
         _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is LedType.APA102)
@@ -206,6 +201,8 @@ public abstract class Output : ReactiveObject
         }
     }
 
+
+    public abstract JsonOutput GetJson();
     private Bitmap? GetImage(DeviceControllerType type)
     {
         string assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
@@ -242,5 +239,6 @@ public abstract class Output : ReactiveObject
     }
 
     public abstract string Generate(bool xbox);
+    [JsonIgnore]
     public virtual IReadOnlyList<Output> Outputs => new []{this};
 }

@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using DynamicData.Kernel;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class Pico : Microcontroller
 {

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
@@ -70,13 +70,11 @@ public class Gh5NeckInput : TwiInput
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller.Microcontroller controller): base(controller, Gh5TwiType, Gh5TwiFreq)
+    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller controller, int? sda = null, int? scl = null) : base(controller,
+        Gh5TwiType, Gh5TwiFreq, sda, scl)
     {
         Input = input;
-        Controller = controller;
     }
-
-    private Microcontroller.Microcontroller Controller { get; }
 
     public Gh5NeckInputType Input { get; set; }
 
@@ -96,10 +94,15 @@ public class Gh5NeckInput : TwiInput
         return String.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})"));
     }
 
+    public override JsonInput GetJson()
+    {
+        return new JsonGh5NeckInput(Sda, Scl, Input);
+    }
+
     public override bool IsAnalog => Input == Gh5NeckInputType.TapBar;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller.Microcontroller controller)
+        Microcontroller controller)
     {
         return String.Join(";\n", bindings.Select(binding => binding.Item2));
     }
@@ -108,13 +111,11 @@ public class Gh5NeckInput : TwiInput
     {
         if (Input <= Gh5NeckInputType.Orange)
         {
-            return new[] {"INPUT_GH5_NECK"};
+            return base.RequiredDefines().Concat(new[] {"INPUT_GH5_NECK"}).ToList();
         }
         else
         {
-            return new[] {"INPUT_GH5_NECK", "INPUT_GH5_NECK_TAP_BAR"};
+            return base.RequiredDefines().Concat(new[] {"INPUT_GH5_NECK", "INPUT_GH5_NECK_TAP_BAR"}).ToList();
         }
     }
-
-
 }

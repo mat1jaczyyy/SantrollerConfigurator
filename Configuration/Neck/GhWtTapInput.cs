@@ -2,25 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
-
 public class GhWtTapInput : InputWithPin
 {
     public GhWtInputType Input { get; set; }
     
-    public override DevicePinMode PinMode => DevicePinMode.Analog;
+    public override DevicePinMode PinMode => DevicePinMode.Floating;
 
-    protected override Microcontroller.Microcontroller Microcontroller => _microcontroller;
-
-    // TODO this should probably directly link to and control something in ConfigViewModel as it is global and needs to be shared.
+    protected override Microcontroller Microcontroller => _microcontroller;
     public override int Pin { get; }
 
-    public GhWtTapInput(GhWtInputType input, Microcontroller.Microcontroller microcontroller)
+    public GhWtTapInput(GhWtInputType input, Microcontroller microcontroller, int pin = 0)
     {
         Input = input;
         _microcontroller = microcontroller;
+        Pin = pin;
     }
 
     static readonly Dictionary<int, BarButton> Mappings = new()
@@ -55,7 +54,7 @@ public class GhWtTapInput : InputWithPin
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    private Microcontroller.Microcontroller _microcontroller;
+    private Microcontroller _microcontroller;
 
     public override string Generate()
     {
@@ -68,17 +67,22 @@ public class GhWtTapInput : InputWithPin
         return String.Join(" || ", mappings.Select(mapping => $"(lastTap == {mapping})"));
     }
 
+    public override JsonInput GetJson()
+    {
+        return new JsonGhWtInput(Pin, Input);
+    }
+
     public override bool IsAnalog => Input == GhWtInputType.TapBar;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller.Microcontroller controller)
+        Microcontroller controller)
     {
         return String.Join(";\n", bindings.Select(binding => binding.Item2));
     }
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return new[] {"INPUT_WT_NECK"};
+        return new[] {"INPUT_WT_NECK", $"WT_NECK_PIN {Pin}"};
     }
 }
 

@@ -1,11 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
-
 public class WiiInput : TwiInput
 {
     public static readonly string WiiTwiType = "wii";
@@ -181,7 +180,6 @@ public class WiiInput : TwiInput
         {WiiInputType.DrumPlus, "((~data[4]) & (1 << 2))"},
         {WiiInputType.DrumMinus, "((~data[4]) & (1 << 4))"},
         {WiiInputType.DrumKickPedal, "((~data[5]) & (1 << 2))"},
-        // TODO
         {WiiInputType.DrumHiHatPedal, "drumVelocity[DRUM_HIHAT]"},
         {WiiInputType.DrumBlue, "((~data[5]) & (1 << 3))"},
         {WiiInputType.DrumGreen, "((~data[5]) & (1 << 4))"},
@@ -213,13 +211,14 @@ public class WiiInput : TwiInput
         "data[4]",
         "data[5]",
         Mappings[WiiInputType.ClassicLeftStickX],
-        Mappings[WiiInputType.ClassicLeftStickY], 
+        Mappings[WiiInputType.ClassicLeftStickY],
         Mappings[WiiInputType.ClassicRightStickX],
-        Mappings[WiiInputType.ClassicRightStickY], 
+        Mappings[WiiInputType.ClassicRightStickY],
         Mappings[WiiInputType.ClassicLeftTrigger],
         Mappings[WiiInputType.ClassicRightTrigger],
     };
-    private static readonly Dictionary<string,string> HiResMap = new()
+
+    private static readonly Dictionary<string, string> HiResMap = new()
     {
         {"data[4]", "data[6]"},
         {"data[5]", "data[7]"},
@@ -231,7 +230,8 @@ public class WiiInput : TwiInput
         {Mappings[WiiInputType.ClassicRightTrigger], "data[5]"},
     };
 
-    private static readonly Dictionary<WiiControllerType, string> CType = new() {
+    private static readonly Dictionary<WiiControllerType, string> CType = new()
+    {
         {WiiControllerType.ClassicController, "WII_CLASSIC_CONTROLLER"},
         {WiiControllerType.Nunchuk, "WII_NUNCHUK"},
         {WiiControllerType.UDraw, "WII_THQ_UDRAW_TABLET"},
@@ -243,7 +243,8 @@ public class WiiInput : TwiInput
         {WiiControllerType.MotionPlus, "WII_MOTION_PLUS"}
     };
 
-    public WiiInput(WiiInputType input, Microcontroller.Microcontroller microcontroller): base(microcontroller, WiiTwiType, WiiTwiFreq)
+    public WiiInput(WiiInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null) : base(microcontroller,
+        WiiTwiType, WiiTwiFreq, sda, scl)
     {
         Input = input;
     }
@@ -253,10 +254,15 @@ public class WiiInput : TwiInput
         return Mappings[Input];
     }
 
+    public override JsonInput GetJson()
+    {
+        return new JsonWiiInput(Sda, Scl, Input);
+    }
+
     public override bool IsAnalog => Input <= WiiInputType.DrawsomePenPressure;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller.Microcontroller controller)
+        Microcontroller controller)
     {
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
         foreach (var binding in bindings)
@@ -267,11 +273,12 @@ public class WiiInput : TwiInput
                 {
                     mappedBindings.Add(input.WiiControllerType, new List<string>());
                 }
+
                 mappedBindings[input.WiiControllerType].Add(binding.Item2);
             }
         }
 
-        var ret = "";
+        var ret = "switch(wiiControllerType) {";
         if (mappedBindings.ContainsKey(WiiControllerType.ClassicController))
         {
             var mappings = mappedBindings[WiiControllerType.ClassicController];
@@ -284,42 +291,50 @@ public class WiiInput : TwiInput
                 {
                     val = mapping.Replace(key, HiResMap[key]);
                 }
+
                 mappings2.Add(val);
             }
-            ret += @$"case WII_CLASSIC_CONTROLLER:
+
+            ret += @$"
+case WII_CLASSIC_CONTROLLER:
 case WII_CLASSIC_CONTROLLER_PRO:
 if (hiRes) {{
-    {String.Join(";\n",mappings2)};
+    {String.Join(";\n", mappings2)};
 }} else {{
-    {String.Join(";\n",mappings)};
+    {String.Join(";\n", mappings)};
 }}
 ";
         }
+
         foreach (var binding in mappedBindings)
         {
             var input = binding.Key;
             var mappings = binding.Value;
             ret += @$"case {CType[input]}:
-    {String.Join(";\n",mappings)};
+    {String.Join(";\n", mappings)};
     break;";
         }
-        return ret;
+
+        return ret+"}";
     }
 
     public override IReadOnlyList<string> RequiredDefines()
     {
         if (WiiControllerType == WiiControllerType.Drum)
         {
-            return new[] {"INPUT_WII", "INPUT_WII_DRUM"};
+            return base.RequiredDefines().Concat(new[] {"INPUT_WII", "INPUT_WII_DRUM"}).ToList();
         }
+
         if (WiiControllerType == WiiControllerType.Nunchuk)
         {
-            return new[] {"INPUT_WII", "INPUT_WII_NUNCHUK"};
+            return base.RequiredDefines().Concat(new[] {"INPUT_WII", "INPUT_WII_NUNCHUK"}).ToList();
         }
+
         if (WiiControllerType == WiiControllerType.ClassicController)
         {
-            return new[] {"INPUT_WII", "INPUT_WII_CLASSIC"};
+            return base.RequiredDefines().Concat(new[] {"INPUT_WII", "INPUT_WII_CLASSIC"}).ToList();
         }
-        return new[] {"INPUT_WII"};
+
+        return base.RequiredDefines().Concat(new[] {"INPUT_WII"}).ToList();
     }
 }

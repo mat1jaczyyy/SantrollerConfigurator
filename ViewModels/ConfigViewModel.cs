@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Collections;
@@ -14,7 +15,8 @@ using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Configuration.Combined;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Utils;
@@ -33,20 +35,15 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public MainWindowViewModel Main { get; }
 
-        public IEnumerable<DeviceControllerType> DeviceControllerTypes =>
-            Enum.GetValues(typeof(DeviceControllerType)).Cast<DeviceControllerType>();
+        public IEnumerable<DeviceControllerType> DeviceControllerTypes => Enum.GetValues<DeviceControllerType>();
 
-        public IEnumerable<RhythmType> RhythmTypes =>
-            Enum.GetValues(typeof(RhythmType)).Cast<RhythmType>();
+        public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
 
-        public IEnumerable<EmulationType> EmulationTypes =>
-            Enum.GetValues(typeof(EmulationType)).Cast<EmulationType>();
+        public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>();
 
-        public IEnumerable<LedType> LedTypes =>
-            Enum.GetValues(typeof(LedType)).Cast<LedType>();
+        public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
 
-        public IEnumerable<SimpleType> SimpleTypes =>
-            Enum.GetValues(typeof(SimpleType)).Cast<SimpleType>();
+        public IEnumerable<SimpleType> SimpleTypes => Enum.GetValues<SimpleType>();
 
         public ICommand WriteConfig { get; }
 
@@ -86,8 +83,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
         }
 
-        public IEnumerable<StandardButtonType> StandardButtonTypes =>
-            Enum.GetValues(typeof(StandardButtonType)).Cast<StandardButtonType>();
+        public IEnumerable<StandardButtonType> StandardButtonTypes => Enum.GetValues<StandardButtonType>();
 
         private StandardAxisType? _axisType;
 
@@ -103,8 +99,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         }
 
         // TODO Somehow these will all need to be localised to the current controller type
-        public IEnumerable<StandardAxisType> StandardAxisTypes =>
-            Enum.GetValues(typeof(StandardAxisType)).Cast<StandardAxisType>();
+        public IEnumerable<StandardAxisType> StandardAxisTypes => Enum.GetValues<StandardAxisType>();
 
         private Key? _key;
 
@@ -119,8 +114,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
         }
 
-        public IEnumerable<Key> Keys =>
-            Enum.GetValues(typeof(Key)).Cast<Key>();
+        public IEnumerable<Key> Keys => Enum.GetValues<Key>();
 
         private MouseAxisType? _mouseAxisType;
 
@@ -135,8 +129,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
         }
 
-        public IEnumerable<MouseAxisType> MouseAxisTypes =>
-            Enum.GetValues(typeof(MouseAxisType)).Cast<MouseAxisType>();
+        public IEnumerable<MouseAxisType> MouseAxisTypes => Enum.GetValues<MouseAxisType>();
 
         private MouseButtonType? _mouseButtonType;
 
@@ -151,16 +144,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
         }
 
-        public IEnumerable<MouseButtonType> MouseButtonTypes =>
-            Enum.GetValues(typeof(MouseButtonType)).Cast<MouseButtonType>();
-
-        private bool _tiltEnabled;
-
-        public bool TiltEnabled
-        {
-            get => _tiltEnabled;
-            set => this.RaiseAndSetIfChanged(ref _tiltEnabled, value);
-        }
+        public IEnumerable<MouseButtonType> MouseButtonTypes => Enum.GetValues<MouseButtonType>();
 
         private bool _xinputOnWindows;
 
@@ -212,14 +196,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         {
             get => _microController;
             set => this.RaiseAndSetIfChanged(ref _microController, value);
-        }
-
-        private int _wtPin;
-
-        public int WtPin
-        {
-            get => _wtPin;
-            set => this.RaiseAndSetIfChanged(ref _wtPin, value);
         }
 
 
@@ -278,7 +254,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             DeviceType = DeviceControllerType.Gamepad;
             EmulationType = EmulationType.Controller;
             RhythmType = RhythmType.GuitarHero;
-            TiltEnabled = false;
             XInputOnWindows = false;
             SetDefaultBindings();
         }
@@ -288,7 +263,15 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             Bindings.Clear();
             if (EmulationType == EmulationType.Controller)
             {
-                //TODO: this should also add a IOutput for every controller output as well!
+                foreach (var type in Enum.GetValues<StandardAxisType>())
+                {
+                    Bindings.Add(new ControllerAxis(this, null, Colors.Transparent, Colors.Transparent, 1, 0, 0, type));
+                }
+
+                foreach (var type in Enum.GetValues<StandardButtonType>())
+                {
+                    Bindings.Add(new ControllerButton(this, null, Colors.Transparent, Colors.Transparent, 1, type));
+                }
             }
         }
 
@@ -299,8 +282,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var inputs = Bindings.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
             string configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
-            // var json = JsonSerializer.Serialize(new JsonConfiguration(this), JsonConfiguration.GetJsonOptions(MicroController));
-            var json = "";
+            var json = JsonSerializer.Serialize(new JsonConfiguration(this), JsonConfiguration.GetJsonOptions(this));
+            Console.WriteLine(json);
+            JsonSerializer.Deserialize(json, typeof(JsonConfiguration), JsonConfiguration.GetJsonOptions(this));
             var bytes = Encoding.UTF8.GetBytes(json);
             var lines = new List<string>();
             using (var outputStream = new MemoryStream())
@@ -310,7 +294,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     compressStream.Write(bytes, 0, bytes.Length);
                 }
 
-                lines.Add($"#define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
+                lines.Add(
+                    $"#define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
                 lines.Add($"#define CONFIGURATION_LEN {outputStream.ToArray().Length}");
             }
 
@@ -327,8 +312,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             lines.Add($"#define LED_TYPE {((byte) LedType)}");
 
-            lines.Add($"#define TILT_ENABLED {TiltEnabled.ToString().ToLower()}");
-
             lines.Add($"#define CONSOLE_TYPE {((byte) EmulationType)}");
 
             lines.Add($"#define DEVICE_TYPE {((byte) DeviceType)}");
@@ -338,11 +321,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 $"#define ADC_PINS {{{String.Join(",", directInputs.OrderBy(s => s.Pin).Select(s => _microController.GetChannel(s.Pin).ToString()))}}}");
 
             lines.Add($"#define PIN_INIT {_microController.GenerateInit(Bindings.ToList())}");
-            
+
             lines.Add(_microController.GenerateDefinitions());
 
             lines.Add($"#define ARDWIINO_BOARD \"{_microController.Board.ArdwiinoName}\"");
-            lines.Add(String.Join("\n",Bindings.SelectMany(binding => binding.Outputs).Where(binding => binding.Input != null).SelectMany(binding => binding.Input!.RequiredDefines()).Distinct().Select(def => $"#define {def}")));
+            lines.Add(String.Join("\n",
+                Bindings.SelectMany(binding => binding.Outputs).Where(binding => binding.Input != null)
+                    .SelectMany(binding => binding.Input!.RequiredDefines()).Distinct()
+                    .Select(def => $"#define {def}")));
 
             File.WriteAllLines(configFile, lines);
         }
@@ -385,7 +371,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                                 Bindings.Add(new GHWTCombinedOutput(this, _microController));
                                 break;
                             case Configuration.Types.SimpleType.DJTurntableSimple:
-                                Bindings.Add(new DJCombinedOutput(this, _microController));
+                                Bindings.Add(new DjCombinedOutput(this, _microController));
                                 break;
                         }
                     }
@@ -463,7 +449,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 }).ToList(), _microController);
             }
 
-            return ret.Replace('\n',' ');
+            return ret.Replace('\n', ' ');
         }
     }
 }

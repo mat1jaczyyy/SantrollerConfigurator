@@ -2,38 +2,42 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontroller;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
 public abstract class SpiInput : Input
 {
-    private readonly Microcontroller.Microcontroller _microcontroller;
+    private readonly Microcontroller _microcontroller;
 
     // ReSharper disable ExplicitCallerInfoArgument
-    protected SpiInput(Microcontroller.Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
-        bool cpha, bool msbFirst)
+    protected SpiInput(Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
+        bool cpha, bool msbFirst, int? miso = null, int? mosi = null, int? sck = null)
     {
         _microcontroller = microcontroller;
-        SpiType = spiType;
-        var config = microcontroller.GetSpiForType(SpiType);
+        _spiType = spiType;
+        var config = microcontroller.GetSpiForType(_spiType);
         if (config != null)
         {
             _spiConfig = config;
         }
         else
         {
-            var pins = microcontroller.SpiPins(SpiType);
+            var pins = microcontroller.SpiPins(_spiType);
             if (!pins.Any())
             {
                 throw new PinUnavailableException("No SPI Pins Available!");
             }
 
-            var miso = pins.First(pair => pair.Value is SpiPinType.MISO).Key;
-            var mosi = pins.First(pair => pair.Value is SpiPinType.MOSI).Key;
-            var sck = pins.First(pair => pair.Value is SpiPinType.SCK).Key;
-            _spiConfig = microcontroller.AssignSpiPins(SpiType, mosi, miso, sck, cpol, cpha, msbFirst, spiFreq)!;
+            if (miso == null || mosi == null || sck == null)
+            {
+                miso = pins.First(pair => pair.Value is SpiPinType.MISO).Key;
+                mosi = pins.First(pair => pair.Value is SpiPinType.MOSI).Key;
+                sck = pins.First(pair => pair.Value is SpiPinType.SCK).Key;
+            }
+
+            _spiConfig = microcontroller.AssignSpiPins(_spiType, mosi.Value, miso.Value, sck.Value, cpol, cpha, msbFirst, spiFreq)!;
         }
 
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged("Miso"));
@@ -42,22 +46,27 @@ public abstract class SpiInput : Input
         microcontroller.TwiConfigs.CollectionChanged +=
             (_, _) =>
             {
-                var mosi = Mosi;
-                var miso = Miso;
-                var sck = Sck;
+                var mosi2 = Mosi;
+                var miso2 = Miso;
+                var sck2 = Sck;
                 this.RaisePropertyChanged("AvailableMosiPins");
                 this.RaisePropertyChanged("AvailableMisoPins");
                 this.RaisePropertyChanged("AvailableSckPins");
-                Mosi = mosi;
-                Miso = miso;
-                Sck = sck;
+                Mosi = mosi2;
+                Miso = miso2;
+                Sck = sck2;
             };
     }
 
-    private string SpiType { get; }
+    private string _spiType;
 
     private readonly SpiConfig _spiConfig;
-
+    
+    public override IReadOnlyList<string> RequiredDefines()
+    {
+        return new[] {$"{_spiType.ToUpper()}_SPI_PORT {_spiConfig.Definition}"};
+    }
+    
     public int Mosi
     {
         get => _spiConfig.Mosi;
@@ -82,21 +91,21 @@ public abstract class SpiInput : Input
 
     private List<int> GetMosiPins()
     {
-        return _microcontroller.SpiPins(SpiType)
+        return _microcontroller.SpiPins(_spiType)
             .Where(s => s.Value is SpiPinType.MOSI)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetMisoPins()
     {
-        return _microcontroller.SpiPins(SpiType)
+        return _microcontroller.SpiPins(_spiType)
             .Where(s => s.Value is SpiPinType.MISO)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetSckPins()
     {
-        return _microcontroller.SpiPins(SpiType)
+        return _microcontroller.SpiPins(_spiType)
             .Where(s => s.Value is SpiPinType.SCK)
             .Select(s => s.Key).ToList();
     }

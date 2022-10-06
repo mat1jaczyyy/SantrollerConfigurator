@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Collections;
 using DynamicData;
-using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using LibUsbDotNet;
 using LibUsbDotNet.DeviceNotify;

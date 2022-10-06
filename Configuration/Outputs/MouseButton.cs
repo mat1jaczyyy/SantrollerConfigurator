@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-
 public class MouseButton : OutputButton
 {
     // TODO need to have this all in the right order
@@ -34,4 +34,8 @@ public class MouseButton : OutputButton
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;
+    public override JsonOutput GetJson()
+    {
+        return new JsonMouseButton(Input?.GetJson(), LedOn, LedOff, Debounce, Type);
+    }
 }

@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration.Json;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-
 public class ControllerAxis : OutputAxis
 {
     
@@ -45,4 +44,8 @@ public class ControllerAxis : OutputAxis
         return "report->" + Mappings[Type];
     }
     public override bool IsCombined => false;
+    public override JsonOutput GetJson()
+    {
+        return new JsonControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, Deadzone);
+    }
 }
