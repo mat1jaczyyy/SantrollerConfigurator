@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DynamicData.Kernel;
@@ -11,6 +12,10 @@ public class Pico : Microcontroller
     private const int PinA0 = 26;
 
     public override Board Board { get; }
+    public override string GeneratePulseRead(int pin, PulseMode mode, int timeout)
+    {
+        return $"puseIn({pin},{mode},{timeout})";
+    }
 
     public Pico(Board board)
     {
@@ -30,26 +35,26 @@ public class Pico : Microcontroller
 
     public static readonly Dictionary<int, SpiPinType> SpiTypesByPin = new()
     {
-        {0, SpiPinType.MISO},
+        {0, SpiPinType.Miso},
         {1, SpiPinType.CSn},
-        {2, SpiPinType.SCK},
-        {3, SpiPinType.MOSI},
-        {4, SpiPinType.MISO},
+        {2, SpiPinType.Sck},
+        {3, SpiPinType.Mosi},
+        {4, SpiPinType.Miso},
         {5, SpiPinType.CSn},
-        {6, SpiPinType.SCK},
-        {7, SpiPinType.MOSI},
-        {19, SpiPinType.MOSI},
-        {18, SpiPinType.SCK},
+        {6, SpiPinType.Sck},
+        {7, SpiPinType.Mosi},
+        {19, SpiPinType.Mosi},
+        {18, SpiPinType.Sck},
         {17, SpiPinType.CSn},
-        {16, SpiPinType.MISO},
-        {8, SpiPinType.MISO},
+        {16, SpiPinType.Miso},
+        {8, SpiPinType.Miso},
         {9, SpiPinType.CSn},
-        {10, SpiPinType.SCK},
-        {11, SpiPinType.MOSI},
-        {12, SpiPinType.MISO},
+        {10, SpiPinType.Sck},
+        {11, SpiPinType.Mosi},
+        {12, SpiPinType.Miso},
         {13, SpiPinType.CSn},
-        {14, SpiPinType.SCK},
-        {15, SpiPinType.MOSI},
+        {14, SpiPinType.Sck},
+        {15, SpiPinType.Mosi},
     };
 
     public static readonly Dictionary<int, int> SpiIndexByPin = new()
@@ -106,30 +111,30 @@ public class Pico : Microcontroller
 
     public static readonly Dictionary<int, TwiPinType> TwiTypeByPin = new()
     {
-        {0, TwiPinType.SDA},
-        {1, TwiPinType.SCL},
-        {2, TwiPinType.SDA},
-        {3, TwiPinType.SCL},
-        {4, TwiPinType.SDA},
-        {5, TwiPinType.SCL},
-        {6, TwiPinType.SDA},
-        {7, TwiPinType.SCL},
-        {8, TwiPinType.SDA},
-        {9, TwiPinType.SCL},
-        {10, TwiPinType.SDA},
-        {11, TwiPinType.SCL},
-        {12, TwiPinType.SDA},
-        {13, TwiPinType.SCL},
-        {14, TwiPinType.SDA},
-        {15, TwiPinType.SCL},
-        {16, TwiPinType.SDA},
-        {17, TwiPinType.SCL},
-        {18, TwiPinType.SDA},
-        {19, TwiPinType.SCL},
-        {20, TwiPinType.SDA},
-        {21, TwiPinType.SCL},
-        {26, TwiPinType.SDA},
-        {27, TwiPinType.SCL},
+        {0, TwiPinType.Sda},
+        {1, TwiPinType.Scl},
+        {2, TwiPinType.Sda},
+        {3, TwiPinType.Scl},
+        {4, TwiPinType.Sda},
+        {5, TwiPinType.Scl},
+        {6, TwiPinType.Sda},
+        {7, TwiPinType.Scl},
+        {8, TwiPinType.Sda},
+        {9, TwiPinType.Scl},
+        {10, TwiPinType.Sda},
+        {11, TwiPinType.Scl},
+        {12, TwiPinType.Sda},
+        {13, TwiPinType.Scl},
+        {14, TwiPinType.Sda},
+        {15, TwiPinType.Scl},
+        {16, TwiPinType.Sda},
+        {17, TwiPinType.Scl},
+        {18, TwiPinType.Sda},
+        {19, TwiPinType.Scl},
+        {20, TwiPinType.Sda},
+        {21, TwiPinType.Scl},
+        {26, TwiPinType.Sda},
+        {27, TwiPinType.Scl},
     };
 
 
@@ -138,7 +143,7 @@ public class Pico : Microcontroller
         int clock)
     {
         int pin = SpiIndexByPin[mosi];
-        if (pin != SpiIndexByPin[miso] || SpiTypesByPin[mosi] != SpiPinType.MOSI || SpiTypesByPin[miso] != SpiPinType.MISO)
+        if (pin != SpiIndexByPin[miso] || SpiTypesByPin[mosi] != SpiPinType.Mosi || SpiTypesByPin[miso] != SpiPinType.Miso)
         {
             return null;
         }
@@ -158,7 +163,7 @@ public class Pico : Microcontroller
     public override TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock)
     {
         int pin = TwiIndexByPin[sda];
-        if (pin != TwiIndexByPin[scl] || TwiTypeByPin[sda] != TwiPinType.SDA || TwiTypeByPin[scl] != TwiPinType.SCL)
+        if (pin != TwiIndexByPin[scl] || TwiTypeByPin[sda] != TwiPinType.Sda || TwiTypeByPin[scl] != TwiPinType.Scl)
         {
             return null;
         }
@@ -175,11 +180,16 @@ public class Pico : Microcontroller
         return config;
     }
 
-    public override bool HasConfigurableSpiPins => true;
-    public override bool HasConfigurableTwiPins => true;
+    public override string GenerateAckDefines(int ack)
+    {
+        return "";
+    }
 
-    public override bool TwiPinsFree => TwiConfigs.Count < 2;
-    public override bool SpiPinsFree => SpiConfigs.Count < 2;
+    public override List<int> SupportedAckPins()
+    {
+        return Enumerable.Range(0, GpioCount).ToList();
+    }
+
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
         var types = SpiTypesByPin.AsEnumerable();
@@ -206,14 +216,18 @@ public class Pico : Microcontroller
         return types.ToList();
     }
 
-    public override void UnAssignSPIPins(string type)
+    public override void UnAssignSpiPins(string type)
     {
-        SpiConfigs.AsList().RemoveAll(s => ((PicoSpiConfig)s).Type == type);
+        var elements = SpiConfigs.Where(s => s.Type == type).ToList();
+        SpiConfigs.RemoveAll(elements);
     }
 
-    public override void UnAssignTWIPins(string type)
+    public override void UnAssignTwiPins(string type)
     {
-        TwiConfigs.AsList().RemoveAll(s => s.Type == type);
+        var elements = TwiConfigs.Where(s => s.Type == type).ToList();
+        TwiConfigs.RemoveAll(elements);
+        Console.WriteLine(TwiConfigs.Count);
+        
     }
 
     public override string GenerateDefinitions()
@@ -240,32 +254,29 @@ public class Pico : Microcontroller
             }
         }
 
-        ret += $"#define SKIP_MASK_PICO {{{skip.ToString()}}}";
+        ret += $"#define SKIP_MASK_PICO {skip.ToString()}";
         return ret;
     }
 
     public override string GenerateInit(List<Output> bindings)
     {
         string ret = "";
-        foreach (var output in bindings)
+        var pins = bindings.SelectMany(s => s.Pins).Distinct();
+        foreach (var devicePin in pins)
         {
-            if (output.Input?.InnermostInput() is DirectInput direct)
+            if (devicePin.PinMode == DevicePinMode.Analog)
             {
-                if (direct.IsAnalog)
-                {
-                    ret += $"adc_gpio_init({direct.Pin});";
-                }
-                else
-                {
-                    bool up = direct.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
-                    bool down = direct.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
-                    ret += $"gpio_init({direct.Pin});";
-                    ret += $"gpio_set_dir({direct.Pin},false);";
-                    ret += $"gpio_set_pulls({direct.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
-                }
+                ret += $"adc_gpio_init({devicePin.Pin});";
+            }
+            else
+            {
+                bool up = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
+                bool down = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
+                ret += $"gpio_init({devicePin.Pin});";
+                ret += $"gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});";
+                ret += $"gpio_set_pulls({devicePin.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
             }
         }
-
         return ret;
     }
 

@@ -91,7 +91,7 @@ public class Gh5NeckInput : TwiInput
         }
 
         var mappings = MappingByInput[Input];
-        return String.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})"));
+        return "if (gh5Valid) {" + String.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})"))+"}";
     }
 
     public override SerializedInput GetJson()
@@ -107,15 +107,15 @@ public class Gh5NeckInput : TwiInput
         return String.Join(";\n", bindings.Select(binding => binding.Item2));
     }
 
+    public override List<DevicePin> Pins => new();
+
     public override IReadOnlyList<string> RequiredDefines()
     {
         if (Input <= Gh5NeckInputType.Orange)
         {
             return base.RequiredDefines().Concat(new[] {"INPUT_GH5_NECK"}).ToList();
         }
-        else
-        {
-            return base.RequiredDefines().Concat(new[] {"INPUT_GH5_NECK", "INPUT_GH5_NECK_TAP_BAR"}).ToList();
-        }
+
+        return base.RequiredDefines().Concat(new[] {"INPUT_GH5_NECK", "INPUT_GH5_NECK_TAP_BAR"}).ToList();
     }
 }

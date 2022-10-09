@@ -130,7 +130,7 @@ namespace GuitarConfiguratorSharp.NetCore
 
         }
 
-        public bool IsAVR()
+        public bool IsAvr()
         {
             return Atmega32U4Boards.Contains(this) || UnoBoards.Contains(this) || MegaBoards.Contains(this) || MiniBoards.Contains(this);
         }

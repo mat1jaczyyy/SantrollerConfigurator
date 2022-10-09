@@ -29,6 +29,7 @@ public class DigitalToAnalog : Input
     {
         return Child;
     }
+    public override List<DevicePin> Pins => Child.Pins;
 
     public override bool IsAnalog => Child.IsAnalog;
 
@@ -41,5 +42,10 @@ public class DigitalToAnalog : Input
     public override IReadOnlyList<string> RequiredDefines()
     {
         return Child.RequiredDefines();
+    }
+
+    public override void Dispose()
+    {
+        Child.Dispose();
     }
 }

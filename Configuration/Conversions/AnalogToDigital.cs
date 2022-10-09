@@ -43,12 +43,19 @@ public class AnalogToDigital : Input
         return Child;
     }
 
+    public override List<DevicePin> Pins => Child.Pins;
+
     public override bool IsAnalog => Child.IsAnalog;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)
     {
         throw new InvalidOperationException("Never call GenerateAll on AnalogToDigital, call it on its children");
+    }
+
+    public override void Dispose()
+    {
+        Child.Dispose();
     }
 
     public override IReadOnlyList<string> RequiredDefines()

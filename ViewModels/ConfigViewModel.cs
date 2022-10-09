@@ -17,6 +17,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Combined;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Utils;
@@ -179,8 +180,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             get => _emulationType;
             set
             {
-                this.SetDefaultBindings();
                 this.RaiseAndSetIfChanged(ref _emulationType, value);
+                this.SetDefaultBindings();
             }
         }
 
@@ -262,7 +263,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public void SetDefaultBindings()
         {
-            Bindings.Clear();
+            ClearOutputs();
             if (EmulationType == EmulationType.Controller)
             {
                 foreach (var type in Enum.GetValues<StandardAxisType>())
@@ -276,12 +277,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 }
             }
         }
-
-
         public void Generate(PlatformIo pio)
         {
             if (_microController == null) return;
-            var inputs = Bindings.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
+            var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
+            var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
             string configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
             var lines = new List<string>();
@@ -312,30 +312,35 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             lines.Add($"#define DEVICE_TYPE {((byte) DeviceType)}");
 
+            lines.Add(Ps2Input.GeneratePs2Pressures(inputs));
+
             // Sort by pin index, and then map to adc number and turn into an array
             lines.Add(
                 $"#define ADC_PINS {{{String.Join(",", directInputs.OrderBy(s => s.Pin).Select(s => _microController.GetChannel(s.Pin).ToString()))}}}");
 
-            lines.Add($"#define PIN_INIT {_microController.GenerateInit(Bindings.ToList())}");
+            lines.Add($"#define PIN_INIT {_microController.GenerateInit(outputs)}");
 
             lines.Add(_microController.GenerateDefinitions());
 
             lines.Add($"#define ARDWIINO_BOARD \"{_microController.Board.ArdwiinoName}\"");
-            lines.Add(String.Join("\n",
-                Bindings.SelectMany(binding => binding.Outputs).Where(binding => binding.Input != null)
-                    .SelectMany(binding => binding.Input!.RequiredDefines()).Distinct()
-                    .Select(def => $"#define {def}")));
+            lines.Add(String.Join("\n", inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}")));
 
             File.WriteAllLines(configFile, lines);
         }
 
         public void RemoveOutput(Output output)
         {
+            output.Dispose();
             Bindings.Remove(output);
         }
 
         public void ClearOutputs()
         {
+            foreach (var binding in Bindings)
+            {
+                binding.Dispose();
+            }
+
             Bindings.Clear();
         }
 
@@ -357,16 +362,16 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                             case Configuration.Types.SimpleType.WiiInputSimple:
                                 Bindings.Add(new WiiCombinedOutput(this, _microController));
                                 break;
-                            case Configuration.Types.SimpleType.GH5NeckSimple:
-                                Bindings.Add(new GH5CombinedOutput(this, _microController));
+                            case Configuration.Types.SimpleType.Gh5NeckSimple:
+                                Bindings.Add(new Gh5CombinedOutput(this, _microController));
                                 break;
-                            case Configuration.Types.SimpleType.PS2InputSimple:
+                            case Configuration.Types.SimpleType.Ps2InputSimple:
                                 Bindings.Add(new Ps2CombinedOutput(this, _microController));
                                 break;
-                            case Configuration.Types.SimpleType.WTNeckSimple:
-                                Bindings.Add(new GHWTCombinedOutput(this, _microController));
+                            case Configuration.Types.SimpleType.WtNeckSimple:
+                                Bindings.Add(new GhwtCombinedOutput(this, _microController));
                                 break;
-                            case Configuration.Types.SimpleType.DJTurntableSimple:
+                            case Configuration.Types.SimpleType.DjTurntableSimple:
                                 Bindings.Add(new DjCombinedOutput(this, _microController));
                                 break;
                         }
@@ -410,11 +415,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var inputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
             var groupedInputs = inputs.GroupBy(s => s.Input?.InnermostInput().GetType());
             string ret = "";
-            int index = 0;
             bool combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
+
+            Dictionary<string, int> debounces = new();
+            HashSet<string> debounceTicks = new();
+            int indexCount = 0;
             if (combined)
             {
-                index = 1;
+                indexCount++;
             }
 
             foreach (var group in groupedInputs)
@@ -422,19 +430,26 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 ret += group.First().Input?.InnermostInput().GenerateAll(xbox, group.Select(output =>
                 {
                     var input = output.Input?.InnermostInput();
+                    if (!debounces.ContainsKey(output.Name))
+                    {
+                        debounces[output.Name] = indexCount++;
+                    }
+
+                    var index = debounces[output.Name];
                     if (input != null)
                     {
-                        var generated = output.Generate(xbox);
+                        
+                        var generated = output.Generate(xbox, index);
                         if (output is OutputButton button)
                         {
                             if (combined && button.IsStrum)
                             {
-                                generated = generated.Replace("debounce[i]", "debounce[0]");
+                                generated = output.Generate(xbox, 0);
+                                debounceTicks.Add(button.GenerateDebounceUpdate(0, xbox));
                             }
                             else
                             {
-                                generated = generated.Replace("debounce[i]", $"debounce[{index}]");
-                                index++;
+                                debounceTicks.Add(button.GenerateDebounceUpdate(index, xbox));
                             }
                         }
 
@@ -444,7 +459,10 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     throw new IncompleteConfigurationException("Output without Input found!");
                 }).ToList(), _microController);
             }
-
+            foreach (var debounceTick in debounceTicks)
+            {
+                ret += debounceTick;
+            }
             return ret.Replace('\n', ' ');
         }
     }

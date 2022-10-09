@@ -60,7 +60,7 @@ public class Dfu : IConfigurableDevice
         return Task.FromResult((string?)_port);
     }
 
-    public bool IsAVR()
+    public bool IsAvr()
     {
         return true;
     }

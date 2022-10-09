@@ -8,7 +8,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 public class MouseButton : OutputButton
 {
     // TODO need to have this all in the right order
-    private static List<MouseButtonType> order = new()
+    private static List<MouseButtonType> _order = new()
     {
         MouseButtonType.Left,
         MouseButtonType.Right,
@@ -23,7 +23,7 @@ public class MouseButton : OutputButton
     public MouseButtonType Type { get; }
     public override string GenerateIndex(bool xbox)
     {
-        return order.IndexOf(Type).ToString();
+        return _order.IndexOf(Type).ToString();
     }
 
     public override string GenerateOutput(bool xbox)

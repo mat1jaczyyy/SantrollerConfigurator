@@ -33,6 +33,6 @@ public class SerializedGh5CombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new GH5CombinedOutput(model, microcontroller, Sda, Scl, FretsEnabled, MapTapBarToFrets, MapTapBarToAxis);
+        return new Gh5CombinedOutput(model, microcontroller, Sda, Scl, FretsEnabled, MapTapBarToFrets, MapTapBarToAxis);
     }
 }

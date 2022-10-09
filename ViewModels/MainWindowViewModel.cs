@@ -405,7 +405,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         }
                         else if (product == "Ardwiino")
                         {
-                            if (revision == Ardwiino.SERIAL_ARDWIINO_REVISION)
+                            if (revision == Ardwiino.SerialArdwiinoRevision)
                             {
                                 return;
                             }

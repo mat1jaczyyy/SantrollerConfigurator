@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class Mega : AvrController
@@ -87,6 +90,16 @@ public class Mega : AvrController
 
     public override int PinCount => _pinInputs.Length;
 
+    public static readonly Dictionary<int, string> Interrupts = new ()
+    {
+        {2, "INT0"},
+        {3, "INT1"},
+        {18, "INT5"},
+        {19, "INT4"},
+        {20, "INT3"},
+        {21, "INT2"},
+    };
+
     private static readonly char[] Ports = {
         'E'    , // 'E' 0 ** 0 ** USART0_RX	
         'E'    , // 'E' 1 ** 1 ** USART0_TX	
@@ -164,6 +177,17 @@ public class Mega : AvrController
 
     protected override int PinA0 => 54;
 
+    
+    protected override string GetInterruptForPin(int ack)
+    {
+        return Interrupts[ack];
+    }
+
+    public override List<int> SupportedAckPins()
+    {
+        return Interrupts.Keys.ToList();
+    }
+
     public override Board Board {get;}
 
     public Mega(Board board) {
@@ -190,11 +214,11 @@ public class Mega : AvrController
         switch (pin)
         {
             case 0:
-                return AvrPinMode.INPUT;
+                return AvrPinMode.Input;
             case 1:
-                return AvrPinMode.OUTPUT;
+                return AvrPinMode.Output;
             case 13:
-                return AvrPinMode.INPUT;
+                return AvrPinMode.Input;
             default:
                 return null;
         }

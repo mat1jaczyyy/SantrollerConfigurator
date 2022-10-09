@@ -17,7 +17,7 @@ public class DjCombinedOutput : TwiOutput
         _bindings = new()
         {
             new ControllerButton(model, new DjInput(DjInputType.LeftAny, microcontroller), Colors.Transparent, Colors.Transparent, 5,
-                StandardButtonType.LB),
+                StandardButtonType.Lb),
             new ControllerButton(model, new DjInput(DjInputType.LeftGreen, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.A),
             new ControllerButton(model, new DjInput(DjInputType.LeftRed, microcontroller), Colors.Transparent, Colors.Transparent, 5,
@@ -25,7 +25,7 @@ public class DjCombinedOutput : TwiOutput
             new ControllerButton(model, new DjInput(DjInputType.LeftBlue, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.X),
             new ControllerButton(model, new DjInput(DjInputType.RightAny, microcontroller), Colors.Transparent, Colors.Transparent, 5,
-                StandardButtonType.RB),
+                StandardButtonType.Rb),
             new ControllerButton(model, new DjInput(DjInputType.RightGreen, microcontroller), Colors.Transparent, Colors.Transparent, 5,
                 StandardButtonType.A),
             new ControllerButton(model, new DjInput(DjInputType.RightRed, microcontroller), Colors.Transparent, Colors.Transparent, 5,
@@ -46,7 +46,7 @@ public class DjCombinedOutput : TwiOutput
         return new SerializedDjCombinedOutput(LedOn, LedOff, Sda, Scl);
     }
 
-    public override string Generate(bool xbox)
+    public override string Generate(bool xbox, int debounceIndex)
     {
         return "";
     }

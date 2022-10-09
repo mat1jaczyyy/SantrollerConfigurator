@@ -8,16 +8,16 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
-public class GHWTCombinedOutput : Output
+public class GhwtCombinedOutput : Output
 {
-    private readonly List<Output> BindingsTap;
-    private readonly Output BindingTapBar;
+    private readonly List<Output> _bindingsTap;
+    private readonly Output _bindingTapBar;
     public bool MapTapBarToAxis { get; set; }
     public bool MapTapBarToFrets { get; set; }
     
     public int Pin { get; set; }
 
-    public GHWTCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null, bool mapTapBarToFrets = false, bool mapTapBarToAxis = false) : base(model, null, Colors.Transparent, Colors.Transparent, "GHWT")
+    public GhwtCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null, bool mapTapBarToFrets = false, bool mapTapBarToAxis = false) : base(model, null, Colors.Transparent, Colors.Transparent, "GHWT")
     {
         this.MapTapBarToFrets = mapTapBarToAxis;
         this.MapTapBarToAxis = mapTapBarToAxis;
@@ -26,7 +26,7 @@ public class GHWTCombinedOutput : Output
             Pin = pin.Value;
         }
 
-        BindingsTap = new()
+        _bindingsTap = new()
         {
             new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapGreen, microcontroller), Colors.Green,
                 Colors.Transparent, 5, StandardButtonType.A),
@@ -37,9 +37,9 @@ public class GHWTCombinedOutput : Output
             new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapBlue, microcontroller), Colors.Green,
                 Colors.Transparent, 5, StandardButtonType.X),
             new ControllerButton(model, new GhWtTapInput(GhWtInputType.TapOrange, microcontroller), Colors.Green,
-                Colors.Transparent, 5, StandardButtonType.LB),
+                Colors.Transparent, 5, StandardButtonType.Lb),
         };
-        BindingTapBar = new ControllerAxis(model, new GhWtTapInput(GhWtInputType.TapBar, microcontroller),
+        _bindingTapBar = new ControllerAxis(model, new GhWtTapInput(GhWtInputType.TapBar, microcontroller),
             Colors.Transparent,
             Colors.Transparent, 1, 0, 0, StandardAxisType.RightStickY);
     }
@@ -51,7 +51,7 @@ public class GHWTCombinedOutput : Output
         return new SerializedGhwtCombinedOutput(LedOn, LedOff, Pin, MapTapBarToFrets, MapTapBarToAxis);
     }
 
-    public override string Generate(bool xbox)
+    public override string Generate(bool xbox, int debounceIndex)
     {
         return "";
     }
@@ -64,12 +64,12 @@ public class GHWTCombinedOutput : Output
 
         if (MapTapBarToAxis)
         {
-            outputs.Add(BindingTapBar);
+            outputs.Add(_bindingTapBar);
         }
 
         if (MapTapBarToFrets)
         {
-            outputs.AddRange(BindingsTap);
+            outputs.AddRange(_bindingsTap);
         }
 
         return outputs.AsReadOnly();

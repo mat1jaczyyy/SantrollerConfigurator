@@ -19,5 +19,5 @@ public interface IConfigurableDevice {
 
     public Task<string?> GetUploadPort();
 
-    public bool IsAVR();
+    public bool IsAvr();
 }

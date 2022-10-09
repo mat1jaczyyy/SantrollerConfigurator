@@ -35,9 +35,9 @@ public abstract class SpiOutput : Output
 
             if (miso == null || mosi == null || sck == null)
             {
-                miso = pins.First(pair => pair.Value is SpiPinType.MISO).Key;
-                mosi = pins.First(pair => pair.Value is SpiPinType.MOSI).Key;
-                sck = pins.First(pair => pair.Value is SpiPinType.SCK).Key;
+                miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
+                mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
+                sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
             }
 
             _spiConfig = microcontroller.AssignSpiPins(SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha, msbFirst, spiFreq)!;
@@ -90,21 +90,26 @@ public abstract class SpiOutput : Output
     private List<int> GetMosiPins()
     {
         return _microcontroller.SpiPins(SpiType)
-            .Where(s => s.Value is SpiPinType.MOSI)
+            .Where(s => s.Value is SpiPinType.Mosi)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetMisoPins()
     {
         return _microcontroller.SpiPins(SpiType)
-            .Where(s => s.Value is SpiPinType.MISO)
+            .Where(s => s.Value is SpiPinType.Miso)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetSckPins()
     {
         return _microcontroller.SpiPins(SpiType)
-            .Where(s => s.Value is SpiPinType.SCK)
+            .Where(s => s.Value is SpiPinType.Sck)
             .Select(s => s.Key).ToList();
+    }
+    public override void Dispose()
+    {
+        _microcontroller.UnAssignSpiPins(SpiType);
+        base.Dispose();
     }
 }

@@ -19,7 +19,7 @@ namespace GuitarConfiguratorSharp.NetCore;
 /// </summary>
 public class BitmapAssetValueConverter : IValueConverter
 {
-    public static BitmapAssetValueConverter instance = new();
+    public static BitmapAssetValueConverter Instance = new();
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

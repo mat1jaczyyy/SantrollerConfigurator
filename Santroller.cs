@@ -16,18 +16,18 @@ public class Santroller : ConfigurableUsbDevice
 {
     enum Commands
     {
-        COMMAND_REBOOT = 0x30,
-        COMMAND_JUMP_BOOTLOADER,
-        COMMAND_JUMP_BOOTLOADER_UNO,
-        COMMAND_READ_CONFIG,
-        COMMAND_READ_F_CPU,
-        COMMAND_READ_BOARD,
-        COMMAND_FIND_DIGITAL,
-        COMMAND_FIND_ANALOG,
-        COMMAND_GET_FOUND,
-        COMMAND_GET_EXTENSION,
-        COMMAND_SET_LEDS,
-        COMMAND_SET_SP,
+        CommandReboot = 0x30,
+        CommandJumpBootloader,
+        CommandJumpBootloaderUno,
+        CommandReadConfig,
+        CommandReadFCpu,
+        CommandReadBoard,
+        CommandFindDigital,
+        CommandFindAnalog,
+        CommandGetFound,
+        CommandGetExtension,
+        CommandSetLeds,
+        CommandSetSp,
     }
 
     public override bool MigrationSupported => true;
@@ -44,13 +44,13 @@ public class Santroller : ConfigurableUsbDevice
 
     public override void Bootloader()
     {
-        WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER), Array.Empty<byte>());
+        WriteData(0, ((byte)Commands.CommandJumpBootloader), Array.Empty<byte>());
     }
     public override void BootloaderUsb()
     {
         if (Board.HasUsbmcu)
         {
-            WriteData(0, ((byte)Commands.COMMAND_JUMP_BOOTLOADER_UNO), Array.Empty<byte>());
+            WriteData(0, ((byte)Commands.CommandJumpBootloaderUno), Array.Empty<byte>());
         }
     }
 
@@ -58,13 +58,13 @@ public class Santroller : ConfigurableUsbDevice
     {
         try
         {
-            var fCpuStr = Encoding.UTF8.GetString(ReadData(0, ((byte)Commands.COMMAND_READ_F_CPU), 32)).Replace("\0", "").Replace("L", "").Trim();
+            var fCpuStr = Encoding.UTF8.GetString(ReadData(0, ((byte)Commands.CommandReadFCpu), 32)).Replace("\0", "").Replace("L", "").Trim();
             var fCpu = uint.Parse(fCpuStr);
-            var board = Encoding.UTF8.GetString(ReadData(0, ((byte)Commands.COMMAND_READ_BOARD), 32)).Replace("\0", "");
+            var board = Encoding.UTF8.GetString(ReadData(0, ((byte)Commands.CommandReadBoard), 32)).Replace("\0", "");
             Microcontroller m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
             Board = m.Board;
             model.MicroController = m;
-            var data = ReadData(0, ((byte)Commands.COMMAND_READ_CONFIG), 2048);
+            var data = ReadData(0, ((byte)Commands.CommandReadConfig), 2048);
             using (var inputStream = new MemoryStream(data))
             {
                 using (var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress))

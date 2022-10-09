@@ -28,6 +28,6 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new GHWTCombinedOutput(model, microcontroller, Pin, MapTapBarToFrets, MapTapBarToAxis);
+        return new GhwtCombinedOutput(model, microcontroller, Pin, MapTapBarToFrets, MapTapBarToAxis);
     }
 }

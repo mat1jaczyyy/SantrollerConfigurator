@@ -20,7 +20,7 @@ public class DirectInput : InputWithPin
     {
         var modes = Enum.GetValues(typeof(DevicePinMode)).Cast<DevicePinMode>()
             .Where(mode => mode is not (DevicePinMode.Output or DevicePinMode.Analog));
-        if (_microcontroller.Board.IsAVR())
+        if (_microcontroller.Board.IsAvr())
         {
             return modes.Where(mode => mode is not (DevicePinMode.BusKeep or DevicePinMode.PullDown));
         }
@@ -52,11 +52,20 @@ public class DirectInput : InputWithPin
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)
     {
-        return String.Join("\n", bindings.Select(binding => binding.Item2));
+        return String.Join(";\n", bindings.Select(binding => binding.Item2));
+    }
+
+    public override void Dispose()
+    {  
     }
 
     public override IReadOnlyList<string> RequiredDefines()
     {
         return new[] {"INPUT_DIRECT"};
     }
+    
+    public override List<DevicePin> Pins => new()
+    {
+        new (Pin, PinMode)
+    };
 }

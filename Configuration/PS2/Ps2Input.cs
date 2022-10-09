@@ -12,9 +12,8 @@ public class Ps2Input : SpiInput
     public static readonly bool Ps2SpiCpol = true;
     public static readonly bool Ps2SpiCpha = true;
     public static readonly bool Ps2SpiMsbFirst = true;
-    //TODO: Other ps2 pins such as ATT and ACK
-    public int? Ack { get; }
-    public int? Att { get; }
+    public int Ack { get; }
+    public int Att { get; }
     public Ps2InputType Input { get; }
 
     private static readonly List<Ps2InputType> Dualshock2Order = new()
@@ -58,61 +57,61 @@ public class Ps2Input : SpiInput
     };
     private static readonly Dictionary<Ps2InputType, String> Mappings = new()
     {
-        {Ps2InputType.LeftX, "(in[7] - 128) << 8"},
-        {Ps2InputType.LeftY, "-(in[8] - 127) << 8"},
-        {Ps2InputType.MouseX, "(in[5] - 128) << 8"},
-        {Ps2InputType.MouseY, "-(in[6] - 127) << 8"},
-        {Ps2InputType.RightX, "(in[5] - 128) << 8"},
-        {Ps2InputType.RightY, "-(in[6] - 127) << 8"},
-        {Ps2InputType.NegConTwist, "(in[5] - 128) << 8"},
-        {Ps2InputType.NegConI, "in[6]"},
-        {Ps2InputType.NegConIi, "in[7]"},
-        {Ps2InputType.NegConL, "in[8]"},
-        {Ps2InputType.NegConR, $"in[4] & ({1 << 3})"},
-        {Ps2InputType.NegConA, $"in[4] & ({1 << 5})"},
-        {Ps2InputType.NegConB, $"in[4] & ({1 << 4})"},
-        {Ps2InputType.GunconHSync, "(in[6] << 8) | in[5]"},
-        {Ps2InputType.GunconVSync, "(in[8] << 8) | in[7]"},
-        {Ps2InputType.JogConWheel, "(in[6] << 8) | in[5]"},
-        {Ps2InputType.GuitarWhammy, "-(in[8] - 127) << 8"},
-        {Ps2InputType.Dualshock2RightButton, "in[generated]"},
-        {Ps2InputType.Dualshock2LeftButton, "in[generated]"},
-        {Ps2InputType.Dualshock2UpButton, "in[generated]"},
-        {Ps2InputType.Dualshock2DownButton, "in[generated]"},
-        {Ps2InputType.Dualshock2Triangle, "in[generated]"},
-        {Ps2InputType.Dualshock2Circle, "in[generated]"},
-        {Ps2InputType.Dualshock2Cross, "in[generated]"},
-        {Ps2InputType.Dualshock2Square, "in[generated]"},
-        {Ps2InputType.Dualshock2L1, "in[generated]"},
-        {Ps2InputType.Dualshock2R1, "in[generated]"},
-        {Ps2InputType.Dualshock2L2, "in[generated]"},
-        {Ps2InputType.Dualshock2R2, "in[generated]"},
-        {Ps2InputType.GuitarGreen, $"in[4] & ({1 << 1})"},
-        {Ps2InputType.GuitarRed, $"in[4] & ({1 << 5})"},
-        {Ps2InputType.GuitarYellow, $"in[4] & ({1 << 4})"},
-        {Ps2InputType.GuitarBlue, $"in[4] & ({1 << 6})"},
-        {Ps2InputType.GuitarOrange, $"in[4] & ({1 << 7})"},
-        {Ps2InputType.GuitarSelect, $"in[3] & ({1 << 0})"},
-        {Ps2InputType.GuitarStart, $"in[3] & ({1 << 3})"},
-        {Ps2InputType.NegConStart, $"in[3] & ({1 << 3})"},
-        {Ps2InputType.L3, $"in[3] & ({1 << 1})"},
-        {Ps2InputType.R3, $"in[3] & ({1 << 2})"},
-        {Ps2InputType.Start, $"in[3] & ({1 << 3})"},
-        {Ps2InputType.GuitarStrumUp, $"in[3] & ({1 << 4})"},
-        {Ps2InputType.GuitarStrumDown, $"in[3] & ({1 << 6})"},
-        {Ps2InputType.Select, $"in[3] & ({1 << 0})"},
-        {Ps2InputType.Up, $"in[3] & ({1 << 4})"},
-        {Ps2InputType.Right, $"in[3] & ({1 << 5})"},
-        {Ps2InputType.Down, $"in[3] & ({1 << 6})"},
-        {Ps2InputType.Left, $"in[3] & ({1 << 7})"},
-        {Ps2InputType.L2, $"in[4] & ({1 << 0})"},
-        {Ps2InputType.R2, $"in[4] & ({1 << 1})"},
-        {Ps2InputType.L1, $"in[4] & ({1 << 2})"},
-        {Ps2InputType.R1, $"in[4] & ({1 << 3})"},
-        {Ps2InputType.Triangle, $"in[4] & ({1 << 4})"},
-        {Ps2InputType.Circle, $"in[4] & ({1 << 5})"},
-        {Ps2InputType.Cross, $"in[4] & ({1 << 6})"},
-        {Ps2InputType.Square, $"in[4] & ({1 << 7})"}
+        {Ps2InputType.LeftX, "(ps2Data[7] - 128) << 8"},
+        {Ps2InputType.LeftY, "-(ps2Data[8] - 127) << 8"},
+        {Ps2InputType.MouseX, "(ps2Data[5] - 128) << 8"},
+        {Ps2InputType.MouseY, "-(ps2Data[6] - 127) << 8"},
+        {Ps2InputType.RightX, "(ps2Data[5] - 128) << 8"},
+        {Ps2InputType.RightY, "-(ps2Data[6] - 127) << 8"},
+        {Ps2InputType.NegConTwist, "(ps2Data[5] - 128) << 8"},
+        {Ps2InputType.NegConI, "ps2Data[6]"},
+        {Ps2InputType.NegConIi, "ps2Data[7]"},
+        {Ps2InputType.NegConL, "ps2Data[8]"},
+        {Ps2InputType.NegConR, $"ps2Data[4] & ({1 << 3})"},
+        {Ps2InputType.NegConA, $"ps2Data[4] & ({1 << 5})"},
+        {Ps2InputType.NegConB, $"ps2Data[4] & ({1 << 4})"},
+        {Ps2InputType.GunconHSync, "(ps2Data[6] << 8) | ps2Data[5]"},
+        {Ps2InputType.GunconVSync, "(ps2Data[8] << 8) | ps2Data[7]"},
+        {Ps2InputType.JogConWheel, "(ps2Data[6] << 8) | ps2Data[5]"},
+        {Ps2InputType.GuitarWhammy, "-(ps2Data[8] - 127) << 8"},
+        {Ps2InputType.Dualshock2RightButton, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2LeftButton, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2UpButton, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2DownButton, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2Triangle, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2Circle, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2Cross, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2Square, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2L1, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2R1, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2L2, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2R2, "ps2Data[generated]"},
+        {Ps2InputType.GuitarGreen, $"ps2Data[4] & ({1 << 1})"},
+        {Ps2InputType.GuitarRed, $"ps2Data[4] & ({1 << 5})"},
+        {Ps2InputType.GuitarYellow, $"ps2Data[4] & ({1 << 4})"},
+        {Ps2InputType.GuitarBlue, $"ps2Data[4] & ({1 << 6})"},
+        {Ps2InputType.GuitarOrange, $"ps2Data[4] & ({1 << 7})"},
+        {Ps2InputType.GuitarSelect, $"ps2Data[3] & ({1 << 0})"},
+        {Ps2InputType.GuitarStart, $"ps2Data[3] & ({1 << 3})"},
+        {Ps2InputType.NegConStart, $"ps2Data[3] & ({1 << 3})"},
+        {Ps2InputType.L3, $"ps2Data[3] & ({1 << 1})"},
+        {Ps2InputType.R3, $"ps2Data[3] & ({1 << 2})"},
+        {Ps2InputType.Start, $"ps2Data[3] & ({1 << 3})"},
+        {Ps2InputType.GuitarStrumUp, $"ps2Data[3] & ({1 << 4})"},
+        {Ps2InputType.GuitarStrumDown, $"ps2Data[3] & ({1 << 6})"},
+        {Ps2InputType.Select, $"ps2Data[3] & ({1 << 0})"},
+        {Ps2InputType.Up, $"ps2Data[3] & ({1 << 4})"},
+        {Ps2InputType.Right, $"ps2Data[3] & ({1 << 5})"},
+        {Ps2InputType.Down, $"ps2Data[3] & ({1 << 6})"},
+        {Ps2InputType.Left, $"ps2Data[3] & ({1 << 7})"},
+        {Ps2InputType.L2, $"ps2Data[4] & ({1 << 0})"},
+        {Ps2InputType.R2, $"ps2Data[4] & ({1 << 1})"},
+        {Ps2InputType.L1, $"ps2Data[4] & ({1 << 2})"},
+        {Ps2InputType.R1, $"ps2Data[4] & ({1 << 3})"},
+        {Ps2InputType.Triangle, $"ps2Data[4] & ({1 << 4})"},
+        {Ps2InputType.Circle, $"ps2Data[4] & ({1 << 5})"},
+        {Ps2InputType.Cross, $"ps2Data[4] & ({1 << 6})"},
+        {Ps2InputType.Square, $"ps2Data[4] & ({1 << 7})"}
     };
 
     private static readonly Dictionary<Ps2InputType, Ps2ControllerType> AxisToType =
@@ -139,22 +138,22 @@ public class Ps2Input : SpiInput
     };
     
     private static readonly Dictionary<Ps2ControllerType, string> CType = new() {
-        {Ps2ControllerType.Digital, "PSPROTO_DIGITAL"},
-        {Ps2ControllerType.Dualshock, "PSPROTO_DUALSHOCK"},
-        {Ps2ControllerType.Dualshock2, "PSPROTO_DUALSHOCK2"},
-        {Ps2ControllerType.FlightStick, "PSPROTO_FLIGHTSTICK"},
-        {Ps2ControllerType.NegCon, "PSPROTO_NEGCON"},
-        {Ps2ControllerType.JogCon, "PSPROTO_JOGCON"},
-        {Ps2ControllerType.GunCon, "PSPROTO_GUNCON"},
-        {Ps2ControllerType.Guitar, "PSPROTO_GUITAR"},
-        {Ps2ControllerType.Mouse, "PSPROTO_MOUSE"},
+        {Ps2ControllerType.Digital, "PSX_DIGITAL"},
+        {Ps2ControllerType.Dualshock, "PSX_DUALSHOCK_1_CONTROLLER"},
+        {Ps2ControllerType.Dualshock2, "PSX_DUALSHOCK_2_CONTROLLER"},
+        {Ps2ControllerType.FlightStick, "PSX_FLIGHTSTICK"},
+        {Ps2ControllerType.NegCon, "PSX_NEGCON"},
+        {Ps2ControllerType.JogCon, "PSX_JOGCON"},
+        {Ps2ControllerType.GunCon, "PSX_GUNCON"},
+        {Ps2ControllerType.Guitar, "PSX_GUITAR_HERO_CONTROLLER"},
+        {Ps2ControllerType.Mouse, "PSX_MOUSE"},
     };
 
     public Ps2Input(Ps2InputType input, Microcontroller microcontroller, int? miso = null, int? mosi = null, int? sck = null, int? att = null, int? ack = null): base(microcontroller, Ps2SpiType,Ps2SpiFreq,Ps2SpiCpol,Ps2SpiCpha,Ps2SpiMsbFirst, miso, mosi, sck)
     {
         Input = input;
-        Ack = ack;
-        Att = att;
+        Ack = microcontroller.SupportedAckPins()[0];
+        Att = 0;
     }
 
     public override string Generate()
@@ -169,6 +168,33 @@ public class Ps2Input : SpiInput
 
     public override bool IsAnalog => Input <= Ps2InputType.Dualshock2R2;
 
+    public static string GeneratePs2Pressures(List<Input> bindings)
+    {
+        string retDs2 = "#define PRESSURES_DS2 0b11";
+        var ds2Axis = bindings.Where(s => s is Ps2Input).Cast<Ps2Input>().Select(s => s.Input).ToHashSet();
+        bool found = false;
+        for (var i = 0; i < Dualshock2Order.Count; i++)
+        {
+            found = true;
+            var binding = Dualshock2Order[i];
+            if (ds2Axis.Contains(binding))
+            {
+                retDs2 += "1";
+            }
+            else
+            {
+                retDs2 += "0";
+            }
+            if (((i+3) % 8) == 0 && i != Dualshock2Order.Count)
+            {
+                retDs2 += ", 0b";
+            }
+        }
+
+        if (!found) return "";
+
+        return retDs2;
+    }
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)
     {
@@ -222,8 +248,6 @@ public class Ps2Input : SpiInput
                 i++;
             }
         }
-
-        //TODO: we also need to generate the ps2 init somehow too for this, otherwise it wont work!
         
         if (!string.IsNullOrEmpty(retDs2))
         {
@@ -232,7 +256,7 @@ public class Ps2Input : SpiInput
             mappedBindings[Ps2ControllerType.Dualshock2] = mappings;
         }
 
-        var ret = "switch (ps2ControllerType) {";
+        var ret = "if (ps2Valid) { switch (ps2ControllerType) {";
         foreach (var binding in mappedBindings)
         {
             var input = binding.Key;
@@ -242,11 +266,22 @@ public class Ps2Input : SpiInput
     break;";
         }
 
-        return ret+"}"; 
+        return ret+"}}"; 
     }
+    
+    public override List<DevicePin> Pins => new()
+    {
+        new (Ack, DevicePinMode.Output),
+        new (Att, DevicePinMode.Floating),
+    };
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return base.RequiredDefines().Concat(new[] {"INPUT_PS2"}).ToList();
+        string ack = Microcontroller.GenerateAckDefines(Ack);
+        if (String.IsNullOrEmpty(ack))
+        {
+            return base.RequiredDefines().Concat(new[] {"INPUT_PS2"}).ToList();
+        }
+        return base.RequiredDefines().Concat(new[] {"INPUT_PS2", ack}).ToList();
     }
 }

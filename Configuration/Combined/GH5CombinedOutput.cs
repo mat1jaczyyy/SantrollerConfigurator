@@ -8,24 +8,24 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
-public class GH5CombinedOutput : TwiOutput
+public class Gh5CombinedOutput : TwiOutput
 {
-    private readonly List<Output> BindingsFret;
-    private readonly List<Output> BindingsTap;
-    private readonly Output BindingTapBar;
+    private readonly List<Output> _bindingsFret;
+    private readonly List<Output> _bindingsTap;
+    private readonly Output _bindingTapBar;
     public bool MapTapBarToAxis { get; set; }
     public bool MapTapBarToFrets { get; set; }
     
     public bool FretsEnabled { get; set; }
 
-    public GH5CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda=null, int? scl=null, bool fretsEnabled = false, bool mapTapBarToFrets = false, bool mapTapBarToAxis = false) : base(model,
+    public Gh5CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda=null, int? scl=null, bool fretsEnabled = true, bool mapTapBarToFrets = false, bool mapTapBarToAxis = false) : base(model,
         microcontroller,
         "gh5", 100000, "GH5", sda, scl)
     {
         FretsEnabled = fretsEnabled;
         MapTapBarToAxis = mapTapBarToAxis;
         MapTapBarToFrets = mapTapBarToFrets;
-        BindingsFret = new()
+        _bindingsFret = new()
         {
             new ControllerButton(model, new Gh5NeckInput(Gh5NeckInputType.Green, microcontroller), Colors.Green,
                 Colors.Transparent, 5,
@@ -41,10 +41,10 @@ public class GH5CombinedOutput : TwiOutput
                 StandardButtonType.X),
             new ControllerButton(model, new Gh5NeckInput(Gh5NeckInputType.Orange, microcontroller), Colors.Green,
                 Colors.Transparent, 5,
-                StandardButtonType.LB),
+                StandardButtonType.Lb),
         };
 
-        BindingsTap = new()
+        _bindingsTap = new()
         {
             new ControllerButton(model, new Gh5NeckInput(Gh5NeckInputType.TapGreen, microcontroller), Colors.Green,
                 Colors.Transparent, 5,
@@ -60,9 +60,9 @@ public class GH5CombinedOutput : TwiOutput
                 StandardButtonType.X),
             new ControllerButton(model, new Gh5NeckInput(Gh5NeckInputType.TapOrange, microcontroller), Colors.Green,
                 Colors.Transparent, 5,
-                StandardButtonType.LB),
+                StandardButtonType.Lb),
         };
-        BindingTapBar = new ControllerAxis(model, new Gh5NeckInput(Gh5NeckInputType.TapBar, microcontroller),
+        _bindingTapBar = new ControllerAxis(model, new Gh5NeckInput(Gh5NeckInputType.TapBar, microcontroller),
             Colors.Transparent,
             Colors.Transparent, 1, 0, 0, StandardAxisType.RightStickY);
     }
@@ -74,7 +74,7 @@ public class GH5CombinedOutput : TwiOutput
         return new SerializedGh5CombinedOutput(LedOn, LedOff, Sda, Scl, FretsEnabled, MapTapBarToFrets, MapTapBarToAxis);
     }
 
-    public override string Generate(bool xbox)
+    public override string Generate(bool xbox, int debounceIndex)
     {
         return "";
     }
@@ -86,17 +86,17 @@ public class GH5CombinedOutput : TwiOutput
         List<Output> outputs = new();
         if (FretsEnabled)
         {
-            outputs.AddRange(BindingsFret);
+            outputs.AddRange(_bindingsFret);
         }
 
         if (MapTapBarToAxis)
         {
-            outputs.Add(BindingTapBar);
+            outputs.Add(_bindingTapBar);
         }
 
         if (MapTapBarToFrets)
         {
-            outputs.AddRange(BindingsTap);
+            outputs.AddRange(_bindingsTap);
         }
 
         return outputs.AsReadOnly();

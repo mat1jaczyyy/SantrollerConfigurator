@@ -9,21 +9,21 @@ namespace GuitarConfiguratorSharp.NetCore;
 
 public abstract class ConfigurableUsbDevice : IConfigurableDevice
 {
-    protected readonly UsbDevice device;
-    protected readonly string product;
-    protected readonly string serial;
-    protected readonly Version version;
-    protected readonly string path;
+    protected readonly UsbDevice Device;
+    protected readonly string Product;
+    protected readonly string Serial;
+    protected readonly Version Version;
+    protected readonly string Path;
 
     public Board Board {get; protected set;}
 
     public ConfigurableUsbDevice(UsbDevice device, string path, string product, string serial, ushort version)
     {
-        this.device = device;
-        this.path = path;
-        this.product = product;
-        this.serial = serial;
-        this.version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, (version) & 0xf);
+        this.Device = device;
+        this.Path = path;
+        this.Product = product;
+        this.Serial = serial;
+        this.Version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, (version) & 0xf);
     }
 
     public abstract bool MigrationSupported { get; }
@@ -37,7 +37,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public bool IsSameDevice(string serialOrPath)
     {
-        return serial == serialOrPath || path == serialOrPath;
+        return Serial == serialOrPath || Path == serialOrPath;
     }
 
     public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
@@ -51,7 +51,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             wValue,
             2,
             buffer.Length);
-        device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
+        Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
         Array.Resize(ref buffer, length);
         return buffer;
     }
@@ -68,7 +68,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             wValue,
             2,
             buffer.Length);
-        device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
+        Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
         return (uint)length;
     }
     public IConfigurableDevice? BootloaderDevice { get; private set; }
@@ -95,7 +95,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         var other = device as ConfigurableUsbDevice;
         if (other != null)
         {
-            return other.serial == serial;
+            return other.Serial == Serial;
         }
         var arduino = device as Arduino;
         if (arduino != null)
@@ -121,8 +121,8 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         }
     }
 
-    public bool IsAVR()
+    public bool IsAvr()
     {
-        return Board.IsAVR();
+        return Board.IsAvr();
     }
 }

@@ -82,13 +82,16 @@ public class GhWtTapInput : InputWithPin
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return new[] {"INPUT_WT_NECK", $"WT_NECK_PIN {Pin}"};
+        return new[] {"INPUT_WT_NECK", $"WT_NECK_READ() {_microcontroller.GeneratePulseRead(Pin, PulseMode.LOW, 100)}"};
+    }
+    
+    public override List<DevicePin> Pins => new()
+    {
+        new (Pin, DevicePinMode.Floating),
+    };
+    
+
+    public override void Dispose()
+    {
     }
 }
-
-// Note that we would need to generate the right pulse reading command
-// long pulse = readPulse;
-// if (pulse == readPulse) {
-//     lastTapShifted = pulse << 1;
-//     lastTap = pulse;
-// }

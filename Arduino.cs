@@ -89,7 +89,7 @@ public class Arduino : IConfigurableDevice
         return Task.FromResult((string?)GetSerialPort());
     }
 
-    public bool IsAVR()
+    public bool IsAvr()
     {
         return true;
     }

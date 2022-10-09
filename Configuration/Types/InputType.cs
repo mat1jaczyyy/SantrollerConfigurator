@@ -5,8 +5,8 @@ public enum InputType
     AnalogPinInput,
     DigitalPinInput,
     WiiInput,
-    PS2Input,
+    Ps2Input,
     TurntableInput,
-    WTNeckInput,
-    GH5NeckInput
+    WtNeckInput,
+    Gh5NeckInput
 }

@@ -17,9 +17,9 @@ public abstract class AvrController : Microcontroller
 
     public enum AvrPinMode
     {
-        INPUT,
-        INPUT_PULLDOWN,
-        OUTPUT
+        Input,
+        InputPulldown,
+        Output
     }
 
     public override string GenerateDigitalRead(int pin, bool pullUp)
@@ -30,7 +30,12 @@ public abstract class AvrController : Microcontroller
             return $"(PIN{GetPort(pin)} & (1 << {GetIndex(pin)})) == 0";
         }
 
-        return $"PIN{GetPort(pin)} & (1 << {GetIndex(pin)})";
+        return $"PIN{GetPort(pin)} & ({1 << GetIndex(pin)})";
+    }
+
+    public override string GeneratePulseRead(int pin, PulseMode mode, int timeout)
+    {
+        return $"puseIn(PIN{GetPort(pin)},{1 << GetIndex(pin)},{mode},{timeout})";
     }
 
     public abstract int GetIndex(int pin);
@@ -43,6 +48,7 @@ public abstract class AvrController : Microcontroller
 
     private AvrTwiConfig? _twiConfig;
     private AvrSpiConfig? _spiConfig;
+
     public override SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
         bool msbfirst,
         int clock)
@@ -61,23 +67,17 @@ public abstract class AvrController : Microcontroller
         return _twiConfig;
     }
 
-    public override void UnAssignSPIPins(string type)
+    public override void UnAssignSpiPins(string type)
     {
         SpiConfigs.Clear();
         _spiConfig = null;
     }
 
-    public override void UnAssignTWIPins(string type)
+    public override void UnAssignTwiPins(string type)
     {
         TwiConfigs.Clear();
         _twiConfig = null;
     }
-    
-    public override bool HasConfigurableSpiPins => false;
-    public override bool HasConfigurableTwiPins => false;
-    
-    public override bool TwiPinsFree => _twiConfig == null;
-    public override bool SpiPinsFree => _spiConfig == null;
 
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
@@ -85,12 +85,13 @@ public abstract class AvrController : Microcontroller
         {
             return new();
         }
+
         return new()
         {
-            new (SpiCSn, SpiPinType.CSn),
-            new (SpiMiso, SpiPinType.MISO),
-            new (SpiMosi, SpiPinType.MOSI),
-            new (SpiSck, SpiPinType.SCK),
+            new(SpiCSn, SpiPinType.CSn),
+            new(SpiMiso, SpiPinType.Miso),
+            new(SpiMosi, SpiPinType.Mosi),
+            new(SpiSck, SpiPinType.Sck),
         };
     }
 
@@ -100,10 +101,11 @@ public abstract class AvrController : Microcontroller
         {
             return new();
         }
+
         return new()
         {
-            new (I2CScl, TwiPinType.SCL),
-            new (I2CSda, TwiPinType.SDA),
+            new(I2CScl, TwiPinType.Scl),
+            new(I2CSda, TwiPinType.Sda),
         };
     }
 
@@ -141,8 +143,8 @@ public abstract class AvrController : Microcontroller
         }
 
         var ret = "#define SKIP_MASK_AVR {" + string.Join(", ",
-                            skippedByPort.Keys.OrderBy(x => x).Select(x => skippedByPort[x].ToString())) +
-                        "}";
+                      skippedByPort.Keys.OrderBy(x => x).Select(x => skippedByPort[x].ToString())) +
+                  "}";
         if (_spiConfig != null)
         {
             ret += _spiConfig.Generate();
@@ -152,6 +154,7 @@ public abstract class AvrController : Microcontroller
         {
             ret += _twiConfig.Generate();
         }
+
         return ret;
     }
 
@@ -159,32 +162,26 @@ public abstract class AvrController : Microcontroller
     {
         // DDRx 1 = output, 0 = input
         // PORTx input 1= pullup, 0 = floating
-        // TODO: outputs (Start power led?)
         Dictionary<char, int> ddrByPort = new Dictionary<char, int>();
         Dictionary<char, int> portByPort = new Dictionary<char, int>();
-        foreach (var output in bindings)
+        var pins = bindings.SelectMany(s => s.Pins).Distinct();
+        foreach (var pin in pins)
         {
-            if (output.Input?.InnermostInput() is DirectInput direct)
+            var port = GetPort(pin.Pin);
+            var idx = GetIndex(pin.Pin);
+            var currentPort = portByPort.GetValueOrDefault(port, 0);
+            var currentDdr = ddrByPort.GetValueOrDefault(port, 0);
+            if (pin.PinMode == DevicePinMode.Output)
             {
-                if (!direct.IsAnalog)
-                {
-                    var port = GetPort(direct.Pin);
-                    var idx = GetIndex(direct.Pin);
-                    var currentPort = portByPort.GetValueOrDefault(port, 0);
-                    var currentDdr = ddrByPort.GetValueOrDefault(port, 0);
-                    if (direct.PinMode == DevicePinMode.PullUp)
-                    {
-                        currentPort += 1 << idx;
-                    }
-
-                    if (currentPort != 0)
-                    {
-                        portByPort[port] = currentPort;
-                    }
-
-                    ddrByPort[port] = currentDdr;
-                }
+                currentDdr += 1 << idx;
             }
+            else if (pin.PinMode == DevicePinMode.PullUp)
+            {
+                currentPort += 1 << idx;
+            }
+
+            portByPort[port] = currentPort;
+            ddrByPort[port] = currentDdr;
         }
 
         for (var i = 0; i < PinCount; i++)
@@ -198,10 +195,10 @@ public abstract class AvrController : Microcontroller
                 var currentDdr = ddrByPort.GetValueOrDefault(port, 0);
                 switch (force)
                 {
-                    case AvrPinMode.INPUT_PULLDOWN:
+                    case AvrPinMode.InputPulldown:
                         currentPort |= 1 << idx;
                         break;
-                    case AvrPinMode.OUTPUT:
+                    case AvrPinMode.Output:
                         currentDdr |= 1 << idx;
                         break;
                 }
@@ -266,4 +263,11 @@ public abstract class AvrController : Microcontroller
 
         return ret;
     }
+
+    public override string GenerateAckDefines(int ack)
+    {
+        return $"INTERRUPT_PS2_ACK {GetInterruptForPin(ack)}";
+    }
+
+    protected abstract string GetInterruptForPin(int ack);
 }

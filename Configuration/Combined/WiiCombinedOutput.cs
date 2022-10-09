@@ -18,10 +18,10 @@ public class WiiCombinedOutput : TwiOutput
         {WiiInputType.ClassicB, StandardButtonType.B},
         {WiiInputType.ClassicX, StandardButtonType.X},
         {WiiInputType.ClassicY, StandardButtonType.Y},
-        {WiiInputType.ClassicLt, StandardButtonType.LT},
-        {WiiInputType.ClassicRt, StandardButtonType.RT},
-        {WiiInputType.ClassicZl, StandardButtonType.LB},
-        {WiiInputType.ClassicZr, StandardButtonType.RB},
+        {WiiInputType.ClassicLt, StandardButtonType.Lt},
+        {WiiInputType.ClassicRt, StandardButtonType.Rt},
+        {WiiInputType.ClassicZl, StandardButtonType.Lb},
+        {WiiInputType.ClassicZr, StandardButtonType.Rb},
         {WiiInputType.ClassicMinus, StandardButtonType.Select},
         {WiiInputType.ClassicPlus, StandardButtonType.Start},
         {WiiInputType.ClassicDPadDown, StandardButtonType.Down},
@@ -34,8 +34,8 @@ public class WiiCombinedOutput : TwiOutput
         {WiiInputType.DjHeroRightGreen, StandardButtonType.A},
         {WiiInputType.DjHeroRightRed, StandardButtonType.B},
         {WiiInputType.DjHeroRightBlue, StandardButtonType.X},
-        {WiiInputType.DjHeroLeftAny, StandardButtonType.LB},
-        {WiiInputType.DjHeroRightAny, StandardButtonType.RB},
+        {WiiInputType.DjHeroLeftAny, StandardButtonType.Lb},
+        {WiiInputType.DjHeroRightAny, StandardButtonType.Rb},
         {WiiInputType.DjHeroEuphoria, StandardButtonType.Y},
         {WiiInputType.NunchukC, StandardButtonType.A},
         {WiiInputType.NunchukZ, StandardButtonType.B},
@@ -43,7 +43,7 @@ public class WiiCombinedOutput : TwiOutput
         {WiiInputType.GuitarRed, StandardButtonType.B},
         {WiiInputType.GuitarYellow, StandardButtonType.Y},
         {WiiInputType.GuitarBlue, StandardButtonType.X},
-        {WiiInputType.GuitarOrange, StandardButtonType.LB},
+        {WiiInputType.GuitarOrange, StandardButtonType.Lb},
         {WiiInputType.GuitarStrumDown, StandardButtonType.Down},
         {WiiInputType.GuitarStrumUp, StandardButtonType.Up},
         {WiiInputType.GuitarMinus, StandardButtonType.Select},
@@ -59,10 +59,8 @@ public class WiiCombinedOutput : TwiOutput
         {WiiInputType.DrumRed, StandardButtonType.B},
         {WiiInputType.DrumYellow, StandardButtonType.Y},
         {WiiInputType.DrumBlue, StandardButtonType.X},
-        {WiiInputType.DrumOrange, StandardButtonType.LB},
-        {WiiInputType.DrumKickPedal, StandardButtonType.RB},
-        //TODO: not really sure what to map this to yet?
-        {WiiInputType.DrumHiHatPedal, StandardButtonType.RB},
+        {WiiInputType.DrumOrange, StandardButtonType.Lb},
+        {WiiInputType.DrumKickPedal, StandardButtonType.Rb},
     };
 
     public static readonly Dictionary<WiiInputType, StandardAxisType> Axis = new()
@@ -167,7 +165,7 @@ public class WiiCombinedOutput : TwiOutput
 
     public override bool IsCombined => true;
 
-    public override string Generate(bool xbox)
+    public override string Generate(bool xbox, int debounceIndex)
     {
         return "";
     }

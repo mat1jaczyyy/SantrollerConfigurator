@@ -5,16 +5,20 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.DJ;
+
 public class DjInput : TwiInput
 {
     public static readonly string DjTwiType = "dj";
     public static readonly int DjTwiFreq = 250000;
-    public DjInput(DjInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null): base(microcontroller, DjTwiType, DjTwiFreq, sda, scl)
+
+    public DjInput(DjInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null) : base(
+        microcontroller, DjTwiType, DjTwiFreq, sda, scl)
     {
         Input = input;
     }
 
     public DjInputType Input { get; set; }
+
     public override string Generate()
     {
         switch (Input)
@@ -35,7 +39,6 @@ public class DjInput : TwiInput
             case DjInputType.RightRed:
             case DjInputType.RightBlue:
                 return $"(dj_right[0] & {1 << ((byte) Input) - ((byte) DjInputType.RightGreen)})";
-
         }
 
         throw new InvalidOperationException("Shouldn't get here!");
@@ -46,10 +49,16 @@ public class DjInput : TwiInput
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)
     {
-        Console.WriteLine("yeet");
-        Console.WriteLine(String.Join("\n", bindings.Select(binding => binding.Item2)));
-        return String.Join(";\n", bindings.Select(binding => binding.Item2));
+        string left = String.Join(";",
+            bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
+                .Select(binding => binding.Item2));
+        string right = String.Join(";",
+            bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
+                .Select(binding => binding.Item2));
+        return $"if (djLeftValid) {{{left}}} if (djRightValid) {{{right}}}";
     }
+
+    public override List<DevicePin> Pins => new();
 
     public override IReadOnlyList<string> RequiredDefines()
     {
@@ -61,13 +70,3 @@ public class DjInput : TwiInput
         return new SerializedDjInput(Sda, Scl, Input);
     }
 }
-
-/*
-#ifdef INPUT_DJ_TURNTABLE
-    uint8_t dj_left[3] = {0,0,0};
-    uint8_t dj_right[3] = {0,0,0};
-    twi_readFromPointer(DJLEFT_ADDR, DJ_BUTTONS_PTR, sizeof(dj_left), dj_left);
-    twi_readFromPointer(DJRIGHT_ADDR, DJ_BUTTONS_PTR, sizeof(dj_right), dj_right);
-#endif
-
-*/

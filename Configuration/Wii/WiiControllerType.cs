@@ -8,7 +8,7 @@ public enum WiiControllerType
     Drawsome,
     Guitar,
     Drum,
-    DJ,
+    Dj,
     Taiko,
     MotionPlus
 }

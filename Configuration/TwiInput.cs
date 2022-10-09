@@ -31,8 +31,8 @@ public abstract class TwiInput : Input
                     throw new PinUnavailableException("No I2C Pins Available!");
                 }
 
-                scl = pins.First(pair => pair.Value is TwiPinType.SCL).Key;
-                sda = pins.First(pair => pair.Value is TwiPinType.SDA).Key;
+                scl = pins.First(pair => pair.Value is TwiPinType.Scl).Key;
+                sda = pins.First(pair => pair.Value is TwiPinType.Sda).Key;
             }
 
             _twiConfig = microcontroller.AssignTwiPins(_twiType, sda.Value, scl.Value, twiFreq)!;
@@ -76,19 +76,24 @@ public abstract class TwiInput : Input
     private List<int> GetSdaPins()
     {
         return _microcontroller.TwiPins(_twiType)
-            .Where(s => s.Value is TwiPinType.SDA)
+            .Where(s => s.Value is TwiPinType.Sda)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetSclPins()
     {
         return _microcontroller.TwiPins(_twiType)
-            .Where(s => s.Value is TwiPinType.SCL)
+            .Where(s => s.Value is TwiPinType.Scl)
             .Select(s => s.Key).ToList();
     }
     
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return new[] {$"{_twiType.ToUpper()}_SPI_PORT {_twiConfig.Definition}"};
+        return new[] {$"{_twiType.ToUpper()}_TWI_PORT {_twiConfig.Definition}"};
+    }
+    
+    public override void Dispose()
+    {
+        _microcontroller.UnAssignTwiPins(_twiType);
     }
 }

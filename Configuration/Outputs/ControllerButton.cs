@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -13,10 +14,10 @@ public class ControllerButton : OutputButton
         StandardButtonType.B,
         StandardButtonType.A,
         StandardButtonType.X,
-        StandardButtonType.LB,
-        StandardButtonType.RB,
-        StandardButtonType.LT,
-        StandardButtonType.RT,
+        StandardButtonType.Lb,
+        StandardButtonType.Rb,
+        StandardButtonType.Lt,
+        StandardButtonType.Rt,
         StandardButtonType.Start,
         StandardButtonType.Select,
         StandardButtonType.LeftStick,
@@ -35,8 +36,8 @@ public class ControllerButton : OutputButton
         StandardButtonType.Select,
         StandardButtonType.LeftStick,
         StandardButtonType.RightStick,
-        StandardButtonType.LB,
-        StandardButtonType.RB,
+        StandardButtonType.Lb,
+        StandardButtonType.Rb,
         StandardButtonType.Home,
         StandardButtonType.Capture,
         StandardButtonType.A,
@@ -62,6 +63,11 @@ public class ControllerButton : OutputButton
     {
         if (xbox)
         {
+            if (!XboxOrder.Contains(Type))
+            {
+                //On the xbox, LT and RT are analog only.
+                return "";
+            }
             return XboxOrder.IndexOf(Type).ToString();
         }
 

@@ -125,7 +125,7 @@
                     </Label>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type combined:GH5CombinedOutput}">
+            <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input"></Label>
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Scl}"
@@ -136,7 +136,7 @@
                     </ComboBox>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type combined:GHWTCombinedOutput}">
+            <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GHWT TapBar Input"></Label>
                 </StackPanel>

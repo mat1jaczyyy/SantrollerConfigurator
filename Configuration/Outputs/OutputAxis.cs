@@ -25,9 +25,10 @@ public abstract class OutputAxis : Output
     public abstract string GenerateOutput(bool xbox);
     public override bool IsCombined => false;
 
-    public override string Generate(bool xbox)
+    public override string Generate(bool xbox, int debounceIndex)
     {
         if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
         return $"{GenerateOutput(xbox)} = {Input.Generate()}";
     }
+
 }

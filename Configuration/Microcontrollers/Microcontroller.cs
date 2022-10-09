@@ -18,14 +18,11 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
         public readonly AvaloniaList<SpiConfig> SpiConfigs = new();
         public readonly AvaloniaList<TwiConfig> TwiConfigs = new();
         
-        // TODO: call the below stuff in Inputs that use i2c or spi, and with APA102 stuff or RF stuff (eventually)
+        // TODO: call the below stuff for APA102 stuff or RF stuff (eventually)
         public abstract SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
             bool msbfirst,
             int clock);
         public abstract TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock);
-        
-        public abstract bool TwiPinsFree { get; }
-        public abstract bool SpiPinsFree { get; }
 
         public TwiConfig? GetTwiForType(string type)
         {
@@ -53,17 +50,21 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
             return null;
         }
 
-        public abstract bool HasConfigurableSpiPins { get; }
-        public abstract bool HasConfigurableTwiPins { get; }
+        public abstract string GenerateAckDefines(int ack);
+
+        public abstract List<int> SupportedAckPins();
+
         public abstract List<KeyValuePair<int, SpiPinType>> SpiPins(string type);
         public abstract List<KeyValuePair<int, TwiPinType>> TwiPins(string type);
-
-        public abstract void UnAssignSPIPins(string type);
-        public abstract void UnAssignTWIPins(string type);
+        
+        public abstract void UnAssignSpiPins(string type);
+        public abstract void UnAssignTwiPins(string type);
 
         public abstract Board Board {get;}
         public string GenerateAnalogRead(int pin) {
             return $"adc_raw({pin})";
         }
+
+        public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);
     }
 }

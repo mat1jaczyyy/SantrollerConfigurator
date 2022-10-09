@@ -37,8 +37,8 @@ public abstract class TwiOutput : Output
                     throw new PinUnavailableException("No I2C Pins Available!");
                 }
 
-                scl = pins.First(pair => pair.Value is TwiPinType.SCL).Key;
-                sda = pins.First(pair => pair.Value is TwiPinType.SDA).Key;
+                scl = pins.First(pair => pair.Value is TwiPinType.Scl).Key;
+                sda = pins.First(pair => pair.Value is TwiPinType.Sda).Key;
             }
 
             _twiConfig = microcontroller.AssignTwiPins(_twiType, sda.Value, scl.Value, twiFreq)!;
@@ -82,14 +82,20 @@ public abstract class TwiOutput : Output
     private List<int> GetSdaPins()
     {
         return _microcontroller.TwiPins(_twiType)
-            .Where(s => s.Value is TwiPinType.SDA)
+            .Where(s => s.Value is TwiPinType.Sda)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetSclPins()
     {
         return _microcontroller.TwiPins(_twiType)
-            .Where(s => s.Value is TwiPinType.SCL)
+            .Where(s => s.Value is TwiPinType.Scl)
             .Select(s => s.Key).ToList();
+    }
+
+    public override void Dispose()
+    {
+        _microcontroller.UnAssignTwiPins(_twiType);
+        base.Dispose();
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -20,7 +21,7 @@ using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-public abstract class Output : ReactiveObject
+public abstract class Output : ReactiveObject, IDisposable
 {
     protected readonly ConfigViewModel Model;
 
@@ -32,7 +33,6 @@ public abstract class Output : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _input, value);
     }
 
-    //TODO: probably want to load these ahead of time and cache, or atleast load them in the background
     private readonly ObservableAsPropertyHelper<Bitmap?> _image;
     public Bitmap? Image => _image.Value;
 
@@ -140,13 +140,13 @@ public abstract class Output : ReactiveObject
             .ToProperty(this, x => x.IsDj);
         _isWii = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.WiiInput)
             .ToProperty(this, x => x.IsWii);
-        _isGh5 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.GH5NeckInput)
+        _isGh5 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.Gh5NeckInput)
             .ToProperty(this, x => x.IsGh5);
-        _isPs2 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.PS2Input)
+        _isPs2 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.Ps2Input)
             .ToProperty(this,  x => x.IsPs2);
-        _isWt = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.WTNeckInput)
+        _isWt = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.WtNeckInput)
             .ToProperty(this, x => x.IsWt);
-        _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is LedType.APA102)
+        _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is LedType.Apa102)
             .ToProperty(this, x => x.AreLedsEnabled);
     }
 
@@ -170,16 +170,16 @@ public abstract class Output : ReactiveObject
             case InputType.TurntableInput:
                 input = new DjInput(_djInputType, Model.MicroController!);
                 break;
-            case InputType.GH5NeckInput:
+            case InputType.Gh5NeckInput:
                 input = new Gh5NeckInput(_gh5NeckInputType, Model.MicroController!);
                 break;
-            case InputType.WTNeckInput:
+            case InputType.WtNeckInput:
                 input = new GhWtTapInput(_ghWtInputType, Model.MicroController!);
                 break;
             case InputType.WiiInput:
                 input = new WiiInput(_wiiInputType, Model.MicroController!);
                 break;
-            case InputType.PS2Input:
+            case InputType.Ps2Input:
                 input = new Ps2Input(_ps2InputType, Model.MicroController!);
                 break;
             default:
@@ -190,13 +190,13 @@ public abstract class Output : ReactiveObject
         {
             case true when this is OutputAxis:
             case false when this is OutputButton:
-                this.Input = input;
+                Input = input;
                 break;
             case true when this is OutputButton:
-                this.Input = new AnalogToDigital(input, AnalogToDigitalType.JoyHigh, 0);
+                Input = new AnalogToDigital(input, AnalogToDigitalType.JoyHigh, 0);
                 break;
             case false when this is OutputAxis:
-                this.Input = new DigitalToAnalog(input, 0);
+                Input = new DigitalToAnalog(input, 0);
                 break;
         }
     }
@@ -238,7 +238,15 @@ public abstract class Output : ReactiveObject
 
     }
 
-    public abstract string Generate(bool xbox);
+    public abstract string Generate(bool xbox, int debounceIndex);
     [JsonIgnore]
     public virtual IReadOnlyList<Output> Outputs => new []{this};
+
+    public virtual void Dispose()
+    {
+        Input?.Dispose();
+    }
+
+    public List<DevicePin> Pins =>
+        Outputs.SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.Pins ?? new())).Distinct().ToList();
 }

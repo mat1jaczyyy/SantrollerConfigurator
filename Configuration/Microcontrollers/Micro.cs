@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class Micro : AvrController
@@ -106,6 +109,24 @@ public class Micro : AvrController
         9	// A11		D12		PD6					ADC9
     };
 
+    public static readonly Dictionary<int, string> Interrupts = new ()
+    {
+        {0, "INT2"},
+        {1, "INT3"},
+        {2, "INT1"},
+        {3, "INT0"},
+        {7, "INT4"},
+    };
+    
+    protected override string GetInterruptForPin(int ack)
+    {
+        return Interrupts[ack];
+    }
+
+    public override List<int> SupportedAckPins()
+    {
+        return Interrupts.Keys.ToList();
+    }
     protected override int PinA0 => 18;
 
     public override Board Board {get;}

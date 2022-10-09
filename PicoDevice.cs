@@ -59,7 +59,7 @@ public class PicoDevice : IConfigurableDevice
         return Task.FromResult((string?)_path);
     }
 
-    public bool IsAVR()
+    public bool IsAvr()
     {
         return false;
     }

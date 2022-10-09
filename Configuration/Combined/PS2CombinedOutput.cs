@@ -17,10 +17,8 @@ public class Ps2CombinedOutput : SpiOutput
         {Ps2InputType.Circle, StandardButtonType.B},
         {Ps2InputType.Square, StandardButtonType.X},
         {Ps2InputType.Triangle, StandardButtonType.Y},
-        {Ps2InputType.L1, StandardButtonType.LT},
-        {Ps2InputType.R1, StandardButtonType.RT},
-        {Ps2InputType.L2, StandardButtonType.LB},
-        {Ps2InputType.R2, StandardButtonType.RB},
+        {Ps2InputType.L2, StandardButtonType.Lb},
+        {Ps2InputType.R2, StandardButtonType.Rb},
         {Ps2InputType.L3, StandardButtonType.LeftStick},
         {Ps2InputType.R3, StandardButtonType.RightStick},
         {Ps2InputType.Select, StandardButtonType.Select},
@@ -33,12 +31,12 @@ public class Ps2CombinedOutput : SpiOutput
         {Ps2InputType.GuitarRed, StandardButtonType.B},
         {Ps2InputType.GuitarYellow, StandardButtonType.Y},
         {Ps2InputType.GuitarBlue, StandardButtonType.X},
-        {Ps2InputType.GuitarOrange, StandardButtonType.LB},
+        {Ps2InputType.GuitarOrange, StandardButtonType.Lb},
         {Ps2InputType.GuitarStrumDown, StandardButtonType.Down},
         {Ps2InputType.GuitarStrumUp, StandardButtonType.Up},
         {Ps2InputType.GuitarSelect, StandardButtonType.Select},
         {Ps2InputType.GuitarStart, StandardButtonType.Start},
-        {Ps2InputType.NegConR, StandardButtonType.RB},
+        {Ps2InputType.NegConR, StandardButtonType.Rb},
         {Ps2InputType.NegConA, StandardButtonType.B},
         {Ps2InputType.NegConB, StandardButtonType.Y},
     };
@@ -96,7 +94,7 @@ public class Ps2CombinedOutput : SpiOutput
         return new SerializedPs2CombinedOutput(LedOn, LedOff, Miso, Mosi, Sck);
     }
 
-    public override string Generate(bool xbox)
+    public override string Generate(bool xbox, int debounceIndex)
     {
         return "";
     }
