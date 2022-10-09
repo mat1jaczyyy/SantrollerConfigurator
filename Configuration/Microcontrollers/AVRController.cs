@@ -32,10 +32,19 @@ public abstract class AvrController : Microcontroller
 
         return $"PIN{GetPort(pin)} & ({1 << GetIndex(pin)})";
     }
+    public override string GenerateDigitalWrite(int pin, bool val)
+    {
+        if (val)
+        {
+            return $"PORT{GetPort(pin)} |= {1 <<GetIndex(pin)}";
+        }
+
+        return $"PORT{GetPort(pin)} &= {~(1 << GetIndex(pin))}";
+    }
 
     public override string GeneratePulseRead(int pin, PulseMode mode, int timeout)
     {
-        return $"puseIn(PIN{GetPort(pin)},{1 << GetIndex(pin)},{mode},{timeout})";
+        return $"pulseIn(PIN{GetPort(pin)},{1 << GetIndex(pin)},{mode},{timeout})";
     }
 
     public abstract int GetIndex(int pin);

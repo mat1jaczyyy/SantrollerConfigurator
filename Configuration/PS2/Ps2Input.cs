@@ -277,11 +277,16 @@ public class Ps2Input : SpiInput
 
     public override IReadOnlyList<string> RequiredDefines()
     {
+        var defines = base.RequiredDefines().ToList();
+        defines.Add("INPUT_PS2");
+        defines.Add($"INPUT_PS2_ATT_SET() {Microcontroller.GenerateDigitalWrite(Att, true)}");
+        defines.Add($"INPUT_PS2_ATT_CLEAR() {Microcontroller.GenerateDigitalWrite(Att, true)}");
         string ack = Microcontroller.GenerateAckDefines(Ack);
-        if (String.IsNullOrEmpty(ack))
+        if (!String.IsNullOrEmpty(ack))
         {
-            return base.RequiredDefines().Concat(new[] {"INPUT_PS2"}).ToList();
+            defines.Add(ack);
         }
-        return base.RequiredDefines().Concat(new[] {"INPUT_PS2", ack}).ToList();
+
+        return defines;
     }
 }

@@ -7,6 +7,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
     public abstract class Microcontroller
     {
         public abstract string GenerateDigitalRead(int pin, bool pullUp);
+        public abstract string GenerateDigitalWrite(int pin, bool val);
         public abstract string GenerateDefinitions();
 
         public abstract int GetChannel(int pin);

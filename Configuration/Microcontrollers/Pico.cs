@@ -33,6 +33,16 @@ public class Pico : Microcontroller
         return $"sio_hw->gpio_in & (1 << {pin})";
     }
 
+    public override string GenerateDigitalWrite(int pin, bool val)
+    {
+        if (val)
+        {
+            return $"sio_hw->gpio_out = {1 << pin}";
+        }
+
+        return $"sio_hw->gpio_clr = {1 << pin}";
+    }
+
     public static readonly Dictionary<int, SpiPinType> SpiTypesByPin = new()
     {
         {0, SpiPinType.Miso},
