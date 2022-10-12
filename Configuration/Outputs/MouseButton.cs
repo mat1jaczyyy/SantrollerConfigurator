@@ -7,7 +7,6 @@ using GuitarConfiguratorSharp.NetCore.ViewModels;
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 public class MouseButton : OutputButton
 {
-    // TODO need to have this all in the right order
     private static List<MouseButtonType> _order = new()
     {
         MouseButtonType.Left,

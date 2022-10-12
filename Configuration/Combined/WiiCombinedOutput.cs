@@ -63,6 +63,15 @@ public class WiiCombinedOutput : TwiOutput
         {WiiInputType.DrumKickPedal, StandardButtonType.Rb},
     };
 
+    public static readonly Dictionary<WiiInputType, StandardButtonType> Tap = new()
+    {
+        {WiiInputType.GuitarTapGreen, StandardButtonType.A},
+        {WiiInputType.GuitarTapRed, StandardButtonType.B},
+        {WiiInputType.GuitarTapYellow, StandardButtonType.Y},
+        {WiiInputType.GuitarTapBlue, StandardButtonType.X},
+        {WiiInputType.GuitarTapOrange, StandardButtonType.Lb},
+    };
+
     public static readonly Dictionary<WiiInputType, StandardAxisType> Axis = new()
     {
         {WiiInputType.ClassicLeftStickX, StandardAxisType.LeftStickX},
@@ -94,73 +103,23 @@ public class WiiCombinedOutput : TwiOutput
         {WiiInputType.NunchukRotationPitch, StandardAxisType.RightStickY},
     };
 
-    private readonly List<Output> _bindings = new();
-    private readonly List<Output> _bindingsAcceleration = new();
-    private readonly List<Output> _bindingsDPad = new();
-    //TODO: use the tap bar implementation we have in ardwiino, gh5 tap bar works the same way.
-    private readonly List<Output> _bindingsFrets = new();
-
-    private readonly Output _bindingTap;
-
     public bool MapTapBarToFrets { get; set; }
     public bool MapTapBarToAxis { get; set; }
     public bool MapGuitarJoystickToDPad { get; set; }
     public bool MapNunchukAccelerationToRightJoy { get; set; }
 
-    public WiiCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda=null, int? scl=null, bool mapTapBarToFrets = false, bool mapTapBarToAxis = false, bool mapGuitarJoystickToDPad = false, bool mapNunchukAccelerationToRightJoy = false): base(model, microcontroller, WiiInput.WiiTwiType, WiiInput.WiiTwiFreq, "Wii", sda, scl)
+    private readonly Microcontroller _microcontroller;
+
+    public WiiCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
+        bool mapTapBarToFrets = false, bool mapTapBarToAxis = false, bool mapGuitarJoystickToDPad = false,
+        bool mapNunchukAccelerationToRightJoy = false) : base(model, microcontroller, WiiInput.WiiTwiType,
+        WiiInput.WiiTwiFreq, "Wii", sda, scl)
     {
+        _microcontroller = microcontroller;
         MapTapBarToFrets = mapTapBarToFrets;
         MapTapBarToAxis = mapTapBarToAxis;
         MapGuitarJoystickToDPad = mapGuitarJoystickToDPad;
         MapNunchukAccelerationToRightJoy = mapNunchukAccelerationToRightJoy;
-        foreach (var pair in Buttons)
-        {
-            _bindings.Add(new ControllerButton(model, new WiiInput(pair.Key, microcontroller), Colors.Transparent, Colors.Transparent, 10,
-                pair.Value));
-        }
-        foreach (var pair in Axis)
-        {
-            _bindings.Add(new ControllerAxis(model, new WiiInput(pair.Key, microcontroller), Colors.Transparent,
-                Colors.Transparent, 1, 0, 0, pair.Value));
-        }
-
-        foreach (var pair in AxisAcceleration)
-        {
-            _bindingsAcceleration.Add(new ControllerAxis(model, new WiiInput(pair.Key, microcontroller), Colors.Transparent,
-                Colors.Transparent, 1, 0, 0, pair.Value));
-        }
-        _bindings.Add(new ControllerButton(model,
-            new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, microcontroller), AnalogToDigitalType.JoyLow, 32),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
-
-        _bindings.Add(new ControllerButton(model,
-            new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, microcontroller), AnalogToDigitalType.JoyHigh, 32),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Right));
-
-        _bindings.Add(new ControllerButton(model,
-            new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, microcontroller), AnalogToDigitalType.JoyLow, 32),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Up));
-
-        _bindings.Add(new ControllerButton(model,
-            new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, microcontroller), AnalogToDigitalType.JoyLow, 32),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Down));
-        _bindingsDPad.Add(new ControllerButton(model,
-            new AnalogToDigital(new WiiInput(WiiInputType.GuitarJoystickX, microcontroller), AnalogToDigitalType.JoyLow, 32),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
-
-        _bindingsDPad.Add(new ControllerButton(model,
-            new AnalogToDigital(new WiiInput(WiiInputType.GuitarJoystickX, microcontroller), AnalogToDigitalType.JoyHigh, 32),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Right));
-
-        _bindingsDPad.Add(new ControllerButton(model,
-            new AnalogToDigital(new WiiInput(WiiInputType.GuitarJoystickY, microcontroller), AnalogToDigitalType.JoyLow, 32),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Up));
-
-        _bindingsDPad.Add(new ControllerButton(model,
-            new AnalogToDigital(new WiiInput(WiiInputType.GuitarJoystickY, microcontroller), AnalogToDigitalType.JoyLow, 32),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Down));
-        _bindingTap = new ControllerAxis(model, new WiiInput(WiiInputType.GuitarTapBar, microcontroller), Colors.Transparent,
-            Colors.Transparent, 1, 0, 0, StandardAxisType.RightStickY);
     }
 
     public override bool IsCombined => true;
@@ -172,33 +131,109 @@ public class WiiCombinedOutput : TwiOutput
 
     public override SerializedOutput GetJson()
     {
-        return new SerializedWiiCombinedOutput(LedOn, LedOff, Sda, Scl, MapTapBarToFrets, MapTapBarToAxis, MapGuitarJoystickToDPad, MapNunchukAccelerationToRightJoy);
+        return new SerializedWiiCombinedOutput(LedOn, LedOff, Sda, Scl, MapTapBarToFrets, MapTapBarToAxis,
+            MapGuitarJoystickToDPad, MapNunchukAccelerationToRightJoy);
     }
 
     public override IReadOnlyList<Output> Outputs => GetBindings();
-    
+
     private IReadOnlyList<Output> GetBindings()
     {
-        List<Output> outputs = new(_bindings);
+        List<Output> outputs = new();
+        foreach (var pair in Buttons)
+        {
+            outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl),
+                Colors.Transparent,
+                Colors.Transparent, 10,
+                pair.Value));
+        }
 
+        foreach (var pair in Axis)
+        {
+            outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl),
+                Colors.Transparent,
+                Colors.Transparent, 1, 0, 0, pair.Value));
+        }
+
+        foreach (var pair in Buttons)
+        {
+            outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl),
+                Colors.Transparent,
+                Colors.Transparent, 10,
+                pair.Value));
+        }
+
+        outputs.Add(new ControllerButton(Model,
+            new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, _microcontroller, Sda, Scl),
+                AnalogToDigitalType.JoyLow, 32),
+            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
+
+        outputs.Add(new ControllerButton(Model,
+            new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, _microcontroller, Sda, Scl),
+                AnalogToDigitalType.JoyHigh, 32),
+            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Right));
+
+        outputs.Add(new ControllerButton(Model,
+            new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, _microcontroller, Sda, Scl),
+                AnalogToDigitalType.JoyLow, 32),
+            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Up));
+
+        outputs.Add(new ControllerButton(Model,
+            new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, _microcontroller, Sda, Scl),
+                AnalogToDigitalType.JoyLow, 32),
+            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Down));
         if (MapTapBarToAxis)
         {
-            outputs.Add(_bindingTap);
+            outputs.Add(new ControllerAxis(Model, new WiiInput(WiiInputType.GuitarTapBar, _microcontroller, Sda, Scl),
+                Colors.Transparent,
+                Colors.Transparent, 1, 0, 0, StandardAxisType.RightStickY));
         }
 
         if (MapGuitarJoystickToDPad)
         {
-            outputs.AddRange(_bindingsDPad);
+            outputs.Add(new ControllerButton(Model,
+                new AnalogToDigital(new WiiInput(WiiInputType.GuitarJoystickX, _microcontroller, Sda, Scl),
+                    AnalogToDigitalType.JoyLow,
+                    32),
+                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
+
+            outputs.Add(new ControllerButton(Model,
+                new AnalogToDigital(new WiiInput(WiiInputType.GuitarJoystickX, _microcontroller, Sda, Scl),
+                    AnalogToDigitalType.JoyHigh, 32),
+                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Right));
+
+            outputs.Add(new ControllerButton(Model,
+                new AnalogToDigital(new WiiInput(WiiInputType.GuitarJoystickY, _microcontroller, Sda, Scl),
+                    AnalogToDigitalType.JoyLow,
+                    32),
+                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Up));
+
+            outputs.Add(new ControllerButton(Model,
+                new AnalogToDigital(new WiiInput(WiiInputType.GuitarJoystickY, _microcontroller, Sda, Scl),
+                    AnalogToDigitalType.JoyLow,
+                    32),
+                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Down));
         }
 
         if (MapNunchukAccelerationToRightJoy)
         {
-            outputs.AddRange(_bindingsAcceleration);
+            foreach (var pair in AxisAcceleration)
+            {
+                outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl),
+                    Colors.Transparent,
+                    Colors.Transparent, 1, 0, 0, pair.Value));
+            }
         }
 
         if (MapTapBarToFrets)
         {
-            outputs.AddRange(_bindingsFrets);
+            foreach (var pair in Tap)
+            {
+                outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl),
+                    Colors.Transparent,
+                    Colors.Transparent, 10,
+                    pair.Value));
+            }
         }
 
         return outputs.AsReadOnly();

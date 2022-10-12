@@ -64,7 +64,7 @@ public class GhWtTapInput : InputWithPin
         }
 
         var mappings = MappingByInput[Input];
-        return String.Join(" || ", mappings.Select(mapping => $"(lastTap == {mapping})"));
+        return String.Join(" || ", mappings.Select(mapping => $"(lastTapShift == {mapping})"));
     }
 
     public override SerializedInput GetJson()

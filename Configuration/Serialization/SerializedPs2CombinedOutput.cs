@@ -16,18 +16,22 @@ public class SerializedPs2CombinedOutput : SerializedOutput
     [ProtoMember(4)] public int Miso { get; }
     [ProtoMember(5)] public int Mosi { get; }
     [ProtoMember(6)] public int Sck { get; }
+    [ProtoMember(7)] public int Att { get; }
+    [ProtoMember(8)] public int Ack { get; }
 
-    public SerializedPs2CombinedOutput(Color ledOn, Color ledOff, int miso, int mosi, int sck)
+    public SerializedPs2CombinedOutput(Color ledOn, Color ledOff, int miso, int mosi, int sck, int att, int ack)
     {
         LedOn = ledOn;
         LedOff = ledOff;
         Miso = miso;
         Mosi = mosi;
         Sck = sck;
+        Att = att;
+        Ack = ack;
     }
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new Ps2CombinedOutput(model, microcontroller, Miso, Mosi, Sck);
+        return new Ps2CombinedOutput(model, microcontroller, Miso, Mosi, Sck, Att, Ack);
     }
 }

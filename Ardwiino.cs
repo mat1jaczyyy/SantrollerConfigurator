@@ -383,21 +383,33 @@ public class Ardwiino : ConfigurableUsbDevice
             int mosi = 3;
             int miso = 4;
             int sck = 6;
+            int att = 0;
+            int ack = 0;
+            switch (controller)
+            {   
+                case Micro:
+                case Pico:
+                    att = 10;
+                    ack = 7;
+                    break;
+                case Uno:
+                case Mega:
+                    att = 10;
+                    ack = 2;
+                    break;
+            }
 
             if (config.all.main.inputType == (int) InputControllerType.Direct)
             {
                 if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
                 {
-                    var output = new Gh5CombinedOutput(model, controller);
-                    output.MapTapBarToFrets = config.neck.gh5NeckBar != 0;
-                    output.Sda = sda;
-                    output.Scl = scl;
+                    var output = new Gh5CombinedOutput(model, controller, sda, scl, config.neck.gh5Neck != 0);
                     bindings.Add(output);
                 }
 
                 if (config.neck.wtNeck != 0)
                 {
-                    bindings.Add(new GhwtCombinedOutput(model, controller));
+                    bindings.Add(new GhwtCombinedOutput(model, controller, 9));
                 }
 
                 foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
@@ -425,7 +437,8 @@ public class Ardwiino : ConfigurableUsbDevice
                         isTrigger = true;
                     }
 
-                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt && config.all.main.tiltType == 2)
+                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt &&
+                        config.all.main.tiltType == 2)
                     {
                         bindings.Add(new ControllerAxis(model,
                             new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, controller), 32767), on,
@@ -442,7 +455,7 @@ public class Ardwiino : ConfigurableUsbDevice
                             new DirectInput(pin.pin, DevicePinMode.Analog, controller), on, off,
                             axisMultiplier, axisOffset, axisDeadzone, genAxis));
                     }
-                } 
+                }
 
                 foreach (int button in Enum.GetValues(typeof(ControllerButtons)))
                 {
@@ -477,7 +490,8 @@ public class Ardwiino : ConfigurableUsbDevice
                     bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, controller), on, off,
                         debounce, genButton));
                 }
-            } else if (config.all.main.tiltType == 2)
+            }
+            else if (config.all.main.tiltType == 2)
             {
                 if (deviceType == DeviceControllerType.Guitar)
                 {
@@ -485,9 +499,9 @@ public class Ardwiino : ConfigurableUsbDevice
                     if (pin.pin != NotUsed)
                     {
                         Color on = Color.FromRgb(0, 0, 0);
-                        if (colors.ContainsKey((int)(XboxTilt + XboxBtnCount)))
+                        if (colors.ContainsKey((int) (XboxTilt + XboxBtnCount)))
                         {
-                            on = colors[(int)(XboxTilt + XboxBtnCount)];
+                            on = colors[(int) (XboxTilt + XboxBtnCount)];
                         }
 
                         Color off = Color.FromRgb(0, 0, 0);
@@ -496,27 +510,19 @@ public class Ardwiino : ConfigurableUsbDevice
                             off, 1, 0,
                             0, StandardAxisType.RightStickY));
                     }
-
-                    
                 }
+
                 if (config.all.main.inputType == (int) InputControllerType.Wii)
                 {
-                    var output = new WiiCombinedOutput(model, controller);
-                    output.Scl = scl;
-                    output.Sda = sda;
-                    output.MapNunchukAccelerationToRightJoy = config.all.main.mapNunchukAccelToRightJoy != 0;
-                    bindings.Add(output);
+                    bindings.Add(new WiiCombinedOutput(model, controller, sda, scl,
+                        mapNunchukAccelerationToRightJoy: config.all.main.mapNunchukAccelToRightJoy != 0));
                 }
                 else if (config.all.main.inputType == (int) InputControllerType.Ps2)
                 {
-                    var output = new Ps2CombinedOutput(model, controller);
-                    output.Mosi = mosi;
-                    output.Miso = miso;
-                    output.Sck = sck;
-                    bindings.Add(output);
+                    bindings.Add(new Ps2CombinedOutput(model, controller, miso, mosi, sck, att, ack));
                 }
             }
-           
+
             // Keyboard / Mouse does not have a joystick
             if (config.all.main.mapLeftJoystickToDPad > 0)
             {

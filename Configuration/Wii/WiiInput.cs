@@ -5,6 +5,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
+
 public class WiiInput : TwiInput
 {
     public static readonly string WiiTwiType = "wii";
@@ -199,7 +200,12 @@ public class WiiInput : TwiInput
         {WiiInputType.TaTaConLeftDrumCenter, "((~wiiData[0]) & (1 << 6))"},
         {WiiInputType.UDrawPenButton1, "((~wiiData[5]) & (1 << 0))"},
         {WiiInputType.UDrawPenButton2, "((~wiiData[5]) & (1 << 1))"},
-        {WiiInputType.UDrawPenClick, "(( wiiData[5]) & (1 << 2))"}
+        {WiiInputType.UDrawPenClick, "(( wiiData[5]) & (1 << 2))"}, 
+        {WiiInputType.GuitarTapGreen, GetMappingForTapBar(0x04, 0x07)},
+        {WiiInputType.GuitarTapRed, GetMappingForTapBar(0x07, 0x0A, 0x0c, 0x0d)},
+        {WiiInputType.GuitarTapYellow, GetMappingForTapBar(0x0c, 0x0d, 0x12, 0x13, 0x14, 0x15)},
+        {WiiInputType.GuitarTapBlue, GetMappingForTapBar(0x14, 0x15, 0x17, 0x18, 0x1A)},
+        {WiiInputType.GuitarTapOrange, GetMappingForTapBar(0x1A, 0x1F)},
     };
 
     private static readonly List<string> HiResMapOrder = new()
@@ -239,7 +245,8 @@ public class WiiInput : TwiInput
         {WiiControllerType.MotionPlus, "WII_MOTION_PLUS"}
     };
 
-    public WiiInput(WiiInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null) : base(microcontroller,
+    public WiiInput(WiiInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null) : base(
+        microcontroller,
         WiiTwiType, WiiTwiFreq, sda, scl)
     {
         Input = input;
@@ -259,10 +266,16 @@ public class WiiInput : TwiInput
 
     public override List<DevicePin> Pins => new();
 
+    private static string GetMappingForTapBar(params int[] mappings)
+    {
+        return string.Join(" || ", mappings.Select(s2 => $"(lastTapWii == {s2})"));
+    }
+
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)
     {
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
+        bool hasTapBar = false;
         foreach (var binding in bindings)
         {
             if (binding.Item1 is WiiInput input)
@@ -272,11 +285,22 @@ public class WiiInput : TwiInput
                     mappedBindings.Add(input.WiiControllerType, new List<string>());
                 }
 
+                if (input.Input.ToString().StartsWith("GuitarTap"))
+                {
+                    hasTapBar = true;
+                }
+
                 mappedBindings[input.WiiControllerType].Add(binding.Item2);
             }
         }
 
-        var ret = "if (wiiValid) { switch(wiiControllerType) {";
+        var ret = "if (wiiValid) {";
+        if (hasTapBar)
+        {
+            ret += "uint8_t lastTapWii = (wiiData[2] & 0x1f) << 11;";
+        }
+
+        ret += " switch(wiiControllerType) {";
         if (mappedBindings.ContainsKey(WiiControllerType.ClassicController))
         {
             var mappings = mappedBindings[WiiControllerType.ClassicController];
@@ -314,9 +338,9 @@ break;
     break;";
         }
 
-        return ret+"}}";
+        return ret + "}}";
     }
-    //TODO: change INPUT_x to something else
+
     public override IReadOnlyList<string> RequiredDefines()
     {
         if (WiiControllerType == WiiControllerType.Drum)

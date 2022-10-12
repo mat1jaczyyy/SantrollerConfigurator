@@ -11,7 +11,7 @@ public class Ps2Input : SpiInput
     public static readonly int Ps2SpiFreq = 500000;
     public static readonly bool Ps2SpiCpol = true;
     public static readonly bool Ps2SpiCpha = true;
-    public static readonly bool Ps2SpiMsbFirst = true;
+    public static readonly bool Ps2SpiMsbFirst = false;
     public int Ack { get; }
     public int Att { get; }
     public Ps2InputType Input { get; }
@@ -152,8 +152,8 @@ public class Ps2Input : SpiInput
     public Ps2Input(Ps2InputType input, Microcontroller microcontroller, int? miso = null, int? mosi = null, int? sck = null, int? att = null, int? ack = null): base(microcontroller, Ps2SpiType,Ps2SpiFreq,Ps2SpiCpol,Ps2SpiCpha,Ps2SpiMsbFirst, miso, mosi, sck)
     {
         Input = input;
-        Ack = microcontroller.SupportedAckPins()[0];
-        Att = 0;
+        Ack = ack ?? microcontroller.SupportedAckPins()[0];
+        Att = att ?? 0;
     }
 
     public override string Generate()
@@ -279,8 +279,9 @@ public class Ps2Input : SpiInput
     {
         var defines = base.RequiredDefines().ToList();
         defines.Add("INPUT_PS2");
+        defines.Add($"PS2_ACK {Ack}");
         defines.Add($"INPUT_PS2_ATT_SET() {Microcontroller.GenerateDigitalWrite(Att, true)}");
-        defines.Add($"INPUT_PS2_ATT_CLEAR() {Microcontroller.GenerateDigitalWrite(Att, true)}");
+        defines.Add($"INPUT_PS2_ATT_CLEAR() {Microcontroller.GenerateDigitalWrite(Att, false)}");
         string ack = Microcontroller.GenerateAckDefines(Ack);
         if (!String.IsNullOrEmpty(ack))
         {

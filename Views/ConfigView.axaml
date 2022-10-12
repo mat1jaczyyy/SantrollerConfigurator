@@ -59,6 +59,17 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="PS2 Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
+                              Items="{Binding AvailableMosiPins}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Miso}"
+                              Items="{Binding AvailableMisoPins}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sck}"
+                              Items="{Binding AvailableSckPins}">
+                    </ComboBox>
+                    <NumericUpDown Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type wii:WiiInput}">
@@ -93,6 +104,7 @@
             <DataTemplate DataType="{x:Type output:OutputAxis}">
                 <StackPanel Orientation="Horizontal">
                     <!-- TODO: this would all just be replaced with a "Calibrate" dialog, and possibly some gauges showing the current values -->
+                    <!-- If we can it would be cool to do something like CH does, where you show the offset/multiplier/deadzone all overlaid on top of the gauge showing the raw / converted value -->
                     <NumericUpDown Value="{Binding Multiplier}" VerticalAlignment="Center"></NumericUpDown>
                     <NumericUpDown Value="{Binding Offset}" VerticalAlignment="Center"></NumericUpDown>
                     <NumericUpDown Value="{Binding Deadzone}" VerticalAlignment="Center"></NumericUpDown>
@@ -144,6 +156,17 @@
             <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="PS2 Controller Input"></Label>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
+                              Items="{Binding AvailableMosiPins}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Miso}"
+                              Items="{Binding AvailableMisoPins}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sck}"
+                              Items="{Binding AvailableSckPins}">
+                    </ComboBox>
+                    <NumericUpDown Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">

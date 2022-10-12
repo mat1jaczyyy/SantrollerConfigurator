@@ -27,14 +27,14 @@ public abstract class SpiOutput : Output
         }
         else
         {
-            var pins = microcontroller.SpiPins(SpiType);
-            if (!pins.Any())
-            {
-                throw new PinUnavailableException("No SPI Pins Available!");
-            }
 
             if (miso == null || mosi == null || sck == null)
             {
+                var pins = microcontroller.SpiPins(SpiType);
+                if (!pins.Any())
+                {
+                    throw new PinUnavailableException("No SPI Pins Available!");
+                }
                 miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;

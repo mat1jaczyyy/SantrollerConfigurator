@@ -24,6 +24,7 @@ public class Pico : Microcontroller
 
     public override string GenerateDigitalRead(int pin, bool pullUp)
     {
+        Console.WriteLine(pin);
         // Invert on pullup
         if (pullUp)
         {

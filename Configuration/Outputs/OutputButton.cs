@@ -26,6 +26,7 @@ public abstract class OutputButton : Output
         if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
         var outputVar = GenerateOutput(xbox);
         var outputBit = GenerateIndex(xbox);
+        if (String.IsNullOrEmpty(outputBit)) return "";
         return $"if (debounce[{debounceIndex}]) {{ debounce[{debounceIndex}]--; {outputVar} |= (1 << {outputBit});}}";
     } 
     public override string Generate(bool xbox, int debounceIndex)

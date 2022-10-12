@@ -467,15 +467,13 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             if (CheckDependancies()) return;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // Use pnputil to install the drivers, utlising runas to run with admin
-                //TODO: Test using SpecialFolder.System instead of windows
-                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86 );
                 string appdataFolder = AssetUtils.GetAppDataFolder();
                 string driverZip = Path.Combine(appdataFolder, "drivers.zip");
                 string driverFolder = Path.Combine(appdataFolder, "drivers");
                 await AssetUtils.ExtractZip("dfu.zip", driverZip, driverFolder);
 
-                var info = new ProcessStartInfo(Path.Combine(windowsDir, "sysnative", "pnputil.exe"));
+                var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.AddRange(new string[] { "-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf") });
                 info.UseShellExecute = true;
                 info.Verb = "runas";

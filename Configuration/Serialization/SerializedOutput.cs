@@ -9,14 +9,16 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 [ProtoInclude(100, typeof(SerializedKeyboardButton))]
 [ProtoInclude(101, typeof(SerializedMouseAxis))]
 [ProtoInclude(102, typeof(SerializedMouseButton))]
-[ProtoInclude(103, typeof(SerializedDjCombinedOutput))]
-[ProtoInclude(104, typeof(SerializedGh5CombinedOutput))]
-[ProtoInclude(105, typeof(SerializedGhwtCombinedOutput))]
-[ProtoInclude(106, typeof(SerializedPs2CombinedOutput))]
-[ProtoInclude(107, typeof(SerializedWiiCombinedOutput))]
-[ProtoInclude(108, typeof(SerializedControllerAxis))]
-[ProtoInclude(109, typeof(SerializedControllerButton))]
-[ProtoContract(SkipConstructor = true)]
+[ProtoInclude(103, typeof(SerializedControllerAxis))]
+[ProtoInclude(104, typeof(SerializedControllerButton))]
+
+[ProtoInclude(105, typeof(SerializedDjCombinedOutput))]
+[ProtoInclude(106, typeof(SerializedGh5CombinedOutput))]
+[ProtoInclude(107, typeof(SerializedGhwtCombinedOutput))]
+[ProtoInclude(108, typeof(SerializedPs2CombinedOutput))]
+[ProtoInclude(109, typeof(SerializedWiiCombinedOutput))]
+
+[ProtoContract]
 public abstract class SerializedOutput
 {
     public abstract SerializedInput? Input { get; }
