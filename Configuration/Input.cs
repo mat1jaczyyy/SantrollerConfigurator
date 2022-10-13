@@ -14,6 +14,7 @@ public abstract class Input: ReactiveObject, IDisposable
     public abstract SerializedInput GetJson();
 
     public abstract bool IsAnalog { get; }
+    public abstract bool IsUint { get; }
 
     public virtual Input InnermostInput()
     {

@@ -32,6 +32,7 @@ public class DigitalToAnalog : Input
     public override List<DevicePin> Pins => Child.Pins;
 
     public override bool IsAnalog => Child.IsAnalog;
+    public override bool IsUint => Child.IsUint;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)

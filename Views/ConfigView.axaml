@@ -107,7 +107,7 @@
                     <!-- If we can it would be cool to do something like CH does, where you show the offset/multiplier/deadzone all overlaid on top of the gauge showing the raw / converted value -->
                     <NumericUpDown Value="{Binding Multiplier}" VerticalAlignment="Center"></NumericUpDown>
                     <NumericUpDown Value="{Binding Offset}" VerticalAlignment="Center"></NumericUpDown>
-                    <NumericUpDown Value="{Binding Deadzone}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown Value="{Binding DeadZone}" VerticalAlignment="Center"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputButton}"></DataTemplate>

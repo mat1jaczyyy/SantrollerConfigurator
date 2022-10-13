@@ -28,7 +28,7 @@ public class ControllerAxis : OutputAxis
         {StandardAxisType.LeftTrigger, "lt"},
         {StandardAxisType.RightTrigger, "rt"},
     };
-    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, float multiplier, int offset, int deadzone, StandardAxisType type) : base(model, input, ledOn, ledOff, multiplier, offset, deadzone, type.ToString())
+    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, float multiplier, int offset, int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, multiplier, offset, deadZone, type.ToString())
     {
         Type = type;
     }
@@ -46,6 +46,6 @@ public class ControllerAxis : OutputAxis
     public override bool IsCombined => false;
     public override SerializedOutput GetJson()
     {
-        return new SerializedControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, Deadzone);
+        return new SerializedControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, DeadZone);
     }
 }

@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Avalonia.Collections;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -6,6 +8,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
@@ -87,14 +90,17 @@ public class Ps2CombinedOutput : SpiOutput
         return "";
     }
 
-    public override IReadOnlyList<Output> Outputs => GetBindings();
+    public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);
 
-    private IReadOnlyList<Output> GetBindings()
+    private IReadOnlyList<Output> GetBindings(IList<Output> bindings)
     {
-        List<Output> _bindings = new();
+        List<Output> outputs = new();
+        var inputs = bindings.Select(s => s.Input?.InnermostInput()).Where(s => s is Ps2Input).Cast<Ps2Input>()
+            .Select(s => s.Input).ToHashSet();
         foreach (var pair in Buttons)
         {
-            _bindings.Add(new ControllerButton(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack), Colors.Transparent,
+            if (inputs.Contains(pair.Key)) continue;
+            outputs.Add(new ControllerButton(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack), Colors.Transparent,
                 Colors.Transparent,
                 10,
                 pair.Value));
@@ -102,19 +108,38 @@ public class Ps2CombinedOutput : SpiOutput
 
         foreach (var pair in Axis)
         {
-            _bindings.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack), Colors.Transparent,
+            if (inputs.Contains(pair.Key)) continue;
+            outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack), Colors.Transparent,
                 Colors.Transparent, 1, 0, 0, pair.Value));
         }
 
-        _bindings.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, _microcontroller, Miso, Mosi, Sck, Att, Ack), AnalogToDigitalType.Trigger, 128),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
-        _bindings.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, _microcontroller, Miso, Mosi, Sck, Att, Ack), AnalogToDigitalType.Trigger, 128),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
-        _bindings.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, _microcontroller, Miso, Mosi, Sck, Att, Ack), AnalogToDigitalType.Trigger, 240),
-            Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
-        return _bindings;
+        if (!inputs.Contains(Ps2InputType.NegConI))
+        {
+            outputs.Add(new ControllerButton(Model,
+                new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, _microcontroller, Miso, Mosi, Sck, Att, Ack),
+                    AnalogToDigitalType.Trigger, 128),
+                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
+        }
+
+
+        if (!inputs.Contains(Ps2InputType.NegConIi))
+        {
+            outputs.Add(new ControllerButton(Model,
+                new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, _microcontroller, Miso, Mosi, Sck, Att, Ack),
+                    AnalogToDigitalType.Trigger, 128),
+                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
+        }
+
+
+        if (!inputs.Contains(Ps2InputType.NegConL))
+        {
+
+            outputs.Add(new ControllerButton(Model,
+                new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, _microcontroller, Miso, Mosi, Sck, Att, Ack),
+                    AnalogToDigitalType.Trigger, 240),
+                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
+        }
+
+        return outputs;
     }
 }

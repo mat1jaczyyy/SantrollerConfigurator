@@ -153,7 +153,7 @@ public class WiiInput : TwiInput
         {WiiInputType.ClassicPlus, "((~wiiData[4]) & (1 << 2))"},
         {WiiInputType.ClassicHome, "((~wiiData[4]) & (1 << 3))"},
         {WiiInputType.ClassicMinus, "((~wiiData[4]) & (1 << 4))"},
-        {WiiInputType.ClassicLt, "((~wiiData[4]) & (1 << 1))"},
+        {WiiInputType.ClassicLt, "((~wiiData[4]) & (1 << 5))"},
         {WiiInputType.ClassicDPadDown, "((~wiiData[4]) & (1 << 6))"},
         {WiiInputType.ClassicDPadRight, "((~wiiData[4]) & (1 << 7))"},
         {WiiInputType.ClassicDPadUp, "((~wiiData[5]) & (1 << 0))"},
@@ -263,6 +263,7 @@ public class WiiInput : TwiInput
     }
 
     public override bool IsAnalog => Input <= WiiInputType.DrawsomePenPressure;
+    public override bool IsUint => !Input.ToString().ToLower().Contains("stick");
 
     public override List<DevicePin> Pins => new();
 

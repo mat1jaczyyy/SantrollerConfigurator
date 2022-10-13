@@ -108,6 +108,7 @@ public class Gh5NeckInput : TwiInput
     }
 
     public override List<DevicePin> Pins => new();
+    public override bool IsUint => true;
 
     public override IReadOnlyList<string> RequiredDefines()
     {

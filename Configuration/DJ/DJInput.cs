@@ -59,6 +59,7 @@ public class DjInput : TwiInput
     }
 
     public override List<DevicePin> Pins => new();
+    public override bool IsUint => false;
 
     public override IReadOnlyList<string> RequiredDefines()
     {

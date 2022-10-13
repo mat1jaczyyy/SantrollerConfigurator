@@ -272,7 +272,7 @@ public class Pico : Microcontroller
     public override string GenerateInit(List<Output> bindings)
     {
         string ret = "";
-        var pins = bindings.SelectMany(s => s.Pins).Distinct();
+        var pins = bindings.SelectMany(s => s.GetPins(bindings)).Distinct();
         foreach (var devicePin in pins)
         {
             if (devicePin.PinMode == DevicePinMode.Analog)

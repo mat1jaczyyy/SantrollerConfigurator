@@ -251,7 +251,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         async Task Write()
         {
             Generate(Main.Pio);
-            await Main.Write(this);
+            // await Main.Write(this);
         }
 
         public void SetDefaults(Microcontroller microcontroller)
@@ -287,7 +287,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public void Generate(PlatformIo pio)
         {
             if (_microController == null) return;
-            var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
+            var outputs = Bindings.SelectMany(binding => binding.GetOutputs(Bindings)).ToList();
             var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
             string configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
@@ -420,10 +420,10 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
         }
 
-        public string GenerateTick(bool xbox)
+        private string GenerateTick(bool xbox)
         {
             if (_microController == null) return "";
-            var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
+            var outputs = Bindings.SelectMany(binding => binding.GetOutputs(Bindings)).ToList();
             var groupedOutputs = outputs.GroupBy(s => s.Input?.InnermostInput().GetType());
             string ret = "";
             bool combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
@@ -481,10 +481,10 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             return ret.Replace('\n', ' ');
         }
 
-        public int CalculateDebounceTicks()
+        private int CalculateDebounceTicks()
         {
             bool combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
-            var count = Bindings.SelectMany(binding => binding.Outputs).Where(s => s is OutputButton button && (!combined || !button.IsStrum)).Select(s => s.Name).Distinct().Count();
+            var count = Bindings.SelectMany(binding => binding.GetOutputs(Bindings)).Where(s => s is OutputButton button && (!combined || !button.IsStrum)).Select(s => s.Name).Distinct().Count();
             if (combined)
             {
                 count++;

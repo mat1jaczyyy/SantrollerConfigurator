@@ -13,7 +13,7 @@ public class MouseAxis : OutputAxis
         {MouseAxisType.ScrollX, "ScrollX"},
         {MouseAxisType.ScrollY, "ScrollY"},
     };
-    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, float multiplier, int offset, int deadzone, MouseAxisType type) : base(model, input, ledOn, ledOff, multiplier, offset, deadzone, type.ToString())
+    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, float multiplier, int offset, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, multiplier, offset, deadZone, type.ToString())
     {
         Type = type;
     }
@@ -27,6 +27,6 @@ public class MouseAxis : OutputAxis
     public override bool IsCombined => false;
     public override SerializedOutput GetJson()
     {
-        return new SerializedMouseAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, Deadzone);
+        return new SerializedMouseAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, DeadZone);
     }
 }

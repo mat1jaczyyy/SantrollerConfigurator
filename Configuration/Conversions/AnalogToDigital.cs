@@ -4,6 +4,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
+
 public class AnalogToDigital : Input
 {
     public Input Child { get; }
@@ -46,6 +47,7 @@ public class AnalogToDigital : Input
     public override List<DevicePin> Pins => Child.Pins;
 
     public override bool IsAnalog => Child.IsAnalog;
+    public override bool IsUint => Child.IsUint;
 
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)

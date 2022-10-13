@@ -173,7 +173,7 @@ public abstract class AvrController : Microcontroller
         // PORTx input 1= pullup, 0 = floating
         Dictionary<char, int> ddrByPort = new Dictionary<char, int>();
         Dictionary<char, int> portByPort = new Dictionary<char, int>();
-        var pins = bindings.SelectMany(s => s.Pins).Distinct();
+        var pins = bindings.SelectMany(s => s.GetPins(bindings)).Distinct();
         foreach (var pin in pins)
         {
             var port = GetPort(pin.Pin);

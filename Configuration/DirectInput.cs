@@ -41,6 +41,7 @@ public class DirectInput : InputWithPin
     }
 
     public override bool IsAnalog => PinMode == DevicePinMode.Analog;
+    public override bool IsUint => true;
 
     public override string Generate()
     {

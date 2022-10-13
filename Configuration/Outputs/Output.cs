@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -239,14 +240,14 @@ public abstract class Output : ReactiveObject, IDisposable
     }
 
     public abstract string Generate(bool xbox, int debounceIndex);
-    [JsonIgnore]
-    public virtual IReadOnlyList<Output> Outputs => new []{this};
+
+    public virtual IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => new[] {this};
 
     public virtual void Dispose()
     {
         Input?.Dispose();
     }
 
-    public List<DevicePin> Pins =>
-        Outputs.SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.Pins ?? new())).Distinct().ToList();
+    public List<DevicePin> GetPins(IList<Output> bindings) => GetOutputs(bindings).SelectMany(s => s.GetOutputs(bindings)).SelectMany(s => (s.Input?.Pins ?? new()))
+        .Distinct().ToList();
 }
