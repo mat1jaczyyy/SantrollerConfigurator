@@ -22,13 +22,28 @@ public class AnalogToDigital : Input
 
     public override string Generate()
     {
-        switch (AnalogToDigitalType)
+        if (Child.IsUint)
         {
-            case AnalogToDigitalType.Trigger:
-            case AnalogToDigitalType.JoyHigh:
-                return $"{Child.Generate()} > {Threshold}";
-            case AnalogToDigitalType.JoyLow:
-                return $"{Child.Generate()} < {-Threshold}";
+            switch (AnalogToDigitalType)
+            {
+                case AnalogToDigitalType.Trigger:
+                case AnalogToDigitalType.JoyHigh:
+                    return $"({Child.Generate()}) > {short.MaxValue + Threshold}";
+                case AnalogToDigitalType.JoyLow:
+                    return $"({Child.Generate()}) < {short.MaxValue - Threshold}";
+            }
+        }
+        else
+        {
+
+            switch (AnalogToDigitalType)
+            {
+                case AnalogToDigitalType.Trigger:
+                case AnalogToDigitalType.JoyHigh:
+                    return $"({Child.Generate()}) > {Threshold}";
+                case AnalogToDigitalType.JoyLow:
+                    return $"({Child.Generate()}) < {-Threshold}";
+            }
         }
 
         return "";

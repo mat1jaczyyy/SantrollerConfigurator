@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Collections;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -160,16 +159,6 @@ public class WiiCombinedOutput : TwiOutput
                 Colors.Transparent,
                 Colors.Transparent, 1.2f, 0, 10, pair.Value));
         }
-
-        foreach (var pair in Buttons)
-        {
-            if (inputs.Contains(pair.Key)) continue;
-            outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl),
-                Colors.Transparent,
-                Colors.Transparent, 10,
-                pair.Value));
-        }
-
         if (!inputs.Contains(WiiInputType.DjStickX))
         {
             outputs.Add(new ControllerButton(Model,

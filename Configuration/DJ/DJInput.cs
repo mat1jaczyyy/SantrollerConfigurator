@@ -49,10 +49,10 @@ public class DjInput : TwiInput
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)
     {
-        string left = String.Join(";",
+        string left = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
                 .Select(binding => binding.Item2));
-        string right = String.Join(";",
+        string right = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
                 .Select(binding => binding.Item2));
         return $"if (djLeftValid) {{{left}}} if (djRightValid) {{{right}}}";

@@ -64,7 +64,7 @@ public class GhWtTapInput : InputWithPin
         }
 
         var mappings = MappingByInput[Input];
-        return String.Join(" || ", mappings.Select(mapping => $"(lastTapShift == {mapping})"));
+        return string.Join(" || ", mappings.Select(mapping => $"(lastTapShift == {mapping})"));
     }
 
     public override SerializedInput GetJson()
@@ -78,7 +78,7 @@ public class GhWtTapInput : InputWithPin
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)
     {
-        return String.Join(";\n", bindings.Select(binding => binding.Item2));
+        return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }
 
     public override IReadOnlyList<string> RequiredDefines()

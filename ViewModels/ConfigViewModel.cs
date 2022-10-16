@@ -5,8 +5,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Collections;
@@ -22,7 +20,6 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using ProtoBuf;
-using ProtoBuf.Meta;
 using ReactiveUI;
 using MouseButton = GuitarConfiguratorSharp.NetCore.Configuration.Outputs.MouseButton;
 
@@ -185,7 +182,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _emulationType, value);
-                this.SetDefaultBindings();
+                SetDefaultBindings();
             }
         }
 
@@ -230,7 +227,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
             Bindings = new AvaloniaList<Output>();
             ShowPinSelectDialogCommand =
-                ReactiveCommand.CreateFromObservable<InputWithPin, SelectPinWindowViewModel?>((output) =>
+                ReactiveCommand.CreateFromObservable<InputWithPin, SelectPinWindowViewModel?>(output =>
                     ShowPinSelectDialog.Handle(output));
             _isRhythm = this.WhenAnyValue(x => x.DeviceType)
                 .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
@@ -310,7 +307,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             lines.Add($"#define TICK_XINPUT {GenerateTick(true)}");
 
-            lines.Add($"#define ADC_COUNT {directInputs.Count(input => input.IsAnalog)}");
+            lines.Add($"#define ADC_COUNT {directInputs.DistinctBy(s => s.Pin).Count(input => input.IsAnalog)}");
 
             lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
 
@@ -326,14 +323,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             // Sort by pin index, and then map to adc number and turn into an array
             lines.Add(
-                $"#define ADC_PINS {{{String.Join(",", directInputs.OrderBy(s => s.Pin).Select(s => _microController.GetChannel(s.Pin).ToString()))}}}");
+                $"#define ADC_PINS {{{string.Join(",", directInputs.OrderBy(s => s.Pin).Where(s => s.IsAnalog).Select(s => _microController.GetChannel(s.Pin).ToString()).Distinct())}}}");
 
             lines.Add($"#define PIN_INIT {_microController.GenerateInit(outputs)}");
 
             lines.Add(_microController.GenerateDefinitions());
 
             lines.Add($"#define ARDWIINO_BOARD \"{_microController.Board.ArdwiinoName}\"");
-            lines.Add(String.Join("\n",
+            lines.Add(string.Join("\n",
                 inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}")));
 
             File.WriteAllLines(configFile, lines);

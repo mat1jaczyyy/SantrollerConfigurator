@@ -32,11 +32,12 @@ public abstract class AvrController : Microcontroller
 
         return $"PIN{GetPort(pin)} & ({1 << GetIndex(pin)})";
     }
+
     public override string GenerateDigitalWrite(int pin, bool val)
     {
         if (val)
         {
-            return $"PORT{GetPort(pin)} |= {1 <<GetIndex(pin)}";
+            return $"PORT{GetPort(pin)} |= {1 << GetIndex(pin)}";
         }
 
         return $"PORT{GetPort(pin)} &= {~(1 << GetIndex(pin))}";
@@ -95,7 +96,7 @@ public abstract class AvrController : Microcontroller
             return new();
         }
 
-        return new()
+        return new List<KeyValuePair<int, SpiPinType>>
         {
             new(SpiCSn, SpiPinType.CSn),
             new(SpiMiso, SpiPinType.Miso),
@@ -120,51 +121,7 @@ public abstract class AvrController : Microcontroller
 
     public override string GenerateDefinitions()
     {
-        List<int> skippedPins = new List<int>();
-        if (_spiConfig != null)
-        {
-            skippedPins.Add(SpiCSn);
-            skippedPins.Add(SpiMiso);
-            skippedPins.Add(SpiMosi);
-            skippedPins.Add(SpiSck);
-        }
-
-        if (_twiConfig != null)
-        {
-            skippedPins.Add(I2CScl);
-            skippedPins.Add(I2CSda);
-        }
-
-        Dictionary<char, int> skippedByPort = new Dictionary<char, int>();
-        for (var i = 0; i < PinCount; i++)
-        {
-            if (ForcedMode(i) is not null)
-            {
-                skippedPins.Add(i);
-            }
-
-            skippedByPort[GetPort(i)] = 0;
-        }
-
-        foreach (var pin in skippedPins)
-        {
-            skippedByPort[GetPort(pin)] |= 1 << GetIndex(pin);
-        }
-
-        var ret = "#define SKIP_MASK_AVR {" + string.Join(", ",
-                      skippedByPort.Keys.OrderBy(x => x).Select(x => skippedByPort[x].ToString())) +
-                  "}";
-        if (_spiConfig != null)
-        {
-            ret += _spiConfig.Generate();
-        }
-
-        if (_twiConfig != null)
-        {
-            ret += _twiConfig.Generate();
-        }
-
-        return ret;
+        return (_spiConfig?.Generate() ?? "") + (_twiConfig?.Generate() ?? "");
     }
 
     public override string GenerateInit(List<Output> bindings)
@@ -234,7 +191,7 @@ public abstract class AvrController : Microcontroller
 
     public override string GetPin(int pin)
     {
-        string ret = $"{pin}";
+        var ret = $"{pin}";
         if (pin >= PinA0)
         {
             ret += $" / A{pin - PinA0}";
@@ -242,32 +199,32 @@ public abstract class AvrController : Microcontroller
 
         if (pin == SpiCSn)
         {
-            ret += $" / SPI CS";
+            ret += " / SPI CS";
         }
 
         if (pin == SpiMiso)
         {
-            ret += $" / SPI MISO";
+            ret += " / SPI MISO";
         }
 
         if (pin == SpiMosi)
         {
-            ret += $" / SPI MOSI";
+            ret += " / SPI MOSI";
         }
 
         if (pin == SpiSck)
         {
-            ret += $" / SPI CLK";
+            ret += " / SPI CLK";
         }
 
         if (pin == I2CScl)
         {
-            ret += $" / I2C SCL";
+            ret += " / I2C SCL";
         }
 
         if (pin == I2CSda)
         {
-            ret += $" / I2C SDA";
+            ret += " / I2C SDA";
         }
 
         return ret;

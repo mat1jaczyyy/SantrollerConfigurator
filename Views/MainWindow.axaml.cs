@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Views
 {
-    public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
+    public class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         public MainWindow()
         {

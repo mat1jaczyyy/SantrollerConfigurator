@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Collections;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
@@ -41,6 +40,7 @@ public class Gh5CombinedOutput : TwiOutput
         microcontroller,
         "gh5", 100000, "GH5", sda, scl)
     {
+        _microcontroller = microcontroller;
         FretsEnabled = fretsEnabled;
         MapTapBarToAxis = mapTapBarToAxis;
         MapTapBarToFrets = mapTapBarToFrets;

@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
-using System.Text.Json.Serialization;
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -135,7 +133,7 @@ public abstract class Output : ReactiveObject, IDisposable
         LedOn = ledOn;
         LedOff = ledOff;
         Name = name;
-        this.Model = model;
+        Model = model;
         _image = this.WhenAnyValue(x => x.Model.DeviceType).Select(GetImage).ToProperty(this, x => x.Image);
         _isDj = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.TurntableInput)
             .ToProperty(this, x => x.IsDj);
@@ -217,10 +215,10 @@ public abstract class Output : ReactiveObject, IDisposable
             switch (type)
             {
                 case DeviceControllerType.Guitar:
-                    bitmap = $"GH/{this.Name}.png";
+                    bitmap = $"GH/{Name}.png";
                     break;
                 case DeviceControllerType.Gamepad:
-                    bitmap = $"Icons/Others/Xbox360/360_{this.Name}.png";
+                    bitmap = $"Icons/Others/Xbox360/360_{Name}.png";
                     break;
             }
         }

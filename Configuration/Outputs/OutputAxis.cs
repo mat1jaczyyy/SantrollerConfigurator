@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -50,9 +49,9 @@ public abstract class OutputAxis : Output
         }
 
         int mulInt = (int) (Multiplier * 1024);
-        if (mulInt > UInt16.MaxValue)
+        if (mulInt > ushort.MaxValue)
         {
-            mulInt = UInt16.MaxValue;
+            mulInt = ushort.MaxValue;
         }
         return
             $"{GenerateOutput(xbox)} = {function}({Input.Generate()}, {Offset}, {mulInt}, {DeadZone})";

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Collections;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
@@ -27,28 +28,12 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public TwiConfig? GetTwiForType(string type)
         {
-            foreach (var config in TwiConfigs)
-            {
-                if (config.Type == type)
-                {
-                    return config;
-                }
-            }
-
-            return null;
+            return TwiConfigs.FirstOrDefault(config => config.Type == type);
         }
 
         public SpiConfig? GetSpiForType(string type)
         {
-            foreach (var config in SpiConfigs)
-            {
-                if (config.Type == type)
-                {
-                    return config;
-                }
-            }
-
-            return null;
+            return SpiConfigs.FirstOrDefault(config => config.Type == type);
         }
 
         public abstract string GenerateAckDefines(int ack);
@@ -63,7 +48,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public abstract Board Board {get;}
         public string GenerateAnalogRead(int pin) {
-            return $"adc_raw({pin})";
+            return $"adc({pin})";
         }
 
         public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);

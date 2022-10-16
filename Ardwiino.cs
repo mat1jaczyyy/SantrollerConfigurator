@@ -12,13 +12,12 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using LibUsbDotNet;
-using DigitalToAnalog = GuitarConfiguratorSharp.NetCore.Configuration.Conversions.DigitalToAnalog;
 
 namespace GuitarConfiguratorSharp.NetCore;
 
 public class Ardwiino : ConfigurableUsbDevice
 {
-    private UInt32 _cpuFreq;
+    private uint _cpuFreq;
     private const int XboxBtnCount = 16;
     private const int XboxAxisCount = 6;
     private const int XboxTriggerCount = 2;
@@ -81,7 +80,7 @@ public class Ardwiino : ConfigurableUsbDevice
         }
     }
 
-    public override String ToString()
+    public override string ToString()
     {
         if (_failed)
         {
@@ -112,11 +111,11 @@ public class Ardwiino : ConfigurableUsbDevice
         try
         {
             var readConfig = ReadConfigCommand;
-            if (this.Version < new Version(8, 0, 7))
+            if (Version < new Version(8, 0, 7))
             {
                 readConfig = ReadConfigPre807Command;
             }
-            else if (this.Version < new Version(7, 0, 3))
+            else if (Version < new Version(7, 0, 3))
             {
                 readConfig = ReadConfigPre703Command;
             }
@@ -135,8 +134,8 @@ public class Ardwiino : ConfigurableUsbDevice
             foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
             {
                 config.axisScale.axis[axis].multiplier = 1;
-                config.axisScale.axis[axis].offset = Int16.MinValue;
-                config.axisScale.axis[axis].deadzone = Int16.MaxValue;
+                config.axisScale.axis[axis].offset = short.MinValue;
+                config.axisScale.axis[axis].deadzone = short.MaxValue;
             }
 
             config.debounce.buttons = 5;
@@ -223,7 +222,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 {
                     config.axisScale.axis[axis].multiplier = configOld.axisScale.axis[axis].multiplier;
                     config.axisScale.axis[axis].offset = configOld.axisScale.axis[axis].offset;
-                    config.axisScale.axis[axis].deadzone = Int16.MaxValue;
+                    config.axisScale.axis[axis].deadzone = short.MaxValue;
                 }
 
                 config.pinsSP = configOld.pinsSP;
@@ -528,7 +527,7 @@ public class Ardwiino : ConfigurableUsbDevice
             {
                 ControllerAxis? lx = null;
                 ControllerAxis? ly = null;
-                var threshold = config.all.axis.joyThreshold;
+                var threshold = config.all.axis.joyThreshold << 8;
                 foreach (var binding in bindings)
                 {
                     if (binding is ControllerAxis axis)
@@ -623,7 +622,7 @@ public class Ardwiino : ConfigurableUsbDevice
         MidiLiveGuitar,
         MidiGuitarHeroDrums,
         MidiRockBandDrums
-    };
+    }
 
     enum ControllerButtons
     {
@@ -644,7 +643,7 @@ public class Ardwiino : ConfigurableUsbDevice
         XboxB,
         XboxX,
         XboxY,
-    };
+    }
 
     enum ControllerAxisType
     {
@@ -654,7 +653,7 @@ public class Ardwiino : ConfigurableUsbDevice
         XboxLY,
         XboxRX,
         XboxRY
-    };
+    }
 
     private static readonly Dictionary<ControllerAxisType, StandardAxisType> AxisToStandard =
         new()
@@ -697,7 +696,7 @@ public class Ardwiino : ConfigurableUsbDevice
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct CpuInfoOld
     {
-        public readonly UInt32 cpu_freq;
+        public readonly uint cpu_freq;
         public readonly byte multi;
 
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 15)]
@@ -707,7 +706,7 @@ public class Ardwiino : ConfigurableUsbDevice
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct CpuInfo
     {
-        public readonly UInt32 cpu_freq;
+        public readonly uint cpu_freq;
         public readonly byte multi;
 
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 30)]
@@ -734,8 +733,8 @@ public class Ardwiino : ConfigurableUsbDevice
         public readonly byte mapLeftJoystickToDPad;
         public readonly byte mapStartSelectToHome;
         public readonly byte mapNunchukAccelToRightJoy;
-        public readonly UInt32 signature;
-        public readonly UInt32 version;
+        public readonly uint signature;
+        public readonly uint version;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -783,8 +782,8 @@ public class Ardwiino : ConfigurableUsbDevice
         public readonly byte mapLeftJoystickToDPad;
         public readonly byte mapStartSelectToHome;
         public readonly byte mapNunchukAccelToRightJoy;
-        public readonly UInt32 signature;
-        public readonly UInt32 version;
+        public readonly uint signature;
+        public readonly uint version;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -795,7 +794,7 @@ public class Ardwiino : ConfigurableUsbDevice
         public readonly byte drumThreshold;
 
         public byte mpu6050Orientation;
-        public readonly Int16 tiltSensitivity;
+        public readonly short tiltSensitivity;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -815,29 +814,29 @@ public class Ardwiino : ConfigurableUsbDevice
     private struct RfConfig
     {
         public byte rfInEnabled;
-        public UInt32 id;
+        public uint id;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct AxisScale
     {
-        public Int16 multiplier;
-        public Int16 offset;
-        public Int16 deadzone;
+        public short multiplier;
+        public short offset;
+        public short deadzone;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct AxisScale12
     {
-        public readonly Int16 multiplier;
-        public readonly Int16 offset;
+        public readonly short multiplier;
+        public readonly short offset;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct Version11AxisWhammyConfig
     {
         public readonly byte multiplier;
-        public readonly UInt16 offset;
+        public readonly ushort offset;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

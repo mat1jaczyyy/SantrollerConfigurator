@@ -19,11 +19,11 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public ConfigurableUsbDevice(UsbDevice device, string path, string product, string serial, ushort version)
     {
-        this.Device = device;
-        this.Path = path;
-        this.Product = product;
-        this.Serial = serial;
-        this.Version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, (version) & 0xf);
+        Device = device;
+        Path = path;
+        Product = product;
+        Serial = serial;
+        Version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, (version) & 0xf);
     }
 
     public abstract bool MigrationSupported { get; }
@@ -72,7 +72,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         return (uint)length;
     }
     public IConfigurableDevice? BootloaderDevice { get; private set; }
-    private TaskCompletionSource<String?>? _bootloaderPath = null;
+    private TaskCompletionSource<string?>? _bootloaderPath;
     public bool DeviceAdded(IConfigurableDevice device)
     {
         if (Board.ArdwiinoName.Contains("pico"))
@@ -115,10 +115,8 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             Bootloader();
             return await _bootloaderPath.Task;
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     public bool IsAvr()

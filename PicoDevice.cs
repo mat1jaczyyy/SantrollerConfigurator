@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -31,7 +30,7 @@ public class PicoDevice : IConfigurableDevice
         return _path;
     }
 
-    public override String ToString()
+    public override string ToString()
     {
         return $"Pico ({_path})";
     }

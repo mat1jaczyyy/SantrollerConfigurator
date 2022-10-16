@@ -37,7 +37,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public bool MigrationSupported => SelectedDevice == null || SelectedDevice.MigrationSupported;
 
-        private bool _writingToUsb = false;
+        private bool _writingToUsb;
 
         private readonly static string UdevFile = "99-ardwiino.rules";
         private readonly static string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
@@ -72,7 +72,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         }
 
 
-        private bool _installed = false;
+        private bool _installed;
 
         public bool Installed
         {
@@ -100,7 +100,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
         }
 
-        private bool _connected = false;
+        private bool _connected;
 
         public bool Connected
         {
@@ -114,7 +114,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
         }
 
-        private bool _readyToConfigure = false;
+        private bool _readyToConfigure;
 
         public bool ReadyToConfigure
         {
@@ -128,7 +128,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
         }
 
-        private double _progress = 0;
+        private double _progress;
 
         public double Progress
         {
@@ -225,7 +225,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 Console.WriteLine(message);
             };
 
-            Pio.PlatformIoError += (val) =>
+            Pio.PlatformIoError += val =>
             {
                 ProgressbarColor = val ? "red" : "PrimaryColor";
             };
@@ -278,7 +278,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             // Do something so that working is only set to false once the guitar appears on the host machine again
             // This will probably involve keeping a copy of the serial number  for the last written to device
             // So that we know the right device is picked back up.
-            Pio.PlatformIoWorking += (working) =>
+            Pio.PlatformIoWorking += working =>
             {
                 Working = working;
             };
@@ -396,8 +396,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     else if (e.Device.Open(out UsbDevice dev))
                     {
                         ushort revision = (ushort)dev.Info.Descriptor.BcdDevice;
-                        String product = dev.Info.ProductString;
-                        String serial = dev.Info.SerialString; ;
+                        string product = dev.Info.ProductString;
+                        string serial = dev.Info.SerialString; ;
                         if (product == "Santroller")
                         {
                             var c = new Santroller(Pio, e.Device.Name, dev, product, serial, revision);
@@ -409,10 +409,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                             {
                                 return;
                             }
-                            else
-                            {
-                                AddDevice(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
-                            }
+
+                            AddDevice(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
                         }
                         else
                         {
@@ -455,7 +453,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 // Check if the driver exists (we install this specific version of the driver so its easiest to check for it.)
                 return output.Contains("Atmel USB Devices") && output.Contains("Atmel Corporation") && output.Contains("10/02/2010 1.2.2.0");
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return File.Exists(UdevPath);
             }
@@ -474,7 +473,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 await AssetUtils.ExtractZip("dfu.zip", driverZip, driverFolder);
 
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
-                info.ArgumentList.AddRange(new string[] { "-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf") });
+                info.ArgumentList.AddRange(new[] { "-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf") });
                 info.UseShellExecute = true;
                 info.Verb = "runas";
                 Process.Start(info);
@@ -486,7 +485,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 string rules = Path.Combine(appdataFolder, UdevFile);
                 await AssetUtils.ExtractFile(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
-                info.ArgumentList.AddRange(new string[] { "cp", rules, UdevPath });
+                info.ArgumentList.AddRange(new[] { "cp", rules, UdevPath });
                 info.UseShellExecute = true;
                 Process.Start(info);
             }

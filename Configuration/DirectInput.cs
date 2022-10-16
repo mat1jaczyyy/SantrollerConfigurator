@@ -53,7 +53,7 @@ public class DirectInput : InputWithPin
     public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
         Microcontroller controller)
     {
-        return String.Join(";\n", bindings.Select(binding => binding.Item2));
+        return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }
 
     public override void Dispose()

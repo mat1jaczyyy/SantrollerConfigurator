@@ -80,8 +80,8 @@ public class Santroller : ConfigurableUsbDevice
         }
     }
 
-    public override String ToString()
+    public override string ToString()
     {
-        return $"Santroller";
+        return "Santroller";
     }
 }

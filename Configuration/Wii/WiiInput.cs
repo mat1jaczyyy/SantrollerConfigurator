@@ -121,12 +121,12 @@ public class WiiInput : TwiInput
         {WiiInputType.DjEffectDial, "(wiiData[3] & 0xE0) >> 5 | (wiiData[2] & 0x60) >> 2"},
         {WiiInputType.DjStickX, "((wiiData[0] & 0x3F) - 0x20) << 10"},
         {WiiInputType.DjStickY, "((wiiData[1] & 0x3F) - 0x20) << 10"},
-        {WiiInputType.DjTurntableLeft, "(((wiiData[4] & 1) ? 32 : 1) + (0x1F - (wiiData[3] & 0x1F))) << 10"},
+        {WiiInputType.DjTurntableLeft, "(((wiiButtonsLow & 1) ? 32 : 1) + (0x1F - (wiiData[3] & 0x1F))) << 10"},
         {
             WiiInputType.DjTurntableRight,
             "(((wiiData[2] & 1) ? 32 : 1) + (0x1F - ((wiiData[2] & 0x80) >> 7 | (wiiData[1] & 0xC0) >> 5 | (wiiData[0] & 0xC0) >> 3))) << 10"
         },
-        {WiiInputType.DrawsomePenPressure, "(wiiData[4] | (wiiData[5] & 0x0f) << 8)"},
+        {WiiInputType.DrawsomePenPressure, "(wiiButtonsLow | (wiiButtonsHigh & 0x0f) << 8)"},
         {WiiInputType.DrawsomePenX, "wiiData[0] | wiiData[1] << 8"},
         {WiiInputType.DrawsomePenY, "wiiData[2] | wiiData[3] << 8"},
         {WiiInputType.UDrawPenPressure, "wiiData[3]"},
@@ -145,62 +145,62 @@ public class WiiInput : TwiInput
         {WiiInputType.NunchukAccelerationX, "accX"},
         {WiiInputType.NunchukAccelerationY, "accY"},
         {WiiInputType.NunchukAccelerationZ, "accZ"},
-        {WiiInputType.NunchukRotationPitch, $"fxpt_atan2(accY,accZ)"},
-        {WiiInputType.NunchukRotationRoll, $"fxpt_atan2(accX,accZ)"},
+        {WiiInputType.NunchukRotationPitch, "fxpt_atan2(accY,accZ)"},
+        {WiiInputType.NunchukRotationRoll, "fxpt_atan2(accX,accZ)"},
         {WiiInputType.NunchukStickX, "(wiiData[0] - 0x80) << 8"},
         {WiiInputType.NunchukStickY, "(wiiData[1] - 0x80) << 8"},
-        {WiiInputType.ClassicRt, "((~wiiData[4]) & (1 << 1))"},
-        {WiiInputType.ClassicPlus, "((~wiiData[4]) & (1 << 2))"},
-        {WiiInputType.ClassicHome, "((~wiiData[4]) & (1 << 3))"},
-        {WiiInputType.ClassicMinus, "((~wiiData[4]) & (1 << 4))"},
-        {WiiInputType.ClassicLt, "((~wiiData[4]) & (1 << 5))"},
-        {WiiInputType.ClassicDPadDown, "((~wiiData[4]) & (1 << 6))"},
-        {WiiInputType.ClassicDPadRight, "((~wiiData[4]) & (1 << 7))"},
-        {WiiInputType.ClassicDPadUp, "((~wiiData[5]) & (1 << 0))"},
-        {WiiInputType.ClassicDPadLeft, "((~wiiData[5]) & (1 << 1))"},
-        {WiiInputType.ClassicZr, "((~wiiData[5]) & (1 << 2))"},
-        {WiiInputType.ClassicX, "((~wiiData[5]) & (1 << 3))"},
-        {WiiInputType.ClassicA, "((~wiiData[5]) & (1 << 4))"},
-        {WiiInputType.ClassicY, "((~wiiData[5]) & (1 << 5))"},
-        {WiiInputType.ClassicB, "((~wiiData[5]) & (1 << 6))"},
-        {WiiInputType.ClassicZl, "((~wiiData[5]) & (1 << 7))"},
-        {WiiInputType.DjHeroPlus, "((~wiiData[4]) & (1 << 2))"},
-        {WiiInputType.DjHeroMinus, "((~wiiData[4]) & (1 << 4))"},
-        {WiiInputType.DjHeroLeftBlue, "((~wiiData[5]) & (1 << 7))"},
-        {WiiInputType.DjHeroLeftRed, "((~wiiData[4]) & (1 << 5))"},
-        {WiiInputType.DjHeroLeftGreen, "((~wiiData[5]) & (1 << 3))"},
-        {WiiInputType.DjHeroLeftAny, "(((~wiiData[5]) & ((1 << 3)|1 << 7)) | ((~wiiData[4]) & (1 << 5)))"},
-        {WiiInputType.DjHeroRightGreen, "((~wiiData[5]) & (1 << 5))"},
-        {WiiInputType.DjHeroRightRed, "((~wiiData[4]) & (1 << 1))"},
-        {WiiInputType.DjHeroRightBlue, "((~wiiData[5]) & (1 << 2))"},
-        {WiiInputType.DjHeroRightAny, "(((~wiiData[5]) & ((1 << 5)|1 << 2)) | ((~wiiData[4]) & (1 << 1)))"},
-        {WiiInputType.DjHeroEuphoria, "((~wiiData[5]) & (1 << 4))"},
-        {WiiInputType.DrumPlus, "((~wiiData[4]) & (1 << 2))"},
-        {WiiInputType.DrumMinus, "((~wiiData[4]) & (1 << 4))"},
-        {WiiInputType.DrumKickPedal, "((~wiiData[5]) & (1 << 2))"},
-        {WiiInputType.DrumBlue, "((~wiiData[5]) & (1 << 3))"},
-        {WiiInputType.DrumGreen, "((~wiiData[5]) & (1 << 4))"},
-        {WiiInputType.DrumYellow, "((~wiiData[5]) & (1 << 5))"},
-        {WiiInputType.DrumRed, "((~wiiData[5]) & (1 << 6))"},
-        {WiiInputType.DrumOrange, "((~wiiData[5]) & (1 << 7))"},
-        {WiiInputType.GuitarPlus, "((~wiiData[4]) & (1 << 2))"},
-        {WiiInputType.GuitarMinus, "((~wiiData[4]) & (1 << 4))"},
-        {WiiInputType.GuitarStrumDown, "((~wiiData[4]) & (1 << 6))"},
-        {WiiInputType.GuitarStrumUp, "((~wiiData[5]) & (1 << 0))"},
-        {WiiInputType.GuitarYellow, "((~wiiData[5]) & (1 << 3))"},
-        {WiiInputType.GuitarGreen, "((~wiiData[5]) & (1 << 4))"},
-        {WiiInputType.GuitarBlue, "((~wiiData[5]) & (1 << 5))"},
-        {WiiInputType.GuitarRed, "((~wiiData[5]) & (1 << 6))"},
-        {WiiInputType.GuitarOrange, "((~wiiData[5]) & (1 << 7))"},
-        {WiiInputType.NunchukC, "((~wiiData[5]) & (1 << 1))"},
-        {WiiInputType.NunchukZ, "((~wiiData[5]) & (1 << 0))"},
+        {WiiInputType.ClassicRt, "((wiiButtonsLow) & (1 << 1))"},
+        {WiiInputType.ClassicPlus, "((wiiButtonsLow) & (1 << 2))"},
+        {WiiInputType.ClassicHome, "((wiiButtonsLow) & (1 << 3))"},
+        {WiiInputType.ClassicMinus, "((wiiButtonsLow) & (1 << 4))"},
+        {WiiInputType.ClassicLt, "((wiiButtonsLow) & (1 << 5))"},
+        {WiiInputType.ClassicDPadDown, "((wiiButtonsLow) & (1 << 6))"},
+        {WiiInputType.ClassicDPadRight, "((wiiButtonsLow) & (1 << 7))"},
+        {WiiInputType.ClassicDPadUp, "((wiiButtonsHigh) & (1 << 0))"},
+        {WiiInputType.ClassicDPadLeft, "((wiiButtonsHigh) & (1 << 1))"},
+        {WiiInputType.ClassicZr, "((wiiButtonsHigh) & (1 << 2))"},
+        {WiiInputType.ClassicX, "((wiiButtonsHigh) & (1 << 3))"},
+        {WiiInputType.ClassicA, "((wiiButtonsHigh) & (1 << 4))"},
+        {WiiInputType.ClassicY, "((wiiButtonsHigh) & (1 << 5))"},
+        {WiiInputType.ClassicB, "((wiiButtonsHigh) & (1 << 6))"},
+        {WiiInputType.ClassicZl, "((wiiButtonsHigh) & (1 << 7))"},
+        {WiiInputType.DjHeroPlus, "((wiiButtonsLow) & (1 << 2))"},
+        {WiiInputType.DjHeroMinus, "((wiiButtonsLow) & (1 << 4))"},
+        {WiiInputType.DjHeroLeftBlue, "((wiiButtonsHigh) & (1 << 7))"},
+        {WiiInputType.DjHeroLeftRed, "((wiiButtonsLow) & (1 << 5))"},
+        {WiiInputType.DjHeroLeftGreen, "((wiiButtonsHigh) & (1 << 3))"},
+        {WiiInputType.DjHeroLeftAny, "(((wiiButtonsHigh) & ((1 << 3)|1 << 7)) | ((wiiButtonsLow) & (1 << 5)))"},
+        {WiiInputType.DjHeroRightGreen, "((wiiButtonsHigh) & (1 << 5))"},
+        {WiiInputType.DjHeroRightRed, "((wiiButtonsLow) & (1 << 1))"},
+        {WiiInputType.DjHeroRightBlue, "((wiiButtonsHigh) & (1 << 2))"},
+        {WiiInputType.DjHeroRightAny, "(((wiiButtonsHigh) & ((1 << 5)|1 << 2)) | ((wiiButtonsLow) & (1 << 1)))"},
+        {WiiInputType.DjHeroEuphoria, "((wiiButtonsHigh) & (1 << 4))"},
+        {WiiInputType.DrumPlus, "((wiiButtonsLow) & (1 << 2))"},
+        {WiiInputType.DrumMinus, "((wiiButtonsLow) & (1 << 4))"},
+        {WiiInputType.DrumKickPedal, "((wiiButtonsHigh) & (1 << 2))"},
+        {WiiInputType.DrumBlue, "((wiiButtonsHigh) & (1 << 3))"},
+        {WiiInputType.DrumGreen, "((wiiButtonsHigh) & (1 << 4))"},
+        {WiiInputType.DrumYellow, "((wiiButtonsHigh) & (1 << 5))"},
+        {WiiInputType.DrumRed, "((wiiButtonsHigh) & (1 << 6))"},
+        {WiiInputType.DrumOrange, "((wiiButtonsHigh) & (1 << 7))"},
+        {WiiInputType.GuitarPlus, "((wiiButtonsLow) & (1 << 2))"},
+        {WiiInputType.GuitarMinus, "((wiiButtonsLow) & (1 << 4))"},
+        {WiiInputType.GuitarStrumDown, "((wiiButtonsLow) & (1 << 6))"},
+        {WiiInputType.GuitarStrumUp, "((wiiButtonsHigh) & (1 << 0))"},
+        {WiiInputType.GuitarYellow, "((wiiButtonsHigh) & (1 << 3))"},
+        {WiiInputType.GuitarGreen, "((wiiButtonsHigh) & (1 << 4))"},
+        {WiiInputType.GuitarBlue, "((wiiButtonsHigh) & (1 << 5))"},
+        {WiiInputType.GuitarRed, "((wiiButtonsHigh) & (1 << 6))"},
+        {WiiInputType.GuitarOrange, "((wiiButtonsHigh) & (1 << 7))"},
+        {WiiInputType.NunchukC, "((wiiButtonsHigh) & (1 << 1))"},
+        {WiiInputType.NunchukZ, "((wiiButtonsHigh) & (1 << 0))"},
         {WiiInputType.TaTaConRightDrumRim, "((~wiiData[0]) & (1 << 3))"},
         {WiiInputType.TaTaConRightDrumCenter, "((~wiiData[0]) & (1 << 4))"},
         {WiiInputType.TaTaConLeftDrumRim, "((~wiiData[0]) & (1 << 5))"},
         {WiiInputType.TaTaConLeftDrumCenter, "((~wiiData[0]) & (1 << 6))"},
-        {WiiInputType.UDrawPenButton1, "((~wiiData[5]) & (1 << 0))"},
-        {WiiInputType.UDrawPenButton2, "((~wiiData[5]) & (1 << 1))"},
-        {WiiInputType.UDrawPenClick, "(( wiiData[5]) & (1 << 2))"}, 
+        {WiiInputType.UDrawPenButton1, "((wiiButtonsHigh) & (1 << 0))"},
+        {WiiInputType.UDrawPenButton2, "((wiiButtonsHigh) & (1 << 1))"},
+        {WiiInputType.UDrawPenClick, "((~wiiButtonsHigh) & (1 << 2))"}, 
         {WiiInputType.GuitarTapGreen, GetMappingForTapBar(0x04, 0x07)},
         {WiiInputType.GuitarTapRed, GetMappingForTapBar(0x07, 0x0A, 0x0c, 0x0d)},
         {WiiInputType.GuitarTapYellow, GetMappingForTapBar(0x0c, 0x0d, 0x12, 0x13, 0x14, 0x15)},
@@ -210,8 +210,6 @@ public class WiiInput : TwiInput
 
     private static readonly List<string> HiResMapOrder = new()
     {
-        "wiiData[4]",
-        "wiiData[5]",
         Mappings[WiiInputType.ClassicLeftStickX],
         Mappings[WiiInputType.ClassicLeftStickY],
         Mappings[WiiInputType.ClassicRightStickX],
@@ -222,8 +220,6 @@ public class WiiInput : TwiInput
 
     private static readonly Dictionary<string, string> HiResMap = new()
     {
-        {"wiiData[4]", "wiiData[6]"},
-        {"wiiData[5]", "wiiData[7]"},
         {Mappings[WiiInputType.ClassicLeftStickX], "(wiiData[0] - 0x80) << 8"},
         {Mappings[WiiInputType.ClassicLeftStickY], "(wiiData[2] - 0x80) << 8"},
         {Mappings[WiiInputType.ClassicRightStickX], "(wiiData[1] - 0x80) << 8"},
@@ -307,6 +303,8 @@ public class WiiInput : TwiInput
             var mappings = mappedBindings[WiiControllerType.ClassicController];
             mappedBindings.Remove(WiiControllerType.ClassicController);
             var mappings2 = new List<string>();
+            var mappingsDigital = mappings.Where(m => m.Contains("wiiButtons"));
+            mappings = mappings.Where(m => !m.Contains("wiiButtons")).ToList();
             foreach (var mapping in mappings)
             {
                 var val = mapping;
@@ -322,20 +320,20 @@ public class WiiInput : TwiInput
 case WII_CLASSIC_CONTROLLER:
 case WII_CLASSIC_CONTROLLER_PRO:
 if (hiRes) {{
-    {String.Join(";\n", mappings2)};
+    {string.Join(";\n", mappings2)};
 }} else {{
-    {String.Join(";\n", mappings)};
+    {string.Join(";\n", mappings)};
 }}
+{string.Join(";\n",mappingsDigital)};
 break;
 ";
         }
-
         foreach (var binding in mappedBindings)
         {
             var input = binding.Key;
             var mappings = binding.Value;
             ret += @$"case {CType[input]}:
-    {String.Join(";\n", mappings)};
+    {string.Join(";\n", mappings)};
     break;";
         }
 

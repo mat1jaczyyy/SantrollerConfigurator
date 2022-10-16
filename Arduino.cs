@@ -1,4 +1,4 @@
-using System;
+using System.IO.Ports;
 using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -31,14 +31,14 @@ public class Arduino : IConfigurableDevice
         {
             MigrationSupported = false;
 
-            System.IO.Ports.SerialPort serial = new System.IO.Ports.SerialPort(port.Port, 115200);
+            SerialPort serial = new SerialPort(port.Port, 115200);
             serial.Open();
             serial.Write("i\x06\n");
             var boardName = serial.ReadLine().Trim();
             serial.DiscardInBuffer();
             serial.Write("i\x04\n");
             var boardFreqStr = serial.ReadLine().Replace("UL", "");
-            var boardFreq = UInt32.Parse(boardFreqStr);
+            var boardFreq = uint.Parse(boardFreqStr);
             var tmp = Board.FindBoard(boardName, boardFreq);
             Board = new Board(boardName, $"Ardwiino - {tmp.Name} - pre 4.3.7", boardFreq, tmp.Environment, tmp.ProductIDs, tmp.HasUsbmcu);
         }
@@ -64,7 +64,7 @@ public class Arduino : IConfigurableDevice
         return _port.Port;
     }
 
-    public override String ToString()
+    public override string ToString()
     {
         return $"{Board.Name} ({_port.Port})";
     }

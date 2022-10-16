@@ -8,7 +8,7 @@ using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Views
 {
-    public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
+    public class ConfigView : ReactiveUserControl<ConfigViewModel>
     {
         public ConfigView()
         {
@@ -28,12 +28,12 @@ namespace GuitarConfiguratorSharp.NetCore.Views
         private async Task DoShowDialogAsync(InteractionContext<InputWithPin, SelectPinWindowViewModel?> interaction)
         {
             SelectPinWindowViewModel model = new SelectPinWindowViewModel(interaction.Input);
-            var dialog = new SelectPinWindow()
+            var dialog = new SelectPinWindow
             {
                 DataContext = model
             };
             
-            var result = await dialog.ShowDialog<SelectPinWindowViewModel?>((Window) this.VisualRoot!);
+            var result = await dialog.ShowDialog<SelectPinWindowViewModel?>((Window) VisualRoot!);
             interaction.SetOutput(result);
         }
     }

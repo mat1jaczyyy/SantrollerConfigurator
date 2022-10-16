@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DynamicData.Kernel;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -237,36 +236,12 @@ public class Pico : Microcontroller
     {
         var elements = TwiConfigs.Where(s => s.Type == type).ToList();
         TwiConfigs.RemoveAll(elements);
-        Console.WriteLine(TwiConfigs.Count);
-        
     }
 
     public override string GenerateDefinitions()
     {
-        string ret = "";
-        List<int> skippedPins = new List<int>();
-        foreach (var config in SpiConfigs)
-        {
-            skippedPins.AddRange(config.GetPins());
-            ret += config.Generate();
-        }
-        foreach (var config in TwiConfigs)
-        {
-            skippedPins.AddRange(config.GetPins());
-            ret += config.Generate();
-        }
-
-        int skip = 0;
-        foreach (var pin in skippedPins)
-        {
-            if (pin != 0xFF)
-            {
-                skip |= 1 << pin;
-            }
-        }
-
-        ret += $"#define SKIP_MASK_PICO {skip.ToString()}";
-        return ret;
+        var ret = SpiConfigs.Aggregate("", (current, config) => current + config.Generate());
+        return TwiConfigs.Aggregate(ret, (current, config) => current + config.Generate());
     }
 
     public override string GenerateInit(List<Output> bindings)

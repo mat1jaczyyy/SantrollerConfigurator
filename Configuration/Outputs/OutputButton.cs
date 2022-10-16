@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -26,7 +25,7 @@ public abstract class OutputButton : Output
         if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
         var outputVar = GenerateOutput(xbox);
         var outputBit = GenerateIndex(xbox);
-        if (String.IsNullOrEmpty(outputBit)) return "";
+        if (string.IsNullOrEmpty(outputBit)) return "";
         return $"if (debounce[{debounceIndex}]) {{ debounce[{debounceIndex}]--; {outputVar} |= (1 << {outputBit});}}";
     } 
     public override string Generate(bool xbox, int debounceIndex)
@@ -34,7 +33,7 @@ public abstract class OutputButton : Output
         if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
         var outputVar = GenerateOutput(xbox);
         var outputBit = GenerateIndex(xbox);
-        if (String.IsNullOrEmpty(outputBit)) return "";
+        if (string.IsNullOrEmpty(outputBit)) return "";
         if (Debounce == 0)
         {
             return $"if (({Input.Generate()})) {{{outputVar} |= (1 << {outputBit});}}";
