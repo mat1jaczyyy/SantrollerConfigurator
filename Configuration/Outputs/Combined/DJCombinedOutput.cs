@@ -3,13 +3,12 @@ using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
-public class DjCombinedOutput : TwiOutput
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
+public class DjCombinedOutput : CombinedTwiOutput
 {
 
     private static readonly Dictionary<DjInputType, StandardButtonType> Buttons = new()
@@ -29,17 +28,9 @@ public class DjCombinedOutput : TwiOutput
     {
         _microcontroller = microcontroller;
     }
-
-    public override bool IsCombined => true;
-
     public override SerializedOutput GetJson()
     {
         return new SerializedDjCombinedOutput(LedOn, LedOff, Sda, Scl);
-    }
-
-    public override string Generate(bool xbox, int debounceIndex)
-    {
-        return "";
     }
 
     public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);

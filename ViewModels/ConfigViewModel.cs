@@ -11,10 +11,10 @@ using Avalonia.Collections;
 using Avalonia.Input;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
-using GuitarConfiguratorSharp.NetCore.Configuration.Combined;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
@@ -25,7 +25,6 @@ using MouseButton = GuitarConfiguratorSharp.NetCore.Configuration.Outputs.MouseB
 
 namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
-    // ReSharper disable ExplicitCallerInfoArgument
     public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         public Interaction<InputWithPin, SelectPinWindowViewModel?> ShowPinSelectDialog { get; }
@@ -43,8 +42,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
 
-        public IEnumerable<SimpleType> SimpleTypes => Enum.GetValues<SimpleType>();
-
         //TODO: actually read and write this as part of the config
         public int[] KvKey1 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
         public int[] KvKey2 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
@@ -53,6 +50,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public ICommand GoBack { get; }
 
+        private LedOrderType _ledOrder;
+
+        public LedOrderType LedOrder
+        {
+            get => _ledOrder;
+            set => this.RaiseAndSetIfChanged(ref _ledOrder, value);
+        }
+
         private LedType _ledType;
 
         public LedType LedType
@@ -60,95 +65,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             get => _ledType;
             set => this.RaiseAndSetIfChanged(ref _ledType, value);
         }
-
-        private SimpleType? _simpleType;
-
-        public SimpleType? SimpleType
-        {
-            get => _simpleType;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _simpleType, value);
-                this.RaiseAndSetIfChanged(ref _axisType, null, "StandardAxisType");
-                this.RaiseAndSetIfChanged(ref _buttonType, null, "StandardButtonType");
-            }
-        }
-
-        private StandardButtonType? _buttonType;
-
-        public StandardButtonType? StandardButtonType
-        {
-            get => _buttonType;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _buttonType, value);
-                this.RaiseAndSetIfChanged(ref _simpleType, null, "SimpleType");
-                this.RaiseAndSetIfChanged(ref _axisType, null, "StandardAxisType");
-            }
-        }
-
-        public IEnumerable<StandardButtonType> StandardButtonTypes => Enum.GetValues<StandardButtonType>();
-
-        private StandardAxisType? _axisType;
-
-        public StandardAxisType? StandardAxisType
-        {
-            get => _axisType;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _axisType, value);
-                this.RaiseAndSetIfChanged(ref _simpleType, null, "SimpleType");
-                this.RaiseAndSetIfChanged(ref _buttonType, null, "StandardButtonType");
-            }
-        }
-
-        // TODO Somehow these will all need to be localised to the current controller type
-        public IEnumerable<StandardAxisType> StandardAxisTypes => Enum.GetValues<StandardAxisType>();
-
-        private Key? _key;
-
-        public Key? Key
-        {
-            get => _key;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _key, value);
-                this.RaiseAndSetIfChanged(ref _mouseAxisType, null, "MouseAxisType");
-                this.RaiseAndSetIfChanged(ref _mouseButtonType, null, "MouseButtonType");
-            }
-        }
-
-        public IEnumerable<Key> Keys => Enum.GetValues<Key>();
-
-        private MouseAxisType? _mouseAxisType;
-
-        public MouseAxisType? MouseAxisType
-        {
-            get => _mouseAxisType;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _mouseAxisType, value);
-                this.RaiseAndSetIfChanged(ref _mouseButtonType, null, "MouseButtonType");
-                this.RaiseAndSetIfChanged(ref _key, null, "Key");
-            }
-        }
-
-        public IEnumerable<MouseAxisType> MouseAxisTypes => Enum.GetValues<MouseAxisType>();
-
-        private MouseButtonType? _mouseButtonType;
-
-        public MouseButtonType? MouseButtonType
-        {
-            get => _mouseButtonType;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _mouseButtonType, value);
-                this.RaiseAndSetIfChanged(ref _mouseAxisType, null, "MouseAxisType");
-                this.RaiseAndSetIfChanged(ref _key, null, "Key");
-            }
-        }
-
-        public IEnumerable<MouseButtonType> MouseButtonTypes => Enum.GetValues<MouseButtonType>();
 
         private bool _xinputOnWindows;
 
@@ -171,7 +87,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public DeviceControllerType DeviceType
         {
             get => _deviceControllerType;
-            set => this.RaiseAndSetIfChanged(ref _deviceControllerType, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _deviceControllerType, value);
+                UpdateBindings();
+            }
         }
 
         private EmulationType _emulationType;
@@ -191,7 +111,50 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public RhythmType RhythmType
         {
             get => _rhythmType;
-            set => this.RaiseAndSetIfChanged(ref _rhythmType, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _rhythmType, value);
+                UpdateBindings();
+            }
+        }
+
+        private void UpdateBindings()
+        {
+            Bindings.RemoveAll(Bindings.Where(binding => binding.LocalisedName == null).ToList());
+            // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
+            if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput))
+            {
+                return;
+            }
+            var types = ControllerEnumConverter.GetTypes((_deviceControllerType, _rhythmType)).Where(s => s is not SimpleType).ToList();
+            foreach (var binding in Bindings)
+            {
+                if (binding is ControllerButton button)
+                {
+                    types.Remove(button.Type);
+                } else if (binding is ControllerAxis axis)
+                {
+                    types.Remove(axis.Type);
+                }
+            }
+            foreach (var type in types)
+            {
+                if (type is StandardButtonType buttonType)
+                {
+                    Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
+                        Colors.Transparent, Colors.Transparent, 1, buttonType));
+                }
+                if (type is StandardAxisType axisType)
+                {
+                    Bindings.Add(new ControllerAxis(this, new DirectInput(0, DevicePinMode.Analog, MicroController!),
+                        Colors.Transparent, Colors.Transparent, 1, 0, 0, axisType));
+                }
+            }
+
+            if (_deviceControllerType == DeviceControllerType.TurnTable && !Bindings.Any(s => s is DjCombinedOutput))
+            {
+                Bindings.Add(new DjCombinedOutput(this, MicroController!));
+            }
         }
 
         private Microcontroller? _microController;
@@ -269,12 +232,15 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 foreach (var type in Enum.GetValues<StandardAxisType>())
                 {
+                    if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
                     Bindings.Add(new ControllerAxis(this, new DirectInput(0, DevicePinMode.Analog, MicroController!),
                         Colors.Transparent, Colors.Transparent, 1, 0, 0, type));
                 }
 
                 foreach (var type in Enum.GetValues<StandardButtonType>())
                 {
+                    if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
+                        null) continue;
                     Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
                         Colors.Transparent, Colors.Transparent, 1, type));
                 }
@@ -303,9 +269,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
 
-            lines.Add($"#define TICK_PS3 {GenerateTick(false)}");
+            lines.Add($"#define TICK_SHARED {GenerateTick(false, true)}");
 
-            lines.Add($"#define TICK_XINPUT {GenerateTick(true)}");
+            lines.Add($"#define TICK_PS3 {GenerateTick(false, false)}");
+
+            lines.Add($"#define TICK_XINPUT {GenerateTick(true, false)}");
 
             lines.Add($"#define ADC_COUNT {directInputs.DistinctBy(s => s.Pin).Count(input => input.IsAnalog)}");
 
@@ -359,120 +327,74 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public void AddOutput()
         {
-            if (_microController == null) return;
-            switch (EmulationType)
-            {
-                case EmulationType.Controller:
-                    if (SimpleType.HasValue)
-                    {
-                        switch (SimpleType)
-                        {
-                            case Configuration.Types.SimpleType.WiiInputSimple:
-                                Bindings.Add(new WiiCombinedOutput(this, _microController));
-                                break;
-                            case Configuration.Types.SimpleType.Gh5NeckSimple:
-                                Bindings.Add(new Gh5CombinedOutput(this, _microController));
-                                break;
-                            case Configuration.Types.SimpleType.Ps2InputSimple:
-                                Bindings.Add(new Ps2CombinedOutput(this, _microController));
-                                break;
-                            case Configuration.Types.SimpleType.WtNeckSimple:
-                                Bindings.Add(new GhwtCombinedOutput(this, _microController));
-                                break;
-                            case Configuration.Types.SimpleType.DjTurntableSimple:
-                                Bindings.Add(new DjCombinedOutput(this, _microController));
-                                break;
-                        }
-                    }
-                    else if (StandardAxisType.HasValue)
-                    {
-                        Bindings.Add(new ControllerAxis(this, null, Colors.Transparent, Colors.Transparent, 1, 0, 0,
-                            StandardAxisType.Value));
-                    }
-                    else if (StandardButtonType.HasValue)
-                    {
-                        Bindings.Add(new ControllerButton(this, null, Colors.Transparent, Colors.Transparent, 5,
-                            StandardButtonType.Value));
-                    }
-
-                    break;
-                case EmulationType.KeyboardMouse:
-                    if (MouseAxisType.HasValue)
-                    {
-                        Bindings.Add(new MouseAxis(this, null, Colors.Transparent, Colors.Transparent, 1, 0, 0,
-                            MouseAxisType.Value));
-                    }
-                    else if (MouseButtonType.HasValue)
-                    {
-                        Bindings.Add(new MouseButton(this, null, Colors.Transparent, Colors.Transparent, 5,
-                            MouseButtonType.Value));
-                    }
-                    else if (Key.HasValue)
-                    {
-                        Bindings.Add(new KeyboardButton(this, null, Colors.Transparent, Colors.Transparent, 5,
-                            Key.Value));
-                    }
-
-                    break;
-            }
+            Bindings.Add(new EmptyOutput(this));
         }
 
-        private string GenerateTick(bool xbox)
+        private string GenerateTick(bool xbox, bool shared)
         {
             if (_microController == null) return "";
             var outputs = Bindings.SelectMany(binding => binding.GetOutputs(Bindings)).ToList();
             var groupedOutputs = outputs.GroupBy(s => s.Input?.InnermostInput().GetType());
-            string ret = "";
             bool combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 
             Dictionary<string, int> debounces = new();
             HashSet<string> debounceTicks = new();
-            int indexCount = 0;
+            Dictionary<int, string> leds = new();
             if (combined)
             {
-                indexCount++;
+                foreach (var output in outputs.Where(output => output.IsStrum))
+                {
+                    debounces[output.Name] = debounces.Count;
+                }
             }
 
-            foreach (var group in groupedOutputs)
-            {
-                ret += group.First().Input?.InnermostInput().GenerateAll(xbox, group.Select(output =>
-                {
-                    var input = output.Input?.InnermostInput();
-                    if (input != null)
+            string ret = groupedOutputs.Aggregate("", (current, group) => current + (group.First()
+                .Input?.InnermostInput()
+                .GenerateAll(group.Select(output =>
                     {
-                        
-                        var generated = output.Generate(xbox, 0);
+                        var input = output.Input?.InnermostInput();
+                        if (input == null) throw new IncompleteConfigurationException("Output without Input found!");
+                        var index = 0;
                         if (output is OutputButton button)
                         {
-                            if (combined && button.IsStrum)
+                            if (!debounces.ContainsKey(output.Name))
                             {
-                                debounceTicks.Add(button.GenerateDebounceUpdate(0, xbox));
+                                debounces[output.Name] = debounces.Count;
                             }
-                            else
-                            {
-                                if (!debounces.ContainsKey(output.Name))
-                                {
-                                    debounces[output.Name] = indexCount++;
-                                }
 
-                                var index = debounces[output.Name];
-                                generated = output.Generate(xbox, index);
-                                debounceTicks.Add(button.GenerateDebounceUpdate(index, xbox));
-                            }
+                            index = debounces[output.Name];
+                            debounceTicks.Add(button.GenerateDebounceUpdate(index, xbox));
                         }
 
+                        if (_ledType == LedType.Apa102 && output.LedIndex.HasValue)
+                        {
+                            leds[output.LedIndex.Value] = output.GenerateLedUpdate(index, xbox);
+                        }
+
+                        var generated = output.Generate(xbox, shared, index, combined);
                         return new Tuple<Input, string>(input, generated);
-                    }
-
-                    throw new IncompleteConfigurationException("Output without Input found!");
-                }).ToList(), _microController) + ";";
-            }
-
-            //TODO: for apa102, the easiest option would be to do something like this, but for each output linked to an LED.
-            //TODO: that should be pretty straightofward, we could even just implement a LED function on each output / input if we wanted to handle that correctly.
-            foreach (var debounceTick in debounceTicks)
+                    })
+                    .Where(s => !string.IsNullOrEmpty(s.Item2))
+                    .ToList()) + ";"));
+            if (!shared)
             {
-                ret += debounceTick;
+                //For any missing leds, we need to pad out the indexes so that the leds are aligned
+                if (leds.Any())
+                {
+                    int max = leds.Keys.Max();
+                    for (int i = 0; i < max; i++)
+                    {
+                        if (!leds.ContainsKey(i))
+                        {
+                            leds[i] =
+                                @"spi_transfer(APA102_SPI_PORT, 0xff);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);";
+                        }
+                    }
+                }
+
+                var ticks = debounceTicks.ToList();
+                ticks.InsertRange(0, leds.OrderBy(led => led.Key).Select(s => s.Value));
+                ret = ticks.Aggregate(ret, (current, debounceTick) => current + debounceTick);
             }
 
             return ret.Replace('\n', ' ');
@@ -481,7 +403,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private int CalculateDebounceTicks()
         {
             bool combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
-            var count = Bindings.SelectMany(binding => binding.GetOutputs(Bindings)).Where(s => s is OutputButton button && (!combined || !button.IsStrum)).Select(s => s.Name).Distinct().Count();
+            var count = Bindings.SelectMany(binding => binding.GetOutputs(Bindings))
+                .Where(s => s is OutputButton button && (!combined || !button.IsStrum)).Select(s => s.Name).Distinct()
+                .Count();
             if (combined)
             {
                 count++;

@@ -3,14 +3,13 @@ using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
-public class Gh5CombinedOutput : TwiOutput
+public class Gh5CombinedOutput : CombinedTwiOutput
 {
     private readonly Microcontroller _microcontroller;
     public bool MapTapBarToAxis { get; set; }
@@ -46,17 +45,10 @@ public class Gh5CombinedOutput : TwiOutput
         MapTapBarToFrets = mapTapBarToFrets;
     }
 
-    public override bool IsCombined => true;
-
     public override SerializedOutput GetJson()
     {
         return new SerializedGh5CombinedOutput(LedOn, LedOff, Sda, Scl, FretsEnabled, MapTapBarToFrets,
             MapTapBarToAxis);
-    }
-
-    public override string Generate(bool xbox, int debounceIndex)
-    {
-        return "";
     }
 
     public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);

@@ -46,8 +46,7 @@ public class DjInput : TwiInput
 
     public override bool IsAnalog => Input <= DjInputType.RightTurnable;
 
-    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller controller)
+    public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
         string left = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))

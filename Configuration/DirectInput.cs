@@ -50,8 +50,7 @@ public class DirectInput : InputWithPin
             : _microcontroller.GenerateDigitalRead(Pin, PinMode is DevicePinMode.PullUp);
     }
 
-    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller controller)
+    public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
         return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }

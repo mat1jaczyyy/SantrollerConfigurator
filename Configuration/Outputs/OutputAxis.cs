@@ -24,10 +24,12 @@ public abstract class OutputAxis : Output
 
     public abstract string GenerateOutput(bool xbox);
     public override bool IsCombined => false;
+    public override bool IsStrum => false;
 
-    public override string Generate(bool xbox, int debounceIndex)
+    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined)
     {
         if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
+        if (shared) return "";
         bool isUInt = Input.InnermostInput()?.IsUint == true;
         string function;
         if (xbox)
@@ -55,5 +57,10 @@ public abstract class OutputAxis : Output
         }
         return
             $"{GenerateOutput(xbox)} = {function}({Input.Generate()}, {Offset}, {mulInt}, {DeadZone})";
+    }
+
+    public override string GenerateLedUpdate(int debounceIndex, bool xbox)
+    {
+        throw new System.NotImplementedException();
     }
 }

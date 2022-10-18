@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class AvrTwiConfig : TwiConfig
@@ -7,7 +9,7 @@ public class AvrTwiConfig : TwiConfig
     }
 
     public override string Definition => "GC_TWI";
-    protected override void UpdatePins(string field)
+    protected override void UpdatePins([CallerMemberName]string? propertyName = null)
     {
     }
 }

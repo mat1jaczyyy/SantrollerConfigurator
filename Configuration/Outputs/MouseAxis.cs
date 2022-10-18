@@ -25,6 +25,8 @@ public class MouseAxis : OutputAxis
         return "report->" + Mappings[Type];
     }
     public override bool IsCombined => false;
+    public override string? GetLocalisedName() => Name;
+
     public override SerializedOutput GetJson()
     {
         return new SerializedMouseAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, DeadZone);

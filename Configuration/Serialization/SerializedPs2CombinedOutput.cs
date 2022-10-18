@@ -1,7 +1,7 @@
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.Combined;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ProtoBuf;
 

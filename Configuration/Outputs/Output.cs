@@ -20,6 +20,7 @@ using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+
 public abstract class Output : ReactiveObject, IDisposable
 {
     protected readonly ConfigViewModel Model;
@@ -103,6 +104,9 @@ public abstract class Output : ReactiveObject, IDisposable
     private readonly ObservableAsPropertyHelper<bool> _isGh5;
     private readonly ObservableAsPropertyHelper<bool> _isWt;
     private readonly ObservableAsPropertyHelper<bool> _areLedsEnabled;
+    private readonly ObservableAsPropertyHelper<string?> _localisedName;
+
+    public string? LocalisedName => _localisedName.Value;
     public bool IsDj => _isDj.Value;
     public bool IsWii => _isWii.Value;
     public bool IsPs2 => _isPs2.Value;
@@ -114,6 +118,13 @@ public abstract class Output : ReactiveObject, IDisposable
 
     private Color _ledOn;
     private Color _ledOff;
+    private int? _ledIndex;
+
+    public int? LedIndex
+    {
+        get => _ledIndex;
+        set => this.RaiseAndSetIfChanged(ref _ledIndex, value);
+    }
 
     public Color LedOn
     {
@@ -142,13 +153,18 @@ public abstract class Output : ReactiveObject, IDisposable
         _isGh5 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.Gh5NeckInput)
             .ToProperty(this, x => x.IsGh5);
         _isPs2 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.Ps2Input)
-            .ToProperty(this,  x => x.IsPs2);
+            .ToProperty(this, x => x.IsPs2);
         _isWt = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.WtNeckInput)
             .ToProperty(this, x => x.IsWt);
         _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is LedType.Apa102)
             .ToProperty(this, x => x.AreLedsEnabled);
+        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType,x => x.Model.RhythmType).Select(x => GetLocalisedName())
+            .ToProperty(this, x => x.LocalisedName);
     }
 
+    
+    public abstract string? GetLocalisedName();
+    public abstract bool IsStrum { get; }
 
     public void ClearInput()
     {
@@ -202,11 +218,16 @@ public abstract class Output : ReactiveObject, IDisposable
 
 
     public abstract SerializedOutput GetJson();
+
     private Bitmap? GetImage(DeviceControllerType type)
     {
-        string assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
+        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         string? bitmap = null;
-        if (IsCombined)
+        if (this is EmptyOutput)
+        {
+            bitmap = "Generic.png";
+        }
+        else if (IsCombined)
         {
             bitmap = $"Combined/{Name}.png";
         }
@@ -218,7 +239,7 @@ public abstract class Output : ReactiveObject, IDisposable
                     bitmap = $"GH/{Name}.png";
                     break;
                 case DeviceControllerType.Gamepad:
-                    bitmap = $"Icons/Others/Xbox360/360_{Name}.png";
+                    bitmap = $"Others/Xbox360/360_{Name}.png";
                     break;
             }
         }
@@ -234,10 +255,12 @@ public abstract class Output : ReactiveObject, IDisposable
         {
             return null;
         }
-
     }
 
-    public abstract string Generate(bool xbox, int debounceIndex);
+    public abstract string Generate(bool xbox, bool shared, int debounceIndex, bool combined);
+    public abstract string GenerateLedUpdate(int debounceIndex, bool xbox);
+    
+    public virtual bool RequiresInput => true;
 
     public virtual IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => new[] {this};
 
@@ -246,6 +269,7 @@ public abstract class Output : ReactiveObject, IDisposable
         Input?.Dispose();
     }
 
-    public List<DevicePin> GetPins(IList<Output> bindings) => GetOutputs(bindings).SelectMany(s => s.GetOutputs(bindings)).SelectMany(s => (s.Input?.Pins ?? new()))
+    public List<DevicePin> GetPins(IList<Output> bindings) => GetOutputs(bindings)
+        .SelectMany(s => s.GetOutputs(bindings)).SelectMany(s => (s.Input?.Pins ?? new()))
         .Distinct().ToList();
 }

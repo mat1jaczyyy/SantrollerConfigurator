@@ -64,8 +64,7 @@ public class AnalogToDigital : Input
     public override bool IsAnalog => Child.IsAnalog;
     public override bool IsUint => Child.IsUint;
 
-    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller controller)
+    public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
         throw new InvalidOperationException("Never call GenerateAll on AnalogToDigital, call it on its children");
     }

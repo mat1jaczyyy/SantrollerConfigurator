@@ -235,6 +235,8 @@ public class KeyboardButton : OutputButton
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;
+    public override string? GetLocalisedName() => Name;
+
     public override SerializedOutput GetJson()
     {
         return new SerializedKeyboardButton(Input?.GetJson(), LedOn, LedOff, Debounce, Key);

@@ -16,6 +16,7 @@ public class SerializedConfiguration
     [ProtoMember(5)] public EmulationType EmulationType { get; }
     [ProtoMember(6)] public RhythmType RhythmType { get; }
     [ProtoMember(7)] public List<SerializedOutput> Bindings { get; }
+    [ProtoMember(8)] public LedOrderType LedOrder { get; }
     
     public SerializedConfiguration(ConfigViewModel model)
     {
@@ -26,6 +27,7 @@ public class SerializedConfiguration
         RhythmType = model.RhythmType;
         XInputOnWindows = model.XInputOnWindows;
         CombinedDebounce = model.CombinedDebounce;
+        LedOrder = model.LedOrder;
     }
 
     public void LoadConfiguration(ConfigViewModel model)
@@ -38,5 +40,6 @@ public class SerializedConfiguration
         model.XInputOnWindows = XInputOnWindows;
         model.Bindings.Clear();
         model.Bindings.AddRange(Bindings.Select(s => s.Generate(model, model.MicroController!)));
+        model.LedOrder = LedOrder;
     }
 }

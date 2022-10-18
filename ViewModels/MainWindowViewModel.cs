@@ -39,8 +39,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         private bool _writingToUsb;
 
-        private readonly static string UdevFile = "99-ardwiino.rules";
-        private readonly static string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
+        private static readonly string UdevFile = "99-ardwiino.rules";
+        private static readonly string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
 
         public IConfigurableDevice? SelectedDevice
         {
@@ -51,7 +51,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _selectedDevice, value);
-                this.RaisePropertyChanged("MigrationSupported");
+                this.RaisePropertyChanged(nameof(MigrationSupported));
                 Connected = SelectedDevice != null;
             }
         }

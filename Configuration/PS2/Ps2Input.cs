@@ -228,8 +228,7 @@ public class Ps2Input : SpiInput
         return retDs2;
     }
 
-    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller controller)
+    public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
         Dictionary<Ps2InputType, string> ds2Axis = new();
         Dictionary<Ps2ControllerType, List<string>> mappedBindings = new();

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -33,7 +34,7 @@ public abstract class TwiConfig: ReactiveObject
 
     public string Type => _type;
     public abstract string Definition { get; }
-    protected abstract void UpdatePins(string field);
+    protected abstract void UpdatePins([CallerMemberName]string? propertyName = null);
 
     public int Sda
     {
@@ -41,7 +42,7 @@ public abstract class TwiConfig: ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged(ref _sda, value);
-            UpdatePins("sda");
+            UpdatePins();
         }
     }
 
@@ -51,7 +52,7 @@ public abstract class TwiConfig: ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged(ref _scl, value);
-            UpdatePins("scl");
+            UpdatePins();
         }
     }
 

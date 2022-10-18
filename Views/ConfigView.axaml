@@ -11,12 +11,29 @@
              xmlns:ps2="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.PS2"
              xmlns:wii="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Wii"
              xmlns:output="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Outputs"
-             xmlns:combined="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Combined"
+             xmlns:combined="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfiguratorSharp.NetCore.Views.ConfigView"
              x:CompileBindings="True"
              Background="Transparent">
     <UserControl.Resources>
+        <netCore:EnumToStringConverter x:Key="EnumToStringConverter" />
+        <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
+        <DataTemplate x:Key="ControllerEnumTemplate" DataType="system:Object">
+            <TextBlock x:CompileBindings="False">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
+                        <Binding></Binding>
+                        <Binding Path="$parent[UserControl].DataContext.DeviceType"></Binding>
+                        <Binding Path="$parent[UserControl].DataContext.RhythmType"></Binding>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DataTemplate>
+        <DataTemplate x:Key="EnumToStringTemplate" DataType="system:Object">
+            <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
+        </DataTemplate>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
             <DataTemplate DataType="{x:Type neck:Gh5NeckInput}">
                 <StackPanel Orientation="Horizontal">
@@ -28,6 +45,30 @@
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}">
                     </ComboBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="configuration:EmptyOutput">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsController}">
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding CombinedType}"
+                                  Items="{Binding CombinedTypes}" ItemTemplate="{StaticResource ControllerEnumTemplate}">
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding MouseAxisType}"
+                                  Items="{Binding MouseAxisTypes}">
+                        </ComboBox>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding MouseButtonType}"
+                                  Items="{Binding MouseButtonTypes}">
+                        </ComboBox>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Key}" Items="{Binding Keys}">
+                        </ComboBox>
+                        <!-- TODO: Keyboard key from key with detection  -->
+                    </StackPanel>
+                    <Button
+                        Command="{Binding AddCommand}">
+                        Add
+                    </Button>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type neck:GhWtTapInput}">
@@ -224,33 +265,6 @@
                                       SelectedItem="{Binding LedType}" Items="{Binding LedTypes}">
                             </ComboBox>
                         </StackPanel>
-                        <StackPanel IsVisible="{Binding IsController}">
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Binding"
-                                       TextAlignment="Center" />
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding SimpleType}" Items="{Binding SimpleTypes}">
-                            </ComboBox>
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding StandardButtonType}" Items="{Binding StandardButtonTypes}">
-                            </ComboBox>
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding StandardAxisType}" Items="{Binding StandardAxisTypes}">
-                            </ComboBox>
-                        </StackPanel>
-                        <StackPanel IsVisible="{Binding IsKeyboard}">
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Binding"
-                                       TextAlignment="Center" />
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding MouseAxisType}" Items="{Binding MouseAxisTypes}">
-                            </ComboBox>
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding MouseButtonType}" Items="{Binding MouseButtonTypes}">
-                            </ComboBox>
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding Key}" Items="{Binding Keys}">
-                            </ComboBox>
-                            <!-- TODO: Keyboard key from key with detection  -->
-                        </StackPanel>
                         <Button x:CompileBindings="False" Command="{Binding AddOutput}" HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Add Binding
@@ -290,7 +304,7 @@
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate DataType="output:Output">
                                 <WrapPanel>
-                                    <Image ToolTip.Tip="{Binding Name}"
+                                    <Image ToolTip.Tip="{Binding LocalisedName}"
                                            HorizontalAlignment="Center" Width="75"
                                            Source="{Binding Image}">
                                     </Image>
@@ -309,6 +323,7 @@
                                                 <Binding Path="Input"
                                                          Converter="{x:Static  ObjectConverters.IsNull}" />
                                                 <Binding Path="!IsCombined" />
+                                                <Binding Path="RequiresInput" />
                                             </MultiBinding>
                                         </StackPanel.IsVisible>
                                         <ComboBox VerticalAlignment="Center"

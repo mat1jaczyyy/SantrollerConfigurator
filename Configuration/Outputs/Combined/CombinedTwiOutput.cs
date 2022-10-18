@@ -4,19 +4,17 @@ using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
-public abstract class TwiOutput : Output
+public abstract class CombinedTwiOutput : CombinedOutput
 {
     private readonly Microcontroller _microcontroller;
 
-    // ReSharper disable ExplicitCallerInfoArgument
     
-    protected TwiOutput(ConfigViewModel model, Microcontroller microcontroller, string twiType,
+    protected CombinedTwiOutput(ConfigViewModel model, Microcontroller microcontroller, string twiType,
         int twiFreq, string name, int? sda = null, int? scl = null) : base(model, null, Colors.Transparent, Colors.Transparent, name)
         
     {
@@ -45,15 +43,15 @@ public abstract class TwiOutput : Output
         }
 
        
-        this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged("Scl"));
-        this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged("Sda"));
+        this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged(nameof(Scl)));
+        this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged(nameof(Sda)));
         microcontroller.TwiConfigs.CollectionChanged +=
             (sender, args) =>
             {
                 var sda2 = Sda;
                 var scl2 = Scl;
-                this.RaisePropertyChanged("AvailableSdaPins");
-                this.RaisePropertyChanged("AvailableSclPins");
+                this.RaisePropertyChanged(nameof(AvailableSdaPins));
+                this.RaisePropertyChanged(nameof(AvailableSclPins));
                 Sda = sda2;
                 Scl = scl2;
             };

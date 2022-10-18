@@ -101,8 +101,7 @@ public class Gh5NeckInput : TwiInput
 
     public override bool IsAnalog => Input == Gh5NeckInputType.TapBar;
 
-    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller controller)
+    public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
         return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }

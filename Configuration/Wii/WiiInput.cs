@@ -200,7 +200,7 @@ public class WiiInput : TwiInput
         {WiiInputType.TaTaConLeftDrumCenter, "((~wiiData[0]) & (1 << 6))"},
         {WiiInputType.UDrawPenButton1, "((wiiButtonsHigh) & (1 << 0))"},
         {WiiInputType.UDrawPenButton2, "((wiiButtonsHigh) & (1 << 1))"},
-        {WiiInputType.UDrawPenClick, "((~wiiButtonsHigh) & (1 << 2))"}, 
+        {WiiInputType.UDrawPenClick, "((~wiiButtonsHigh) & (1 << 2))"},
         {WiiInputType.GuitarTapGreen, GetMappingForTapBar(0x04, 0x07)},
         {WiiInputType.GuitarTapRed, GetMappingForTapBar(0x07, 0x0A, 0x0c, 0x0d)},
         {WiiInputType.GuitarTapYellow, GetMappingForTapBar(0x0c, 0x0d, 0x12, 0x13, 0x14, 0x15)},
@@ -268,8 +268,7 @@ public class WiiInput : TwiInput
         return string.Join(" || ", mappings.Select(s2 => $"(lastTapWii == {s2})"));
     }
 
-    public override string GenerateAll(bool xbox, List<Tuple<Input, string>> bindings,
-        Microcontroller controller)
+    public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
         bool hasTapBar = false;
@@ -316,7 +315,9 @@ public class WiiInput : TwiInput
                 mappings2.Add(val);
             }
 
-            ret += @$"
+            if (mappings.Any())
+            {
+                ret += @$"
 case WII_CLASSIC_CONTROLLER:
 case WII_CLASSIC_CONTROLLER_PRO:
 if (hiRes) {{
@@ -324,10 +325,20 @@ if (hiRes) {{
 }} else {{
     {string.Join(";\n", mappings)};
 }}
-{string.Join(";\n",mappingsDigital)};
 break;
 ";
+            }
+            else
+            {
+                ret += @$"
+case WII_CLASSIC_CONTROLLER:
+case WII_CLASSIC_CONTROLLER_PRO:
+{string.Join(";\n", mappingsDigital)};
+break;
+";
+            }
         }
+
         foreach (var binding in mappedBindings)
         {
             var input = binding.Key;

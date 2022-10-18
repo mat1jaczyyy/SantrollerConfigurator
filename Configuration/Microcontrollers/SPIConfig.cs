@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -49,7 +50,7 @@ public abstract class SpiConfig : ReactiveObject
     public string Type => _type;
     
     public abstract string Definition { get; }
-    protected abstract void UpdatePins(string field);
+    protected abstract void UpdatePins([CallerMemberName]string? propertyName = null);
 
     public int Mosi
     {
@@ -57,7 +58,7 @@ public abstract class SpiConfig : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged(ref _mosi, value);
-            UpdatePins("mosi");
+            UpdatePins();
         }
     }
 
@@ -67,7 +68,7 @@ public abstract class SpiConfig : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged(ref _miso, value);
-            UpdatePins("miso");
+            UpdatePins();
         }
     }
 
@@ -77,7 +78,7 @@ public abstract class SpiConfig : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged(ref _sck, value);
-            UpdatePins("sck");
+            UpdatePins();
         }
     }
 }

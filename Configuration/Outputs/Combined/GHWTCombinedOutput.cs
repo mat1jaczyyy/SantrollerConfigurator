@@ -3,13 +3,12 @@ using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
-public class GhwtCombinedOutput : Output
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
+public class GhwtCombinedOutput : CombinedOutput
 {
     public bool MapTapBarToAxis { get; set; }
     public bool MapTapBarToFrets { get; set; }
@@ -35,16 +34,9 @@ public class GhwtCombinedOutput : Output
         }
     }
 
-    public override bool IsCombined => true;
-
     public override SerializedOutput GetJson()
     {
         return new SerializedGhwtCombinedOutput(LedOn, LedOff, Pin, MapTapBarToFrets, MapTapBarToAxis);
-    }
-
-    public override string Generate(bool xbox, int debounceIndex)
-    {
-        return "";
     }
 
     public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);

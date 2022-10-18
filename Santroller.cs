@@ -73,7 +73,7 @@ public class Santroller : ConfigurableUsbDevice
                 }
             }
         }
-        catch (Exception ex) when (ex is JsonException || ex is FormatException || ex is InvalidOperationException)
+        catch (Exception ex) when (ex is JsonException or FormatException or InvalidOperationException)
         {
             throw new NotImplementedException("Configuration missing from Santroller device, are you sure this is a real santroller device?");
             // TODO: throw a better exception here, and handle this in the gui, so that a device that appears to be missing its config doesn't do something weird.

@@ -11,7 +11,6 @@ public abstract class TwiInput : Input
 {
     private readonly Microcontroller _microcontroller;
 
-    // ReSharper disable ExplicitCallerInfoArgument
     protected TwiInput(Microcontroller microcontroller, string twiType, int twiFreq, int? sda, int? scl)
     {
         _microcontroller = microcontroller;
@@ -39,15 +38,15 @@ public abstract class TwiInput : Input
         }
 
        
-        this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged("Scl"));
-        this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged("Sda"));
+        this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged(nameof(Scl)));
+        this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged(nameof(Sda)));
         microcontroller.TwiConfigs.CollectionChanged +=
             (sender, args) =>
             {
                 var sda2 = Sda;
                 var scl2 = Scl;
-                this.RaisePropertyChanged("AvailableSdaPins");
-                this.RaisePropertyChanged("AvailableSclPins");
+                this.RaisePropertyChanged(nameof(AvailableSdaPins));
+                this.RaisePropertyChanged(nameof(AvailableSclPins));
                 Sda = sda2;
                 Scl = scl2;
             };

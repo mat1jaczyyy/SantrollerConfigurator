@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class AvrSpiConfig: SpiConfig
@@ -7,7 +9,7 @@ public class AvrSpiConfig: SpiConfig
     }
 
     public override string Definition => "GC_SPI";
-    protected override void UpdatePins(string field)
+    protected override void UpdatePins([CallerMemberName]string? propertyName = null)
     {
     }
 }

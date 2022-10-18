@@ -4,18 +4,16 @@ using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
-public abstract class SpiOutput : Output
+public abstract class CombinedSpiOutput : CombinedOutput
 {
     private readonly Microcontroller _microcontroller;
 
-    // ReSharper disable ExplicitCallerInfoArgument
-    protected SpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
+    protected CombinedSpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
         bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null): base(model, null, Colors.Transparent, Colors.Transparent, name)
     {
         _microcontroller = microcontroller;
@@ -43,18 +41,18 @@ public abstract class SpiOutput : Output
             _spiConfig = microcontroller.AssignSpiPins(SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha, msbFirst, spiFreq)!;
         }
 
-        this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged("Miso"));
-        this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged("Mosi"));
-        this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged("Sck"));
+        this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
+        this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
+        this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged(nameof(Sck)));
         microcontroller.TwiConfigs.CollectionChanged +=
             (_, _) =>
             {
                 var mosi2 = Mosi;
                 var miso2 = Miso;
                 var sck2 = Sck;
-                this.RaisePropertyChanged("AvailableMosiPins");
-                this.RaisePropertyChanged("AvailableMisoPins");
-                this.RaisePropertyChanged("AvailableSckPins");
+                this.RaisePropertyChanged(nameof(AvailableMosiPins));
+                this.RaisePropertyChanged(nameof(AvailableMisoPins));
+                this.RaisePropertyChanged(nameof(AvailableSckPins));
                 Mosi = mosi2;
                 Miso = miso2;
                 Sck = sck2;

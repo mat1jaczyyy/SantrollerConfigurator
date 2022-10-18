@@ -33,6 +33,8 @@ public class MouseButton : OutputButton
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;
+    public override string? GetLocalisedName() => Name;
+
     public override SerializedOutput GetJson()
     {
         return new SerializedMouseButton(Input?.GetJson(), LedOn, LedOff, Debounce, Type);

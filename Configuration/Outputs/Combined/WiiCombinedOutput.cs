@@ -3,15 +3,14 @@ using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
-public class WiiCombinedOutput : TwiOutput
+public class WiiCombinedOutput : CombinedTwiOutput
 {
     public static readonly Dictionary<WiiInputType, StandardButtonType> Buttons = new()
     {
@@ -121,13 +120,6 @@ public class WiiCombinedOutput : TwiOutput
         MapTapBarToAxis = mapTapBarToAxis;
         MapGuitarJoystickToDPad = mapGuitarJoystickToDPad;
         MapNunchukAccelerationToRightJoy = mapNunchukAccelerationToRightJoy;
-    }
-
-    public override bool IsCombined => true;
-
-    public override string Generate(bool xbox, int debounceIndex)
-    {
-        return "";
     }
 
     public override SerializedOutput GetJson()

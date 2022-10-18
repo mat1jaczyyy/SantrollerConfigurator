@@ -58,6 +58,10 @@ public class ControllerButton : OutputButton
         Type = type;
     }
     public StandardButtonType Type { get; }
+
+    public override string? GetLocalisedName() =>
+        ControllerEnumConverter.GetButtonText(Model.DeviceType, Model.RhythmType, Type);
+
     public override string GenerateIndex(bool xbox)
     {
         if (xbox)

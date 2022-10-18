@@ -10,8 +10,6 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration;
 public abstract class SpiInput : Input
 {
     protected readonly Microcontroller Microcontroller;
-
-    // ReSharper disable ExplicitCallerInfoArgument
     protected SpiInput(Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
         bool cpha, bool msbFirst, int? miso = null, int? mosi = null, int? sck = null)
     {
@@ -40,18 +38,18 @@ public abstract class SpiInput : Input
             _spiConfig = microcontroller.AssignSpiPins(_spiType, mosi.Value, miso.Value, sck.Value, cpol, cpha, msbFirst, spiFreq)!;
         }
 
-        this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged("Miso"));
-        this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged("Mosi"));
-        this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged("Sck"));
+        this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
+        this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
+        this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged(nameof(Sck)));
         microcontroller.TwiConfigs.CollectionChanged +=
             (_, _) =>
             {
                 var mosi2 = Mosi;
                 var miso2 = Miso;
                 var sck2 = Sck;
-                this.RaisePropertyChanged("AvailableMosiPins");
-                this.RaisePropertyChanged("AvailableMisoPins");
-                this.RaisePropertyChanged("AvailableSckPins");
+                this.RaisePropertyChanged(nameof(AvailableMosiPins));
+                this.RaisePropertyChanged(nameof(AvailableMisoPins));
+                this.RaisePropertyChanged(nameof(AvailableSckPins));
                 Mosi = mosi2;
                 Miso = miso2;
                 Sck = sck2;

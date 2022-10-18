@@ -3,15 +3,14 @@ using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Combined;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
-public class Ps2CombinedOutput : SpiOutput
+public class Ps2CombinedOutput : CombinedSpiOutput
 {
     public static readonly Dictionary<Ps2InputType, StandardButtonType> Buttons = new()
     {
@@ -75,17 +74,9 @@ public class Ps2CombinedOutput : SpiOutput
         Att = att ?? 0;
         Ack = ack ?? 0;
     }
-
-    public override bool IsCombined => true;
-
     public override SerializedOutput GetJson()
     {
         return new SerializedPs2CombinedOutput(LedOn, LedOff, Miso, Mosi, Sck, Att, Ack);
-    }
-
-    public override string Generate(bool xbox, int debounceIndex)
-    {
-        return "";
     }
 
     public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);
