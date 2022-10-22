@@ -42,6 +42,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
     {
+        if (!Device.IsOpen) return Array.Empty<byte>();
         UsbCtrlFlags requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
         byte[] buffer = new byte[size];
 
@@ -57,11 +58,10 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     }
 
 
-    public uint WriteData(ushort wValue, byte bRequest, byte[] buffer)
+    public void WriteData(ushort wValue, byte bRequest, byte[] buffer)
     {
+        if (!Device.IsOpen) return;
         UsbCtrlFlags requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
-
-
         var sp = new UsbSetupPacket(
             ((byte)requestType),
             bRequest,
@@ -69,7 +69,6 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             2,
             buffer.Length);
         Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
-        return (uint)length;
     }
     public IConfigurableDevice? BootloaderDevice { get; private set; }
     private TaskCompletionSource<string?>? _bootloaderPath;
@@ -77,16 +76,14 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     {
         if (Board.ArdwiinoName.Contains("pico"))
         {
-            var pico = device as PicoDevice;
-            if (pico != null)
+            if (device is PicoDevice pico)
             {
                 _bootloaderPath?.SetResult(pico.GetPath());
             }
         }
         else if (Board.HasUsbmcu)
         {
-            var dfu = device as Dfu;
-            if (dfu != null && dfu.Board.HasUsbmcu && dfu.Board.Environment.Contains("arduino_uno_mega"))
+            if (device is Dfu {Board.HasUsbmcu: true} dfu)
             {
                 BootloaderDevice = dfu;
                 _bootloaderPath?.SetResult(dfu.Board.Environment);
