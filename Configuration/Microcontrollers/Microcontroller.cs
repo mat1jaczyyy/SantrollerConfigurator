@@ -52,5 +52,6 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
         }
 
         public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);
+        public abstract int GetFirstAnalogPin();
     }
 }

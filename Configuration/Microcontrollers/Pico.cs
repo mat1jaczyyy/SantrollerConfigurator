@@ -16,6 +16,11 @@ public class Pico : Microcontroller
         return $"puseIn({pin},{mode},{timeout})";
     }
 
+    public override int GetFirstAnalogPin()
+    {
+        return PinA0;
+    }
+
     public Pico(Board board)
     {
         Board = board;

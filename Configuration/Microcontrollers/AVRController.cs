@@ -236,4 +236,8 @@ public abstract class AvrController : Microcontroller
     }
 
     protected abstract string GetInterruptForPin(int ack);
+    public override int GetFirstAnalogPin()
+    {
+        return PinA0;
+    }
 }

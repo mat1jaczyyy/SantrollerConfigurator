@@ -254,7 +254,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 foreach (var type in Enum.GetValues<StandardAxisType>())
                 {
                     if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
-                    Bindings.Add(new ControllerAxis(this, new DirectInput(0, DevicePinMode.Analog, MicroController!),
+                    Bindings.Add(new ControllerAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, MicroController!),
                         Colors.Transparent, Colors.Transparent, 1, 0, 0, type));
                 }
 

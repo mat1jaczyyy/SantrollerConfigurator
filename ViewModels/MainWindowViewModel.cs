@@ -54,8 +54,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private readonly ObservableAsPropertyHelper<bool> _newDevice;
         public bool NewDevice => _newDevice.Value;
 
-        private bool _writingToUsb;
-
         private static readonly string UdevFile = "99-ardwiino.rules";
         private static readonly string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
 
@@ -89,7 +87,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             set => this.RaiseAndSetIfChanged(ref _arduino32U4Type, value);
         }
 
-        private Board _picoType;
+        private Board _picoType = Board.Rp2040Boards[0];
 
         public Board PicoType
         {
@@ -173,6 +171,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             if (config.MicroController.Board.HasUsbmcu)
             {
                 env += "_usb";
+            }
+
+            if (NewDevice)
+            {
+                env = env.Replace("_8", "");
+                env = env.Replace("_16", "");
             }
 
             await Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
@@ -324,20 +328,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 Devices.Add(device);
             }
 
-            if (_disconnectedDevice != null)
-            {
-                if (_disconnectedDevice.DeviceAdded(device))
-                {
-                    if (device is ConfigurableUsbDevice)
-                    {
-                        _selectedDevice = device;
-                        _disconnectedDevice = null;
+            if (_disconnectedDevice == null) return;
+            if (!_disconnectedDevice.DeviceAdded(device)) return;
+            if (device is not ConfigurableUsbDevice) return;
+            _selectedDevice = device;
+            _disconnectedDevice = null;
 
-                        Message = "Writing - Done";
-                        Progress = 100;
-                    }
-                }
-            }
+            Message = "Writing - Done";
+            Progress = 100;
         }
 
         private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
@@ -419,7 +417,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     string serial = dev.Info.SerialString;
                     if (product == "Santroller")
                     {
-                        if (Programming) return;
+                        if (Programming && !IsPico) return;
                         var c = new Santroller(Pio, e.Device.Name, dev, product, serial, revision);
                         AddDevice(c);
                     }

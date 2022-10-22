@@ -20,8 +20,6 @@ public class Arduino : IConfigurableDevice
     
     public Subject<bool> DfuDetected { get; }
 
-    private Santroller? controller;
-
     public Arduino(PlatformIo pio, PlatformIoPort port)
     {
         DfuDetected = new Subject<bool>();
@@ -120,22 +118,16 @@ public class Arduino : IConfigurableDevice
  
     public bool DeviceAdded(IConfigurableDevice device)
     {
-        if (controller != null)
-        {
-            return controller.DeviceAdded(device);
-        }
 
-        if (Is32U4()) return false;
         Console.WriteLine(device);
         switch (device)
         {
-            case Dfu:
+            case Dfu when !Is32U4():
             {
                 DfuDetected.OnNext(true);
                 break;
             }
-            case Santroller santroller:
-                controller = santroller;
+            case Santroller:
                 return true;
         }
 
