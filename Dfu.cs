@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using LibUsbDotNet.DeviceNotify;
+using LibUsbDotNet.Main;
 
 namespace GuitarConfiguratorSharp.NetCore;
 
@@ -27,12 +28,14 @@ public class Dfu : IConfigurableDevice
         _port = args.Device.Name;
         foreach (var board in Board.Boards)
         {
-            if (board.ProductIDs.Contains((uint)pid) && board.HasUsbmcu)
+            if (board.ProductIDs.Contains((uint) pid) && board.HasUsbmcu)
             {
                 Board = board;
+                Console.WriteLine(Board.Environment);
                 return;
             }
         }
+
         throw new InvalidOperationException("Not expected");
     }
 
@@ -48,16 +51,32 @@ public class Dfu : IConfigurableDevice
 
     public bool DeviceAdded(IConfigurableDevice device)
     {
+        Console.WriteLine("DFU device added");
+        if (device is Dfu dfu)
+        {
+            dfu.Launch();
+        }
+
+        if (device is Arduino arduino)
+        {
+            Console.WriteLine("Hello!");
+        }
         return false;
     }
 
-    public void LoadConfiguration(ConfigViewModel model)
+    public async Task LoadConfiguration(ConfigViewModel model)
     {
+        await model.SetDefaults(Board.FindMicrocontroller(Board));
     }
 
     public Task<string?> GetUploadPort()
     {
-        return Task.FromResult((string?)_port);
+        return Task.FromResult((string?) _port);
+    }
+
+    public override string ToString()
+    {
+        return $"{Board.Name} in DFU mode ({_port})";
     }
 
     public bool IsAvr()
@@ -71,5 +90,41 @@ public class Dfu : IConfigurableDevice
 
     public void BootloaderUsb()
     {
+    }
+
+    public void Launch()
+    {
+        _args.Device.Open(out var device);
+        UsbCtrlFlags requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class |
+                                   UsbCtrlFlags.Recipient_Interface;
+
+        var sp = new UsbSetupPacket(
+            ((byte) requestType),
+            3,
+            0,
+            0,
+            8);
+        var buffer = new byte[8];
+        device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
+        Console.WriteLine(length);
+        buffer = new byte[] {0x04, 0x03, 0x01, 0x00, 0x00};
+        requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
+
+        sp = new UsbSetupPacket(
+            ((byte) requestType),
+            1,
+            0,
+            0,
+            buffer.Length);
+        device.ControlTransfer(ref sp, buffer, buffer.Length, out length);
+        Console.WriteLine(length);
+        sp = new UsbSetupPacket(
+            ((byte) requestType),
+            1,
+            0,
+            0,
+            0);
+        device.ControlTransfer(ref sp, buffer, 0, out length);
+        Console.WriteLine(length);
     }
 }

@@ -5,10 +5,10 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Collections;
-using Avalonia.Input;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
@@ -21,13 +21,13 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using ProtoBuf;
 using ReactiveUI;
-using MouseButton = GuitarConfiguratorSharp.NetCore.Configuration.Outputs.MouseButton;
 
 namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
     public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         public Interaction<InputWithPin, SelectPinWindowViewModel?> ShowPinSelectDialog { get; }
+        public Interaction<Arduino, ShowUnoShortWindowViewModel?> ShowUnoShortDialog { get; }
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
 
         public IScreen HostScreen { get; }
@@ -179,6 +179,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public ConfigViewModel(MainWindowViewModel screen)
         {
             ShowPinSelectDialog = new Interaction<InputWithPin, SelectPinWindowViewModel?>();
+            ShowUnoShortDialog = new Interaction<Arduino, ShowUnoShortWindowViewModel?>();
             Main = screen;
             HostScreen = screen;
 
@@ -208,13 +209,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public ICommand ShowPinSelectDialogCommand { get; }
 
-        async Task Write()
+        public async Task Write()
         {
-            Generate(Main.Pio);
-            // await Main.Write(this);
+            await Main.Write(this);
         }
 
-        public void SetDefaults(Microcontroller microcontroller)
+        public async Task SetDefaults(Microcontroller microcontroller)
         {
             MicroController = microcontroller;
             LedType = LedType.None;
@@ -222,7 +222,28 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             EmulationType = EmulationType.Controller;
             RhythmType = RhythmType.GuitarHero;
             XInputOnWindows = false;
-            SetDefaultBindings();
+            ClearOutputs();
+            
+            switch (Main.DeviceInputType)
+            {
+                case DeviceInputType.Direct:
+                    SetDefaultBindings();
+                    break;
+                case DeviceInputType.Wii:
+                    Bindings.Add(new WiiCombinedOutput(this, microcontroller));
+                    break;
+                case DeviceInputType.Ps2:
+                    Bindings.Add(new Ps2CombinedOutput(this, microcontroller));
+                    break;
+            }
+
+            if (Main.IsUno || Main.IsMega)
+            {
+                await Task.WhenAll(Write(), ShowUnoShortDialog.Handle((Arduino) Main.SelectedDevice!).ToTask());
+                return;
+            }
+            await Write();
+
         }
 
         public void SetDefaultBindings()
@@ -278,6 +299,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             lines.Add($"#define ADC_COUNT {directInputs.DistinctBy(s => s.Pin).Count(input => input.IsAnalog)}");
 
             lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
+            //TODO: this
+            lines.Add($"#define LED_COUNT 0");
 
             lines.Add($"#define LED_TYPE {((byte) LedType)}");
 

@@ -6,13 +6,17 @@
              xmlns:guitarConfiguratorSharp="clr-namespace:GuitarConfiguratorSharp"
              xmlns:netCore="clr-namespace:GuitarConfiguratorSharp.NetCore"
              xmlns:viewModels="clr-namespace:GuitarConfiguratorSharp.NetCore.ViewModels"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="GuitarConfiguratorSharp.NetCore.Views.MainView"
              x:DataType="viewModels:MainViewModel"
              x:CompileBindings="True"
              Background="Transparent">
     <UserControl.Resources>
-        <netCore:BitmapAssetValueConverter x:Key="ImageConverter"/>
+        <netCore:EnumToStringConverter x:Key="EnumToStringConverter" />
+        <DataTemplate x:Key="EnumToStringTemplate" DataType="system:Object">
+            <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
+        </DataTemplate>
     </UserControl.Resources>
     <Panel>
         <DockPanel HorizontalAlignment="Stretch">
@@ -21,11 +25,14 @@
                     <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
                 </ExperimentalAcrylicBorder.Material>
                 <StackPanel>
-                <WrapPanel HorizontalAlignment="Center">
-                <TextBlock Text="Status: " />
-                <TextBlock Text="{Binding Main.Message}" />
-                </WrapPanel>
-                <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Foreground="{Binding Main.ProgressbarColor}" Name="RunProgress" Value="{Binding Main.Progress}" IsIndeterminate="False" Minimum="0" Maximum="100" Height="30"/>
+                    <WrapPanel HorizontalAlignment="Center">
+                        <TextBlock Text="Status: " />
+                        <TextBlock Text="{Binding Main.Message}" />
+                    </WrapPanel>
+                    <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True"
+                                 Foreground="{Binding Main.ProgressbarColor}" Name="RunProgress"
+                                 Value="{Binding Main.Progress}" IsIndeterminate="False" Minimum="0" Maximum="100"
+                                 Height="30" />
                 </StackPanel>
             </ExperimentalAcrylicBorder>
             <ExperimentalAcrylicBorder>
@@ -34,18 +41,46 @@
                 </ExperimentalAcrylicBorder.Material>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock Text="Welcome to the Santroller Configuration Tool!" />
-                    <ComboBox HorizontalAlignment="Stretch" IsEnabled="false" IsVisible="{Binding !Main.Devices.Count}" SelectedIndex="0">
+                    <ComboBox HorizontalAlignment="Stretch" IsEnabled="false" IsVisible="{Binding !Main.Devices.Count}"
+                              SelectedIndex="0">
                         <ComboBoxItem>No supported device found</ComboBoxItem>
                     </ComboBox>
-                    <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.Devices.Count}" Items="{Binding Main.Devices}" SelectedItem="{Binding Main.SelectedDevice, Mode=TwoWay}">
+                    <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.Devices.Count}"
+                              Items="{Binding Main.Devices}" SelectedItem="{Binding Main.SelectedDevice, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding}" />
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <TextBlock IsVisible="{Binding !Main.MigrationSupported}" Text="The firmware on this device is too old, it's configuration will be erased when upgrading." />
-                    <Button Content="Configure" Command="{Binding Main.Configure}" IsEnabled="{Binding Main.ReadyToConfigure}" HorizontalAlignment="Center" />
+                    <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsMega}"
+                              SelectedItem="{Binding Main.MegaType}"
+                              Items="{Binding Main.MegaTypes}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.Is32U4}"
+                              SelectedItem="{Binding Main.Arduino32U4Type}"
+                              Items="{Binding Main.Arduino32U4Types}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsPico}"
+                              SelectedItem="{Binding Main.PicoType}"
+                              Items="{Binding Main.PicoTypes}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.NewDevice}"
+                              SelectedItem="{Binding Main.DeviceInputType}"
+                              Items="{Binding Main.DeviceInputTypes}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}">
+                    </ComboBox>
+                    <TextBlock IsVisible="{Binding !Main.MigrationSupported}"
+                               Text="The firmware on this device is too old, it's configuration will be erased when upgrading." />
+                    <Button Content="Configure" Command="{Binding Main.Configure}"
+                            IsEnabled="{Binding Main.ReadyToConfigure}" HorizontalAlignment="Center" />
                 </StackPanel>
             </ExperimentalAcrylicBorder>
         </DockPanel>

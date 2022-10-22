@@ -1,4 +1,8 @@
+using System;
 using System.IO.Ports;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Utils;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -13,9 +17,14 @@ public class Arduino : IConfigurableDevice
     public Board Board { get; }
 
     public bool MigrationSupported { get; }
+    
+    public Subject<bool> DfuDetected { get; }
+
+    private Santroller? controller;
 
     public Arduino(PlatformIo pio, PlatformIoPort port)
     {
+        DfuDetected = new Subject<bool>();
         _port = port;
         foreach (var board in Board.Boards)
         {
@@ -79,9 +88,24 @@ public class Arduino : IConfigurableDevice
         // Automagically handled by pio
     }
 
-    public void LoadConfiguration(ConfigViewModel model)
+    public bool Is32U4()
     {
-        model.SetDefaults(Board.FindMicrocontroller(Board));
+        return Board.Atmega32U4Boards.Contains(Board);
+    }
+    
+    public bool IsUno()
+    {
+        return Board.Uno.Name == Board.Name;
+    }
+    
+    public bool IsMega()
+    {
+        return Board.MegaBoards.Contains(Board);
+    }
+
+    public async Task LoadConfiguration(ConfigViewModel model)
+    {
+        await model.SetDefaults(Board.FindMicrocontroller(Board));
     }
 
     public Task<string?> GetUploadPort()
@@ -93,9 +117,28 @@ public class Arduino : IConfigurableDevice
     {
         return true;
     }
-
+ 
     public bool DeviceAdded(IConfigurableDevice device)
     {
+        if (controller != null)
+        {
+            return controller.DeviceAdded(device);
+        }
+
+        if (Is32U4()) return false;
+        Console.WriteLine(device);
+        switch (device)
+        {
+            case Dfu:
+            {
+                DfuDetected.OnNext(true);
+                break;
+            }
+            case Santroller santroller:
+                controller = santroller;
+                return true;
+        }
+
         return false;
     }
 }

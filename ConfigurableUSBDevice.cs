@@ -15,9 +15,9 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     protected readonly Version Version;
     protected readonly string Path;
 
-    public Board Board {get; protected set;}
+    protected Board Board {get; set;}
 
-    public ConfigurableUsbDevice(UsbDevice device, string path, string product, string serial, ushort version)
+    protected ConfigurableUsbDevice(UsbDevice device, string path, string product, string serial, ushort version)
     {
         Device = device;
         Path = path;
@@ -92,20 +92,20 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
                 _bootloaderPath?.SetResult(dfu.Board.Environment);
             }
         }
-        var other = device as ConfigurableUsbDevice;
-        if (other != null)
+
+        if (device is ConfigurableUsbDevice other)
         {
             return other.Serial == Serial;
         }
-        var arduino = device as Arduino;
-        if (arduino != null)
+
+        if (device is Arduino arduino)
         {
             return arduino.Board.ArdwiinoName == Board.UsbUpload.ArdwiinoName;
         }
         return false;
     }
 
-    public abstract void LoadConfiguration(ConfigViewModel model);
+    public abstract Task LoadConfiguration(ConfigViewModel model);
 
     public async Task<string?> GetUploadPort()
     {

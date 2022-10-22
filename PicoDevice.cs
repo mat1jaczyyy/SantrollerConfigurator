@@ -48,9 +48,9 @@ public class PicoDevice : IConfigurableDevice
         return false;
     }
 
-    public void LoadConfiguration(ConfigViewModel model)
+    public async Task LoadConfiguration(ConfigViewModel model)
     {
-        model.SetDefaults(Board.FindMicrocontroller(Board.FindBoard("pico",0)));
+        await model.SetDefaults(Board.FindMicrocontroller(Board.FindBoard("pico",0)));
     }
 
     public Task<string?> GetUploadPort()

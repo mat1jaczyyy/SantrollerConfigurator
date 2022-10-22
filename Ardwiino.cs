@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
@@ -100,11 +101,11 @@ public class Ardwiino : ConfigurableUsbDevice
         WriteData(JumpBootloaderCommandUno, RequestHidSetReport, Array.Empty<byte>());
     }
 
-    public override void LoadConfiguration(ConfigViewModel model)
+    public override async Task LoadConfiguration(ConfigViewModel model)
     {
         if (!MigrationSupported)
         {
-            model.SetDefaults(Board.FindMicrocontroller(Board));
+            await model.SetDefaults(Board.FindMicrocontroller(Board));
             return;
         }
 
@@ -576,6 +577,7 @@ public class Ardwiino : ConfigurableUsbDevice
             model.XInputOnWindows = xinputOnWindows;
             model.Bindings.Clear();
             model.Bindings.AddRange(bindings);
+            await model.Write();
         }
         catch (ArgumentException)
         {

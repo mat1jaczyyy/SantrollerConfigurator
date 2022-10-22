@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Utils;
@@ -39,22 +40,26 @@ public class Santroller : ConfigurableUsbDevice
 
     public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort revision) : base(device, path, product, serial, revision)
     {
-       
+        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, ((byte)Commands.CommandReadFCpu), 32)).Replace("\0", "").Replace("L", "").Trim();
+        var fCpu = uint.Parse(fCpuStr);
+        var board = Encoding.UTF8.GetString(ReadData(0, ((byte)Commands.CommandReadBoard), 32)).Replace("\0", "");
+        Microcontroller m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
+        Board = m.Board;
     }
 
     public override void Bootloader()
     {
         WriteData(0, ((byte)Commands.CommandJumpBootloader), Array.Empty<byte>());
+        Device.Close();
     }
     public override void BootloaderUsb()
     {
-        if (Board.HasUsbmcu)
-        {
-            WriteData(0, ((byte)Commands.CommandJumpBootloaderUno), Array.Empty<byte>());
-        }
+        if (!Board.HasUsbmcu) return;
+        WriteData(0, ((byte)Commands.CommandJumpBootloaderUno), Array.Empty<byte>());
+        Device.Close();
     }
 
-    public override void LoadConfiguration(ConfigViewModel model)
+    public override async Task LoadConfiguration(ConfigViewModel model)
     {
         try
         {
@@ -65,13 +70,9 @@ public class Santroller : ConfigurableUsbDevice
             Board = m.Board;
             model.MicroController = m;
             var data = ReadData(0, ((byte)Commands.CommandReadConfig), 2048);
-            using (var inputStream = new MemoryStream(data))
-            {
-                using (var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress))
-                {
-                    Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
-                }
-            }
+            using var inputStream = new MemoryStream(data);
+            await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
+            Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
         }
         catch (Exception ex) when (ex is JsonException or FormatException or InvalidOperationException)
         {
@@ -82,6 +83,6 @@ public class Santroller : ConfigurableUsbDevice
 
     public override string ToString()
     {
-        return "Santroller";
+        return $"Santroller - {Board.Name}";
     }
 }
