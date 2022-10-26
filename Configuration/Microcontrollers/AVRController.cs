@@ -56,42 +56,41 @@ public abstract class AvrController : Microcontroller
     public abstract int PinCount { get; }
 
 
-    private AvrTwiConfig? _twiConfig;
-    private AvrSpiConfig? _spiConfig;
 
     public override SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
         bool msbfirst,
         int clock)
     {
-        if (_spiConfig != null) return null;
-        _spiConfig = new AvrSpiConfig(type, SpiMosi, SpiMiso, SpiSck, cpol, cpha, msbfirst, clock);
-        SpiConfigs.Add(_spiConfig);
-        return _spiConfig;
+        if (PinConfigs.Any(c => c is AvrSpiConfig)) return null;
+        var conf = new AvrSpiConfig(type, SpiMosi, SpiMiso, SpiSck, cpol, cpha, msbfirst, clock);
+        PinConfigs.Add(conf);
+        return conf;
     }
 
     public override TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock)
     {
-        if (_twiConfig != null) return null;
-        _twiConfig = new AvrTwiConfig(type, I2CSda, I2CScl, clock);
-        TwiConfigs.Add(_twiConfig);
-        return _twiConfig;
+        if (PinConfigs.Any(c => c is AvrTwiConfig)) return null;
+        var conf = new AvrTwiConfig(type, I2CSda, I2CScl, clock);
+        PinConfigs.Add(conf);
+        return conf;
     }
 
-    public override void UnAssignSpiPins(string type)
+    public override void UnAssignPins(string type)
     {
-        SpiConfigs.Clear();
-        _spiConfig = null;
-    }
+        var elements = PinConfigs.Where(s => s.Type == type).ToList();
+        PinConfigs.RemoveAll(elements);
 
-    public override void UnAssignTwiPins(string type)
+    }
+    public override void AssignPin(PinConfig pinConfig)
     {
-        TwiConfigs.Clear();
-        _twiConfig = null;
+        UnAssignPins(pinConfig.Type);
+        PinConfigs.Add(pinConfig);
     }
 
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
-        if (_spiConfig != null && _spiConfig.Type != type)
+        var conf = PinConfigs.FirstOrDefault(c => c is AvrSpiConfig);
+        if (conf != null && conf.Type != type)
         {
             return new();
         }
@@ -107,7 +106,8 @@ public abstract class AvrController : Microcontroller
 
     public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type)
     {
-        if (_twiConfig != null && _twiConfig.Type != type)
+        var conf = PinConfigs.FirstOrDefault(c => c is AvrTwiConfig);
+        if (conf != null && conf.Type != type)
         {
             return new();
         }
@@ -119,18 +119,13 @@ public abstract class AvrController : Microcontroller
         };
     }
 
-    public override string GenerateDefinitions()
-    {
-        return (_spiConfig?.Generate() ?? "") + (_twiConfig?.Generate() ?? "");
-    }
-
-    public override string GenerateInit(List<Output> bindings)
+    public override string GenerateInit()
     {
         // DDRx 1 = output, 0 = input
         // PORTx input 1= pullup, 0 = floating
         Dictionary<char, int> ddrByPort = new Dictionary<char, int>();
         Dictionary<char, int> portByPort = new Dictionary<char, int>();
-        var pins = bindings.SelectMany(s => s.GetPins(bindings)).Distinct();
+        var pins = PinConfigs.OfType<DirectPinConfig>();
         foreach (var pin in pins)
         {
             var port = GetPort(pin.Pin);
@@ -236,6 +231,7 @@ public abstract class AvrController : Microcontroller
     }
 
     protected abstract string GetInterruptForPin(int ack);
+
     public override int GetFirstAnalogPin()
     {
         return PinA0;

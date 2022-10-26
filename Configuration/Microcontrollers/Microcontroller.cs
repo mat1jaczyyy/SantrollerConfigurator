@@ -9,16 +9,18 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
     {
         public abstract string GenerateDigitalRead(int pin, bool pullUp);
         public abstract string GenerateDigitalWrite(int pin, bool val);
-        public abstract string GenerateDefinitions();
+        public string GenerateDefinitions()
+        {
+            return PinConfigs.Aggregate("", (current, config) => current + config.Generate());
+        }
 
         public abstract int GetChannel(int pin);
 
-        public abstract string GenerateInit(List<Output> bindings);
+        public abstract string GenerateInit();
 
         public abstract string GetPin(int pin);
 
-        public readonly AvaloniaList<SpiConfig> SpiConfigs = new();
-        public readonly AvaloniaList<TwiConfig> TwiConfigs = new();
+        public readonly AvaloniaList<PinConfig> PinConfigs = new();
         
         // TODO: call the below stuff for APA102 stuff or RF stuff (eventually)
         public abstract SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
@@ -28,12 +30,12 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public TwiConfig? GetTwiForType(string type)
         {
-            return TwiConfigs.FirstOrDefault(config => config.Type == type);
+            return (TwiConfig?)PinConfigs.FirstOrDefault(config => config is TwiConfig && config.Type == type);
         }
 
         public SpiConfig? GetSpiForType(string type)
         {
-            return SpiConfigs.FirstOrDefault(config => config.Type == type);
+            return (SpiConfig?)PinConfigs.FirstOrDefault(config => config is SpiConfig && config.Type == type);
         }
 
         public abstract string GenerateAckDefines(int ack);
@@ -43,8 +45,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
         public abstract List<KeyValuePair<int, SpiPinType>> SpiPins(string type);
         public abstract List<KeyValuePair<int, TwiPinType>> TwiPins(string type);
         
-        public abstract void UnAssignSpiPins(string type);
-        public abstract void UnAssignTwiPins(string type);
+        public abstract void UnAssignPins(string type);
 
         public abstract Board Board {get;}
         public string GenerateAnalogRead(int pin) {
@@ -53,5 +54,6 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);
         public abstract int GetFirstAnalogPin();
+        public abstract void AssignPin(PinConfig pinConfig);
     }
 }

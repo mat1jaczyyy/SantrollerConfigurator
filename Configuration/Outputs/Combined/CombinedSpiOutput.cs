@@ -44,7 +44,7 @@ public abstract class CombinedSpiOutput : CombinedOutput
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
         this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
         this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged(nameof(Sck)));
-        microcontroller.TwiConfigs.CollectionChanged +=
+        microcontroller.PinConfigs.CollectionChanged +=
             (_, _) =>
             {
                 var mosi2 = Mosi;
@@ -107,7 +107,7 @@ public abstract class CombinedSpiOutput : CombinedOutput
     }
     public override void Dispose()
     {
-        _microcontroller.UnAssignSpiPins(SpiType);
+        _microcontroller.UnAssignPins(SpiType);
         base.Dispose();
     }
 }

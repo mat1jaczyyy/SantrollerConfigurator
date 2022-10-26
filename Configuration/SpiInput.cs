@@ -41,7 +41,7 @@ public abstract class SpiInput : Input
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
         this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
         this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged(nameof(Sck)));
-        microcontroller.TwiConfigs.CollectionChanged +=
+        microcontroller.PinConfigs.CollectionChanged +=
             (_, _) =>
             {
                 var mosi2 = Mosi;
@@ -110,6 +110,6 @@ public abstract class SpiInput : Input
 
     public override void Dispose()
     {
-        Microcontroller.UnAssignSpiPins(_spiType);
+        Microcontroller.UnAssignPins(_spiType);
     }
 }

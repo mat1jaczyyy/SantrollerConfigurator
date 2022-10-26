@@ -9,10 +9,10 @@ public class DirectInput : InputWithPin
 {
     public DirectInput(int pin, DevicePinMode pinMode, Microcontroller microcontroller)
     {
-        Pin = pin;
-        PinMode = pinMode;
+        _pinConfig = new DirectPinConfig(Guid.NewGuid().ToString(), pin, pinMode);
         _microcontroller = microcontroller;
     }
+     
 
     public IEnumerable<DevicePinMode> DevicePinModes => GetPinModes();
 
@@ -28,26 +28,34 @@ public class DirectInput : InputWithPin
         return modes;
     }
 
-    public override DevicePinMode PinMode { get; }
+    private DirectPinConfig _pinConfig;
+    public override DirectPinConfig PinConfig
+    {
+        get => _pinConfig;
+        set
+        {
+            _pinConfig = value;
+            Microcontroller.AssignPin(_pinConfig);
+        }
+    }
 
     protected override Microcontroller Microcontroller => _microcontroller;
 
     private Microcontroller _microcontroller;
-    public override int Pin { get; }
 
     public override SerializedInput GetJson()
     {
-        return new SerializedDirectInput(Pin, PinMode);
+        return new SerializedDirectInput(PinConfig.Pin, PinConfig.PinMode);
     }
 
-    public override bool IsAnalog => PinMode == DevicePinMode.Analog;
+    public override bool IsAnalog => PinConfig.PinMode == DevicePinMode.Analog;
     public override bool IsUint => true;
 
     public override string Generate()
     {
         return IsAnalog
-            ? _microcontroller.GenerateAnalogRead(Pin)
-            : _microcontroller.GenerateDigitalRead(Pin, PinMode is DevicePinMode.PullUp);
+            ? _microcontroller.GenerateAnalogRead(PinConfig.Pin)
+            : _microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
     }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
@@ -66,6 +74,6 @@ public class DirectInput : InputWithPin
     
     public override List<DevicePin> Pins => new()
     {
-        new (Pin, PinMode)
+        new (PinConfig.Pin, PinConfig.PinMode)
     };
 }

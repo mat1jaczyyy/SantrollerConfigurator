@@ -40,7 +40,7 @@ public abstract class TwiInput : Input
        
         this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged(nameof(Scl)));
         this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged(nameof(Sda)));
-        microcontroller.TwiConfigs.CollectionChanged +=
+        microcontroller.PinConfigs.CollectionChanged +=
             (sender, args) =>
             {
                 var sda2 = Sda;
@@ -93,6 +93,6 @@ public abstract class TwiInput : Input
     
     public override void Dispose()
     {
-        _microcontroller.UnAssignTwiPins(_twiType);
+        _microcontroller.UnAssignPins(_twiType);
     }
 }

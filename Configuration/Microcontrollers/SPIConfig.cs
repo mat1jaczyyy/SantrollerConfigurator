@@ -3,13 +3,12 @@ using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
-public abstract class SpiConfig : ReactiveObject
+public abstract class SpiConfig : PinConfig
 {
     private bool _cpol;
     private bool _cpha;
     private bool _msbfirst;
     private int _clock;
-    private string _type;
 
     protected int _mosi;
 
@@ -19,7 +18,7 @@ public abstract class SpiConfig : ReactiveObject
 
     protected SpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, int clock)
     {
-        _type = type;
+        Type = type;
         _mosi = mosi;
         _miso = miso;
         _sck = sck;
@@ -29,7 +28,7 @@ public abstract class SpiConfig : ReactiveObject
         _clock = clock;
     }
 
-    public string Generate()
+    public override string Generate()
     {
         return $@"
 #define {Definition}_MOSI {_mosi}
@@ -42,14 +41,7 @@ public abstract class SpiConfig : ReactiveObject
 ";
     }
 
-    public int[] GetPins()
-    {
-        return new[] {_mosi, _miso, _sck};
-    }
-
-    public string Type => _type;
-    
-    public abstract string Definition { get; }
+    public override string Type { get; }
     protected abstract void UpdatePins([CallerMemberName]string? propertyName = null);
 
     public int Mosi

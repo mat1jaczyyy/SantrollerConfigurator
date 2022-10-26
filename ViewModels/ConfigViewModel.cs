@@ -296,7 +296,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             lines.Add($"#define TICK_XINPUT {GenerateTick(true, false)}");
 
-            lines.Add($"#define ADC_COUNT {directInputs.DistinctBy(s => s.Pin).Count(input => input.IsAnalog)}");
+            lines.Add($"#define ADC_COUNT {directInputs.DistinctBy(s => s.PinConfig.Pin).Count(input => input.IsAnalog)}");
 
             lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
             //TODO: this
@@ -314,9 +314,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             // Sort by pin index, and then map to adc number and turn into an array
             lines.Add(
-                $"#define ADC_PINS {{{string.Join(",", directInputs.OrderBy(s => s.Pin).Where(s => s.IsAnalog).Select(s => _microController.GetChannel(s.Pin).ToString()).Distinct())}}}");
+                $"#define ADC_PINS {{{string.Join(",", directInputs.OrderBy(s => s.PinConfig.Pin).Where(s => s.IsAnalog).Select(s => _microController.GetChannel(s.PinConfig.Pin).ToString()).Distinct())}}}");
 
-            lines.Add($"#define PIN_INIT {_microController.GenerateInit(outputs)}");
+            lines.Add($"#define PIN_INIT {_microController.GenerateInit()}");
 
             lines.Add(_microController.GenerateDefinitions());
 

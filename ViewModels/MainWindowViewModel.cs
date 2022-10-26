@@ -18,6 +18,7 @@ using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
 using ReactiveUI;
+using Timer = System.Timers.Timer;
 
 namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
@@ -111,14 +112,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         }
 
 
-        private bool _programming = false;
-
-        public bool Programming
-        {
-            get => _programming;
-            set => this.RaiseAndSetIfChanged(ref _programming, value);
-        }
-
+        private bool _programming;
 
         private bool _installed;
 
@@ -304,14 +298,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
                 _timer.Start();
             };
-            // Do something so that working is only set to false once the guitar appears on the host machine again
-            // This will probably involve keeping a copy of the serial number  for the last written to device
-            // So that we know the right device is picked back up.
             Pio.PlatformIoWorking += working => { Working = working; };
-            Pio.PlatformIoProgramming += programming => { Programming = programming; };
+            Pio.PlatformIoProgramming += programming => { _programming = programming; };
             _ = Pio.InitialisePlatformIo();
 
-            Task.Run(InstallDependancies);
+            Task.Run(InstallDependencies);
         }
 
         private readonly List<string> _currentDrives = new();
@@ -417,13 +408,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     string serial = dev.Info.SerialString;
                     if (product == "Santroller")
                     {
-                        if (Programming && !IsPico) return;
-                        var c = new Santroller(Pio, e.Device.Name, dev, product, serial, revision);
-                        AddDevice(c);
+                        if (_programming && !IsPico) return;
+                        AddDevice(new Santroller(Pio, e.Device.Name, dev, product, serial, revision));
                     }
                     else if (product == "Ardwiino")
                     {
-                        if (Programming) return;
+                        if (_programming) return;
                         if (revision == Ardwiino.SerialArdwiinoRevision)
                         {
                             return;
@@ -451,13 +441,13 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             _deviceListener.OnDeviceNotify -= OnDeviceNotify;
         }
 
-        public bool CheckDependancies()
+        private static bool CheckDependencies()
         {
-            // Call check dependancies on startup, and pop up a dialog saying drivers are missing would you like to install if they are missing
+            // Call check dependencies on startup, and pop up a dialog saying drivers are missing would you like to install if they are missing
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-                ProcessStartInfo info = new ProcessStartInfo(Path.Combine(windowsDir, "sysnative", "pnputil.exe"));
+                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
+                ProcessStartInfo info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.Add("-e");
                 info.UseShellExecute = true;
                 info.RedirectStandardOutput = true;
@@ -477,9 +467,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             return true;
         }
 
-        public async void InstallDependancies()
+        private static async void InstallDependencies()
         {
-            if (CheckDependancies()) return;
+            if (CheckDependencies()) return;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
@@ -506,7 +496,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 Process.Start(info);
             }
 
-            if (!CheckDependancies())
+            if (!CheckDependencies())
             {
                 // Pop open a dialog that it failed and to try again
             }

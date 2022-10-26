@@ -163,15 +163,14 @@ public class Pico : Microcontroller
             return null;
         }
 
-        PicoSpiConfig? config = SpiConfigs.Cast<PicoSpiConfig>().FirstOrDefault(c => c.Type == type);
+        PicoSpiConfig? config = PinConfigs.OfType<PicoSpiConfig>().FirstOrDefault(c => c.Type == type);
         if (config != null)
         {
             return config;
         }
-        config = SpiConfigs.Cast<PicoSpiConfig>().FirstOrDefault(c => c.Index == pin);
-        if (config != null) return null;
+        if (PinConfigs.Any(c => c is PicoSpiConfig s && s.Index == pin)) return null;
         config = new PicoSpiConfig(type, mosi, miso, sck, cpol, cpha, msbfirst, clock);
-        SpiConfigs.Add(config);
+        PinConfigs.Add(config);
         return config;
     }
 
@@ -183,15 +182,14 @@ public class Pico : Microcontroller
             return null;
         }
 
-        PicoTwiConfig? config = TwiConfigs.Cast<PicoTwiConfig>().FirstOrDefault(c => c.Type == type);
+        PicoTwiConfig? config = PinConfigs.OfType<PicoTwiConfig>().FirstOrDefault(c => c.Type == type);
         if (config != null)
         {
             return config;
         }
-        config = TwiConfigs.Cast<PicoTwiConfig>().FirstOrDefault(c => c.Index == pin);
-        if (config != null) return null;
+        if (PinConfigs.Any(c => c is PicoTwiConfig s && s.Index == pin)) return null;
         config = new PicoTwiConfig(type,  sda, scl, clock);
-        TwiConfigs.Add(config);
+        PinConfigs.Add(config);
         return config;
     }
 
@@ -208,7 +206,7 @@ public class Pico : Microcontroller
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
         var types = SpiTypesByPin.AsEnumerable();
-        foreach (var config in SpiConfigs.Cast<PicoSpiConfig>())
+        foreach (var config in PinConfigs.OfType<PicoSpiConfig>())
         {
             if (config.Type != type)
             {
@@ -221,7 +219,7 @@ public class Pico : Microcontroller
     public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type)
     {
         var types = TwiTypeByPin.AsEnumerable();
-        foreach (var config in TwiConfigs.Cast<PicoTwiConfig>())
+        foreach (var config in PinConfigs.OfType<PicoTwiConfig>())
         {
             if (config.Type != type)
             {
@@ -231,28 +229,21 @@ public class Pico : Microcontroller
         return types.ToList();
     }
 
-    public override void UnAssignSpiPins(string type)
+    public override void UnAssignPins(string type)
     {
-        var elements = SpiConfigs.Where(s => s.Type == type).ToList();
-        SpiConfigs.RemoveAll(elements);
+        var elements = PinConfigs.Where(s => s.Type == type).ToList();
+        PinConfigs.RemoveAll(elements);
+    }
+    public override void AssignPin(PinConfig pinConfig)
+    {
+        UnAssignPins(pinConfig.Type);
+        PinConfigs.Add(pinConfig);
     }
 
-    public override void UnAssignTwiPins(string type)
-    {
-        var elements = TwiConfigs.Where(s => s.Type == type).ToList();
-        TwiConfigs.RemoveAll(elements);
-    }
-
-    public override string GenerateDefinitions()
-    {
-        var ret = SpiConfigs.Aggregate("", (current, config) => current + config.Generate());
-        return TwiConfigs.Aggregate(ret, (current, config) => current + config.Generate());
-    }
-
-    public override string GenerateInit(List<Output> bindings)
+    public override string GenerateInit()
     {
         string ret = "";
-        var pins = bindings.SelectMany(s => s.GetPins(bindings)).Distinct();
+        var pins = PinConfigs.OfType<DirectPinConfig>();
         foreach (var devicePin in pins)
         {
             if (devicePin.PinMode == DevicePinMode.Analog)

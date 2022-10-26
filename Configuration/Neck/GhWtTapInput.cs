@@ -6,20 +6,31 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
+
 public class GhWtTapInput : InputWithPin
 {
     public GhWtInputType Input { get; set; }
-    
-    public override DevicePinMode PinMode => DevicePinMode.Floating;
 
     protected override Microcontroller Microcontroller => _microcontroller;
-    public override int Pin { get; }
+    private DirectPinConfig _pinConfig;
+
+    public override DirectPinConfig PinConfig
+    {
+        get => _pinConfig;
+        set
+        {
+            _pinConfig = value;
+            Microcontroller.AssignPin(_pinConfig);
+        }
+    }
+
 
     public GhWtTapInput(GhWtInputType input, Microcontroller microcontroller, int pin = 0)
     {
         Input = input;
         _microcontroller = microcontroller;
-        Pin = pin;
+        _pinConfig = new DirectPinConfig(Guid.NewGuid().ToString(), pin, DevicePinMode.Floating);
+        _microcontroller.AssignPin(_pinConfig);
     }
 
     static readonly Dictionary<int, BarButton> Mappings = new()
@@ -39,7 +50,7 @@ public class GhWtTapInput : InputWithPin
         {0x3, BarButton.Blue | BarButton.Orange},
         {0x0, BarButton.Orange},
     };
-    
+
     private static readonly Dictionary<GhWtInputType, BarButton> InputToButton = new()
     {
         {GhWtInputType.TapGreen, BarButton.Green},
@@ -48,7 +59,7 @@ public class GhWtTapInput : InputWithPin
         {GhWtInputType.TapBlue, BarButton.Blue},
         {GhWtInputType.TapOrange, BarButton.Orange},
     };
-    
+
     private static readonly Dictionary<GhWtInputType, ReadOnlyCollection<int>> MappingByInput =
         InputToButton.Keys.ToDictionary(type => type,
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
@@ -69,7 +80,7 @@ public class GhWtTapInput : InputWithPin
 
     public override SerializedInput GetJson()
     {
-        return new SerializedGhWtInput(Pin, Input);
+        return new SerializedGhWtInput(PinConfig.Pin, Input);
     }
 
     public override bool IsAnalog => Input == GhWtInputType.TapBar;
@@ -82,16 +93,11 @@ public class GhWtTapInput : InputWithPin
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return new[] {"INPUT_WT_NECK", $"WT_NECK_READ() {_microcontroller.GeneratePulseRead(Pin, PulseMode.LOW, 100)}"};
+        return new[] {"INPUT_WT_NECK", $"WT_NECK_READ() {_microcontroller.GeneratePulseRead(PinConfig.Pin, PulseMode.LOW, 100)}"};
     }
-    
+
     public override List<DevicePin> Pins => new()
     {
-        new (Pin, DevicePinMode.Floating),
+        new(PinConfig.Pin, DevicePinMode.Floating),
     };
-    
-
-    public override void Dispose()
-    {
-    }
 }

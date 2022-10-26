@@ -3,7 +3,7 @@ using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
-public abstract class TwiConfig: ReactiveObject
+public abstract class TwiConfig: PinConfig
 {
     protected int _sda;
     protected int _scl;
@@ -17,8 +17,12 @@ public abstract class TwiConfig: ReactiveObject
         _scl = scl;
         _clock = clock;
     }
+    public virtual string GenerateInit()
+    {
+        return "";
+    }
 
-    public string Generate()
+    public override string Generate()
     {
         return $@"
 #define {Definition}_SDA {_sda}
@@ -27,13 +31,7 @@ public abstract class TwiConfig: ReactiveObject
 ";
     }
 
-    public int[] GetPins()
-    {
-        return new[] {_sda, _scl};
-    }
-
-    public string Type => _type;
-    public abstract string Definition { get; }
+    public override string Type => _type;
     protected abstract void UpdatePins([CallerMemberName]string? propertyName = null);
 
     public int Sda
