@@ -400,8 +400,7 @@
                                     </StackPanel>
                                     <Button
                                         x:CompileBindings="False"
-                                        Command="{Binding $parent[UserControl].DataContext.RemoveOutput}"
-                                        CommandParameter="{Binding}">
+                                        Command="{Binding Remove}">
                                         Remove
                                     </Button>
                                 </WrapPanel>

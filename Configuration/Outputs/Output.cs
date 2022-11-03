@@ -291,6 +291,11 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public virtual IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => new[] {this};
 
+    public void Remove()
+    {
+        Model.RemoveOutput(this);
+    }
+
     public virtual void Dispose()
     {
         Input?.Dispose();
