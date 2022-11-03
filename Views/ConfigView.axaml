@@ -387,7 +387,6 @@
                                     <ContentControl Content="{Binding Input}"
                                                     ContentTemplate="{StaticResource OutputTemplates}">
                                     </ContentControl>
-                                    <NumericUpDown Value="{Binding LedIndex}" VerticalAlignment="Center"></NumericUpDown>
                                     <StackPanel Orientation="Horizontal">
                                         <StackPanel.IsVisible>
                                             <MultiBinding Converter="{x:Static BoolConverters.And}">
@@ -395,6 +394,7 @@
                                                 <Binding Path="!IsCombined" />
                                             </MultiBinding>
                                         </StackPanel.IsVisible>
+                                        <NumericUpDown Value="{Binding LedIndex}" VerticalAlignment="Center"></NumericUpDown>
                                         <ColorPicker Color="{Binding LedOn}"></ColorPicker>
                                         <ColorPicker Color="{Binding LedOff}"></ColorPicker>
                                     </StackPanel>
