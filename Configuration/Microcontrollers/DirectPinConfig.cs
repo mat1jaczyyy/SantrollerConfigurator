@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -20,4 +21,5 @@ public class DirectPinConfig : PinConfig
         PinMode = pinMode;
         Pin = pin;
     }
+    public override IEnumerable<int> Pins => new List<int> {Pin};
 }

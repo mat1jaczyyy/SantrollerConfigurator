@@ -13,13 +13,14 @@ public class SerializedMouseAxis : SerializedOutput
     [ProtoMember(1)] public override SerializedInput? Input { get; }
     [ProtoMember(2)] public override Color LedOn { get; }
     [ProtoMember(3)] public override Color LedOff { get; }
+    [ProtoMember(7)] public override int? LedIndex { get; }
     [ProtoMember(4)] public float Multiplier { get; }
     [ProtoMember(5)] public int Offset { get; }
     [ProtoMember(6)] public int Deadzone { get; }
 
     public MouseAxisType Type { get; }
 
-    public SerializedMouseAxis(SerializedInput? input, MouseAxisType type, Color ledOn, Color ledOff, float multiplier, int offset,
+    public SerializedMouseAxis(SerializedInput? input, MouseAxisType type, Color ledOn, Color ledOff, int? ledIndex, float multiplier, int offset,
         int deadzone)
     {
         Input = input;
@@ -29,11 +30,12 @@ public class SerializedMouseAxis : SerializedOutput
         Offset = offset;
         Deadzone = deadzone;
         Type = type;
+        LedIndex = ledIndex;
     }
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new MouseAxis(model, Input?.Generate(microcontroller), LedOn, LedOff, Multiplier, Offset, Deadzone,
+        return new MouseAxis(model, Input?.Generate(microcontroller), LedOn, LedOff, LedIndex, Multiplier, Offset, Deadzone,
             Type);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 
@@ -247,6 +248,7 @@ public class WiiInput : TwiInput
     {
         Input = input;
     }
+    public override InputType? InputType => Types.InputType.WiiInput;
 
     public override string Generate()
     {
@@ -271,7 +273,7 @@ public class WiiInput : TwiInput
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
-        bool hasTapBar = false;
+        var hasTapBar = false;
         foreach (var binding in bindings)
         {
             if (binding.Item1 is WiiInput input)

@@ -152,4 +152,10 @@ public class Micro : AvrController
     {
         return null;
     }
+    
+    public override List<int> GetFreePins()
+    {
+        var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
+        return Enumerable.Range(0, _pinIndex.Length).Where(s => !used.Contains(s)).ToList();
+    }
 }

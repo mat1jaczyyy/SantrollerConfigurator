@@ -123,8 +123,8 @@ public abstract class AvrController : Microcontroller
     {
         // DDRx 1 = output, 0 = input
         // PORTx input 1= pullup, 0 = floating
-        Dictionary<char, int> ddrByPort = new Dictionary<char, int>();
-        Dictionary<char, int> portByPort = new Dictionary<char, int>();
+        var ddrByPort = new Dictionary<char, int>();
+        var portByPort = new Dictionary<char, int>();
         var pins = PinConfigs.OfType<DirectPinConfig>();
         foreach (var pin in pins)
         {
@@ -169,7 +169,7 @@ public abstract class AvrController : Microcontroller
             }
         }
 
-        string ret = "uint8_t oldSREG = SREG;cli();";
+        var ret = "uint8_t oldSREG = SREG;cli();";
         foreach (var port in portByPort)
         {
             ret += $"PORT{port.Key} = {port.Value};";

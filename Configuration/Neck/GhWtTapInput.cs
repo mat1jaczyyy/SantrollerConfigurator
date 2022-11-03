@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
@@ -11,26 +12,10 @@ public class GhWtTapInput : InputWithPin
 {
     public GhWtInputType Input { get; set; }
 
-    protected override Microcontroller Microcontroller => _microcontroller;
-    private DirectPinConfig _pinConfig;
 
-    public override DirectPinConfig PinConfig
-    {
-        get => _pinConfig;
-        set
-        {
-            _pinConfig = value;
-            Microcontroller.AssignPin(_pinConfig);
-        }
-    }
-
-
-    public GhWtTapInput(GhWtInputType input, Microcontroller microcontroller, int pin = 0)
+    public GhWtTapInput(GhWtInputType input, Microcontroller microcontroller, int pin = 0): base(microcontroller, new DirectPinConfig(Guid.NewGuid().ToString(), pin, DevicePinMode.Floating))
     {
         Input = input;
-        _microcontroller = microcontroller;
-        _pinConfig = new DirectPinConfig(Guid.NewGuid().ToString(), pin, DevicePinMode.Floating);
-        _microcontroller.AssignPin(_pinConfig);
     }
 
     static readonly Dictionary<int, BarButton> Mappings = new()
@@ -65,8 +50,6 @@ public class GhWtTapInput : InputWithPin
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    private Microcontroller _microcontroller;
-
     public override string Generate()
     {
         if (Input == GhWtInputType.TapBar)
@@ -84,6 +67,7 @@ public class GhWtTapInput : InputWithPin
     }
 
     public override bool IsAnalog => Input == GhWtInputType.TapBar;
+    public override InputType? InputType => Types.InputType.WtNeckInput;
     public override bool IsUint => true;
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
@@ -93,7 +77,7 @@ public class GhWtTapInput : InputWithPin
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return new[] {"INPUT_WT_NECK", $"WT_NECK_READ() {_microcontroller.GeneratePulseRead(PinConfig.Pin, PulseMode.LOW, 100)}"};
+        return new[] {"INPUT_WT_NECK", $"WT_NECK_READ() {Microcontroller.GeneratePulseRead(PinConfig.Pin, PulseMode.LOW, 100)}"};
     }
 
     public override List<DevicePin> Pins => new()

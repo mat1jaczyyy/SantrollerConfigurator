@@ -1,29 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Windows.Input;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Metadata;
+using Avalonia.Threading;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
-using MouseButton = GuitarConfiguratorSharp.NetCore.Configuration.Outputs.MouseButton;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public class EmptyOutput : Output
 {
-    public EmptyOutput(ConfigViewModel model) : base(model, null, Colors.Transparent, Colors.Transparent, "Empty")
+    public EmptyOutput(ConfigViewModel model) : base(model, null, Colors.Transparent, Colors.Transparent, null, "Empty")
     {
-        _isRhythm = this.WhenAnyValue(x => x.Model.DeviceType)
-            .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
-            .ToProperty(this, x => x.IsRhythm);
         _isController = this.WhenAnyValue(x => x.Model.EmulationType)
             .Select(x => x is EmulationType.Controller)
             .ToProperty(this, x => x.IsController);
@@ -34,15 +28,10 @@ public class EmptyOutput : Output
             .Select(x => x is EmulationType.Midi)
             .ToProperty(this, x => x.IsMidi);
 
-        _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType, vm => vm.Model.RhythmType).Select(ControllerEnumConverter.GetTypes).ToProperty(this, x => x.CombinedTypes);
-        var canAdd = this.WhenAnyValue(vm => vm.CombinedType).Select(s => s != null);
-        AddCommand = ReactiveCommand.Create(Generate, canAdd);
+        _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType, vm => vm.Model.RhythmType)
+            .Select(ControllerEnumConverter.GetTypes).ToProperty(this, x => x.CombinedTypes);
     }
 
-    public ICommand AddCommand { get; }
-
-    private readonly ObservableAsPropertyHelper<bool> _isRhythm;
-    public bool IsRhythm => _isRhythm.Value;
     private readonly ObservableAsPropertyHelper<bool> _isController;
     public bool IsController => _isController.Value;
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
@@ -54,12 +43,10 @@ public class EmptyOutput : Output
 
     public IEnumerable<object> CombinedTypes => _combinedTypes.Value;
 
-    private object? _combinedType;
-
     public object? CombinedType
     {
-        get => _combinedType;
-        set => this.RaiseAndSetIfChanged(ref _combinedType, value);
+        get => null;
+        set => Generate(value);
     }
 
     private Key? _key;
@@ -107,41 +94,41 @@ public class EmptyOutput : Output
 
     public IEnumerable<MouseButtonType> MouseButtonTypes => Enum.GetValues<MouseButtonType>();
 
-    private void Generate()
+    private void Generate(object? value)
     {
         if (Model.MicroController == null) return;
         switch (Model.EmulationType)
         {
             case EmulationType.Controller:
-                if (CombinedType is SimpleType simpleType)
+                if (value is SimpleType simpleType)
                 {
                     switch (simpleType)
                     {
-                        case Configuration.Types.SimpleType.WiiInputSimple:
+                        case SimpleType.WiiInputSimple:
                             Model.Bindings.Add(new WiiCombinedOutput(Model, Model.MicroController!));
                             break;
-                        case Configuration.Types.SimpleType.Gh5NeckSimple:
+                        case SimpleType.Gh5NeckSimple:
                             Model.Bindings.Add(new Gh5CombinedOutput(Model, Model.MicroController!));
                             break;
-                        case Configuration.Types.SimpleType.Ps2InputSimple:
+                        case SimpleType.Ps2InputSimple:
                             Model.Bindings.Add(new Ps2CombinedOutput(Model, Model.MicroController!));
                             break;
-                        case Configuration.Types.SimpleType.WtNeckSimple:
+                        case SimpleType.WtNeckSimple:
                             Model.Bindings.Add(new GhwtCombinedOutput(Model, Model.MicroController!));
                             break;
-                        case Configuration.Types.SimpleType.DjTurntableSimple:
+                        case SimpleType.DjTurntableSimple:
                             Model.Bindings.Add(new DjCombinedOutput(Model, Model.MicroController!));
                             break;
                     }
                 }
-                else if (CombinedType is StandardAxisType standardAxisType)
+                else if (value is StandardAxisType standardAxisType)
                 {
-                    Model.Bindings.Add(new ControllerAxis(Model, null, Colors.Transparent, Colors.Transparent, 1, 0, 0,
+                    Model.Bindings.Add(new ControllerAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model.MicroController), Colors.Transparent, Colors.Transparent, -1,1, 0, 0,
                         standardAxisType));
                 }
-                else if (CombinedType is StandardButtonType standardButtonType)
+                else if (value is StandardButtonType standardButtonType)
                 {
-                    Model.Bindings.Add(new ControllerButton(Model, null, Colors.Transparent, Colors.Transparent, 5,
+                    Model.Bindings.Add(new ControllerButton(Model, new DirectInput(0, DevicePinMode.PullUp, Model.MicroController), Colors.Transparent, Colors.Transparent, -1, 5,
                         standardButtonType));
                 }
 
@@ -149,31 +136,31 @@ public class EmptyOutput : Output
             case EmulationType.KeyboardMouse:
                 if (MouseAxisType.HasValue)
                 {
-                    Model.Bindings.Add(new MouseAxis(Model, null, Colors.Transparent, Colors.Transparent, 1, 0, 0,
+                    Model.Bindings.Add(new MouseAxis(Model, null, Colors.Transparent, Colors.Transparent, -1, 1, 0, 0,
                         MouseAxisType.Value));
                 }
                 else if (MouseButtonType.HasValue)
                 {
-                    Model.Bindings.Add(new MouseButton(Model, null, Colors.Transparent, Colors.Transparent, 5,
+                    Model.Bindings.Add(new MouseButton(Model, null, Colors.Transparent, Colors.Transparent, -1,5,
                         MouseButtonType.Value));
                 }
                 else if (Key.HasValue)
                 {
-                    Model.Bindings.Add(new KeyboardButton(Model, null, Colors.Transparent, Colors.Transparent, 5,
+                    Model.Bindings.Add(new KeyboardButton(Model, null, Colors.Transparent, Colors.Transparent, -1,5,
                         Key.Value));
                 }
 
                 break;
         }
 
-        Model.Bindings.Remove(this);
+        Dispatcher.UIThread.InvokeAsync(() => Model.Bindings.Remove(this));
     }
 
     public override string? GetLocalisedName() => "Unset";
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 
-    public override bool RequiresInput => false;
+    public virtual bool RequiresInput => false;
 
     public override SerializedOutput GetJson()
     {

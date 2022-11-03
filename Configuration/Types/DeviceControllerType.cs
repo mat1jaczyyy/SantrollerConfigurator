@@ -7,9 +7,9 @@ public enum DeviceControllerType
     ArcadeStick = 3,
     FlightStick = 4,
     DancePad = 5,
+    ArcadePad = 6,
     Guitar = 7,
     LiveGuitar = 8,
     Drum = 9,
-    ArcadePad = 19,
-    TurnTable = 23
+    TurnTable = 10
 }

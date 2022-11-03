@@ -30,7 +30,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public ReactiveCommand<Unit, IRoutableViewModel> Configure { get; }
 
         // The command that navigates a user back.
-        public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
+        public ReactiveCommand<Unit, IRoutableViewModel?> GoBack => Router.NavigateBack;
 
         public AvaloniaList<IConfigurableDevice> Devices { get; } = new();
 
@@ -401,11 +401,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 {
                     AddDevice(new Dfu(e));
                 }
-                else if (e.Device.Open(out UsbDevice dev))
+                else if (e.Device.Open(out var dev))
                 {
-                    ushort revision = (ushort) dev.Info.Descriptor.BcdDevice;
-                    string product = dev.Info.ProductString;
-                    string serial = dev.Info.SerialString;
+                    var revision = (ushort) dev.Info.Descriptor.BcdDevice;
+                    var product = dev.Info.ProductString;
+                    var serial = dev.Info.SerialString;
                     if (product == "Santroller")
                     {
                         if (_programming && !IsPico) return;
@@ -447,7 +447,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
-                ProcessStartInfo info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
+                var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.Add("-e");
                 info.UseShellExecute = true;
                 info.RedirectStandardOutput = true;
@@ -473,9 +473,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
-                string appdataFolder = AssetUtils.GetAppDataFolder();
-                string driverZip = Path.Combine(appdataFolder, "drivers.zip");
-                string driverFolder = Path.Combine(appdataFolder, "drivers");
+                var appdataFolder = AssetUtils.GetAppDataFolder();
+                var driverZip = Path.Combine(appdataFolder, "drivers.zip");
+                var driverFolder = Path.Combine(appdataFolder, "drivers");
                 await AssetUtils.ExtractZip("dfu.zip", driverZip, driverFolder);
 
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
@@ -487,8 +487,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 // Just copy the file to install it, using pkexec for admin
-                string appdataFolder = AssetUtils.GetAppDataFolder();
-                string rules = Path.Combine(appdataFolder, UdevFile);
+                var appdataFolder = AssetUtils.GetAppDataFolder();
+                var rules = Path.Combine(appdataFolder, UdevFile);
                 await AssetUtils.ExtractFile(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
                 info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});

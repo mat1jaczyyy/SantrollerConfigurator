@@ -32,7 +32,7 @@ namespace GuitarConfiguratorSharp.NetCore.Views
 
         private async Task DoShowUnoDialogAsync(InteractionContext<Arduino, ShowUnoShortWindowViewModel?> interaction)
         {
-            ShowUnoShortWindowViewModel model = new ShowUnoShortWindowViewModel(interaction.Input);
+            var model = new ShowUnoShortWindowViewModel(interaction.Input);
             var dialog = new UnoShortWindow()
             {
                 DataContext = model
@@ -44,7 +44,7 @@ namespace GuitarConfiguratorSharp.NetCore.Views
 
         private async Task DoShowDialogAsync(InteractionContext<InputWithPin, SelectPinWindowViewModel?> interaction)
         {
-            SelectPinWindowViewModel model = new SelectPinWindowViewModel(interaction.Input);
+            var model = new SelectPinWindowViewModel(interaction.Input);
             var dialog = new SelectPinWindow
             {
                 DataContext = model

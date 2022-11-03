@@ -43,8 +43,8 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
     {
         if (!Device.IsOpen) return Array.Empty<byte>();
-        UsbCtrlFlags requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
-        byte[] buffer = new byte[size];
+        var requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
+        var buffer = new byte[size];
 
         var sp = new UsbSetupPacket(
             ((byte)requestType),
@@ -61,7 +61,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     public void WriteData(ushort wValue, byte bRequest, byte[] buffer)
     {
         if (!Device.IsOpen) return;
-        UsbCtrlFlags requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
+        var requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
         var sp = new UsbSetupPacket(
             ((byte)requestType),
             bRequest,

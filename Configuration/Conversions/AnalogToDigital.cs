@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 
@@ -10,6 +11,7 @@ public class AnalogToDigital : Input
     public Input Child { get; }
     public AnalogToDigitalType AnalogToDigitalType { get; set; }
     public int Threshold { get; set; }
+    public override InputType? InputType => Child.InputType;
     public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes => Enum.GetValues<AnalogToDigitalType>();
 
     public AnalogToDigital(Input child, AnalogToDigitalType analogToDigitalType, int threshold)

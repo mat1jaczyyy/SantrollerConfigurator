@@ -129,25 +129,28 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var types = ControllerEnumConverter.GetTypes((_deviceControllerType, _rhythmType)).Where(s => s is not SimpleType).ToList();
             foreach (var binding in Bindings)
             {
-                if (binding is ControllerButton button)
+                switch (binding)
                 {
-                    types.Remove(button.Type);
-                } else if (binding is ControllerAxis axis)
-                {
-                    types.Remove(axis.Type);
+                    case ControllerButton button:
+                        types.Remove(button.Type);
+                        break;
+                    case ControllerAxis axis:
+                        types.Remove(axis.Type);
+                        break;
                 }
             }
             foreach (var type in types)
             {
-                if (type is StandardButtonType buttonType)
+                switch (type)
                 {
-                    Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
-                        Colors.Transparent, Colors.Transparent, 1, buttonType));
-                }
-                if (type is StandardAxisType axisType)
-                {
-                    Bindings.Add(new ControllerAxis(this, new DirectInput(0, DevicePinMode.Analog, MicroController!),
-                        Colors.Transparent, Colors.Transparent, 1, 0, 0, axisType));
+                    case StandardButtonType buttonType:
+                        Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
+                            Colors.Transparent, Colors.Transparent, -1, 1, buttonType));
+                        break;
+                    case StandardAxisType axisType:
+                        Bindings.Add(new ControllerAxis(this, new DirectInput(0, DevicePinMode.Analog, MicroController!),
+                            Colors.Transparent, Colors.Transparent, -1, 1, 0, 0, axisType));
+                        break;
                 }
             }
 
@@ -186,7 +189,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             WriteConfig = ReactiveCommand.CreateFromTask(Write,
                 this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected))
                     .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
-            GoBack = ReactiveCommand.CreateFromObservable<Unit, Unit>(Main.GoBack.Execute,
+            GoBack = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
                 this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected))
                     .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
             Bindings = new AvaloniaList<Output>();
@@ -255,7 +258,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 {
                     if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
                     Bindings.Add(new ControllerAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, MicroController!),
-                        Colors.Transparent, Colors.Transparent, 1, 0, 0, type));
+                        Colors.Transparent, Colors.Transparent, -1, 1, 0, 0, type));
                 }
 
                 foreach (var type in Enum.GetValues<StandardButtonType>())
@@ -263,7 +266,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
                         null) continue;
                     Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
-                        Colors.Transparent, Colors.Transparent, 1, type));
+                        Colors.Transparent, Colors.Transparent, -1, 1, type));
                 }
             }
         }
@@ -274,7 +277,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var outputs = Bindings.SelectMany(binding => binding.GetOutputs(Bindings)).ToList();
             var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
-            string configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
+            var configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
             var lines = new List<string>();
             using (var outputStream = new MemoryStream())
             {
@@ -307,6 +310,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             lines.Add($"#define CONSOLE_TYPE {((byte) EmulationType)}");
 
             lines.Add($"#define DEVICE_TYPE {((byte) DeviceType)}");
+            
+            lines.Add($"#define RHYTHM_TYPE {((byte) RhythmType)}");
             lines.Add($"#define KV_KEY_1 {{{string.Join(",", KvKey1.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
             lines.Add($"#define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
 
@@ -358,7 +363,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             if (_microController == null) return "";
             var outputs = Bindings.SelectMany(binding => binding.GetOutputs(Bindings)).ToList();
             var groupedOutputs = outputs.GroupBy(s => s.Input?.InnermostInput().GetType());
-            bool combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
+            var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 
             Dictionary<string, int> debounces = new();
             HashSet<string> debounceTicks = new();
@@ -371,7 +376,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 }
             }
 
-            string ret = groupedOutputs.Aggregate("", (current, group) => current + (group.First()
+            var ret = groupedOutputs.Aggregate("", (current, group) => current + (group.First()
                 .Input?.InnermostInput()
                 .GenerateAll(group.Select(output =>
                     {
@@ -404,8 +409,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 //For any missing leds, we need to pad out the indexes so that the leds are aligned
                 if (leds.Any())
                 {
-                    int max = leds.Keys.Max();
-                    for (int i = 0; i < max; i++)
+                    var max = leds.Keys.Max();
+                    for (var i = 0; i < max; i++)
                     {
                         if (!leds.ContainsKey(i))
                         {
@@ -425,7 +430,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         private int CalculateDebounceTicks()
         {
-            bool combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
+            var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
             var count = Bindings.SelectMany(binding => binding.GetOutputs(Bindings))
                 .Where(s => s is OutputButton button && (!combined || !button.IsStrum)).Select(s => s.Name).Distinct()
                 .Count();

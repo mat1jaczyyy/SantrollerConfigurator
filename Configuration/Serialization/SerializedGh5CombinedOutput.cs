@@ -11,19 +11,18 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 public class SerializedGh5CombinedOutput : SerializedOutput
 {
     [ProtoMember(1)] public override SerializedInput? Input => null;
-    [ProtoMember(2)] public override Color LedOn { get; }
-    [ProtoMember(3)] public override Color LedOff { get; }
     [ProtoMember(4)] public int Sda { get; }
     [ProtoMember(5)] public int Scl { get; }
     [ProtoMember(6)] public bool MapTapBarToFrets { get; }
     [ProtoMember(7)] public bool MapTapBarToAxis { get; }
     [ProtoMember(8)] public bool FretsEnabled { get; }
+    public override Color LedOn => Colors.Transparent;
+    public override Color LedOff => Colors.Transparent;
+    public override int? LedIndex => null;
 
-    public SerializedGh5CombinedOutput(Color ledOn, Color ledOff, int sda, int scl, bool fretsEnabled, bool mapTapBarToFrets,
+    public SerializedGh5CombinedOutput(int sda, int scl, bool fretsEnabled, bool mapTapBarToFrets,
         bool mapTapBarToAxis)
     {
-        LedOn = ledOn;
-        LedOff = ledOff;
         Sda = sda;
         Scl = scl;
         FretsEnabled = fretsEnabled;

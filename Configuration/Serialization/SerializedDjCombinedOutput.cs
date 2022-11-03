@@ -11,15 +11,14 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 public class SerializedDjCombinedOutput : SerializedOutput
 {
     [ProtoMember(1)] public override SerializedInput? Input => null;
-    [ProtoMember(2)] public override Color LedOn { get; }
-    [ProtoMember(3)] public override Color LedOff { get; }
     [ProtoMember(4)] public int Sda { get; }
     [ProtoMember(5)] public int Scl { get; }
+    public override Color LedOn => Colors.Transparent;
+    public override Color LedOff => Colors.Transparent;
+    public override int? LedIndex => null;
 
-    public SerializedDjCombinedOutput(Color ledOn, Color ledOff, int sda, int scl)
+    public SerializedDjCombinedOutput(int sda, int scl)
     {
-        LedOn = ledOn;
-        LedOff = ledOff;
         Sda = sda;
         Scl = scl;
     }

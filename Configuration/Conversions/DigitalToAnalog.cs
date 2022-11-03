@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 public class DigitalToAnalog : Input
@@ -30,6 +31,7 @@ public class DigitalToAnalog : Input
         return Child;
     }
     public override List<DevicePin> Pins => Child.Pins;
+    public override InputType? InputType => Child.InputType;
 
     public override bool IsAnalog => Child.IsAnalog;
     public override bool IsUint => Child.IsUint;

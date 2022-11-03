@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
@@ -76,6 +77,7 @@ public class Gh5NeckInput : TwiInput
         Input = input;
     }
 
+    public override InputType? InputType => Types.InputType.Gh5NeckInput;
     public Gh5NeckInputType Input { get; set; }
 
     public override string Generate()

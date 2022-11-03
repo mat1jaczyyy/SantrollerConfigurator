@@ -157,13 +157,13 @@ public class Pico : Microcontroller
         bool msbfirst,
         int clock)
     {
-        int pin = SpiIndexByPin[mosi];
+        var pin = SpiIndexByPin[mosi];
         if (pin != SpiIndexByPin[miso] || SpiTypesByPin[mosi] != SpiPinType.Mosi || SpiTypesByPin[miso] != SpiPinType.Miso)
         {
             return null;
         }
 
-        PicoSpiConfig? config = PinConfigs.OfType<PicoSpiConfig>().FirstOrDefault(c => c.Type == type);
+        var config = PinConfigs.OfType<PicoSpiConfig>().FirstOrDefault(c => c.Type == type);
         if (config != null)
         {
             return config;
@@ -176,13 +176,13 @@ public class Pico : Microcontroller
 
     public override TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock)
     {
-        int pin = TwiIndexByPin[sda];
+        var pin = TwiIndexByPin[sda];
         if (pin != TwiIndexByPin[scl] || TwiTypeByPin[sda] != TwiPinType.Sda || TwiTypeByPin[scl] != TwiPinType.Scl)
         {
             return null;
         }
 
-        PicoTwiConfig? config = PinConfigs.OfType<PicoTwiConfig>().FirstOrDefault(c => c.Type == type);
+        var config = PinConfigs.OfType<PicoTwiConfig>().FirstOrDefault(c => c.Type == type);
         if (config != null)
         {
             return config;
@@ -242,7 +242,7 @@ public class Pico : Microcontroller
 
     public override string GenerateInit()
     {
-        string ret = "";
+        var ret = "";
         var pins = PinConfigs.OfType<DirectPinConfig>();
         foreach (var devicePin in pins)
         {
@@ -252,8 +252,8 @@ public class Pico : Microcontroller
             }
             else
             {
-                bool up = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
-                bool down = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
+                var up = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
+                var down = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
                 ret += $"gpio_init({devicePin.Pin});";
                 ret += $"gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});";
                 ret += $"gpio_set_pulls({devicePin.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
@@ -269,12 +269,18 @@ public class Pico : Microcontroller
 
     public override string GetPin(int pin)
     {
-        string ret = $"GP{pin}";
+        var ret = $"GP{pin}";
         if (pin >= 26)
         {
             ret += $" / ADC{pin - 26}";
         }
 
         return ret;
+    }
+    
+    public override List<int> GetFreePins()
+    {
+        var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
+        return Enumerable.Range(0, GpioCount).Where(s => !used.Contains(s)).ToList();
     }
 }

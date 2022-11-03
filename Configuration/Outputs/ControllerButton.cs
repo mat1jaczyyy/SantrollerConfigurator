@@ -53,7 +53,7 @@ public class ControllerButton : OutputButton
         StandardButtonType.Right,
     };
 
-    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, debounce, type.ToString())
+    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, int debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndex, debounce, type.ToString())
     {
         Type = type;
     }
@@ -95,6 +95,6 @@ public class ControllerButton : OutputButton
     public override bool IsCombined => false;
     public override SerializedOutput GetJson()
     {
-        return new SerializedControllerButton(Input?.GetJson(), LedOn, LedOff, Debounce, Type);
+        return new SerializedControllerButton(Input?.GetJson(), LedOn, LedOff, LedIndex, Debounce, Type);
     }
 }

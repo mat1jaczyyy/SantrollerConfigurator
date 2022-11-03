@@ -171,8 +171,8 @@ public class ControllerEnumConverter : IMultiValueConverter
             return null;
         }
 
-        DeviceControllerType deviceControllerType = (DeviceControllerType) values[1]!;
-        RhythmType rhythmType = (RhythmType) values[2]!;
+        var deviceControllerType = (DeviceControllerType) values[1]!;
+        var rhythmType = (RhythmType) values[2]!;
         if (values[0] is StandardAxisType axis)
         {
             return GetAxisText(deviceControllerType, rhythmType, axis);

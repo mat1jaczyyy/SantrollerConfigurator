@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 
@@ -198,12 +199,13 @@ public class Ps2Input : SpiInput
 
     public override bool IsAnalog => Input <= Ps2InputType.Dualshock2R2;
     public override bool IsUint => !IntInputs.Contains(Input);
+    public override InputType? InputType => Types.InputType.Ps2Input;
 
     public static string GeneratePs2Pressures(List<Input> bindings)
     {
-        string retDs2 = "#define PRESSURES_DS2 0b11";
+        var retDs2 = "#define PRESSURES_DS2 0b11";
         var ds2Axis = bindings.Where(s => s is Ps2Input).Cast<Ps2Input>().Select(s => s.Input).ToHashSet();
-        bool found = false;
+        var found = false;
         for (var i = 0; i < Dualshock2Order.Count; i++)
         {
             found = true;
@@ -236,7 +238,7 @@ public class Ps2Input : SpiInput
         {
             if (binding.Item1 is Ps2Input input)
             {
-                List<Ps2ControllerType> types = new List<Ps2ControllerType>();
+                var types = new List<Ps2ControllerType>();
                 if (AxisToType.ContainsKey(input.Input))
                 {
                     types.Add(AxisToType[input.Input]);
@@ -276,8 +278,8 @@ public class Ps2Input : SpiInput
             }
         }
 
-        int i = 0;
-        string retDs2 = "";
+        var i = 0;
+        var retDs2 = "";
         foreach (var binding in Dualshock2Order)
         {
             if (ds2Axis.ContainsKey(binding))
@@ -320,7 +322,7 @@ public class Ps2Input : SpiInput
         defines.Add($"PS2_ACK {Ack}");
         defines.Add($"INPUT_PS2_ATT_SET() {Microcontroller.GenerateDigitalWrite(Att, true)}");
         defines.Add($"INPUT_PS2_ATT_CLEAR() {Microcontroller.GenerateDigitalWrite(Att, false)}");
-        string ack = Microcontroller.GenerateAckDefines(Ack);
+        var ack = Microcontroller.GenerateAckDefines(Ack);
         if (!string.IsNullOrEmpty(ack))
         {
             defines.Add(ack);

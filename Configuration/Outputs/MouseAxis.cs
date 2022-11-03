@@ -13,14 +13,13 @@ public class MouseAxis : OutputAxis
         {MouseAxisType.ScrollX, "ScrollX"},
         {MouseAxisType.ScrollY, "ScrollY"},
     };
-    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, float multiplier, int offset, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, multiplier, offset, deadZone, type.ToString())
+    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, float multiplier, int offset, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndex, multiplier, offset, deadZone, type.ToString(), (_)=>false)
     {
         Type = type;
     }
     public MouseAxisType Type { get; }
-    public override bool Trigger => false;
 
-    public override string GenerateOutput(bool xbox)
+    protected override string GenerateOutput(bool xbox)
     {
         return "report->" + Mappings[Type];
     }
@@ -29,6 +28,6 @@ public class MouseAxis : OutputAxis
 
     public override SerializedOutput GetJson()
     {
-        return new SerializedMouseAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, DeadZone);
+        return new SerializedMouseAxis(Input?.GetJson(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset, DeadZone);
     }
 }

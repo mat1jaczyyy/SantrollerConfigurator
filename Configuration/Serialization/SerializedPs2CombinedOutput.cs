@@ -11,18 +11,17 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 public class SerializedPs2CombinedOutput : SerializedOutput
 {
     [ProtoMember(1)] public override SerializedInput? Input => null;
-    [ProtoMember(2)] public override Color LedOn { get; }
-    [ProtoMember(3)] public override Color LedOff { get; }
     [ProtoMember(4)] public int Miso { get; }
     [ProtoMember(5)] public int Mosi { get; }
     [ProtoMember(6)] public int Sck { get; }
     [ProtoMember(7)] public int Att { get; }
     [ProtoMember(8)] public int Ack { get; }
+    public override Color LedOn => Colors.Transparent;
+    public override Color LedOff => Colors.Transparent;
+    public override int? LedIndex => null;
 
-    public SerializedPs2CombinedOutput(Color ledOn, Color ledOff, int miso, int mosi, int sck, int att, int ack)
+    public SerializedPs2CombinedOutput(int miso, int mosi, int sck, int att, int ack)
     {
-        LedOn = ledOn;
-        LedOff = ledOff;
         Miso = miso;
         Mosi = mosi;
         Sck = sck;

@@ -208,7 +208,7 @@ public class KeyboardButton : OutputButton
     }
     
 
-    public KeyboardButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int debounce, Key type) : base(model, input, ledOn, ledOff,
+    public KeyboardButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, int debounce, Key type) : base(model, input, ledOn, ledOff, ledIndex,
         debounce, type.ToString())
     {
         Key = type;
@@ -223,7 +223,7 @@ public class KeyboardButton : OutputButton
 
     public override string GenerateOutput(bool xbox)
     {
-        int code = 0;
+        var code = 0;
         return $"report->keys[{code >> 3}] |= {1 << (code & 7)}";
     }
 
@@ -239,6 +239,6 @@ public class KeyboardButton : OutputButton
 
     public override SerializedOutput GetJson()
     {
-        return new SerializedKeyboardButton(Input?.GetJson(), LedOn, LedOff, Debounce, Key);
+        return new SerializedKeyboardButton(Input?.GetJson(), LedOn, LedOff, LedIndex, Debounce, Key);
     }
 }

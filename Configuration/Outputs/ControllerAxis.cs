@@ -8,7 +8,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public class ControllerAxis : OutputAxis
 {
-    public static readonly Dictionary<StandardAxisType, string> Mappings = new()
+    private static readonly Dictionary<StandardAxisType, string> Mappings = new()
     {
         {StandardAxisType.LeftStickX, "l_x"},
         {StandardAxisType.LeftStickY, "l_y"},
@@ -21,7 +21,7 @@ public class ControllerAxis : OutputAxis
         {StandardAxisType.AccelerationZ, "accel[2]"},
     };
 
-    public static readonly Dictionary<StandardAxisType, string> MappingsXbox = new()
+    private static readonly Dictionary<StandardAxisType, string> MappingsXbox = new()
     {
         {StandardAxisType.LeftStickX, "l_x"},
         {StandardAxisType.LeftStickY, "l_y"},
@@ -31,20 +31,25 @@ public class ControllerAxis : OutputAxis
         {StandardAxisType.RightTrigger, "rt"},
     };
 
-    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, float multiplier, int offset,
-        int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, multiplier, offset, deadZone,
-        type.ToString())
+    
+    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, float multiplier, int offset,
+        int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndex, multiplier, offset, deadZone,
+        type.ToString(), (s)=>IsTrigger(s, type))
     {
         Type = type;
+
     }
 
+    private static bool IsTrigger(DeviceControllerType s, StandardAxisType type)
+    {
+        return (s is DeviceControllerType.Guitar &&
+                type is StandardAxisType.RightStickX or StandardAxisType.RightStickY) ||
+               type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
+    }
     public StandardAxisType Type { get; }
 
-    public override bool Trigger =>
-        (Model.DeviceType is DeviceControllerType.Guitar && Type is StandardAxisType.RightStickX) ||
-        Type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
 
-    public override string GenerateOutput(bool xbox)
+    protected override string GenerateOutput(bool xbox)
     {
         if (xbox)
         {
@@ -61,6 +66,6 @@ public class ControllerAxis : OutputAxis
 
     public override SerializedOutput GetJson()
     {
-        return new SerializedControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, Multiplier, Offset, DeadZone);
+        return new SerializedControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset, DeadZone);
     }
 }

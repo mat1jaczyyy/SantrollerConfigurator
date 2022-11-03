@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 public class DirectInput : InputWithPin
 {
-    public DirectInput(int pin, DevicePinMode pinMode, Microcontroller microcontroller)
+    public DirectInput(int pin, DevicePinMode pinMode, Microcontroller microcontroller): base(microcontroller, new DirectPinConfig(Guid.NewGuid().ToString(), pin, pinMode))
     {
-        _pinConfig = new DirectPinConfig(Guid.NewGuid().ToString(), pin, pinMode);
-        _microcontroller = microcontroller;
     }
      
 
@@ -20,7 +19,7 @@ public class DirectInput : InputWithPin
     {
         var modes = Enum.GetValues(typeof(DevicePinMode)).Cast<DevicePinMode>()
             .Where(mode => mode is not (DevicePinMode.Output or DevicePinMode.Analog));
-        if (_microcontroller.Board.IsAvr())
+        if (Microcontroller.Board.IsAvr())
         {
             return modes.Where(mode => mode is not (DevicePinMode.BusKeep or DevicePinMode.PullDown));
         }
@@ -28,21 +27,7 @@ public class DirectInput : InputWithPin
         return modes;
     }
 
-    private DirectPinConfig _pinConfig;
-    public override DirectPinConfig PinConfig
-    {
-        get => _pinConfig;
-        set
-        {
-            _pinConfig = value;
-            Microcontroller.AssignPin(_pinConfig);
-        }
-    }
-
-    protected override Microcontroller Microcontroller => _microcontroller;
-
-    private Microcontroller _microcontroller;
-
+   
     public override SerializedInput GetJson()
     {
         return new SerializedDirectInput(PinConfig.Pin, PinConfig.PinMode);
@@ -54,9 +39,11 @@ public class DirectInput : InputWithPin
     public override string Generate()
     {
         return IsAnalog
-            ? _microcontroller.GenerateAnalogRead(PinConfig.Pin)
-            : _microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
+            ? Microcontroller.GenerateAnalogRead(PinConfig.Pin)
+            : Microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
     }
+
+    public override InputType? InputType => IsAnalog? Types.InputType.AnalogPinInput : Types.InputType.DigitalPinInput;
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ReactiveUI;
 
@@ -73,4 +74,5 @@ public abstract class SpiConfig : PinConfig
             UpdatePins();
         }
     }
+    public override IEnumerable<int> Pins => new List<int> {_miso, _miso, _sck};
 }

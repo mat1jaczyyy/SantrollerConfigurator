@@ -30,7 +30,7 @@ public class DjCombinedOutput : CombinedTwiOutput
     }
     public override SerializedOutput GetJson()
     {
-        return new SerializedDjCombinedOutput(LedOn, LedOff, Sda, Scl);
+        return new SerializedDjCombinedOutput(Sda, Scl);
     }
 
     public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);
@@ -38,18 +38,18 @@ public class DjCombinedOutput : CombinedTwiOutput
     {
         var inputs = bindings.Select(s => s.Input?.InnermostInput()).Where(s => s is DjInput).Cast<DjInput>()
             .Select(s => s.Input).ToHashSet();
-        var outputs = (from pair in Buttons where !inputs.Contains(pair.Key) select new ControllerButton(Model, new DjInput(pair.Key, _microcontroller), Colors.Transparent, Colors.Transparent, 5, pair.Value)).Cast<Output>().ToList();
+        var outputs = (from pair in Buttons where !inputs.Contains(pair.Key) select new ControllerButton(Model, new DjInput(pair.Key, _microcontroller), Colors.Transparent, Colors.Transparent, null, 5, pair.Value)).Cast<Output>().ToList();
 
         if (!inputs.Contains(DjInputType.LeftTurntable))
         {
             outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, _microcontroller), Colors.Transparent,
-                Colors.Transparent, 1,
+                Colors.Transparent, -1,1,
                 0, 0, StandardAxisType.LeftStickX));
         }
         if (!inputs.Contains(DjInputType.RightTurnable))
         {
             outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, _microcontroller), Colors.Transparent,
-                Colors.Transparent, 1,
+                Colors.Transparent, -1,1,
                 0, 0, StandardAxisType.LeftStickY));
         }
 

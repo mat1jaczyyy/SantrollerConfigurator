@@ -8,13 +8,15 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
+
 public class GhwtCombinedOutput : CombinedOutput
 {
     public bool MapTapBarToAxis { get; set; }
     public bool MapTapBarToFrets { get; set; }
-    
+
     public int Pin { get; set; }
     private readonly Microcontroller _microcontroller;
+
     private static readonly Dictionary<GhWtInputType, StandardButtonType> Taps = new()
     {
         {GhWtInputType.TapGreen, StandardButtonType.A},
@@ -23,7 +25,9 @@ public class GhwtCombinedOutput : CombinedOutput
         {GhWtInputType.TapBlue, StandardButtonType.X},
         {GhWtInputType.TapOrange, StandardButtonType.Lb},
     };
-    public GhwtCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null, bool mapTapBarToFrets = false, bool mapTapBarToAxis = false) : base(model, null, Colors.Transparent, Colors.Transparent, "GHWT")
+
+    public GhwtCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null,
+        bool mapTapBarToFrets = false, bool mapTapBarToAxis = false) : base(model, null, "GHWT")
     {
         _microcontroller = microcontroller;
         MapTapBarToFrets = mapTapBarToAxis;
@@ -36,7 +40,7 @@ public class GhwtCombinedOutput : CombinedOutput
 
     public override SerializedOutput GetJson()
     {
-        return new SerializedGhwtCombinedOutput(LedOn, LedOff, Pin, MapTapBarToFrets, MapTapBarToAxis);
+        return new SerializedGhwtCombinedOutput(Pin, MapTapBarToFrets, MapTapBarToAxis);
     }
 
     public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);
@@ -50,7 +54,7 @@ public class GhwtCombinedOutput : CombinedOutput
         {
             outputs.Add(new ControllerAxis(Model, new GhWtTapInput(GhWtInputType.TapBar, _microcontroller),
                 Colors.Transparent,
-                Colors.Transparent, 1, 0, 0, StandardAxisType.RightStickY));
+                Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
         }
 
         if (MapTapBarToFrets)
@@ -59,7 +63,7 @@ public class GhwtCombinedOutput : CombinedOutput
             {
                 if (inputs.Contains(pair.Key)) continue;
                 outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, _microcontroller), Colors.Green,
-                    Colors.Transparent, 5, pair.Value));
+                    Colors.Transparent, null, 5, pair.Value));
             }
         }
 

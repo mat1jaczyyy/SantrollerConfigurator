@@ -38,7 +38,7 @@ public class Arduino : IConfigurableDevice
         {
             MigrationSupported = false;
 
-            SerialPort serial = new SerialPort(port.Port, 115200);
+            var serial = new SerialPort(port.Port, 115200);
             serial.Open();
             serial.Write("i\x06\n");
             var boardName = serial.ReadLine().Trim();

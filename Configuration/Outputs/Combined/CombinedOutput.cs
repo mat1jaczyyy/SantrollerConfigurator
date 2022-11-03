@@ -5,7 +5,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
 public abstract class CombinedOutput : Output
 {
-    protected CombinedOutput(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, string name) : base(model, input, ledOn, ledOff, name)
+    protected CombinedOutput(ConfigViewModel model, Input? input, string name) : base(model, input, Colors.Transparent, Colors.Transparent, null, name)
     {
     }
 

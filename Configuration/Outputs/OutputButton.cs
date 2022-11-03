@@ -8,7 +8,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public abstract class OutputButton : Output
 {
-    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int debounce, string name): base(model, input, ledOn, ledOff, name)
+    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, int debounce, string name): base(model, input, ledOn, ledOff, ledIndex, name)
     {
         Debounce = debounce;
     }
@@ -35,7 +35,7 @@ public abstract class OutputButton : Output
         if (string.IsNullOrEmpty(outputBit) || !shared) return "";
         if (combined && IsStrum)
         {
-            int otherIndex = debounceIndex == 1 ? 0 : 1;
+            var otherIndex = debounceIndex == 1 ? 0 : 1;
             return $"if (({Input.Generate()}) && (!debounce[{otherIndex}])) {{debounce[{debounceIndex}] = {Debounce+1};}}";
         }
         return $"if (({Input.Generate()})) {{debounce[{debounceIndex}] = {Debounce+1};}}";

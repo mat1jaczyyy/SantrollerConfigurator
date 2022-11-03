@@ -15,18 +15,20 @@ public class SerializedMouseButton : SerializedOutput
     [ProtoMember(3)] public override Color LedOff { get; }
     [ProtoMember(4)] public int Debounce { get; }
     [ProtoMember(5)] public MouseButtonType Type { get; }
+    [ProtoMember(6)] public override int? LedIndex { get; }
 
-    public SerializedMouseButton(SerializedInput? input, Color ledOn, Color ledOff, int debounce, MouseButtonType type)
+    public SerializedMouseButton(SerializedInput? input, Color ledOn, Color ledOff, int? ledIndex, int debounce, MouseButtonType type)
     {
         Input = input;
         LedOn = ledOn;
         LedOff = ledOff;
+        LedIndex = ledIndex;
         Debounce = debounce;
         Type = type;
     }
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new MouseButton(model, Input?.Generate(microcontroller), LedOn, LedOff, Debounce, Type);
+        return new MouseButton(model, Input?.Generate(microcontroller), LedOn, LedOff, LedIndex, Debounce, Type);
     }
 }

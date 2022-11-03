@@ -28,7 +28,7 @@ namespace GuitarConfiguratorSharp.NetCore.Utils
 
             var nameSpan = name.AsSpan();
 
-            for (int i = 0; i < nameSpan.Length; i++)
+            for (var i = 0; i < nameSpan.Length; i++)
             {
                 if (nameSpan[i] == ' ')
                 {
@@ -42,10 +42,10 @@ namespace GuitarConfiguratorSharp.NetCore.Utils
                     switch (state)
                     {
                         case SnakeCaseState.Upper:
-                            bool hasNext = (i + 1 < nameSpan.Length);
+                            var hasNext = (i + 1 < nameSpan.Length);
                             if (i > 0 && hasNext)
                             {
-                                char nextChar = nameSpan[i + 1];
+                                var nextChar = nameSpan[i + 1];
                                 if (!char.IsUpper(nextChar) && nextChar != '_')
                                 {
                                     sb.Append('_');

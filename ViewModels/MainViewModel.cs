@@ -16,6 +16,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         {
             Main = screen;
             HostScreen = screen;
+            // FretSmasher.StartLinux();
         }
     }
 }

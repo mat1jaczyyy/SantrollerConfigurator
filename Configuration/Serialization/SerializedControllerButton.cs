@@ -13,20 +13,22 @@ public class SerializedControllerButton : SerializedOutput
     [ProtoMember(1)] public override SerializedInput? Input { get; }
     [ProtoMember(2)] public override Color LedOn { get; }
     [ProtoMember(3)] public override Color LedOff { get; }
+    [ProtoMember(6)] public override int? LedIndex { get; }
     [ProtoMember(4)] public int Debounce { get; }
     [ProtoMember(5)] public StandardButtonType Type { get; }
 
-    public SerializedControllerButton(SerializedInput? input, Color ledOn, Color ledOff, int debounce, StandardButtonType type)
+    public SerializedControllerButton(SerializedInput? input, Color ledOn, Color ledOff, int? ledIndex, int debounce, StandardButtonType type)
     {
         Input = input;
         LedOn = ledOn;
         LedOff = ledOff;
+        LedIndex = ledIndex;
         Debounce = debounce;
         Type = type;
     }
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new ControllerButton(model, Input?.Generate(microcontroller), LedOn, LedOff, Debounce, Type);
+        return new ControllerButton(model, Input?.Generate(microcontroller), LedOn, LedOff, LedIndex, Debounce, Type);
     }
 }

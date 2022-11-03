@@ -38,52 +38,40 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public string Name { get; }
 
-    private InputType? _inputType;
-
     public InputType? SelectedInputType
     {
-        get => _inputType;
-        set => this.RaiseAndSetIfChanged(ref _inputType, value);
+        get => Input?.InputType;
+        set => SetInput(value, null, null, null, null, null);
     }
-
-    private WiiInputType _wiiInputType;
 
     public WiiInputType WiiInputType
     {
-        get => _wiiInputType;
-        set => this.RaiseAndSetIfChanged(ref _wiiInputType, value);
+        get => (Input?.InnermostInput() as WiiInput)?.Input ?? WiiInputType.ClassicA;
+        set => SetInput(SelectedInputType, value, null, null, null, null);
     }
-
-    private Ps2InputType _ps2InputType;
 
     public Ps2InputType Ps2InputType
     {
-        get => _ps2InputType;
-        set => this.RaiseAndSetIfChanged(ref _ps2InputType, value);
+        get => (Input?.InnermostInput() as Ps2Input)?.Input ?? Ps2InputType.Cross;
+        set => SetInput(SelectedInputType, null, value, null, null, null);
     }
-
-    private Gh5NeckInputType _gh5NeckInputType;
 
     public Gh5NeckInputType Gh5NeckInputType
     {
-        get => _gh5NeckInputType;
-        set => this.RaiseAndSetIfChanged(ref _gh5NeckInputType, value);
+        get => (Input?.InnermostInput() as Gh5NeckInput)?.Input ?? Gh5NeckInputType.Green;
+        set => SetInput(SelectedInputType, null, null, null, value, null);
     }
-
-    private DjInputType _djInputType;
 
     public DjInputType DjInputType
     {
-        get => _djInputType;
-        set => this.RaiseAndSetIfChanged(ref _djInputType, value);
+        get => (Input?.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
+        set => SetInput(SelectedInputType, null, null, null, null, value);
     }
-
-    private GhWtInputType _ghWtInputType;
 
     public GhWtInputType GhWtInputType
     {
-        get => _ghWtInputType;
-        set => this.RaiseAndSetIfChanged(ref _ghWtInputType, value);
+        get => (Input?.InnermostInput() as GhWtTapInput)?.Input ?? GhWtInputType.TapGreen;
+        set => SetInput(SelectedInputType, null, null, value, null, null);
     }
 
     public IEnumerable<GhWtInputType> GhWtInputTypes => Enum.GetValues<GhWtInputType>();
@@ -138,64 +126,99 @@ public abstract class Output : ReactiveObject, IDisposable
         set => this.RaiseAndSetIfChanged(ref _ledOff, value);
     }
 
-    public Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, string name)
+    protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, string name)
     {
         Input = input;
         LedOn = ledOn;
         LedOff = ledOff;
+        LedIndex = ledIndex;
         Name = name;
         Model = model;
         _image = this.WhenAnyValue(x => x.Model.DeviceType).Select(GetImage).ToProperty(this, x => x.Image);
-        _isDj = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.TurntableInput)
+        _isDj = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is DjInput)
             .ToProperty(this, x => x.IsDj);
-        _isWii = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.WiiInput)
+        _isWii = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is WiiInput)
             .ToProperty(this, x => x.IsWii);
-        _isGh5 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.Gh5NeckInput)
+        _isGh5 = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is Gh5NeckInput)
             .ToProperty(this, x => x.IsGh5);
-        _isPs2 = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.Ps2Input)
+        _isPs2 = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is Ps2Input)
             .ToProperty(this, x => x.IsPs2);
-        _isWt = this.WhenAnyValue(x => x.SelectedInputType).Select(x => x is InputType.WtNeckInput)
+        _isWt = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is GhWtTapInput)
             .ToProperty(this, x => x.IsWt);
         _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is LedType.Apa102)
             .ToProperty(this, x => x.AreLedsEnabled);
-        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType,x => x.Model.RhythmType).Select(x => GetLocalisedName())
+        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType)
+            .Select(x => GetLocalisedName())
             .ToProperty(this, x => x.LocalisedName);
     }
 
-    
+
     public abstract string? GetLocalisedName();
     public abstract bool IsStrum { get; }
 
-    public void ClearInput()
-    {
-        Input = null;
-    }
-
-    public void SetInput()
+    private void SetInput(InputType? inputType, WiiInputType? wiiInput, Ps2InputType? ps2InputType,
+        GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
     {
         Input input;
-        switch (SelectedInputType)
+        var lastPin = 0;
+        var pinMode = DevicePinMode.PullUp;
+        if (Input?.InnermostInput() is DirectInput direct)
+        {
+            lastPin = direct.Pin;
+            if (!direct.IsAnalog)
+            {
+                pinMode = direct.PinMode;
+            }
+        }
+
+        switch (inputType)
         {
             case InputType.AnalogPinInput:
-                input = new DirectInput(0, DevicePinMode.Analog, Model.MicroController!);
+                input = new DirectInput(lastPin, DevicePinMode.Analog, Model.MicroController!);
                 break;
             case InputType.DigitalPinInput:
-                input = new DirectInput(0, DevicePinMode.PullUp, Model.MicroController!);
+                input = new DirectInput(lastPin, pinMode, Model.MicroController!);
                 break;
-            case InputType.TurntableInput:
-                input = new DjInput(_djInputType, Model.MicroController!);
+            case InputType.TurntableInput when Input?.InnermostInput() is not DjInput:
+                djInputType ??= DjInputType.LeftGreen;
+                input = new DjInput(djInputType.Value, Model.MicroController!);
                 break;
-            case InputType.Gh5NeckInput:
-                input = new Gh5NeckInput(_gh5NeckInputType, Model.MicroController!);
+            case InputType.TurntableInput when Input?.InnermostInput() is DjInput dj:
+                djInputType ??= DjInputType.LeftGreen;
+                input = new DjInput(djInputType.Value, Model.MicroController!, dj.Sda, dj.Scl);
                 break;
-            case InputType.WtNeckInput:
-                input = new GhWtTapInput(_ghWtInputType, Model.MicroController!);
+            case InputType.Gh5NeckInput when Input?.InnermostInput() is not Gh5NeckInput:
+                gh5NeckInputType ??= Gh5NeckInputType.Green;
+                input = new Gh5NeckInput(gh5NeckInputType.Value, Model.MicroController!);
                 break;
-            case InputType.WiiInput:
-                input = new WiiInput(_wiiInputType, Model.MicroController!);
+            case InputType.Gh5NeckInput when Input?.InnermostInput() is Gh5NeckInput gh5:
+                gh5NeckInputType ??= Gh5NeckInputType.Green;
+                input = new Gh5NeckInput(gh5NeckInputType.Value, Model.MicroController!, gh5.Sda, gh5.Scl);
                 break;
-            case InputType.Ps2Input:
-                input = new Ps2Input(_ps2InputType, Model.MicroController!);
+            case InputType.WtNeckInput when Input?.InnermostInput() is not GhWtTapInput:
+                ghWtInputType ??= GhWtInputType.TapGreen;
+                input = new GhWtTapInput(ghWtInputType.Value, Model.MicroController!);
+                break;
+            case InputType.WtNeckInput when Input?.InnermostInput() is GhWtTapInput wt:
+                ghWtInputType ??= GhWtInputType.TapGreen;
+                input = new GhWtTapInput(ghWtInputType.Value, Model.MicroController!, wt.Pin);
+                break;
+            case InputType.WiiInput when Input?.InnermostInput() is not WiiInput:
+                wiiInput ??= WiiInputType.ClassicA;
+                input = new WiiInput(wiiInput.Value, Model.MicroController!);
+                break;
+            case InputType.WiiInput when Input?.InnermostInput() is WiiInput wii:
+                wiiInput ??= WiiInputType.ClassicA;
+                input = new WiiInput(wiiInput.Value, Model.MicroController!, wii.Sda, wii.Scl);
+                break;
+            case InputType.Ps2Input when Input?.InnermostInput() is not Ps2Input:
+                ps2InputType ??= Ps2InputType.Cross;
+                input = new Ps2Input(ps2InputType.Value, Model.MicroController!);
+                break;
+            case InputType.Ps2Input when Input?.InnermostInput() is Ps2Input ps2:
+                ps2InputType ??= Ps2InputType.Cross;
+                input = new Ps2Input(ps2InputType.Value, Model.MicroController!, ps2.Miso, ps2.Mosi, ps2.Sck, ps2.Att,
+                    ps2.Ack);
                 break;
             default:
                 return;
@@ -214,6 +237,12 @@ public abstract class Output : ReactiveObject, IDisposable
                 Input = new DigitalToAnalog(input, 0);
                 break;
         }
+
+        this.RaisePropertyChanged(nameof(WiiInputType));
+        this.RaisePropertyChanged(nameof(Ps2InputType));
+        this.RaisePropertyChanged(nameof(GhWtInputType));
+        this.RaisePropertyChanged(nameof(Gh5NeckInputType));
+        this.RaisePropertyChanged(nameof(DjInputType));
     }
 
 
@@ -259,8 +288,6 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public abstract string Generate(bool xbox, bool shared, int debounceIndex, bool combined);
     public abstract string GenerateLedUpdate(int debounceIndex, bool xbox);
-    
-    public virtual bool RequiresInput => true;
 
     public virtual IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => new[] {this};
 

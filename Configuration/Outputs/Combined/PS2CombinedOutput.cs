@@ -74,9 +74,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         Att = att ?? 0;
         Ack = ack ?? 0;
     }
+
     public override SerializedOutput GetJson()
     {
-        return new SerializedPs2CombinedOutput(LedOn, LedOff, Miso, Mosi, Sck, Att, Ack);
+        return new SerializedPs2CombinedOutput(Miso, Mosi, Sck, Att, Ack);
     }
 
     public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);
@@ -89,8 +90,9 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         foreach (var pair in Buttons)
         {
             if (inputs.Contains(pair.Key)) continue;
-            outputs.Add(new ControllerButton(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack), Colors.Transparent,
+            outputs.Add(new ControllerButton(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack),
                 Colors.Transparent,
+                Colors.Transparent, null,
                 10,
                 pair.Value));
         }
@@ -98,8 +100,9 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         foreach (var pair in Axis)
         {
             if (inputs.Contains(pair.Key)) continue;
-            outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack), Colors.Transparent,
-                Colors.Transparent, 1, 0, 0, pair.Value));
+            outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack),
+                Colors.Transparent,
+                Colors.Transparent, null, 1, 0, 0, pair.Value));
         }
 
         if (!inputs.Contains(Ps2InputType.NegConI))
@@ -107,7 +110,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             outputs.Add(new ControllerButton(Model,
                 new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, _microcontroller, Miso, Mosi, Sck, Att, Ack),
                     AnalogToDigitalType.Trigger, 128),
-                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
+                Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
         }
 
 
@@ -116,17 +119,16 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             outputs.Add(new ControllerButton(Model,
                 new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, _microcontroller, Miso, Mosi, Sck, Att, Ack),
                     AnalogToDigitalType.Trigger, 128),
-                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
+                Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
         }
 
 
         if (!inputs.Contains(Ps2InputType.NegConL))
         {
-
             outputs.Add(new ControllerButton(Model,
                 new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, _microcontroller, Miso, Mosi, Sck, Att, Ack),
                     AnalogToDigitalType.Trigger, 240),
-                Colors.Transparent, Colors.Transparent, 10, StandardButtonType.Left));
+                Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
         }
 
         return outputs;

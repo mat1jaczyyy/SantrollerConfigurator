@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 
@@ -18,6 +19,7 @@ public class DjInput : TwiInput
     }
 
     public DjInputType Input { get; set; }
+    public override InputType? InputType => Types.InputType.TurntableInput;
 
     public override string Generate()
     {
@@ -48,10 +50,10 @@ public class DjInput : TwiInput
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
-        string left = string.Join(";",
+        var left = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
                 .Select(binding => binding.Item2));
-        string right = string.Join(";",
+        var right = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
                 .Select(binding => binding.Item2));
         return $"if (djLeftValid) {{{left}}} if (djRightValid) {{{right}}}";

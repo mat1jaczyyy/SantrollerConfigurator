@@ -47,7 +47,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
 
     public override SerializedOutput GetJson()
     {
-        return new SerializedGh5CombinedOutput(LedOn, LedOff, Sda, Scl, FretsEnabled, MapTapBarToFrets,
+        return new SerializedGh5CombinedOutput(Sda, Scl, FretsEnabled, MapTapBarToFrets,
             MapTapBarToAxis);
     }
 
@@ -65,7 +65,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
             {
                 if (inputs.Contains(pair.Key)) continue;
                 outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller), Colors.Green,
-                    Colors.Transparent, 5, pair.Value));
+                    Colors.Transparent, null, 5, pair.Value));
             }
         }
 
@@ -75,7 +75,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
             {
                 outputs.Add(new ControllerAxis(Model, new Gh5NeckInput(Gh5NeckInputType.TapBar, _microcontroller),
                     Colors.Transparent,
-                    Colors.Transparent, 1, 0, 0, StandardAxisType.RightStickY));
+                    Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
             }
         }
 
@@ -85,7 +85,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
             {
                 if (inputs.Contains(pair.Key)) continue;
                 outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller), Colors.Green,
-                    Colors.Transparent, 5, pair.Value));
+                    Colors.Transparent, null, 5, pair.Value));
             }
         }
 

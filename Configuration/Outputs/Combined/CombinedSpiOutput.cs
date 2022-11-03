@@ -14,7 +14,7 @@ public abstract class CombinedSpiOutput : CombinedOutput
     private readonly Microcontroller _microcontroller;
 
     protected CombinedSpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
-        bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null): base(model, null, Colors.Transparent, Colors.Transparent, name)
+        bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null): base(model, null, name)
     {
         _microcontroller = microcontroller;
         SpiType = spiType;

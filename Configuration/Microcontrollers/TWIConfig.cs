@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
-public abstract class TwiConfig: PinConfig
+public abstract class TwiConfig : PinConfig
 {
     protected int _sda;
     protected int _scl;
@@ -17,6 +18,7 @@ public abstract class TwiConfig: PinConfig
         _scl = scl;
         _clock = clock;
     }
+
     public virtual string GenerateInit()
     {
         return "";
@@ -32,7 +34,7 @@ public abstract class TwiConfig: PinConfig
     }
 
     public override string Type => _type;
-    protected abstract void UpdatePins([CallerMemberName]string? propertyName = null);
+    protected abstract void UpdatePins([CallerMemberName] string? propertyName = null);
 
     public int Sda
     {
@@ -54,5 +56,5 @@ public abstract class TwiConfig: PinConfig
         }
     }
 
-    public int Clock => _clock;
+    public override IEnumerable<int> Pins => new List<int> {_sda, _scl};
 }

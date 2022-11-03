@@ -15,7 +15,7 @@ public class AssetUtils
         using (var f = File.OpenWrite(location))
         {
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-            string assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
+            var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
             var uri = new Uri($"avares://{assemblyName}/Assets/{file}");
             using (var target = assets!.Open(uri))
             {
@@ -33,7 +33,7 @@ public class AssetUtils
 
     public static string GetAppDataFolder()
     {
-        string folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         return Path.Combine(folder, "SantrollerConfigurator");
     }
 }

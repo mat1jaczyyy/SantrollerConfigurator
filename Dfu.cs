@@ -95,8 +95,8 @@ public class Dfu : IConfigurableDevice
     public void Launch()
     {
         _args.Device.Open(out var device);
-        UsbCtrlFlags requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class |
-                                   UsbCtrlFlags.Recipient_Interface;
+        var requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class |
+                          UsbCtrlFlags.Recipient_Interface;
 
         var sp = new UsbSetupPacket(
             ((byte) requestType),

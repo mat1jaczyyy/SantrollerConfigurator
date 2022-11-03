@@ -15,7 +15,7 @@ public abstract class CombinedTwiOutput : CombinedOutput
 
     
     protected CombinedTwiOutput(ConfigViewModel model, Microcontroller microcontroller, string twiType,
-        int twiFreq, string name, int? sda = null, int? scl = null) : base(model, null, Colors.Transparent, Colors.Transparent, name)
+        int twiFreq, string name, int? sda = null, int? scl = null) : base(model, null, name)
         
     {
         _microcontroller = microcontroller;

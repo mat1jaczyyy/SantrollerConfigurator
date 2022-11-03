@@ -1,7 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:colorpicker="clr-namespace:AvaloniaColorPicker;assembly=AvaloniaColorPicker"
              xmlns:netCore="clr-namespace:GuitarConfiguratorSharp.NetCore"
              xmlns:viewModels="clr-namespace:GuitarConfiguratorSharp.NetCore.ViewModels"
              xmlns:configuration="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration"
@@ -47,7 +46,7 @@
                     </ComboBox>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="configuration:EmptyOutput">
+            <DataTemplate DataType="output:EmptyOutput">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding IsController}">
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding CombinedType}"
@@ -65,10 +64,6 @@
                         </ComboBox>
                         <!-- TODO: Keyboard key from key with detection  -->
                     </StackPanel>
-                    <Button
-                        Command="{Binding AddCommand}">
-                        Add
-                    </Button>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type neck:GhWtTapInput}">
@@ -144,11 +139,56 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputAxis}">
                 <StackPanel Orientation="Horizontal">
-                    <!-- TODO: this would all just be replaced with a "Calibrate" dialog, and possibly some gauges showing the current values -->
-                    <!-- If we can it would be cool to do something like CH does, where you show the offset/multiplier/deadzone all overlaid on top of the gauge showing the raw / converted value -->
-                    <NumericUpDown Value="{Binding Multiplier}" VerticalAlignment="Center"></NumericUpDown>
-                    <NumericUpDown Value="{Binding Offset}" VerticalAlignment="Center"></NumericUpDown>
-                    <NumericUpDown Value="{Binding DeadZone}" VerticalAlignment="Center"></NumericUpDown>
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding Trigger}">
+                                    <ProgressBar HorizontalAlignment="Stretch" Value="{Binding Value}" IsIndeterminate="False" Minimum="0" Maximum="65536" Height="30" Width="500" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}">
+                                    <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch" Value="{Binding ValueLower}"
+                                                 IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30" Width="250">
+                                        <ProgressBar.RenderTransform><ScaleTransform ScaleX="-1"></ScaleTransform></ProgressBar.RenderTransform>
+                                    </ProgressBar>
+                                    <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch" Value="{Binding ValueUpper}"
+                                                 IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30" Width="250"/>
+                                </StackPanel>
+                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding Value}"></TextBlock>
+                            </Grid>
+                        
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsUint}">
+                                    <ProgressBar HorizontalAlignment="Stretch" Value="{Binding ValueRaw}" IsIndeterminate="False" Minimum="0" Maximum="65536" Height="30" Width="500" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}">
+                                    <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch" Value="{Binding ValueRawLower}"
+                                                 IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30" Width="250">
+                                        <ProgressBar.RenderTransform><ScaleTransform ScaleX="-1"></ScaleTransform></ProgressBar.RenderTransform>
+                                    </ProgressBar>
+                                    <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch" Value="{Binding ValueRawUpper}"
+                                                 IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30" Width="250"/>
+                                </StackPanel>
+                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding ValueRaw}"></TextBlock>
+                                <Rectangle Margin="{Binding ComputedDeadZoneMargin}" IsVisible="{Binding !InputIsUint}" Fill="Red" Width="{Binding DeadZoneScaled}" Height="30" Opacity="0.3"></Rectangle>
+                                <Rectangle Margin="{Binding ComputedDeadZoneMargin}" IsVisible="{Binding InputIsUint}" Fill="Red" HorizontalAlignment="Left" Width="{Binding DeadZoneScaled}" Height="30" Opacity="0.3"></Rectangle>
+                                
+                            </Grid>
+                        
+                        </StackPanel>
+                        <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding OffsetSlider}" Minimum="-32767" Maximum="32768" />
+                        <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding OffsetSlider}" Minimum="0" Maximum="65535" />
+                        <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding DeadZoneSlider}" Minimum="-32767" Maximum="32768" />
+                        <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding DeadZoneSlider}" Minimum="0" Maximum="65535" />
+                        <Slider Width="500" Value="{Binding Multiplier}" Minimum="0" Maximum="10" TickFrequency="0.01" IsSnapToTickEnabled="True" />
+                        <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding ValueRaw}" Minimum="-32767" Maximum="32768" />
+                        <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding ValueRaw}" Minimum="0" Maximum="65535" />
+                    </StackPanel>
+                    <Button x:CompileBindings="False" Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center">
+                        Calibrate
+                    </Button>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputButton}"></DataTemplate>
@@ -303,27 +343,17 @@
                     <ItemsRepeater Items="{Binding Bindings}">
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate DataType="output:Output">
-                                <WrapPanel>
+                                <WrapPanel Background="Black" Margin="20 20 20 0">
                                     <Image ToolTip.Tip="{Binding LocalisedName}"
                                            HorizontalAlignment="Center" Width="75"
                                            Source="{Binding Image}">
                                     </Image>
-                                    <ContentControl Content="{Binding Input}"
-                                                    ContentTemplate="{StaticResource OutputTemplates}">
-                                    </ContentControl>
-                                    <Button
-                                        x:CompileBindings="False"
-                                        IsVisible="{Binding Input, Converter={x:Static  ObjectConverters.IsNotNull}}"
-                                        Command="{Binding ClearInput}">
-                                        Change Input
-                                    </Button>
                                     <StackPanel Orientation="Horizontal">
                                         <StackPanel.IsVisible>
                                             <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                 <Binding Path="Input"
-                                                         Converter="{x:Static  ObjectConverters.IsNull}" />
+                                                         Converter="{x:Static  ObjectConverters.IsNotNull}" />
                                                 <Binding Path="!IsCombined" />
-                                                <Binding Path="RequiresInput" />
                                             </MultiBinding>
                                         </StackPanel.IsVisible>
                                         <ComboBox VerticalAlignment="Center"
@@ -350,25 +380,24 @@
                                                   SelectedItem="{Binding GhWtInputType}"
                                                   Items="{Binding GhWtInputTypes}">
                                         </ComboBox>
-                                        <Button x:CompileBindings="False" Command="{Binding SetInput}">
-                                            Add Input
-                                        </Button>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <StackPanel.IsVisible>
-                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                <Binding Path="AreLedsEnabled"
-                                                         Converter="{x:Static  ObjectConverters.IsNull}" />
-                                                <Binding Path="!IsCombined" />
-                                            </MultiBinding>
-                                        </StackPanel.IsVisible>
-                                        <colorpicker:ColorButton Color="{Binding LedOn}"></colorpicker:ColorButton>
-                                        <colorpicker:ColorButton Color="{Binding LedOff}"></colorpicker:ColorButton>
                                     </StackPanel>
                                     <ContentControl Content="{Binding}"
                                                     ContentTemplate="{StaticResource OutputTemplates}">
                                     </ContentControl>
+                                    <ContentControl Content="{Binding Input}"
+                                                    ContentTemplate="{StaticResource OutputTemplates}">
+                                    </ContentControl>
+                                    <NumericUpDown Value="{Binding LedIndex}" VerticalAlignment="Center"></NumericUpDown>
+                                    <StackPanel Orientation="Horizontal">
+                                        <StackPanel.IsVisible>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="AreLedsEnabled" />
+                                                <Binding Path="!IsCombined" />
+                                            </MultiBinding>
+                                        </StackPanel.IsVisible>
+                                        <ColorPicker Color="{Binding LedOn}"></ColorPicker>
+                                        <ColorPicker Color="{Binding LedOff}"></ColorPicker>
+                                    </StackPanel>
                                     <Button
                                         x:CompileBindings="False"
                                         Command="{Binding $parent[UserControl].DataContext.RemoveOutput}"
