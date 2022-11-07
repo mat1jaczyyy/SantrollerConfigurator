@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +16,7 @@ public class Mega : AvrController
     protected override int I2CSda => 20;
 
     protected override int I2CScl => 21;
-    private readonly int[] _pinInputs = {
+    private static readonly int[] PinIndex = {
         0     , // PE 0 ** 0 ** USART0_RX	
         1     , // PE 1 ** 1 ** USART0_TX	
         4     , // PE 4 ** 2 ** PWM2	
@@ -88,7 +89,7 @@ public class Mega : AvrController
         7     , // PK 7 ** 69 ** A15	
     };
 
-    public override int PinCount => _pinInputs.Length;
+    public override int PinCount => PinIndex.Length;
 
     public static readonly Dictionary<int, string> Interrupts = new ()
     {
@@ -173,7 +174,7 @@ public class Mega : AvrController
         'K'    , // 'K' 7 ** 69 ** A15            
     };
 
-    private static readonly char[] PortNames = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'L' };
+    protected override char[] PortNames => new [] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'L' };
 
     protected override int PinA0 => 54;
 
@@ -192,7 +193,7 @@ public class Mega : AvrController
     public override List<int> GetFreePins()
     {
         var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
-        return Enumerable.Range(0, _pinInputs.Length).Where(s => !used.Contains(s)).ToList();
+        return Enumerable.Range(0, PinIndex.Length).Where(s => !used.Contains(s)).ToList();
     }
 
     public Mega(Board board) {
@@ -201,7 +202,7 @@ public class Mega : AvrController
 
     public override int GetIndex(int pin)
     {
-        return _pinInputs[pin];
+        return PinIndex[pin];
     }
 
     public override char GetPort(int pin)
@@ -213,6 +214,9 @@ public class Mega : AvrController
     {
         return PinA0 - pin;
     }
+
+    private Dictionary<Tuple<char, int>, int> _pinByMask = Enumerable.Zip(Ports, PinIndex).Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i)).ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s=>s.Item3);
+    protected override Dictionary<Tuple<char, int>, int> PinByMask => _pinByMask;
 
     public override AvrPinMode? ForcedMode(int pin)
     {

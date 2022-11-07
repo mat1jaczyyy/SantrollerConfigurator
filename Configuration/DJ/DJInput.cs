@@ -10,7 +10,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 public class DjInput : TwiInput
 {
     public static readonly string DjTwiType = "dj";
-    public static readonly int DjTwiFreq = 250000;
+    public static readonly int DjTwiFreq = 150000;
 
     public DjInput(DjInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null) : base(
         microcontroller, DjTwiType, DjTwiFreq, sda, scl)
@@ -26,9 +26,9 @@ public class DjInput : TwiInput
         switch (Input)
         {
             case DjInputType.LeftTurntable:
-                return "((int8_t)dj_left[2]) << 5";
+                return "((int8_t)dj_left[2]) << 15";
             case DjInputType.RightTurnable:
-                return "((int8_t)dj_right[2]) << 5";
+                return "((int8_t)dj_right[2]) << 15";
             case DjInputType.LeftAny:
                 return "dj_left[0]";
             case DjInputType.RightAny:
@@ -36,11 +36,11 @@ public class DjInput : TwiInput
             case DjInputType.LeftBlue:
             case DjInputType.LeftGreen:
             case DjInputType.LeftRed:
-                return $"(dj_left[0] & {1 << ((byte) Input) - ((byte) DjInputType.LeftGreen)})";
+                return $"(dj_left[0] & {1 << ((byte) Input - (byte) DjInputType.LeftGreen + 4)})";
             case DjInputType.RightGreen:
             case DjInputType.RightRed:
             case DjInputType.RightBlue:
-                return $"(dj_right[0] & {1 << ((byte) Input) - ((byte) DjInputType.RightGreen)})";
+                return $"(dj_right[0] & {1 << ((byte) Input - (byte) DjInputType.RightGreen + 4)})";
         }
 
         throw new InvalidOperationException("Shouldn't get here!");

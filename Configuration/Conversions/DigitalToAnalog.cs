@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 public class DigitalToAnalog : Input
@@ -14,6 +16,7 @@ public class DigitalToAnalog : Input
     {
         Child = child;
         Value = value;
+        this.WhenAnyValue(x => x.Child.RawValue).Subscribe(s => RawValue = s * Value);
     }
 
     public override string Generate()
@@ -30,6 +33,7 @@ public class DigitalToAnalog : Input
     {
         return Child;
     }
+
     public override List<DevicePin> Pins => Child.Pins;
     public override InputType? InputType => Child.InputType;
 

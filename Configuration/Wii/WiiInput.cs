@@ -262,7 +262,6 @@ public class WiiInput : TwiInput
 
     public override bool IsAnalog => Input <= WiiInputType.DrawsomePenPressure;
     public override bool IsUint => !Input.ToString().ToLower().Contains("stick");
-
     public override List<DevicePin> Pins => new();
 
     private static string GetMappingForTapBar(params int[] mappings)

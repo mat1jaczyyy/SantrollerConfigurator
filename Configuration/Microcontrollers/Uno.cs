@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +16,7 @@ public class Uno : AvrController
     protected override int I2CSda => 18;
 
     protected override int I2CScl => 19;
-    private readonly int[] _pinInputs = {
+    private static readonly int[] PinIndex = {
         0, /* 0, port D */
         1, 2, 3, 4, 5, 6,
         7, 0,                                 /* 8, port B */
@@ -29,7 +30,10 @@ public class Uno : AvrController
         'B', 'B', 'B', 'B', 'B', 'C',         /* 14 */
         'C', 'C', 'C', 'C', 'C'
     };
-    private static readonly char[] PortNames = { 'B', 'C', 'D' };
+    protected override char[] PortNames => new [] { 'B', 'C', 'D' };
+    
+    private Dictionary<Tuple<char, int>, int> _pinByMask = Enumerable.Zip(Ports, PinIndex).Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i)).ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s=>s.Item3);
+    protected override Dictionary<Tuple<char, int>, int> PinByMask => _pinByMask;
     
     public static readonly Dictionary<int, string> Interrupts = new ()
     {
@@ -38,7 +42,7 @@ public class Uno : AvrController
     };
     protected override int PinA0 => 14;
 
-    public override int PinCount => _pinInputs.Length;
+    public override int PinCount => PinIndex.Length;
     protected override string GetInterruptForPin(int ack)
     {
         return Interrupts[ack];
@@ -57,7 +61,7 @@ public class Uno : AvrController
 
     public override int GetIndex(int pin)
     {
-        return _pinInputs[pin];
+        return PinIndex[pin];
     }
 
     public override char GetPort(int pin)
@@ -88,6 +92,6 @@ public class Uno : AvrController
     public override List<int> GetFreePins()
     {
         var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
-        return Enumerable.Range(0, _pinInputs.Length).Where(s => !used.Contains(s)).ToList();
+        return Enumerable.Range(0, PinIndex.Length).Where(s => !used.Contains(s)).ToList();
     }
 }

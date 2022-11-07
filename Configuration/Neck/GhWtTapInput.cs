@@ -69,6 +69,7 @@ public class GhWtTapInput : InputWithPin
     public override bool IsAnalog => Input == GhWtInputType.TapBar;
     public override InputType? InputType => Types.InputType.WtNeckInput;
     public override bool IsUint => true;
+    
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {

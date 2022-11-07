@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 
@@ -19,6 +21,7 @@ public class AnalogToDigital : Input
         Child = child;
         AnalogToDigitalType = analogToDigitalType;
         Threshold = threshold;
+        this.WhenAnyValue(x => x.Child.RawValue).ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => RawValue = Calculate(s));
     }
 
 
@@ -54,6 +57,36 @@ public class AnalogToDigital : Input
     public override SerializedInput GetJson()
     {
         return new SerializedAnalogToDigital(Child.GetJson(), AnalogToDigitalType, Threshold);
+    }
+
+
+    private int Calculate(int val)
+    {
+        if (Child.IsUint)
+        {
+            switch (AnalogToDigitalType)
+            {
+                case AnalogToDigitalType.Trigger:
+                case AnalogToDigitalType.JoyHigh:
+                    return val > short.MaxValue + Threshold ? 1 : 0;
+                case AnalogToDigitalType.JoyLow:
+                    return val < short.MaxValue - Threshold ? 1 : 0;
+            }
+        }
+        else
+        {
+
+            switch (AnalogToDigitalType)
+            {
+                case AnalogToDigitalType.Trigger:
+                case AnalogToDigitalType.JoyHigh:
+                    return val > Threshold ? 1 : 0;
+                case AnalogToDigitalType.JoyLow:
+                    return val < -Threshold ? 1 : 0;
+            }
+        }
+
+        return 0;
     }
 
     public override Input InnermostInput()

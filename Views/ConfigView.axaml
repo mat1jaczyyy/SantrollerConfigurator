@@ -182,8 +182,6 @@
                         <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding DeadZoneSlider}" Minimum="-32767" Maximum="32768" />
                         <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding DeadZoneSlider}" Minimum="0" Maximum="65535" />
                         <Slider Width="500" Value="{Binding Multiplier}" Minimum="0" Maximum="10" TickFrequency="0.01" IsSnapToTickEnabled="True" />
-                        <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding ValueRaw}" Minimum="-32767" Maximum="32768" />
-                        <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding ValueRaw}" Minimum="0" Maximum="65535" />
                     </StackPanel>
                     <Button x:CompileBindings="False" Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center">
@@ -191,7 +189,9 @@
                     </Button>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type output:OutputButton}"></DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputButton}">
+                <CheckBox IsChecked="{Binding ValueRaw}"></CheckBox>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type conversions:DigitalToAnalog}">
                 <StackPanel Orientation="Horizontal">
                     <NumericUpDown Value="{Binding Value}" VerticalAlignment="Center"></NumericUpDown>

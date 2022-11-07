@@ -17,6 +17,13 @@ public abstract class Input : ReactiveObject, IDisposable
     public abstract bool IsAnalog { get; }
     public abstract bool IsUint { get; }
 
+    private int _rawValue;
+    public int RawValue
+    {
+        get => _rawValue;
+        set => this.RaiseAndSetIfChanged(ref _rawValue, value);
+    }
+
     public virtual Input InnermostInput()
     {
         return this;

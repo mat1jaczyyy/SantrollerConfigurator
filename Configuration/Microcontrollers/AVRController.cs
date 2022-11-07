@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using DynamicData;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -118,6 +120,38 @@ public abstract class AvrController : Microcontroller
             new(I2CSda, TwiPinType.Sda),
         };
     }
+
+    public override void PinsFromPortMask(int port, int mask, byte pins,
+        Dictionary<int, bool> digitalRaw)
+    {
+        char portChar = PortNames[port];
+        for (int i = 0; i < 8; i++)
+        {
+            if ((mask & i) != 0)
+            {
+                digitalRaw[PinByMask[new Tuple<char, int>(portChar, i)]] = (pins & i) != 0;
+            }
+        }
+    }
+    public override int GetAnalogMask(DevicePin devicePin)
+    {
+        return 1 << GetIndex(devicePin.Pin);
+    }
+    public override Dictionary<int, int> GetPortsForTicking(IEnumerable<DevicePin> digital)
+    {
+        var maskByPort = new Dictionary<int, int>();
+        foreach (var devicePin in digital)
+        {
+            var port = PortNames.IndexOf(GetPort(devicePin.Pin));
+            var mask = 1 << GetIndex(devicePin.Pin);
+            maskByPort[port] = mask | maskByPort.GetValueOrDefault(port, 0);
+        }
+
+        return maskByPort;
+    }
+
+    protected abstract char[] PortNames { get; }
+    protected abstract Dictionary<Tuple<char, int>, int> PinByMask { get; }
 
     public override string GenerateInit()
     {

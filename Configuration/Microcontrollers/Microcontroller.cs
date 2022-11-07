@@ -47,6 +47,11 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
         
         public abstract void UnAssignPins(string type);
 
+        public void UnAssignAll()
+        {
+            PinConfigs.Clear();
+        }
+
         public abstract Board Board {get;}
         public string GenerateAnalogRead(int pin) {
             return $"adc({pin})";
@@ -57,5 +62,10 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
         public abstract void AssignPin(PinConfig pinConfig);
 
         public abstract List<int> GetFreePins();
+        public abstract Dictionary<int, int> GetPortsForTicking(IEnumerable<DevicePin> digital);
+        public abstract void PinsFromPortMask(int port, int mask, byte pins,
+            Dictionary<int, bool> digitalRaw);
+
+        public abstract int GetAnalogMask(DevicePin devicePin);
     }
 }

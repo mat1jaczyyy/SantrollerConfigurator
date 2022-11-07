@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
@@ -11,6 +10,7 @@ public class Pico : Microcontroller
     private const int PinA0 = 26;
 
     public override Board Board { get; }
+
     public override string GeneratePulseRead(int pin, PulseMode mode, int timeout)
     {
         return $"puseIn({pin},{mode},{timeout})";
@@ -28,7 +28,6 @@ public class Pico : Microcontroller
 
     public override string GenerateDigitalRead(int pin, bool pullUp)
     {
-        Console.WriteLine(pin);
         // Invert on pullup
         if (pullUp)
         {
@@ -158,7 +157,8 @@ public class Pico : Microcontroller
         int clock)
     {
         var pin = SpiIndexByPin[mosi];
-        if (pin != SpiIndexByPin[miso] || SpiTypesByPin[mosi] != SpiPinType.Mosi || SpiTypesByPin[miso] != SpiPinType.Miso)
+        if (pin != SpiIndexByPin[miso] || SpiTypesByPin[mosi] != SpiPinType.Mosi ||
+            SpiTypesByPin[miso] != SpiPinType.Miso)
         {
             return null;
         }
@@ -168,6 +168,7 @@ public class Pico : Microcontroller
         {
             return config;
         }
+
         if (PinConfigs.Any(c => c is PicoSpiConfig s && s.Index == pin)) return null;
         config = new PicoSpiConfig(type, mosi, miso, sck, cpol, cpha, msbfirst, clock);
         PinConfigs.Add(config);
@@ -187,8 +188,9 @@ public class Pico : Microcontroller
         {
             return config;
         }
+
         if (PinConfigs.Any(c => c is PicoTwiConfig s && s.Index == pin)) return null;
-        config = new PicoTwiConfig(type,  sda, scl, clock);
+        config = new PicoTwiConfig(type, sda, scl, clock);
         PinConfigs.Add(config);
         return config;
     }
@@ -211,8 +213,9 @@ public class Pico : Microcontroller
             if (config.Type != type)
             {
                 types = types.Where(s => SpiIndexByPin[s.Key] != config.Index).ToDictionary(s => s.Key, s => s.Value);
-            }   
+            }
         }
+
         return types.ToList();
     }
 
@@ -224,8 +227,9 @@ public class Pico : Microcontroller
             if (config.Type != type)
             {
                 types = types.Where(s => TwiIndexByPin[s.Key] != config.Index).ToDictionary(s => s.Key, s => s.Value);
-            }   
+            }
         }
+
         return types.ToList();
     }
 
@@ -234,6 +238,7 @@ public class Pico : Microcontroller
         var elements = PinConfigs.Where(s => s.Type == type).ToList();
         PinConfigs.RemoveAll(elements);
     }
+
     public override void AssignPin(PinConfig pinConfig)
     {
         UnAssignPins(pinConfig.Type);
@@ -252,19 +257,21 @@ public class Pico : Microcontroller
             }
             else
             {
-                var up = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
-                var down = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
+                var up = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
+                var down = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
                 ret += $"gpio_init({devicePin.Pin});";
-                ret += $"gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});";
+                ret +=
+                    $"gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});";
                 ret += $"gpio_set_pulls({devicePin.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
             }
         }
+
         return ret;
     }
 
     public override int GetChannel(int pin)
     {
-        return pin;
+        return pin - PinA0;
     }
 
     public override string GetPin(int pin)
@@ -277,10 +284,41 @@ public class Pico : Microcontroller
 
         return ret;
     }
-    
+
     public override List<int> GetFreePins()
     {
         var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
         return Enumerable.Range(0, GpioCount).Where(s => !used.Contains(s)).ToList();
+    }
+
+    public override void PinsFromPortMask(int port, int mask, byte pins,
+        Dictionary<int, bool> digitalRaw)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            if ((mask & (1 << i)) != 0)
+            {
+                digitalRaw[(port * 8) + i] = (pins & (1 << i)) != 0;
+            }
+        }
+    }
+
+    public override int GetAnalogMask(DevicePin devicePin)
+    {
+        return 0;
+    }
+
+    public override Dictionary<int, int> GetPortsForTicking(IEnumerable<DevicePin> digital)
+    {
+        Dictionary<int, int> ports = new();
+        foreach (var devicePin in digital)
+        {
+            var port = devicePin.Pin / 8;
+            var mask = 1 << (devicePin.Pin % 8);
+            mask |= ports.GetValueOrDefault(port, 0);
+            ports[port] = mask;
+        }
+
+        return ports;
     }
 }

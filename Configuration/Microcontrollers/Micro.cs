@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +16,7 @@ public class Micro : AvrController
     protected override int I2CSda => 2;
 
     protected override int I2CScl => 3;
-    private readonly int[] _pinIndex = {
+    private static readonly int[] PinIndex = {
         2, // D0 - PD2
         3,	// D1 - PD3
         1, // D2 - PD1
@@ -53,7 +54,7 @@ public class Micro : AvrController
         5, // D30 / TX Led - PD5	
     };
 
-    public override int PinCount => _pinIndex.Length;
+    public override int PinCount => PinIndex.Length;
 
     private static readonly char[] Ports = {
         'D', // D0 - 'D'2
@@ -92,7 +93,7 @@ public class Micro : AvrController
         'D', // D29 / D12 - A11 - 'D'6
         'D' // D30 / TX Led - 'D'5            
     };
-    private static readonly char[] PortNames = { 'B', 'C', 'D', 'E', 'F' };
+    protected override char[] PortNames => new []{ 'B', 'C', 'D', 'E', 'F' };
 
     private static readonly int[] Channels = {
         7,	// A0				PF7					ADC7
@@ -118,6 +119,9 @@ public class Micro : AvrController
         {7, "INT4"},
     };
     
+    private Dictionary<Tuple<char, int>, int> _pinByMask = Enumerable.Zip(Ports, PinIndex).Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i)).ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s=>s.Item3);
+    protected override Dictionary<Tuple<char, int>, int> PinByMask => _pinByMask;
+    
     protected override string GetInterruptForPin(int ack)
     {
         return Interrupts[ack];
@@ -136,7 +140,7 @@ public class Micro : AvrController
     }
     public override int GetIndex(int pin)
     {
-        return _pinIndex[pin];
+        return PinIndex[pin];
     }
 
     public override char GetPort(int pin)
@@ -156,6 +160,6 @@ public class Micro : AvrController
     public override List<int> GetFreePins()
     {
         var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
-        return Enumerable.Range(0, _pinIndex.Length).Where(s => !used.Contains(s)).ToList();
+        return Enumerable.Range(0, PinIndex.Length).Where(s => !used.Contains(s)).ToList();
     }
 }

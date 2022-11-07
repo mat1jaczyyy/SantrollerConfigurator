@@ -33,13 +33,14 @@ public class SerializedConfiguration
     public void LoadConfiguration(ConfigViewModel model)
     {
         model.CombinedDebounce = CombinedDebounce;
-        model.DeviceType = DeviceType;
         model.EmulationType = EmulationType;
         model.RhythmType = RhythmType;
         model.LedType = LedType;
         model.XInputOnWindows = XInputOnWindows;
+        model.MicroController!.UnAssignAll();
         model.Bindings.Clear();
         model.Bindings.AddRange(Bindings.Select(s => s.Generate(model, model.MicroController!)));
+        model.DeviceType = DeviceType;
         model.LedOrder = LedOrder;
     }
 }

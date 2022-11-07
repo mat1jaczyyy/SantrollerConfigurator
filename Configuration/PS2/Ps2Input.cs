@@ -199,6 +199,7 @@ public class Ps2Input : SpiInput
 
     public override bool IsAnalog => Input <= Ps2InputType.Dualshock2R2;
     public override bool IsUint => !IntInputs.Contains(Input);
+    
     public override InputType? InputType => Types.InputType.Ps2Input;
 
     public static string GeneratePs2Pressures(List<Input> bindings)

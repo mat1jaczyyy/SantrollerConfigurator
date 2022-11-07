@@ -43,6 +43,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
 
         //TODO: actually read and write this as part of the config
+        public bool KvEnabled { get; set; } = false;
         public int[] KvKey1 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
         public int[] KvKey2 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
 
@@ -312,14 +313,19 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             lines.Add($"#define DEVICE_TYPE {((byte) DeviceType)}");
             
             lines.Add($"#define RHYTHM_TYPE {((byte) RhythmType)}");
-            lines.Add($"#define KV_KEY_1 {{{string.Join(",", KvKey1.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
-            lines.Add($"#define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
+            if (KvEnabled)
+            {
+                lines.Add(
+                    $"#define KV_KEY_1 {{{string.Join(",", KvKey1.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
+                lines.Add(
+                    $"#define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
+            }
 
             lines.Add(Ps2Input.GeneratePs2Pressures(inputs));
 
             // Sort by pin index, and then map to adc number and turn into an array
             lines.Add(
-                $"#define ADC_PINS {{{string.Join(",", directInputs.OrderBy(s => s.PinConfig.Pin).Where(s => s.IsAnalog).Select(s => _microController.GetChannel(s.PinConfig.Pin).ToString()).Distinct())}}}");
+                $"#define ADC_PINS {{{string.Join(",", directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin).Select(s => _microController.GetChannel(s.PinConfig.Pin).ToString()).Distinct())}}}");
 
             lines.Add($"#define PIN_INIT {_microController.GenerateInit()}");
 
