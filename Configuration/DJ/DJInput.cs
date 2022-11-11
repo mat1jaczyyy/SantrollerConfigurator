@@ -25,10 +25,11 @@ public class DjInput : TwiInput
     {
         switch (Input)
         {
+            //TODO: would it make more sense to drop this 13 here, and then have a default multiplier that we apply to turntables?
             case DjInputType.LeftTurntable:
-                return "((int8_t)dj_left[2]) << 15";
+                return "((int8_t)dj_left[2]) << 13";
             case DjInputType.RightTurnable:
-                return "((int8_t)dj_right[2]) << 15";
+                return "((int8_t)dj_right[2]) << 13";
             case DjInputType.LeftAny:
                 return "dj_left[0]";
             case DjInputType.RightAny:

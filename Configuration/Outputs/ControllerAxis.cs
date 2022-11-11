@@ -31,13 +31,13 @@ public class ControllerAxis : OutputAxis
         {StandardAxisType.RightTrigger, "rt"},
     };
 
-    
-    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, float multiplier, int offset,
+
+    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex,
+        float multiplier, int offset,
         int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndex, multiplier, offset, deadZone,
-        type.ToString(), (s)=>IsTrigger(s, type))
+        type.ToString(), (s) => IsTrigger(s, type))
     {
         Type = type;
-
     }
 
     private static bool IsTrigger(DeviceControllerType s, StandardAxisType type)
@@ -46,6 +46,7 @@ public class ControllerAxis : OutputAxis
                 type is StandardAxisType.RightStickX or StandardAxisType.RightStickY) ||
                type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
     }
+
     public StandardAxisType Type { get; }
 
 
@@ -64,8 +65,71 @@ public class ControllerAxis : OutputAxis
 
     public override bool IsCombined => false;
 
+    protected override string MinCalibrationText()
+    {
+        if (Model.DeviceType == DeviceControllerType.Guitar && Type is StandardAxisType.RightStickX)
+        {
+            return "Release the whammy";
+        }
+
+        if (Model.DeviceType == DeviceControllerType.Guitar && Type is StandardAxisType.RightStickY)
+        {
+            return "Leave the guitar in a neutral position";
+        }
+
+        switch (Type)
+        {
+            case StandardAxisType.LeftStickX:
+            case StandardAxisType.RightStickX:
+                return "Move axis to the leftmost position";
+            case StandardAxisType.LeftStickY:
+            case StandardAxisType.RightStickY:
+                return "Move axis to the lowest position";
+            case StandardAxisType.LeftTrigger:
+            case StandardAxisType.RightTrigger:
+                return "Release the trigger";
+            default:
+                return "";
+        }
+    }
+
+    protected override string MaxCalibrationText()
+    {
+        if (Model.DeviceType == DeviceControllerType.Guitar && Type is StandardAxisType.RightStickX)
+        {
+            return "Push the whammy all the way in";
+        }
+
+        if (Model.DeviceType == DeviceControllerType.Guitar && Type is StandardAxisType.RightStickY)
+        {
+            return "Tilt the guitar up";
+        }
+
+        switch (Type)
+        {
+            case StandardAxisType.LeftStickX:
+            case StandardAxisType.RightStickX:
+                return "Move axis to the rightmost position";
+            case StandardAxisType.LeftStickY:
+            case StandardAxisType.RightStickY:
+                return "Move axis to the highest position";
+            case StandardAxisType.LeftTrigger:
+            case StandardAxisType.RightTrigger:
+                return "Push the trigger all the way in";
+            default:
+                return "";
+        }
+    }
+
+    protected override bool SupportsCalibration()
+    {
+        return Type is not (StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
+            or StandardAxisType.AccelerationZ);
+    }
+
     public override SerializedOutput GetJson()
     {
-        return new SerializedControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset, DeadZone);
+        return new SerializedControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset,
+            DeadZone);
     }
 }

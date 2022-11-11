@@ -37,10 +37,21 @@ public class DirectInput : InputWithPin
     public bool IsUintDirect = true;
     public override bool IsUint => IsUintDirect;
 
+    private string GenerateAnalogRead(int index)
+    {
+        var ret = Microcontroller.GenerateAnalogRead(index);
+        // We are treating the uint from the sensor as an analog value, so we need to convert it here
+        if (!IsUintDirect)
+        {
+            ret += $" - {short.MaxValue}";
+        }
+
+        return ret;
+    }
     public override string Generate()
     {
         return IsAnalog
-            ? Microcontroller.GenerateAnalogRead(Microcontroller.GetChannel(PinConfig.Pin))
+            ? GenerateAnalogRead(Microcontroller.GetChannel(PinConfig.Pin))
             : Microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
     }
 
@@ -57,9 +68,8 @@ public class DirectInput : InputWithPin
         for (var i = 0; i < binding.Count; i++)
         {
             var tuple = binding[i];
-            fillPins[tuple.Item2] = Microcontroller.GenerateAnalogRead(i);
+            fillPins[tuple.Item2] = GenerateAnalogRead(i);
         }
-        
         return string.Join(";\n", bindings.Select(b => b.Item1.IsAnalog ? fillPins[b.Item2] : b.Item2));
     }
 
