@@ -55,10 +55,9 @@ public class GhwtCombinedOutput : CombinedOutput
     
     public void AddTapBarFrets()
     {
-        //TODO: colours
         foreach (var pair in Taps)
         {
-            _outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, _microcontroller), Colors.Green,
+            _outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, _microcontroller), Colors.Transparent,
                 Colors.Transparent, null, 5, pair.Value));
         }
     }

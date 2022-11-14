@@ -231,15 +231,73 @@ public class Ps2Input : SpiInput
         return retDs2;
     }
 
-    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Data,
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        if (ps2Raw.Any())
+        if (!ps2ControllerType.Any()) return;
+        var type = ps2ControllerType[0];
+        if (!Enum.IsDefined(typeof(Ps2ControllerType), type)) return;
+        RawValue = Input switch
         {
-            var type = ps2Raw[0];
-        }
-        //TODO: this
+            Ps2InputType.LeftX => (ps2Data[7] - 128) << 8,
+            Ps2InputType.LeftY => -(ps2Data[8] - 127) << 8,
+            Ps2InputType.MouseX => (ps2Data[5] - 128) << 8,
+            Ps2InputType.MouseY => -(ps2Data[6] - 127) << 8,
+            Ps2InputType.RightX => (ps2Data[5] - 128) << 8,
+            Ps2InputType.RightY => -(ps2Data[6] - 127) << 8,
+            Ps2InputType.NegConTwist => (ps2Data[5] - 128) << 8,
+            Ps2InputType.NegConI => ps2Data[6],
+            Ps2InputType.NegConIi => ps2Data[7],
+            Ps2InputType.NegConL => ps2Data[8],
+            Ps2InputType.NegConR => (~ps2Data[4]) & (1 << 3),
+            Ps2InputType.NegConA => (~ps2Data[4]) & (1 << 5),
+            Ps2InputType.NegConB => (~ps2Data[4]) & (1 << 4),
+            Ps2InputType.GunconHSync => (ps2Data[6] << 8) | ps2Data[5],
+            Ps2InputType.GunconVSync => (ps2Data[8] << 8) | ps2Data[7],
+            Ps2InputType.JogConWheel => (ps2Data[6] << 8) | ps2Data[5],
+            Ps2InputType.GuitarWhammy => -(ps2Data[8] - 127) << 9,
+            //TODO: we will need to configure reading all bytes for this to work right
+            // Ps2InputType.Dualshock2RightButton => ps2Data[generated],
+            // Ps2InputType.Dualshock2LeftButton => ps2Data[generated],
+            // Ps2InputType.Dualshock2UpButton => ps2Data[generated],
+            // Ps2InputType.Dualshock2DownButton => ps2Data[generated],
+            // Ps2InputType.Dualshock2Triangle => ps2Data[generated],
+            // Ps2InputType.Dualshock2Circle => ps2Data[generated],
+            // Ps2InputType.Dualshock2Cross => ps2Data[generated],
+            // Ps2InputType.Dualshock2Square => ps2Data[generated],
+            // Ps2InputType.Dualshock2L1 => ps2Data[generated],
+            // Ps2InputType.Dualshock2R1 => ps2Data[generated],
+            // Ps2InputType.Dualshock2L2 => ps2Data[generated],
+            // Ps2InputType.Dualshock2R2 => ps2Data[generated],
+            Ps2InputType.GuitarGreen => (~ps2Data[4]) & (1 << 1),
+            Ps2InputType.GuitarRed => (~ps2Data[4]) & (1 << 5),
+            Ps2InputType.GuitarYellow => (~ps2Data[4]) & (1 << 4),
+            Ps2InputType.GuitarBlue => (~ps2Data[4]) & (1 << 6),
+            Ps2InputType.GuitarOrange => (~ps2Data[4]) & (1 << 7),
+            Ps2InputType.GuitarSelect => (~ps2Data[3]) & (1 << 0),
+            Ps2InputType.GuitarStart => (~ps2Data[3]) & (1 << 3),
+            Ps2InputType.NegConStart => (~ps2Data[3]) & (1 << 3),
+            Ps2InputType.L3 => (~ps2Data[3]) & (1 << 1),
+            Ps2InputType.R3 => (~ps2Data[3]) & (1 << 2),
+            Ps2InputType.Start => (~ps2Data[3]) & (1 << 3),
+            Ps2InputType.GuitarStrumUp => (~ps2Data[3]) & (1 << 4),
+            Ps2InputType.GuitarStrumDown => (~ps2Data[3]) & (1 << 6),
+            Ps2InputType.Select => (~ps2Data[3]) & (1 << 0),
+            Ps2InputType.Up => (~ps2Data[3]) & (1 << 4),
+            Ps2InputType.Right => (~ps2Data[3]) & (1 << 5),
+            Ps2InputType.Down => (~ps2Data[3]) & (1 << 6),
+            Ps2InputType.Left => (~ps2Data[3]) & (1 << 7),
+            Ps2InputType.L2 => (~ps2Data[4]) & (1 << 0),
+            Ps2InputType.R2 => (~ps2Data[4]) & (1 << 1),
+            Ps2InputType.L1 => (~ps2Data[4]) & (1 << 2),
+            Ps2InputType.R1 => (~ps2Data[4]) & (1 << 3),
+            Ps2InputType.Triangle => (~ps2Data[4]) & (1 << 4),
+            Ps2InputType.Circle => (~ps2Data[4]) & (1 << 5),
+            Ps2InputType.Cross => (~ps2Data[4]) & (1 << 6),
+            Ps2InputType.Square => (~ps2Data[4]) & (1 << 7),
+            _ => RawValue
+        };
     }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)

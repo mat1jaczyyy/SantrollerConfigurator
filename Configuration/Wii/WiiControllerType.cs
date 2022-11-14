@@ -4,6 +4,7 @@ public enum WiiControllerType
 {
     Nunchuk,
     ClassicController,
+    ClassicControllerPro,
     UDraw,
     Drawsome,
     Guitar,

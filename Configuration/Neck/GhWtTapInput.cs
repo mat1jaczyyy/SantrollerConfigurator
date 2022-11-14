@@ -76,7 +76,7 @@ public class GhWtTapInput : InputWithPin
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        //TODO: this
+        RawValue = ghWtRaw;
     }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)

@@ -266,6 +266,7 @@
             <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input"></Label>
+                    <CheckBox IsChecked="{Binding Detected}" IsEnabled="False">Detected</CheckBox>
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}">
                     </ComboBox>
@@ -282,6 +283,11 @@
             <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="PS2 Controller Input"></Label>
+                    
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="Detected Controller Type"></Label>
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding DetectedType}">
+                    </TextBlock>
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
                               Items="{Binding AvailableMosiPins}">
                     </ComboBox>
@@ -298,6 +304,11 @@
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="Wii Controller Input"></Label>
+                    
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="Detected Controller Type"></Label>
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding DetectedType}">
+                    </TextBlock>
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}">
                     </ComboBox>

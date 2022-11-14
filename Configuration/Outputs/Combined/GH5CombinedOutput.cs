@@ -7,6 +7,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
@@ -78,4 +79,20 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     }
 
     public override AvaloniaList<Output> Outputs => _outputs;
+    
+    private bool _detected;
+
+    public bool Detected
+    {
+        get => _detected;
+        set => this.RaiseAndSetIfChanged(ref _detected, value);
+    }
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw,
+        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+    {
+        base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType,
+            wiiControllerType);
+        _detected = gh5Raw.Any();
+    }
 }

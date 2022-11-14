@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
@@ -8,6 +9,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
@@ -121,10 +123,37 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
     }
 
+    public void CreateAnalogPressures()
+    {
+        //TODO: add inputs for the various DS2 analog pressures   
+    }
+
     public override SerializedOutput GetJson()
     {
         return new SerializedPs2CombinedOutput(Miso, Mosi, Sck, Att, Ack, _outputs.ToList());
     }
 
     public override AvaloniaList<Output> Outputs => _outputs;
+    
+
+    private Ps2ControllerType? _detectedType;
+    public string? DetectedType => _detectedType?.ToString() ?? "None";
+
+
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw,
+        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+    {
+        base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType,
+            wiiControllerType);
+        if (!wiiControllerType.Any()) return;
+        var type = ps2ControllerType[0];
+        if (!Enum.IsDefined(typeof(Ps2ControllerType), type)) return;
+        var newType = (Ps2ControllerType)type;
+        if (newType == _detectedType) return;
+        this.RaisePropertyChanging(nameof(DetectedType));
+        _detectedType = newType;
+        this.RaisePropertyChanged(nameof(DetectedType));
+
+    }
 }

@@ -109,7 +109,22 @@ public class Gh5NeckInput : TwiInput
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        //TODO: this
+        if (!gh5Raw.Any()) return;
+        switch (Input)
+        {
+            case <= Gh5NeckInputType.Orange:
+                RawValue = (gh5Raw[0] & (1 << ((byte) Input) - ((byte) Gh5NeckInputType.Green))) != 0 ? 1 : 0;
+                break;
+            case Gh5NeckInputType.TapBar:
+                RawValue = gh5Raw[1];
+                break;
+            default:
+            {
+                var mappings = MappingByInput[Input];
+                RawValue = mappings.Contains(gh5Raw[1]) ? 1 : 0;
+                break;
+            }
+        }
     }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)

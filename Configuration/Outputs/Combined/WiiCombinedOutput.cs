@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
@@ -8,12 +9,13 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
 public class WiiCombinedOutput : CombinedTwiOutput
 {
-    public static readonly Dictionary<WiiInputType, StandardButtonType> Buttons = new()
+    private static readonly Dictionary<WiiInputType, StandardButtonType> Buttons = new()
     {
         {WiiInputType.ClassicA, StandardButtonType.A},
         {WiiInputType.ClassicB, StandardButtonType.B},
@@ -64,7 +66,22 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.DrumKickPedal, StandardButtonType.Rb},
     };
 
-    public static readonly Dictionary<WiiInputType, StandardButtonType> Tap = new()
+    public static readonly Dictionary<int, WiiControllerType> ControllerTypeById = new()
+    {
+        {0x0000, WiiControllerType.Nunchuk},
+        {0x0001, WiiControllerType.ClassicController},
+        {0x0101, WiiControllerType.ClassicControllerPro},
+        {0x0301, WiiControllerType.ClassicControllerPro},
+        {0xFF12, WiiControllerType.UDraw},
+        {0xFF13, WiiControllerType.Drawsome},
+        {0x0003, WiiControllerType.Guitar},
+        {0x0103, WiiControllerType.Drum},
+        {0x0303, WiiControllerType.Dj},
+        {0x0011, WiiControllerType.Taiko},
+        {0x0005, WiiControllerType.MotionPlus}
+    };
+
+    private static readonly Dictionary<WiiInputType, StandardButtonType> Tap = new()
     {
         {WiiInputType.GuitarTapGreen, StandardButtonType.A},
         {WiiInputType.GuitarTapRed, StandardButtonType.B},
@@ -73,7 +90,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.GuitarTapOrange, StandardButtonType.Lb},
     };
 
-    public static readonly Dictionary<WiiInputType, StandardAxisType> Axis = new()
+    private static readonly Dictionary<WiiInputType, StandardAxisType> Axis = new()
     {
         {WiiInputType.ClassicLeftStickX, StandardAxisType.LeftStickX},
         {WiiInputType.ClassicLeftStickY, StandardAxisType.LeftStickY},
@@ -164,7 +181,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             Colors.Transparent,
             Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
     }
-    
+
     public void AddTapBarFrets()
     {
         foreach (var pair in Tap)
@@ -190,4 +207,24 @@ public class WiiCombinedOutput : CombinedTwiOutput
     }
 
     public override AvaloniaList<Output> Outputs => _outputs;
+
+    private WiiControllerType? _detectedType;
+
+    public string? DetectedType => _detectedType?.ToString() ?? "None";
+
+
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw,
+        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+    {
+        base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType,
+            wiiControllerType);
+        if (!wiiControllerType.Any()) return;
+        var type = BitConverter.ToUInt16(wiiControllerType);
+        var newType = ControllerTypeById.GetValueOrDefault(type);
+        if (newType == _detectedType) return;
+        this.RaisePropertyChanging(nameof(DetectedType));
+        _detectedType = newType;
+        this.RaisePropertyChanged(nameof(DetectedType));
+    }
 }
