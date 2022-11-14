@@ -409,7 +409,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 {
                     if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
                     {
-                        bindings.Add(new Gh5CombinedOutput(model, controller, sda, scl, config.neck.gh5Neck != 0));
+                        bindings.Add(new Gh5CombinedOutput(model, controller, sda, scl));
                     }
 
                     if (config.neck.wtNeck != 0)
@@ -534,8 +534,12 @@ public class Ardwiino : ConfigurableUsbDevice
 
                 if (config.all.main.inputType == (int) InputControllerType.Wii)
                 {
-                    bindings.Add(new WiiCombinedOutput(model, controller, sda, scl,
-                        mapNunchukAccelerationToRightJoy: config.all.main.mapNunchukAccelToRightJoy != 0));
+                    var wii = new WiiCombinedOutput(model, controller, sda, scl);
+                    if (config.all.main.mapNunchukAccelToRightJoy != 0)
+                    {
+                        wii.AddNunchukAcceleration();
+                    }
+                    bindings.Add(wii);
                 }
                 else if (config.all.main.inputType == (int) InputControllerType.Ps2)
                 {

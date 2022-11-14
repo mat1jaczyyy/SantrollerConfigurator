@@ -25,11 +25,10 @@ public class DjInput : TwiInput
     {
         switch (Input)
         {
-            //TODO: would it make more sense to drop this 13 here, and then have a default multiplier that we apply to turntables?
             case DjInputType.LeftTurntable:
-                return "((int8_t)dj_left[2]) << 13";
+                return "((int8_t)dj_left[2])";
             case DjInputType.RightTurnable:
-                return "((int8_t)dj_right[2]) << 13";
+                return "((int8_t)dj_right[2])";
             case DjInputType.LeftAny:
                 return "dj_left[0]";
             case DjInputType.RightAny:
@@ -48,6 +47,45 @@ public class DjInput : TwiInput
     }
 
     public override bool IsAnalog => Input <= DjInputType.RightTurnable;
+
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw,
+        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+    {
+        if (!djLeftRaw.Any())
+        {
+            djLeftRaw = new byte[] {0, 0, 0};
+        }
+        if (!djRightRaw.Any())
+        {
+            djRightRaw = new byte[] {0, 0, 0};
+        }
+        switch (Input)
+        {
+            case DjInputType.LeftTurntable:
+                RawValue = (sbyte) djLeftRaw[2];
+                break;
+            case DjInputType.RightTurnable:
+                RawValue = (sbyte) djRightRaw[2];
+                break;
+            case DjInputType.LeftAny:
+                RawValue = djLeftRaw[0] != 0 ? 1 : 0;
+                break;
+            case DjInputType.RightAny:
+                RawValue = djRightRaw[0] != 0 ? 1 : 0;
+                break;
+            case DjInputType.LeftBlue:
+            case DjInputType.LeftGreen:
+            case DjInputType.LeftRed:
+                RawValue = (djLeftRaw[0] & 1 << ((byte) Input - (byte) DjInputType.LeftGreen + 4)) != 0 ? 1 : 0;
+                break;
+            case DjInputType.RightGreen:
+            case DjInputType.RightRed:
+            case DjInputType.RightBlue:
+                RawValue = (djRightRaw[0] & 1 << ((byte) Input - (byte) DjInputType.RightGreen + 4)) != 0 ? 1 : 0;
+                break;
+        }
+    }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {

@@ -1,16 +1,19 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Collections;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
+
 public class DjCombinedOutput : CombinedTwiOutput
 {
-
     private static readonly Dictionary<DjInputType, StandardButtonType> Buttons = new()
     {
         {DjInputType.LeftAny, StandardButtonType.Lb},
@@ -22,37 +25,70 @@ public class DjCombinedOutput : CombinedTwiOutput
         {DjInputType.RightRed, StandardButtonType.B},
         {DjInputType.RightBlue, StandardButtonType.X},
     };
-    private readonly Microcontroller _microcontroller;
 
-    public DjCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null) : base(model, microcontroller, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ", sda, scl)
+    private readonly Microcontroller _microcontroller;
+    private readonly AvaloniaList<Output> _outputs = new();
+
+    public DjCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
+        IReadOnlyCollection<Output>? outputs = null) :
+        base(model, microcontroller, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ", sda, scl)
     {
         _microcontroller = microcontroller;
+        if (outputs != null)
+        {
+            _outputs = new AvaloniaList<Output>(outputs);
+        }
+        else
+        {
+            CreateDefaults();
+        }
     }
+
+    public void CreateDefaults()
+    {
+        _outputs.Clear();
+        _outputs.AddRange(Buttons.Select(pair => new ControllerButton(Model, new DjInput(pair.Key, _microcontroller),
+            Colors.Transparent, Colors.Transparent, null, 5, pair.Value)));
+        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, _microcontroller),
+            Colors.Transparent,
+            Colors.Transparent, -1, 1,
+            0, 0, StandardAxisType.LeftStickX));
+        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, _microcontroller),
+            Colors.Transparent,
+            Colors.Transparent, -1, 1,
+            0, 0, StandardAxisType.LeftStickY));
+    }
+
     public override SerializedOutput GetJson()
     {
-        return new SerializedDjCombinedOutput(Sda, Scl);
+        return new SerializedDjCombinedOutput(Sda, Scl, _outputs.ToList());
     }
 
-    public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);
-    private IReadOnlyList<Output> GetBindings(IList<Output> bindings)
+    private bool _detectedLeft;
+
+    public bool DetectedLeft
     {
-        var inputs = bindings.Select(s => s.Input?.InnermostInput()).Where(s => s is DjInput).Cast<DjInput>()
-            .Select(s => s.Input).ToHashSet();
-        var outputs = (from pair in Buttons where !inputs.Contains(pair.Key) select new ControllerButton(Model, new DjInput(pair.Key, _microcontroller), Colors.Transparent, Colors.Transparent, null, 5, pair.Value)).Cast<Output>().ToList();
-
-        if (!inputs.Contains(DjInputType.LeftTurntable))
-        {
-            outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, _microcontroller), Colors.Transparent,
-                Colors.Transparent, -1,1,
-                0, 0, StandardAxisType.LeftStickX));
-        }
-        if (!inputs.Contains(DjInputType.RightTurnable))
-        {
-            outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, _microcontroller), Colors.Transparent,
-                Colors.Transparent, -1,1,
-                0, 0, StandardAxisType.LeftStickY));
-        }
-
-        return outputs;
+        get => _detectedLeft;
+        set => this.RaiseAndSetIfChanged(ref _detectedLeft, value);
     }
+
+    private bool _detectedRight;
+
+    public bool DetectedRight
+    {
+        get => _detectedRight;
+        set => this.RaiseAndSetIfChanged(ref _detectedRight, value);
+    }
+
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw,
+        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+    {
+        base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType,
+            wiiControllerType);
+        DetectedLeft = djLeftRaw.Any();
+        DetectedRight = djRightRaw.Any();
+    }
+
+    public override AvaloniaList<Output> Outputs => _outputs;
 }

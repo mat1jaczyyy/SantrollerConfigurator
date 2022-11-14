@@ -87,7 +87,9 @@ public class DirectInput : InputWithPin
         new(PinConfig.Pin, PinConfig.PinMode)
     };
 
-    public void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw)
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType,
+        byte[] wiiControllerType)
     {
         if (IsAnalog)
         {

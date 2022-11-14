@@ -13,7 +13,8 @@ public class GhWtTapInput : InputWithPin
     public GhWtInputType Input { get; set; }
 
 
-    public GhWtTapInput(GhWtInputType input, Microcontroller microcontroller, int pin = 0): base(microcontroller, new DirectPinConfig(Guid.NewGuid().ToString(), pin, DevicePinMode.Floating))
+    public GhWtTapInput(GhWtInputType input, Microcontroller microcontroller, int pin = 0) : base(microcontroller,
+        new DirectPinConfig(Guid.NewGuid().ToString(), pin, DevicePinMode.Floating))
     {
         Input = input;
     }
@@ -69,7 +70,14 @@ public class GhWtTapInput : InputWithPin
     public override bool IsAnalog => Input == GhWtInputType.TapBar;
     public override InputType? InputType => Types.InputType.WtNeckInput;
     public override bool IsUint => true;
-    
+
+
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw,
+        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+    {
+        //TODO: this
+    }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
@@ -78,7 +86,8 @@ public class GhWtTapInput : InputWithPin
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return new[] {"INPUT_WT_NECK", $"WT_NECK_READ() {Microcontroller.GeneratePulseRead(PinConfig.Pin, PulseMode.LOW, 100)}"};
+        return new[]
+            {"INPUT_WT_NECK", $"WT_NECK_READ() {Microcontroller.GeneratePulseRead(PinConfig.Pin, PulseMode.LOW, 100)}"};
     }
 
     public override List<DevicePin> Pins => new()

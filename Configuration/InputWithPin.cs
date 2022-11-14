@@ -41,7 +41,7 @@ public abstract class InputWithPin : Input
         get => PinConfig.PinMode;
         set => PinConfig = new DirectPinConfig(PinConfig.Type, PinConfig.Pin, value);
     }
-    
+
     public override void Dispose()
     {
         Microcontroller.UnAssignPins(PinConfig.Type);

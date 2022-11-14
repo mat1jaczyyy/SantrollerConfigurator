@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Collections;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
@@ -12,9 +13,8 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 public class Gh5CombinedOutput : CombinedTwiOutput
 {
     private readonly Microcontroller _microcontroller;
-    public bool MapTapBarToAxis { get; set; }
-    public bool MapTapBarToFrets { get; set; }
-    public bool FretsEnabled { get; set; }
+    
+    private readonly AvaloniaList<Output> _outputs = new();
 
     private static readonly Dictionary<Gh5NeckInputType, StandardButtonType> Buttons = new()
     {
@@ -35,60 +35,47 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     };
 
     public Gh5CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
-        bool fretsEnabled = true, bool mapTapBarToFrets = false, bool mapTapBarToAxis = false) : base(model,
+        IReadOnlyCollection<Output>? outputs = null) : base(model,
         microcontroller,
         "gh5", 100000, "GH5", sda, scl)
     {
         _microcontroller = microcontroller;
-        FretsEnabled = fretsEnabled;
-        MapTapBarToAxis = mapTapBarToAxis;
-        MapTapBarToFrets = mapTapBarToFrets;
+        if (outputs != null)
+        {
+            _outputs = new AvaloniaList<Output>(outputs);
+        }
+        else
+        {
+            CreateDefaults();
+        }
+    }
+
+    public void CreateDefaults()
+    {
+        _outputs.Clear();
+        foreach (var pair in Buttons)
+        {
+            _outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller), Colors.Green,
+                Colors.Transparent, null, 5, pair.Value));
+        }
+        _outputs.Add(new ControllerAxis(Model, new Gh5NeckInput(Gh5NeckInputType.TapBar, _microcontroller),
+            Colors.Transparent,
+            Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
+    }
+
+    public void AddTapBarFrets()
+    {
+        foreach (var pair in Taps)
+        {
+            _outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller), Colors.Transparent,
+                Colors.Transparent, null, 5, pair.Value));
+        }
     }
 
     public override SerializedOutput GetJson()
     {
-        return new SerializedGh5CombinedOutput(Sda, Scl, FretsEnabled, MapTapBarToFrets,
-            MapTapBarToAxis);
+        return new SerializedGh5CombinedOutput(Sda, Scl, _outputs.ToList());
     }
 
-    public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);
-
-    private IReadOnlyList<Output> GetBindings(IList<Output> bindings)
-    {
-        List<Output> outputs = new();
-        var inputs = bindings.Select(s => s.Input?.InnermostInput()).Where(s => s is Gh5NeckInput).Cast<Gh5NeckInput>()
-            .Select(s => s.Input).ToHashSet();
-
-        if (FretsEnabled)
-        {
-            foreach (var pair in Buttons)
-            {
-                if (inputs.Contains(pair.Key)) continue;
-                outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller), Colors.Green,
-                    Colors.Transparent, null, 5, pair.Value));
-            }
-        }
-
-        if (MapTapBarToAxis)
-        {
-            if (!inputs.Contains(Gh5NeckInputType.TapBar))
-            {
-                outputs.Add(new ControllerAxis(Model, new Gh5NeckInput(Gh5NeckInputType.TapBar, _microcontroller),
-                    Colors.Transparent,
-                    Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
-            }
-        }
-
-        if (MapTapBarToFrets)
-        {
-            foreach (var pair in Taps)
-            {
-                if (inputs.Contains(pair.Key)) continue;
-                outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller), Colors.Green,
-                    Colors.Transparent, null, 5, pair.Value));
-            }
-        }
-
-        return outputs.AsReadOnly();
-    }
+    public override AvaloniaList<Output> Outputs => _outputs;
 }

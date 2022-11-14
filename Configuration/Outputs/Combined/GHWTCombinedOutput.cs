@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Collections;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
@@ -11,11 +12,11 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
 public class GhwtCombinedOutput : CombinedOutput
 {
-    public bool MapTapBarToAxis { get; set; }
-    public bool MapTapBarToFrets { get; set; }
 
     public int Pin { get; set; }
     private readonly Microcontroller _microcontroller;
+    
+    private readonly AvaloniaList<Output> _outputs = new();
 
     private static readonly Dictionary<GhWtInputType, StandardButtonType> Taps = new()
     {
@@ -27,46 +28,45 @@ public class GhwtCombinedOutput : CombinedOutput
     };
 
     public GhwtCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null,
-        bool mapTapBarToFrets = false, bool mapTapBarToAxis = false) : base(model, null, "GHWT")
+        IReadOnlyCollection<Output>? outputs = null) : base(model, null, "GHWT")
     {
         _microcontroller = microcontroller;
-        MapTapBarToFrets = mapTapBarToAxis;
-        MapTapBarToAxis = mapTapBarToAxis;
         if (pin.HasValue)
         {
             Pin = pin.Value;
+        }
+        if (outputs != null)
+        {
+            _outputs = new AvaloniaList<Output>(outputs);
+        }
+        else
+        {
+            CreateDefaults();
+        }
+    }
+
+    public void CreateDefaults()
+    {
+        _outputs.Clear();
+        _outputs.Add(new ControllerAxis(Model, new GhWtTapInput(GhWtInputType.TapBar, _microcontroller),
+            Colors.Transparent,
+            Colors.Transparent, null, 1, 0, 0, StandardAxisType.LeftStickX));
+    }
+    
+    public void AddTapBarFrets()
+    {
+        //TODO: colours
+        foreach (var pair in Taps)
+        {
+            _outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, _microcontroller), Colors.Green,
+                Colors.Transparent, null, 5, pair.Value));
         }
     }
 
     public override SerializedOutput GetJson()
     {
-        return new SerializedGhwtCombinedOutput(Pin, MapTapBarToFrets, MapTapBarToAxis);
+        return new SerializedGhwtCombinedOutput(Pin, _outputs.ToList());
     }
 
-    public override IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => GetBindings(bindings);
-
-    private IReadOnlyList<Output> GetBindings(IList<Output> bindings)
-    {
-        List<Output> outputs = new();
-        var inputs = bindings.Select(s => s.Input?.InnermostInput()).Where(s => s is GhWtTapInput).Cast<GhWtTapInput>()
-            .Select(s => s.Input).ToHashSet();
-        if (MapTapBarToAxis && !inputs.Contains(GhWtInputType.TapBar))
-        {
-            outputs.Add(new ControllerAxis(Model, new GhWtTapInput(GhWtInputType.TapBar, _microcontroller),
-                Colors.Transparent,
-                Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
-        }
-
-        if (MapTapBarToFrets)
-        {
-            foreach (var pair in Taps)
-            {
-                if (inputs.Contains(pair.Key)) continue;
-                outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, _microcontroller), Colors.Green,
-                    Colors.Transparent, null, 5, pair.Value));
-            }
-        }
-
-        return outputs.AsReadOnly();
-    }
+    public override AvaloniaList<Output> Outputs => _outputs;
 }

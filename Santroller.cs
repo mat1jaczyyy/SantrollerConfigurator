@@ -34,10 +34,12 @@ public class Santroller : ConfigurableUsbDevice
         CommandReadAnalog,
         CommandReadPs2,
         CommandReadWii,
-        CommandReadDj,
+        CommandReadDjLeft,
+        CommandReadDjRight,
         CommandReadGh5,
-        CommandReadGhwt,
-        CommandGetExtension,
+        CommandReadGhWt,
+        CommandGetExtensionWii,
+        CommandGetExtensionPs2,
         CommandSetLeds,
     }
 
@@ -100,9 +102,23 @@ public class Santroller : ConfigurableUsbDevice
                 _analogRaw[devicePin.Pin] = val;
             }
 
-            foreach (var directInput in direct)
+            var ps2Raw = ReadData(0, (byte) Commands.CommandReadPs2, 32);
+            var wiiRaw = ReadData(0, (byte) Commands.CommandReadWii, 8);
+            var djLeftRaw = ReadData(0, (byte) Commands.CommandReadDjLeft, 3);
+            var djRightRaw = ReadData(0, (byte) Commands.CommandReadDjRight, 3);
+            var gh5Raw = ReadData(0, (byte) Commands.CommandReadGh5, 2);
+            var ghWtRawRaw = ReadData(0, (byte) Commands.CommandReadGhWt, sizeof(int));
+            var ps2ControllerType = ReadData(0, (byte) Commands.CommandGetExtensionPs2, 1);
+            var wiiControllerType = ReadData(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
+            var ghWtRaw = 0;
+            if (ghWtRawRaw.Any())
             {
-                directInput.Update(_analogRaw, _digitalRaw);
+                ghWtRaw = BitConverter.ToInt32(ghWtRawRaw);
+            }
+            foreach (var output in model.Bindings)
+            {
+               output.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+                        ghWtRaw, ps2ControllerType, wiiControllerType);
             }
 
             await Task.Delay(TimeSpan.FromMilliseconds(50));

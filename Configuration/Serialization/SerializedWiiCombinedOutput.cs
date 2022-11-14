@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
@@ -13,28 +14,21 @@ public class SerializedWiiCombinedOutput : SerializedOutput
     [ProtoMember(1)] public override SerializedInput? Input => null;
     [ProtoMember(4)] public int Sda { get; }
     [ProtoMember(5)] public int Scl { get; }
-    [ProtoMember(6)] public bool MapTapBarToFrets { get; set; }
-    [ProtoMember(7)] public bool MapTapBarToAxis { get; set; }
-    [ProtoMember(8)] public bool MapGuitarJoystickToDPad { get; set; }
-    [ProtoMember(9)] public bool MapNunchukAccelerationToRightJoy { get; set; }
+    
+    [ProtoMember(6)] public List<Output> Outputs { get; }
     public override Color LedOn => Colors.Transparent;
     public override Color LedOff => Colors.Transparent;
     public override int? LedIndex => null;
 
-    public SerializedWiiCombinedOutput(int sda, int scl, bool mapTapBarToFrets,
-        bool mapTapBarToAxis, bool mapGuitarJoystickToDPad, bool mapNunchukAccelerationToRightJoy)
+    public SerializedWiiCombinedOutput(int sda, int scl, List<Output> outputs)
     {
         Sda = sda;
         Scl = scl;
-        MapTapBarToFrets = mapTapBarToFrets;
-        MapTapBarToAxis = mapTapBarToAxis;
-        MapGuitarJoystickToDPad = mapGuitarJoystickToDPad;
-        MapNunchukAccelerationToRightJoy = mapNunchukAccelerationToRightJoy;
+        Outputs = outputs;
     }
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new WiiCombinedOutput(model, microcontroller, Sda, Scl, MapTapBarToFrets, MapTapBarToAxis,
-            MapGuitarJoystickToDPad, MapNunchukAccelerationToRightJoy);
+        return new WiiCombinedOutput(model, microcontroller, Sda, Scl, Outputs);
     }
 }

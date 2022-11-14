@@ -71,7 +71,8 @@ public class Gh5NeckInput : TwiInput
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller controller, int? sda = null, int? scl = null) : base(controller,
+    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller controller, int? sda = null, int? scl = null) : base(
+        controller,
         Gh5TwiType, Gh5TwiFreq, sda, scl)
     {
         Input = input;
@@ -93,7 +94,8 @@ public class Gh5NeckInput : TwiInput
         }
 
         var mappings = MappingByInput[Input];
-        return "if (gh5Valid) {" + string.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})"))+"}";
+        return "if (gh5Valid) {" +
+               string.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})")) + "}";
     }
 
     public override SerializedInput GetJson()
@@ -103,6 +105,13 @@ public class Gh5NeckInput : TwiInput
 
     public override bool IsAnalog => Input == Gh5NeckInputType.TapBar;
 
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw,
+        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+    {
+        //TODO: this
+    }
+
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {
         return string.Join(";\n", bindings.Select(binding => binding.Item2));
@@ -110,7 +119,7 @@ public class Gh5NeckInput : TwiInput
 
     public override List<DevicePin> Pins => new();
     public override bool IsUint => true;
-    
+
 
     public override IReadOnlyList<string> RequiredDefines()
     {

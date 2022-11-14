@@ -140,6 +140,33 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         break;
                 }
             }
+
+            if (_deviceControllerType == DeviceControllerType.TurnTable)
+            {
+                if (!Bindings.Any(s => s is DjCombinedOutput))
+                {
+                    Bindings.Add(new DjCombinedOutput(this, MicroController!));
+                }
+
+                var combined = Bindings.OfType<DjCombinedOutput>().First();
+                var outputs = combined.Outputs;
+                foreach (var output in outputs)
+                {
+                    switch (output)
+                    {
+                        case ControllerButton button:
+                            types.Remove(button.Type);
+                            break;
+                        case ControllerAxis axis:
+                            types.Remove(axis.Type);
+                            break;
+                    }
+                }
+            }
+            if (_deviceControllerType == DeviceControllerType.TurnTable && !Bindings.Any(s => s is DjCombinedOutput))
+            {
+                Bindings.Add(new DjCombinedOutput(this, MicroController!));
+            }
             foreach (var type in types)
             {
                 switch (type)
@@ -153,11 +180,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                             Colors.Transparent, Colors.Transparent, -1, 1, 0, 0, axisType));
                         break;
                 }
-            }
-
-            if (_deviceControllerType == DeviceControllerType.TurnTable && !Bindings.Any(s => s is DjCombinedOutput))
-            {
-                Bindings.Add(new DjCombinedOutput(this, MicroController!));
             }
         }
 
@@ -253,29 +275,27 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public void SetDefaultBindings()
         {
             ClearOutputs();
-            if (EmulationType == EmulationType.Controller)
+            if (EmulationType != EmulationType.Controller) return;
+            foreach (var type in Enum.GetValues<StandardAxisType>())
             {
-                foreach (var type in Enum.GetValues<StandardAxisType>())
-                {
-                    if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
-                    Bindings.Add(new ControllerAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, MicroController!),
-                        Colors.Transparent, Colors.Transparent, -1, 1, 0, 0, type));
-                }
+                if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
+                Bindings.Add(new ControllerAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, MicroController!),
+                    Colors.Transparent, Colors.Transparent, -1, 1, 0, 0, type));
+            }
 
-                foreach (var type in Enum.GetValues<StandardButtonType>())
-                {
-                    if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
-                        null) continue;
-                    Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
-                        Colors.Transparent, Colors.Transparent, -1, 1, type));
-                }
+            foreach (var type in Enum.GetValues<StandardButtonType>())
+            {
+                if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
+                    null) continue;
+                Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
+                    Colors.Transparent, Colors.Transparent, -1, 1, type));
             }
         }
 
         public void Generate(PlatformIo pio)
         {
             if (_microController == null) return;
-            var outputs = Bindings.SelectMany(binding => binding.GetOutputs(Bindings)).ToList();
+            var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
             var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
             var configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
@@ -341,7 +361,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public void RemoveOutput(Output output)
         {
             output.Dispose();
-            Bindings.Remove(output);
+            if (Bindings.Remove(output)) return;
+            foreach (var binding in Bindings)
+            {
+                binding.Outputs.Remove(output);
+            }
         }
 
         public void ClearOutputs()
@@ -367,7 +391,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private string GenerateTick(bool xbox, bool shared)
         {
             if (_microController == null) return "";
-            var outputs = Bindings.SelectMany(binding => binding.GetOutputs(Bindings)).ToList();
+            var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
             var groupedOutputs = outputs.GroupBy(s => s.Input?.InnermostInput().GetType());
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 
@@ -437,7 +461,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private int CalculateDebounceTicks()
         {
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
-            var count = Bindings.SelectMany(binding => binding.GetOutputs(Bindings))
+            var count = Bindings.SelectMany(binding => binding.Outputs)
                 .Where(s => s is OutputButton button && (!combined || !button.IsStrum)).Select(s => s.Name).Distinct()
                 .Count();
             if (combined)
@@ -446,6 +470,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
 
             return count;
+        }
+
+        public bool IsCombinedChild(Output output)
+        {
+            return Bindings.Contains(output);
         }
     }
 }

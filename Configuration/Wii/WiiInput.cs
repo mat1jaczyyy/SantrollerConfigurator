@@ -268,6 +268,21 @@ public class WiiInput : TwiInput
     {
         return string.Join(" || ", mappings.Select(s2 => $"(lastTapWii == {s2})"));
     }
+    
+
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw,
+        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+    {
+        if (wiiRaw.Any())
+        {
+            var type = BitConverter.ToUInt16(wiiRaw);
+        }
+        
+        //TODO implement public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw)
+        //TODO for all inputs
+        //TODO: this   
+    }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)
     {

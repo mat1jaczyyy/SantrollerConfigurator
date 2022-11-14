@@ -306,6 +306,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         }
 
         private readonly List<string> _currentDrives = new();
+        private readonly HashSet<string> _currentDrivesTemp = new();
         private readonly List<string> _currentPorts = new();
 
         private void AddDevice(IConfigurableDevice device)
@@ -332,10 +333,10 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
         {
             var drives = DriveInfo.GetDrives();
-            var currentDrivesSet = _currentDrives.ToHashSet();
+            _currentDrivesTemp.UnionWith(_currentDrives);
             foreach (var drive in drives)
             {
-                if (currentDrivesSet.Remove(drive.RootDirectory.FullName))
+                if (_currentDrivesTemp.Remove(drive.RootDirectory.FullName))
                 {
                     continue;
                 }
@@ -353,8 +354,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
 
             // We removed all valid devices above, so anything left in currentDrivesSet is no longer valid
-            Devices.RemoveMany(Devices.Where(x => x is PicoDevice pico && currentDrivesSet.Contains(pico.GetPath())));
-            _currentDrives.RemoveMany(currentDrivesSet);
+            Devices.RemoveMany(Devices.Where(x => x is PicoDevice pico && _currentDrivesTemp.Contains(pico.GetPath())));
+            _currentDrives.RemoveMany(_currentDrivesTemp);
 
             var existingPorts = _currentPorts.ToHashSet();
             var ports = Pio.GetPorts().Result;

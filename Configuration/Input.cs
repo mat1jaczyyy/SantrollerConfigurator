@@ -32,6 +32,10 @@ public abstract class Input : ReactiveObject, IDisposable
     public abstract List<DevicePin> Pins { get; }
     public abstract InputType? InputType { get; }
 
+    public abstract void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType,
+        byte[] wiiControllerType);
+
     public abstract string GenerateAll(List<Tuple<Input, string>> bindings);
 
     public abstract void Dispose();

@@ -71,7 +71,6 @@ public abstract class OutputAxis : Output
                 {
                     return new Thickness((double) s.Item1 / ushort.MaxValue * 500, 0, 0, 0);
                 }
-
                 var val =  (s.Item1 + short.MaxValue) - (s.Item3);
                 return new Thickness((double) val / ushort.MaxValue * 500, 0, 0, 0);
             })
@@ -108,8 +107,10 @@ public abstract class OutputAxis : Output
                 {
                     deadZone = valRaw;
                 }
+                
                 // For Uint, the deadzone goes from min to max, while for int, it starts in the middle and grows in either direction.
-                DeadZone = InputIsUint ? (min - deadZone) : Math.Abs((min + max)/2 - deadZone);
+                _deadZone = InputIsUint ? (min - deadZone) : Math.Abs((min + max)/2 - deadZone);
+                this.RaisePropertyChanged(nameof(DeadZone));
                 break;
         }
 
@@ -373,6 +374,6 @@ public abstract class OutputAxis : Output
 
     public override string GenerateLedUpdate(int debounceIndex, bool xbox)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }

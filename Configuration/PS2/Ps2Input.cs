@@ -199,7 +199,7 @@ public class Ps2Input : SpiInput
 
     public override bool IsAnalog => Input <= Ps2InputType.Dualshock2R2;
     public override bool IsUint => !IntInputs.Contains(Input);
-    
+
     public override InputType? InputType => Types.InputType.Ps2Input;
 
     public static string GeneratePs2Pressures(List<Input> bindings)
@@ -229,6 +229,17 @@ public class Ps2Input : SpiInput
         if (!found) return "";
 
         return retDs2;
+    }
+
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw,
+        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+    {
+        if (ps2Raw.Any())
+        {
+            var type = ps2Raw[0];
+        }
+        //TODO: this
     }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)

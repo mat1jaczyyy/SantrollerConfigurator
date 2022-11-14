@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -289,7 +290,7 @@ public abstract class Output : ReactiveObject, IDisposable
     public abstract string Generate(bool xbox, bool shared, int debounceIndex, bool combined);
     public abstract string GenerateLedUpdate(int debounceIndex, bool xbox);
 
-    public virtual IReadOnlyList<Output> GetOutputs(IList<Output> bindings) => new[] {this};
+    public virtual AvaloniaList<Output> Outputs => new() {this};
 
     public void Remove()
     {
@@ -301,7 +302,20 @@ public abstract class Output : ReactiveObject, IDisposable
         Input?.Dispose();
     }
 
-    public List<DevicePin> GetPins(IList<Output> bindings) => GetOutputs(bindings)
-        .SelectMany(s => s.GetOutputs(bindings)).SelectMany(s => (s.Input?.Pins ?? new()))
+    public bool IsCombinedChild => Model.IsCombinedChild(this);
+
+    public List<DevicePin> GetPins() => Outputs
+        .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.Pins ?? new()))
         .Distinct().ToList();
+
+    public virtual void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+        byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType,
+        byte[] wiiControllerType)
+    {
+        foreach (var output in Outputs)
+        {
+            output.Input?.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+                ps2ControllerType, wiiControllerType);
+        }
+    }
 }

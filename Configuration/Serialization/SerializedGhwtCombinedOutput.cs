@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
@@ -12,21 +13,20 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
 {
     [ProtoMember(1)] public override SerializedInput? Input => null;
     [ProtoMember(4)] public int Pin { get; }
-    [ProtoMember(5)] public bool MapTapBarToFrets { get; set; }
-    [ProtoMember(6)] public bool MapTapBarToAxis { get; set; }
+
+    [ProtoMember(5)] public List<Output> Outputs { get; }
     public override Color LedOn => Colors.Transparent;
     public override Color LedOff => Colors.Transparent;
     public override int? LedIndex => null;
 
-    public SerializedGhwtCombinedOutput(int pin, bool mapTapBarToFrets, bool mapTapBarToAxis)
+    public SerializedGhwtCombinedOutput(int pin, List<Output> outputs)
     {
         Pin = pin;
-        MapTapBarToFrets = mapTapBarToFrets;
-        MapTapBarToAxis = mapTapBarToAxis;
+        Outputs = outputs;
     }
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new GhwtCombinedOutput(model, microcontroller, Pin, MapTapBarToFrets, MapTapBarToAxis);
+        return new GhwtCombinedOutput(model, microcontroller, Pin, Outputs);
     }
 }

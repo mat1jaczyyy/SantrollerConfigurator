@@ -90,7 +90,7 @@ public abstract class TwiInput : Input
     {
         return new[] {$"{_twiType.ToUpper()}_TWI_PORT {_twiConfig.Definition}"};
     }
-    
+
     public override void Dispose()
     {
         _microcontroller.UnAssignPins(_twiType);
