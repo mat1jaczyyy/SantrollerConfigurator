@@ -22,8 +22,8 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 public abstract class SerializedOutput
 {
     public abstract SerializedInput? Input { get; }
-    public abstract Color LedOn { get; }
-    public abstract Color LedOff { get; }
-    public abstract int? LedIndex { get; }
+    public abstract uint LedOn { get; }
+    public abstract uint LedOff { get; }
+    public abstract byte? LedIndex { get; }
     public abstract Output Generate(ConfigViewModel model, Microcontroller microcontroller);
 }

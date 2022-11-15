@@ -145,7 +145,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         _outputs.Clear();
         foreach (var pair in Buttons)
         {
-            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl),
+            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl, true),
                 Colors.Transparent,
                 Colors.Transparent, null, 10,
                 pair.Value));
@@ -153,7 +153,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
         foreach (var pair in Axis)
         {
-            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl),
+            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl, true),
                 Colors.Transparent,
                 Colors.Transparent, null, 1.2f, 0, 10, pair.Value));
         }
@@ -177,7 +177,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         //         AnalogToDigitalType.JoyLow, 32),
         //     Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Down));
         _outputs.Add(new ControllerAxis(Model,
-            new WiiInput(WiiInputType.GuitarTapBar, _microcontroller, Sda, Scl),
+            new WiiInput(WiiInputType.GuitarTapBar, _microcontroller, Sda, Scl, true),
             Colors.Transparent,
             Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
     }
@@ -186,7 +186,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         foreach (var pair in Tap)
         {
-            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller), Colors.Transparent,
+            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl, true), Colors.Transparent,
                 Colors.Transparent, null, 5, pair.Value));
         }
     }
@@ -195,13 +195,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         foreach (var pair in AxisAcceleration)
         {
-            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl),
+            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl, true),
                 Colors.Transparent,
                 Colors.Transparent, null, 1, 0, 0, pair.Value));
         }
     }
 
-    public override SerializedOutput GetJson()
+    public override SerializedOutput Serialize()
     {
         return new SerializedWiiCombinedOutput(Sda, Scl, _outputs.ToList());
     }

@@ -128,7 +128,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         //TODO: add inputs for the various DS2 analog pressures   
     }
 
-    public override SerializedOutput GetJson()
+    public override SerializedOutput Serialize()
     {
         return new SerializedPs2CombinedOutput(Miso, Mosi, Sck, Att, Ack, _outputs.ToList());
     }

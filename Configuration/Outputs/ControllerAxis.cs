@@ -32,7 +32,7 @@ public class ControllerAxis : OutputAxis
     };
 
 
-    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex,
+    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex,
         float multiplier, int offset,
         int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndex, multiplier, offset, deadZone,
         type.ToString(), (s) => IsTrigger(s, type))
@@ -127,7 +127,7 @@ public class ControllerAxis : OutputAxis
             or StandardAxisType.AccelerationZ);
     }
 
-    public override SerializedOutput GetJson()
+    public override SerializedOutput Serialize()
     {
         return new SerializedControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset,
             DeadZone);

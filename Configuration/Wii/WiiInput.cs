@@ -244,11 +244,13 @@ public class WiiInput : TwiInput
         {WiiControllerType.MotionPlus, "WII_MOTION_PLUS"}
     };
 
-    public WiiInput(WiiInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null) : base(
+    private bool _combined;
+    public WiiInput(WiiInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null, bool combined = false) : base(
         microcontroller,
         WiiTwiType, WiiTwiFreq, sda, scl)
     {
         Input = input;
+        _combined = combined;
     }
 
     public override InputType? InputType => Types.InputType.WiiInput;
@@ -260,6 +262,10 @@ public class WiiInput : TwiInput
 
     public override SerializedInput GetJson()
     {
+        if (_combined)
+        {
+            return new SerializedWiiInputCombined(Input);
+        }
         return new SerializedWiiInput(Sda, Scl, Input);
     }
 
@@ -288,222 +294,220 @@ public class WiiInput : TwiInput
         byte[] wiiData, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        if (wiiControllerType.Any())
+        if (!wiiControllerType.Any()) return;
+        var type = BitConverter.ToUInt16(wiiControllerType);
+        var newType = ControllerTypeById.GetValueOrDefault(type);
+        var checkedType = newType;
+        if (checkedType == WiiControllerType.ClassicControllerPro)
         {
-            var type = BitConverter.ToUInt16(wiiControllerType);
-            var newType = ControllerTypeById.GetValueOrDefault(type);
-            var checkedType = newType;
-            if (checkedType == WiiControllerType.ClassicControllerPro)
-            {
-                checkedType = WiiControllerType.ClassicController;
-            }
+            checkedType = WiiControllerType.ClassicController;
+        }
 
-            if (checkedType != WiiControllerType) return;
-            var wiiButtonsLow = ~wiiData[4];
-            var wiiButtonsHigh = ~wiiData[5];
-            var highResolution = checkedType == WiiControllerType.ClassicController && wiiData.Length == 8;
-            if (highResolution)
-            {
-                wiiButtonsLow = ~wiiData[6];
-                wiiButtonsHigh = ~wiiData[7];
-            }
+        if (checkedType != WiiControllerType) return;
+        var wiiButtonsLow = ~wiiData[4];
+        var wiiButtonsHigh = ~wiiData[5];
+        var highResolution = checkedType == WiiControllerType.ClassicController && wiiData.Length == 8;
+        if (highResolution)
+        {
+            wiiButtonsLow = ~wiiData[6];
+            wiiButtonsHigh = ~wiiData[7];
+        }
 
-            switch (checkedType)
-            {
-                case WiiControllerType.Nunchuk:
-                    var accX = ((wiiData[2] << 2) | ((wiiData[5] & 0xC0) >> 6)) - 511;
-                    var accY = ((wiiData[3] << 2) | ((wiiData[5] & 0x30) >> 4)) - 511;
-                    var accZ = ((wiiData[4] << 2) | ((wiiData[5] & 0xC) >> 2)) - 511;
+        switch (checkedType)
+        {
+            case WiiControllerType.Nunchuk:
+                var accX = ((wiiData[2] << 2) | ((wiiData[5] & 0xC0) >> 6)) - 511;
+                var accY = ((wiiData[3] << 2) | ((wiiData[5] & 0x30) >> 4)) - 511;
+                var accZ = ((wiiData[4] << 2) | ((wiiData[5] & 0xC) >> 2)) - 511;
+                RawValue = Input switch
+                {
+                    WiiInputType.NunchukC => ((wiiButtonsHigh & (1 << 1)) != 0) ? 1 : 0,
+                    WiiInputType.NunchukZ => ((wiiButtonsHigh & (1 << 0)) != 0) ? 1 : 0,
+                    WiiInputType.NunchukAccelerationX => accX,
+                    WiiInputType.NunchukAccelerationY => accY,
+                    WiiInputType.NunchukAccelerationZ => accZ,
+                    WiiInputType.NunchukRotationPitch => (int) (Math.Atan2(accY, accZ) / (Math.PI / 32767)),
+                    WiiInputType.NunchukRotationRoll => (int) (Math.Atan2(accX, accZ) / (Math.PI / 32767)),
+                    WiiInputType.NunchukStickX => (wiiData[0] - 0x80) << 8,
+                    WiiInputType.NunchukStickY => (wiiData[1] - 0x80) << 8,
+                    _ => RawValue
+                };
+                break;
+            case WiiControllerType.ClassicController:
+                RawValue = Input switch
+                {
+                    WiiInputType.ClassicRt => ((wiiButtonsLow) & (1 << 1)),
+                    WiiInputType.ClassicPlus => ((wiiButtonsLow) & (1 << 2)),
+                    WiiInputType.ClassicHome => ((wiiButtonsLow) & (1 << 3)),
+                    WiiInputType.ClassicMinus => ((wiiButtonsLow) & (1 << 4)),
+                    WiiInputType.ClassicLt => ((wiiButtonsLow) & (1 << 5)),
+                    WiiInputType.ClassicDPadDown => ((wiiButtonsLow) & (1 << 6)),
+                    WiiInputType.ClassicDPadRight => ((wiiButtonsLow) & (1 << 7)),
+                    WiiInputType.ClassicDPadUp => ((wiiButtonsHigh) & (1 << 0)),
+                    WiiInputType.ClassicDPadLeft => ((wiiButtonsHigh) & (1 << 1)),
+                    WiiInputType.ClassicZr => ((wiiButtonsHigh) & (1 << 2)),
+                    WiiInputType.ClassicX => ((wiiButtonsHigh) & (1 << 3)),
+                    WiiInputType.ClassicA => ((wiiButtonsHigh) & (1 << 4)),
+                    WiiInputType.ClassicY => ((wiiButtonsHigh) & (1 << 5)),
+                    WiiInputType.ClassicB => ((wiiButtonsHigh) & (1 << 6)),
+                    WiiInputType.ClassicZl => ((wiiButtonsHigh) & (1 << 7)),
+                    _ => RawValue
+                };
+                if (highResolution)
+                {
                     RawValue = Input switch
                     {
-                        WiiInputType.NunchukC => ((wiiButtonsHigh & (1 << 1)) != 0) ? 1 : 0,
-                        WiiInputType.NunchukZ => ((wiiButtonsHigh & (1 << 0)) != 0) ? 1 : 0,
-                        WiiInputType.NunchukAccelerationX => accX,
-                        WiiInputType.NunchukAccelerationY => accY,
-                        WiiInputType.NunchukAccelerationZ => accZ,
-                        WiiInputType.NunchukRotationPitch => (int) (Math.Atan2(accY, accZ) / (Math.PI / 32767)),
-                        WiiInputType.NunchukRotationRoll => (int) (Math.Atan2(accX, accZ) / (Math.PI / 32767)),
-                        WiiInputType.NunchukStickX => (wiiData[0] - 0x80) << 8,
-                        WiiInputType.NunchukStickY => (wiiData[1] - 0x80) << 8,
+                        WiiInputType.ClassicLeftStickX => (wiiData[0] - 0x80) << 8,
+                        WiiInputType.ClassicLeftStickY => (wiiData[2] - 0x80) << 8,
+                        WiiInputType.ClassicRightStickX => (wiiData[1] - 0x80) << 8,
+                        WiiInputType.ClassicRightStickY => (wiiData[3] - 0x80) << 8,
+                        WiiInputType.ClassicLeftTrigger => wiiData[4] << 8,
+                        WiiInputType.ClassicRightTrigger => wiiData[5] << 8,
                         _ => RawValue
                     };
-                    break;
-                case WiiControllerType.ClassicController:
+                }
+                else
+                {
                     RawValue = Input switch
                     {
-                        WiiInputType.ClassicRt => ((wiiButtonsLow) & (1 << 1)),
-                        WiiInputType.ClassicPlus => ((wiiButtonsLow) & (1 << 2)),
-                        WiiInputType.ClassicHome => ((wiiButtonsLow) & (1 << 3)),
-                        WiiInputType.ClassicMinus => ((wiiButtonsLow) & (1 << 4)),
-                        WiiInputType.ClassicLt => ((wiiButtonsLow) & (1 << 5)),
-                        WiiInputType.ClassicDPadDown => ((wiiButtonsLow) & (1 << 6)),
-                        WiiInputType.ClassicDPadRight => ((wiiButtonsLow) & (1 << 7)),
-                        WiiInputType.ClassicDPadUp => ((wiiButtonsHigh) & (1 << 0)),
-                        WiiInputType.ClassicDPadLeft => ((wiiButtonsHigh) & (1 << 1)),
-                        WiiInputType.ClassicZr => ((wiiButtonsHigh) & (1 << 2)),
-                        WiiInputType.ClassicX => ((wiiButtonsHigh) & (1 << 3)),
-                        WiiInputType.ClassicA => ((wiiButtonsHigh) & (1 << 4)),
-                        WiiInputType.ClassicY => ((wiiButtonsHigh) & (1 << 5)),
-                        WiiInputType.ClassicB => ((wiiButtonsHigh) & (1 << 6)),
-                        WiiInputType.ClassicZl => ((wiiButtonsHigh) & (1 << 7)),
+                        WiiInputType.ClassicLeftStickX => ((wiiData[0] & 0x3f) - 32) << 9,
+                        WiiInputType.ClassicLeftStickY => ((wiiData[1] & 0x3f) - 32) << 9,
+                        WiiInputType.ClassicRightStickX => ((((wiiData[0] & 0xc0) >> 3) |
+                                                             ((wiiData[1] & 0xc0) >> 5) | (wiiData[2] >> 7)) -
+                                                            16) << 10,
+                        WiiInputType.ClassicRightStickY => ((wiiData[2] & 0x1f) - 16) << 10,
+                        WiiInputType.ClassicLeftTrigger => ((wiiData[3] >> 5) | ((wiiData[2] & 0x60) >> 2)),
+                        WiiInputType.ClassicRightTrigger => (wiiData[3] & 0x1f) << 3,
                         _ => RawValue
                     };
-                    if (highResolution)
-                    {
-                        RawValue = Input switch
-                        {
-                            WiiInputType.ClassicLeftStickX => (wiiData[0] - 0x80) << 8,
-                            WiiInputType.ClassicLeftStickY => (wiiData[2] - 0x80) << 8,
-                            WiiInputType.ClassicRightStickX => (wiiData[1] - 0x80) << 8,
-                            WiiInputType.ClassicRightStickY => (wiiData[3] - 0x80) << 8,
-                            WiiInputType.ClassicLeftTrigger => wiiData[4] << 8,
-                            WiiInputType.ClassicRightTrigger => wiiData[5] << 8,
-                            _ => RawValue
-                        };
-                    }
-                    else
-                    {
-                        RawValue = Input switch
-                        {
-                            WiiInputType.ClassicLeftStickX => ((wiiData[0] & 0x3f) - 32) << 9,
-                            WiiInputType.ClassicLeftStickY => ((wiiData[1] & 0x3f) - 32) << 9,
-                            WiiInputType.ClassicRightStickX => ((((wiiData[0] & 0xc0) >> 3) |
-                                                                 ((wiiData[1] & 0xc0) >> 5) | (wiiData[2] >> 7)) -
-                                                                16) << 10,
-                            WiiInputType.ClassicRightStickY => ((wiiData[2] & 0x1f) - 16) << 10,
-                            WiiInputType.ClassicLeftTrigger => ((wiiData[3] >> 5) | ((wiiData[2] & 0x60) >> 2)),
-                            WiiInputType.ClassicRightTrigger => (wiiData[3] & 0x1f) << 3,
-                            _ => RawValue
-                        };
-                    }
+                }
 
-                    break;
-                case WiiControllerType.UDraw:
-                    RawValue = Input switch
-                    {
-                        WiiInputType.UDrawPenPressure => wiiData[3],
-                        WiiInputType.UDrawPenX => ((wiiData[2] & 0x0f) << 8) | wiiData[0],
-                        WiiInputType.UDrawPenY => ((wiiData[2] & 0xf0) << 4) | wiiData[1],
-                        WiiInputType.UDrawPenButton1 => ((wiiButtonsHigh) & (1 << 0)),
-                        WiiInputType.UDrawPenButton2 => ((wiiButtonsHigh) & (1 << 1)),
-                        WiiInputType.UDrawPenClick => ((~wiiButtonsHigh) & (1 << 2)),
-                        _ => RawValue
-                    };
+                break;
+            case WiiControllerType.UDraw:
+                RawValue = Input switch
+                {
+                    WiiInputType.UDrawPenPressure => wiiData[3],
+                    WiiInputType.UDrawPenX => ((wiiData[2] & 0x0f) << 8) | wiiData[0],
+                    WiiInputType.UDrawPenY => ((wiiData[2] & 0xf0) << 4) | wiiData[1],
+                    WiiInputType.UDrawPenButton1 => ((wiiButtonsHigh) & (1 << 0)),
+                    WiiInputType.UDrawPenButton2 => ((wiiButtonsHigh) & (1 << 1)),
+                    WiiInputType.UDrawPenClick => ((~wiiButtonsHigh) & (1 << 2)),
+                    _ => RawValue
+                };
                         
-                    break;
-                case WiiControllerType.Drawsome:
-                    RawValue = Input switch
-                    {
-                        WiiInputType.DrawsomePenPressure => (wiiButtonsLow | (wiiButtonsHigh & 0x0f) << 8),
-                        WiiInputType.DrawsomePenX => wiiData[0] | wiiData[1] << 8,
-                        WiiInputType.DrawsomePenY => wiiData[2] | wiiData[3] << 8,
-                        _ => RawValue
-                    };
-                    break;
-                case WiiControllerType.Guitar:
-                    var lastTapWii = (wiiData[2] & 0x1f);
-                    RawValue = Input switch
-                    {
-                        WiiInputType.GuitarPlus => ((wiiButtonsLow) & (1 << 2)),
-                        WiiInputType.GuitarMinus => ((wiiButtonsLow) & (1 << 4)),
-                        WiiInputType.GuitarStrumDown => ((wiiButtonsLow) & (1 << 6)),
-                        WiiInputType.GuitarStrumUp => ((wiiButtonsHigh) & (1 << 0)),
-                        WiiInputType.GuitarYellow => ((wiiButtonsHigh) & (1 << 3)),
-                        WiiInputType.GuitarGreen => ((wiiButtonsHigh) & (1 << 4)),
-                        WiiInputType.GuitarBlue => ((wiiButtonsHigh) & (1 << 5)),
-                        WiiInputType.GuitarRed => ((wiiButtonsHigh) & (1 << 6)),
-                        WiiInputType.GuitarOrange => ((wiiButtonsHigh) & (1 << 7)),
-                        WiiInputType.GuitarJoystickX => ((wiiData[0] & 0x3f) - 32) << 10,
-                        WiiInputType.GuitarJoystickY => ((wiiData[1] & 0x3f) - 32) << 10,
-                        WiiInputType.GuitarTapBar => (wiiData[2] & 0x1f) << 11,
-                        WiiInputType.GuitarWhammy => (wiiData[3] & 0x1f) << 11,
-                        WiiInputType.GuitarTapGreen => lastTapWii is 0x04 or 0x07 ? 1 : 0,
-                        WiiInputType.GuitarTapRed => lastTapWii is 0x07 or 0x0A or 0x0c or 0x0d ? 1 : 0,
-                        WiiInputType.GuitarTapYellow => lastTapWii is 0x0c or 0x0d or 0x12 or 0x13 or 0x14 or 0x15 ? 1 : 0,
-                        WiiInputType.GuitarTapBlue => lastTapWii is 0x14 or 0x15 or 0x17 or 0x18 or 0x1A ? 1 : 0,
-                        WiiInputType.GuitarTapOrange => lastTapWii is 0x1A or 0x1F ? 1 : 0,
-                        _ => RawValue
-                    };
-                    break;
-                case WiiControllerType.Drum:
-                    var vel = (7 - (wiiData[3] >> 5)) << 5;
-                    var which = (wiiData[2] & 0b01111100) >> 1;
-                    switch (which) {
-                        case 0x1B:
-                            drumVelocity[(int) DrumType.DrumKick] = vel;
-                            break;
-                        case 0x12:
-                            drumVelocity[(int) DrumType.DrumGreen] = vel;
-                            break;
-                        case 0x19:
-                            drumVelocity[(int) DrumType.DrumRed] = vel;
-                            break;
-                        case 0x11:
-                            drumVelocity[(int) DrumType.DrumYellow] = vel;
-                            break;
-                        case 0x0F:
-                            drumVelocity[(int) DrumType.DrumBlue] = vel;
-                            break;
-                        case 0x0E:
-                            drumVelocity[(int) DrumType.DrumOrange] = vel;
-                            break;
-                    }
-                    RawValue = Input switch
-                    {
-                        WiiInputType.DrumPlus => ((wiiButtonsLow) & (1 << 2)),
-                        WiiInputType.DrumMinus => ((wiiButtonsLow) & (1 << 4)),
-                        WiiInputType.DrumKickPedal => ((wiiButtonsHigh) & (1 << 2)),
-                        WiiInputType.DrumBlue => ((wiiButtonsHigh) & (1 << 3)),
-                        WiiInputType.DrumGreen => ((wiiButtonsHigh) & (1 << 4)),
-                        WiiInputType.DrumYellow => ((wiiButtonsHigh) & (1 << 5)),
-                        WiiInputType.DrumRed => ((wiiButtonsHigh) & (1 << 6)),
-                        WiiInputType.DrumOrange => ((wiiButtonsHigh) & (1 << 7)),
-                        WiiInputType.DrumGreenPressure => drumVelocity[(int) DrumType.DrumGreen],
-                        WiiInputType.DrumRedPressure => drumVelocity[(int) DrumType.DrumRed],
-                        WiiInputType.DrumYellowPressure => drumVelocity[(int) DrumType.DrumYellow],
-                        WiiInputType.DrumBluePressure => drumVelocity[(int) DrumType.DrumBlue],
-                        WiiInputType.DrumOrangePressure => drumVelocity[(int) DrumType.DrumOrange],
-                        WiiInputType.DrumKickPedalPressure => drumVelocity[(int) DrumType.DrumKick],
-                        _ => RawValue
-                    };
-                    break;
-                case WiiControllerType.Dj:
-                    RawValue = Input switch
-                    {
-                        WiiInputType.DjHeroPlus => ((wiiButtonsLow) & (1 << 2)),
-                        WiiInputType.DjHeroMinus => ((wiiButtonsLow) & (1 << 4)),
-                        WiiInputType.DjHeroLeftBlue => ((wiiButtonsHigh) & (1 << 7)),
-                        WiiInputType.DjHeroLeftRed => ((wiiButtonsLow) & (1 << 5)),
-                        WiiInputType.DjHeroLeftGreen => ((wiiButtonsHigh) & (1 << 3)),
-                        WiiInputType.DjHeroLeftAny => (((wiiButtonsHigh) & ((1 << 3)|1 << 7)) | ((wiiButtonsLow) & (1 << 5))),
-                        WiiInputType.DjHeroRightGreen => ((wiiButtonsHigh) & (1 << 5)),
-                        WiiInputType.DjHeroRightRed => ((wiiButtonsLow) & (1 << 1)),
-                        WiiInputType.DjHeroRightBlue => ((wiiButtonsHigh) & (1 << 2)),
-                        WiiInputType.DjHeroRightAny => (((wiiButtonsHigh) & ((1 << 5)|1 << 2)) | ((wiiButtonsLow) & (1 << 1))),
-                        WiiInputType.DjHeroEuphoria => ((wiiButtonsHigh) & (1 << 4)),
-                        WiiInputType.DjCrossfadeSlider => (wiiData[2] & 0x1E) >> 1,
-                        WiiInputType.DjEffectDial => (wiiData[3] & 0xE0) >> 5 | (wiiData[2] & 0x60) >> 2,
-                        WiiInputType.DjStickX => ((wiiData[0] & 0x3F) - 0x20) << 10,
-                        WiiInputType.DjStickY => ((wiiData[1] & 0x3F) - 0x20) << 10,
-                        WiiInputType.DjTurntableLeft => (((wiiButtonsLow & 1) != 0 ? 32 : 1) + (0x1F - (wiiData[3] & 0x1F))) << 10,
-                        WiiInputType.DjTurntableRight => (((wiiData[2] & 1) != 0 ? 32 : 1) + (0x1F - ((wiiData[2] & 0x80) >> 7 | (wiiData[1] & 0xC0) >> 5 | (wiiData[0] & 0xC0) >> 3))) << 10,
+                break;
+            case WiiControllerType.Drawsome:
+                RawValue = Input switch
+                {
+                    WiiInputType.DrawsomePenPressure => (wiiButtonsLow | (wiiButtonsHigh & 0x0f) << 8),
+                    WiiInputType.DrawsomePenX => wiiData[0] | wiiData[1] << 8,
+                    WiiInputType.DrawsomePenY => wiiData[2] | wiiData[3] << 8,
+                    _ => RawValue
+                };
+                break;
+            case WiiControllerType.Guitar:
+                var lastTapWii = (wiiData[2] & 0x1f);
+                RawValue = Input switch
+                {
+                    WiiInputType.GuitarPlus => ((wiiButtonsLow) & (1 << 2)),
+                    WiiInputType.GuitarMinus => ((wiiButtonsLow) & (1 << 4)),
+                    WiiInputType.GuitarStrumDown => ((wiiButtonsLow) & (1 << 6)),
+                    WiiInputType.GuitarStrumUp => ((wiiButtonsHigh) & (1 << 0)),
+                    WiiInputType.GuitarYellow => ((wiiButtonsHigh) & (1 << 3)),
+                    WiiInputType.GuitarGreen => ((wiiButtonsHigh) & (1 << 4)),
+                    WiiInputType.GuitarBlue => ((wiiButtonsHigh) & (1 << 5)),
+                    WiiInputType.GuitarRed => ((wiiButtonsHigh) & (1 << 6)),
+                    WiiInputType.GuitarOrange => ((wiiButtonsHigh) & (1 << 7)),
+                    WiiInputType.GuitarJoystickX => ((wiiData[0] & 0x3f) - 32) << 10,
+                    WiiInputType.GuitarJoystickY => ((wiiData[1] & 0x3f) - 32) << 10,
+                    WiiInputType.GuitarTapBar => (wiiData[2] & 0x1f) << 11,
+                    WiiInputType.GuitarWhammy => (wiiData[3] & 0x1f) << 11,
+                    WiiInputType.GuitarTapGreen => lastTapWii is 0x04 or 0x07 ? 1 : 0,
+                    WiiInputType.GuitarTapRed => lastTapWii is 0x07 or 0x0A or 0x0c or 0x0d ? 1 : 0,
+                    WiiInputType.GuitarTapYellow => lastTapWii is 0x0c or 0x0d or 0x12 or 0x13 or 0x14 or 0x15 ? 1 : 0,
+                    WiiInputType.GuitarTapBlue => lastTapWii is 0x14 or 0x15 or 0x17 or 0x18 or 0x1A ? 1 : 0,
+                    WiiInputType.GuitarTapOrange => lastTapWii is 0x1A or 0x1F ? 1 : 0,
+                    _ => RawValue
+                };
+                break;
+            case WiiControllerType.Drum:
+                var vel = (7 - (wiiData[3] >> 5)) << 5;
+                var which = (wiiData[2] & 0b01111100) >> 1;
+                switch (which) {
+                    case 0x1B:
+                        drumVelocity[(int) DrumType.DrumKick] = vel;
+                        break;
+                    case 0x12:
+                        drumVelocity[(int) DrumType.DrumGreen] = vel;
+                        break;
+                    case 0x19:
+                        drumVelocity[(int) DrumType.DrumRed] = vel;
+                        break;
+                    case 0x11:
+                        drumVelocity[(int) DrumType.DrumYellow] = vel;
+                        break;
+                    case 0x0F:
+                        drumVelocity[(int) DrumType.DrumBlue] = vel;
+                        break;
+                    case 0x0E:
+                        drumVelocity[(int) DrumType.DrumOrange] = vel;
+                        break;
+                }
+                RawValue = Input switch
+                {
+                    WiiInputType.DrumPlus => ((wiiButtonsLow) & (1 << 2)),
+                    WiiInputType.DrumMinus => ((wiiButtonsLow) & (1 << 4)),
+                    WiiInputType.DrumKickPedal => ((wiiButtonsHigh) & (1 << 2)),
+                    WiiInputType.DrumBlue => ((wiiButtonsHigh) & (1 << 3)),
+                    WiiInputType.DrumGreen => ((wiiButtonsHigh) & (1 << 4)),
+                    WiiInputType.DrumYellow => ((wiiButtonsHigh) & (1 << 5)),
+                    WiiInputType.DrumRed => ((wiiButtonsHigh) & (1 << 6)),
+                    WiiInputType.DrumOrange => ((wiiButtonsHigh) & (1 << 7)),
+                    WiiInputType.DrumGreenPressure => drumVelocity[(int) DrumType.DrumGreen],
+                    WiiInputType.DrumRedPressure => drumVelocity[(int) DrumType.DrumRed],
+                    WiiInputType.DrumYellowPressure => drumVelocity[(int) DrumType.DrumYellow],
+                    WiiInputType.DrumBluePressure => drumVelocity[(int) DrumType.DrumBlue],
+                    WiiInputType.DrumOrangePressure => drumVelocity[(int) DrumType.DrumOrange],
+                    WiiInputType.DrumKickPedalPressure => drumVelocity[(int) DrumType.DrumKick],
+                    _ => RawValue
+                };
+                break;
+            case WiiControllerType.Dj:
+                RawValue = Input switch
+                {
+                    WiiInputType.DjHeroPlus => ((wiiButtonsLow) & (1 << 2)),
+                    WiiInputType.DjHeroMinus => ((wiiButtonsLow) & (1 << 4)),
+                    WiiInputType.DjHeroLeftBlue => ((wiiButtonsHigh) & (1 << 7)),
+                    WiiInputType.DjHeroLeftRed => ((wiiButtonsLow) & (1 << 5)),
+                    WiiInputType.DjHeroLeftGreen => ((wiiButtonsHigh) & (1 << 3)),
+                    WiiInputType.DjHeroLeftAny => (((wiiButtonsHigh) & ((1 << 3)|1 << 7)) | ((wiiButtonsLow) & (1 << 5))),
+                    WiiInputType.DjHeroRightGreen => ((wiiButtonsHigh) & (1 << 5)),
+                    WiiInputType.DjHeroRightRed => ((wiiButtonsLow) & (1 << 1)),
+                    WiiInputType.DjHeroRightBlue => ((wiiButtonsHigh) & (1 << 2)),
+                    WiiInputType.DjHeroRightAny => (((wiiButtonsHigh) & ((1 << 5)|1 << 2)) | ((wiiButtonsLow) & (1 << 1))),
+                    WiiInputType.DjHeroEuphoria => ((wiiButtonsHigh) & (1 << 4)),
+                    WiiInputType.DjCrossfadeSlider => (wiiData[2] & 0x1E) >> 1,
+                    WiiInputType.DjEffectDial => (wiiData[3] & 0xE0) >> 5 | (wiiData[2] & 0x60) >> 2,
+                    WiiInputType.DjStickX => ((wiiData[0] & 0x3F) - 0x20) << 10,
+                    WiiInputType.DjStickY => ((wiiData[1] & 0x3F) - 0x20) << 10,
+                    WiiInputType.DjTurntableLeft => (((wiiButtonsLow & 1) != 0 ? 32 : 1) + (0x1F - (wiiData[3] & 0x1F))) << 10,
+                    WiiInputType.DjTurntableRight => (((wiiData[2] & 1) != 0 ? 32 : 1) + (0x1F - ((wiiData[2] & 0x80) >> 7 | (wiiData[1] & 0xC0) >> 5 | (wiiData[0] & 0xC0) >> 3))) << 10,
 
-                        _ => RawValue
-                    };
-                    break;
-                case WiiControllerType.Taiko:
-                    RawValue = Input switch
-                    {
-                        WiiInputType.TaTaConRightDrumRim => ((~wiiData[0]) & (1 << 3)),
-                        WiiInputType.TaTaConRightDrumCenter => ((~wiiData[0]) & (1 << 4)),
-                        WiiInputType.TaTaConLeftDrumRim => ((~wiiData[0]) & (1 << 5)),
-                        WiiInputType.TaTaConLeftDrumCenter => ((~wiiData[0]) & (1 << 6)),
-                        _ => RawValue
-                    };
-                    break;
-                case WiiControllerType.MotionPlus:
-                    break;
-            }
+                    _ => RawValue
+                };
+                break;
+            case WiiControllerType.Taiko:
+                RawValue = Input switch
+                {
+                    WiiInputType.TaTaConRightDrumRim => ((~wiiData[0]) & (1 << 3)),
+                    WiiInputType.TaTaConRightDrumCenter => ((~wiiData[0]) & (1 << 4)),
+                    WiiInputType.TaTaConLeftDrumRim => ((~wiiData[0]) & (1 << 5)),
+                    WiiInputType.TaTaConLeftDrumCenter => ((~wiiData[0]) & (1 << 6)),
+                    _ => RawValue
+                };
+                break;
+            case WiiControllerType.MotionPlus:
+                break;
         }
     }
 
@@ -578,10 +582,8 @@ break;
             }
         }
 
-        foreach (var binding in mappedBindings)
+        foreach (var (input, mappings) in mappedBindings)
         {
-            var input = binding.Key;
-            var mappings = binding.Value;
             ret += @$"case {CType[input]}:
     {string.Join(";\n", mappings)};
     break;";
@@ -592,16 +594,13 @@ break;
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        if (WiiControllerType == WiiControllerType.Drum)
+        return WiiControllerType switch
         {
-            return base.RequiredDefines().Concat(new[] {"INPUT_WII", "INPUT_WII_DRUM"}).ToList();
-        }
-
-        if (WiiControllerType == WiiControllerType.Nunchuk)
-        {
-            return base.RequiredDefines().Concat(new[] {"INPUT_WII", "INPUT_WII_NUNCHUK"}).ToList();
-        }
-
-        return base.RequiredDefines().Concat(new[] {"INPUT_WII"}).ToList();
+            WiiControllerType.Drum => base.RequiredDefines().Concat(new[] {"INPUT_WII", "INPUT_WII_DRUM"}).ToList(),
+            WiiControllerType.Nunchuk => base.RequiredDefines()
+                .Concat(new[] {"INPUT_WII", "INPUT_WII_NUNCHUK"})
+                .ToList(),
+            _ => base.RequiredDefines().Concat(new[] {"INPUT_WII"}).ToList()
+        };
     }
 }

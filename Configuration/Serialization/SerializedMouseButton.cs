@@ -11,17 +11,17 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 public class SerializedMouseButton : SerializedOutput
 {
     [ProtoMember(1)] public override SerializedInput? Input { get; }
-    [ProtoMember(2)] public override Color LedOn { get; }
-    [ProtoMember(3)] public override Color LedOff { get; }
-    [ProtoMember(4)] public int Debounce { get; }
+    [ProtoMember(2)] public override uint LedOn { get; }
+    [ProtoMember(3)] public override uint LedOff { get; }
+    [ProtoMember(4)] public byte Debounce { get; }
     [ProtoMember(5)] public MouseButtonType Type { get; }
-    [ProtoMember(6)] public override int? LedIndex { get; }
+    [ProtoMember(6)] public override byte? LedIndex { get; }
 
-    public SerializedMouseButton(SerializedInput? input, Color ledOn, Color ledOff, int? ledIndex, int debounce, MouseButtonType type)
+    public SerializedMouseButton(SerializedInput? input, Color ledOn, Color ledOff, byte? ledIndex, byte debounce, MouseButtonType type)
     {
         Input = input;
-        LedOn = ledOn;
-        LedOff = ledOff;
+        LedOn = ledOn.ToUint32();
+        LedOff = ledOff.ToUint32();
         LedIndex = ledIndex;
         Debounce = debounce;
         Type = type;
@@ -29,6 +29,6 @@ public class SerializedMouseButton : SerializedOutput
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new MouseButton(model, Input?.Generate(microcontroller), LedOn, LedOff, LedIndex, Debounce, Type);
+        return new MouseButton(model, Input?.Generate(microcontroller), Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
     }
 }

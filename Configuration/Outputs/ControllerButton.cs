@@ -5,6 +5,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+
 public class ControllerButton : OutputButton
 {
     public static readonly List<StandardButtonType> Order = new()
@@ -53,10 +54,12 @@ public class ControllerButton : OutputButton
         StandardButtonType.Right,
     };
 
-    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, int debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndex, debounce, type.ToString())
+    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex,
+        byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndex, debounce, type.ToString())
     {
         Type = type;
     }
+
     public StandardButtonType Type { get; }
 
     public override string? GetLocalisedName() =>
@@ -66,19 +69,11 @@ public class ControllerButton : OutputButton
     {
         if (xbox)
         {
-            if (!XboxOrder.Contains(Type))
-            {
-                //On the xbox, LT and RT are analog only.
-                return "";
-            }
-            return XboxOrder.IndexOf(Type).ToString();
+            //On the xbox, LT and RT are analog only.
+            return XboxOrder.Contains(Type) ? XboxOrder.IndexOf(Type).ToString() : "";
         }
 
-        if (HatOrder.Contains(Type))
-        {
-            return HatOrder.IndexOf(Type).ToString();
-        }
-        return Order.IndexOf(Type).ToString();
+        return HatOrder.Contains(Type) ? HatOrder.IndexOf(Type).ToString() : Order.IndexOf(Type).ToString();
     }
 
     public override string GenerateOutput(bool xbox)
@@ -87,13 +82,15 @@ public class ControllerButton : OutputButton
         {
             return "report->hat";
         }
+
         return "report->buttons";
     }
 
     public override bool IsStrum => Type is StandardButtonType.Up or StandardButtonType.Down;
 
     public override bool IsCombined => false;
-    public override SerializedOutput GetJson()
+
+    public override SerializedOutput Serialize()
     {
         return new SerializedControllerButton(Input?.GetJson(), LedOn, LedOff, LedIndex, Debounce, Type);
     }

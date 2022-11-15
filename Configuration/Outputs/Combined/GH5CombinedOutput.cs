@@ -73,7 +73,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         }
     }
 
-    public override SerializedOutput GetJson()
+    public override SerializedOutput Serialize()
     {
         return new SerializedGh5CombinedOutput(Sda, Scl, _outputs.ToList());
     }

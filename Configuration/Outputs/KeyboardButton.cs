@@ -208,7 +208,7 @@ public class KeyboardButton : OutputButton
     }
     
 
-    public KeyboardButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, int debounce, Key type) : base(model, input, ledOn, ledOff, ledIndex,
+    public KeyboardButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex, byte debounce, Key type) : base(model, input, ledOn, ledOff, ledIndex,
         debounce, type.ToString())
     {
         Key = type;
@@ -237,7 +237,7 @@ public class KeyboardButton : OutputButton
     public override bool IsCombined => false;
     public override string? GetLocalisedName() => Name;
 
-    public override SerializedOutput GetJson()
+    public override SerializedOutput Serialize()
     {
         return new SerializedKeyboardButton(Input?.GetJson(), LedOn, LedOff, LedIndex, Debounce, Key);
     }

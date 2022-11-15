@@ -24,7 +24,7 @@ public abstract class OutputAxis : Output
 {
     protected delegate bool TriggerDelegate(DeviceControllerType type);
 
-    protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex,
+    protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex,
         float multiplier, int offset,
         int deadZone, string name, TriggerDelegate triggerDelegate) : base(model, input, ledOn, ledOff, ledIndex, name)
     {

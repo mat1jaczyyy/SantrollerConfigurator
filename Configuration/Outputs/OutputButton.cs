@@ -10,12 +10,12 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public abstract class OutputButton : Output
 {
-    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, int debounce, string name): base(model, input, ledOn, ledOff, ledIndex, name)
+    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex, byte debounce, string name): base(model, input, ledOn, ledOff, ledIndex, name)
     {
         Debounce = debounce;
         _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue).Select(s => s != 0).ToProperty(this, x => x.ValueRaw);
     }
-    public int Debounce { get; set; }
+    public byte Debounce { get; set; }
     public abstract string GenerateIndex(bool xbox);
 
     public abstract string GenerateOutput(bool xbox);

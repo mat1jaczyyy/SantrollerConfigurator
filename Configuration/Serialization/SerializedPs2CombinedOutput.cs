@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
@@ -18,10 +19,10 @@ public class SerializedPs2CombinedOutput : SerializedOutput
     [ProtoMember(7)] public int Att { get; }
     [ProtoMember(8)] public int Ack { get; }
     
-    [ProtoMember(9)] public List<Output> Outputs { get; }
-    public override Color LedOn => Colors.Transparent;
-    public override Color LedOff => Colors.Transparent;
-    public override int? LedIndex => null;
+    [ProtoMember(9)] public List<SerializedOutput> Outputs { get; }
+    public override uint LedOn => Colors.Transparent.ToUint32();
+    public override uint LedOff => Colors.Transparent.ToUint32();
+    public override byte? LedIndex => null;
 
     public SerializedPs2CombinedOutput(int miso, int mosi, int sck, int att, int ack, List<Output> outputs)
     {
@@ -30,11 +31,11 @@ public class SerializedPs2CombinedOutput : SerializedOutput
         Sck = sck;
         Att = att;
         Ack = ack;
-        Outputs = outputs;
+        Outputs = outputs.Select(s => s.Serialize()).ToList();
     }
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new Ps2CombinedOutput(model, microcontroller, Miso, Mosi, Sck, Att, Ack, Outputs);
+        return new Ps2CombinedOutput(model, microcontroller, Miso, Mosi, Sck, Att, Ack, Outputs.Select(s => s.Generate(model, microcontroller)).ToList());
     }
 }

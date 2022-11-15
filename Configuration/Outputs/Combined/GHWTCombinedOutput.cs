@@ -62,7 +62,7 @@ public class GhwtCombinedOutput : CombinedOutput
         }
     }
 
-    public override SerializedOutput GetJson()
+    public override SerializedOutput Serialize()
     {
         return new SerializedGhwtCombinedOutput(Pin, _outputs.ToList());
     }

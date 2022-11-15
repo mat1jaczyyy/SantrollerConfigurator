@@ -17,7 +17,7 @@ public class MouseAxis : OutputAxis
         {MouseAxisType.ScrollY, "ScrollY"},
     };
 
-    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, float multiplier,
+    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex, float multiplier,
         int offset, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndex, multiplier, offset,
         deadZone, type.ToString(), (_) => false)
     {
@@ -72,7 +72,7 @@ public class MouseAxis : OutputAxis
 
     public override string? GetLocalisedName() => Name;
 
-    public override SerializedOutput GetJson()
+    public override SerializedOutput Serialize()
     {
         return new SerializedMouseAxis(Input?.GetJson(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset, DeadZone);
     }

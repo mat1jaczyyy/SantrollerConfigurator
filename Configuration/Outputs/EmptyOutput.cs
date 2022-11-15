@@ -123,12 +123,12 @@ public class EmptyOutput : Output
                 }
                 else if (value is StandardAxisType standardAxisType)
                 {
-                    Model.Bindings.Add(new ControllerAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model.MicroController), Colors.Transparent, Colors.Transparent, -1,1, 0, 0,
+                    Model.Bindings.Add(new ControllerAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model.MicroController), Colors.Transparent, Colors.Transparent, null,1, 0, 0,
                         standardAxisType));
                 }
                 else if (value is StandardButtonType standardButtonType)
                 {
-                    Model.Bindings.Add(new ControllerButton(Model, new DirectInput(0, DevicePinMode.PullUp, Model.MicroController), Colors.Transparent, Colors.Transparent, -1, 5,
+                    Model.Bindings.Add(new ControllerButton(Model, new DirectInput(0, DevicePinMode.PullUp, Model.MicroController), Colors.Transparent, Colors.Transparent, null, 5,
                         standardButtonType));
                 }
 
@@ -136,17 +136,17 @@ public class EmptyOutput : Output
             case EmulationType.KeyboardMouse:
                 if (MouseAxisType.HasValue)
                 {
-                    Model.Bindings.Add(new MouseAxis(Model, null, Colors.Transparent, Colors.Transparent, -1, 1, 0, 0,
+                    Model.Bindings.Add(new MouseAxis(Model, null, Colors.Transparent, Colors.Transparent, null, 1, 0, 0,
                         MouseAxisType.Value));
                 }
                 else if (MouseButtonType.HasValue)
                 {
-                    Model.Bindings.Add(new MouseButton(Model, null, Colors.Transparent, Colors.Transparent, -1,5,
+                    Model.Bindings.Add(new MouseButton(Model, null, Colors.Transparent, Colors.Transparent, null,5,
                         MouseButtonType.Value));
                 }
                 else if (Key.HasValue)
                 {
-                    Model.Bindings.Add(new KeyboardButton(Model, null, Colors.Transparent, Colors.Transparent, -1,5,
+                    Model.Bindings.Add(new KeyboardButton(Model, null, Colors.Transparent, Colors.Transparent, null,5,
                         Key.Value));
                 }
 
@@ -162,7 +162,7 @@ public class EmptyOutput : Output
 
     public virtual bool RequiresInput => false;
 
-    public override SerializedOutput GetJson()
+    public override SerializedOutput Serialize()
     {
         throw new IncompleteConfigurationException("Output is not configured!");
     }

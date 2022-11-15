@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
@@ -20,7 +21,7 @@ public class SerializedConfiguration
     
     public SerializedConfiguration(ConfigViewModel model)
     {
-        Bindings = model.Bindings.Select(s => s.GetJson()).ToList();
+        Bindings = model.Bindings.Select(s => s.Serialize()).ToList();
         LedType = model.LedType;
         DeviceType = model.DeviceType;
         EmulationType = model.EmulationType;

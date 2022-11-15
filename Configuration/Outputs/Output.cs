@@ -107,9 +107,9 @@ public abstract class Output : ReactiveObject, IDisposable
 
     private Color _ledOn;
     private Color _ledOff;
-    private int? _ledIndex;
+    private byte? _ledIndex;
 
-    public int? LedIndex
+    public byte? LedIndex
     {
         get => _ledIndex;
         set => this.RaiseAndSetIfChanged(ref _ledIndex, value);
@@ -127,7 +127,7 @@ public abstract class Output : ReactiveObject, IDisposable
         set => this.RaiseAndSetIfChanged(ref _ledOff, value);
     }
 
-    protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, int? ledIndex, string name)
+    protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex, string name)
     {
         Input = input;
         LedOn = ledOn;
@@ -247,7 +247,7 @@ public abstract class Output : ReactiveObject, IDisposable
     }
 
 
-    public abstract SerializedOutput GetJson();
+    public abstract SerializedOutput Serialize();
 
     private Bitmap? GetImage(DeviceControllerType type)
     {

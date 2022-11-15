@@ -264,8 +264,8 @@ public class Ardwiino : ConfigurableUsbDevice
             var controller = Board.FindMicrocontroller(Board);
             var bindings = new List<Output>();
             var colors = new Dictionary<int, Color>();
-            var ledIndexes = new Dictionary<int, int>();
-            for (var index = 0; index < config.all!.leds!.Length; index++)
+            var ledIndexes = new Dictionary<int, byte>();
+            for (byte index = 0; index < config.all!.leds!.Length; index++)
             {
                 var led = config.all!.leds![index];
                 if (led.pin != 0)
@@ -442,7 +442,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         on = colors[axis + XboxBtnCount];
                     }
                     
-                    var ledIndex = ledIndexes.GetValueOrDefault(pin.pin, -1);
+                    byte? ledIndex = ledIndexes.GetValueOrDefault(pin.pin);
 
                     var off = Color.FromRgb(0, 0, 0);
                     if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
@@ -483,7 +483,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     {
                         on = colors[button];
                     }
-                    var ledIndex = ledIndexes.GetValueOrDefault(pin, -1);
+                    byte? ledIndex = ledIndexes.GetValueOrDefault(pin);
 
                     var off = Color.FromRgb(0, 0, 0);
                     var genButton = ButtonToStandard[(ControllerButtons) button];
@@ -524,7 +524,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         }
 
                         var off = Color.FromRgb(0, 0, 0);
-                        var ledIndex = ledIndexes.GetValueOrDefault(pin.pin, -1);
+                        byte? ledIndex = ledIndexes.GetValueOrDefault(pin.pin);
                         bindings.Add(new ControllerAxis(model,
                             new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, controller), 32767), on,
                             off, ledIndex, 1, 0,
@@ -574,10 +574,10 @@ public class Ardwiino : ConfigurableUsbDevice
                     var ledOff = lx.LedOff;
                     bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyLow, threshold), ledOn, ledOff,
-                        -1, config.debounce.buttons, StandardButtonType.Left));
+                        null, config.debounce.buttons, StandardButtonType.Left));
                     bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyHigh, threshold), ledOn, ledOff,
-                        -1, config.debounce.buttons, StandardButtonType.Right));
+                        null, config.debounce.buttons, StandardButtonType.Right));
                 }
 
                 if (ly != null && ly.Input != null)
@@ -586,10 +586,10 @@ public class Ardwiino : ConfigurableUsbDevice
                     var ledOff = ly.LedOff;
                     bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold), ledOn, ledOff,
-                        -1, config.debounce.buttons, StandardButtonType.Up));
+                        null, config.debounce.buttons, StandardButtonType.Up));
                     bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold), ledOn, ledOff,
-                        -1, config.debounce.buttons, StandardButtonType.Down));
+                        null, config.debounce.buttons, StandardButtonType.Down));
                 }
             }
 

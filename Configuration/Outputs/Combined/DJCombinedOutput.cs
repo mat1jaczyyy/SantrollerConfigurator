@@ -51,15 +51,15 @@ public class DjCombinedOutput : CombinedTwiOutput
             Colors.Transparent, Colors.Transparent, null, 5, pair.Value)));
         _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, _microcontroller),
             Colors.Transparent,
-            Colors.Transparent, -1, 1,
+            Colors.Transparent, null, 1,
             0, 0, StandardAxisType.LeftStickX));
         _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, _microcontroller),
             Colors.Transparent,
-            Colors.Transparent, -1, 1,
+            Colors.Transparent, null, 1,
             0, 0, StandardAxisType.LeftStickY));
     }
 
-    public override SerializedOutput GetJson()
+    public override SerializedOutput Serialize()
     {
         return new SerializedDjCombinedOutput(Sda, Scl, _outputs.ToList());
     }

@@ -127,7 +127,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 return;
             }
-            var types = ControllerEnumConverter.GetTypes((_deviceControllerType, _rhythmType)).Where(s => s is not SimpleType).ToList();
+
+            var types = ControllerEnumConverter.GetTypes((_deviceControllerType, _rhythmType))
+                .Where(s => s is not SimpleType).ToList();
             foreach (var binding in Bindings)
             {
                 switch (binding)
@@ -163,21 +165,25 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     }
                 }
             }
+
             if (_deviceControllerType == DeviceControllerType.TurnTable && !Bindings.Any(s => s is DjCombinedOutput))
             {
                 Bindings.Add(new DjCombinedOutput(this, MicroController!));
             }
+
             foreach (var type in types)
             {
                 switch (type)
                 {
                     case StandardButtonType buttonType:
-                        Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
-                            Colors.Transparent, Colors.Transparent, -1, 1, buttonType));
+                        Bindings.Add(new ControllerButton(this,
+                            new DirectInput(0, DevicePinMode.PullUp, MicroController!),
+                            Colors.Transparent, Colors.Transparent, null, 1, buttonType));
                         break;
                     case StandardAxisType axisType:
-                        Bindings.Add(new ControllerAxis(this, new DirectInput(0, DevicePinMode.Analog, MicroController!),
-                            Colors.Transparent, Colors.Transparent, -1, 1, 0, 0, axisType));
+                        Bindings.Add(new ControllerAxis(this,
+                            new DirectInput(0, DevicePinMode.Analog, MicroController!),
+                            Colors.Transparent, Colors.Transparent, null, 1, 0, 0, axisType));
                         break;
                 }
             }
@@ -249,7 +255,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             RhythmType = RhythmType.GuitarHero;
             XInputOnWindows = false;
             ClearOutputs();
-            
+
             switch (Main.DeviceInputType)
             {
                 case DeviceInputType.Direct:
@@ -268,8 +274,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 await Task.WhenAll(Write(), ShowUnoShortDialog.Handle((Arduino) Main.SelectedDevice!).ToTask());
                 return;
             }
-            await Write();
 
+            await Write();
         }
 
         public void SetDefaultBindings()
@@ -279,8 +285,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             foreach (var type in Enum.GetValues<StandardAxisType>())
             {
                 if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
-                Bindings.Add(new ControllerAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, MicroController!),
-                    Colors.Transparent, Colors.Transparent, -1, 1, 0, 0, type));
+                Bindings.Add(new ControllerAxis(this,
+                    new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, MicroController!),
+                    Colors.Transparent, Colors.Transparent, null, 1, 0, 0, type));
             }
 
             foreach (var type in Enum.GetValues<StandardButtonType>())
@@ -288,7 +295,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
                     null) continue;
                 Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
-                    Colors.Transparent, Colors.Transparent, -1, 1, type));
+                    Colors.Transparent, Colors.Transparent, null, 1, type));
             }
         }
 
@@ -311,6 +318,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     $"#define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
                 lines.Add($"#define CONFIGURATION_LEN {outputStream.ToArray().Length}");
             }
+            
 
             lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
 
@@ -320,7 +328,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             lines.Add($"#define TICK_XINPUT {GenerateTick(true, false)}");
 
-            lines.Add($"#define ADC_COUNT {directInputs.DistinctBy(s => s.PinConfig.Pin).Count(input => input.IsAnalog)}");
+            lines.Add(
+                $"#define ADC_COUNT {directInputs.DistinctBy(s => s.PinConfig.Pin).Count(input => input.IsAnalog)}");
 
             lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
             //TODO: this
@@ -331,7 +340,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             lines.Add($"#define CONSOLE_TYPE {((byte) EmulationType)}");
 
             lines.Add($"#define DEVICE_TYPE {((byte) DeviceType)}");
-            
+
             lines.Add($"#define RHYTHM_TYPE {((byte) RhythmType)}");
             if (KvEnabled)
             {

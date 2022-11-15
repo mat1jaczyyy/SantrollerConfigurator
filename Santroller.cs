@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using DynamicData;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -136,8 +137,17 @@ public class Santroller : ConfigurableUsbDevice
             var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
             Board = m.Board;
             model.MicroController = m;
-            var data = ReadData(0, ((byte) Commands.CommandReadConfig), 2048);
-            using var inputStream = new MemoryStream(data);
+            ushort start = 0;
+            var data = new List<byte>();
+            while (true)
+            {
+                var chunk = ReadData(start, ((byte) Commands.CommandReadConfig), 64);
+                if (!chunk.Any()) break;
+                data.AddRange(chunk);
+                start += 64;
+            }
+
+            using var inputStream = new MemoryStream(data.ToArray());
             await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
             Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
             _deviceControllerType = model.DeviceType;
