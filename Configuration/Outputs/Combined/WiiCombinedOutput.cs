@@ -219,7 +219,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType,
             wiiControllerType);
-        if (!wiiControllerType.Any()) return;
+        if (!wiiControllerType.Any())
+        {
+            this.RaisePropertyChanging(nameof(DetectedType));
+            _detectedType = null;
+            this.RaisePropertyChanged(nameof(DetectedType));
+            return;
+        }
         var type = BitConverter.ToUInt16(wiiControllerType);
         var newType = ControllerTypeById.GetValueOrDefault(type);
         if (newType == _detectedType) return;
