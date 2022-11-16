@@ -115,7 +115,7 @@ public class Santroller : ConfigurableUsbDevice
                 var wiiControllerType = ReadData(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
                 foreach (var output in model.Bindings)
                 {
-                    output.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+                    output.Update(model.Bindings.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                         ghWtRaw, ps2ControllerType, wiiControllerType);
                 }
             }

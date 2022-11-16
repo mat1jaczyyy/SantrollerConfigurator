@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using static GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined.WiiCombinedOutput;
@@ -290,7 +291,8 @@ public class WiiInput : TwiInput
         DrumHihat
     };
 
-    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+    public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
+        Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiData, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {

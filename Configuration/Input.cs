@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using ReactiveUI;
@@ -32,7 +33,8 @@ public abstract class Input : ReactiveObject, IDisposable
     public abstract List<DevicePin> Pins { get; }
     public abstract InputType? InputType { get; }
 
-    public abstract void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+    public abstract void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
+        Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
         byte[] wiiControllerType);
 

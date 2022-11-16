@@ -308,13 +308,14 @@ public abstract class Output : ReactiveObject, IDisposable
         .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.Pins ?? new()))
         .Distinct().ToList();
 
-    public virtual void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
+    public virtual void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
+        Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
         byte[] wiiControllerType)
     {
         foreach (var output in Outputs)
         {
-            output.Input?.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+            output.Input?.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
                 ps2ControllerType, wiiControllerType);
         }
     }
