@@ -18,16 +18,32 @@ public class Ps2Input : SpiInput
     public static readonly bool Ps2SpiMsbFirst = false;
     public static readonly string Ps2AckType = "ps2_ack";
     public static readonly string Ps2AttType = "ps2_att";
-    public int Ack { get; }
-    public int Att { get; }
+    public int Ack { get; set; }
+    public int Att { get; set;}
     public Ps2InputType Input { get; }
 
-    private static readonly List<Ps2InputType> Dualshock2Order = new()
+    public static readonly List<Ps2InputType> Dualshock2Order = new()
     {
         Ps2InputType.RightX,
         Ps2InputType.RightY,
         Ps2InputType.LeftX,
         Ps2InputType.LeftY,
+        Ps2InputType.Dualshock2RightButton,
+        Ps2InputType.Dualshock2LeftButton,
+        Ps2InputType.Dualshock2UpButton,
+        Ps2InputType.Dualshock2DownButton,
+        Ps2InputType.Dualshock2Triangle,
+        Ps2InputType.Dualshock2Circle,
+        Ps2InputType.Dualshock2Cross,
+        Ps2InputType.Dualshock2Square,
+        Ps2InputType.Dualshock2L1,
+        Ps2InputType.Dualshock2R1,
+        Ps2InputType.Dualshock2L2,
+        Ps2InputType.Dualshock2R2,
+    };
+    
+    public static readonly List<Ps2InputType> Dualshock2AnalogButtons = new()
+    {
         Ps2InputType.Dualshock2RightButton,
         Ps2InputType.Dualshock2LeftButton,
         Ps2InputType.Dualshock2UpButton,
@@ -182,17 +198,22 @@ public class Ps2Input : SpiInput
         {Ps2ControllerType.Mouse, "PSX_MOUSE"},
     };
 
+    public bool Combined { get; }
+
     public Ps2Input(Ps2InputType input, Microcontroller microcontroller, int? miso = null, int? mosi = null,
-        int? sck = null, int? att = null, int? ack = null) : base(microcontroller, Ps2SpiType, Ps2SpiFreq, Ps2SpiCpol,
+        int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(microcontroller, Ps2SpiType, Ps2SpiFreq, Ps2SpiCpol,
         Ps2SpiCpha, Ps2SpiMsbFirst, miso, mosi, sck)
     {
+        Combined = combined;
         Input = input;
-        Ack = microcontroller.PinConfigs.Where(s => s.Type == Ps2AckType).Select(s => s.Pins.First())
-            .FirstOrDefault(ack ?? microcontroller.SupportedAckPins()[0]);
-        Att = microcontroller.PinConfigs.Where(s => s.Type == Ps2AttType).Select(s => s.Pins.First())
-            .FirstOrDefault(att ?? 0);
-        microcontroller.AssignPin(new DirectPinConfig(Ps2AckType, Ack, DevicePinMode.Floating));
-        microcontroller.AssignPin(new DirectPinConfig(Ps2AttType, Att, DevicePinMode.Output));
+        Ack = microcontroller.GetOrSetPin(Ps2AckType, ack ?? microcontroller.SupportedAckPins()[0], DevicePinMode.Floating).Pin;
+        Att = microcontroller.GetOrSetPin(Ps2AttType, att ?? 0, DevicePinMode.Output).Pin;
+        microcontroller.PinConfigs.CollectionChanged +=
+            (_, _) =>
+            {
+                Ack = microcontroller.PinConfigs.Where(s => s.Type == Ps2AckType).Select(s => s.Pins.First()).First();
+                Att = microcontroller.PinConfigs.Where(s => s.Type == Ps2AttType).Select(s => s.Pins.First()).First();
+            };
     }
 
     public override string Generate()
@@ -200,9 +221,16 @@ public class Ps2Input : SpiInput
         return Mappings[Input];
     }
 
-    public override SerializedInput GetJson()
+    public override SerializedInput Serialise()
     {
-        return new SerializedPs2Input(Miso, Mosi, Sck, Att, Ack, Input);
+        if (Combined)
+        {
+            return new SerializedPs2InputCombined(Input);
+        }
+        else
+        {
+            return new SerializedPs2Input(Miso, Mosi, Sck, Att, Ack, Input);
+        }
     }
 
     public override bool IsAnalog => Input <= Ps2InputType.Dualshock2R2;

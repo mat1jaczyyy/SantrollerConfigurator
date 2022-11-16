@@ -13,7 +13,7 @@ public abstract class Input : ReactiveObject, IDisposable
     public abstract IReadOnlyList<string> RequiredDefines();
     public abstract string Generate();
 
-    public abstract SerializedInput GetJson();
+    public abstract SerializedInput Serialise();
 
     public abstract bool IsAnalog { get; }
     public abstract bool IsUint { get; }

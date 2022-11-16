@@ -28,7 +28,7 @@ public class DirectInput : InputWithPin
     }
 
 
-    public override SerializedInput GetJson()
+    public override SerializedInput Serialise()
     {
         return new SerializedDirectInput(PinConfig.Pin, PinConfig.PinMode);
     }

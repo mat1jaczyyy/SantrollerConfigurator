@@ -129,7 +129,7 @@ public class ControllerAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedControllerAxis(Input?.GetJson(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset,
+        return new SerializedControllerAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset,
             DeadZone);
     }
 }

@@ -67,5 +67,14 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
             Dictionary<int, bool> digitalRaw);
 
         public abstract int GetAnalogMask(DevicePin devicePin);
+        
+        public DirectPinConfig GetOrSetPin(string type, int pin, DevicePinMode devicePinMode)
+        {
+            var existing = PinConfigs.OfType<DirectPinConfig>().FirstOrDefault(s => s.Type == type);
+            if (existing != null) return existing;
+            var config = new DirectPinConfig(type, pin, devicePinMode);
+            PinConfigs.Add(config);
+            return config;
+        }
     }
 }

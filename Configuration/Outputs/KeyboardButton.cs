@@ -239,6 +239,6 @@ public class KeyboardButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedKeyboardButton(Input?.GetJson(), LedOn, LedOff, LedIndex, Debounce, Key);
+        return new SerializedKeyboardButton(Input?.Serialise(), LedOn, LedOff, LedIndex, Debounce, Key);
     }
 }

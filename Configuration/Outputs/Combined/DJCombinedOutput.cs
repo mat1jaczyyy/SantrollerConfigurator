@@ -47,13 +47,14 @@ public class DjCombinedOutput : CombinedTwiOutput
     public void CreateDefaults()
     {
         _outputs.Clear();
-        _outputs.AddRange(Buttons.Select(pair => new ControllerButton(Model, new DjInput(pair.Key, _microcontroller),
+        _outputs.AddRange(Buttons.Select(pair => new ControllerButton(Model,
+            new DjInput(pair.Key, _microcontroller, combined: true),
             Colors.Transparent, Colors.Transparent, null, 5, pair.Value)));
-        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, _microcontroller),
+        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, null, 1,
             0, 0, StandardAxisType.LeftStickX));
-        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, _microcontroller),
+        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, null, 1,
             0, 0, StandardAxisType.LeftStickY));
@@ -85,7 +86,8 @@ public class DjCombinedOutput : CombinedTwiOutput
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType,
+        base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+            ps2ControllerType,
             wiiControllerType);
         DetectedLeft = djLeftRaw.Any();
         DetectedRight = djRightRaw.Any();

@@ -55,9 +55,9 @@ public class AnalogToDigital : Input
         return "";
     }
 
-    public override SerializedInput GetJson()
+    public override SerializedInput Serialise()
     {
-        return new SerializedAnalogToDigital(Child.GetJson(), AnalogToDigitalType, Threshold);
+        return new SerializedAnalogToDigital(Child.Serialise(), AnalogToDigitalType, Threshold);
     }
 
 

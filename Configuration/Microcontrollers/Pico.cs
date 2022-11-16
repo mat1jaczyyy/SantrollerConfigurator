@@ -234,7 +234,6 @@ public class Pico : Microcontroller
         UnAssignPins(pinConfig.Type);
         PinConfigs.Add(pinConfig);
     }
-
     public override string GenerateInit()
     {
         var ret = "";

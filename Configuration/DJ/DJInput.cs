@@ -13,9 +13,12 @@ public class DjInput : TwiInput
     public static readonly string DjTwiType = "dj";
     public static readonly int DjTwiFreq = 150000;
 
-    public DjInput(DjInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null) : base(
+    public bool Combined { get; }
+
+    public DjInput(DjInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null, bool combined = false) : base(
         microcontroller, DjTwiType, DjTwiFreq, sda, scl)
     {
+        Combined = combined;
         Input = input;
     }
 
@@ -108,8 +111,12 @@ public class DjInput : TwiInput
         return base.RequiredDefines().Concat(new[] {"INPUT_DJ_TURNTABLE"}).ToList();
     }
 
-    public override SerializedInput GetJson()
+    public override SerializedInput Serialise()
     {
+        if (Combined)
+        {
+            return new SerializedDjInputCombined(Input);
+        }
         return new SerializedDjInput(Sda, Scl, Input);
     }
 }

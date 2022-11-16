@@ -38,10 +38,10 @@
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input: "></Label>
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="{Binding Input}"></Label>
-                    <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}">
                     </ComboBox>
                 </StackPanel>
@@ -71,23 +71,23 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="GH WT Tap Input: "></TextBlock>
                     <TextBlock Text="{Binding Input}"></TextBlock>
-                    <Button IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}" 
+                    <Button IsVisible="{Binding !Combined}" 
                             x:CompileBindings="False"
                             Command="{Binding $parent[UserControl].DataContext.ShowPinSelectDialogCommand}"
                             CommandParameter="{Binding}">
                         Change Pin
                     </Button>
-                    <NumericUpDown IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}"  Value="{Binding Pin}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown IsVisible="{Binding !Combined}"  Value="{Binding Pin}" VerticalAlignment="Center"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type dj:DjInput}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="DJ Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}">
                     </ComboBox>
                 </StackPanel>
@@ -96,27 +96,27 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="PS2 Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}"  VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
+                    <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
                               Items="{Binding AvailableMosiPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}"  VerticalAlignment="Center" SelectedItem="{Binding Miso}"
+                    <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Miso}"
                               Items="{Binding AvailableMisoPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}"  VerticalAlignment="Center" SelectedItem="{Binding Sck}"
+                    <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Sck}"
                               Items="{Binding AvailableSckPins}">
                     </ComboBox>
-                    <NumericUpDown IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}" Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
-                    <NumericUpDown IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}" Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown IsVisible="{Binding !Combined}" Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown IsVisible="{Binding !Combined}" Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type wii:WiiInput}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="Wii Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}"  VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                    <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}"  VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                    <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}">
                     </ComboBox>
                 </StackPanel>

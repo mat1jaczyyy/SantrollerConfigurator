@@ -25,9 +25,9 @@ public class DigitalToAnalog : Input
         return $"({Child.Generate()}) * {Value}";
     }
 
-    public override SerializedInput GetJson()
+    public override SerializedInput Serialise()
     {
-        return new SerializedDigitalToAnalog(Child.GetJson(), Value);
+        return new SerializedDigitalToAnalog(Child.Serialise(), Value);
     }
 
     public override Input InnermostInput()

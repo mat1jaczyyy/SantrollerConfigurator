@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
@@ -29,6 +30,8 @@ public class SerializedDjCombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
+        // Since we filter out sda and scl from inputs for size, we need to make sure its assigned before we construct the inputs.
+        microcontroller.AssignTwiPins(DjInput.DjTwiType, Sda, Scl, DjInput.DjTwiFreq);
         return new DjCombinedOutput(model, microcontroller, Sda, Scl, Outputs.Select(s => s.Generate(model, microcontroller)).ToList());
     }
 }

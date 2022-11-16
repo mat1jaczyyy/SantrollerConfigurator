@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -28,6 +29,7 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
+        microcontroller.AssignPin(new DirectPinConfig(GhWtTapInput.GhWtTapPinType, Pin, DevicePinMode.Floating));
         return new GhwtCombinedOutput(model, microcontroller, Pin, Outputs.Select(s => s.Generate(model, microcontroller)).ToList());
     }
 }

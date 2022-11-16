@@ -11,12 +11,16 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
 public class GhWtTapInput : InputWithPin
 {
+    public static string GhWtTapPinType = "ghwt";
     public GhWtInputType Input { get; set; }
 
 
-    public GhWtTapInput(GhWtInputType input, Microcontroller microcontroller, int pin = 0) : base(microcontroller,
-        new DirectPinConfig(Guid.NewGuid().ToString(), pin, DevicePinMode.Floating))
+    public bool Combined { get; }
+
+    public GhWtTapInput(GhWtInputType input, Microcontroller microcontroller, int pin = 0, bool combined = false) : base(microcontroller,
+        microcontroller.GetOrSetPin(GhWtTapPinType, pin, DevicePinMode.Floating))
     {
+        Combined = combined;
         Input = input;
     }
 
@@ -63,8 +67,12 @@ public class GhWtTapInput : InputWithPin
         return string.Join(" || ", mappings.Select(mapping => $"(lastTapShift == {mapping})"));
     }
 
-    public override SerializedInput GetJson()
+    public override SerializedInput Serialise()
     {
+        if (Combined)
+        {
+            return new SerializedGhWtInputCombined(Input);
+        }
         return new SerializedGhWtInput(PinConfig.Pin, Input);
     }
 

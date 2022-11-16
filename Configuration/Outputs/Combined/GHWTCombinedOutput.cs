@@ -48,7 +48,7 @@ public class GhwtCombinedOutput : CombinedOutput
     public void CreateDefaults()
     {
         _outputs.Clear();
-        _outputs.Add(new ControllerAxis(Model, new GhWtTapInput(GhWtInputType.TapBar, _microcontroller),
+        _outputs.Add(new ControllerAxis(Model, new GhWtTapInput(GhWtInputType.TapBar, _microcontroller, combined:true),
             Colors.Transparent,
             Colors.Transparent, null, 1, 0, 0, StandardAxisType.LeftStickX));
     }
@@ -57,7 +57,7 @@ public class GhwtCombinedOutput : CombinedOutput
     {
         foreach (var pair in Taps)
         {
-            _outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, _microcontroller), Colors.Transparent,
+            _outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, _microcontroller, combined:true), Colors.Transparent,
                 Colors.Transparent, null, 5, pair.Value));
         }
     }

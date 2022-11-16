@@ -92,6 +92,6 @@ public class ControllerButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedControllerButton(Input?.GetJson(), LedOn, LedOff, LedIndex, Debounce, Type);
+        return new SerializedControllerButton(Input?.Serialise(), LedOn, LedOff, LedIndex, Debounce, Type);
     }
 }

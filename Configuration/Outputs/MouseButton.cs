@@ -37,6 +37,6 @@ public class MouseButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedMouseButton(Input?.GetJson(), LedOn, LedOff, LedIndex, Debounce, Type);
+        return new SerializedMouseButton(Input?.Serialise(), LedOn, LedOff, LedIndex, Debounce, Type);
     }
 }

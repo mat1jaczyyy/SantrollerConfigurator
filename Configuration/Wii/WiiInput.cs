@@ -245,13 +245,14 @@ public class WiiInput : TwiInput
         {WiiControllerType.MotionPlus, "WII_MOTION_PLUS"}
     };
 
-    private bool _combined;
+    public bool Combined { get; }
+
     public WiiInput(WiiInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null, bool combined = false) : base(
         microcontroller,
         WiiTwiType, WiiTwiFreq, sda, scl)
     {
         Input = input;
-        _combined = combined;
+        Combined = combined;
     }
 
     public override InputType? InputType => Types.InputType.WiiInput;
@@ -261,9 +262,9 @@ public class WiiInput : TwiInput
         return Mappings[Input];
     }
 
-    public override SerializedInput GetJson()
+    public override SerializedInput Serialise()
     {
-        if (_combined)
+        if (Combined)
         {
             return new SerializedWiiInputCombined(Input);
         }

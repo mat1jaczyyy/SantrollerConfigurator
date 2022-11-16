@@ -95,7 +95,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         foreach (var pair in Buttons)
         {
             _outputs.Add(new ControllerButton(Model,
-                new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack),
+                new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
                 Colors.Transparent, null,
                 10,
@@ -104,28 +104,23 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
         foreach (var pair in Axis)
         {
-            _outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack),
+            _outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
                 Colors.Transparent, null, 1, 0, 0, pair.Value));
         }
 
         _outputs.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, _microcontroller, Miso, Mosi, Sck, Att, Ack),
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 128),
             Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
         _outputs.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, _microcontroller, Miso, Mosi, Sck, Att, Ack),
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 128),
             Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
         _outputs.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, _microcontroller, Miso, Mosi, Sck, Att, Ack),
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 240),
             Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
-    }
-
-    public void CreateAnalogPressures()
-    {
-        //TODO: add inputs for the various DS2 analog pressures   
     }
 
     public override SerializedOutput Serialize()

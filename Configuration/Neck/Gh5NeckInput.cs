@@ -72,10 +72,13 @@ public class Gh5NeckInput : TwiInput
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller controller, int? sda = null, int? scl = null) : base(
+    public bool Combined { get; }
+
+    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller controller, int? sda = null, int? scl = null, bool combined = false) : base(
         controller,
         Gh5TwiType, Gh5TwiFreq, sda, scl)
     {
+        Combined = combined;
         Input = input;
     }
 
@@ -99,8 +102,12 @@ public class Gh5NeckInput : TwiInput
                string.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})")) + "}";
     }
 
-    public override SerializedInput GetJson()
+    public override SerializedInput Serialise()
     {
+        if (Combined)
+        {
+            return new SerializedGh5NeckInputCombined(Input);
+        }
         return new SerializedGh5NeckInput(Sda, Scl, Input);
     }
 

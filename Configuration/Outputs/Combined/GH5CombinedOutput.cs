@@ -56,10 +56,10 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         _outputs.Clear();
         foreach (var pair in Buttons)
         {
-            _outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller), Colors.Green,
+            _outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller, combined:true), Colors.Green,
                 Colors.Transparent, null, 5, pair.Value));
         }
-        _outputs.Add(new ControllerAxis(Model, new Gh5NeckInput(Gh5NeckInputType.TapBar, _microcontroller),
+        _outputs.Add(new ControllerAxis(Model, new Gh5NeckInput(Gh5NeckInputType.TapBar, _microcontroller, combined:true),
             Colors.Transparent,
             Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
     }
@@ -68,7 +68,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     {
         foreach (var pair in Taps)
         {
-            _outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller), Colors.Transparent,
+            _outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller, combined:true), Colors.Transparent,
                 Colors.Transparent, null, 5, pair.Value));
         }
     }

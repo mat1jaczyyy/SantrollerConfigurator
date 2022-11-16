@@ -74,6 +74,6 @@ public class MouseAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedMouseAxis(Input?.GetJson(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset, DeadZone);
+        return new SerializedMouseAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset, DeadZone);
     }
 }
