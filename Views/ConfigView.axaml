@@ -105,8 +105,8 @@
                     <ComboBox IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}"  VerticalAlignment="Center" SelectedItem="{Binding Sck}"
                               Items="{Binding AvailableSckPins}">
                     </ComboBox>
-                    <NumericUpDown Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
-                    <NumericUpDown Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}" Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown IsVisible="{Binding $parent[Expander], Converter={x:Static ObjectConverters.IsNull}}" Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type wii:WiiInput}">

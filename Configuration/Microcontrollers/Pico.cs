@@ -13,7 +13,7 @@ public class Pico : Microcontroller
 
     public override string GeneratePulseRead(int pin, PulseMode mode, int timeout)
     {
-        return $"puseIn({pin},{mode},{timeout})";
+        return $"pulseIn({pin},{mode},{timeout})";
     }
 
     public override int GetFirstAnalogPin()
@@ -29,22 +29,12 @@ public class Pico : Microcontroller
     public override string GenerateDigitalRead(int pin, bool pullUp)
     {
         // Invert on pullup
-        if (pullUp)
-        {
-            return $"(sio_hw->gpio_in & (1 << {pin})) == 0";
-        }
-
-        return $"sio_hw->gpio_in & (1 << {pin})";
+        return pullUp ? $"(sio_hw->gpio_in & (1 << {pin})) == 0" : $"sio_hw->gpio_in & (1 << {pin})";
     }
 
     public override string GenerateDigitalWrite(int pin, bool val)
     {
-        if (val)
-        {
-            return $"sio_hw->gpio_out = {1 << pin}";
-        }
-
-        return $"sio_hw->gpio_clr = {1 << pin}";
+        return val ? $"sio_hw->gpio_set = {1 << pin}" : $"sio_hw->gpio_clr = {1 << pin}";
     }
 
     public static readonly Dictionary<int, SpiPinType> SpiTypesByPin = new()

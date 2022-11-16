@@ -74,9 +74,10 @@ public class GhWtTapInput : InputWithPin
 
     public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        RawValue = ghWtRaw;
+        if (!ghWtRaw.Any()) return;
+        RawValue = BitConverter.ToInt32(ghWtRaw);
     }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings)

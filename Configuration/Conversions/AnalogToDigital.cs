@@ -101,7 +101,7 @@ public class AnalogToDigital : Input
 
     public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
         Child.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType, wiiControllerType);
     }

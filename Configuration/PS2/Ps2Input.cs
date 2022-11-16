@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DynamicData.Kernel;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
@@ -14,6 +15,8 @@ public class Ps2Input : SpiInput
     public static readonly bool Ps2SpiCpol = true;
     public static readonly bool Ps2SpiCpha = true;
     public static readonly bool Ps2SpiMsbFirst = false;
+    public static readonly string Ps2AckType = "ps2_ack";
+    public static readonly string Ps2AttType = "ps2_att";
     public int Ack { get; }
     public int Att { get; }
     public Ps2InputType Input { get; }
@@ -183,8 +186,12 @@ public class Ps2Input : SpiInput
         Ps2SpiCpha, Ps2SpiMsbFirst, miso, mosi, sck)
     {
         Input = input;
-        Ack = ack ?? microcontroller.SupportedAckPins()[0];
-        Att = att ?? 0;
+        Ack = microcontroller.PinConfigs.Where(s => s.Type == Ps2AckType).Select(s => s.Pins.First())
+            .FirstOrDefault(ack ?? microcontroller.SupportedAckPins()[0]);
+        Att = microcontroller.PinConfigs.Where(s => s.Type == Ps2AttType).Select(s => s.Pins.First())
+            .FirstOrDefault(att ?? 0);
+        microcontroller.AssignPin(new DirectPinConfig(Ps2AckType, Ack, DevicePinMode.Floating));
+        microcontroller.AssignPin(new DirectPinConfig(Ps2AttType, Att, DevicePinMode.Output));
     }
 
     public override string Generate()
@@ -233,69 +240,107 @@ public class Ps2Input : SpiInput
 
     public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Data,
         byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        if (!ps2ControllerType.Any()) return;
+        if (!ps2ControllerType.Any() || !ps2Data.Any()) return;
         var type = ps2ControllerType[0];
         if (!Enum.IsDefined(typeof(Ps2ControllerType), type)) return;
+        var realType = (Ps2ControllerType)type;
+        var types = new List<Ps2ControllerType>();
+        if (AxisToType.ContainsKey(Input))
+        {
+            types.Add(AxisToType[Input]);
+        }
+        else if (Dualshock2Order.Contains(Input))
+        {
+            types.Add(Ps2ControllerType.Dualshock2);
+        }
+        else if (DigitalButtons.Contains(Input))
+        {
+            types.Add(Ps2ControllerType.Digital);
+            types.Add(Ps2ControllerType.Dualshock);
+            types.Add(Ps2ControllerType.Dualshock2);
+            types.Add(Ps2ControllerType.FlightStick);
+        }
+
+        if (GuitarButtons.Contains(Input))
+        {
+            types.Add(Ps2ControllerType.Guitar);
+        }
+
+        if (Dualshock.Contains(Input))
+        {
+            types.Add(Ps2ControllerType.Dualshock);
+            types.Add(Ps2ControllerType.FlightStick);
+        }
+
+        var mouse = realType == Ps2ControllerType.Mouse;
+        var guitar = realType == Ps2ControllerType.Guitar;
+        var basicAxis = realType is Ps2ControllerType.Dualshock or Ps2ControllerType.Dualshock2
+            or Ps2ControllerType.FlightStick;
+        var digital = realType is Ps2ControllerType.Dualshock or Ps2ControllerType.Dualshock2
+            or Ps2ControllerType.FlightStick or Ps2ControllerType.Digital;
+        var negcon = realType is Ps2ControllerType.NegCon;
+        var jogcon = realType is Ps2ControllerType.JogCon;
+        var guncon = realType is Ps2ControllerType.GunCon;
+        var ds2 = realType is Ps2ControllerType.Dualshock2;
         RawValue = Input switch
         {
-            Ps2InputType.LeftX => (ps2Data[7] - 128) << 8,
-            Ps2InputType.LeftY => -(ps2Data[8] - 127) << 8,
-            Ps2InputType.MouseX => (ps2Data[5] - 128) << 8,
-            Ps2InputType.MouseY => -(ps2Data[6] - 127) << 8,
-            Ps2InputType.RightX => (ps2Data[5] - 128) << 8,
-            Ps2InputType.RightY => -(ps2Data[6] - 127) << 8,
-            Ps2InputType.NegConTwist => (ps2Data[5] - 128) << 8,
-            Ps2InputType.NegConI => ps2Data[6],
-            Ps2InputType.NegConIi => ps2Data[7],
-            Ps2InputType.NegConL => ps2Data[8],
-            Ps2InputType.NegConR => (~ps2Data[4]) & (1 << 3),
-            Ps2InputType.NegConA => (~ps2Data[4]) & (1 << 5),
-            Ps2InputType.NegConB => (~ps2Data[4]) & (1 << 4),
-            Ps2InputType.GunconHSync => (ps2Data[6] << 8) | ps2Data[5],
-            Ps2InputType.GunconVSync => (ps2Data[8] << 8) | ps2Data[7],
-            Ps2InputType.JogConWheel => (ps2Data[6] << 8) | ps2Data[5],
-            Ps2InputType.GuitarWhammy => -(ps2Data[8] - 127) << 9,
-            //TODO: we will need to configure reading all bytes for this to work right
-            // Ps2InputType.Dualshock2RightButton => ps2Data[generated],
-            // Ps2InputType.Dualshock2LeftButton => ps2Data[generated],
-            // Ps2InputType.Dualshock2UpButton => ps2Data[generated],
-            // Ps2InputType.Dualshock2DownButton => ps2Data[generated],
-            // Ps2InputType.Dualshock2Triangle => ps2Data[generated],
-            // Ps2InputType.Dualshock2Circle => ps2Data[generated],
-            // Ps2InputType.Dualshock2Cross => ps2Data[generated],
-            // Ps2InputType.Dualshock2Square => ps2Data[generated],
-            // Ps2InputType.Dualshock2L1 => ps2Data[generated],
-            // Ps2InputType.Dualshock2R1 => ps2Data[generated],
-            // Ps2InputType.Dualshock2L2 => ps2Data[generated],
-            // Ps2InputType.Dualshock2R2 => ps2Data[generated],
-            Ps2InputType.GuitarGreen => (~ps2Data[4]) & (1 << 1),
-            Ps2InputType.GuitarRed => (~ps2Data[4]) & (1 << 5),
-            Ps2InputType.GuitarYellow => (~ps2Data[4]) & (1 << 4),
-            Ps2InputType.GuitarBlue => (~ps2Data[4]) & (1 << 6),
-            Ps2InputType.GuitarOrange => (~ps2Data[4]) & (1 << 7),
-            Ps2InputType.GuitarSelect => (~ps2Data[3]) & (1 << 0),
-            Ps2InputType.GuitarStart => (~ps2Data[3]) & (1 << 3),
+            Ps2InputType.MouseX when mouse => (ps2Data[5] - 128) << 8,
+            Ps2InputType.MouseY when mouse => -(ps2Data[6] - 127) << 8,
+            Ps2InputType.LeftX when basicAxis => (ps2Data[7] - 128) << 8,
+            Ps2InputType.LeftY when basicAxis => -(ps2Data[8] - 127) << 8,
+            Ps2InputType.RightX when basicAxis => (ps2Data[5] - 128) << 8,
+            Ps2InputType.RightY when basicAxis => -(ps2Data[6] - 127) << 8,
+            Ps2InputType.NegConTwist when negcon => (ps2Data[5] - 128) << 8,
+            Ps2InputType.NegConI when negcon => ps2Data[6],
+            Ps2InputType.NegConIi when negcon => ps2Data[7],
+            Ps2InputType.NegConL when negcon => ps2Data[8],
+            Ps2InputType.NegConR when negcon => (~ps2Data[4]) & (1 << 3),
+            Ps2InputType.NegConA when negcon => (~ps2Data[4]) & (1 << 5),
+            Ps2InputType.NegConB when negcon => (~ps2Data[4]) & (1 << 4),
+            Ps2InputType.GunconHSync when guncon => (ps2Data[6] << 8) | ps2Data[5],
+            Ps2InputType.GunconVSync when guncon => (ps2Data[8] << 8) | ps2Data[7],
+            Ps2InputType.JogConWheel when jogcon => (ps2Data[6] << 8) | ps2Data[5],
+            Ps2InputType.GuitarWhammy when guitar => -(ps2Data[8] - 127) << 9,
+            Ps2InputType.Dualshock2RightButton when ds2 => ps2Data[9],
+            Ps2InputType.Dualshock2LeftButton when ds2 => ps2Data[10],
+            Ps2InputType.Dualshock2UpButton when ds2 => ps2Data[11],
+            Ps2InputType.Dualshock2DownButton when ds2 => ps2Data[12],
+            Ps2InputType.Dualshock2Triangle when ds2 => ps2Data[13],
+            Ps2InputType.Dualshock2Circle when ds2 => ps2Data[14],
+            Ps2InputType.Dualshock2Cross when ds2 => ps2Data[15],
+            Ps2InputType.Dualshock2Square when ds2 => ps2Data[16],
+            Ps2InputType.Dualshock2L1 when ds2 => ps2Data[17],
+            Ps2InputType.Dualshock2R1 when ds2 => ps2Data[18],
+            Ps2InputType.Dualshock2L2 when ds2 => ps2Data[19],
+            Ps2InputType.Dualshock2R2 when ds2 => ps2Data[20],
+            Ps2InputType.GuitarGreen when guitar => (~ps2Data[4]) & (1 << 1),
+            Ps2InputType.GuitarRed when guitar => (~ps2Data[4]) & (1 << 5),
+            Ps2InputType.GuitarYellow when guitar => (~ps2Data[4]) & (1 << 4),
+            Ps2InputType.GuitarBlue when guitar => (~ps2Data[4]) & (1 << 6),
+            Ps2InputType.GuitarOrange when guitar => (~ps2Data[4]) & (1 << 7),
+            Ps2InputType.GuitarSelect when guitar => (~ps2Data[3]) & (1 << 0),
+            Ps2InputType.GuitarStart when guitar => (~ps2Data[3]) & (1 << 3),
+            Ps2InputType.GuitarStrumUp when guitar => (~ps2Data[3]) & (1 << 4),
+            Ps2InputType.GuitarStrumDown when guitar => (~ps2Data[3]) & (1 << 6),
             Ps2InputType.NegConStart => (~ps2Data[3]) & (1 << 3),
-            Ps2InputType.L3 => (~ps2Data[3]) & (1 << 1),
-            Ps2InputType.R3 => (~ps2Data[3]) & (1 << 2),
-            Ps2InputType.Start => (~ps2Data[3]) & (1 << 3),
-            Ps2InputType.GuitarStrumUp => (~ps2Data[3]) & (1 << 4),
-            Ps2InputType.GuitarStrumDown => (~ps2Data[3]) & (1 << 6),
-            Ps2InputType.Select => (~ps2Data[3]) & (1 << 0),
-            Ps2InputType.Up => (~ps2Data[3]) & (1 << 4),
-            Ps2InputType.Right => (~ps2Data[3]) & (1 << 5),
-            Ps2InputType.Down => (~ps2Data[3]) & (1 << 6),
-            Ps2InputType.Left => (~ps2Data[3]) & (1 << 7),
-            Ps2InputType.L2 => (~ps2Data[4]) & (1 << 0),
-            Ps2InputType.R2 => (~ps2Data[4]) & (1 << 1),
-            Ps2InputType.L1 => (~ps2Data[4]) & (1 << 2),
-            Ps2InputType.R1 => (~ps2Data[4]) & (1 << 3),
-            Ps2InputType.Triangle => (~ps2Data[4]) & (1 << 4),
-            Ps2InputType.Circle => (~ps2Data[4]) & (1 << 5),
-            Ps2InputType.Cross => (~ps2Data[4]) & (1 << 6),
-            Ps2InputType.Square => (~ps2Data[4]) & (1 << 7),
+            Ps2InputType.L3 when digital => (~ps2Data[3]) & (1 << 1),
+            Ps2InputType.R3 when digital => (~ps2Data[3]) & (1 << 2),
+            Ps2InputType.Start when digital => (~ps2Data[3]) & (1 << 3),
+            Ps2InputType.Select when digital => (~ps2Data[3]) & (1 << 0),
+            Ps2InputType.Up when digital => (~ps2Data[3]) & (1 << 4),
+            Ps2InputType.Right when digital => (~ps2Data[3]) & (1 << 5),
+            Ps2InputType.Down when digital => (~ps2Data[3]) & (1 << 6),
+            Ps2InputType.Left when digital => (~ps2Data[3]) & (1 << 7),
+            Ps2InputType.L2 when digital => (~ps2Data[4]) & (1 << 0),
+            Ps2InputType.R2 when digital => (~ps2Data[4]) & (1 << 1),
+            Ps2InputType.L1 when digital => (~ps2Data[4]) & (1 << 2),
+            Ps2InputType.R1 when digital => (~ps2Data[4]) & (1 << 3),
+            Ps2InputType.Triangle when digital => (~ps2Data[4]) & (1 << 4),
+            Ps2InputType.Circle when digital => (~ps2Data[4]) & (1 << 5),
+            Ps2InputType.Cross when digital => (~ps2Data[4]) & (1 << 6),
+            Ps2InputType.Square when digital => (~ps2Data[4]) & (1 << 7),
             _ => RawValue
         };
     }

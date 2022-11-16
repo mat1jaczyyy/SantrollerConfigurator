@@ -82,44 +82,46 @@ public class Santroller : ConfigurableUsbDevice
     {
         while (Device.IsOpen)
         {
-            var direct = model.Bindings.Where(s => s.Input != null).Select(s => s.Input!.InnermostInput())
-                .OfType<DirectInput>().ToList();
-            var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins);
-            var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins);
-            var ports = model.MicroController!.GetPortsForTicking(digital);
-            foreach (var (port, mask) in ports)
+            try
             {
-                var wValue = (ushort) (port | (mask << 8));
-                var pins = ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte))[0];
-                model.MicroController!.PinsFromPortMask(port, mask, pins, _digitalRaw);
-            }
+                var direct = model.Bindings.Where(s => s.Input != null).Select(s => s.Input!.InnermostInput())
+                    .OfType<DirectInput>().ToList();
+                var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins);
+                var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins);
+                var ports = model.MicroController!.GetPortsForTicking(digital);
+                foreach (var (port, mask) in ports)
+                {
+                    var wValue = (ushort) (port | (mask << 8));
+                    var pins = ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte))[0];
+                    model.MicroController!.PinsFromPortMask(port, mask, pins, _digitalRaw);
+                }
 
-            foreach (var devicePin in analog)
-            {
-                var mask = model.MicroController!.GetAnalogMask(devicePin);
-                var wValue = (ushort) (devicePin.Pin | (mask << 8));
-                var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
-                    sizeof(ushort)));
-                _analogRaw[devicePin.Pin] = val;
-            }
+                foreach (var devicePin in analog)
+                {
+                    var mask = model.MicroController!.GetAnalogMask(devicePin);
+                    var wValue = (ushort) (devicePin.Pin | (mask << 8));
+                    var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
+                        sizeof(ushort)));
+                    _analogRaw[devicePin.Pin] = val;
+                }
 
-            var ps2Raw = ReadData(0, (byte) Commands.CommandReadPs2, 32);
-            var wiiRaw = ReadData(0, (byte) Commands.CommandReadWii, 8);
-            var djLeftRaw = ReadData(0, (byte) Commands.CommandReadDjLeft, 3);
-            var djRightRaw = ReadData(0, (byte) Commands.CommandReadDjRight, 3);
-            var gh5Raw = ReadData(0, (byte) Commands.CommandReadGh5, 2);
-            var ghWtRawRaw = ReadData(0, (byte) Commands.CommandReadGhWt, sizeof(int));
-            var ps2ControllerType = ReadData(0, (byte) Commands.CommandGetExtensionPs2, 1);
-            var wiiControllerType = ReadData(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
-            var ghWtRaw = 0;
-            if (ghWtRawRaw.Any())
-            {
-                ghWtRaw = BitConverter.ToInt32(ghWtRawRaw);
-            }
-            foreach (var output in model.Bindings)
-            {
-               output.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+                var ps2Raw = ReadData(0, (byte) Commands.CommandReadPs2, 9);
+                var wiiRaw = ReadData(0, (byte) Commands.CommandReadWii, 8);
+                var djLeftRaw = ReadData(0, (byte) Commands.CommandReadDjLeft, 3);
+                var djRightRaw = ReadData(0, (byte) Commands.CommandReadDjRight, 3);
+                var gh5Raw = ReadData(0, (byte) Commands.CommandReadGh5, 2);
+                var ghWtRaw = ReadData(0, (byte) Commands.CommandReadGhWt, sizeof(int));
+                var ps2ControllerType = ReadData(0, (byte) Commands.CommandGetExtensionPs2, 1);
+                var wiiControllerType = ReadData(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
+                foreach (var output in model.Bindings)
+                {
+                    output.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                         ghWtRaw, ps2ControllerType, wiiControllerType);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
 
             await Task.Delay(TimeSpan.FromMilliseconds(50));

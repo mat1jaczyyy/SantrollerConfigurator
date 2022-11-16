@@ -142,11 +142,11 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, int ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
         base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType,
             wiiControllerType);
-        if (!wiiControllerType.Any()) return;
+        if (!ps2ControllerType.Any()) return;
         var type = ps2ControllerType[0];
         if (!Enum.IsDefined(typeof(Ps2ControllerType), type)) return;
         var newType = (Ps2ControllerType)type;
