@@ -43,6 +43,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {Ps2InputType.NegConR, StandardButtonType.Rb},
         {Ps2InputType.NegConA, StandardButtonType.B},
         {Ps2InputType.NegConB, StandardButtonType.Y},
+        {Ps2InputType.NegConStart, StandardButtonType.Start},
     };
 
     public static readonly Dictionary<Ps2InputType, StandardAxisType> Axis = new()
@@ -64,8 +65,20 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     };
 
 
-    public int Ack { get; set; }
-    public int Att { get; set; }
+    private readonly DirectPinConfig _ackConfig;
+    private readonly DirectPinConfig _attConfig;
+
+    public int Ack
+    {
+        get => _ackConfig.Pin;
+        set => _ackConfig.Pin = value;
+    }
+
+    public int Att
+    {
+        get => _attConfig.Pin;
+        set => _attConfig.Pin = value;
+    }
 
     private readonly Microcontroller _microcontroller;
 
@@ -77,8 +90,11 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         Ps2Input.Ps2SpiFreq, Ps2Input.Ps2SpiCpol, Ps2Input.Ps2SpiCpha, Ps2Input.Ps2SpiMsbFirst, "PS2", miso, mosi, sck)
     {
         _microcontroller = microcontroller;
-        Att = att ?? 0;
-        Ack = ack ?? 0;
+        _ackConfig = microcontroller
+            .GetOrSetPin(Ps2Input.Ps2AckType, ack ?? microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);
+        _attConfig = microcontroller.GetOrSetPin(Ps2Input.Ps2AttType, att ?? 0, DevicePinMode.Output);
+        this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
+        this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         if (outputs != null)
         {
             _outputs = new AvaloniaList<Output>(outputs);
@@ -102,25 +118,25 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                 pair.Value));
         }
 
+        _outputs.Add(new ControllerButton(Model,
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+                AnalogToDigitalType.Trigger, 128),
+            Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.A));
+        _outputs.Add(new ControllerButton(Model,
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+                AnalogToDigitalType.Trigger, 128),
+            Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.X));
+        _outputs.Add(new ControllerButton(Model,
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+                AnalogToDigitalType.Trigger, 240),
+            Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Lb));
+
         foreach (var pair in Axis)
         {
             _outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
                 Colors.Transparent, null, 1, 0, 0, pair.Value));
         }
-
-        _outputs.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
-                AnalogToDigitalType.Trigger, 128),
-            Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
-        _outputs.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
-                AnalogToDigitalType.Trigger, 128),
-            Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
-        _outputs.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
-                AnalogToDigitalType.Trigger, 240),
-            Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
     }
 
     public override SerializedOutput Serialize()

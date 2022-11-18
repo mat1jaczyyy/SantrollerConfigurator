@@ -26,6 +26,8 @@ namespace GuitarConfiguratorSharp.NetCore.Views
                 disposables(ViewModel!.ShowUnoShortDialog.RegisterHandler(DoShowUnoDialogAsync));
                 disposables(Observable.StartAsync(() => ViewModel!.Main.SelectedDevice!.LoadConfiguration(ViewModel))
                     .Subscribe());
+                disposables(
+                    ViewModel!.WhenAnyValue(x => x.Main.SelectedDevice!).OfType<Santroller>().ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => s.StartTicking(ViewModel)));
             });
             AvaloniaXamlLoader.Load(this);
         }

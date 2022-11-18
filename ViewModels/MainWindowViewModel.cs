@@ -323,9 +323,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             if (_disconnectedDevice == null) return;
             if (!_disconnectedDevice.DeviceAdded(device)) return;
             if (device is not ConfigurableUsbDevice) return;
-            _selectedDevice = device;
+            SelectedDevice = device;
             _disconnectedDevice = null;
-
             Message = "Writing - Done";
             Progress = 100;
         }

@@ -8,7 +8,14 @@ public class DirectPinConfig : PinConfig
     public override string Type { get; }
     public override string Definition => "";
     public DevicePinMode PinMode { get; }
-    public int Pin { get; }
+    private int _pin;
+
+    public int Pin
+    {
+        get => _pin;
+        set => this.RaiseAndSetIfChanged(ref _pin, value);
+    }
+
 
     public override string Generate()
     {
@@ -21,5 +28,6 @@ public class DirectPinConfig : PinConfig
         PinMode = pinMode;
         Pin = pin;
     }
+
     public override IEnumerable<int> Pins => new List<int> {Pin};
 }

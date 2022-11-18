@@ -105,8 +105,8 @@
                     <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Sck}"
                               Items="{Binding AvailableSckPins}">
                     </ComboBox>
-                    <NumericUpDown IsVisible="{Binding !Combined}" Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
-                    <NumericUpDown IsVisible="{Binding !Combined}" Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown FormatString="{}{0:#,0}" IsVisible="{Binding !Combined}" Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown FormatString="{}{0:#,0}" IsVisible="{Binding !Combined}" Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type wii:WiiInput}">
@@ -135,7 +135,7 @@
                         CommandParameter="{Binding}">
                         Change Pin
                     </Button>
-                    <NumericUpDown Value="{Binding Pin}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Pin}" VerticalAlignment="Center"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputAxis}">
@@ -297,8 +297,14 @@
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sck}"
                               Items="{Binding AvailableSckPins}">
                     </ComboBox>
-                    <NumericUpDown Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
-                    <NumericUpDown Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
+                    
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset bindings
+                    </Button>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">

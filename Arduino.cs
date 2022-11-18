@@ -119,7 +119,6 @@ public class Arduino : IConfigurableDevice
     public bool DeviceAdded(IConfigurableDevice device)
     {
 
-        Console.WriteLine(device);
         switch (device)
         {
             case Dfu when !Is32U4():

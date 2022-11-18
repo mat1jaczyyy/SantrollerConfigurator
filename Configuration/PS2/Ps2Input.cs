@@ -6,6 +6,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 
@@ -18,8 +19,21 @@ public class Ps2Input : SpiInput
     public static readonly bool Ps2SpiMsbFirst = false;
     public static readonly string Ps2AckType = "ps2_ack";
     public static readonly string Ps2AttType = "ps2_att";
-    public int Ack { get; set; }
-    public int Att { get; set;}
+    private readonly DirectPinConfig _ackConfig;
+    private readonly DirectPinConfig _attConfig;
+
+    public int Ack
+    {
+        get => _ackConfig.Pin;
+        set => _ackConfig.Pin = value;
+    }
+
+    public int Att
+    {
+        get => _attConfig.Pin;
+        set => _attConfig.Pin = value;
+    }
+
     public Ps2InputType Input { get; }
 
     public static readonly List<Ps2InputType> Dualshock2Order = new()
@@ -41,7 +55,7 @@ public class Ps2Input : SpiInput
         Ps2InputType.Dualshock2L2,
         Ps2InputType.Dualshock2R2,
     };
-    
+
     public static readonly List<Ps2InputType> Dualshock2AnalogButtons = new()
     {
         Ps2InputType.Dualshock2RightButton,
@@ -201,19 +215,17 @@ public class Ps2Input : SpiInput
     public bool Combined { get; }
 
     public Ps2Input(Ps2InputType input, Microcontroller microcontroller, int? miso = null, int? mosi = null,
-        int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(microcontroller, Ps2SpiType, Ps2SpiFreq, Ps2SpiCpol,
+        int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(microcontroller, Ps2SpiType,
+        Ps2SpiFreq, Ps2SpiCpol,
         Ps2SpiCpha, Ps2SpiMsbFirst, miso, mosi, sck)
     {
         Combined = combined;
         Input = input;
-        Ack = microcontroller.GetOrSetPin(Ps2AckType, ack ?? microcontroller.SupportedAckPins()[0], DevicePinMode.Floating).Pin;
-        Att = microcontroller.GetOrSetPin(Ps2AttType, att ?? 0, DevicePinMode.Output).Pin;
-        microcontroller.PinConfigs.CollectionChanged +=
-            (_, _) =>
-            {
-                Ack = microcontroller.PinConfigs.Where(s => s.Type == Ps2AckType).Select(s => s.Pins.First()).First();
-                Att = microcontroller.PinConfigs.Where(s => s.Type == Ps2AttType).Select(s => s.Pins.First()).First();
-            };
+        _ackConfig = microcontroller
+            .GetOrSetPin(Ps2AckType, ack ?? microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);
+        _attConfig = microcontroller.GetOrSetPin(Ps2AttType, att ?? 0, DevicePinMode.Output);
+        this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
+        this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
     }
 
     public override string Generate()
@@ -275,7 +287,7 @@ public class Ps2Input : SpiInput
         if (!ps2ControllerType.Any() || !ps2Data.Any()) return;
         var type = ps2ControllerType[0];
         if (!Enum.IsDefined(typeof(Ps2ControllerType), type)) return;
-        var realType = (Ps2ControllerType)type;
+        var realType = (Ps2ControllerType) type;
         var mouse = realType == Ps2ControllerType.Mouse;
         var guitar = realType == Ps2ControllerType.Guitar;
         var basicAxis = realType is Ps2ControllerType.Dualshock or Ps2ControllerType.Dualshock2
@@ -286,16 +298,19 @@ public class Ps2Input : SpiInput
         var jogcon = realType is Ps2ControllerType.JogCon;
         var guncon = realType is Ps2ControllerType.GunCon;
         var ds2 = realType is Ps2ControllerType.Dualshock2;
-        var inputs = modelBindings.SelectMany(s => s.Outputs).Select(s => s.Input).OfType<Ps2Input>().Select(s => s.Input).ToHashSet();
-        var ds2Indices = new Dictionary<Ps2InputType, int>();
-        var i = 0;
-        foreach (var binding in Dualshock2Order)
+        if (ds2 && Dualshock2Order.Contains(Input))
         {
-            if (inputs.Contains(binding))
+            var inputs = modelBindings.SelectMany(s => s.Outputs).Select(s => s.Input).OfType<Ps2Input>()
+                .Select(s => s.Input).ToHashSet();
+            var i = Dualshock2Order.Intersect(inputs).Select((s, idx) => (s, idx))
+                .FirstOrOptional(s => s.s == Input);
+            if (i.HasValue)
             {
-                ds2Indices[binding] = i++;
+                RawValue = ps2Data[i.Value.idx] << 8;
+                return;
             }
         }
+
         RawValue = Input switch
         {
             Ps2InputType.MouseX when mouse => (ps2Data[5] - 128) << 8,
@@ -315,18 +330,6 @@ public class Ps2Input : SpiInput
             Ps2InputType.GunconVSync when guncon => (ps2Data[8] << 8) | ps2Data[7],
             Ps2InputType.JogConWheel when jogcon => (ps2Data[6] << 8) | ps2Data[5],
             Ps2InputType.GuitarWhammy when guitar => -(ps2Data[8] - 127) << 9,
-            Ps2InputType.Dualshock2RightButton when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2LeftButton when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2UpButton when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2DownButton when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2Triangle when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2Circle when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2Cross when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2Square when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2L1 when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2R1 when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2L2 when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
-            Ps2InputType.Dualshock2R2 when ds2 && ds2Indices.ContainsKey(Input) => ps2Data[ds2Indices[Input]] << 8,
             Ps2InputType.GuitarGreen when guitar => (~ps2Data[4]) & (1 << 1),
             Ps2InputType.GuitarRed when guitar => (~ps2Data[4]) & (1 << 5),
             Ps2InputType.GuitarYellow when guitar => (~ps2Data[4]) & (1 << 4),
