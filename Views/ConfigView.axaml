@@ -71,13 +71,13 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="GH WT Tap Input: "></TextBlock>
                     <TextBlock Text="{Binding Input}"></TextBlock>
-                    <Button IsVisible="{Binding !Combined}" 
+                    <Button IsVisible="{Binding !Combined}"
                             x:CompileBindings="False"
                             Command="{Binding $parent[UserControl].DataContext.ShowPinSelectDialogCommand}"
                             CommandParameter="{Binding}">
                         Change Pin
                     </Button>
-                    <NumericUpDown IsVisible="{Binding !Combined}"  Value="{Binding Pin}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown IsVisible="{Binding !Combined}" Value="{Binding Pin}" VerticalAlignment="Center"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type dj:DjInput}">
@@ -96,17 +96,21 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="PS2 Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
                               Items="{Binding AvailableMosiPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Miso}"
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Miso}"
                               Items="{Binding AvailableMisoPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Sck}"
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Sck}"
                               Items="{Binding AvailableSckPins}">
                     </ComboBox>
-                    <NumericUpDown FormatString="{}{0:#,0}" IsVisible="{Binding !Combined}" Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
-                    <NumericUpDown FormatString="{}{0:#,0}" IsVisible="{Binding !Combined}" Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown FormatString="{}{0:#,0}" IsVisible="{Binding !Combined}" Value="{Binding Ack}"
+                                   VerticalAlignment="Center">
+                    </NumericUpDown>
+                    <NumericUpDown FormatString="{}{0:#,0}" IsVisible="{Binding !Combined}" Value="{Binding Att}"
+                                   VerticalAlignment="Center">
+                    </NumericUpDown>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type wii:WiiInput}">
@@ -258,9 +262,15 @@
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}">
                     </ComboBox>
-                    
+
                     <CheckBox IsChecked="{Binding DetectedLeft}" IsEnabled="False">Left Turntable Found</CheckBox>
                     <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False">Right Turntable Found</CheckBox>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset bindings
+                    </Button>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
@@ -273,18 +283,43 @@
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}">
                     </ComboBox>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding AddTapBarFrets}">
+                        Map Tap Bar to Frets
+                    </Button>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset bindings
+                    </Button>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GHWT TapBar Input"></Label>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding AddTapBarFrets}">
+                        Map Tap Bar to Frets
+                    </Button>
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset bindings
+                    </Button>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="PS2 Controller Input"></Label>
-                    
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="Detected Controller Type"></Label>
+
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                           Content="Detected Controller Type">
+                    </Label>
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                Text="{Binding DetectedType}">
                     </TextBlock>
@@ -299,7 +334,7 @@
                     </ComboBox>
                     <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Ack}" VerticalAlignment="Center"></NumericUpDown>
                     <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Att}" VerticalAlignment="Center"></NumericUpDown>
-                    
+
                     <Button
                         x:CompileBindings="False"
                         Command="{Binding CreateDefaults}">
@@ -310,8 +345,10 @@
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="Wii Controller Input"></Label>
-                    
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="Detected Controller Type"></Label>
+
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                           Content="Detected Controller Type">
+                    </Label>
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                Text="{Binding DetectedType}">
                     </TextBlock>
@@ -321,6 +358,22 @@
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}">
                     </ComboBox>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding AddTapBarFrets}">
+                        Map Tap Bar to Frets
+                    </Button>
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding AddNunchukAcceleration}">
+                        Map Nunchuk to Left Joystick
+                    </Button>
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset bindings
+                    </Button>
                 </StackPanel>
             </DataTemplate>
         </netCore:OutputTemplateSelector>
