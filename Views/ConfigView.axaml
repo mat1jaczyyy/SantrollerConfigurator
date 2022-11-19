@@ -402,8 +402,8 @@
                     <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
                 </ExperimentalAcrylicBorder.Material>
                 <ScrollViewer VerticalContentAlignment="Center">
-                    <ItemsRepeater Items="{Binding Bindings}">
-                        <ItemsRepeater.ItemTemplate>
+                    <ItemsControl Items="{Binding Bindings}">
+                        <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="output:Output">
                                 <StackPanel Background="Black">
                                     <WrapPanel Margin="20 20 20 0">
@@ -468,8 +468,8 @@
                                         </Button>
                                     </WrapPanel>
                                     <Expander IsVisible="{Binding IsCombined}" HorizontalAlignment="Stretch">
-                                        <ItemsRepeater Items="{Binding Outputs}">
-                                            <ItemsRepeater.ItemTemplate>
+                                        <ItemsControl Items="{Binding Outputs}">
+                                            <ItemsControl.ItemTemplate>
                                                 <DataTemplate DataType="output:Output">
                                                     <WrapPanel Margin="20 20 20 0">
                                                         <Image ToolTip.Tip="{Binding LocalisedName}"
@@ -503,13 +503,13 @@
                                                         </Button>
                                                     </WrapPanel>
                                                 </DataTemplate>
-                                            </ItemsRepeater.ItemTemplate>
-                                        </ItemsRepeater>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </Expander>
                                 </StackPanel>
                             </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </ScrollViewer>
             </ExperimentalAcrylicBorder>
         </DockPanel>
