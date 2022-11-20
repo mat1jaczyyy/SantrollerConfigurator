@@ -27,6 +27,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.ClassicZr, StandardButtonType.Rb},
         {WiiInputType.ClassicMinus, StandardButtonType.Select},
         {WiiInputType.ClassicPlus, StandardButtonType.Start},
+        {WiiInputType.ClassicHome, StandardButtonType.Home},
         {WiiInputType.ClassicDPadDown, StandardButtonType.Down},
         {WiiInputType.ClassicDPadUp, StandardButtonType.Up},
         {WiiInputType.ClassicDPadLeft, StandardButtonType.Left},

@@ -127,6 +127,13 @@ public abstract class Output : ReactiveObject, IDisposable
         set => this.RaiseAndSetIfChanged(ref _ledOff, value);
     }
 
+    private readonly ObservableAsPropertyHelper<double> _imageOpacity;
+
+    public double ImageOpacity => _imageOpacity.Value;
+
+    private readonly ObservableAsPropertyHelper<int> _valueRaw;
+    public int ValueRaw => _valueRaw.Value;
+
     protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex, string name)
     {
         Input = input;
@@ -151,6 +158,10 @@ public abstract class Output : ReactiveObject, IDisposable
         _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType)
             .Select(x => GetLocalisedName())
             .ToProperty(this, x => x.LocalisedName);
+        _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue).ToProperty(this, x => x.ValueRaw);
+        _imageOpacity = this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
+            .Select(s => (s.Item3 || s.Item2?.IsAnalog == true) ? 1 : ((s.Item1 == 0 ? 0 : 0.35) + 0.65))
+            .ToProperty(this, s => s.ImageOpacity);
     }
 
 
@@ -232,10 +243,22 @@ public abstract class Output : ReactiveObject, IDisposable
                 Input = input;
                 break;
             case true when this is OutputButton:
-                Input = new AnalogToDigital(input, AnalogToDigitalType.JoyHigh, 0);
+                var oldThreshold = 0;
+                if (Input is AnalogToDigital atd)
+                {
+                    oldThreshold = atd.Threshold;
+                }
+
+                Input = new AnalogToDigital(input, AnalogToDigitalType.JoyHigh, oldThreshold);
                 break;
             case false when this is OutputAxis:
-                Input = new DigitalToAnalog(input, 0);
+                var oldValue = 0;
+                if (Input is DigitalToAnalog dta)
+                {
+                    oldValue = dta.Value;
+                }
+
+                Input = new DigitalToAnalog(input, oldValue);
                 break;
         }
 
@@ -274,7 +297,6 @@ public abstract class Output : ReactiveObject, IDisposable
             }
         }
 
-        if (bitmap == null) return null;
         var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
         try
         {
@@ -283,7 +305,8 @@ public abstract class Output : ReactiveObject, IDisposable
         }
         catch (FileNotFoundException)
         {
-            return null;
+            var asset = assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/None.png"));
+            return new Bitmap(asset);
         }
     }
 
@@ -315,7 +338,8 @@ public abstract class Output : ReactiveObject, IDisposable
     {
         foreach (var output in Outputs)
         {
-            output.Input?.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+            output.Input?.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+                ghWtRaw,
                 ps2ControllerType, wiiControllerType);
         }
     }

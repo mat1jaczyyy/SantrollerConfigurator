@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -10,6 +11,11 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
 public abstract class Input : ReactiveObject, IDisposable
 {
+
+    protected Input()
+    {
+        _imageOpacity = this.WhenAnyValue(x => x.RawValue).Select(s => (s == 0?0:0.25) + 0.75).ToProperty(this, s => s.ImageOpacity);
+    }
     public abstract IReadOnlyList<string> RequiredDefines();
     public abstract string Generate();
 
@@ -24,6 +30,10 @@ public abstract class Input : ReactiveObject, IDisposable
         get => _rawValue;
         set => this.RaiseAndSetIfChanged(ref _rawValue, value);
     }
+    
+    private readonly ObservableAsPropertyHelper<double> _imageOpacity;
+
+    public double ImageOpacity => _imageOpacity.Value;
 
     public virtual Input InnermostInput()
     {

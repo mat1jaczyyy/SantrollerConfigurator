@@ -50,12 +50,12 @@ public abstract class OutputAxis : Output
         _inputIsUInt = this.WhenAnyValue(x => x.Input, x => x.Trigger).Select(i =>
                 i.Item1!.InnermostInput() is DirectInput ? i.Item2 : i.Item1!.IsUint)
             .ToProperty(this, x => x.InputIsUint);
-        _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue).Select(ApplyCalibration)
-            .ToProperty(this, x => x.ValueRaw);
+        _calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue).Select(ApplyCalibration);
         _valueRawLower = this.WhenAnyValue(x => x.ValueRaw).Select(s => (s < 0 ? -s : 0))
             .ToProperty(this, x => x.ValueRawLower);
         _valueRawUpper = this.WhenAnyValue(x => x.ValueRaw).Select(s => (s > 0 ? s : 0))
             .ToProperty(this, x => x.ValueRawUpper);
+        
         _value = this
             .WhenAnyValue(x => x.ValueRaw, x => x.Multiplier, x => x.Offset, x => x.DeadZone, x => x.Trigger,
                 x => x.Model.DeviceType).Select(Calculate).ToProperty(this, x => x.Value);
@@ -215,9 +215,6 @@ public abstract class OutputAxis : Output
         return (int) val;
     }
 
-    private readonly ObservableAsPropertyHelper<int> _valueRaw;
-    public int ValueRaw => _valueRaw.Value;
-
     private readonly ObservableAsPropertyHelper<int> _valueRawLower;
     public int ValueRawLower => _valueRawLower.Value;
     private readonly ObservableAsPropertyHelper<int> _valueRawUpper;
@@ -315,6 +312,7 @@ public abstract class OutputAxis : Output
     public override bool IsCombined => false;
     public override bool IsStrum => false;
     private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.NONE;
+    private readonly IObservable<int> _calibrationWatcher;
 
     public string? CalibrationText => GetCalibrationText();
     protected abstract string MinCalibrationText();

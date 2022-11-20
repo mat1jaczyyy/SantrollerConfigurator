@@ -1,10 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reflection;
+using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using ReactiveUI;
 using static GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined.WiiCombinedOutput;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
@@ -17,6 +24,7 @@ public class WiiInput : TwiInput
 
     public WiiControllerType WiiControllerType => AxisToType[Input];
 
+    public Bitmap? Image { get; }
 
     private static readonly Dictionary<WiiInputType, WiiControllerType> AxisToType =
         new()
@@ -99,6 +107,11 @@ public class WiiInput : TwiInput
             {WiiInputType.GuitarBlue, WiiControllerType.Guitar},
             {WiiInputType.GuitarRed, WiiControllerType.Guitar},
             {WiiInputType.GuitarOrange, WiiControllerType.Guitar},
+            {WiiInputType.GuitarTapYellow, WiiControllerType.Guitar},
+            {WiiInputType.GuitarTapGreen, WiiControllerType.Guitar},
+            {WiiInputType.GuitarTapBlue, WiiControllerType.Guitar},
+            {WiiInputType.GuitarTapRed, WiiControllerType.Guitar},
+            {WiiInputType.GuitarTapOrange, WiiControllerType.Guitar},
             {WiiInputType.NunchukC, WiiControllerType.Nunchuk},
             {WiiInputType.NunchukZ, WiiControllerType.Nunchuk},
             {WiiInputType.TaTaConRightDrumRim, WiiControllerType.Taiko},
@@ -247,12 +260,14 @@ public class WiiInput : TwiInput
 
     public bool Combined { get; }
 
-    public WiiInput(WiiInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null, bool combined = false) : base(
+    public WiiInput(WiiInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null,
+        bool combined = false) : base(
         microcontroller,
         WiiTwiType, WiiTwiFreq, sda, scl)
     {
         Input = input;
         Combined = combined;
+        Image = GetImage();
     }
 
     public override InputType? InputType => Types.InputType.WiiInput;
@@ -268,6 +283,7 @@ public class WiiInput : TwiInput
         {
             return new SerializedWiiInputCombined(Input);
         }
+
         return new SerializedWiiInput(Sda, Scl, Input);
     }
 
@@ -282,7 +298,8 @@ public class WiiInput : TwiInput
 
     private int[] drumVelocity = new int[8];
 
-    enum DrumType {
+    enum DrumType
+    {
         DrumGreen,
         DrumRed,
         DrumYellow,
@@ -397,7 +414,7 @@ public class WiiInput : TwiInput
                     WiiInputType.UDrawPenClick => ((~wiiButtonsHigh) & (1 << 2)),
                     _ => RawValue
                 };
-                        
+
                 break;
             case WiiControllerType.Drawsome:
                 RawValue = Input switch
@@ -436,7 +453,8 @@ public class WiiInput : TwiInput
             case WiiControllerType.Drum:
                 var vel = (7 - (wiiData[3] >> 5)) << 5;
                 var which = (wiiData[2] & 0b01111100) >> 1;
-                switch (which) {
+                switch (which)
+                {
                     case 0x1B:
                         drumVelocity[(int) DrumType.DrumKick] = vel;
                         break;
@@ -456,6 +474,7 @@ public class WiiInput : TwiInput
                         drumVelocity[(int) DrumType.DrumOrange] = vel;
                         break;
                 }
+
                 RawValue = Input switch
                 {
                     WiiInputType.DrumPlus => ((wiiButtonsLow) & (1 << 2)),
@@ -483,18 +502,23 @@ public class WiiInput : TwiInput
                     WiiInputType.DjHeroLeftBlue => ((wiiButtonsHigh) & (1 << 7)),
                     WiiInputType.DjHeroLeftRed => ((wiiButtonsLow) & (1 << 5)),
                     WiiInputType.DjHeroLeftGreen => ((wiiButtonsHigh) & (1 << 3)),
-                    WiiInputType.DjHeroLeftAny => (((wiiButtonsHigh) & ((1 << 3)|1 << 7)) | ((wiiButtonsLow) & (1 << 5))),
+                    WiiInputType.DjHeroLeftAny => (((wiiButtonsHigh) & ((1 << 3) | 1 << 7)) |
+                                                   ((wiiButtonsLow) & (1 << 5))),
                     WiiInputType.DjHeroRightGreen => ((wiiButtonsHigh) & (1 << 5)),
                     WiiInputType.DjHeroRightRed => ((wiiButtonsLow) & (1 << 1)),
                     WiiInputType.DjHeroRightBlue => ((wiiButtonsHigh) & (1 << 2)),
-                    WiiInputType.DjHeroRightAny => (((wiiButtonsHigh) & ((1 << 5)|1 << 2)) | ((wiiButtonsLow) & (1 << 1))),
+                    WiiInputType.DjHeroRightAny => (((wiiButtonsHigh) & ((1 << 5) | 1 << 2)) |
+                                                    ((wiiButtonsLow) & (1 << 1))),
                     WiiInputType.DjHeroEuphoria => ((wiiButtonsHigh) & (1 << 4)),
                     WiiInputType.DjCrossfadeSlider => (wiiData[2] & 0x1E) >> 1,
                     WiiInputType.DjEffectDial => (wiiData[3] & 0xE0) >> 5 | (wiiData[2] & 0x60) >> 2,
                     WiiInputType.DjStickX => ((wiiData[0] & 0x3F) - 0x20) << 10,
                     WiiInputType.DjStickY => ((wiiData[1] & 0x3F) - 0x20) << 10,
-                    WiiInputType.DjTurntableLeft => (((wiiButtonsLow & 1) != 0 ? 32 : 1) + (0x1F - (wiiData[3] & 0x1F))) << 10,
-                    WiiInputType.DjTurntableRight => (((wiiData[2] & 1) != 0 ? 32 : 1) + (0x1F - ((wiiData[2] & 0x80) >> 7 | (wiiData[1] & 0xC0) >> 5 | (wiiData[0] & 0xC0) >> 3))) << 10,
+                    WiiInputType.DjTurntableLeft =>
+                        (((wiiButtonsLow & 1) != 0 ? 32 : 1) + (0x1F - (wiiData[3] & 0x1F))) << 10,
+                    WiiInputType.DjTurntableRight => (((wiiData[2] & 1) != 0 ? 32 : 1) +
+                                                      (0x1F - ((wiiData[2] & 0x80) >> 7 | (wiiData[1] & 0xC0) >> 5 |
+                                                               (wiiData[0] & 0xC0) >> 3))) << 10,
 
                     _ => RawValue
                 };
@@ -605,5 +629,20 @@ break;
                 .ToList(),
             _ => base.RequiredDefines().Concat(new[] {"INPUT_WII"}).ToList()
         };
+    }
+
+    private Bitmap? GetImage()
+    {
+        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
+        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+        try
+        {
+            var asset = assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Wii/{Input}.png"));
+            return new Bitmap(asset);
+        }
+        catch (FileNotFoundException)
+        {
+            return null;
+        }
     }
 }

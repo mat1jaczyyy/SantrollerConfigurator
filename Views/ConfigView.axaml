@@ -115,8 +115,10 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type wii:WiiInput}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="Wii Controller Input: "></TextBlock>
-                    <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
+                    <Image ToolTip.Tip="{Binding Input}"
+                           HorizontalAlignment="Center" Width="75"
+                           Source="{Binding Image}" Opacity="{Binding ImageOpacity}">
+                    </Image>
                     <ComboBox IsVisible="{Binding !Combined}"  VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}">
                     </ComboBox>
@@ -229,9 +231,7 @@
                     </Button>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type output:OutputButton}">
-                <CheckBox IsChecked="{Binding ValueRaw}"></CheckBox>
-            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputButton}"></DataTemplate>
             <DataTemplate DataType="{x:Type conversions:DigitalToAnalog}">
                 <StackPanel Orientation="Horizontal">
                     <NumericUpDown Value="{Binding Value}" VerticalAlignment="Center"></NumericUpDown>
@@ -462,7 +462,7 @@
                                     <WrapPanel Margin="20 20 20 0">
                                         <Image ToolTip.Tip="{Binding LocalisedName}"
                                                HorizontalAlignment="Center" Width="75"
-                                               Source="{Binding Image}">
+                                               Source="{Binding Image}" Opacity="{Binding ImageOpacity}">
                                         </Image>
                                         <StackPanel Orientation="Horizontal">
                                             <StackPanel.IsVisible>
@@ -522,12 +522,17 @@
                                     </WrapPanel>
                                     <Expander IsVisible="{Binding IsCombined}" HorizontalAlignment="Stretch">
                                         <ItemsControl Items="{Binding Outputs}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate DataType="output:Output">
                                                     <WrapPanel Margin="20 20 20 0">
                                                         <Image ToolTip.Tip="{Binding LocalisedName}"
                                                                HorizontalAlignment="Center" Width="75"
-                                                               Source="{Binding Image}">
+                                                               Source="{Binding Image}" Opacity="{Binding ImageOpacity}">
                                                         </Image>
                                                         <ContentControl Content="{Binding}"
                                                                         ContentTemplate="{StaticResource OutputTemplates}">
