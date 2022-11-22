@@ -27,7 +27,6 @@
     <UserControl.Resources>
         <netCore:EnumToStringConverter x:Key="EnumToStringConverter" />
         <netCore:PinToStringConverter x:Key="PinToStringConverter" />
-        <netCore:PinToColorConverter x:Key="PinToColorConverter" />
         <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
         <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
             <TextBlock x:CompileBindings="False">
@@ -39,14 +38,6 @@
                         <Binding Path="$parent[ComboBox].SelectedItem"></Binding>
                     </MultiBinding>
                 </TextBlock.Text>
-                <TextBlock.Background>
-                    <MultiBinding Converter="{StaticResource PinToColorConverter }">
-                        <Binding></Binding>
-                        <Binding Path="$parent[UserControl].DataContext.MicroController"></Binding>
-                        <Binding Path="$parent[UserControl].DataContext"></Binding>
-                        <Binding Path="$parent[ComboBox].SelectedItem"></Binding>
-                    </MultiBinding>
-                </TextBlock.Background>
             </TextBlock>
         </DataTemplate>
         <DataTemplate x:Key="ControllerEnumTemplate" DataType="system:Object">

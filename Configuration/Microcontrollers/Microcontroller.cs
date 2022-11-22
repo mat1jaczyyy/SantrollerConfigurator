@@ -26,9 +26,9 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
             var isSpi = selectedConfig.Any(s => s is SpiConfig);
             var output = string.Join(" - ", outputs.Where(o => o.GetPinConfigs().Any(s => s.Pins.Contains(possiblePin))).Select(s => s.Name));
             var ret = GetPinForMicrocontroller(possiblePin, isTwi, isSpi);
-            if (!string.IsNullOrEmpty(output))
+            if (selectedPin != possiblePin && !string.IsNullOrEmpty(output))
             {
-                return ret + " - " + output;
+                return "* " + ret + " - " + output;
             }
 
             return ret;
