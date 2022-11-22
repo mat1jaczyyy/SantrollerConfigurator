@@ -28,7 +28,7 @@ public abstract class InputWithPin : Input
         }
     }
 
-    public List<int> AvailablePins => Microcontroller.GetFreePins();
+    public List<int> AvailablePins => Microcontroller.GetAllPins();
 
     public int Pin
     {
@@ -46,5 +46,6 @@ public abstract class InputWithPin : Input
     {
         Microcontroller.UnAssignPins(PinConfig.Type);
     }
+    public override List<PinConfig> PinConfigs => new() {_pinConfig};
     
 }

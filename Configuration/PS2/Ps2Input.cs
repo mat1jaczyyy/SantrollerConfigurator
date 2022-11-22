@@ -226,6 +226,8 @@ public class Ps2Input : SpiInput
         _attConfig = microcontroller.GetOrSetPin(Ps2AttType, att ?? 0, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
+        Microcontroller.PinConfigs.CollectionChanged +=
+            (_, _) => this.RaisePropertyChanged(nameof(AvailablePins));
     }
 
     public override string Generate()
@@ -249,6 +251,7 @@ public class Ps2Input : SpiInput
     public override bool IsUint => !IntInputs.Contains(Input);
 
     public override InputType? InputType => Types.InputType.Ps2Input;
+    public List<int> AvailablePins => Microcontroller.GetAllPins();
 
     public static string GeneratePs2Pressures(List<Input> bindings)
     {
@@ -443,6 +446,7 @@ public class Ps2Input : SpiInput
     {
         new(Att, DevicePinMode.Output),
         new(Ack, DevicePinMode.Floating),
+        
     };
 
     public override IReadOnlyList<string> RequiredDefines()
@@ -460,4 +464,6 @@ public class Ps2Input : SpiInput
 
         return defines;
     }
+
+    public override List<PinConfig> PinConfigs => base.PinConfigs.Concat(new List<PinConfig>() { _ackConfig, _attConfig}).ToList();
 }

@@ -11,12 +11,12 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
 public abstract class CombinedSpiOutput : CombinedOutput
 {
-    private readonly Microcontroller _microcontroller;
+    protected readonly Microcontroller Microcontroller;
 
     protected CombinedSpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
         bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null): base(model, null, name)
     {
-        _microcontroller = microcontroller;
+        Microcontroller = microcontroller;
         SpiType = spiType;
         var config = microcontroller.GetSpiForType(SpiType);
         if (config != null)
@@ -87,27 +87,27 @@ public abstract class CombinedSpiOutput : CombinedOutput
 
     private List<int> GetMosiPins()
     {
-        return _microcontroller.SpiPins(SpiType)
+        return Microcontroller.SpiPins(SpiType)
             .Where(s => s.Value is SpiPinType.Mosi)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetMisoPins()
     {
-        return _microcontroller.SpiPins(SpiType)
+        return Microcontroller.SpiPins(SpiType)
             .Where(s => s.Value is SpiPinType.Miso)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetSckPins()
     {
-        return _microcontroller.SpiPins(SpiType)
+        return Microcontroller.SpiPins(SpiType)
             .Where(s => s.Value is SpiPinType.Sck)
             .Select(s => s.Key).ToList();
     }
     public override void Dispose()
     {
-        _microcontroller.UnAssignPins(SpiType);
+        Microcontroller.UnAssignPins(SpiType);
         base.Dispose();
     }
 }

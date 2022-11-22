@@ -263,9 +263,17 @@ public class Pico : Microcontroller
         return pin - PinA0;
     }
 
-    public override string GetPin(int pin)
+    protected override string GetPinForMicrocontroller(int pin, bool twi, bool spi)
     {
         var ret = $"GP{pin}";
+        if (twi && TwiIndexByPin.ContainsKey(pin))
+        {
+            ret += $" / TWI{TwiIndexByPin[pin]} {TwiTypeByPin[pin].ToString().ToUpper()}";
+        }
+        if (spi && SpiIndexByPin.ContainsKey(pin))
+        {
+            ret += $" / SPI{SpiIndexByPin[pin]} {SpiTypesByPin[pin].ToString().ToUpper()}";
+        }
         if (pin >= 26)
         {
             ret += $" / ADC{pin - 26}";
@@ -274,11 +282,7 @@ public class Pico : Microcontroller
         return ret;
     }
 
-    public override List<int> GetFreePins()
-    {
-        var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
-        return Enumerable.Range(0, GpioCount).Where(s => !used.Contains(s)).ToList();
-    }
+    public override List<int> GetAllPins() => Enumerable.Range(0, GpioCount).ToList();
 
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)

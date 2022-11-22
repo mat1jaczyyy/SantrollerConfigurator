@@ -218,7 +218,7 @@ public abstract class AvrController : Microcontroller
         return ret;
     }
 
-    public override string GetPin(int pin)
+    protected override string GetPinForMicrocontroller(int pin, bool spi, bool twi)
     {
         var ret = $"{pin}";
         if (pin >= PinA0)

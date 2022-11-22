@@ -327,6 +327,9 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public bool IsCombinedChild => Model.IsCombinedChild(this);
 
+    public List<PinConfig> GetPinConfigs() => Outputs
+        .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.PinConfigs ?? new()))
+        .Distinct().ToList();
     public List<DevicePin> GetPins() => Outputs
         .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.Pins ?? new()))
         .Distinct().ToList();

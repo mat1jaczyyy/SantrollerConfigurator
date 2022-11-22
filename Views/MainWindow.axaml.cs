@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -11,6 +12,9 @@ namespace GuitarConfiguratorSharp.NetCore.Views
         {
             this.WhenActivated(disposables => { });
             AvaloniaXamlLoader.Load(this);
+#if DEBUG
+            this.AttachDevTools();
+#endif
         }
     }
 }

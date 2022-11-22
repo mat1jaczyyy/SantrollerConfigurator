@@ -190,11 +190,7 @@ public class Mega : AvrController
     }
 
     public override Board Board {get;}
-    public override List<int> GetFreePins()
-    {
-        var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
-        return Enumerable.Range(0, PinIndex.Length).Where(s => !used.Contains(s)).ToList();
-    }
+    public override List<int> GetAllPins() => Enumerable.Range(0, PinIndex.Length).ToList();
 
     public Mega(Board board) {
         Board = board;

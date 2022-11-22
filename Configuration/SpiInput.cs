@@ -112,4 +112,6 @@ public abstract class SpiInput : Input
     {
         Microcontroller.UnAssignPins(_spiType);
     }
+
+    public override List<PinConfig> PinConfigs => new() {_spiConfig};
 }

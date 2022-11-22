@@ -36,6 +36,7 @@ public class DigitalToAnalog : Input
     }
 
     public override List<DevicePin> Pins => Child.Pins;
+    public override List<PinConfig> PinConfigs => Child.PinConfigs;
     public override InputType? InputType => Child.InputType;
 
     public override bool IsAnalog => Child.IsAnalog;

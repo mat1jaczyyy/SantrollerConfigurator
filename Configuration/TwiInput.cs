@@ -95,4 +95,5 @@ public abstract class TwiInput : Input
     {
         _microcontroller.UnAssignPins(_twiType);
     }
+    public override List<PinConfig> PinConfigs => new() {_twiConfig};
 }

@@ -74,5 +74,5 @@ public abstract class SpiConfig : PinConfig
             UpdatePins();
         }
     }
-    public override IEnumerable<int> Pins => new List<int> {_miso, _miso, _sck};
+    public override IEnumerable<int> Pins => new List<int> {_mosi, _miso, _sck};
 }

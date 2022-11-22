@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
@@ -18,7 +19,22 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public abstract string GenerateInit();
 
-        public abstract string GetPin(int pin);
+        public string GetPin(int possiblePin, int selectedPin, AvaloniaList<Output> outputs)
+        {
+            var selectedConfig = PinConfigs.Where(s => s.Pins.Contains(selectedPin)).ToList();
+            var isTwi = selectedConfig.Any(s => s is TwiConfig);
+            var isSpi = selectedConfig.Any(s => s is SpiConfig);
+            var output = string.Join(" - ", outputs.Where(o => o.GetPinConfigs().Any(s => s.Pins.Contains(possiblePin))).Select(s => s.Name));
+            var ret = GetPinForMicrocontroller(possiblePin, isTwi, isSpi);
+            if (!string.IsNullOrEmpty(output))
+            {
+                return ret + " - " + output;
+            }
+
+            return ret;
+        }
+
+        protected abstract string GetPinForMicrocontroller(int pin, bool twi, bool spi);
 
         public readonly AvaloniaList<PinConfig> PinConfigs = new();
         
@@ -61,7 +77,13 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
         public abstract int GetFirstAnalogPin();
         public abstract void AssignPin(PinConfig pinConfig);
 
-        public abstract List<int> GetFreePins();
+        public abstract List<int> GetAllPins();
+
+        public List<int> GetFreePins()
+        {
+            var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
+            return GetAllPins().Where(s => !used.Contains(s)).ToList();
+        }
         public abstract Dictionary<int, int> GetPortsForTicking(IEnumerable<DevicePin> digital);
         public abstract void PinsFromPortMask(int port, int mask, byte pins,
             Dictionary<int, bool> digitalRaw);

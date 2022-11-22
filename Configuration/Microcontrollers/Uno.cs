@@ -89,7 +89,7 @@ public class Uno : AvrController
         }
     }
     
-    public override List<int> GetFreePins()
+    public override List<int> GetAllPins()
     {
         var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
         return Enumerable.Range(0, PinIndex.Length).Where(s => !used.Contains(s)).ToList();
