@@ -14,7 +14,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 public class Gh5CombinedOutput : CombinedTwiOutput
 {
     private readonly Microcontroller _microcontroller;
-    
+
     private readonly AvaloniaList<Output> _outputs = new();
 
     private static readonly Dictionary<Gh5NeckInputType, StandardButtonType> Buttons = new()
@@ -56,10 +56,13 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         _outputs.Clear();
         foreach (var pair in Buttons)
         {
-            _outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller, combined:true), Colors.Green,
+            _outputs.Add(new ControllerButton(Model,
+                new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Green,
                 Colors.Transparent, null, 5, pair.Value));
         }
-        _outputs.Add(new ControllerAxis(Model, new Gh5NeckInput(Gh5NeckInputType.TapBar, _microcontroller, combined:true),
+
+        _outputs.Add(new ControllerAxis(Model,
+            new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
     }
@@ -68,7 +71,8 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     {
         foreach (var pair in Taps)
         {
-            _outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, _microcontroller, combined:true), Colors.Transparent,
+            _outputs.Add(new ControllerButton(Model,
+                new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Transparent,
                 Colors.Transparent, null, 5, pair.Value));
         }
     }
@@ -79,7 +83,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     }
 
     public override AvaloniaList<Output> Outputs => _outputs;
-    
+
     private bool _detected;
 
     public bool Detected
@@ -87,12 +91,14 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         get => _detected;
         set => this.RaiseAndSetIfChanged(ref _detected, value);
     }
+
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType,
+        base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+            ps2ControllerType,
             wiiControllerType);
         _detected = gh5Raw.Any();
     }

@@ -186,50 +186,50 @@ public abstract class Output : ReactiveObject, IDisposable
         switch (inputType)
         {
             case InputType.AnalogPinInput:
-                input = new DirectInput(lastPin, DevicePinMode.Analog, Model.MicroController!);
+                input = new DirectInput(lastPin, DevicePinMode.Analog, Model, Model.MicroController!);
                 break;
             case InputType.DigitalPinInput:
-                input = new DirectInput(lastPin, pinMode, Model.MicroController!);
+                input = new DirectInput(lastPin, pinMode, Model, Model.MicroController!);
                 break;
             case InputType.TurntableInput when Input?.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;
-                input = new DjInput(djInputType.Value, Model.MicroController!);
+                input = new DjInput(djInputType.Value, Model, Model.MicroController!);
                 break;
             case InputType.TurntableInput when Input?.InnermostInput() is DjInput dj:
                 djInputType ??= DjInputType.LeftGreen;
-                input = new DjInput(djInputType.Value, Model.MicroController!, dj.Sda, dj.Scl);
+                input = new DjInput(djInputType.Value, Model, Model.MicroController!, dj.Sda, dj.Scl);
                 break;
             case InputType.Gh5NeckInput when Input?.InnermostInput() is not Gh5NeckInput:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
-                input = new Gh5NeckInput(gh5NeckInputType.Value, Model.MicroController!);
+                input = new Gh5NeckInput(gh5NeckInputType.Value, Model, Model.MicroController!);
                 break;
             case InputType.Gh5NeckInput when Input?.InnermostInput() is Gh5NeckInput gh5:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
-                input = new Gh5NeckInput(gh5NeckInputType.Value, Model.MicroController!, gh5.Sda, gh5.Scl);
+                input = new Gh5NeckInput(gh5NeckInputType.Value, Model, Model.MicroController!, gh5.Sda, gh5.Scl);
                 break;
             case InputType.WtNeckInput when Input?.InnermostInput() is not GhWtTapInput:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                input = new GhWtTapInput(ghWtInputType.Value, Model.MicroController!);
+                input = new GhWtTapInput(ghWtInputType.Value, Model, Model.MicroController!);
                 break;
             case InputType.WtNeckInput when Input?.InnermostInput() is GhWtTapInput wt:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                input = new GhWtTapInput(ghWtInputType.Value, Model.MicroController!, wt.Pin);
+                input = new GhWtTapInput(ghWtInputType.Value, Model,  Model.MicroController!, wt.Pin);
                 break;
             case InputType.WiiInput when Input?.InnermostInput() is not WiiInput:
                 wiiInput ??= WiiInputType.ClassicA;
-                input = new WiiInput(wiiInput.Value, Model.MicroController!);
+                input = new WiiInput(wiiInput.Value, Model, Model.MicroController!);
                 break;
             case InputType.WiiInput when Input?.InnermostInput() is WiiInput wii:
                 wiiInput ??= WiiInputType.ClassicA;
-                input = new WiiInput(wiiInput.Value, Model.MicroController!, wii.Sda, wii.Scl);
+                input = new WiiInput(wiiInput.Value, Model, Model.MicroController!, wii.Sda, wii.Scl);
                 break;
             case InputType.Ps2Input when Input?.InnermostInput() is not Ps2Input:
                 ps2InputType ??= Ps2InputType.Cross;
-                input = new Ps2Input(ps2InputType.Value, Model.MicroController!);
+                input = new Ps2Input(ps2InputType.Value, Model, Model.MicroController!);
                 break;
             case InputType.Ps2Input when Input?.InnermostInput() is Ps2Input ps2:
                 ps2InputType ??= Ps2InputType.Cross;
-                input = new Ps2Input(ps2InputType.Value, Model.MicroController!, ps2.Miso, ps2.Mosi, ps2.Sck, ps2.Att,
+                input = new Ps2Input(ps2InputType.Value, Model, Model.MicroController!, ps2.Miso, ps2.Mosi, ps2.Sck, ps2.Att,
                     ps2.Ack);
                 break;
             default:
@@ -249,7 +249,7 @@ public abstract class Output : ReactiveObject, IDisposable
                     oldThreshold = atd.Threshold;
                 }
 
-                Input = new AnalogToDigital(input, AnalogToDigitalType.JoyHigh, oldThreshold);
+                Input = new AnalogToDigital(input, AnalogToDigitalType.JoyHigh, oldThreshold, Model);
                 break;
             case false when this is OutputAxis:
                 var oldValue = 0;
@@ -258,7 +258,7 @@ public abstract class Output : ReactiveObject, IDisposable
                     oldValue = dta.Value;
                 }
 
-                Input = new DigitalToAnalog(input, oldValue);
+                Input = new DigitalToAnalog(input, oldValue, Model);
                 break;
         }
 

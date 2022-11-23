@@ -5,12 +5,13 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
 public class DirectInput : InputWithPin
 {
-    public DirectInput(int pin, DevicePinMode pinMode, Microcontroller microcontroller) : base(microcontroller,
+    public DirectInput(int pin, DevicePinMode pinMode, ConfigViewModel model, Microcontroller microcontroller) : base(model, microcontroller,
         new DirectPinConfig(Guid.NewGuid().ToString(), pin, pinMode))
     {
     }
@@ -49,6 +50,7 @@ public class DirectInput : InputWithPin
 
         return ret;
     }
+
     public override string Generate()
     {
         return IsAnalog
@@ -71,12 +73,15 @@ public class DirectInput : InputWithPin
             var tuple = binding[i];
             fillPins[tuple.Item2] = GenerateAnalogRead(i);
         }
+
         return string.Join(";\n", bindings.Select(b => b.Item1.IsAnalog ? fillPins[b.Item2] : b.Item2));
     }
 
     public override void Dispose()
     {
     }
+
+    protected override string DetectionText => IsAnalog ? "Move the axis to detect" : "Press the button to detect";
 
     public override IReadOnlyList<string> RequiredDefines()
     {

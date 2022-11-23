@@ -19,11 +19,6 @@ public abstract class TwiConfig : PinConfig
         _clock = clock;
     }
 
-    public virtual string GenerateInit()
-    {
-        return "";
-    }
-
     public override string Generate()
     {
         return $@"
@@ -34,26 +29,17 @@ public abstract class TwiConfig : PinConfig
     }
 
     public override string Type => _type;
-    protected abstract void UpdatePins([CallerMemberName] string? propertyName = null);
 
     public int Sda
     {
         get => _sda;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _sda, value);
-            UpdatePins();
-        }
+        set => this.RaiseAndSetIfChanged(ref _sda, value);
     }
 
     public int Scl
     {
         get => _scl;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _scl, value);
-            UpdatePins();
-        }
+        set => this.RaiseAndSetIfChanged(ref _scl, value);
     }
 
     public override IEnumerable<int> Pins => new List<int> {_sda, _scl};

@@ -5,6 +5,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 
@@ -14,11 +15,14 @@ public class DjInput : TwiInput
     public static readonly int DjTwiFreq = 150000;
 
     public bool Combined { get; }
+    
+    public bool BindableTwi { get; }
 
-    public DjInput(DjInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null, bool combined = false) : base(
-        microcontroller, DjTwiType, DjTwiFreq, sda, scl)
+    public DjInput(DjInputType input, ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null, bool combined = false) : base(
+        microcontroller, DjTwiType, DjTwiFreq, sda, scl, model)
     {
         Combined = combined;
+        BindableTwi = !combined && microcontroller is not AvrController;
         Input = input;
     }
 

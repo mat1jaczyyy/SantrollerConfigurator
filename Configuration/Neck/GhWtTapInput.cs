@@ -6,6 +6,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
@@ -17,7 +18,7 @@ public class GhWtTapInput : InputWithPin
 
     public bool Combined { get; }
 
-    public GhWtTapInput(GhWtInputType input, Microcontroller microcontroller, int pin = 0, bool combined = false) : base(microcontroller,
+    public GhWtTapInput(GhWtInputType input, ConfigViewModel model, Microcontroller microcontroller, int pin = 0, bool combined = false) : base(model, microcontroller,
         microcontroller.GetOrSetPin(GhWtTapPinType, pin, DevicePinMode.Floating))
     {
         Combined = combined;
@@ -79,6 +80,7 @@ public class GhWtTapInput : InputWithPin
     public override bool IsAnalog => Input == GhWtInputType.TapBar;
     public override InputType? InputType => Types.InputType.WtNeckInput;
     public override bool IsUint => true;
+    protected override string DetectionText => "Tap on the tap bar";
 
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,

@@ -35,7 +35,7 @@ public class SerializedControllerAxis : SerializedOutput
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new ControllerAxis(model, Input?.Generate(microcontroller), Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Multiplier, Offset, Deadzone,
+        return new ControllerAxis(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Multiplier, Offset, Deadzone,
             Type);
     }
 }

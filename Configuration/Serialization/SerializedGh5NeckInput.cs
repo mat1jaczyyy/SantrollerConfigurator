@@ -1,5 +1,6 @@
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ProtoBuf;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -18,8 +19,8 @@ public class SerializedGh5NeckInput : SerializedInput
         Type = type;
     }
 
-    public override Input Generate(Microcontroller microcontroller)
+    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new Gh5NeckInput(Type, microcontroller, Sda, Scl);
+        return new Gh5NeckInput(Type, model, microcontroller, Sda, Scl);
     }
 }

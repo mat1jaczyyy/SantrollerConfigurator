@@ -123,12 +123,12 @@ public class EmptyOutput : Output
                 }
                 else if (value is StandardAxisType standardAxisType)
                 {
-                    Model.Bindings.Add(new ControllerAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model.MicroController), Colors.Transparent, Colors.Transparent, null,1, 0, 0,
+                    Model.Bindings.Add(new ControllerAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, null,1, 0, 0,
                         standardAxisType));
                 }
                 else if (value is StandardButtonType standardButtonType)
                 {
-                    Model.Bindings.Add(new ControllerButton(Model, new DirectInput(0, DevicePinMode.PullUp, Model.MicroController), Colors.Transparent, Colors.Transparent, null, 5,
+                    Model.Bindings.Add(new ControllerButton(Model, new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, null, 5,
                         standardButtonType));
                 }
 

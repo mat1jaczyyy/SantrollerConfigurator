@@ -49,6 +49,7 @@ public class Santroller : ConfigurableUsbDevice
     private DeviceControllerType? _deviceControllerType;
     private Dictionary<int, bool> _digitalRaw = new();
     private Dictionary<int, int> _analogRaw = new();
+    private bool _picking;
 
     // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
     //     new(0x1209, 0x2882, label: "Santroller",
@@ -82,6 +83,12 @@ public class Santroller : ConfigurableUsbDevice
     {
         while (Device.IsOpen)
         {
+            if (_picking)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(50));
+                continue;
+            }
+
             try
             {
                 var direct = model.Bindings.Where(s => s.Input != null).Select(s => s.Input!.InnermostInput())
@@ -115,7 +122,8 @@ public class Santroller : ConfigurableUsbDevice
                 var wiiControllerType = ReadData(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
                 foreach (var output in model.Bindings)
                 {
-                    output.Update(model.Bindings.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+                    output.Update(model.Bindings.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
+                        djRightRaw, gh5Raw,
                         ghWtRaw, ps2ControllerType, wiiControllerType);
                 }
             }
@@ -165,8 +173,94 @@ public class Santroller : ConfigurableUsbDevice
         StartTicking(model);
     }
 
-    public void StartTicking(ConfigViewModel model) {
+    public void StartTicking(ConfigViewModel model)
+    {
         _ = Dispatcher.UIThread.InvokeAsync(() => Tick(model));
+    }
+
+    public async Task<int> DetectPin(bool analog, int original, Microcontroller microcontroller)
+    {
+        //TODO: this
+        //TODO: do we support a timeout?
+        _picking = true;
+        var importantPins = new List<int>();
+        foreach (var config in microcontroller.PinConfigs)
+        {
+            switch (config)
+            {
+                case SpiConfig spi:
+                    importantPins.AddRange(spi.Pins);
+                    break;
+                case TwiConfig twi:
+                    importantPins.AddRange(twi.Pins);
+                    break;
+                case DirectPinConfig direct:
+                    if (!direct.Type.Contains("-"))
+                    {
+                        importantPins.AddRange(direct.Pins);
+                    }
+
+                    break;
+            }
+        }
+
+        if (analog)
+        {
+            var pins = microcontroller.AnalogPins.Except(importantPins);
+            var analogVals = new Dictionary<int, int>();
+            while (true)
+            {
+                foreach (var pin in pins)
+                {
+                    DevicePin devicePin = new DevicePin(pin, DevicePinMode.PullUp);
+                    var mask = microcontroller.GetAnalogMask(devicePin);
+                    var wValue = (ushort) (pin | (mask << 8));
+                    var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
+                        sizeof(ushort)));
+                    if (analogVals.ContainsKey(pin))
+                    {
+                        var diff = Math.Abs(analogVals[pin] - val);
+                        if (diff > 1000)
+                        {
+                            _picking = false;
+                            return pin;
+                        }
+                    }
+
+                    analogVals[pin] = val;
+                }
+
+                await Task.Delay(100);
+            }
+        }
+
+        var allPins = microcontroller.GetAllPins().Except(importantPins)
+            .Select(s => new DevicePin(s, DevicePinMode.PullUp));
+        var ports = microcontroller.GetPortsForTicking(allPins);
+
+        Dictionary<int, byte> tickedPorts = new();
+        while (true)
+        {
+            foreach (var (port, mask) in ports)
+            {
+                var wValue = (ushort) (port | (mask << 8));
+                var pins = (byte) (ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte))[0] & mask);
+                if (tickedPorts.ContainsKey(port))
+                {
+                    if (tickedPorts[port] != pins)
+                    {
+                        Dictionary<int, bool> outPins = new();
+                        // Xor the old and new values to work out what changed, and then return the first changed bit
+                        microcontroller.PinsFromPortMask(port, mask, (byte) (pins ^ tickedPorts[port]), outPins);
+                        return outPins.First(s => s.Value).Key;
+                    }
+                }
+
+                tickedPorts[port] = pins;
+            }
+
+            await Task.Delay(100);
+        }
     }
 
     public override string ToString()

@@ -6,6 +6,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
@@ -213,13 +214,16 @@ public class Ps2Input : SpiInput
     };
 
     public bool Combined { get; }
+    
+    public bool BindableSpi { get; }
 
-    public Ps2Input(Ps2InputType input, Microcontroller microcontroller, int? miso = null, int? mosi = null,
+    public Ps2Input(Ps2InputType input, ConfigViewModel model, Microcontroller microcontroller, int? miso = null, int? mosi = null,
         int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(microcontroller, Ps2SpiType,
         Ps2SpiFreq, Ps2SpiCpol,
-        Ps2SpiCpha, Ps2SpiMsbFirst, miso, mosi, sck)
+        Ps2SpiCpha, Ps2SpiMsbFirst, miso: miso, mosi: mosi, sck: sck, model:model)
     {
         Combined = combined;
+        BindableSpi = !Combined && microcontroller is not AvrController;
         Input = input;
         _ackConfig = microcontroller
             .GetOrSetPin(Ps2AckType, ack ?? microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);

@@ -5,6 +5,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
@@ -17,7 +18,8 @@ public class AnalogToDigital : Input
     public override InputType? InputType => Child.InputType;
     public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes => Enum.GetValues<AnalogToDigitalType>();
 
-    public AnalogToDigital(Input child, AnalogToDigitalType analogToDigitalType, int threshold)
+    public AnalogToDigital(Input child, AnalogToDigitalType analogToDigitalType, int threshold,
+        ConfigViewModel model) : base(model)
     {
         Child = child;
         AnalogToDigitalType = analogToDigitalType;

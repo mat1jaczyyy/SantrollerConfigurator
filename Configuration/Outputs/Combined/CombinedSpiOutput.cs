@@ -9,7 +9,7 @@ using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
-public abstract class CombinedSpiOutput : CombinedOutput
+public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 {
     protected readonly Microcontroller Microcontroller;
 
@@ -18,6 +18,7 @@ public abstract class CombinedSpiOutput : CombinedOutput
     {
         Microcontroller = microcontroller;
         SpiType = spiType;
+        BindableSpi = microcontroller is not AvrController;
         var config = microcontroller.GetSpiForType(SpiType);
         if (config != null)
         {
@@ -44,20 +45,9 @@ public abstract class CombinedSpiOutput : CombinedOutput
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
         this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
         this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged(nameof(Sck)));
-        microcontroller.PinConfigs.CollectionChanged +=
-            (_, _) =>
-            {
-                var mosi2 = Mosi;
-                var miso2 = Miso;
-                var sck2 = Sck;
-                this.RaisePropertyChanged(nameof(AvailableMosiPins));
-                this.RaisePropertyChanged(nameof(AvailableMisoPins));
-                this.RaisePropertyChanged(nameof(AvailableSckPins));
-                Mosi = mosi2;
-                Miso = miso2;
-                Sck = sck2;
-            };
     }
+
+    public bool BindableSpi { get; }
 
     private string SpiType { get; }
 
@@ -110,4 +100,6 @@ public abstract class CombinedSpiOutput : CombinedOutput
         Microcontroller.UnAssignPins(SpiType);
         base.Dispose();
     }
+
+    public List<int> SpiPins() => new() {Mosi, Miso, Sck};
 }

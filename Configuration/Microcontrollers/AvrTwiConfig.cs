@@ -9,7 +9,4 @@ public class AvrTwiConfig : TwiConfig
     }
 
     public override string Definition => "GC_TWI";
-    protected override void UpdatePins([CallerMemberName]string? propertyName = null)
-    {
-    }
 }

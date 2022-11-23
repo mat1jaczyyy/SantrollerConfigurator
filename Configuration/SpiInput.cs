@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
-public abstract class SpiInput : Input
+public abstract class SpiInput : Input, ISpi
 {
     protected readonly Microcontroller Microcontroller;
     protected SpiInput(Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
-        bool cpha, bool msbFirst, int? miso = null, int? mosi = null, int? sck = null)
+        bool cpha, bool msbFirst, ConfigViewModel model, int? miso = null, int? mosi = null, int? sck = null) : base(model)
     {
         Microcontroller = microcontroller;
         _spiType = spiType;
@@ -41,19 +42,6 @@ public abstract class SpiInput : Input
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
         this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
         this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged(nameof(Sck)));
-        microcontroller.PinConfigs.CollectionChanged +=
-            (_, _) =>
-            {
-                var mosi2 = Mosi;
-                var miso2 = Miso;
-                var sck2 = Sck;
-                this.RaisePropertyChanged(nameof(AvailableMosiPins));
-                this.RaisePropertyChanged(nameof(AvailableMisoPins));
-                this.RaisePropertyChanged(nameof(AvailableSckPins));
-                Mosi = mosi2;
-                Miso = miso2;
-                Sck = sck2;
-            };
     }
 
     private string _spiType;
@@ -114,4 +102,5 @@ public abstract class SpiInput : Input
     }
 
     public override List<PinConfig> PinConfigs => new() {_spiConfig};
+    public List<int> SpiPins() => new() {Mosi, Miso, Sck};
 }

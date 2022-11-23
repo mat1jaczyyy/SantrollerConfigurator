@@ -114,7 +114,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         foreach (var pair in Buttons)
         {
             _outputs.Add(new ControllerButton(Model,
-                new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+                new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
                 Colors.Transparent, null,
                 10,
@@ -122,21 +122,21 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         }
 
         _outputs.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
-                AnalogToDigitalType.Trigger, 128),
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+                AnalogToDigitalType.Trigger, 128, Model),
             Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.A));
         _outputs.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
-                AnalogToDigitalType.Trigger, 128),
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+                AnalogToDigitalType.Trigger, 128, Model),
             Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.X));
         _outputs.Add(new ControllerButton(Model,
-            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
-                AnalogToDigitalType.Trigger, 240),
+            new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+                AnalogToDigitalType.Trigger, 240, Model),
             Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Lb));
 
         foreach (var pair in Axis)
         {
-            _outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+            _outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
                 Colors.Transparent, null, 1, 0, 0, pair.Value));
         }

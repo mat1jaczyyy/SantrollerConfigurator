@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
-public abstract class TwiInput : Input
+public abstract class TwiInput : Input, ITwi
 {
     private readonly Microcontroller _microcontroller;
 
-    protected TwiInput(Microcontroller microcontroller, string twiType, int twiFreq, int? sda, int? scl)
+    protected TwiInput(Microcontroller microcontroller, string twiType, int twiFreq, int? sda, int? scl,
+        ConfigViewModel model) : base(model)
     {
         _microcontroller = microcontroller;
         _twiType = twiType;
@@ -40,16 +42,6 @@ public abstract class TwiInput : Input
        
         this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged(nameof(Scl)));
         this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged(nameof(Sda)));
-        microcontroller.PinConfigs.CollectionChanged +=
-            (sender, args) =>
-            {
-                var sda2 = Sda;
-                var scl2 = Scl;
-                this.RaisePropertyChanged(nameof(AvailableSdaPins));
-                this.RaisePropertyChanged(nameof(AvailableSclPins));
-                Sda = sda2;
-                Scl = scl2;
-            };
     }
 
     private readonly string _twiType;
@@ -96,4 +88,5 @@ public abstract class TwiInput : Input
         _microcontroller.UnAssignPins(_twiType);
     }
     public override List<PinConfig> PinConfigs => new() {_twiConfig};
+    public List<int> TwiPins() => new() {Sda, Scl};
 }

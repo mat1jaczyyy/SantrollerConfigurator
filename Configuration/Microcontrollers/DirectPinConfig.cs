@@ -7,7 +7,12 @@ public class DirectPinConfig : PinConfig
 {
     public override string Type { get; }
     public override string Definition => "";
-    public DevicePinMode PinMode { get; }
+    private DevicePinMode _pinMode;
+    public DevicePinMode PinMode
+    {
+        get => _pinMode;
+        set => this.RaiseAndSetIfChanged(ref _pinMode, value);
+    }
     private int _pin;
 
     public int Pin

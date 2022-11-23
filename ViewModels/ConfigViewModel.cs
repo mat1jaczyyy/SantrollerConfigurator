@@ -28,7 +28,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
     {
         public Interaction<InputWithPin, SelectPinWindowViewModel?> ShowPinSelectDialog { get; }
         public Interaction<Arduino, ShowUnoShortWindowViewModel?> ShowUnoShortDialog { get; }
-        public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
+        public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
 
         public IScreen HostScreen { get; }
 
@@ -177,12 +177,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 {
                     case StandardButtonType buttonType:
                         Bindings.Add(new ControllerButton(this,
-                            new DirectInput(0, DevicePinMode.PullUp, MicroController!),
+                            new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
                             Colors.Transparent, Colors.Transparent, null, 1, buttonType));
                         break;
                     case StandardAxisType axisType:
                         Bindings.Add(new ControllerAxis(this,
-                            new DirectInput(0, DevicePinMode.Analog, MicroController!),
+                            new DirectInput(0, DevicePinMode.Analog, this, MicroController!),
                             Colors.Transparent, Colors.Transparent, null, 1, 0, 0, axisType));
                         break;
                 }
@@ -286,7 +286,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
                 Bindings.Add(new ControllerAxis(this,
-                    new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, MicroController!),
+                    new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
                     Colors.Transparent, Colors.Transparent, null, 1, 0, 0, type));
             }
 
@@ -294,7 +294,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
                     null) continue;
-                Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, MicroController!),
+                Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
                     Colors.Transparent, Colors.Transparent, null, 1, type));
             }
         }

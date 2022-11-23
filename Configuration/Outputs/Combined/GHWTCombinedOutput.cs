@@ -12,10 +12,9 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
 public class GhwtCombinedOutput : CombinedOutput
 {
-
     public int Pin { get; set; }
     private readonly Microcontroller _microcontroller;
-    
+
     private readonly AvaloniaList<Output> _outputs = new();
 
     private static readonly Dictionary<GhWtInputType, StandardButtonType> Taps = new()
@@ -35,6 +34,7 @@ public class GhwtCombinedOutput : CombinedOutput
         {
             Pin = pin.Value;
         }
+
         if (outputs != null)
         {
             _outputs = new AvaloniaList<Output>(outputs);
@@ -48,16 +48,20 @@ public class GhwtCombinedOutput : CombinedOutput
     public void CreateDefaults()
     {
         _outputs.Clear();
-        _outputs.Add(new ControllerAxis(Model, new GhWtTapInput(GhWtInputType.TapBar, _microcontroller, combined:true),
+        _outputs.Add(new ControllerAxis(Model,
+            new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
+                combined: true),
             Colors.Transparent,
             Colors.Transparent, null, 1, 0, 0, StandardAxisType.LeftStickX));
     }
-    
+
     public void AddTapBarFrets()
     {
         foreach (var pair in Taps)
         {
-            _outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, _microcontroller, combined:true), Colors.Transparent,
+            _outputs.Add(new ControllerButton(Model,
+                new GhWtTapInput(pair.Key, Model, _microcontroller,
+                    combined: true), Colors.Transparent,
                 Colors.Transparent, null, 5, pair.Value));
         }
     }

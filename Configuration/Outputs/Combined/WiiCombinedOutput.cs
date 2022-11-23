@@ -146,7 +146,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         _outputs.Clear();
         foreach (var pair in Buttons)
         {
-            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl, true),
+            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
                 Colors.Transparent,
                 Colors.Transparent, null, 10,
                 pair.Value));
@@ -154,31 +154,31 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
         foreach (var pair in Axis)
         {
-            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl, true),
+            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model,_microcontroller, Sda, Scl, true),
                 Colors.Transparent,
                 Colors.Transparent, null, 1.2f, 0, 10, pair.Value));
         }
 
         // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, _microcontroller, Sda, Scl),
+        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, Model,_microcontroller, Sda, Scl),
         //         AnalogToDigitalType.JoyLow, 32),
         //     Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Left));
         //
         // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, _microcontroller, Sda, Scl),
+        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, Model,_microcontroller, Sda, Scl),
         //         AnalogToDigitalType.JoyHigh, 32),
         //     Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Right));
         // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, _microcontroller, Sda, Scl),
+        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, Model,_microcontroller, Sda, Scl),
         //         AnalogToDigitalType.JoyLow, 32),
         //     Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Up));
         //
         // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, _microcontroller, Sda, Scl),
+        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, Model,_microcontroller, Sda, Scl),
         //         AnalogToDigitalType.JoyLow, 32),
         //     Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Down));
         _outputs.Add(new ControllerAxis(Model,
-            new WiiInput(WiiInputType.GuitarTapBar, _microcontroller, Sda, Scl, true),
+            new WiiInput(WiiInputType.GuitarTapBar, Model,_microcontroller, Sda, Scl, true),
             Colors.Transparent,
             Colors.Transparent, null, 1, 0, 0, StandardAxisType.RightStickY));
     }
@@ -187,7 +187,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         foreach (var pair in Tap)
         {
-            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl, true), Colors.Transparent,
+            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true), Colors.Transparent,
                 Colors.Transparent, null, 5, pair.Value));
         }
     }
@@ -196,7 +196,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         foreach (var pair in AxisAcceleration)
         {
-            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, _microcontroller, Sda, Scl, true),
+            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
                 Colors.Transparent,
                 Colors.Transparent, null, 1, 0, 0, pair.Value));
         }

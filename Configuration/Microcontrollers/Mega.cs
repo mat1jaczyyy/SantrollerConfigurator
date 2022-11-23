@@ -210,9 +210,9 @@ public class Mega : AvrController
     {
         return PinA0 - pin;
     }
+    public override List<int> AnalogPins => Enumerable.Range(PinA0,5).ToList();
 
-    private Dictionary<Tuple<char, int>, int> _pinByMask = Enumerable.Zip(Ports, PinIndex).Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i)).ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s=>s.Item3);
-    protected override Dictionary<Tuple<char, int>, int> PinByMask => _pinByMask;
+    protected override Dictionary<Tuple<char, int>, int> PinByMask { get; } = Ports.Zip(PinIndex).Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i)).ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s=>s.Item3);
 
     public override AvrPinMode? ForcedMode(int pin)
     {

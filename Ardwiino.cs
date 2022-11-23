@@ -454,7 +454,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         config.all.main.tiltType == 2)
                     {
                         bindings.Add(new ControllerAxis(model,
-                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, controller), 32767), on,
+                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller), 32767, model), on,
                             off, ledIndex, 1, 0,
                             0, StandardAxisType.RightStickY));
                     }
@@ -465,7 +465,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         var axisOffset = ((isTrigger ? 0 : 32670) + scale.offset) >> 8;
                         var axisDeadzone = ((isTrigger ? 32768 : 0) + scale.deadzone) >> 8;
                         bindings.Add(new ControllerAxis(model,
-                            new DirectInput(pin.pin, DevicePinMode.Analog, controller), on, off,
+                            new DirectInput(pin.pin, DevicePinMode.Analog, model, controller), on, off,
                             ledIndex, axisMultiplier, axisOffset, axisDeadzone, genAxis));
                     }
                 }
@@ -506,7 +506,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         genButton = StandardButtonType.Y;
                     }
 
-                    bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, controller), on, off,
+                    bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, model, controller), on, off,
                         ledIndex, debounce, genButton));
                 }
             }
@@ -526,7 +526,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         var off = Color.FromRgb(0, 0, 0);
                         byte? ledIndex = ledIndexes.GetValueOrDefault(pin.pin);
                         bindings.Add(new ControllerAxis(model,
-                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, controller), 32767), on,
+                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller), 32767, model), on,
                             off, ledIndex, 1, 0,
                             0, StandardAxisType.RightStickY));
                     }
@@ -573,10 +573,10 @@ public class Ardwiino : ConfigurableUsbDevice
                     var ledOn = lx.LedOn;
                     var ledOff = lx.LedOff;
                     bindings.Add(new ControllerButton(model,
-                        new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyLow, threshold), ledOn, ledOff,
+                        new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
                         null, config.debounce.buttons, StandardButtonType.Left));
                     bindings.Add(new ControllerButton(model,
-                        new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyHigh, threshold), ledOn, ledOff,
+                        new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
                         null, config.debounce.buttons, StandardButtonType.Right));
                 }
 
@@ -585,10 +585,10 @@ public class Ardwiino : ConfigurableUsbDevice
                     var ledOn = ly.LedOn;
                     var ledOff = ly.LedOff;
                     bindings.Add(new ControllerButton(model,
-                        new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold), ledOn, ledOff,
+                        new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
                         null, config.debounce.buttons, StandardButtonType.Up));
                     bindings.Add(new ControllerButton(model,
-                        new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold), ledOn, ledOff,
+                        new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
                         null, config.debounce.buttons, StandardButtonType.Down));
                 }
             }

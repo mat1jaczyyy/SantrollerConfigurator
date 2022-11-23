@@ -73,6 +73,7 @@ public class Uno : AvrController
     {
         return PinA0 - pin;
     }
+    public override List<int> AnalogPins => Enumerable.Range(PinA0,4).ToList();
 
     public override AvrPinMode? ForcedMode(int pin)
     {

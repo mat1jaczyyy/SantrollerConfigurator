@@ -195,33 +195,9 @@ public class Pico : Microcontroller
         return Enumerable.Range(0, GpioCount).ToList();
     }
 
-    public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
-    {
-        var types = SpiTypesByPin.AsEnumerable();
-        foreach (var config in PinConfigs.OfType<PicoSpiConfig>())
-        {
-            if (config.Type != type)
-            {
-                types = types.Where(s => SpiIndexByPin[s.Key] != config.Index).ToDictionary(s => s.Key, s => s.Value);
-            }
-        }
+    public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type) => SpiTypesByPin.ToList();
 
-        return types.ToList();
-    }
-
-    public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type)
-    {
-        var types = TwiTypeByPin.AsEnumerable();
-        foreach (var config in PinConfigs.OfType<PicoTwiConfig>())
-        {
-            if (config.Type != type)
-            {
-                types = types.Where(s => TwiIndexByPin[s.Key] != config.Index).ToDictionary(s => s.Key, s => s.Value);
-            }
-        }
-
-        return types.ToList();
-    }
+    public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type) => TwiTypeByPin.ToList();
 
     public override void UnAssignPins(string type)
     {
@@ -283,6 +259,7 @@ public class Pico : Microcontroller
     }
 
     public override List<int> GetAllPins() => Enumerable.Range(0, GpioCount).ToList();
+    public override List<int> AnalogPins => new() { 26,27,28,29 };
 
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)

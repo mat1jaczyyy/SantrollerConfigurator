@@ -1,5 +1,6 @@
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ProtoBuf;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -18,8 +19,8 @@ public class SerializedDjInput : SerializedInput
         Type = type;
     }
 
-    public override Input Generate(Microcontroller microcontroller)
+    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new DjInput(Type, microcontroller, Sda, Scl);
+        return new DjInput(Type, model, microcontroller, Sda, Scl);
     }
 }

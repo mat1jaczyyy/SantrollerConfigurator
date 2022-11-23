@@ -5,15 +5,18 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
 public abstract class Input : ReactiveObject, IDisposable
 {
+    protected ConfigViewModel Model { get; }
 
-    protected Input()
+    protected Input(ConfigViewModel model)
     {
+        Model = model;
         _imageOpacity = this.WhenAnyValue(x => x.RawValue).Select(s => (s == 0?0:0.25) + 0.75).ToProperty(this, s => s.ImageOpacity);
     }
     public abstract IReadOnlyList<string> RequiredDefines();

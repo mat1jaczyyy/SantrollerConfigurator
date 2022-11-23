@@ -43,36 +43,23 @@ public abstract class SpiConfig : PinConfig
     }
 
     public override string Type { get; }
-    protected abstract void UpdatePins([CallerMemberName]string? propertyName = null);
 
     public int Mosi
     {
         get => _mosi;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _mosi, value);
-            UpdatePins();
-        }
+        set => this.RaiseAndSetIfChanged(ref _mosi, value);
     }
 
     public int Miso
     {
         get => _miso;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _miso, value);
-            UpdatePins();
-        }
+        set => this.RaiseAndSetIfChanged(ref _miso, value);
     }
 
     public int Sck
     {
         get => _sck;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _sck, value);
-            UpdatePins();
-        }
+        set => this.RaiseAndSetIfChanged(ref _sck, value);
     }
     public override IEnumerable<int> Pins => new List<int> {_mosi, _miso, _sck};
 }

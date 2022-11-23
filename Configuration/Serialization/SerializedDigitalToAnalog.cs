@@ -1,5 +1,6 @@
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ProtoBuf;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -16,8 +17,8 @@ public class SerializedDigitalToAnalog : SerializedInput
         Value = value;
     }
 
-    public override Input Generate(Microcontroller microcontroller)
+    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new DigitalToAnalog(Child.Generate(microcontroller), Value);
+        return new DigitalToAnalog(Child.Generate(microcontroller, model), Value, model);
     }
 }

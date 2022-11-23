@@ -29,6 +29,6 @@ public class SerializedControllerButton : SerializedOutput
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new ControllerButton(model, Input?.Generate(microcontroller), Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
+        return new ControllerButton(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
     }
 }

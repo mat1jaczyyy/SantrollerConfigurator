@@ -5,6 +5,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
@@ -13,7 +14,7 @@ public class DigitalToAnalog : Input
     public Input Child { get; }
     public int Value { get; set; }
 
-    public DigitalToAnalog(Input child, int value)
+    public DigitalToAnalog(Input child, int value, ConfigViewModel model) : base(model)
     {
         Child = child;
         Value = value;

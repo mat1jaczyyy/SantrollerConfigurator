@@ -1,5 +1,6 @@
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ProtoBuf;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -17,8 +18,8 @@ public class SerializedAnalogToDigital : SerializedInput
         Threshold = threshold;
     }
 
-    public override Input Generate(Microcontroller microcontroller)
+    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new AnalogToDigital(Child.Generate(microcontroller), Type, Threshold);
+        return new AnalogToDigital(Child.Generate(microcontroller, model), Type, Threshold, model);
     }
 }

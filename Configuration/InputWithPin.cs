@@ -1,51 +1,77 @@
+using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
+using HidSharp.Reports.Units;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
 public abstract class InputWithPin : Input
 {
-    protected InputWithPin(Microcontroller microcontroller, DirectPinConfig pinConfig)
+    protected InputWithPin(ConfigViewModel model, Microcontroller microcontroller, DirectPinConfig pinConfig) :
+        base(model)
     {
         Microcontroller = microcontroller;
         _pinConfig = pinConfig;
         Microcontroller.AssignPin(_pinConfig);
-        Microcontroller.PinConfigs.CollectionChanged +=
-            (_, _) => this.RaisePropertyChanged(nameof(AvailablePins));
+        Microcontroller.PinConfigs.CollectionChanged += (_, _) => this.RaisePropertyChanged(nameof(AvailablePins));
+        DetectPinCommand =
+            ReactiveCommand.CreateFromTask(DetectPin, this.WhenAnyValue(s => s.Model.Main.Working).Select(s => !s));
     }
 
     protected Microcontroller Microcontroller { get; }
 
     private DirectPinConfig _pinConfig;
-    public DirectPinConfig PinConfig
-    {
-        get => _pinConfig;
-        set
-        {
-            _pinConfig = value;
-            Microcontroller.AssignPin(_pinConfig);
-        }
-    }
+
+    public DirectPinConfig PinConfig => _pinConfig;
 
     public List<int> AvailablePins => Microcontroller.GetAllPins();
 
     public int Pin
     {
         get => PinConfig.Pin;
-        set => PinConfig = new DirectPinConfig(PinConfig.Type, value, PinConfig.PinMode);
+        set
+        {
+            PinConfig.Pin = value;
+            this.RaisePropertyChanged();
+        }
     }
-    
+
     public DevicePinMode PinMode
     {
         get => PinConfig.PinMode;
-        set => PinConfig = new DirectPinConfig(PinConfig.Type, PinConfig.Pin, value);
+        set
+        {
+            PinConfig.PinMode = value;
+            this.RaisePropertyChanged();
+        }
     }
 
     public override void Dispose()
     {
         Microcontroller.UnAssignPins(PinConfig.Type);
     }
+
     public override List<PinConfig> PinConfigs => new() {_pinConfig};
-    
+
+    public string PinConfigText { get; private set; } = "Find Pin";
+
+    protected abstract string DetectionText { get; }
+    public ICommand DetectPinCommand { get; }
+
+    private async Task DetectPin()
+    {
+        if (Model.Main.SelectedDevice is Santroller santroller)
+        {
+            PinConfigText = DetectionText;
+            this.RaisePropertyChanged(nameof(PinConfigText));
+            Pin = await santroller.DetectPin(IsAnalog, Pin, Microcontroller);
+            PinConfigText = "Find Pin";
+            this.RaisePropertyChanged(nameof(PinConfigText));
+        }
+    }
 }

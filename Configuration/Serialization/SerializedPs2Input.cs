@@ -1,5 +1,6 @@
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ProtoBuf;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -24,8 +25,8 @@ public class SerializedPs2Input : SerializedInput
         Type = type;
     }
 
-    public override Input Generate(Microcontroller microcontroller)
+    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new Ps2Input(Type, microcontroller, Miso, Mosi, Sck, Att, Ack);
+        return new Ps2Input(Type, model, microcontroller, Miso, Mosi, Sck, Att, Ack);
     }
 }

@@ -11,6 +11,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 using static GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined.WiiCombinedOutput;
 
@@ -259,14 +260,17 @@ public class WiiInput : TwiInput
     };
 
     public bool Combined { get; }
+    
+    public bool BindableTwi { get; }
 
-    public WiiInput(WiiInputType input, Microcontroller microcontroller, int? sda = null, int? scl = null,
+    public WiiInput(WiiInputType input, ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
         bool combined = false) : base(
         microcontroller,
-        WiiTwiType, WiiTwiFreq, sda, scl)
+        WiiTwiType, WiiTwiFreq, sda, scl, model)
     {
         Input = input;
         Combined = combined;
+        BindableTwi = !combined && microcontroller is not AvrController;
         Image = GetImage();
     }
 

@@ -1,4 +1,5 @@
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ProtoBuf;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -15,8 +16,8 @@ public class SerializedDirectInput : SerializedInput
         PinMode = pinMode;
     }
 
-    public override Input Generate(Microcontroller microcontroller)
+    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new DirectInput(Pin, PinMode, microcontroller);
+        return new DirectInput(Pin, PinMode, model, microcontroller);
     }
 }

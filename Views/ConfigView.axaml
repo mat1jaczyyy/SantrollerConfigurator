@@ -36,6 +36,7 @@
                         <Binding Path="$parent[UserControl].DataContext.MicroController"></Binding>
                         <Binding Path="$parent[UserControl].DataContext"></Binding>
                         <Binding Path="$parent[ComboBox].SelectedItem"></Binding>
+                        <Binding Path="$parent[ComboBox].DataContext"></Binding>
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
@@ -55,18 +56,6 @@
             <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
         </DataTemplate>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
-            <DataTemplate DataType="{x:Type neck:Gh5NeckInput}">
-                <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input: "></Label>
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="{Binding Input}"></Label>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
-                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
-                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                </StackPanel>
-            </DataTemplate>
             <DataTemplate DataType="output:EmptyOutput">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding IsController}">
@@ -92,14 +81,20 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="GH WT Tap Input: "></TextBlock>
                     <TextBlock Text="{Binding Input}"></TextBlock>
-                    <Button IsVisible="{Binding !Combined}"
-                            x:CompileBindings="False"
-                            Command="{Binding $parent[UserControl].DataContext.ShowPinSelectDialogCommand}"
-                            CommandParameter="{Binding}">
-                        Change Pin
-                    </Button>
                     <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Pin}"
                               Items="{Binding AvailablePins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type neck:Gh5NeckInput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input: "></Label>
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="{Binding Input}"></Label>
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
                 </StackPanel>
             </DataTemplate>
@@ -107,10 +102,10 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="DJ Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}">
                     </ComboBox>
                 </StackPanel>
@@ -119,13 +114,13 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="PS2 Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
+                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
                               Items="{Binding AvailableMosiPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Miso}"
+                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center" SelectedItem="{Binding Miso}"
                               Items="{Binding AvailableMisoPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Sck}"
+                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center" SelectedItem="{Binding Sck}"
                               Items="{Binding AvailableSckPins}">
                     </ComboBox>
                     <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Ack}"
@@ -142,10 +137,10 @@
                            HorizontalAlignment="Center" Width="75"
                            Source="{Binding Image}" Opacity="{Binding ImageOpacity}">
                     </Image>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
                 </StackPanel>
@@ -159,10 +154,7 @@
                         </ComboBox>
                     </StackPanel>
                     <Button
-                        x:CompileBindings="False"
-                        Command="{Binding $parent[UserControl].DataContext.ShowPinSelectDialogCommand}"
-                        CommandParameter="{Binding}">
-                        Change Pin
+                        Command="{Binding DetectPinCommand}" Content="{Binding PinConfigText}">
                     </Button>
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Pin}" Items="{Binding AvailablePins}"
                               ItemTemplate="{StaticResource PinToStringTemplate}">
@@ -281,10 +273,10 @@
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
                            Content="DJ Hero Turntable Input">
                     </Label>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Scl}"
-                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                               Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
 
@@ -302,10 +294,10 @@
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input"></Label>
                     <CheckBox IsChecked="{Binding Detected}" IsEnabled="False">Detected</CheckBox>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
 
@@ -348,13 +340,13 @@
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                Text="{Binding DetectedType}">
                     </TextBlock>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}" SelectedItem="{Binding Mosi}"
                               Items="{Binding AvailableMosiPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Miso}"
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}" SelectedItem="{Binding Miso}"
                               Items="{Binding AvailableMisoPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sck}"
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}" SelectedItem="{Binding Sck}"
                               Items="{Binding AvailableSckPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Ack}" Items="{Binding AvailablePins}"
@@ -381,10 +373,10 @@
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                Text="{Binding DetectedType}">
                     </TextBlock>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
 

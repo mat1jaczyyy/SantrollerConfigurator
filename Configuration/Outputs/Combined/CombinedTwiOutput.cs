@@ -9,16 +9,19 @@ using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
-public abstract class CombinedTwiOutput : CombinedOutput
+public abstract class CombinedTwiOutput : CombinedOutput, ITwi
 {
     private readonly Microcontroller _microcontroller;
 
-    
+    public bool BindableTwi { get; }
+
+
     protected CombinedTwiOutput(ConfigViewModel model, Microcontroller microcontroller, string twiType,
         int twiFreq, string name, int? sda = null, int? scl = null) : base(model, null, name)
-        
+
     {
         _microcontroller = microcontroller;
+        BindableTwi = microcontroller is not AvrController;
         _twiType = twiType;
         var config = microcontroller.GetTwiForType(_twiType);
         if (config != null)
@@ -42,19 +45,9 @@ public abstract class CombinedTwiOutput : CombinedOutput
             _twiConfig = microcontroller.AssignTwiPins(_twiType, sda.Value, scl.Value, twiFreq)!;
         }
 
-       
+
         this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged(nameof(Scl)));
         this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged(nameof(Sda)));
-        microcontroller.PinConfigs.CollectionChanged +=
-            (sender, args) =>
-            {
-                var sda2 = Sda;
-                var scl2 = Scl;
-                this.RaisePropertyChanged(nameof(AvailableSdaPins));
-                this.RaisePropertyChanged(nameof(AvailableSclPins));
-                Sda = sda2;
-                Scl = scl2;
-            };
     }
 
     private readonly string _twiType;
@@ -96,4 +89,6 @@ public abstract class CombinedTwiOutput : CombinedOutput
         _microcontroller.UnAssignPins(_twiType);
         base.Dispose();
     }
+
+    public List<int> TwiPins() => new() {Sda, Scl};
 }

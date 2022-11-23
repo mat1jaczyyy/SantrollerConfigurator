@@ -48,13 +48,13 @@ public class DjCombinedOutput : CombinedTwiOutput
     {
         _outputs.Clear();
         _outputs.AddRange(Buttons.Select(pair => new ControllerButton(Model,
-            new DjInput(pair.Key, _microcontroller, combined: true),
+            new DjInput(pair.Key, Model, _microcontroller, combined: true),
             Colors.Transparent, Colors.Transparent, null, 5, pair.Value)));
-        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, _microcontroller, combined: true),
+        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, null, 1,
             0, 0, StandardAxisType.LeftStickX));
-        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, _microcontroller, combined: true),
+        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, Model, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, null, 1,
             0, 0, StandardAxisType.LeftStickY));

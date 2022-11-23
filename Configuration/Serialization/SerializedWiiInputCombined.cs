@@ -1,5 +1,6 @@
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ProtoBuf;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -14,8 +15,8 @@ public class SerializedWiiInputCombined : SerializedInput
         Type = type;
     }
 
-    public override Input Generate(Microcontroller microcontroller)
+    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new WiiInput(Type, microcontroller, combined:true);
+        return new WiiInput(Type, model,microcontroller, combined:true);
     }
 }

@@ -9,8 +9,4 @@ public class AvrSpiConfig: SpiConfig
     }
 
     public override string Definition => "GC_SPI";
-
-    protected override void UpdatePins([CallerMemberName]string? propertyName = null)
-    {
-    }
 }

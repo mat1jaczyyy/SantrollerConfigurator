@@ -6,6 +6,7 @@ using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 
@@ -73,12 +74,15 @@ public class Gh5NeckInput : TwiInput
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
     public bool Combined { get; }
+    
+    public bool BindableTwi { get; }
 
-    public Gh5NeckInput(Gh5NeckInputType input, Microcontroller controller, int? sda = null, int? scl = null, bool combined = false) : base(
+    public Gh5NeckInput(Gh5NeckInputType input, ConfigViewModel model, Microcontroller controller, int? sda = null, int? scl = null, bool combined = false) : base(
         controller,
-        Gh5TwiType, Gh5TwiFreq, sda, scl)
+        Gh5TwiType, Gh5TwiFreq, sda, scl, model)
     {
         Combined = combined;
+        BindableTwi = !combined && controller is not AvrController;
         Input = input;
     }
 
