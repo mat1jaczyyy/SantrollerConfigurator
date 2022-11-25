@@ -106,7 +106,7 @@ public class Santroller : ConfigurableUsbDevice
                 foreach (var devicePin in analog)
                 {
                     var mask = model.MicroController!.GetAnalogMask(devicePin);
-                    var wValue = (ushort) (devicePin.Pin | (mask << 8));
+                    var wValue = (ushort) (model.MicroController!.GetChannel(devicePin.Pin) | (mask << 8));
                     var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     _analogRaw[devicePin.Pin] = val;
@@ -214,7 +214,7 @@ public class Santroller : ConfigurableUsbDevice
                 {
                     DevicePin devicePin = new DevicePin(pin, DevicePinMode.PullUp);
                     var mask = microcontroller.GetAnalogMask(devicePin);
-                    var wValue = (ushort) (pin | (mask << 8));
+                    var wValue = (ushort) (microcontroller.GetChannel(pin) | (mask << 8));
                     var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     if (analogVals.ContainsKey(pin))

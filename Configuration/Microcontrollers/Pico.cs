@@ -144,11 +144,11 @@ public class Pico : Microcontroller
 
     public override SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
         bool msbfirst,
-        int clock)
+        uint clock)
     {
-        var pin = SpiIndexByPin[mosi];
-        if (pin != SpiIndexByPin[miso] || SpiTypesByPin[mosi] != SpiPinType.Mosi ||
-            SpiTypesByPin[miso] != SpiPinType.Miso)
+        //Some things don't need MISO (like apa102s)
+        if (mosi != -1 && SpiTypesByPin[mosi] != SpiPinType.Mosi ||
+           miso != -1 && SpiTypesByPin[miso] != SpiPinType.Miso)
         {
             return null;
         }
@@ -158,8 +158,6 @@ public class Pico : Microcontroller
         {
             return config;
         }
-
-        if (PinConfigs.Any(c => c is PicoSpiConfig s && s.Index == pin)) return null;
         config = new PicoSpiConfig(type, mosi, miso, sck, cpol, cpha, msbfirst, clock);
         PinConfigs.Add(config);
         return config;

@@ -54,7 +54,7 @@ public class ControllerButton : OutputButton
         StandardButtonType.Right,
     };
 
-    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex,
+    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex,
         byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndex, debounce, type.ToString())
     {
         Type = type;

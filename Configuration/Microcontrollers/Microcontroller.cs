@@ -41,11 +41,9 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
         protected abstract string GetPinForMicrocontroller(int pin, bool twi, bool spi);
 
         public readonly AvaloniaList<PinConfig> PinConfigs = new();
-
-        // TODO: call the below stuff for APA102 stuff or RF stuff (eventually)
         public abstract SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
             bool msbfirst,
-            int clock);
+            uint clock);
 
         public abstract TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock);
 
@@ -75,9 +73,9 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public abstract Board Board { get; }
 
-        public string GenerateAnalogRead(int pin)
+        public string GenerateAnalogRead(bool isUint)
         {
-            return $"adc({pin})";
+            return isUint ? "adc_i({pin})" : "adc({pin})";
         }
 
         public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);

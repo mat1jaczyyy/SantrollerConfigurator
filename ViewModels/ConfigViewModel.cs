@@ -26,6 +26,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
     public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
+        public static readonly string Apa102SpiType = "apa102";
         public Interaction<InputWithPin, SelectPinWindowViewModel?> ShowPinSelectDialog { get; }
         public Interaction<Arduino, ShowUnoShortWindowViewModel?> ShowUnoShortDialog { get; }
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
@@ -51,12 +52,18 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public ICommand GoBack { get; }
 
-        private LedOrderType _ledOrder;
+        private SpiConfig? _apa102SpiConfig;
 
-        public LedOrderType LedOrder
+        public int Apa102Mosi
         {
-            get => _ledOrder;
-            set => this.RaiseAndSetIfChanged(ref _ledOrder, value);
+            get => _apa102SpiConfig?.Mosi ?? 0;
+            set => _apa102SpiConfig!.Mosi = value;
+        }
+
+        public int Apa102Sck
+        {
+            get => _apa102SpiConfig?.Sck ?? 0;
+            set => _apa102SpiConfig!.Sck = value;
         }
 
         private LedType _ledType;
@@ -64,7 +71,25 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public LedType LedType
         {
             get => _ledType;
-            set => this.RaiseAndSetIfChanged(ref _ledType, value);
+            set
+            {
+                if (value == LedType.None)
+                {
+                    MicroController!.UnAssignPins(Apa102SpiType);
+                }
+                else if (_ledType == LedType.None)
+                {
+                    var pins = MicroController!.SpiPins(Apa102SpiType);
+                    var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
+                    var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
+                    _apa102SpiConfig = MicroController.AssignSpiPins(Apa102SpiType, mosi, -1, sck, true, true, true,
+                        Math.Min(MicroController.Board.CpuFreq / 2, 12000000))!;
+                    this.RaisePropertyChanged(nameof(Apa102Mosi));
+                    this.RaisePropertyChanged(nameof(Apa102Sck));
+                }
+
+                this.RaiseAndSetIfChanged(ref _ledType, value);
+            }
         }
 
         private bool _xinputOnWindows;
@@ -117,6 +142,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 this.RaiseAndSetIfChanged(ref _rhythmType, value);
                 UpdateBindings();
             }
+        }
+
+        public void SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceControllerType type, RhythmType rhythmType,
+            EmulationType emulationType)
+        {
+            this.RaiseAndSetIfChanged(ref _deviceControllerType, type, nameof(DeviceType));
+            this.RaiseAndSetIfChanged(ref _rhythmType, rhythmType, nameof(RhythmType));
+            this.RaiseAndSetIfChanged(ref _emulationType, emulationType, nameof(EmulationType));
         }
 
         private void UpdateBindings()
@@ -178,12 +211,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     case StandardButtonType buttonType:
                         Bindings.Add(new ControllerButton(this,
                             new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
-                            Colors.Transparent, Colors.Transparent, null, 1, buttonType));
+                            Colors.Transparent, Colors.Transparent, 0, 1, buttonType));
                         break;
                     case StandardAxisType axisType:
                         Bindings.Add(new ControllerAxis(this,
                             new DirectInput(0, DevicePinMode.Analog, this, MicroController!),
-                            Colors.Transparent, Colors.Transparent, null, 1, 0, 0, axisType));
+                            Colors.Transparent, Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, axisType));
                         break;
                 }
             }
@@ -208,6 +241,13 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private readonly ObservableAsPropertyHelper<bool> _isMidi;
         public bool IsMidi => _isMidi.Value;
 
+        private readonly ObservableAsPropertyHelper<bool> _isApa102;
+        public bool IsApa102 => _isApa102.Value;
+
+
+        private readonly ObservableAsPropertyHelper<bool> _bindableSpi;
+        public bool BindableSpi => _bindableSpi.Value;
+
         public ConfigViewModel(MainWindowViewModel screen)
         {
             ShowPinSelectDialog = new Interaction<InputWithPin, SelectPinWindowViewModel?>();
@@ -222,9 +262,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected))
                     .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
             Bindings = new AvaloniaList<Output>();
-            ShowPinSelectDialogCommand =
-                ReactiveCommand.CreateFromObservable<InputWithPin, SelectPinWindowViewModel?>(output =>
-                    ShowPinSelectDialog.Handle(output));
+            ReactiveCommand.CreateFromObservable<InputWithPin, SelectPinWindowViewModel?>(output =>
+                ShowPinSelectDialog.Handle(output));
             _isRhythm = this.WhenAnyValue(x => x.DeviceType)
                 .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
                 .ToProperty(this, x => x.IsRhythm);
@@ -237,9 +276,42 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             _isMidi = this.WhenAnyValue(x => x.EmulationType)
                 .Select(x => x is EmulationType.Midi)
                 .ToProperty(this, x => x.IsMidi);
+            _isApa102 = this.WhenAnyValue(x => x.LedType)
+                .Select(x => x is LedType.APA102_BGR or LedType.APA102_BRG or LedType.APA102_GBR or LedType.APA102_GRB
+                    or LedType.APA102_RBG or LedType.APA102_RGB)
+                .ToProperty(this, x => x.IsApa102);
+            _bindableSpi = this.WhenAnyValue(x => x.MicroController, x => x.IsApa102)
+                .Select(x => x.Item1 is not AvrController && x.Item2)
+                .ToProperty(this, x => x.BindableSpi);
+            _availableMosiPins = this.WhenAnyValue(x => x.MicroController)
+                .Select(GetMosiPins)
+                .ToProperty(this, x => x.AvailableMosiPins);
+            _availableSckPins = this.WhenAnyValue(x => x.MicroController)
+                .Select(GetSckPins)
+                .ToProperty(this, x => x.AvailableSckPins);
         }
 
-        public ICommand ShowPinSelectDialogCommand { get; }
+        private readonly ObservableAsPropertyHelper<List<int>> _availableMosiPins;
+        private readonly ObservableAsPropertyHelper<List<int>> _availableSckPins;
+        public List<int> AvailableMosiPins => _availableMosiPins.Value;
+        public List<int> AvailableSckPins => _availableSckPins.Value;
+        public IEnumerable<PinConfig> PinConfigs => new[] {_apa102SpiConfig!};
+
+        private List<int> GetMosiPins(Microcontroller? microcontroller)
+        {
+            if (MicroController == null) return new List<int>();
+            return microcontroller!.SpiPins(Apa102SpiType)
+                .Where(s => s.Value is SpiPinType.Mosi)
+                .Select(s => s.Key).ToList();
+        }
+
+        private List<int> GetSckPins(Microcontroller? microcontroller)
+        {
+            if (MicroController == null) return new List<int>();
+            return microcontroller!.SpiPins(Apa102SpiType)
+                .Where(s => s.Value is SpiPinType.Sck)
+                .Select(s => s.Key).ToList();
+        }
 
         public async Task Write()
         {
@@ -287,15 +359,16 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
                 Bindings.Add(new ControllerAxis(this,
                     new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
-                    Colors.Transparent, Colors.Transparent, null, 1, 0, 0, type));
+                    Colors.Transparent, Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, type));
             }
 
             foreach (var type in Enum.GetValues<StandardButtonType>())
             {
                 if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
                     null) continue;
-                Bindings.Add(new ControllerButton(this, new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
-                    Colors.Transparent, Colors.Transparent, null, 1, type));
+                Bindings.Add(new ControllerButton(this,
+                    new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
+                    Colors.Transparent, Colors.Transparent, 0, 1, type));
             }
         }
 
@@ -307,6 +380,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var directInputs = inputs.OfType<DirectInput>().ToList();
             var configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
             var lines = new List<string>();
+            var ledCount = outputs.SelectMany(s => s.Outputs).Select(s => s.LedIndex).Max();
             using (var outputStream = new MemoryStream())
             {
                 using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
@@ -318,7 +392,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     $"#define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
                 lines.Add($"#define CONFIGURATION_LEN {outputStream.ToArray().Length}");
             }
-            
+
 
             lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
 
@@ -332,10 +406,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 $"#define ADC_COUNT {directInputs.DistinctBy(s => s.PinConfig.Pin).Count(input => input.IsAnalog)}");
 
             lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
-            //TODO: this
-            lines.Add($"#define LED_COUNT 0");
+            lines.Add($"#define LED_COUNT {ledCount}");
 
-            lines.Add($"#define LED_TYPE {((byte) LedType)}");
+            lines.Add($"#define LED_TYPE {GetLedType()}");
+
+            if (IsApa102)
+            {
+                lines.Add($"#define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}");
+            }
 
             lines.Add($"#define CONSOLE_TYPE {((byte) EmulationType)}");
 
@@ -365,6 +443,23 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}")));
 
             File.WriteAllLines(configFile, lines);
+        }
+
+        private int GetLedType()
+        {
+            switch (LedType)
+            {
+                case LedType.APA102_RGB:
+                case LedType.APA102_RBG:
+                case LedType.APA102_GRB:
+                case LedType.APA102_GBR:
+                case LedType.APA102_BRG:
+                case LedType.APA102_BGR:
+                    return 1;
+                case LedType.None:
+                default:
+                    return 0;
+            }
         }
 
         public void RemoveOutput(Output output)
@@ -417,7 +512,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             var ret = groupedOutputs.Aggregate("", (current, group) => current + (group.First()
                 .Input?.InnermostInput()
-                .GenerateAll(group.Select(output =>
+                .GenerateAll(Bindings.ToList(), group.Select(output =>
                     {
                         var input = output.Input?.InnermostInput();
                         if (input == null) throw new IncompleteConfigurationException("Output without Input found!");
@@ -433,9 +528,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                             debounceTicks.Add(button.GenerateDebounceUpdate(index, xbox));
                         }
 
-                        if (_ledType == LedType.Apa102 && output.LedIndex.HasValue)
+                        if (_ledType != LedType.None && output.LedIndex > 0)
                         {
-                            leds[output.LedIndex.Value] = output.GenerateLedUpdate(index, xbox);
+                            leds[output.LedIndex - 1] = output.GenerateLedUpdate(index, xbox);
                         }
 
                         var generated = output.Generate(xbox, shared, index, combined);
@@ -446,6 +541,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             if (!shared)
             {
                 //For any missing leds, we need to pad out the indexes so that the leds are aligned
+                // And we need to pad out the end with the required padding bytes
                 if (leds.Any())
                 {
                     var max = leds.Keys.Max();
@@ -462,6 +558,10 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 var ticks = debounceTicks.ToList();
                 ticks.InsertRange(0, leds.OrderBy(led => led.Key).Select(s => s.Value));
                 ret = ticks.Aggregate(ret, (current, debounceTick) => current + debounceTick);
+                for (int i = 0; i < leds.Count; i += 16)
+                {
+                    ret += "spi_transfer(APA102_SPI_PORT, 0xff);";
+                }
             }
 
             return ret.Replace('\n', ' ');

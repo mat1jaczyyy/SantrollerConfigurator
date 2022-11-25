@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -542,7 +543,7 @@ public class WiiInput : TwiInput
         }
     }
 
-    public override string GenerateAll(List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
     {
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
         var hasTapBar = false;

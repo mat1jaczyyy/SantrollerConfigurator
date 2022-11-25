@@ -96,8 +96,6 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         _attConfig = microcontroller.GetOrSetPin(Ps2Input.Ps2AttType, att ?? 0, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
-        microcontroller.PinConfigs.CollectionChanged +=
-            (_, _) => this.RaisePropertyChanged(nameof(AvailablePins));
         if (outputs != null)
         {
             _outputs = new AvaloniaList<Output>(outputs);
@@ -116,7 +114,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             _outputs.Add(new ControllerButton(Model,
                 new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
-                Colors.Transparent, null,
+                Colors.Transparent, 0,
                 10,
                 pair.Value));
         }
@@ -124,21 +122,21 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         _outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 128, Model),
-            Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.A));
+            Colors.Transparent, Colors.Transparent, 0, 10, StandardButtonType.A));
         _outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 128, Model),
-            Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.X));
+            Colors.Transparent, Colors.Transparent, 0, 10, StandardButtonType.X));
         _outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 240, Model),
-            Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Lb));
+            Colors.Transparent, Colors.Transparent, 0, 10, StandardButtonType.Lb));
 
         foreach (var pair in Axis)
         {
             _outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
-                Colors.Transparent, null, 1, 0, 0, pair.Value));
+                Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, pair.Value));
         }
     }
 

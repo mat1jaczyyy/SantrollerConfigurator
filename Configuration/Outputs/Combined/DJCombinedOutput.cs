@@ -49,15 +49,13 @@ public class DjCombinedOutput : CombinedTwiOutput
         _outputs.Clear();
         _outputs.AddRange(Buttons.Select(pair => new ControllerButton(Model,
             new DjInput(pair.Key, Model, _microcontroller, combined: true),
-            Colors.Transparent, Colors.Transparent, null, 5, pair.Value)));
+            Colors.Transparent, Colors.Transparent, 0, 5, pair.Value)));
         _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, _microcontroller, combined: true),
             Colors.Transparent,
-            Colors.Transparent, null, 1,
-            0, 0, StandardAxisType.LeftStickX));
+            Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickX));
         _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, Model, _microcontroller, combined: true),
             Colors.Transparent,
-            Colors.Transparent, null, 1,
-            0, 0, StandardAxisType.LeftStickY));
+            Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickY));
     }
 
     public override SerializedOutput Serialize()

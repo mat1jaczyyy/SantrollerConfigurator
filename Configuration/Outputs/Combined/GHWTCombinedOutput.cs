@@ -52,7 +52,7 @@ public class GhwtCombinedOutput : CombinedOutput
             new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
                 combined: true),
             Colors.Transparent,
-            Colors.Transparent, null, 1, 0, 0, StandardAxisType.LeftStickX));
+            Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickX));
     }
 
     public void AddTapBarFrets()
@@ -62,7 +62,7 @@ public class GhwtCombinedOutput : CombinedOutput
             _outputs.Add(new ControllerButton(Model,
                 new GhWtTapInput(pair.Key, Model, _microcontroller,
                     combined: true), Colors.Transparent,
-                Colors.Transparent, null, 5, pair.Value));
+                Colors.Transparent, 0, 5, pair.Value));
         }
     }
 

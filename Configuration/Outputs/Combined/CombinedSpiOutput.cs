@@ -13,7 +13,7 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 {
     protected readonly Microcontroller Microcontroller;
 
-    protected CombinedSpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
+    protected CombinedSpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, uint spiFreq, bool cpol,
         bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null): base(model, null, name)
     {
         Microcontroller = microcontroller;
@@ -30,10 +30,6 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
             if (miso == null || mosi == null || sck == null)
             {
                 var pins = microcontroller.SpiPins(SpiType);
-                if (!pins.Any())
-                {
-                    throw new PinUnavailableException("No SPI Pins Available!");
-                }
                 miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;

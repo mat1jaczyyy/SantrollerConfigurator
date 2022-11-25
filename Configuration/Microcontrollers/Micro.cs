@@ -118,8 +118,8 @@ public class Micro : AvrController
         {3, "INT0"},
         {7, "INT4"},
     };
-    
-    private Dictionary<Tuple<char, int>, int> _pinByMask = Enumerable.Zip(Ports, PinIndex).Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i)).ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s=>s.Item3);
+    //Skip the duplicate analog pins
+    private Dictionary<Tuple<char, int>, int> _pinByMask = Ports.Zip(PinIndex).Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i)).DistinctBy(s => new Tuple<char, int>(s.Item1, s.Item2)).ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s=>s.Item3);
     protected override Dictionary<Tuple<char, int>, int> PinByMask => _pinByMask;
     
     protected override string GetInterruptForPin(int ack)

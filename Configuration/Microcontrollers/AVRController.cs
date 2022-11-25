@@ -61,7 +61,7 @@ public abstract class AvrController : Microcontroller
 
     public override SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
         bool msbfirst,
-        int clock)
+        uint clock)
     {
         if (PinConfigs.Any(c => c is AvrSpiConfig)) return null;
         var conf = new AvrSpiConfig(type, SpiMosi, SpiMiso, SpiSck, cpol, cpha, msbfirst, clock);
@@ -124,13 +124,11 @@ public abstract class AvrController : Microcontroller
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)
     {
-        char portChar = PortNames[port];
-        for (int i = 0; i < 8; i++)
+        var portChar = PortNames[port];
+        for (var i = 0; i < 8; i++)
         {
-            if ((mask & i) != 0)
-            {
-                digitalRaw[PinByMask[new Tuple<char, int>(portChar, i)]] = (pins & i) != 0;
-            }
+            if ((mask & (1 << i)) == 0) continue;
+            digitalRaw[PinByMask[new Tuple<char, int>(portChar, i)]] = (pins & (1 << i)) == 0;
         }
     }
     public override int GetAnalogMask(DevicePin devicePin)

@@ -24,8 +24,8 @@ public abstract class OutputAxis : Output
 {
     protected delegate bool TriggerDelegate(DeviceControllerType type);
 
-    protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex,
-        float multiplier, int offset,
+    protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex,
+        int min, int max,
         int deadZone, string name, TriggerDelegate triggerDelegate) : base(model, input, ledOn, ledOff, ledIndex, name)
     {
         Input = input;
@@ -43,56 +43,99 @@ public abstract class OutputAxis : Output
             .ToProperty(this, x => x.Trigger);
         LedOn = ledOn;
         LedOff = ledOff;
-        Multiplier = multiplier;
-        Offset = offset;
+        _calibrationMax = max;
+        _calibrationMin = min;
         DeadZone = deadZone;
         //Direct Input doesn't actually have a preference for uint or int, so just use the trigger value in that case.
         _inputIsUInt = this.WhenAnyValue(x => x.Input, x => x.Trigger).Select(i =>
                 i.Item1!.InnermostInput() is DirectInput ? i.Item2 : i.Item1!.IsUint)
             .ToProperty(this, x => x.InputIsUint);
-        _calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue).Select(ApplyCalibration);
+        _calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue);
+        _calibrationWatcher.Subscribe(ApplyCalibration);
         _valueRawLower = this.WhenAnyValue(x => x.ValueRaw).Select(s => (s < 0 ? -s : 0))
             .ToProperty(this, x => x.ValueRawLower);
         _valueRawUpper = this.WhenAnyValue(x => x.ValueRaw).Select(s => (s > 0 ? s : 0))
             .ToProperty(this, x => x.ValueRawUpper);
-        
+
         _value = this
-            .WhenAnyValue(x => x.ValueRaw, x => x.Multiplier, x => x.Offset, x => x.DeadZone, x => x.Trigger,
+            .WhenAnyValue(x => x.ValueRaw, x => x.Min, x => x.Max, x => x.DeadZone, x => x.Trigger,
                 x => x.Model.DeviceType).Select(Calculate).ToProperty(this, x => x.Value);
         _valueLower = this.WhenAnyValue(x => x.Value).Select(s => (s < 0 ? -s : 0)).ToProperty(this, x => x.ValueLower);
         _valueUpper = this.WhenAnyValue(x => x.Value).Select(s => (s > 0 ? s : 0)).ToProperty(this, x => x.ValueUpper);
-        _deadZoneScaled = this.WhenAnyValue(x => x.DeadZone, x => x.Trigger)
-            .Select(s => Math.Min((float) s.Item1 / (s.Item2 ? ushort.MaxValue : short.MaxValue) * 500, 500f))
-            .ToProperty(this, x => x.DeadZoneScaled);
-        _computedDeadZoneMargin = this.WhenAnyValue(x => x.Offset, x => x.InputIsUint, x => x.DeadZone)
-            .Select(s =>
-            {
-                if (s.Item2)
-                {
-                    return new Thickness((double) s.Item1 / ushort.MaxValue * 500, 0, 0, 0);
-                }
-                var val =  (s.Item1 + short.MaxValue) - (s.Item3);
-                return new Thickness((double) val / ushort.MaxValue * 500, 0, 0, 0);
-            })
-            .ToProperty(this, x => x.ComputedDeadZoneMargin);
+        _computedDeadZoneMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.InputIsUint, x => x.DeadZone)
+            .Select(ComputeDeadZoneMargin).ToProperty(this, x => x.ComputedDeadZoneMargin);
+        _computedMinMaxMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.InputIsUint)
+            .Select(ComputeMinMaxMargin).ToProperty(this, x => x.CalibrationMinMaxMargin);
     }
 
-    private int _calibrationMin;
-    private int _calibrationMax;
+    private Thickness ComputeDeadZoneMargin((int, int, bool, int) s)
+    {
+        if (!s.Item3)
+        {
+            s.Item1 += short.MaxValue;
+            s.Item2 += short.MaxValue;
+        }
 
-    private int ApplyCalibration(int rawValue)
+        float min = Math.Min(s.Item1, s.Item2);
+        float max = Math.Max(s.Item1, s.Item2);
+
+        if (s.Item3)
+        {
+            if (s.Item1 < s.Item2)
+            {
+                max = min + s.Item4;
+            }
+            else
+            {
+                min = max - s.Item4;
+            }
+        }
+        else
+        {
+            var mid = (max + min) / 2;
+            min = mid - s.Item4;
+            max = mid + s.Item4;
+        }
+
+        var left = Math.Min(min / (ushort.MaxValue) * 500, 500f);
+
+        var right = 500 - Math.Min(max / (ushort.MaxValue) * 500, 500f);
+
+        return new Thickness(left, 0, right, 0);
+    }
+
+
+    private static Thickness ComputeMinMaxMargin((int, int, bool) s)
+    {
+        if (!s.Item3)
+        {
+            s.Item1 += short.MaxValue;
+            s.Item2 += short.MaxValue;
+        }
+
+        float min = Math.Min(s.Item1, s.Item2);
+        float max = Math.Max(s.Item1, s.Item2);
+
+        var left = Math.Min(min / (ushort.MaxValue) * 500, 500f);
+
+        var right = 500 - Math.Min(max / (ushort.MaxValue) * 500, 500f);
+
+        return new Thickness(left, 0, right, 0);
+    }
+
+    private void ApplyCalibration(int rawValue)
     {
         switch (_calibrationState)
         {
             case OutputAxisCalibrationState.MIN:
-                _calibrationMin = rawValue;
+                Min = rawValue;
                 break;
             case OutputAxisCalibrationState.MAX:
-                _calibrationMax = rawValue;
+                Max = rawValue;
                 break;
             case OutputAxisCalibrationState.DEADZONE:
-                var min = Math.Min(_calibrationMin, _calibrationMax);
-                var max = Math.Max(_calibrationMin, _calibrationMax);
+                var min = Math.Min(Min, Max);
+                var max = Math.Max(Min, Max);
                 var valRaw = rawValue;
                 int deadZone;
                 if (valRaw < min)
@@ -107,28 +150,26 @@ public abstract class OutputAxis : Output
                 {
                     deadZone = valRaw;
                 }
-                
-                // For Uint, the deadzone goes from min to max, while for int, it starts in the middle and grows in either direction.
-                _deadZone = InputIsUint ? (min - deadZone) : Math.Abs((min + max)/2 - deadZone);
-                this.RaisePropertyChanged(nameof(DeadZone));
+
+                if (InputIsUint)
+                {
+                    if (Min < Max)
+                    {
+                        DeadZone = valRaw - min;
+                    }
+                    else
+                    {
+                        DeadZone = max - valRaw;
+                    }
+                }
+                else
+                {
+                    // For Int, deadzone starts in the middle and grows in both directions
+                    DeadZone = Math.Abs((min + max) / 2 - deadZone);
+                }
+
                 break;
         }
-
-        float val = Math.Min(_calibrationMin, _calibrationMax);
-        if (!InputIsUint)
-        {
-            val += short.MaxValue;
-        }
-
-        val = val / ushort.MaxValue * 500;
-        CalibrationMinMaxMargin = new Thickness(val, 0, 0, 0);
-        CalibrationMinMaxWidth =
-            Math.Min(
-                (float) Math.Abs(_calibrationMax - _calibrationMin) / (ushort.MaxValue) * 500,
-                500f);
-        this.RaisePropertyChanged(nameof(CalibrationMinMaxMargin));
-        this.RaisePropertyChanged(nameof(CalibrationMinMaxWidth));
-        return rawValue;
     }
 
     public void Calibrate()
@@ -138,20 +179,7 @@ public abstract class OutputAxis : Output
             return;
         }
 
-        if (_calibrationState == OutputAxisCalibrationState.NONE)
-        {
-            _calibrationMax = (InputIsUint ? ushort.MaxValue : short.MaxValue);
-            ApplyCalibration(ValueRaw);
-        }
-
         _calibrationState++;
-
-        if (_calibrationState == OutputAxisCalibrationState.DEADZONE)
-        {
-            _offset = (int) ((float) (_calibrationMax + _calibrationMin) / 2);
-            Multiplier = ushort.MaxValue / (float) (_calibrationMax - _calibrationMin);
-            this.RaisePropertyChanged(nameof(Offset));
-        }
 
         if (_calibrationState == OutputAxisCalibrationState.LAST)
         {
@@ -161,38 +189,48 @@ public abstract class OutputAxis : Output
         this.RaisePropertyChanged(nameof(CalibrationText));
     }
 
-    //TODO: can we somehow show a line for the trigger values for analog to digital?
-    //TODO: and digital to analog should just straight up not show this interface and instead just show a range slider where you set the emulated values
-    private int Calculate((int, float, int, int, bool, DeviceControllerType) values)
+    private int Calculate((int, int, int, int, bool, DeviceControllerType) values)
     {
         double val = values.Item1;
-        var multiplier = values.Item2;
-        var offset = values.Item3;
-        var deadZone = values.Item4;
+        var min = (float) values.Item2;
+        var max = (float) values.Item3;
+        var deadZone = (float) values.Item4;
         var trigger = values.Item5;
-        val -= offset;
         if (InputIsUint)
         {
-            if (val < deadZone)
+            if (max > min)
             {
-                return 0;
+                if ((val - min) < deadZone)
+                {
+                    return 0;
+                }
             }
+            else
+            {
+                min -= deadZone;
 
-            val = (val - deadZone) * (ushort.MaxValue / (ushort.MaxValue - (float) deadZone));
+                if (val > min)
+                {
+                    return 0;
+                }
+            }
         }
         else
         {
-            if (val < deadZone && val > -deadZone)
+            var deadZoneCalc = val - ((max + min) / 2);
+            if (deadZoneCalc < deadZone && deadZoneCalc > -deadZone)
             {
                 return 0;
             }
 
-            val = (val - (Math.Sign(val) * deadZone)) * (short.MaxValue / (short.MaxValue - (float) deadZone));
+            val = (val - (Math.Sign(val) * deadZone));
+            min += deadZone;
+            max -= deadZone;
         }
 
-        val *= multiplier;
         if (trigger)
         {
+            val = (val - min) / (max - min) * (ushort.MaxValue);
             if (!InputIsUint)
             {
                 val += short.MaxValue;
@@ -203,6 +241,7 @@ public abstract class OutputAxis : Output
         }
         else
         {
+            val = (val - min) / (max - min) * (short.MaxValue - short.MinValue) + short.MinValue;
             if (InputIsUint)
             {
                 val -= short.MaxValue;
@@ -225,89 +264,39 @@ public abstract class OutputAxis : Output
     public int ValueLower => _valueLower.Value;
     private readonly ObservableAsPropertyHelper<int> _valueUpper;
     public int ValueUpper => _valueUpper.Value;
-    private readonly ObservableAsPropertyHelper<float> _deadZoneScaled;
-    public float DeadZoneScaled => _deadZoneScaled.Value;
     private readonly ObservableAsPropertyHelper<bool> _inputIsUInt;
     public bool InputIsUint => _inputIsUInt.Value;
+    private int _calibrationMin;
+    private int _calibrationMax;
+
+    public int Min
+    {
+        get => _calibrationMin;
+        set => this.RaiseAndSetIfChanged(ref _calibrationMin, value);
+    }
+
+    public int Max
+    {
+        get => _calibrationMax;
+        set => this.RaiseAndSetIfChanged(ref _calibrationMax, value);
+    }
 
     private readonly ObservableAsPropertyHelper<Thickness> _computedDeadZoneMargin;
     public Thickness ComputedDeadZoneMargin => _computedDeadZoneMargin.Value;
-    public float CalibrationMinMaxWidth { get; set; }
-    public Thickness CalibrationMinMaxMargin { get; set; }
-
-    private float _multiplier;
-
-    public float Multiplier
-    {
-        get => _multiplier;
-        set => this.RaiseAndSetIfChanged(ref _multiplier, value);
-    }
-
-    private int _offset;
-
-    public int Offset
-    {
-        get => _offset;
-        set
-        {
-            if (Trigger)
-            {
-                value = Math.Max(value, 0);
-                value = Math.Min(value, ushort.MaxValue - _deadZone);
-            }
-            else
-            {
-                value = Math.Max(value, short.MinValue + _deadZone);
-                value = Math.Min(value, short.MaxValue - _deadZone);
-            }
-
-
-            this.RaiseAndSetIfChanged(ref _offset, value);
-            this.RaisePropertyChanged(nameof(OffsetSlider));
-            this.RaisePropertyChanged(nameof(DeadZoneSlider));
-        }
-    }
+    private readonly ObservableAsPropertyHelper<Thickness> _computedMinMaxMargin;
+    public Thickness CalibrationMinMaxMargin => _computedMinMaxMargin.Value;
 
     private int _deadZone;
 
     public int DeadZone
     {
         get => _deadZone;
-        set
-        {
-            if (value < 0)
-            {
-                value = 0;
-            }
-
-            this.RaiseAndSetIfChanged(ref _deadZone, value);
-            if (Offset - value < short.MinValue && !InputIsUint)
-            {
-                Offset = short.MinValue + value;
-            }
-
-            this.RaisePropertyChanged(nameof(DeadZoneSlider));
-            this.RaisePropertyChanged(nameof(OffsetSlider));
-        }
+        set => this.RaiseAndSetIfChanged(ref _deadZone, value);
     }
 
 
     private readonly ObservableAsPropertyHelper<bool> _trigger;
     public bool Trigger => _trigger.Value;
-
-    public int DeadZoneSlider
-    {
-        get => DeadZone + Offset;
-        set => DeadZone = value - Offset;
-    }
-
-
-    public int OffsetSlider
-    {
-        get => Offset + (Trigger ? DeadZone / 2 : 0);
-        set => Offset = value - (Trigger ? DeadZone / 2 : 0);
-    }
-
     protected abstract string GenerateOutput(bool xbox);
     public override bool IsCombined => false;
     public override bool IsStrum => false;
@@ -345,29 +334,36 @@ public abstract class OutputAxis : Output
             function = Trigger ? "handle_calibration_ps3_trigger" : "handle_calibration_ps3";
         }
 
+        var min = Min;
+        var max = Max;
         if (InputIsUint)
         {
-            function += "_uint";
+            if (max <= min)
+            {
+                min -= DeadZone;
+            }
         }
         else
         {
-            function += "_int";
+            min += DeadZone;
+            max -= DeadZone;
         }
 
-        var multiplier = Multiplier;
-        if (InputIsUint)
+        float multiplier;
+        if (Trigger)
         {
-            multiplier *= (ushort.MaxValue / (ushort.MaxValue - (float) DeadZone));
+            multiplier = 1f / (max - min) * (ushort.MaxValue);
         }
         else
         {
-            multiplier *= (short.MaxValue / (short.MaxValue - (float) DeadZone));
+            multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
 
         var mulInt = (short) (multiplier * 1024);
 
-        return
-            $"{GenerateOutput(xbox)} = {function}({Input.Generate()}, {Offset}, {mulInt}, {DeadZone});";
+        return InputIsUint
+            ? $"{GenerateOutput(xbox)} = {function}_uint({Input.Generate()}, {min}, {mulInt}, {DeadZone});"
+            : $"{GenerateOutput(xbox)} = {function}_int({Input.Generate()}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});";
     }
 
     public override string GenerateLedUpdate(int debounceIndex, bool xbox)

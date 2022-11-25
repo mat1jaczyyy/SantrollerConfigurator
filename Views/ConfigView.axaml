@@ -114,10 +114,12 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="PS2 Controller Input: "></TextBlock>
                     <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center" SelectedItem="{Binding Mosi}"
+                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center"
+                              SelectedItem="{Binding Mosi}"
                               Items="{Binding AvailableMosiPins}">
                     </ComboBox>
-                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center" SelectedItem="{Binding Miso}"
+                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center"
+                              SelectedItem="{Binding Miso}"
                               Items="{Binding AvailableMisoPins}">
                     </ComboBox>
                     <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center" SelectedItem="{Binding Sck}"
@@ -216,26 +218,27 @@
                                            Text="{Binding ValueRaw}">
                                 </TextBlock>
                                 <Rectangle Margin="{Binding ComputedDeadZoneMargin}" Fill="Red"
-                                           HorizontalAlignment="Left" Width="{Binding DeadZoneScaled}"
-                                           Height="30" Opacity="0.3">
+                                           HorizontalAlignment="Stretch" Height="30" Opacity="0.3">
                                 </Rectangle>
-                                <Rectangle Margin="{Binding CalibrationMinMaxMargin}" HorizontalAlignment="Left"
-                                           Fill="Green" Width="{Binding CalibrationMinMaxWidth}" Height="30"
-                                           Opacity="0.3"
-                                           IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <Rectangle Margin="{Binding CalibrationMinMaxMargin}" HorizontalAlignment="Stretch"
+                                           Fill="Green" Height="30"
+                                           Opacity="0.3">
                                 </Rectangle>
                             </Grid>
 
                         </StackPanel>
-                        <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding OffsetSlider}"
-                                Minimum="-32767" Maximum="32768" />
-                        <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding OffsetSlider}"
-                                Minimum="0" Maximum="65535" />
-                        <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding DeadZoneSlider}"
-                                Minimum="-32767" Maximum="32768" />
-                        <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding DeadZoneSlider}"
-                                Minimum="0" Maximum="65535" />
-                        <Slider Width="500" Value="{Binding Multiplier}" Minimum="-4" Maximum="4" />
+                        <!-- <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding Min}" -->
+                        <!--         Minimum="-32767" Maximum="32768" /> -->
+                        <!-- <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding Min}" -->
+                        <!--         Minimum="0" Maximum="65535" /> -->
+                        <!-- <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding Max}" -->
+                        <!--         Minimum="-32767" Maximum="32768" /> -->
+                        <!-- <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding Max}" -->
+                        <!--         Minimum="0" Maximum="65535" /> -->
+                        <!-- <Slider IsVisible="{Binding !InputIsUint}" Width="500" Value="{Binding DeadZone}" -->
+                        <!--         Minimum="-32767" Maximum="32768" /> -->
+                        <!-- <Slider IsVisible="{Binding InputIsUint}" Width="500" Value="{Binding DeadZone}" -->
+                        <!--         Minimum="0" Maximum="65535" /> -->
                         <TextBlock
                             IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
                             VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding CalibrationText}">
@@ -274,7 +277,7 @@
                            Content="DJ Hero Turntable Input">
                     </Label>
                     <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
-                               Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
                     <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
@@ -340,10 +343,12 @@
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                Text="{Binding DetectedType}">
                     </TextBlock>
-                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}" SelectedItem="{Binding Mosi}"
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}"
+                              SelectedItem="{Binding Mosi}"
                               Items="{Binding AvailableMosiPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
-                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}" SelectedItem="{Binding Miso}"
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}"
+                              SelectedItem="{Binding Miso}"
                               Items="{Binding AvailableMisoPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
                     <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}" SelectedItem="{Binding Sck}"
@@ -441,6 +446,25 @@
                                       SelectedItem="{Binding LedType}" Items="{Binding LedTypes}">
                             </ComboBox>
                         </StackPanel>
+                        <StackPanel IsVisible="{Binding BindableSpi}">
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 CI / SCK Pin"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0" 
+                                      SelectedItem="{Binding Apa102Mosi}"
+                                      Items="{Binding AvailableMosiPins}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}">
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel IsVisible="{Binding BindableSpi}">
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 DI / MOSI Pin"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0" 
+                                      SelectedItem="{Binding Apa102Sck}"
+                                      Items="{Binding AvailableSckPins}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}">
+                            </ComboBox>                        
+
+                        </StackPanel>
                         <Button x:CompileBindings="False" Command="{Binding AddOutput}" HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Add Binding
@@ -531,7 +555,9 @@
                                                     <Binding Path="!IsCombined" />
                                                 </MultiBinding>
                                             </StackPanel.IsVisible>
-                                            <NumericUpDown Value="{Binding LedIndex}" VerticalAlignment="Center"></NumericUpDown>
+                                            <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
+                                                           Value="{Binding LedIndex}" VerticalAlignment="Center">
+                                            </NumericUpDown>
                                             <ColorPicker Color="{Binding LedOn}"></ColorPicker>
                                             <ColorPicker Color="{Binding LedOff}"></ColorPicker>
                                         </StackPanel>
@@ -570,7 +596,8 @@
                                                                     <Binding Path="!IsCombined" />
                                                                 </MultiBinding>
                                                             </StackPanel.IsVisible>
-                                                            <NumericUpDown Value="{Binding LedIndex}"
+                                                            <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
+                                                                           Value="{Binding LedIndex}"
                                                                            VerticalAlignment="Center">
                                                             </NumericUpDown>
                                                             <ColorPicker Color="{Binding LedOn}"></ColorPicker>

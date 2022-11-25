@@ -4,7 +4,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class AvrSpiConfig: SpiConfig
 {
-    public AvrSpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, int clock) : base(type, mosi, miso, sck, cpol, cpha, msbfirst, clock)
+    public AvrSpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, uint clock) : base(type, mosi, miso, sck, cpol, cpha, msbfirst, clock)
     {
     }
 

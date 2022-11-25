@@ -107,9 +107,9 @@ public abstract class Output : ReactiveObject, IDisposable
 
     private Color _ledOn;
     private Color _ledOff;
-    private byte? _ledIndex;
+    private byte _ledIndex;
 
-    public byte? LedIndex
+    public byte LedIndex
     {
         get => _ledIndex;
         set => this.RaiseAndSetIfChanged(ref _ledIndex, value);
@@ -134,7 +134,7 @@ public abstract class Output : ReactiveObject, IDisposable
     private readonly ObservableAsPropertyHelper<int> _valueRaw;
     public int ValueRaw => _valueRaw.Value;
 
-    protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex, string name)
+    protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex, string name)
     {
         Input = input;
         LedOn = ledOn;
@@ -153,7 +153,7 @@ public abstract class Output : ReactiveObject, IDisposable
             .ToProperty(this, x => x.IsPs2);
         _isWt = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is GhWtTapInput)
             .ToProperty(this, x => x.IsWt);
-        _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is LedType.Apa102)
+        _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToProperty(this, x => x.AreLedsEnabled);
         _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType)
             .Select(x => GetLocalisedName())

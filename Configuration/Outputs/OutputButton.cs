@@ -10,7 +10,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public abstract class OutputButton : Output
 {
-    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex, byte debounce, string name): base(model, input, ledOn, ledOff, ledIndex, name)
+    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex, byte debounce, string name): base(model, input, ledOn, ledOff, ledIndex, name)
     {
         Debounce = debounce;
         
@@ -45,14 +45,14 @@ public abstract class OutputButton : Output
 
     public override string GenerateLedUpdate(int debounceIndex, bool xbox)
     {
-        if (!AreLedsEnabled || !LedIndex.HasValue) return "";
+        if (!AreLedsEnabled || LedIndex == 0) return "";
         return @$"
             if (debounce[{debounceIndex}]) {{
                 spi_transfer(APA102_SPI_PORT, 0xff);
-                {string.Join("\n", Model.LedOrder.GetColors(LedOn).Select(b => $"spi_transfer(APA102_SPI_PORT, {b});"))}
+                {string.Join("\n", Model.LedType.GetColors(LedOn).Select(b => $"spi_transfer(APA102_SPI_PORT, {b});"))}
             }} else {{
                 spi_transfer(APA102_SPI_PORT, 0xff);
-                {string.Join("\n", Model.LedOrder.GetColors(LedOff).Select(b => $"spi_transfer(APA102_SPI_PORT, {b});"))}
+                {string.Join("\n", Model.LedType.GetColors(LedOff).Select(b => $"spi_transfer(APA102_SPI_PORT, {b});"))}
             }}";
     }
 }

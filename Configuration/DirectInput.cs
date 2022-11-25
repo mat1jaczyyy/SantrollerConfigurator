@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Collections;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -11,7 +12,8 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration;
 
 public class DirectInput : InputWithPin
 {
-    public DirectInput(int pin, DevicePinMode pinMode, ConfigViewModel model, Microcontroller microcontroller) : base(model, microcontroller,
+    public DirectInput(int pin, DevicePinMode pinMode, ConfigViewModel model, Microcontroller microcontroller) : base(
+        model, microcontroller,
         new DirectPinConfig(Guid.NewGuid().ToString(), pin, pinMode))
     {
     }
@@ -36,45 +38,39 @@ public class DirectInput : InputWithPin
 
     public override bool IsAnalog => PinConfig.PinMode == DevicePinMode.Analog;
 
-    public bool IsUintDirect = true;
+    public bool IsUintDirect = false;
     public override bool IsUint => IsUintDirect;
 
-    private string GenerateAnalogRead(int index)
+    private string GenerateAnalogRead()
     {
-        var ret = Microcontroller.GenerateAnalogRead(index);
-        // We are treating the uint from the sensor as an analog value, so we need to convert it here
-        if (!IsUintDirect)
-        {
-            ret += $" - {short.MaxValue}";
-        }
-
-        return ret;
+        return Microcontroller.GenerateAnalogRead(!IsUintDirect);
     }
 
     public override string Generate()
     {
         return IsAnalog
-            ? GenerateAnalogRead(Microcontroller.GetChannel(PinConfig.Pin))
+            ? GenerateAnalogRead()
             : Microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
     }
 
     public override InputType? InputType => IsAnalog ? Types.InputType.AnalogPinInput : Types.InputType.DigitalPinInput;
 
-    public override string GenerateAll(List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
     {
         if (Microcontroller is not AvrController) return string.Join(";\n", bindings.Select(binding => binding.Item2));
-        Dictionary<string, string> fillPins = new();
-
-        var binding = bindings.Where(s => s.Item1 is DirectInput {IsAnalog: true})
-            .Select(s => ((s.Item1 as DirectInput)!.Pin, s.Item2)).OrderBy(s => s.Pin)
-            .DistinctBy(s => s.Pin).ToList();
-        for (var i = 0; i < binding.Count; i++)
+        var replacements = new Dictionary<string, string>();
+        var seenPins = allBindings.Select(s => s.Input?.InnermostInput()).OfType<DirectInput>().Where(s => s.IsAnalog)
+            .Select(s => s.Pin).Distinct().OrderBy(s => s).Select((pin, index) => (pin, index)).ToDictionary(s => s.pin, s => s.index);
+        foreach (var (item1, item2) in bindings)
         {
-            var tuple = binding[i];
-            fillPins[tuple.Item2] = GenerateAnalogRead(i);
+            var pin = item1.Pins.First().Pin;
+            if (item1.IsAnalog)
+            {
+                replacements[item2] = item2.Replace("{pin}", seenPins[pin].ToString());
+            }
         }
 
-        return string.Join(";\n", bindings.Select(b => b.Item1.IsAnalog ? fillPins[b.Item2] : b.Item2));
+        return string.Join(";\n", bindings.Select(b => b.Item1.IsAnalog ? replacements[b.Item2] : b.Item2));
     }
 
     public override void Dispose()
@@ -90,7 +86,7 @@ public class DirectInput : InputWithPin
 
     public override List<DevicePin> Pins => new()
     {
-        new(PinConfig.Pin, PinConfig.PinMode)
+        new(Pin, PinMode)
     };
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,

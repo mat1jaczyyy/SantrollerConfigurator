@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Collections;
 using DynamicData.Kernel;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
@@ -14,7 +15,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 public class Ps2Input : SpiInput
 {
     public static readonly string Ps2SpiType = "ps2";
-    public static readonly int Ps2SpiFreq = 500000;
+    public static readonly uint Ps2SpiFreq = 500000;
     public static readonly bool Ps2SpiCpol = true;
     public static readonly bool Ps2SpiCpha = true;
     public static readonly bool Ps2SpiMsbFirst = false;
@@ -230,8 +231,6 @@ public class Ps2Input : SpiInput
         _attConfig = microcontroller.GetOrSetPin(Ps2AttType, att ?? 0, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
-        Microcontroller.PinConfigs.CollectionChanged +=
-            (_, _) => this.RaisePropertyChanged(nameof(AvailablePins));
     }
 
     public override string Generate()
@@ -367,7 +366,7 @@ public class Ps2Input : SpiInput
         };
     }
 
-    public override string GenerateAll(List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
     {
         Dictionary<Ps2InputType, string> ds2Axis = new();
         Dictionary<Ps2ControllerType, List<string>> mappedBindings = new();

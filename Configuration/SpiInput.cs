@@ -11,7 +11,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration;
 public abstract class SpiInput : Input, ISpi
 {
     protected readonly Microcontroller Microcontroller;
-    protected SpiInput(Microcontroller microcontroller, string spiType, int spiFreq, bool cpol,
+    protected SpiInput(Microcontroller microcontroller, string spiType, uint spiFreq, bool cpol,
         bool cpha, bool msbFirst, ConfigViewModel model, int? miso = null, int? mosi = null, int? sck = null) : base(model)
     {
         Microcontroller = microcontroller;
@@ -27,10 +27,6 @@ public abstract class SpiInput : Input, ISpi
             if (miso == null || mosi == null || sck == null)
             {
                 var pins = microcontroller.SpiPins(_spiType);
-                if (!pins.Any())
-                {
-                    throw new PinUnavailableException("No SPI Pins Available!");
-                }
                 miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;

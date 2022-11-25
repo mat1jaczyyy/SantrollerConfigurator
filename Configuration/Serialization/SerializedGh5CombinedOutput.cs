@@ -20,7 +20,7 @@ public class SerializedGh5CombinedOutput : SerializedOutput
     [ProtoMember(6)] public List<SerializedOutput> Outputs { get; }
     public override uint LedOn => Colors.Transparent.ToUint32();
     public override uint LedOff => Colors.Transparent.ToUint32();
-    public override byte? LedIndex => null;
+    public override byte LedIndex => 0;
 
     public SerializedGh5CombinedOutput(int sda, int scl, List<Output> outputs)
     {

@@ -9,7 +9,7 @@ public abstract class SpiConfig : PinConfig
     private bool _cpol;
     private bool _cpha;
     private bool _msbfirst;
-    private int _clock;
+    private uint _clock;
 
     protected int _mosi;
 
@@ -17,7 +17,7 @@ public abstract class SpiConfig : PinConfig
 
     protected int _sck;
 
-    protected SpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, int clock)
+    protected SpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, uint clock)
     {
         Type = type;
         _mosi = mosi;

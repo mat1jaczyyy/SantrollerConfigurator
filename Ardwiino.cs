@@ -271,18 +271,17 @@ public class Ardwiino : ConfigurableUsbDevice
                 if (led.pin != 0)
                 {
                     colors[led.pin - 1] = Color.FromRgb(led.red, led.green, led.blue);
-                    ledIndexes[led.pin - 1] = index;
+                    ledIndexes[led.pin - 1] = (byte) (index + 1);
                 }
             }
 
             var ledType = LedType.None;
-            var deviceType = DeviceControllerType.Guitar;
+            DeviceControllerType deviceType;
             var emulationType = EmulationType.Controller;
-            var inputControllerType = (InputControllerType) config.all.main.inputType;
             var rhythmType = RhythmType.GuitarHero;
             if (config.all.main.fretLEDMode == 2)
             {
-                ledType = LedType.Apa102;
+                ledType = LedType.APA102_BGR;
             }
 
             if ((config.all.main.subType >= (int) SubType.KeyboardGamepad &&
@@ -297,7 +296,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 emulationType = EmulationType.Midi;
             }
 
-            var xinputOnWindows = (SubType)config.all.main.subType <= SubType.XinputTurntable;
+            var xinputOnWindows = (SubType) config.all.main.subType <= SubType.XinputTurntable;
             switch ((SubType) config.all.main.subType)
             {
                 case SubType.XinputGamepad:
@@ -382,6 +381,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     break;
             }
 
+            model.SetDeviceTypeAndRhythmTypeWithoutUpdating(deviceType, rhythmType, emulationType);
             var sda = 18;
             var scl = 19;
             var mosi = 3;
@@ -441,8 +441,8 @@ public class Ardwiino : ConfigurableUsbDevice
                     {
                         on = colors[axis + XboxBtnCount];
                     }
-                    
-                    byte? ledIndex = ledIndexes.GetValueOrDefault(pin.pin);
+
+                    var ledIndex = ledIndexes.GetValueOrDefault(axis + XboxBtnCount);
 
                     var off = Color.FromRgb(0, 0, 0);
                     if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
@@ -454,19 +454,26 @@ public class Ardwiino : ConfigurableUsbDevice
                         config.all.main.tiltType == 2)
                     {
                         bindings.Add(new ControllerAxis(model,
-                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller), 32767, model), on,
-                            off, ledIndex, 1, 0,
+                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
+                                32767, model), on,
+                            off, ledIndex, ushort.MinValue, ushort.MaxValue,
                             0, StandardAxisType.RightStickY));
                     }
                     else
                     {
-                        var axisMultiplier = (scale.multiplier / 1024.0f) * (isTrigger ? 2 : 1) *
-                                             (pin.inverted > 0 ? -1 : 1);
-                        var axisOffset = ((isTrigger ? 0 : 32670) + scale.offset) >> 8;
-                        var axisDeadzone = ((isTrigger ? 32768 : 0) + scale.deadzone) >> 8;
+                        var axisMultiplier = (scale.multiplier / 1024.0f) * (pin.inverted > 0 ? -1 : 1);
+                        var axisOffset = (scale.offset);
+                        var axisDeadzone = ((isTrigger ? 32768 : 0) + scale.deadzone);
+                        int min = axisOffset;
+                        int max = (int) (axisOffset + (ushort.MaxValue / axisMultiplier));
+                        if (isTrigger)
+                        {
+                            min += short.MaxValue;
+                            max += short.MaxValue;
+                        }
                         bindings.Add(new ControllerAxis(model,
                             new DirectInput(pin.pin, DevicePinMode.Analog, model, controller), on, off,
-                            ledIndex, axisMultiplier, axisOffset, axisDeadzone, genAxis));
+                            ledIndex, min, max, axisDeadzone, genAxis));
                     }
                 }
 
@@ -483,7 +490,8 @@ public class Ardwiino : ConfigurableUsbDevice
                     {
                         on = colors[button];
                     }
-                    byte? ledIndex = ledIndexes.GetValueOrDefault(pin);
+
+                    byte ledIndex = ledIndexes.GetValueOrDefault(button);
 
                     var off = Color.FromRgb(0, 0, 0);
                     var genButton = ButtonToStandard[(ControllerButtons) button];
@@ -524,10 +532,11 @@ public class Ardwiino : ConfigurableUsbDevice
                         }
 
                         var off = Color.FromRgb(0, 0, 0);
-                        byte? ledIndex = ledIndexes.GetValueOrDefault(pin.pin);
+                        byte ledIndex = ledIndexes.GetValueOrDefault(pin.pin);
                         bindings.Add(new ControllerAxis(model,
-                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller), 32767, model), on,
-                            off, ledIndex, 1, 0,
+                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
+                                32767, model), on,
+                            off, ledIndex, ushort.MinValue, ushort.MaxValue,
                             0, StandardAxisType.RightStickY));
                     }
                 }
@@ -539,6 +548,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     {
                         wii.AddNunchukAcceleration();
                     }
+
                     bindings.Add(wii);
                 }
                 else if (config.all.main.inputType == (int) InputControllerType.Ps2)
@@ -574,10 +584,10 @@ public class Ardwiino : ConfigurableUsbDevice
                     var ledOff = lx.LedOff;
                     bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
-                        null, config.debounce.buttons, StandardButtonType.Left));
+                        0, config.debounce.buttons, StandardButtonType.Left));
                     bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
-                        null, config.debounce.buttons, StandardButtonType.Right));
+                        0, config.debounce.buttons, StandardButtonType.Right));
                 }
 
                 if (ly != null && ly.Input != null)
@@ -586,18 +596,21 @@ public class Ardwiino : ConfigurableUsbDevice
                     var ledOff = ly.LedOff;
                     bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
-                        null, config.debounce.buttons, StandardButtonType.Up));
+                        0, config.debounce.buttons, StandardButtonType.Up));
                     bindings.Add(new ControllerButton(model,
                         new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
-                        null, config.debounce.buttons, StandardButtonType.Down));
+                        0, config.debounce.buttons, StandardButtonType.Down));
                 }
             }
 
             model.MicroController = controller;
             model.LedType = ledType;
-            model.DeviceType = deviceType;
-            model.EmulationType = emulationType;
-            model.RhythmType = rhythmType;
+            if (model.IsApa102)
+            {
+                model.Apa102Mosi = 3;
+                model.Apa102Sck = 6;
+            }
+
             model.XInputOnWindows = xinputOnWindows;
             model.Bindings.Clear();
             model.Bindings.AddRange(bindings);

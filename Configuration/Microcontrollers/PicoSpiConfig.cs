@@ -7,7 +7,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class PicoSpiConfig : SpiConfig
 {
-    public PicoSpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, int clock) :
+    public PicoSpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, uint clock) :
         base(type, mosi, miso, sck, cpol, cpha, msbfirst, clock)
     {
     }

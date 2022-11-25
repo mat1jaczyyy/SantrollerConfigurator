@@ -16,7 +16,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public class EmptyOutput : Output
 {
-    public EmptyOutput(ConfigViewModel model) : base(model, null, Colors.Transparent, Colors.Transparent, null, "Empty")
+    public EmptyOutput(ConfigViewModel model) : base(model, null, Colors.Transparent, Colors.Transparent, 0, "Empty")
     {
         _isController = this.WhenAnyValue(x => x.Model.EmulationType)
             .Select(x => x is EmulationType.Controller)
@@ -123,12 +123,12 @@ public class EmptyOutput : Output
                 }
                 else if (value is StandardAxisType standardAxisType)
                 {
-                    Model.Bindings.Add(new ControllerAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, null,1, 0, 0,
+                    Model.Bindings.Add(new ControllerAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, 0,short.MinValue, short.MaxValue, 0,
                         standardAxisType));
                 }
                 else if (value is StandardButtonType standardButtonType)
                 {
-                    Model.Bindings.Add(new ControllerButton(Model, new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, null, 5,
+                    Model.Bindings.Add(new ControllerButton(Model, new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, 0, 5,
                         standardButtonType));
                 }
 
@@ -136,17 +136,17 @@ public class EmptyOutput : Output
             case EmulationType.KeyboardMouse:
                 if (MouseAxisType.HasValue)
                 {
-                    Model.Bindings.Add(new MouseAxis(Model, null, Colors.Transparent, Colors.Transparent, null, 1, 0, 0,
+                    Model.Bindings.Add(new MouseAxis(Model, null, Colors.Transparent, Colors.Transparent, 0, 1, 0, 0,
                         MouseAxisType.Value));
                 }
                 else if (MouseButtonType.HasValue)
                 {
-                    Model.Bindings.Add(new MouseButton(Model, null, Colors.Transparent, Colors.Transparent, null,5,
+                    Model.Bindings.Add(new MouseButton(Model, null, Colors.Transparent, Colors.Transparent, 0,5,
                         MouseButtonType.Value));
                 }
                 else if (Key.HasValue)
                 {
-                    Model.Bindings.Add(new KeyboardButton(Model, null, Colors.Transparent, Colors.Transparent, null,5,
+                    Model.Bindings.Add(new KeyboardButton(Model, null, Colors.Transparent, Colors.Transparent, 0,5,
                         Key.Value));
                 }
 

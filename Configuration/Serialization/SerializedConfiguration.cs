@@ -17,7 +17,8 @@ public class SerializedConfiguration
     [ProtoMember(5)] public EmulationType EmulationType { get; }
     [ProtoMember(6)] public RhythmType RhythmType { get; }
     [ProtoMember(7)] public List<SerializedOutput> Bindings { get; }
-    [ProtoMember(8)] public LedOrderType LedOrder { get; }
+    [ProtoMember(8)] public int Apa102Mosi { get; }
+    [ProtoMember(9)] public int Apa102Sck { get; }
     
     public SerializedConfiguration(ConfigViewModel model)
     {
@@ -28,7 +29,8 @@ public class SerializedConfiguration
         RhythmType = model.RhythmType;
         XInputOnWindows = model.XInputOnWindows;
         CombinedDebounce = model.CombinedDebounce;
-        LedOrder = model.LedOrder;
+        Apa102Mosi = model.Apa102Mosi;
+        Apa102Sck = model.Apa102Sck;
     }
 
     public void LoadConfiguration(ConfigViewModel model)
@@ -36,12 +38,14 @@ public class SerializedConfiguration
         model.CombinedDebounce = CombinedDebounce;
         model.EmulationType = EmulationType;
         model.RhythmType = RhythmType;
-        model.LedType = LedType;
         model.XInputOnWindows = XInputOnWindows;
         model.MicroController!.UnAssignAll();
         model.Bindings.Clear();
         model.Bindings.AddRange(Bindings.Select(s => s.Generate(model, model.MicroController!)));
         model.DeviceType = DeviceType;
-        model.LedOrder = LedOrder;
+        model.LedType = LedType;
+        if (!model.IsApa102) return;
+        model.Apa102Mosi = Apa102Mosi;
+        model.Apa102Sck = Apa102Sck;
     }
 }

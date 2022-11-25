@@ -32,9 +32,8 @@ public class ControllerAxis : OutputAxis
     };
 
 
-    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte? ledIndex,
-        float multiplier, int offset,
-        int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndex, multiplier, offset, deadZone,
+    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex, int min, int max,
+        int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndex, min, max, deadZone,
         type.ToString(), (s) => IsTrigger(s, type))
     {
         Type = type;
@@ -67,29 +66,27 @@ public class ControllerAxis : OutputAxis
 
     protected override string MinCalibrationText()
     {
-        if (Model.DeviceType == DeviceControllerType.Guitar && Type is StandardAxisType.RightStickX)
+        switch (Model.DeviceType)
         {
-            return "Release the whammy";
-        }
-
-        if (Model.DeviceType == DeviceControllerType.Guitar && Type is StandardAxisType.RightStickY)
-        {
-            return "Leave the guitar in a neutral position";
-        }
-
-        switch (Type)
-        {
-            case StandardAxisType.LeftStickX:
-            case StandardAxisType.RightStickX:
-                return "Move axis to the leftmost position";
-            case StandardAxisType.LeftStickY:
-            case StandardAxisType.RightStickY:
-                return "Move axis to the lowest position";
-            case StandardAxisType.LeftTrigger:
-            case StandardAxisType.RightTrigger:
-                return "Release the trigger";
+            case DeviceControllerType.Guitar when Type is StandardAxisType.RightStickX:
+                return "Release the whammy";
+            case DeviceControllerType.Guitar when Type is StandardAxisType.RightStickY:
+                return "Leave the guitar in a neutral position";
             default:
-                return "";
+                switch (Type)
+                {
+                    case StandardAxisType.LeftStickX:
+                    case StandardAxisType.RightStickX:
+                        return "Move axis to the leftmost position";
+                    case StandardAxisType.LeftStickY:
+                    case StandardAxisType.RightStickY:
+                        return "Move axis to the lowest position";
+                    case StandardAxisType.LeftTrigger:
+                    case StandardAxisType.RightTrigger:
+                        return "Release the trigger";
+                    default:
+                        return "";
+                }
         }
     }
 
@@ -129,7 +126,7 @@ public class ControllerAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedControllerAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndex, Multiplier, Offset,
+        return new SerializedControllerAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndex, Min, Max,
             DeadZone);
     }
 }
