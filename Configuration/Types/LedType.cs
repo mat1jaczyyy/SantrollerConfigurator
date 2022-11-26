@@ -36,4 +36,10 @@ public static class LedTypeMethods
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
+
+    public static int GetColorsAsInt(this LedType type, Color color)
+    {
+        var bytes = GetColors(type, color);
+        return bytes[0] | bytes[1] << 8 | bytes[2] << 16;
+    } 
 }

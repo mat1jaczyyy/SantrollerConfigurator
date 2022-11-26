@@ -1,5 +1,6 @@
 using System;
 using System.Drawing.Printing;
+using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -328,6 +329,16 @@ public abstract class OutputAxis : Output
         if (shared) return "";
         var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
                          this is ControllerAxis {Type: StandardAxisType.RightStickY};
+        var whammyForXbox = xbox && Model.DeviceType == DeviceControllerType.Guitar &&
+                         this is ControllerAxis {Type: StandardAxisType.RightStickX};
+        var led = "";
+        if (AreLedsEnabled && LedIndex != 0)
+        {
+            var ledRead = xbox ? $"{GenerateOutput(xbox)} << 8" : GenerateOutput(xbox);
+            led = $@"if (!ledState[{LedIndex - 1}].select) {{
+                        {string.Join("", Model.LedType.GetColors(LedOn).Zip(Model.LedType.GetColors(LedOff), new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({ledRead})) >> 8));"))}
+                    }}";
+        }
 
         if (Input is DigitalToAnalog)
         {
@@ -349,7 +360,7 @@ public abstract class OutputAxis : Output
         string function;
         if (xbox)
         {
-            function = Trigger ? "handle_calibration_xbox_trigger" : "handle_calibration_xbox";
+            function = (whammyForXbox && InputIsUint) ? "handle_calibration_xbox_whammy" : (Trigger ? "handle_calibration_xbox_trigger" : "handle_calibration_xbox");
         }
         else
         {
@@ -385,17 +396,12 @@ public abstract class OutputAxis : Output
         var ret = InputIsUint
             ? $"{GenerateOutput(xbox)} = {function}_uint({Input.Generate(xbox)}, {min}, {mulInt}, {DeadZone});"
             : $"{GenerateOutput(xbox)} = {function}_int({Input.Generate(xbox)}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});";
-        if (!tiltForPs3) return ret;
+        if (!tiltForPs3) return ret + led;
         //Funnily enough, we actually want the xbox version, as the tilt axis is 16 bit
         var retPs3Gh =
             InputIsUint
                 ? $"{Ps3GuitarTilt} = {function}_uint({Input.Generate(true)}, {min}, {mulInt}, {DeadZone});"
                 : $"{Ps3GuitarTilt} = {function}_int({Input.Generate(true)}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});";
-        return $"if (consoleType == PS3) {{{retPs3Gh}}} else {{{ret}}}";
-    }
-
-    public override string GenerateLedUpdate(int debounceIndex, bool xbox)
-    {
-        throw new NotImplementedException();
+        return $"if (consoleType == PS3) {{{retPs3Gh}}} else {{{ret}}} {led}";
     }
 }

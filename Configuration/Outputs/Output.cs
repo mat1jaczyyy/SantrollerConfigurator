@@ -313,7 +313,6 @@ public abstract class Output : ReactiveObject, IDisposable
     }
 
     public abstract string Generate(bool xbox, bool shared, int debounceIndex, bool combined);
-    public abstract string GenerateLedUpdate(int debounceIndex, bool xbox);
 
     public virtual AvaloniaList<Output> Outputs => new() {this};
 

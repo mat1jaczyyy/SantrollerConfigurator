@@ -171,9 +171,4 @@ public class EmptyOutput : Output
     {
         throw new IncompleteConfigurationException("Output is not configured!");
     }
-
-    public override string GenerateLedUpdate(int debounceIndex, bool xbox)
-    {
-        throw new IncompleteConfigurationException("Output is not configured!");
-    }
 }

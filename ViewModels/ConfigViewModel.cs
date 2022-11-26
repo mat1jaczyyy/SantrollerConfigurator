@@ -415,6 +415,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             if (IsApa102)
             {
                 lines.Add($"#define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}");
+
+                lines.Add($"#define TICK_LED {GenerateLedTick()}");
             }
 
             lines.Add($"#define CONSOLE_TYPE {((byte) EmulationType)}");
@@ -494,6 +496,24 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             Bindings.Add(new EmptyOutput(this));
         }
 
+        private string GenerateLedTick()
+        {
+            if (_microController == null || _ledType == LedType.None) return "";
+            var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
+            var ledMax = outputs.Select(output => output.LedIndex).Max();
+            var ret = "spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);";
+            for (var i = 0; i < ledMax; i++)
+            {
+                ret += $"spi_transfer(APA102_SPI_PORT, 0xff);spi_transfer(APA102_SPI_PORT, ledState[{i}].r);spi_transfer(APA102_SPI_PORT, ledState[{i}].g);spi_transfer(APA102_SPI_PORT, ledState[{i}].b);";
+            }
+
+            for (var i = 0; i < ledMax; i += 16)
+            {
+                ret += "spi_transfer(APA102_SPI_PORT, 0xff);";
+            }
+            return ret.Replace('\n', ' ');
+        }
+
         private string GenerateTick(bool xbox, bool shared)
         {
             if (_microController == null) return "";
@@ -502,8 +522,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 
             Dictionary<string, int> debounces = new();
-            HashSet<string> debounceTicks = new();
-            Dictionary<int, string> leds = new();
             if (combined)
             {
                 foreach (var output in outputs.Where(output => output.IsStrum))
@@ -527,12 +545,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                             }
 
                             index = debounces[output.Name];
-                            debounceTicks.Add(button.GenerateDebounceUpdate(index, xbox));
-                        }
-
-                        if (_ledType != LedType.None && output.LedIndex > 0)
-                        {
-                            leds[output.LedIndex - 1] = output.GenerateLedUpdate(index, xbox);
                         }
 
                         var generated = output.Generate(xbox, shared, index, combined);
@@ -540,32 +552,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     })
                     .Where(s => !string.IsNullOrEmpty(s.Item2))
                     .ToList()) + ";"));
-            if (!shared)
-            {
-                //For any missing leds, we need to pad out the indexes so that the leds are aligned
-                // And we need to pad out the end with the required padding bytes
-                if (leds.Any())
-                {
-                    var max = leds.Keys.Max();
-                    for (var i = 0; i < max; i++)
-                    {
-                        if (!leds.ContainsKey(i))
-                        {
-                            leds[i] =
-                                @"spi_transfer(APA102_SPI_PORT, 0xff);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);";
-                        }
-                    }
-                }
-
-                var ticks = debounceTicks.ToList();
-                ticks.InsertRange(0, leds.OrderBy(led => led.Key).Select(s => s.Value));
-                ret = ticks.Aggregate(ret, (current, debounceTick) => current + debounceTick);
-                for (int i = 0; i < leds.Count; i += 16)
-                {
-                    ret += "spi_transfer(APA102_SPI_PORT, 0xff);";
-                }
-            }
-
             return ret.Replace('\n', ' ');
         }
 

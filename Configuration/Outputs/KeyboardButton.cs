@@ -216,12 +216,12 @@ public class KeyboardButton : OutputButton
 
     public Key Key;
 
-    public override string GenerateIndex(bool xbox)
+    protected override string GenerateIndex(bool xbox)
     {
         throw new NotImplementedException();
     }
 
-    public override string GenerateOutput(bool xbox)
+    protected override string GenerateOutput(bool xbox)
     {
         var code = 0;
         return $"report->keys[{code >> 3}] |= {1 << (code & 7)}";

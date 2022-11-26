@@ -20,12 +20,13 @@ public class MouseButton : OutputButton
     }
 
     public MouseButtonType Type { get; }
-    public override string GenerateIndex(bool xbox)
+
+    protected override string GenerateIndex(bool xbox)
     {
         return _order.IndexOf(Type).ToString();
     }
 
-    public override string GenerateOutput(bool xbox)
+    protected override string GenerateOutput(bool xbox)
     {
         return "report->buttons";
     }

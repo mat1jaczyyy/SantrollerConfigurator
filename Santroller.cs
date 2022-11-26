@@ -88,7 +88,7 @@ public class Santroller : ConfigurableUsbDevice
                 await Task.Delay(TimeSpan.FromMilliseconds(50));
                 continue;
             }
-
+            
             try
             {
                 var direct = model.Bindings.Where(s => s.Input != null).Select(s => s.Input!.InnermostInput())
@@ -99,7 +99,12 @@ public class Santroller : ConfigurableUsbDevice
                 foreach (var (port, mask) in ports)
                 {
                     var wValue = (ushort) (port | (mask << 8));
-                    var pins = ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte))[0];
+                    var data = ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte));
+                    if (data.Length == 0)
+                    {
+                        return;
+                    }
+                    var pins = data[0];
                     model.MicroController!.PinsFromPortMask(port, mask, pins, _digitalRaw);
                 }
 
