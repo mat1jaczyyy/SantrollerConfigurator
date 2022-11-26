@@ -30,7 +30,7 @@ public class DjInput : TwiInput
     public DjInputType Input { get; set; }
     public override InputType? InputType => Types.InputType.TurntableInput;
 
-    public override string Generate()
+    public override string Generate(bool xbox)
     {
         switch (Input)
         {

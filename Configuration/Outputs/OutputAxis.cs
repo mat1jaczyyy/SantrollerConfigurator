@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -29,15 +30,11 @@ public abstract class OutputAxis : Output
         int deadZone, string name, TriggerDelegate triggerDelegate) : base(model, input, ledOn, ledOff, ledIndex, name)
     {
         Input = input;
-        DirectInput? di = input!.InnermostInput() as DirectInput;
+        var di = input!.InnermostInput() as DirectInput;
         _trigger = this.WhenAnyValue(x => x.Model.DeviceType).Select(d =>
             {
                 var ret = triggerDelegate(d);
-                if (di != null)
-                {
-                    di.IsUintDirect = ret;
-                }
-
+                di?.SetTrigger(ret);
                 return ret;
             })
             .ToProperty(this, x => x.Trigger);
@@ -50,8 +47,8 @@ public abstract class OutputAxis : Output
         _inputIsUInt = this.WhenAnyValue(x => x.Input, x => x.Trigger).Select(i =>
                 i.Item1!.InnermostInput() is DirectInput ? i.Item2 : i.Item1!.IsUint)
             .ToProperty(this, x => x.InputIsUint);
-        _calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue);
-        _calibrationWatcher.Subscribe(ApplyCalibration);
+        var calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue);
+        calibrationWatcher.Subscribe(ApplyCalibration);
         _valueRawLower = this.WhenAnyValue(x => x.ValueRaw).Select(s => (s < 0 ? -s : 0))
             .ToProperty(this, x => x.ValueRawLower);
         _valueRawUpper = this.WhenAnyValue(x => x.ValueRaw).Select(s => (s > 0 ? s : 0))
@@ -66,6 +63,8 @@ public abstract class OutputAxis : Output
             .Select(ComputeDeadZoneMargin).ToProperty(this, x => x.ComputedDeadZoneMargin);
         _computedMinMaxMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.InputIsUint)
             .Select(ComputeMinMaxMargin).ToProperty(this, x => x.CalibrationMinMaxMargin);
+        _isDigitalToAnalog = this.WhenAnyValue(x => x.Input).Select(s => s is DigitalToAnalog)
+            .ToProperty(this, x => x.IsDigitalToAnalog);
     }
 
     private Thickness ComputeDeadZoneMargin((int, int, bool, int) s)
@@ -180,11 +179,12 @@ public abstract class OutputAxis : Output
         }
 
         _calibrationState++;
-
         if (_calibrationState == OutputAxisCalibrationState.LAST)
         {
             _calibrationState = OutputAxisCalibrationState.NONE;
         }
+
+        ApplyCalibration(ValueRaw);
 
         this.RaisePropertyChanged(nameof(CalibrationText));
     }
@@ -301,7 +301,8 @@ public abstract class OutputAxis : Output
     public override bool IsCombined => false;
     public override bool IsStrum => false;
     private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.NONE;
-    private readonly IObservable<int> _calibrationWatcher;
+    private readonly ObservableAsPropertyHelper<bool> _isDigitalToAnalog;
+    public bool IsDigitalToAnalog => _isDigitalToAnalog.Value;
 
     public string? CalibrationText => GetCalibrationText();
     protected abstract string MinCalibrationText();
@@ -319,11 +320,32 @@ public abstract class OutputAxis : Output
         };
     }
 
+    private const string Ps3GuitarTilt = "report->accel[0]";
 
     public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined)
     {
         if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
         if (shared) return "";
+        var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
+                         this is ControllerAxis {Type: StandardAxisType.RightStickY};
+
+        if (Input is DigitalToAnalog)
+        {
+            // No calibration, we just want raw values here
+            if (!tiltForPs3)
+            {
+                return $"{GenerateOutput(xbox)} = {Input.Generate(xbox)};";
+            }
+
+            //Thanks to clone hero, we need to invert the tilt axis for only hid
+            var hidInput = (DigitalToAnalog) Input.Serialise().Generate(Model.MicroController!, Model);
+            hidInput.On = -hidInput.On;
+            hidInput.Off = -hidInput.Off;
+            var retPs3Dta = $"{Ps3GuitarTilt} = {Input.Generate(true)};";
+            var retHidDta = $"{GenerateOutput(xbox)} = {hidInput.Generate(xbox)};";
+            return $"if (consoleType == PS3) {{{retPs3Dta}}} else {{{retHidDta}}}";
+        }
+
         string function;
         if (xbox)
         {
@@ -360,10 +382,16 @@ public abstract class OutputAxis : Output
         }
 
         var mulInt = (short) (multiplier * 1024);
-
-        return InputIsUint
-            ? $"{GenerateOutput(xbox)} = {function}_uint({Input.Generate()}, {min}, {mulInt}, {DeadZone});"
-            : $"{GenerateOutput(xbox)} = {function}_int({Input.Generate()}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});";
+        var ret = InputIsUint
+            ? $"{GenerateOutput(xbox)} = {function}_uint({Input.Generate(xbox)}, {min}, {mulInt}, {DeadZone});"
+            : $"{GenerateOutput(xbox)} = {function}_int({Input.Generate(xbox)}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});";
+        if (!tiltForPs3) return ret;
+        //Funnily enough, we actually want the xbox version, as the tilt axis is 16 bit
+        var retPs3Gh =
+            InputIsUint
+                ? $"{Ps3GuitarTilt} = {function}_uint({Input.Generate(true)}, {min}, {mulInt}, {DeadZone});"
+                : $"{Ps3GuitarTilt} = {function}_int({Input.Generate(true)}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});";
+        return $"if (consoleType == PS3) {{{retPs3Gh}}} else {{{ret}}}";
     }
 
     public override string GenerateLedUpdate(int debounceIndex, bool xbox)

@@ -9,16 +9,18 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 public class SerializedDigitalToAnalog : SerializedInput
 {
     [ProtoMember(1)] private SerializedInput Child { get; }
-    [ProtoMember(2)] private int Value { get; }
+    [ProtoMember(2)] private int On { get; }
+    [ProtoMember(3)] private int Off { get; }
 
-    public SerializedDigitalToAnalog(SerializedInput child, int value)
+    public SerializedDigitalToAnalog(SerializedInput child, int on, int off)
     {
         Child = child;
-        Value = value;
+        On = on;
+        Off = off;
     }
 
     public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new DigitalToAnalog(Child.Generate(microcontroller, model), Value, model);
+        return new DigitalToAnalog(Child.Generate(microcontroller, model), On, Off, model);
     }
 }

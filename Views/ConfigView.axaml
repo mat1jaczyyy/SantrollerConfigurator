@@ -164,7 +164,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputAxis}">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <Grid>
@@ -195,13 +195,19 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Grid>
+                                <Rectangle Margin="{Binding CalibrationMinMaxMargin}" HorizontalAlignment="Stretch"
+                                           Fill="Green" Height="30">
+                                </Rectangle>
+                                <Rectangle Margin="{Binding ComputedDeadZoneMargin}" Fill="Red"
+                                           HorizontalAlignment="Stretch" Height="30">
+                                </Rectangle>
                                 <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsUint}">
-                                    <ProgressBar HorizontalAlignment="Stretch" Value="{Binding ValueRaw}"
+                                    <ProgressBar Opacity="0.6" HorizontalAlignment="Stretch" Value="{Binding ValueRaw}"
                                                  IsIndeterminate="False" Minimum="0" Maximum="65536" Height="30"
                                                  Width="500" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}">
-                                    <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                    <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
                                                  Value="{Binding ValueRawLower}"
                                                  IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30"
                                                  Width="250">
@@ -209,7 +215,7 @@
                                             <ScaleTransform ScaleX="-1"></ScaleTransform>
                                         </ProgressBar.RenderTransform>
                                     </ProgressBar>
-                                    <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                    <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
                                                  Value="{Binding ValueRawUpper}"
                                                  IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30"
                                                  Width="250" />
@@ -217,13 +223,6 @@
                                 <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                            Text="{Binding ValueRaw}">
                                 </TextBlock>
-                                <Rectangle Margin="{Binding ComputedDeadZoneMargin}" Fill="Red"
-                                           HorizontalAlignment="Stretch" Height="30" Opacity="0.3">
-                                </Rectangle>
-                                <Rectangle Margin="{Binding CalibrationMinMaxMargin}" HorizontalAlignment="Stretch"
-                                           Fill="Green" Height="30"
-                                           Opacity="0.3">
-                                </Rectangle>
                             </Grid>
 
                         </StackPanel>
@@ -251,10 +250,13 @@
                     </Button>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type output:OutputButton}"></DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputButton}">
+                <NumericUpDown Value="{Binding Debounce}" VerticalAlignment="Center"></NumericUpDown>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type conversions:DigitalToAnalog}">
                 <StackPanel Orientation="Horizontal">
-                    <NumericUpDown Value="{Binding Value}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown Value="{Binding On}" Minimum="{Binding Minimum}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown Value="{Binding Off}" Maximum="{Binding Maximum}" VerticalAlignment="Center"></NumericUpDown>
                     <ContentControl Content="{Binding Child}"
                                     ContentTemplate="{StaticResource OutputTemplates}">
                     </ContentControl>

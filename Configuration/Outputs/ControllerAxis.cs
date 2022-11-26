@@ -41,8 +41,7 @@ public class ControllerAxis : OutputAxis
 
     private static bool IsTrigger(DeviceControllerType s, StandardAxisType type)
     {
-        return (s is DeviceControllerType.Guitar &&
-                type is StandardAxisType.RightStickX or StandardAxisType.RightStickY) ||
+        return (s is DeviceControllerType.Guitar && type is StandardAxisType.RightStickX or StandardAxisType.AccelerationX) ||
                type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
     }
 
@@ -92,29 +91,27 @@ public class ControllerAxis : OutputAxis
 
     protected override string MaxCalibrationText()
     {
-        if (Model.DeviceType == DeviceControllerType.Guitar && Type is StandardAxisType.RightStickX)
+        switch (Model.DeviceType)
         {
-            return "Push the whammy all the way in";
-        }
-
-        if (Model.DeviceType == DeviceControllerType.Guitar && Type is StandardAxisType.RightStickY)
-        {
-            return "Tilt the guitar up";
-        }
-
-        switch (Type)
-        {
-            case StandardAxisType.LeftStickX:
-            case StandardAxisType.RightStickX:
-                return "Move axis to the rightmost position";
-            case StandardAxisType.LeftStickY:
-            case StandardAxisType.RightStickY:
-                return "Move axis to the highest position";
-            case StandardAxisType.LeftTrigger:
-            case StandardAxisType.RightTrigger:
-                return "Push the trigger all the way in";
+            case DeviceControllerType.Guitar when Type is StandardAxisType.RightStickX:
+                return "Push the whammy all the way in";
+            case DeviceControllerType.Guitar when Type is StandardAxisType.RightStickY:
+                return "Tilt the guitar up";
             default:
-                return "";
+                switch (Type)
+                {
+                    case StandardAxisType.LeftStickX:
+                    case StandardAxisType.RightStickX:
+                        return "Move axis to the rightmost position";
+                    case StandardAxisType.LeftStickY:
+                    case StandardAxisType.RightStickY:
+                        return "Move axis to the highest position";
+                    case StandardAxisType.LeftTrigger:
+                    case StandardAxisType.RightTrigger:
+                        return "Push the trigger all the way in";
+                    default:
+                        return "";
+                }
         }
     }
 

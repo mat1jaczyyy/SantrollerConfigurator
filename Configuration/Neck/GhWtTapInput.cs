@@ -58,7 +58,7 @@ public class GhWtTapInput : InputWithPin
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public override string Generate()
+    public override string Generate(bool xbox)
     {
         if (Input == GhWtInputType.TapBar)
         {

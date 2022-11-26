@@ -90,7 +90,7 @@ public class Gh5NeckInput : TwiInput
     public override InputType? InputType => Types.InputType.Gh5NeckInput;
     public Gh5NeckInputType Input { get; set; }
 
-    public override string Generate()
+    public override string Generate(bool xbox)
     {
         if (Input <= Gh5NeckInputType.Orange)
         {

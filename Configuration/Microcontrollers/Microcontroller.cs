@@ -75,7 +75,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public string GenerateAnalogRead(bool isUint)
         {
-            return isUint ? "adc_i({pin})" : "adc({pin})";
+            return isUint ? "adc({pin})" : "adc_i({pin})";
         }
 
         public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);

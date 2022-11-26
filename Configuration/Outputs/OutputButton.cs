@@ -38,9 +38,9 @@ public abstract class OutputButton : Output
         if (combined && IsStrum)
         {
             var otherIndex = debounceIndex == 1 ? 0 : 1;
-            return $"if (({Input.Generate()}) && (!debounce[{otherIndex}])) {{debounce[{debounceIndex}] = {Debounce+1};}}";
+            return $"if (({Input.Generate(xbox)}) && (!debounce[{otherIndex}])) {{debounce[{debounceIndex}] = {Debounce+1};}}";
         }
-        return $"if (({Input.Generate()})) {{debounce[{debounceIndex}] = {Debounce+1};}}";
+        return $"if (({Input.Generate(xbox)})) {{debounce[{debounceIndex}] = {Debounce+1};}}";
     }
 
     public override string GenerateLedUpdate(int debounceIndex, bool xbox)

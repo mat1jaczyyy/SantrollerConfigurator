@@ -29,7 +29,7 @@ public class AnalogToDigital : Input
     }
 
 
-    public override string Generate()
+    public override string Generate(bool xbox)
     {
         if (Child.IsUint)
         {
@@ -37,9 +37,9 @@ public class AnalogToDigital : Input
             {
                 case AnalogToDigitalType.Trigger:
                 case AnalogToDigitalType.JoyHigh:
-                    return $"({Child.Generate()}) > {short.MaxValue + Threshold}";
+                    return $"({Child.Generate(xbox)}) > {short.MaxValue + Threshold}";
                 case AnalogToDigitalType.JoyLow:
-                    return $"({Child.Generate()}) < {short.MaxValue - Threshold}";
+                    return $"({Child.Generate(xbox)}) < {short.MaxValue - Threshold}";
             }
         }
         else
@@ -49,9 +49,9 @@ public class AnalogToDigital : Input
             {
                 case AnalogToDigitalType.Trigger:
                 case AnalogToDigitalType.JoyHigh:
-                    return $"({Child.Generate()}) > {Threshold}";
+                    return $"({Child.Generate(xbox)}) > {Threshold}";
                 case AnalogToDigitalType.JoyLow:
-                    return $"({Child.Generate()}) < {-Threshold}";
+                    return $"({Child.Generate(xbox)}) < {-Threshold}";
             }
         }
 

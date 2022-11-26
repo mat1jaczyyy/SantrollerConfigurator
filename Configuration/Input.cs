@@ -21,7 +21,7 @@ public abstract class Input : ReactiveObject, IDisposable
         _imageOpacity = this.WhenAnyValue(x => x.RawValue).Select(s => (s == 0?0:0.25) + 0.75).ToProperty(this, s => s.ImageOpacity);
     }
     public abstract IReadOnlyList<string> RequiredDefines();
-    public abstract string Generate();
+    public abstract string Generate(bool xbox);
 
     public abstract SerializedInput Serialise();
 

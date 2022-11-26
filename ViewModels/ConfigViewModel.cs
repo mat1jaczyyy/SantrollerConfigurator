@@ -339,6 +339,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 case DeviceInputType.Ps2:
                     Bindings.Add(new Ps2CombinedOutput(this, microcontroller));
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             if (Main.IsUno || Main.IsMega)

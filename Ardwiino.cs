@@ -455,7 +455,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     {
                         bindings.Add(new ControllerAxis(model,
                             new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
-                                32767, model), on,
+                                -32767, 0, model), on,
                             off, ledIndex, ushort.MinValue, ushort.MaxValue,
                             0, StandardAxisType.RightStickY));
                     }
@@ -471,6 +471,7 @@ public class Ardwiino : ConfigurableUsbDevice
                             min += short.MaxValue;
                             max += short.MaxValue;
                         }
+
                         bindings.Add(new ControllerAxis(model,
                             new DirectInput(pin.pin, DevicePinMode.Analog, model, controller), on, off,
                             ledIndex, min, max, axisDeadzone, genAxis));
@@ -535,7 +536,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         byte ledIndex = ledIndexes.GetValueOrDefault(pin.pin);
                         bindings.Add(new ControllerAxis(model,
                             new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
-                                32767, model), on,
+                                -32767, 0, model), on,
                             off, ledIndex, ushort.MinValue, ushort.MaxValue,
                             0, StandardAxisType.RightStickY));
                     }

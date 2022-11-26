@@ -277,7 +277,7 @@ public class WiiInput : TwiInput
 
     public override InputType? InputType => Types.InputType.WiiInput;
 
-    public override string Generate()
+    public override string Generate(bool xbox)
     {
         return Mappings[Input];
     }

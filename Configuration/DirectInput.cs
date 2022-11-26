@@ -38,23 +38,21 @@ public class DirectInput : InputWithPin
 
     public override bool IsAnalog => PinConfig.PinMode == DevicePinMode.Analog;
 
-    public bool IsUintDirect = false;
-    public override bool IsUint => IsUintDirect;
-
-    private string GenerateAnalogRead()
-    {
-        return Microcontroller.GenerateAnalogRead(!IsUintDirect);
-    }
-
-    public override string Generate()
+    private bool _isTrigger;
+    public override bool IsUint => _isTrigger;
+    public override string Generate(bool xbox)
     {
         return IsAnalog
-            ? GenerateAnalogRead()
+            ? Microcontroller.GenerateAnalogRead(_isTrigger)
             : Microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
     }
 
     public override InputType? InputType => IsAnalog ? Types.InputType.AnalogPinInput : Types.InputType.DigitalPinInput;
 
+    public void SetTrigger(bool isTrigger)
+    {
+        _isTrigger = isTrigger;
+    }
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
     {
         if (Microcontroller is not AvrController) return string.Join(";\n", bindings.Select(binding => binding.Item2));
@@ -97,7 +95,7 @@ public class DirectInput : InputWithPin
         if (IsAnalog)
         {
             var raw = analogRaw.GetValueOrDefault(Pin, 0);
-            if (!IsUintDirect)
+            if (!_isTrigger)
             {
                 raw -= short.MaxValue;
             }

@@ -233,7 +233,7 @@ public class Ps2Input : SpiInput
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
     }
 
-    public override string Generate()
+    public override string Generate(bool xbox)
     {
         return Mappings[Input];
     }

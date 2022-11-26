@@ -252,13 +252,15 @@ public abstract class Output : ReactiveObject, IDisposable
                 Input = new AnalogToDigital(input, AnalogToDigitalType.JoyHigh, oldThreshold, Model);
                 break;
             case false when this is OutputAxis:
-                var oldValue = 0;
+                var oldOn = 0;
+                var oldOff = 0;
                 if (Input is DigitalToAnalog dta)
                 {
-                    oldValue = dta.Value;
+                    oldOn = dta.On;
+                    oldOff = dta.Off;
                 }
 
-                Input = new DigitalToAnalog(input, oldValue, Model);
+                Input = new DigitalToAnalog(input, oldOn, oldOff, Model);
                 break;
         }
 

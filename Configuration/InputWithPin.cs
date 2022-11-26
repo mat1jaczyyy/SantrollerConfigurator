@@ -18,7 +18,6 @@ public abstract class InputWithPin : Input
         Microcontroller = microcontroller;
         _pinConfig = pinConfig;
         Microcontroller.AssignPin(_pinConfig);
-        Microcontroller.PinConfigs.CollectionChanged += (_, _) => this.RaisePropertyChanged(nameof(AvailablePins));
         DetectPinCommand =
             ReactiveCommand.CreateFromTask(DetectPin, this.WhenAnyValue(s => s.Model.Main.Working).Select(s => !s));
     }

@@ -35,14 +35,12 @@ public class SerializedConfiguration
 
     public void LoadConfiguration(ConfigViewModel model)
     {
+        model.SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceType, RhythmType, EmulationType);
         model.CombinedDebounce = CombinedDebounce;
-        model.EmulationType = EmulationType;
-        model.RhythmType = RhythmType;
         model.XInputOnWindows = XInputOnWindows;
         model.MicroController!.UnAssignAll();
         model.Bindings.Clear();
         model.Bindings.AddRange(Bindings.Select(s => s.Generate(model, model.MicroController!)));
-        model.DeviceType = DeviceType;
         model.LedType = LedType;
         if (!model.IsApa102) return;
         model.Apa102Mosi = Apa102Mosi;
