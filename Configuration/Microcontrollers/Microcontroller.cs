@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 {
@@ -73,9 +72,9 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public abstract Board Board { get; }
 
-        public string GenerateAnalogRead(bool isUint)
+        public string GenerateAnalogRead()
         {
-            return isUint ? "adc({pin})" : "adc_i({pin})";
+            return "adc({pin})";
         }
 
         public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);

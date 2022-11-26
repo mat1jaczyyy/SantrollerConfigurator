@@ -31,22 +31,14 @@ public abstract class OutputAxis : Output
         int deadZone, string name, TriggerDelegate triggerDelegate) : base(model, input, ledOn, ledOff, ledIndex, name)
     {
         Input = input;
-        var di = input!.InnermostInput() as DirectInput;
-        _trigger = this.WhenAnyValue(x => x.Model.DeviceType).Select(d =>
-            {
-                var ret = triggerDelegate(d);
-                di?.SetTrigger(ret);
-                return ret;
-            })
+        _trigger = this.WhenAnyValue(x => x.Model.DeviceType).Select(d => triggerDelegate(d))
             .ToProperty(this, x => x.Trigger);
         LedOn = ledOn;
         LedOff = ledOff;
         _calibrationMax = max;
         _calibrationMin = min;
         DeadZone = deadZone;
-        //Direct Input doesn't actually have a preference for uint or int, so just use the trigger value in that case.
-        _inputIsUInt = this.WhenAnyValue(x => x.Input, x => x.Trigger).Select(i =>
-                i.Item1!.InnermostInput() is DirectInput ? i.Item2 : i.Item1!.IsUint)
+        _inputIsUInt = this.WhenAnyValue(x => x.Input).Select(i => i!.IsUint)
             .ToProperty(this, x => x.InputIsUint);
         var calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue);
         calibrationWatcher.Subscribe(ApplyCalibration);
@@ -60,9 +52,9 @@ public abstract class OutputAxis : Output
                 x => x.Model.DeviceType).Select(Calculate).ToProperty(this, x => x.Value);
         _valueLower = this.WhenAnyValue(x => x.Value).Select(s => (s < 0 ? -s : 0)).ToProperty(this, x => x.ValueLower);
         _valueUpper = this.WhenAnyValue(x => x.Value).Select(s => (s > 0 ? s : 0)).ToProperty(this, x => x.ValueUpper);
-        _computedDeadZoneMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.InputIsUint, x => x.DeadZone)
+        _computedDeadZoneMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.Trigger, x => x.DeadZone)
             .Select(ComputeDeadZoneMargin).ToProperty(this, x => x.ComputedDeadZoneMargin);
-        _computedMinMaxMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.InputIsUint)
+        _computedMinMaxMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.Trigger)
             .Select(ComputeMinMaxMargin).ToProperty(this, x => x.CalibrationMinMaxMargin);
         _isDigitalToAnalog = this.WhenAnyValue(x => x.Input).Select(s => s is DigitalToAnalog)
             .ToProperty(this, x => x.IsDigitalToAnalog);
@@ -151,7 +143,7 @@ public abstract class OutputAxis : Output
                     deadZone = valRaw;
                 }
 
-                if (InputIsUint)
+                if (Trigger)
                 {
                     if (Min < Max)
                     {
@@ -165,7 +157,7 @@ public abstract class OutputAxis : Output
                 else
                 {
                     // For Int, deadzone starts in the middle and grows in both directions
-                    DeadZone = Math.Abs((min + max) / 2 - deadZone);
+                    DeadZone = Math.Abs(((min + max) / 2) - deadZone);
                 }
 
                 break;
@@ -197,8 +189,13 @@ public abstract class OutputAxis : Output
         var max = (float) values.Item3;
         var deadZone = (float) values.Item4;
         var trigger = values.Item5;
-        if (InputIsUint)
+        if (trigger)
         {
+            if (!InputIsUint)
+            {
+                val += short.MaxValue;
+            }
+
             if (max > min)
             {
                 if ((val - min) < deadZone)
@@ -218,6 +215,11 @@ public abstract class OutputAxis : Output
         }
         else
         {
+            if (InputIsUint)
+            {
+                val -= short.MaxValue;
+            }
+
             var deadZoneCalc = val - ((max + min) / 2);
             if (deadZoneCalc < deadZone && deadZoneCalc > -deadZone)
             {
@@ -232,22 +234,12 @@ public abstract class OutputAxis : Output
         if (trigger)
         {
             val = (val - min) / (max - min) * (ushort.MaxValue);
-            if (!InputIsUint)
-            {
-                val += short.MaxValue;
-            }
-
             if (val > ushort.MaxValue) val = ushort.MaxValue;
             if (val < 0) val = 0;
         }
         else
         {
             val = (val - min) / (max - min) * (short.MaxValue - short.MinValue) + short.MinValue;
-            if (InputIsUint)
-            {
-                val -= short.MaxValue;
-            }
-
             if (val > short.MaxValue) val = short.MaxValue;
             if (val < short.MinValue) val = short.MinValue;
         }
@@ -329,8 +321,8 @@ public abstract class OutputAxis : Output
         if (shared) return "";
         var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
                          this is ControllerAxis {Type: StandardAxisType.RightStickY};
-        var whammyForXbox = xbox && Model.DeviceType == DeviceControllerType.Guitar &&
-                         this is ControllerAxis {Type: StandardAxisType.RightStickX};
+        var whammy = Model.DeviceType == DeviceControllerType.Guitar &&
+                            this is ControllerAxis {Type: StandardAxisType.RightStickX};
         var led = "";
         if (AreLedsEnabled && LedIndex != 0)
         {
@@ -358,50 +350,81 @@ public abstract class OutputAxis : Output
         }
 
         string function;
+        var normal = false;
         if (xbox)
         {
-            function = (whammyForXbox && InputIsUint) ? "handle_calibration_xbox_whammy" : (Trigger ? "handle_calibration_xbox_trigger" : "handle_calibration_xbox");
+            if (whammy)
+            {
+                function = "handle_calibration_xbox_whammy";
+            }
+            else if (Trigger)
+            {
+                function = "handle_calibration_xbox_trigger";
+            }
+            else
+            {
+                normal = true;
+                function = "handle_calibration_xbox";
+            }
         }
         else
         {
-            function = Trigger ? "handle_calibration_ps3_trigger" : "handle_calibration_ps3";
+            if (whammy)
+            {
+                function = "handle_calibration_ps3_whammy";
+            }
+            else if (Trigger)
+            {
+                function = "handle_calibration_ps3_trigger";
+            }
+            else
+            {
+                normal = true;
+                function = "handle_calibration_ps3";
+            }
         }
 
         var min = Min;
         var max = Max;
-        if (InputIsUint)
+
+        float multiplier;
+        if (Trigger)
         {
             if (max <= min)
             {
                 min -= DeadZone;
             }
+            multiplier = 1f / (max - min) * (ushort.MaxValue);
         }
         else
         {
             min += DeadZone;
             max -= DeadZone;
-        }
-
-        float multiplier;
-        if (Trigger)
-        {
-            multiplier = 1f / (max - min) * (ushort.MaxValue);
-        }
-        else
-        {
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
 
+        var generated = Input.Generate(xbox);
+        var generatedPs3 = Input.Generate(true);
+        if (Trigger && !InputIsUint)
+        {
+            generated += " + INT16_MAX";
+            generatedPs3 += " + INT16_MAX";
+        }
+        if (!Trigger && InputIsUint)
+        {
+            generated += " - INT16_MAX";
+            generatedPs3 += " - INT16_MAX";
+        }
         var mulInt = (short) (multiplier * 1024);
-        var ret = InputIsUint
-            ? $"{GenerateOutput(xbox)} = {function}_uint({Input.Generate(xbox)}, {min}, {mulInt}, {DeadZone});"
-            : $"{GenerateOutput(xbox)} = {function}_int({Input.Generate(xbox)}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});";
+        var ret = normal
+            ? $"{GenerateOutput(xbox)} = {function}({generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});"
+            : $"{GenerateOutput(xbox)} = {function}({generated}, {min}, {mulInt}, {DeadZone});";
         if (!tiltForPs3) return ret + led;
         //Funnily enough, we actually want the xbox version, as the tilt axis is 16 bit
         var retPs3Gh =
-            InputIsUint
-                ? $"{Ps3GuitarTilt} = {function}_uint({Input.Generate(true)}, {min}, {mulInt}, {DeadZone});"
-                : $"{Ps3GuitarTilt} = {function}_int({Input.Generate(true)}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});";
+            normal
+                ? $"{Ps3GuitarTilt} = {function}({generatedPs3}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});"
+                : $"{Ps3GuitarTilt} = {function}({generatedPs3}, {min}, {mulInt}, {DeadZone});";
         return $"if (consoleType == PS3) {{{retPs3Gh}}} else {{{ret}}} {led}";
     }
 }
