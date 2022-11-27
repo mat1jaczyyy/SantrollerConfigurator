@@ -33,29 +33,40 @@ public abstract class OutputButton : Output
         {
             var outputVar = GenerateOutput(xbox);
             return
-                $"if (debounce[{debounceIndex}]) {{ debounce[{debounceIndex}]--; {outputVar} |= (1 << {outputBit});}}";
+                @$"if (debounce[{debounceIndex}]) {{ 
+                    debounce[{debounceIndex}]--; 
+                    {outputVar} |= (1 << {outputBit}); 
+                    if (ledState[{LedIndex - 1}].select == 1 && !debounce[{debounceIndex}]) {{
+                        ledState[{LedIndex - 1}].select = 0; 
+                        {string.Join("\n", Model.LedType.GetColors(LedOff).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Second} = {b.First};"))};
+                    }}
+                }}";
         }
 
         var led = "";
+        var led2 = "";
         if (AreLedsEnabled && LedIndex != 0)
         {
             led = $@"
-            if (!ledState[{LedIndex - 1}].select) {{
-                if (debounce[{debounceIndex}]) {{
-                    {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Second} = {b.First};"))}
-                }} else {{
-                    {string.Join("\n", Model.LedType.GetColors(LedOff).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Second} = {b.First};"))}
-                }}
+            if (ledState[{LedIndex - 1}].select == 0 && debounce[{debounceIndex}]) {{
+                ledState[{LedIndex - 1}].select = 1;
+                {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Second} = {b.First};"))}
             }}";
+            led2 = $@"
+            if (!debounce[{debounceIndex}] && ledState[{LedIndex - 1}].select == 1) {{
+                ledState[{LedIndex - 1}].select = 1;
+                {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Second} = {b.First};"))}
+            }}
+            ";
         }
 
         if (combined && IsStrum)
         {
             var otherIndex = debounceIndex == 1 ? 0 : 1;
             return
-                $"if (({Input.Generate(xbox)}) && (!debounce[{otherIndex}])) {{debounce[{debounceIndex}] = {Debounce + 1};}} {led}";
+                $"if (({Input.Generate(xbox)}) && (!debounce[{otherIndex}])) {{ {led2}; debounce[{debounceIndex}] = {Debounce + 1};}} {led}";
         }
 
-        return $"if (({Input.Generate(xbox)})) {{debounce[{debounceIndex}] = {Debounce + 1};}} {led}";
+        return $"if (({Input.Generate(xbox)})) {{ {led2}; debounce[{debounceIndex}] = {Debounce + 1}; }} {led}";
     }
 }

@@ -164,13 +164,14 @@ public abstract class AvrController : Microcontroller
             var idx = GetIndex(pin.Pin);
             var currentPort = portByPort.GetValueOrDefault(port, 0);
             var currentDdr = ddrByPort.GetValueOrDefault(port, 0);
-            if (pin.PinMode == DevicePinMode.Output)
+            switch (pin.PinMode)
             {
-                currentDdr += 1 << idx;
-            }
-            else if (pin.PinMode == DevicePinMode.PullUp)
-            {
-                currentPort += 1 << idx;
+                case DevicePinMode.Output:
+                    currentDdr |= 1 << idx;
+                    break;
+                case DevicePinMode.PullUp:
+                    currentPort |= 1 << idx;
+                    break;
             }
 
             portByPort[port] = currentPort;
@@ -182,23 +183,22 @@ public abstract class AvrController : Microcontroller
             var force = ForcedMode(i);
             var port = GetPort(i);
             var idx = GetIndex(i);
-            if (ForcedMode(i) is not null)
-            {
-                var currentPort = portByPort.GetValueOrDefault(port, 0);
-                var currentDdr = ddrByPort.GetValueOrDefault(port, 0);
-                switch (force)
-                {
-                    case AvrPinMode.InputPulldown:
-                        currentPort |= 1 << idx;
-                        break;
-                    case AvrPinMode.Output:
-                        currentDdr |= 1 << idx;
-                        break;
-                }
 
-                portByPort[port] = currentPort;
-                ddrByPort[port] = currentDdr;
+            if (ForcedMode(i) is null) continue;
+            var currentPort = portByPort.GetValueOrDefault(port, 0);
+            var currentDdr = ddrByPort.GetValueOrDefault(port, 0);
+            switch (force)
+            {
+                case AvrPinMode.InputPulldown:
+                    currentPort |= 1 << idx;
+                    break;
+                case AvrPinMode.Output:
+                    currentDdr |= 1 << idx;
+                    break;
             }
+
+            portByPort[port] = currentPort;
+            ddrByPort[port] = currentDdr;
         }
 
         var ret = "uint8_t oldSREG = SREG;cli();";
