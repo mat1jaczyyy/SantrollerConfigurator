@@ -13,14 +13,14 @@ public class SerializedMouseAxis : SerializedOutput
     [ProtoMember(1)] public override SerializedInput? Input { get; }
     [ProtoMember(2)] public override uint LedOn { get; }
     [ProtoMember(3)] public override uint LedOff { get; }
-    [ProtoMember(7)] public override byte LedIndex { get; }
+    [ProtoMember(7)] public override byte[] LedIndex { get; }
     [ProtoMember(4)] public int Min { get; }
     [ProtoMember(5)] public int Max { get; }
     [ProtoMember(6)] public int Deadzone { get; }
 
     public MouseAxisType Type { get; }
 
-    public SerializedMouseAxis(SerializedInput? input, MouseAxisType type, Color ledOn, Color ledOff, byte ledIndex, int min, int max,
+    public SerializedMouseAxis(SerializedInput? input, MouseAxisType type, Color ledOn, Color ledOff, byte[] ledIndex, int min, int max,
         int deadzone)
     {
         Input = input;

@@ -54,8 +54,8 @@ public class ControllerButton : OutputButton
         StandardButtonType.Right,
     };
 
-    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex,
-        byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndex, debounce, type.ToString())
+    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
+        byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, type.ToString())
     {
         Type = type;
     }
@@ -92,6 +92,6 @@ public class ControllerButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedControllerButton(Input?.Serialise(), LedOn, LedOff, LedIndex, Debounce, Type);
+        return new SerializedControllerButton(Input?.Serialise(), LedOn, LedOff, LedIndices, Debounce, Type);
     }
 }

@@ -14,7 +14,7 @@ public class MouseButton : OutputButton
         MouseButtonType.Middle
     };
 
-    public MouseButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex, byte debounce, MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndex, debounce, type.ToString())
+    public MouseButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce, MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, type.ToString())
     {
         Type = type;
     }
@@ -38,6 +38,6 @@ public class MouseButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedMouseButton(Input?.Serialise(), LedOn, LedOff, LedIndex, Debounce, Type);
+        return new SerializedMouseButton(Input?.Serialise(), LedOn, LedOff, LedIndices, Debounce, Type);
     }
 }

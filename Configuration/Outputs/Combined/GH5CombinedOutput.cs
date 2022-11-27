@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
@@ -58,13 +59,13 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         {
             _outputs.Add(new ControllerButton(Model,
                 new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Green,
-                Colors.Transparent, 0, 5, pair.Value));
+                Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
 
         _outputs.Add(new ControllerAxis(Model,
             new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, _microcontroller, combined: true),
             Colors.Transparent,
-            Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY));
+            Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY));
     }
 
     public void AddTapBarFrets()
@@ -73,7 +74,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         {
             _outputs.Add(new ControllerButton(Model,
                 new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Transparent,
-                Colors.Transparent, 0, 5, pair.Value));
+                Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
     }
 

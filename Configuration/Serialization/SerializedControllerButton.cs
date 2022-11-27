@@ -13,11 +13,11 @@ public class SerializedControllerButton : SerializedOutput
     [ProtoMember(1)] public override SerializedInput? Input { get; }
     [ProtoMember(2)] public override uint LedOn { get; }
     [ProtoMember(3)] public override uint LedOff { get; }
-    [ProtoMember(6)] public override byte LedIndex { get; }
+    [ProtoMember(6)] public override byte[] LedIndex { get; }
     [ProtoMember(4)] public byte Debounce { get; }
     [ProtoMember(5)] public StandardButtonType Type { get; }
 
-    public SerializedControllerButton(SerializedInput? input, Color ledOn, Color ledOff, byte ledIndex, byte debounce, StandardButtonType type)
+    public SerializedControllerButton(SerializedInput? input, Color ledOn, Color ledOff, byte[] ledIndex, byte debounce, StandardButtonType type)
     {
         Input = input;
         LedOn = ledOn.ToUint32();

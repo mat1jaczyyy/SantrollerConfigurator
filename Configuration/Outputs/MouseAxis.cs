@@ -17,7 +17,7 @@ public class MouseAxis : OutputAxis
         {MouseAxisType.ScrollY, "ScrollY"},
     };
 
-    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex, int min, int max, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndex, min, max,
+    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
         deadZone, type.ToString(), (_) => false)
     {
         Type = type;
@@ -73,6 +73,6 @@ public class MouseAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedMouseAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndex, Min, Max, DeadZone);
+        return new SerializedMouseAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices, Min, Max, DeadZone);
     }
 }

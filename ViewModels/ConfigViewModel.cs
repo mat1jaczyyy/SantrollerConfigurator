@@ -211,12 +211,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     case StandardButtonType buttonType:
                         Bindings.Add(new ControllerButton(this,
                             new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
-                            Colors.Transparent, Colors.Transparent, 0, 1, buttonType));
+                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, buttonType));
                         break;
                     case StandardAxisType axisType:
                         Bindings.Add(new ControllerAxis(this,
                             new DirectInput(0, DevicePinMode.Analog, this, MicroController!),
-                            Colors.Transparent, Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, axisType));
+                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, axisType));
                         break;
                 }
             }
@@ -361,7 +361,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
                 Bindings.Add(new ControllerAxis(this,
                     new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
-                    Colors.Transparent, Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, type));
+                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, type));
             }
 
             foreach (var type in Enum.GetValues<StandardButtonType>())
@@ -370,7 +370,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     null) continue;
                 Bindings.Add(new ControllerButton(this,
                     new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
-                    Colors.Transparent, Colors.Transparent, 0, 1, type));
+                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, type));
             }
         }
 
@@ -382,7 +382,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var directInputs = inputs.OfType<DirectInput>().ToList();
             var configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
             var lines = new List<string>();
-            var ledCount = outputs.SelectMany(s => s.Outputs).Select(s => s.LedIndex).Max();
+            var ledCount = outputs.SelectMany(s => s.Outputs).SelectMany(s => s.LedIndices).Max();
+            if (outputs.Any(s => s.LedIndices.Any())) ledCount++;
             using (var outputStream = new MemoryStream())
             {
                 using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
@@ -498,16 +499,16 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         private string GenerateLedTick()
         {
-            if (_microController == null || _ledType == LedType.None) return "";
             var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
-            var ledMax = outputs.Select(output => output.LedIndex).Max();
+            if (_microController == null || _ledType == LedType.None || !outputs.Any(s => s.LedIndices.Any())) return "";
+            var ledMax = outputs.SelectMany(output => output.LedIndices).Max();
             var ret = "spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);";
-            for (var i = 0; i < ledMax; i++)
+            for (var i = 0; i <= ledMax; i++)
             {
                 ret += $"spi_transfer(APA102_SPI_PORT, 0xff);spi_transfer(APA102_SPI_PORT, ledState[{i}].r);spi_transfer(APA102_SPI_PORT, ledState[{i}].g);spi_transfer(APA102_SPI_PORT, ledState[{i}].b);";
             }
 
-            for (var i = 0; i < ledMax; i += 16)
+            for (var i = 0; i <= ledMax; i += 16)
             {
                 ret += "spi_transfer(APA102_SPI_PORT, 0xff);";
             }
@@ -535,7 +536,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 .GenerateAll(Bindings.ToList(), group.Select(output =>
                     {
                         var input = output.Input?.InnermostInput();
-                        if (input == null) throw new IncompleteConfigurationException("Output without Input found!");
+                        if (input == null) throw new IncompleteConfigurationException("Missing input!");
                         var index = 0;
                         if (output is OutputButton button)
                         {

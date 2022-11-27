@@ -114,7 +114,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             _outputs.Add(new ControllerButton(Model,
                 new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
-                Colors.Transparent, 0,
+                Colors.Transparent, Array.Empty<byte>(),
                 10,
                 pair.Value));
         }
@@ -122,21 +122,21 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         _outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 128, Model),
-            Colors.Transparent, Colors.Transparent, 0, 10, StandardButtonType.A));
+            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.A));
         _outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 128, Model),
-            Colors.Transparent, Colors.Transparent, 0, 10, StandardButtonType.X));
+            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.X));
         _outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 240, Model),
-            Colors.Transparent, Colors.Transparent, 0, 10, StandardButtonType.Lb));
+            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.Lb));
 
         foreach (var pair in Axis)
         {
             _outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
-                Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, pair.Value));
+                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
         }
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -19,7 +20,7 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
     [ProtoMember(5)] public List<SerializedOutput> Outputs { get; }
     public override uint LedOn => Colors.Transparent.ToUint32();
     public override uint LedOff => Colors.Transparent.ToUint32();
-    public override byte LedIndex => 0;
+    public override byte[] LedIndex => Array.Empty<byte>();
 
     public SerializedGhwtCombinedOutput(int pin, List<Output> outputs)
     {

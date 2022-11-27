@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
@@ -52,7 +53,7 @@ public class GhwtCombinedOutput : CombinedOutput
             new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
                 combined: true),
             Colors.Transparent,
-            Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickX));
+            Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickX));
     }
 
     public void AddTapBarFrets()
@@ -62,7 +63,7 @@ public class GhwtCombinedOutput : CombinedOutput
             _outputs.Add(new ControllerButton(Model,
                 new GhWtTapInput(pair.Key, Model, _microcontroller,
                     combined: true), Colors.Transparent,
-                Colors.Transparent, 0, 5, pair.Value));
+                Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
     }
 

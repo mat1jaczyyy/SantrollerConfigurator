@@ -109,519 +109,524 @@ public class Ardwiino : ConfigurableUsbDevice
             return;
         }
 
-        try
+        var readConfig = ReadConfigCommand;
+        if (Version < new Version(8, 0, 7))
         {
-            var readConfig = ReadConfigCommand;
-            if (Version < new Version(8, 0, 7))
-            {
-                readConfig = ReadConfigPre807Command;
-            }
-            else if (Version < new Version(7, 0, 3))
-            {
-                readConfig = ReadConfigPre703Command;
-            }
+            readConfig = ReadConfigPre807Command;
+        }
+        else if (Version < new Version(7, 0, 3))
+        {
+            readConfig = ReadConfigPre703Command;
+        }
 
-            var data = new byte[Marshal.SizeOf(typeof(ArdwiinoConfiguration))];
-            var sizeOfAll = Marshal.SizeOf(typeof(FullArdwiinoConfiguration));
-            var offset = 0;
-            var offsetId = 0;
-            var maxSize = data.Length;
-            uint version = 0;
-            // Set the defaults for things that arent in every version
-            var config = new ArdwiinoConfiguration();
-            config.neck = new NeckConfig();
-            config.axisScale = new AxisScaleConfig();
-            config.axisScale.axis = new AxisScale[XboxAxisCount];
+        var data = new byte[Marshal.SizeOf(typeof(ArdwiinoConfiguration))];
+        var sizeOfAll = Marshal.SizeOf(typeof(FullArdwiinoConfiguration));
+        var offset = 0;
+        var offsetId = 0;
+        var maxSize = data.Length;
+        uint version = 0;
+        // Set the defaults for things that arent in every version
+        var config = new ArdwiinoConfiguration();
+        config.neck = new NeckConfig();
+        config.axisScale = new AxisScaleConfig();
+        config.axisScale.axis = new AxisScale[XboxAxisCount];
+        foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
+        {
+            config.axisScale.axis[axis].multiplier = 1;
+            config.axisScale.axis[axis].offset = short.MinValue;
+            config.axisScale.axis[axis].deadzone = short.MaxValue;
+        }
+
+        config.debounce.buttons = 5;
+        config.debounce.strum = 20;
+        config.debounce.combinedStrum = 0;
+        config.rf.id = 0;
+        config.rf.rfInEnabled = 0;
+        while (offset < maxSize)
+        {
+            var data2 = ReadData((ushort) (readConfig + offsetId), RequestHidGetReport);
+            Array.Copy(data2, 0, data, offset, data2.Length);
+            offset += data2.Length;
+            offsetId++;
+            if (offset > sizeOfAll)
+            {
+                config.all = StructTools.RawDeserialize<FullArdwiinoConfiguration>(data, 0);
+                version = config.all.main.version;
+                if (version > 13)
+                {
+                    maxSize = Marshal.SizeOf(typeof(Configuration14));
+                }
+                else if (version > 12)
+                {
+                    maxSize = Marshal.SizeOf(typeof(Configuration13));
+                }
+                else if (version > 11)
+                {
+                    maxSize = Marshal.SizeOf(typeof(Configuration12));
+                }
+                else if (version > 10)
+                {
+                    maxSize = Marshal.SizeOf(typeof(Configuration11));
+                }
+                else if (version > 8)
+                {
+                    maxSize = Marshal.SizeOf(typeof(Configuration10));
+                }
+                else if (version == 8)
+                {
+                    maxSize = Marshal.SizeOf(typeof(Configuration8));
+                }
+                else
+                {
+                    maxSize = sizeOfAll;
+                }
+            }
+        }
+
+        // Patches to all
+        if (version < 9)
+        {
+            // For versions below version 9, r_x is inverted from how we use it now
+            config.all.pins.axis![((byte) ControllerAxisType.XboxRX)].inverted =
+                (byte) (config.all.pins.axis[(int) ControllerAxisType.XboxRX].inverted == 0 ? 1 : 0);
+        }
+
+        // Read in the rest of the data, in the format that it is in
+        if (version == 16 || version == 17)
+        {
+            config = StructTools.RawDeserialize<ArdwiinoConfiguration>(data, 0);
+        }
+        else if (version > 13)
+        {
+            var configOld = StructTools.RawDeserialize<Configuration14>(data, 0);
+            config.axisScale = configOld.axisScale;
+            config.pinsSP = configOld.pinsSP;
+            config.rf = configOld.rf;
+            config.debounce = configOld.debounce;
+        }
+        else if (version > 12)
+        {
+            var configOld = StructTools.RawDeserialize<Configuration13>(data, 0);
+            config.axisScale = configOld.axisScale;
+            config.pinsSP = configOld.pinsSP;
+            config.rf = configOld.rf;
+            config.debounce.buttons = configOld.debounce.buttons;
+            config.debounce.strum = configOld.debounce.strum;
+            config.debounce.combinedStrum = 0;
+        }
+        else if (version > 11)
+        {
+            var configOld = StructTools.RawDeserialize<Configuration12>(data, 0);
             foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
             {
-                config.axisScale.axis[axis].multiplier = 1;
-                config.axisScale.axis[axis].offset = short.MinValue;
+                config.axisScale.axis[axis].multiplier = configOld.axisScale.axis[axis].multiplier;
+                config.axisScale.axis[axis].offset = configOld.axisScale.axis[axis].offset;
                 config.axisScale.axis[axis].deadzone = short.MaxValue;
             }
 
+            config.pinsSP = configOld.pinsSP;
+            config.rf = configOld.rf;
             config.debounce.buttons = 5;
             config.debounce.strum = 20;
             config.debounce.combinedStrum = 0;
-            config.rf.id = 0;
-            config.rf.rfInEnabled = 0;
-            while (offset < maxSize)
-            {
-                var data2 = ReadData((ushort) (readConfig + offsetId), RequestHidGetReport);
-                Array.Copy(data2, 0, data, offset, data2.Length);
-                offset += data2.Length;
-                offsetId++;
-                if (offset > sizeOfAll)
-                {
-                    config.all = StructTools.RawDeserialize<FullArdwiinoConfiguration>(data, 0);
-                    version = config.all.main.version;
-                    if (version > 13)
-                    {
-                        maxSize = Marshal.SizeOf(typeof(Configuration14));
-                    }
-                    else if (version > 12)
-                    {
-                        maxSize = Marshal.SizeOf(typeof(Configuration13));
-                    }
-                    else if (version > 11)
-                    {
-                        maxSize = Marshal.SizeOf(typeof(Configuration12));
-                    }
-                    else if (version > 10)
-                    {
-                        maxSize = Marshal.SizeOf(typeof(Configuration11));
-                    }
-                    else if (version > 8)
-                    {
-                        maxSize = Marshal.SizeOf(typeof(Configuration10));
-                    }
-                    else if (version == 8)
-                    {
-                        maxSize = Marshal.SizeOf(typeof(Configuration8));
-                    }
-                    else
-                    {
-                        maxSize = sizeOfAll;
-                    }
-                }
-            }
-
-            // Patches to all
-            if (version < 9)
-            {
-                // For versions below version 9, r_x is inverted from how we use it now
-                config.all.pins.axis![((byte) ControllerAxisType.XboxRX)].inverted =
-                    (byte) (config.all.pins.axis[(int) ControllerAxisType.XboxRX].inverted == 0 ? 1 : 0);
-            }
-
-            // Read in the rest of the data, in the format that it is in
-            if (version == 16 || version == 17)
-            {
-                config = StructTools.RawDeserialize<ArdwiinoConfiguration>(data, 0);
-            }
-            else if (version > 13)
-            {
-                var configOld = StructTools.RawDeserialize<Configuration14>(data, 0);
-                config.axisScale = configOld.axisScale;
-                config.pinsSP = configOld.pinsSP;
-                config.rf = configOld.rf;
-                config.debounce = configOld.debounce;
-            }
-            else if (version > 12)
-            {
-                var configOld = StructTools.RawDeserialize<Configuration13>(data, 0);
-                config.axisScale = configOld.axisScale;
-                config.pinsSP = configOld.pinsSP;
-                config.rf = configOld.rf;
-                config.debounce.buttons = configOld.debounce.buttons;
-                config.debounce.strum = configOld.debounce.strum;
-                config.debounce.combinedStrum = 0;
-            }
-            else if (version > 11)
-            {
-                var configOld = StructTools.RawDeserialize<Configuration12>(data, 0);
-                foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
-                {
-                    config.axisScale.axis[axis].multiplier = configOld.axisScale.axis[axis].multiplier;
-                    config.axisScale.axis[axis].offset = configOld.axisScale.axis[axis].offset;
-                    config.axisScale.axis[axis].deadzone = short.MaxValue;
-                }
-
-                config.pinsSP = configOld.pinsSP;
-                config.rf = configOld.rf;
-                config.debounce.buttons = 5;
-                config.debounce.strum = 20;
-                config.debounce.combinedStrum = 0;
-            }
-            else if (version > 10)
-            {
-                var configOld = StructTools.RawDeserialize<Configuration11>(data, 0);
-                config.axisScale.axis[(int) ControllerAxisType.XboxRX].multiplier = configOld.whammy.multiplier;
-                config.axisScale.axis[(int) ControllerAxisType.XboxRX].offset = (short) configOld.whammy.offset;
-                config.pinsSP = configOld.pinsSP;
-                config.rf = configOld.rf;
-            }
-            else if (version > 8)
-            {
-                var configOld = StructTools.RawDeserialize<Configuration10>(data, 0);
-                config.pinsSP = configOld.pinsSP;
-                config.rf = configOld.rf;
-            }
-
-            if (version < 17 && config.all.main.subType > (int) SubType.XinputArcadePad)
-            {
-                config.all.main.subType += SubType.XinputTurntable - SubType.XinputArcadePad;
-                if (config.all.main.subType > (int) SubType.Ps3Gamepad)
-                {
-                    config.all.main.subType += 2;
-                }
-
-                if (config.all.main.subType > (int) SubType.WiiRockBandDrums)
-                {
-                    config.all.main.subType += 1;
-                }
-            }
-
-            var controller = Board.FindMicrocontroller(Board);
-            var bindings = new List<Output>();
-            var colors = new Dictionary<int, Color>();
-            var ledIndexes = new Dictionary<int, byte>();
-            for (byte index = 0; index < config.all!.leds!.Length; index++)
-            {
-                var led = config.all!.leds![index];
-                if (led.pin != 0)
-                {
-                    colors[led.pin - 1] = Color.FromRgb(led.red, led.green, led.blue);
-                    ledIndexes[led.pin - 1] = (byte) (index + 1);
-                }
-            }
-
-            var ledType = LedType.None;
-            DeviceControllerType deviceType;
-            var emulationType = EmulationType.Controller;
-            var rhythmType = RhythmType.GuitarHero;
-            if (config.all.main.fretLEDMode == 2)
-            {
-                ledType = LedType.APA102_BGR;
-            }
-
-            if ((config.all.main.subType >= (int) SubType.KeyboardGamepad &&
-                 config.all.main.subType <= (int) SubType.KeyboardRockBandDrums) ||
-                config.all.main.subType == (int) SubType.Mouse)
-            {
-                emulationType = EmulationType.KeyboardMouse;
-            }
-
-            if (config.all.main.subType >= (int) SubType.MidiGamepad)
-            {
-                emulationType = EmulationType.Midi;
-            }
-
-            var xinputOnWindows = (SubType) config.all.main.subType <= SubType.XinputTurntable;
-            switch ((SubType) config.all.main.subType)
-            {
-                case SubType.XinputGamepad:
-                case SubType.XinputLiveGuitar:
-                case SubType.XinputRockBandDrums:
-                case SubType.XinputGuitarHeroDrums:
-                case SubType.XinputRockBandGuitar:
-                case SubType.XinputGuitarHeroGuitar:
-                case SubType.XinputTurntable:
-                    xinputOnWindows = true;
-                    break;
-            }
-
-            switch ((SubType) config.all.main.subType)
-            {
-                case SubType.XinputTurntable:
-                case SubType.Ps3Turntable:
-                    deviceType = DeviceControllerType.TurnTable;
-                    break;
-                case SubType.XinputGamepad:
-                case SubType.Ps3Gamepad:
-                case SubType.SwitchGamepad:
-                case SubType.MidiGamepad:
-                case SubType.KeyboardGamepad:
-                    deviceType = DeviceControllerType.Gamepad;
-                    break;
-                case SubType.XinputArcadePad:
-                    deviceType = DeviceControllerType.ArcadePad;
-                    break;
-                case SubType.XinputWheel:
-                    deviceType = DeviceControllerType.Wheel;
-                    break;
-                case SubType.XinputArcadeStick:
-                    deviceType = DeviceControllerType.ArcadeStick;
-                    break;
-                case SubType.XinputFlightStick:
-                    deviceType = DeviceControllerType.FlightStick;
-                    break;
-                case SubType.XinputDancePad:
-                    deviceType = DeviceControllerType.DancePad;
-                    break;
-                case SubType.WiiLiveGuitar:
-                case SubType.Ps3LiveGuitar:
-                case SubType.MidiLiveGuitar:
-                case SubType.XinputLiveGuitar:
-                case SubType.KeyboardLiveGuitar:
-                    deviceType = DeviceControllerType.LiveGuitar;
-                    rhythmType = RhythmType.GuitarHero;
-                    break;
-                case SubType.Ps3RockBandDrums:
-                case SubType.WiiRockBandDrums:
-                case SubType.MidiRockBandDrums:
-                case SubType.XinputRockBandDrums:
-                case SubType.KeyboardRockBandDrums:
-                    deviceType = DeviceControllerType.Drum;
-                    rhythmType = RhythmType.RockBand;
-                    break;
-                case SubType.Ps3GuitarHeroDrums:
-                case SubType.MidiGuitarHeroDrums:
-                case SubType.XinputGuitarHeroDrums:
-                case SubType.KeyboardGuitarHeroDrums:
-                    deviceType = DeviceControllerType.Drum;
-                    rhythmType = RhythmType.GuitarHero;
-                    break;
-                case SubType.Ps3RockBandGuitar:
-                case SubType.WiiRockBandGuitar:
-                case SubType.MidiRockBandGuitar:
-                case SubType.XinputRockBandGuitar:
-                case SubType.KeyboardRockBandGuitar:
-                    deviceType = DeviceControllerType.Guitar;
-                    rhythmType = RhythmType.RockBand;
-                    break;
-                case SubType.Ps3GuitarHeroGuitar:
-                case SubType.MidiGuitarHeroGuitar:
-                case SubType.XinputGuitarHeroGuitar:
-                case SubType.KeyboardGuitarHeroGuitar:
-                    deviceType = DeviceControllerType.Guitar;
-                    rhythmType = RhythmType.GuitarHero;
-                    break;
-                default:
-                    deviceType = DeviceControllerType.Gamepad;
-                    break;
-            }
-
-            model.SetDeviceTypeAndRhythmTypeWithoutUpdating(deviceType, rhythmType, emulationType);
-            var sda = 18;
-            var scl = 19;
-            var mosi = 3;
-            var miso = 4;
-            var sck = 6;
-            var att = 0;
-            var ack = 0;
-            switch (controller)
-            {
-                case Micro:
-                case Pico:
-                    att = 10;
-                    ack = 7;
-                    break;
-                case Uno:
-                case Mega:
-                    att = 10;
-                    ack = 2;
-                    break;
-            }
-
-            if (config.all.main.inputType == (int) InputControllerType.Direct)
-            {
-                if (deviceType == DeviceControllerType.Guitar)
-                {
-                    if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
-                    {
-                        bindings.Add(new Gh5CombinedOutput(model, controller, sda, scl));
-                    }
-
-                    if (config.neck.wtNeck != 0)
-                    {
-                        bindings.Add(new GhwtCombinedOutput(model, controller, 9));
-                    }
-                }
-
-                if (deviceType == DeviceControllerType.TurnTable)
-                {
-                    bindings.Add(new DjCombinedOutput(model, controller, sda, scl));
-                }
-
-                foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
-                {
-                    var pin = config.all.pins.axis![axis];
-                    if (pin.pin == NotUsed)
-                    {
-                        continue;
-                    }
-
-                    var genAxis = AxisToStandard[(ControllerAxisType) axis];
-                    var scale = config.axisScale.axis[axis];
-                    var isTrigger = axis == (int) ControllerAxisType.XboxLt ||
-                                    axis == (int) ControllerAxisType.XboxRt;
-
-                    var on = Color.FromRgb(0, 0, 0);
-                    if (colors.ContainsKey(axis + XboxBtnCount))
-                    {
-                        on = colors[axis + XboxBtnCount];
-                    }
-
-                    var ledIndex = ledIndexes.GetValueOrDefault(axis + XboxBtnCount);
-
-                    var off = Color.FromRgb(0, 0, 0);
-                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
-                    {
-                        isTrigger = true;
-                    }
-
-                    if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt &&
-                        config.all.main.tiltType == 2)
-                    {
-                        bindings.Add(new ControllerAxis(model,
-                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
-                                -32767, 0, model), on,
-                            off, ledIndex, ushort.MinValue, ushort.MaxValue,
-                            0, StandardAxisType.RightStickY));
-                    }
-                    else
-                    {
-                        var axisMultiplier = (scale.multiplier / 1024.0f) * (pin.inverted > 0 ? -1 : 1);
-                        var axisOffset = (scale.offset);
-                        var axisDeadzone = ((isTrigger ? 32768 : 0) + scale.deadzone);
-                        int min = axisOffset;
-                        int max = (int) (axisOffset + (ushort.MaxValue / axisMultiplier));
-                        if (isTrigger)
-                        {
-                            min += short.MaxValue;
-                            max += short.MaxValue;
-                        }
-
-                        bindings.Add(new ControllerAxis(model,
-                            new DirectInput(pin.pin, DevicePinMode.Analog, model, controller), on, off,
-                            ledIndex, min, max, axisDeadzone, genAxis));
-                    }
-                }
-
-                foreach (int button in Enum.GetValues(typeof(ControllerButtons)))
-                {
-                    var pin = config.all.pins.pins![button];
-                    if (pin == NotUsed)
-                    {
-                        continue;
-                    }
-
-                    var on = Color.FromRgb(0, 0, 0);
-                    if (colors.ContainsKey(button))
-                    {
-                        on = colors[button];
-                    }
-
-                    byte ledIndex = ledIndexes.GetValueOrDefault(button);
-
-                    var off = Color.FromRgb(0, 0, 0);
-                    var genButton = ButtonToStandard[(ControllerButtons) button];
-                    var pinMode = DevicePinMode.PullUp;
-                    if (config.all.main.fretLEDMode == 1 && deviceType == DeviceControllerType.Guitar &&
-                        _frets.Contains(genButton))
-                    {
-                        pinMode = DevicePinMode.Floating;
-                    }
-
-                    var debounce = config.debounce.buttons;
-                    if (deviceType == DeviceControllerType.Guitar &&
-                        (genButton == StandardButtonType.Up || genButton == StandardButtonType.Down))
-                    {
-                        debounce = config.debounce.strum;
-                    }
-
-                    if (deviceType == DeviceControllerType.TurnTable && genButton == StandardButtonType.LeftStick)
-                    {
-                        genButton = StandardButtonType.Y;
-                    }
-
-                    bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, model, controller), on, off,
-                        ledIndex, debounce, genButton));
-                }
-            }
-            else if (config.all.main.tiltType == 2)
-            {
-                if (deviceType == DeviceControllerType.Guitar)
-                {
-                    var pin = config.all.pins.axis![(int) XboxTilt];
-                    if (pin.pin != NotUsed)
-                    {
-                        var on = Color.FromRgb(0, 0, 0);
-                        if (colors.ContainsKey((int) (XboxTilt + XboxBtnCount)))
-                        {
-                            on = colors[(int) (XboxTilt + XboxBtnCount)];
-                        }
-
-                        var off = Color.FromRgb(0, 0, 0);
-                        byte ledIndex = ledIndexes.GetValueOrDefault(pin.pin);
-                        bindings.Add(new ControllerAxis(model,
-                            new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
-                                -32767, 0, model), on,
-                            off, ledIndex, ushort.MinValue, ushort.MaxValue,
-                            0, StandardAxisType.RightStickY));
-                    }
-                }
-
-                if (config.all.main.inputType == (int) InputControllerType.Wii)
-                {
-                    var wii = new WiiCombinedOutput(model, controller, sda, scl);
-                    if (config.all.main.mapNunchukAccelToRightJoy != 0)
-                    {
-                        wii.AddNunchukAcceleration();
-                    }
-
-                    bindings.Add(wii);
-                }
-                else if (config.all.main.inputType == (int) InputControllerType.Ps2)
-                {
-                    bindings.Add(new Ps2CombinedOutput(model, controller, miso, mosi, sck, att, ack));
-                }
-            }
-
-            // Keyboard / Mouse does not have a joystick
-            if (config.all.main.mapLeftJoystickToDPad > 0)
-            {
-                ControllerAxis? lx = null;
-                ControllerAxis? ly = null;
-                var threshold = config.all.axis.joyThreshold << 8;
-                foreach (var binding in bindings)
-                {
-                    if (binding is ControllerAxis axis)
-                    {
-                        if (axis.Type == StandardAxisType.LeftStickX)
-                        {
-                            lx = axis;
-                        }
-                        else if (axis.Type == StandardAxisType.LeftStickY)
-                        {
-                            ly = axis;
-                        }
-                    }
-                }
-
-                if (lx != null && lx.Input != null)
-                {
-                    var ledOn = lx.LedOn;
-                    var ledOff = lx.LedOff;
-                    bindings.Add(new ControllerButton(model,
-                        new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
-                        0, config.debounce.buttons, StandardButtonType.Left));
-                    bindings.Add(new ControllerButton(model,
-                        new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
-                        0, config.debounce.buttons, StandardButtonType.Right));
-                }
-
-                if (ly != null && ly.Input != null)
-                {
-                    var ledOn = ly.LedOn;
-                    var ledOff = ly.LedOff;
-                    bindings.Add(new ControllerButton(model,
-                        new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
-                        0, config.debounce.buttons, StandardButtonType.Up));
-                    bindings.Add(new ControllerButton(model,
-                        new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
-                        0, config.debounce.buttons, StandardButtonType.Down));
-                }
-            }
-
-            model.MicroController = controller;
-            model.LedType = ledType;
-            if (model.IsApa102)
-            {
-                model.Apa102Mosi = 3;
-                model.Apa102Sck = 6;
-            }
-
-            model.XInputOnWindows = xinputOnWindows;
-            model.Bindings.Clear();
-            model.Bindings.AddRange(bindings);
-            await model.Write();
         }
-        catch (ArgumentException)
+        else if (version > 10)
         {
-            //TODO: do this right
-            throw new IncompleteConfigurationException("Something went wrong");
+            var configOld = StructTools.RawDeserialize<Configuration11>(data, 0);
+            config.axisScale.axis[(int) ControllerAxisType.XboxRX].multiplier = configOld.whammy.multiplier;
+            config.axisScale.axis[(int) ControllerAxisType.XboxRX].offset = (short) configOld.whammy.offset;
+            config.pinsSP = configOld.pinsSP;
+            config.rf = configOld.rf;
         }
+        else if (version > 8)
+        {
+            var configOld = StructTools.RawDeserialize<Configuration10>(data, 0);
+            config.pinsSP = configOld.pinsSP;
+            config.rf = configOld.rf;
+        }
+
+        if (version < 17 && config.all.main.subType > (int) SubType.XinputArcadePad)
+        {
+            config.all.main.subType += SubType.XinputTurntable - SubType.XinputArcadePad;
+            if (config.all.main.subType > (int) SubType.Ps3Gamepad)
+            {
+                config.all.main.subType += 2;
+            }
+
+            if (config.all.main.subType > (int) SubType.WiiRockBandDrums)
+            {
+                config.all.main.subType += 1;
+            }
+        }
+
+        var controller = Board.FindMicrocontroller(Board);
+        var bindings = new List<Output>();
+        var colors = new Dictionary<int, Color>();
+        var ledIndexes = new Dictionary<int, byte>();
+        for (byte index = 0; index < config.all!.leds!.Length; index++)
+        {
+            var led = config.all!.leds![index];
+            if (led.pin != 0)
+            {
+                colors[led.pin - 1] = Color.FromRgb(led.red, led.green, led.blue);
+                ledIndexes[led.pin - 1] = index;
+            }
+        }
+
+        var ledType = LedType.None;
+        DeviceControllerType deviceType;
+        var emulationType = EmulationType.Controller;
+        var rhythmType = RhythmType.GuitarHero;
+        if (config.all.main.fretLEDMode == 2)
+        {
+            ledType = LedType.APA102_BGR;
+        }
+
+        if ((config.all.main.subType >= (int) SubType.KeyboardGamepad &&
+             config.all.main.subType <= (int) SubType.KeyboardRockBandDrums) ||
+            config.all.main.subType == (int) SubType.Mouse)
+        {
+            emulationType = EmulationType.KeyboardMouse;
+        }
+
+        if (config.all.main.subType >= (int) SubType.MidiGamepad)
+        {
+            emulationType = EmulationType.Midi;
+        }
+
+        var xinputOnWindows = (SubType) config.all.main.subType <= SubType.XinputTurntable;
+        switch ((SubType) config.all.main.subType)
+        {
+            case SubType.XinputGamepad:
+            case SubType.XinputLiveGuitar:
+            case SubType.XinputRockBandDrums:
+            case SubType.XinputGuitarHeroDrums:
+            case SubType.XinputRockBandGuitar:
+            case SubType.XinputGuitarHeroGuitar:
+            case SubType.XinputTurntable:
+                xinputOnWindows = true;
+                break;
+        }
+
+        switch ((SubType) config.all.main.subType)
+        {
+            case SubType.XinputTurntable:
+            case SubType.Ps3Turntable:
+                deviceType = DeviceControllerType.TurnTable;
+                break;
+            case SubType.XinputGamepad:
+            case SubType.Ps3Gamepad:
+            case SubType.SwitchGamepad:
+            case SubType.MidiGamepad:
+            case SubType.KeyboardGamepad:
+                deviceType = DeviceControllerType.Gamepad;
+                break;
+            case SubType.XinputArcadePad:
+                deviceType = DeviceControllerType.ArcadePad;
+                break;
+            case SubType.XinputWheel:
+                deviceType = DeviceControllerType.Wheel;
+                break;
+            case SubType.XinputArcadeStick:
+                deviceType = DeviceControllerType.ArcadeStick;
+                break;
+            case SubType.XinputFlightStick:
+                deviceType = DeviceControllerType.FlightStick;
+                break;
+            case SubType.XinputDancePad:
+                deviceType = DeviceControllerType.DancePad;
+                break;
+            case SubType.WiiLiveGuitar:
+            case SubType.Ps3LiveGuitar:
+            case SubType.MidiLiveGuitar:
+            case SubType.XinputLiveGuitar:
+            case SubType.KeyboardLiveGuitar:
+                deviceType = DeviceControllerType.LiveGuitar;
+                rhythmType = RhythmType.GuitarHero;
+                break;
+            case SubType.Ps3RockBandDrums:
+            case SubType.WiiRockBandDrums:
+            case SubType.MidiRockBandDrums:
+            case SubType.XinputRockBandDrums:
+            case SubType.KeyboardRockBandDrums:
+                deviceType = DeviceControllerType.Drum;
+                rhythmType = RhythmType.RockBand;
+                break;
+            case SubType.Ps3GuitarHeroDrums:
+            case SubType.MidiGuitarHeroDrums:
+            case SubType.XinputGuitarHeroDrums:
+            case SubType.KeyboardGuitarHeroDrums:
+                deviceType = DeviceControllerType.Drum;
+                rhythmType = RhythmType.GuitarHero;
+                break;
+            case SubType.Ps3RockBandGuitar:
+            case SubType.WiiRockBandGuitar:
+            case SubType.MidiRockBandGuitar:
+            case SubType.XinputRockBandGuitar:
+            case SubType.KeyboardRockBandGuitar:
+                deviceType = DeviceControllerType.Guitar;
+                rhythmType = RhythmType.RockBand;
+                break;
+            case SubType.Ps3GuitarHeroGuitar:
+            case SubType.MidiGuitarHeroGuitar:
+            case SubType.XinputGuitarHeroGuitar:
+            case SubType.KeyboardGuitarHeroGuitar:
+                deviceType = DeviceControllerType.Guitar;
+                rhythmType = RhythmType.GuitarHero;
+                break;
+            default:
+                deviceType = DeviceControllerType.Gamepad;
+                break;
+        }
+
+        model.SetDeviceTypeAndRhythmTypeWithoutUpdating(deviceType, rhythmType, emulationType);
+        var sda = 18;
+        var scl = 19;
+        var mosi = 3;
+        var miso = 4;
+        var sck = 6;
+        var att = 0;
+        var ack = 0;
+        switch (controller)
+        {
+            case Micro:
+            case Pico:
+                att = 10;
+                ack = 7;
+                break;
+            case Uno:
+            case Mega:
+                att = 10;
+                ack = 2;
+                break;
+        }
+
+        if (config.all.main.inputType == (int) InputControllerType.Direct)
+        {
+            if (deviceType == DeviceControllerType.Guitar)
+            {
+                if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
+                {
+                    bindings.Add(new Gh5CombinedOutput(model, controller, sda, scl));
+                }
+
+                if (config.neck.wtNeck != 0)
+                {
+                    bindings.Add(new GhwtCombinedOutput(model, controller, 9));
+                }
+            }
+
+            if (deviceType == DeviceControllerType.TurnTable)
+            {
+                bindings.Add(new DjCombinedOutput(model, controller, sda, scl));
+            }
+
+            foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
+            {
+                var pin = config.all.pins.axis![axis];
+                if (pin.pin == NotUsed)
+                {
+                    continue;
+                }
+
+                var genAxis = AxisToStandard[(ControllerAxisType) axis];
+                var scale = config.axisScale.axis[axis];
+                var isTrigger = axis == (int) ControllerAxisType.XboxLt ||
+                                axis == (int) ControllerAxisType.XboxRt;
+
+                var on = Color.FromRgb(0, 0, 0);
+                if (colors.ContainsKey(axis + XboxBtnCount))
+                {
+                    on = colors[axis + XboxBtnCount];
+                }
+
+                var ledIndex = Array.Empty<byte>();
+                if (ledIndexes.ContainsKey(axis + XboxBtnCount))
+                {
+                    ledIndex = new[] {ledIndexes[axis + XboxBtnCount]};
+                }
+
+                var off = Color.FromRgb(0, 0, 0);
+                if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
+                {
+                    isTrigger = true;
+                }
+
+                if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt &&
+                    config.all.main.tiltType == 2)
+                {
+                    bindings.Add(new ControllerAxis(model,
+                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
+                            -32767, 0, model), on,
+                        off, ledIndex, ushort.MinValue, ushort.MaxValue,
+                        0, StandardAxisType.RightStickY));
+                }
+                else
+                {
+                    var axisMultiplier = (scale.multiplier / 1024.0f) * (pin.inverted > 0 ? -1 : 1);
+                    var axisOffset = (scale.offset);
+                    var axisDeadzone = ((isTrigger ? 32768 : 0) + scale.deadzone);
+                    int min = axisOffset;
+                    int max = (int) (axisOffset + (ushort.MaxValue / axisMultiplier));
+                    if (isTrigger)
+                    {
+                        min += short.MaxValue;
+                        max += short.MaxValue;
+                    }
+
+                    bindings.Add(new ControllerAxis(model,
+                        new DirectInput(pin.pin, DevicePinMode.Analog, model, controller), on, off,
+                        ledIndex, min, max, axisDeadzone, genAxis));
+                }
+            }
+
+            foreach (int button in Enum.GetValues(typeof(ControllerButtons)))
+            {
+                var pin = config.all.pins.pins![button];
+                if (pin == NotUsed)
+                {
+                    continue;
+                }
+
+                var on = Color.FromRgb(0, 0, 0);
+                if (colors.ContainsKey(button))
+                {
+                    on = colors[button];
+                }
+
+                var ledIndex = Array.Empty<byte>();
+                if (ledIndexes.ContainsKey(button))
+                {
+                    ledIndex = new[] {ledIndexes[button]};
+                }
+
+                var off = Color.FromRgb(0, 0, 0);
+                var genButton = ButtonToStandard[(ControllerButtons) button];
+                var pinMode = DevicePinMode.PullUp;
+                if (config.all.main.fretLEDMode == 1 && deviceType == DeviceControllerType.Guitar &&
+                    _frets.Contains(genButton))
+                {
+                    pinMode = DevicePinMode.Floating;
+                }
+
+                var debounce = config.debounce.buttons;
+                if (deviceType == DeviceControllerType.Guitar &&
+                    (genButton == StandardButtonType.Up || genButton == StandardButtonType.Down))
+                {
+                    debounce = config.debounce.strum;
+                }
+
+                if (deviceType == DeviceControllerType.TurnTable && genButton == StandardButtonType.LeftStick)
+                {
+                    genButton = StandardButtonType.Y;
+                }
+
+                bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, model, controller), on, off,
+                    ledIndex, debounce, genButton));
+            }
+        }
+        else if (config.all.main.tiltType == 2)
+        {
+            if (deviceType == DeviceControllerType.Guitar)
+            {
+                var pin = config.all.pins.axis![(int) XboxTilt];
+                if (pin.pin != NotUsed)
+                {
+                    var on = Color.FromRgb(0, 0, 0);
+                    if (colors.ContainsKey((int) (XboxTilt + XboxBtnCount)))
+                    {
+                        on = colors[(int) (XboxTilt + XboxBtnCount)];
+                    }
+
+                    var off = Color.FromRgb(0, 0, 0);
+                    var ledIndex = Array.Empty<byte>();
+                    if (ledIndexes.ContainsKey((int) (XboxTilt + XboxBtnCount)))
+                    {
+                        ledIndex = new[] {ledIndexes[(int) (XboxTilt + XboxBtnCount)]};
+                    }
+
+                    bindings.Add(new ControllerAxis(model,
+                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
+                            -32767, 0, model), on,
+                        off, ledIndex, ushort.MinValue, ushort.MaxValue,
+                        0, StandardAxisType.RightStickY));
+                }
+            }
+
+            if (config.all.main.inputType == (int) InputControllerType.Wii)
+            {
+                var wii = new WiiCombinedOutput(model, controller, sda, scl);
+                if (config.all.main.mapNunchukAccelToRightJoy != 0)
+                {
+                    wii.AddNunchukAcceleration();
+                }
+
+                bindings.Add(wii);
+            }
+            else if (config.all.main.inputType == (int) InputControllerType.Ps2)
+            {
+                bindings.Add(new Ps2CombinedOutput(model, controller, miso, mosi, sck, att, ack));
+            }
+        }
+
+        // Keyboard / Mouse does not have a joystick
+        if (config.all.main.mapLeftJoystickToDPad > 0)
+        {
+            ControllerAxis? lx = null;
+            ControllerAxis? ly = null;
+            var threshold = config.all.axis.joyThreshold << 8;
+            foreach (var binding in bindings)
+            {
+                if (binding is ControllerAxis axis)
+                {
+                    if (axis.Type == StandardAxisType.LeftStickX)
+                    {
+                        lx = axis;
+                    }
+                    else if (axis.Type == StandardAxisType.LeftStickY)
+                    {
+                        ly = axis;
+                    }
+                }
+            }
+
+            if (lx != null && lx.Input != null)
+            {
+                var ledOn = lx.LedOn;
+                var ledOff = lx.LedOff;
+                bindings.Add(new ControllerButton(model,
+                    new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.Left));
+                bindings.Add(new ControllerButton(model,
+                    new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.Right));
+            }
+
+            if (ly != null && ly.Input != null)
+            {
+                var ledOn = ly.LedOn;
+                var ledOff = ly.LedOff;
+                bindings.Add(new ControllerButton(model,
+                    new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.Up));
+                bindings.Add(new ControllerButton(model,
+                    new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.Down));
+            }
+        }
+
+        model.MicroController = controller;
+        model.LedType = ledType;
+        if (model.IsApa102)
+        {
+            model.Apa102Mosi = 3;
+            model.Apa102Sck = 6;
+        }
+
+        model.XInputOnWindows = xinputOnWindows;
+        model.Bindings.Clear();
+        model.Bindings.AddRange(bindings);
+        await model.Write();
     }
 
     enum SubType

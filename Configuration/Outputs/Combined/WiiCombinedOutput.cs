@@ -148,7 +148,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {
             _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
                 Colors.Transparent,
-                Colors.Transparent, 0, 10,
+                Colors.Transparent, Array.Empty<byte>(), 10,
                 pair.Value));
         }
 
@@ -156,7 +156,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {
             _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model,_microcontroller, Sda, Scl, true),
                 Colors.Transparent,
-                Colors.Transparent, 0, -30000, 30000, 10, pair.Value));
+                Colors.Transparent, Array.Empty<byte>(), -30000, 30000, 10, pair.Value));
         }
 
         // _outputs.Add(new ControllerButton(Model,
@@ -180,7 +180,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         _outputs.Add(new ControllerAxis(Model,
             new WiiInput(WiiInputType.GuitarTapBar, Model,_microcontroller, Sda, Scl, true),
             Colors.Transparent,
-            Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY));
+            Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY));
     }
 
     public void AddTapBarFrets()
@@ -188,7 +188,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         foreach (var pair in Tap)
         {
             _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true), Colors.Transparent,
-                Colors.Transparent, 0, 5, pair.Value));
+                Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
     }
 
@@ -198,7 +198,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {
             _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
                 Colors.Transparent,
-                Colors.Transparent, 0, short.MinValue, short.MaxValue, 0, pair.Value));
+                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
         }
     }
 

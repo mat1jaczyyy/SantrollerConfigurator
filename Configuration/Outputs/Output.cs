@@ -107,8 +107,19 @@ public abstract class Output : ReactiveObject, IDisposable
 
     private Color _ledOn;
     private Color _ledOff;
-    private byte _ledIndex;
 
+    private readonly ObservableAsPropertyHelper<string> _ledIndicesDisplay;
+    public string LedIndicesDisplay => _ledIndicesDisplay.Value;
+    private byte[] _ledIndices;
+
+    public byte[] LedIndices
+    {
+        get => _ledIndices;
+        set => this.RaiseAndSetIfChanged(ref _ledIndices, value);
+    }
+
+    private byte _ledIndex;
+    
     public byte LedIndex
     {
         get => _ledIndex;
@@ -134,12 +145,12 @@ public abstract class Output : ReactiveObject, IDisposable
     private readonly ObservableAsPropertyHelper<int> _valueRaw;
     public int ValueRaw => _valueRaw.Value;
 
-    protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex, string name)
+    protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, string name)
     {
         Input = input;
         LedOn = ledOn;
         LedOff = ledOff;
-        LedIndex = ledIndex;
+        LedIndices = ledIndices;
         Name = name;
         Model = model;
         _image = this.WhenAnyValue(x => x.Model.DeviceType).Select(GetImage).ToProperty(this, x => x.Image);
@@ -162,6 +173,22 @@ public abstract class Output : ReactiveObject, IDisposable
         _imageOpacity = this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
             .Select(s => (s.Item3 || s.Item2?.IsAnalog == true) ? 1 : ((s.Item1 == 0 ? 0 : 0.35) + 0.65))
             .ToProperty(this, s => s.ImageOpacity);
+        _ledIndicesDisplay = this.WhenAnyValue(x => x.LedIndices)
+            .Select(s => string.Join(", ",s))
+            .ToProperty(this, s => s.LedIndicesDisplay);
+    }
+
+    public void AddLed()
+    {
+        LedIndices = LedIndices.Append(LedIndex).ToArray();
+    }
+    public void RemoveLed()
+    {
+        LedIndices = LedIndices.Where(s => s != LedIndex).ToArray();
+    }
+    public void ClearLeds()
+    {
+        LedIndices = Array.Empty<byte>();
     }
 
 
@@ -325,8 +352,6 @@ public abstract class Output : ReactiveObject, IDisposable
     {
         Input?.Dispose();
     }
-
-    public bool IsCombinedChild => Model.IsCombinedChild(this);
 
     public List<PinConfig> GetPinConfigs() => Outputs
         .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.PinConfigs ?? new()))

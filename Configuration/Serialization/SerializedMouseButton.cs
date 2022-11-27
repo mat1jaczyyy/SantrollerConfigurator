@@ -15,9 +15,9 @@ public class SerializedMouseButton : SerializedOutput
     [ProtoMember(3)] public override uint LedOff { get; }
     [ProtoMember(4)] public byte Debounce { get; }
     [ProtoMember(5)] public MouseButtonType Type { get; }
-    [ProtoMember(6)] public override byte LedIndex { get; }
+    [ProtoMember(6)] public override byte[] LedIndex { get; }
 
-    public SerializedMouseButton(SerializedInput? input, Color ledOn, Color ledOff, byte ledIndex, byte debounce, MouseButtonType type)
+    public SerializedMouseButton(SerializedInput? input, Color ledOn, Color ledOff, byte[] ledIndex, byte debounce, MouseButtonType type)
     {
         Input = input;
         LedOn = ledOn.ToUint32();

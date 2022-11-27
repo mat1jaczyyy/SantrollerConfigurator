@@ -26,9 +26,9 @@ public abstract class OutputAxis : Output
 {
     protected delegate bool TriggerDelegate(DeviceControllerType type);
 
-    protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex,
+    protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
-        int deadZone, string name, TriggerDelegate triggerDelegate) : base(model, input, ledOn, ledOff, ledIndex, name)
+        int deadZone, string name, TriggerDelegate triggerDelegate) : base(model, input, ledOn, ledOff, ledIndices, name)
     {
         Input = input;
         _trigger = this.WhenAnyValue(x => x.Model.DeviceType).Select(d => triggerDelegate(d))
@@ -317,19 +317,23 @@ public abstract class OutputAxis : Output
 
     public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined)
     {
-        if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
+        if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         if (shared) return "";
         var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
                          this is ControllerAxis {Type: StandardAxisType.RightStickY};
         var whammy = Model.DeviceType == DeviceControllerType.Guitar &&
                             this is ControllerAxis {Type: StandardAxisType.RightStickX};
         var led = "";
-        if (AreLedsEnabled && LedIndex != 0)
+        if (AreLedsEnabled)
         {
-            var ledRead = xbox ? $"{GenerateOutput(xbox)} << 8" : GenerateOutput(xbox);
-            led = $@"if (!ledState[{LedIndex - 1}].select) {{
-                        {string.Join("", Model.LedType.GetColors(LedOn).Zip(Model.LedType.GetColors(LedOff), new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({ledRead})) >> 8));"))}
+            foreach (var index in LedIndices)
+            {
+                var ledRead = xbox ? $"{GenerateOutput(xbox)} << 8" : GenerateOutput(xbox);
+                led += $@"if (!ledState[{index}].select) {{
+                        {string.Join("", Model.LedType.GetColors(LedOn).Zip(Model.LedType.GetColors(LedOff), new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({ledRead})) >> 8));"))}
                     }}";
+            }
+           
         }
 
         if (Input is DigitalToAnalog)

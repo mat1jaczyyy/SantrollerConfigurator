@@ -13,14 +13,14 @@ public class SerializedControllerAxis : SerializedOutput
     [ProtoMember(1)] public override SerializedInput? Input { get; }
     [ProtoMember(2)] public override uint LedOn { get; }
     [ProtoMember(3)] public override uint LedOff { get; }
-    [ProtoMember(8)] public override byte LedIndex { get; }
+    [ProtoMember(8)] public override byte[] LedIndex { get; }
     [ProtoMember(4)] public int Min { get; }
     [ProtoMember(5)] public int Max { get; }
     [ProtoMember(6)] public int Deadzone { get; }
 
     [ProtoMember(7)] public StandardAxisType Type { get; }
 
-    public SerializedControllerAxis(SerializedInput? input, StandardAxisType type, Color ledOn, Color ledOff, byte ledIndex, int min, int max, int deadzone)
+    public SerializedControllerAxis(SerializedInput? input, StandardAxisType type, Color ledOn, Color ledOff, byte[] ledIndex, int min, int max, int deadzone)
     {
         Input = input;
         LedOn = ledOn.ToUint32();

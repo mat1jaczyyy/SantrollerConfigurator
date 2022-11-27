@@ -557,9 +557,17 @@
                                                     <Binding Path="!IsCombined" />
                                                 </MultiBinding>
                                             </StackPanel.IsVisible>
+                                            <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="Led Indexes"></Label>
+                                            <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="{Binding LedIndicesDisplay}"></Label>
                                             <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
                                                            Value="{Binding LedIndex}" VerticalAlignment="Center">
                                             </NumericUpDown>
+                                            <Button x:CompileBindings="False"
+                                                    Command="{Binding AddLed}">Add Led</Button>
+                                            <Button x:CompileBindings="False"
+                                                    Command="{Binding RemoveLed}">Remove Led</Button>
+                                            <Button x:CompileBindings="False"
+                                                    Command="{Binding ClearLeds}">Clear Leds</Button>
                                             <ColorPicker Color="{Binding LedOn}"></ColorPicker>
                                             <ColorPicker Color="{Binding LedOff}"></ColorPicker>
                                         </StackPanel>
@@ -599,7 +607,7 @@
                                                                 </MultiBinding>
                                                             </StackPanel.IsVisible>
                                                             <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
-                                                                           Value="{Binding LedIndex}"
+                                                                           Value="{Binding LedIndices}"
                                                                            VerticalAlignment="Center">
                                                             </NumericUpDown>
                                                             <ColorPicker Color="{Binding LedOn}"></ColorPicker>

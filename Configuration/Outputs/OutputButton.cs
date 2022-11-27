@@ -10,8 +10,9 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public abstract class OutputButton : Output
 {
-    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte ledIndex, byte debounce,
-        string name) : base(model, input, ledOn, ledOff, ledIndex, name)
+    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
+        byte debounce,
+        string name) : base(model, input, ledOn, ledOff, ledIndices, name)
     {
         Debounce = debounce;
     }
@@ -26,38 +27,48 @@ public abstract class OutputButton : Output
 
     public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined)
     {
-        if (Input == null) throw new IncompleteConfigurationException(Name + " missing configuration");
+        if (Input==null) throw new IncompleteConfigurationException("Missing input!");
         var outputBit = GenerateIndex(xbox);
         if (string.IsNullOrEmpty(outputBit)) return "";
         if (!shared)
         {
             var outputVar = GenerateOutput(xbox);
+            var leds = "";
+            if (AreLedsEnabled && LedIndices.Any())
+            {
+                leds += $@"if (!debounce[{debounceIndex}]) {{
+                        {LedIndices.Aggregate("", (s, index) => s += @$"if (ledState[{index}].select == 1) {{
+                            ledState[{index}].select = 0; 
+                            {string.Join("\n", Model.LedType.GetColors(LedOff).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))};
+                        }}")}
+                    }}";
+            }
             return
                 @$"if (debounce[{debounceIndex}]) {{ 
                     debounce[{debounceIndex}]--; 
                     {outputVar} |= (1 << {outputBit}); 
-                    if (ledState[{LedIndex - 1}].select == 1 && !debounce[{debounceIndex}]) {{
-                        ledState[{LedIndex - 1}].select = 0; 
-                        {string.Join("\n", Model.LedType.GetColors(LedOff).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Second} = {b.First};"))};
-                    }}
+                    {leds}
                 }}";
         }
 
         var led = "";
         var led2 = "";
-        if (AreLedsEnabled && LedIndex != 0)
+        if (AreLedsEnabled)
         {
-            led = $@"
-            if (ledState[{LedIndex - 1}].select == 0 && debounce[{debounceIndex}]) {{
-                ledState[{LedIndex - 1}].select = 1;
-                {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Second} = {b.First};"))}
-            }}";
-            led2 = $@"
-            if (!debounce[{debounceIndex}] && ledState[{LedIndex - 1}].select == 1) {{
-                ledState[{LedIndex - 1}].select = 1;
-                {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{LedIndex - 1}].{b.Second} = {b.First};"))}
-            }}
+            foreach (var index in LedIndices)
+            {
+                led += $@"
+                if (ledState[{index}].select == 0 && debounce[{debounceIndex}]) {{
+                    ledState[{index}].select = 1;
+                    {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))}
+                }}";
+                led2 += $@"
+                if (!debounce[{debounceIndex}] && ledState[{index}].select == 1) {{
+                    ledState[{index}].select = 1;
+                    {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))}
+                }}
             ";
+            }
         }
 
         if (combined && IsStrum)
