@@ -97,6 +97,6 @@ public abstract class SpiInput : Input, ISpi
         Microcontroller.UnAssignPins(_spiType);
     }
 
-    public override List<PinConfig> PinConfigs => new() {_spiConfig};
+    public override IList<PinConfig> PinConfigs => new List<PinConfig>() {_spiConfig};
     public List<int> SpiPins() => new() {Mosi, Miso, Sck};
 }

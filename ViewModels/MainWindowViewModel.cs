@@ -351,7 +351,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
                 _currentDrives.Add(drive.RootDirectory.FullName);
             }
-
+            
             // We removed all valid devices above, so anything left in currentDrivesSet is no longer valid
             Devices.RemoveMany(Devices.Where(x => x is PicoDevice pico && _currentDrivesTemp.Contains(pico.GetPath())));
             _currentDrives.RemoveMany(_currentDrivesTemp);
@@ -470,6 +470,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private static async void InstallDependencies()
         {
             if (CheckDependencies()) return;
+            //TODO: pop open a dialog before doing this
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);

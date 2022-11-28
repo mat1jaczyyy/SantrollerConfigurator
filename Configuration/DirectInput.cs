@@ -77,7 +77,7 @@ public class DirectInput : InputWithPin
         return new[] {"INPUT_DIRECT"};
     }
 
-    public override List<DevicePin> Pins => new()
+    public override IList<DevicePin> Pins => new List<DevicePin>()
     {
         new(Pin, PinMode)
     };

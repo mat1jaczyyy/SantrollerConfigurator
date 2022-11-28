@@ -354,10 +354,10 @@ public abstract class Output : ReactiveObject, IDisposable
     }
 
     public List<PinConfig> GetPinConfigs() => Outputs
-        .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.PinConfigs ?? new()))
+        .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.PinConfigs ?? Array.Empty<PinConfig>()))
         .Distinct().ToList();
     public List<DevicePin> GetPins() => Outputs
-        .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.Pins ?? new()))
+        .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.Pins ?? Array.Empty<DevicePin>()))
         .Distinct().ToList();
 
     public virtual void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,

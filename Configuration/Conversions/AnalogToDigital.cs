@@ -98,8 +98,8 @@ public class AnalogToDigital : Input
         return Child;
     }
 
-    public override List<DevicePin> Pins => Child.Pins;
-    public override List<PinConfig> PinConfigs => Child.PinConfigs;
+    public override IList<DevicePin> Pins => Child.Pins;
+    public override IList<PinConfig> PinConfigs => Child.PinConfigs;
 
     public override bool IsAnalog => Child.IsAnalog;
     public override bool IsUint => Child.IsUint;

@@ -216,7 +216,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     case StandardAxisType axisType:
                         Bindings.Add(new ControllerAxis(this,
                             new DirectInput(0, DevicePinMode.Analog, this, MicroController!),
-                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, axisType));
+                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                            0, axisType));
                         break;
                 }
             }
@@ -361,7 +362,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
                 Bindings.Add(new ControllerAxis(this,
                     new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
-                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, type));
+                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                    type));
             }
 
             foreach (var type in Enum.GetValues<StandardButtonType>())
@@ -500,18 +502,22 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private string GenerateLedTick()
         {
             var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
-            if (_microController == null || _ledType == LedType.None || !outputs.Any(s => s.LedIndices.Any())) return "";
+            if (_microController == null || _ledType == LedType.None ||
+                !outputs.Any(s => s.LedIndices.Any())) return "";
             var ledMax = outputs.SelectMany(output => output.LedIndices).Max();
-            var ret = "spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);";
+            var ret =
+                "spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);";
             for (var i = 0; i <= ledMax; i++)
             {
-                ret += $"spi_transfer(APA102_SPI_PORT, 0xff);spi_transfer(APA102_SPI_PORT, ledState[{i}].r);spi_transfer(APA102_SPI_PORT, ledState[{i}].g);spi_transfer(APA102_SPI_PORT, ledState[{i}].b);";
+                ret +=
+                    $"spi_transfer(APA102_SPI_PORT, 0xff);spi_transfer(APA102_SPI_PORT, ledState[{i}].r);spi_transfer(APA102_SPI_PORT, ledState[{i}].g);spi_transfer(APA102_SPI_PORT, ledState[{i}].b);";
             }
 
             for (var i = 0; i <= ledMax; i += 16)
             {
                 ret += "spi_transfer(APA102_SPI_PORT, 0xff);";
             }
+
             return ret.Replace('\n', ' ');
         }
 
@@ -519,6 +525,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         {
             if (_microController == null) return "";
             var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
+            // If whammy isn't bound, then default to -32767 instead of 0.
+            if (xbox && DeviceType == DeviceControllerType.Guitar && !outputs.Any(output => output is ControllerAxis {Type: StandardAxisType.RightStickX}))
+            {
+                outputs.Add(new ControllerAxis(this, new FixedInput(this, -32767), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 0, 0, 0, StandardAxisType.RightStickX));
+            }
             var groupedOutputs = outputs.GroupBy(s => s.Input?.InnermostInput().GetType());
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 

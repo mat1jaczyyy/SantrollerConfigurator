@@ -445,7 +445,7 @@ public class Ps2Input : SpiInput
         return ret + "}}";
     }
 
-    public override List<DevicePin> Pins => new()
+    public override IList<DevicePin> Pins => new List<DevicePin>()
     {
         new(Att, DevicePinMode.Output),
         new(Ack, DevicePinMode.Floating),
@@ -468,5 +468,5 @@ public class Ps2Input : SpiInput
         return defines;
     }
 
-    public override List<PinConfig> PinConfigs => base.PinConfigs.Concat(new List<PinConfig>() { _ackConfig, _attConfig}).ToList();
+    public override IList<PinConfig> PinConfigs => base.PinConfigs.Concat(new List<PinConfig>() { _ackConfig, _attConfig}).ToList();
 }

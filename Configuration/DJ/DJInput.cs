@@ -108,7 +108,7 @@ public class DjInput : TwiInput
         return $"if (djLeftValid) {{{left}}} if (djRightValid) {{{right}}}";
     }
 
-    public override List<DevicePin> Pins => new();
+    public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
     public override bool IsUint => false;
 
     public override IReadOnlyList<string> RequiredDefines()

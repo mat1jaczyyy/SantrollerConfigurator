@@ -39,9 +39,9 @@ public class ControllerAxis : OutputAxis
         Type = type;
     }
 
-    private static bool IsTrigger(DeviceControllerType s, StandardAxisType type)
+    public static bool IsTrigger(DeviceControllerType s, StandardAxisType type)
     {
-        return (s is DeviceControllerType.Guitar && type is StandardAxisType.RightStickX or StandardAxisType.AccelerationX) ||
+        return (s is DeviceControllerType.Guitar && type is StandardAxisType.RightStickX) ||
                type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
     }
 
@@ -52,6 +52,7 @@ public class ControllerAxis : OutputAxis
     {
         if (xbox)
         {
+            if (!MappingsXbox.ContainsKey(Type)) return "";
             return "report->" + MappingsXbox[Type];
         }
 

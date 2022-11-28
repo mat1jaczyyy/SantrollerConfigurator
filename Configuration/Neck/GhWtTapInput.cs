@@ -104,7 +104,7 @@ public class GhWtTapInput : InputWithPin
             {"INPUT_WT_NECK", $"WT_NECK_READ() {Microcontroller.GeneratePulseRead(PinConfig.Pin, PulseMode.LOW, 100)}"};
     }
 
-    public override List<DevicePin> Pins => new()
+    public override IList<DevicePin> Pins => new List<DevicePin>()
     {
         new(PinConfig.Pin, DevicePinMode.Floating),
     };

@@ -44,8 +44,8 @@ public abstract class Input : ReactiveObject, IDisposable
         return this;
     }
 
-    public abstract List<DevicePin> Pins { get; }
-    public abstract List<PinConfig> PinConfigs { get; }
+    public abstract IList<DevicePin> Pins { get; }
+    public abstract IList<PinConfig> PinConfigs { get; }
     public abstract InputType? InputType { get; }
 
     public abstract void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,

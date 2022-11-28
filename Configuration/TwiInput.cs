@@ -82,6 +82,6 @@ public abstract class TwiInput : Input, ITwi
     {
         _microcontroller.UnAssignPins(_twiType);
     }
-    public override List<PinConfig> PinConfigs => new() {_twiConfig};
+    public override IList<PinConfig> PinConfigs => new List<PinConfig>() {_twiConfig};
     public List<int> TwiPins() => new() {Sda, Scl};
 }

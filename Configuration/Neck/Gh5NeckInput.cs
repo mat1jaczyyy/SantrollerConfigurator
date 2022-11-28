@@ -146,7 +146,7 @@ public class Gh5NeckInput : TwiInput
         return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }
 
-    public override List<DevicePin> Pins => new();
+    public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
     public override bool IsUint => true;
 
 

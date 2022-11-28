@@ -55,7 +55,7 @@ public abstract class InputWithPin : Input
         Microcontroller.UnAssignPins(PinConfig.Type);
     }
 
-    public override List<PinConfig> PinConfigs => new() {_pinConfig};
+    public override IList<PinConfig> PinConfigs => new List<PinConfig>() {_pinConfig};
 
     public string PinConfigText { get; private set; } = "Find Pin";
 

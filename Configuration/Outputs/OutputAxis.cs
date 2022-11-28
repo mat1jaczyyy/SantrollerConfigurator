@@ -319,6 +319,10 @@ public abstract class OutputAxis : Output
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         if (shared) return "";
+        if (Input is FixedInput)
+        {
+            return xbox ? $"{GenerateOutput(xbox)} = {Input.Generate(xbox)}" : "";
+        } 
         var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
                          this is ControllerAxis {Type: StandardAxisType.RightStickY};
         var whammy = Model.DeviceType == DeviceControllerType.Guitar &&
