@@ -158,5 +158,5 @@ public class Micro : AvrController
     }
     public override List<int> AnalogPins => Enumerable.Range(PinA0,11).ToList();
     
-    public override List<int> GetAllPins() => Enumerable.Range(0, PinIndex.Length).ToList();
+    public override List<int> GetAllPins(bool isAnalog) => isAnalog ? AnalogPins : Enumerable.Range(0, PinIndex.Length).ToList();
 }

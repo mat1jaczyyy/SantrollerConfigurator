@@ -90,7 +90,7 @@ public class Uno : AvrController
         }
     }
     
-    public override List<int> GetAllPins()
+    public override List<int> GetAllPins(bool isAnalog)
     {
         var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
         return Enumerable.Range(0, PinIndex.Length).Where(s => !used.Contains(s)).ToList();

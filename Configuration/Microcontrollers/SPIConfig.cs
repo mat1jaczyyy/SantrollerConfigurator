@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -17,7 +18,7 @@ public abstract class SpiConfig : PinConfig
 
     protected int _sck;
 
-    protected SpiConfig(string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, uint clock)
+    protected SpiConfig(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol, bool cpha, bool msbfirst, uint clock) : base(model)
     {
         Type = type;
         _mosi = mosi;
@@ -43,23 +44,40 @@ public abstract class SpiConfig : PinConfig
     }
 
     public override string Type { get; }
+    protected abstract bool Reassignable { get; }
 
     public int Mosi
     {
         get => _mosi;
-        set => this.RaiseAndSetIfChanged(ref _mosi, value);
+        set
+        {
+            if (!Reassignable) return;
+            this.RaiseAndSetIfChanged(ref _mosi, value);
+            Update();
+        }
     }
 
     public int Miso
     {
         get => _miso;
-        set => this.RaiseAndSetIfChanged(ref _miso, value);
+        set
+        {
+            if (!Reassignable) return;
+            this.RaiseAndSetIfChanged(ref _miso, value);
+            Update();
+        }
     }
 
     public int Sck
     {
         get => _sck;
-        set => this.RaiseAndSetIfChanged(ref _sck, value);
+        set
+        {
+            if (!Reassignable) return;
+            this.RaiseAndSetIfChanged(ref _sck, value);
+            Update();
+        }
     }
+
     public override IEnumerable<int> Pins => new List<int> {_mosi, _miso, _sck};
 }

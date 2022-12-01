@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DynamicData;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
@@ -59,20 +60,18 @@ public abstract class AvrController : Microcontroller
 
 
 
-    public override SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
+    public override SpiConfig? AssignSpiPins(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol, bool cpha,
         bool msbfirst,
         uint clock)
     {
-        if (PinConfigs.Any(c => c is AvrSpiConfig)) return null;
-        var conf = new AvrSpiConfig(type, SpiMosi, SpiMiso, SpiSck, cpol, cpha, msbfirst, clock);
+        var conf = new AvrSpiConfig(model, type, SpiMosi, SpiMiso, SpiSck, SpiCSn, cpol, cpha, msbfirst, clock);
         PinConfigs.Add(conf);
         return conf;
     }
 
-    public override TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock)
+    public override TwiConfig? AssignTwiPins(ConfigViewModel model,string type, int sda, int scl, int clock)
     {
-        if (PinConfigs.Any(c => c is AvrTwiConfig)) return null;
-        var conf = new AvrTwiConfig(type, I2CSda, I2CScl, clock);
+        var conf = new AvrTwiConfig(model, type, I2CSda, I2CScl, clock);
         PinConfigs.Add(conf);
         return conf;
     }
@@ -91,12 +90,6 @@ public abstract class AvrController : Microcontroller
 
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
-        var conf = PinConfigs.FirstOrDefault(c => c is AvrSpiConfig);
-        if (conf != null && conf.Type != type)
-        {
-            return new();
-        }
-
         return new List<KeyValuePair<int, SpiPinType>>
         {
             new(SpiCSn, SpiPinType.CSn),
@@ -108,12 +101,6 @@ public abstract class AvrController : Microcontroller
 
     public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type)
     {
-        var conf = PinConfigs.FirstOrDefault(c => c is AvrTwiConfig);
-        if (conf != null && conf.Type != type)
-        {
-            return new();
-        }
-
         return new()
         {
             new(I2CScl, TwiPinType.Scl),
@@ -216,7 +203,7 @@ public abstract class AvrController : Microcontroller
         return ret;
     }
 
-    protected override string GetPinForMicrocontroller(int pin, bool spi, bool twi)
+    public override string GetPinForMicrocontroller(int pin, bool spi, bool twi)
     {
         var ret = $"{pin}";
         if (pin >= PinA0)

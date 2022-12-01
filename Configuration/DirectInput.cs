@@ -14,7 +14,7 @@ public class DirectInput : InputWithPin
 {
     public DirectInput(int pin, DevicePinMode pinMode, ConfigViewModel model, Microcontroller microcontroller) : base(
         model, microcontroller,
-        new DirectPinConfig(Guid.NewGuid().ToString(), pin, pinMode))
+        new DirectPinConfig(model, Guid.NewGuid().ToString(), pin, pinMode))
     {
     }
 

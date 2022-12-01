@@ -1,13 +1,14 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
 public class PicoTwiConfig : TwiConfig
 {
-    public PicoTwiConfig(string type, int sda, int scl, int clock) : base(type, sda, scl, clock)
+    public PicoTwiConfig(ConfigViewModel model, string type, int sda, int scl, int clock) : base(model, type, sda, scl, clock)
     {
     }
 

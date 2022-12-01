@@ -32,7 +32,7 @@ public class SerializedWiiCombinedOutput : SerializedOutput
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
         // Since we filter out sda and scl from wii inputs for size, we need to make sure its assigned before we construct the inputs.
-        microcontroller.AssignTwiPins(WiiInput.WiiTwiType, Sda, Scl, WiiInput.WiiTwiFreq);
+        microcontroller.AssignTwiPins(model, WiiInput.WiiTwiType, Sda, Scl, WiiInput.WiiTwiFreq);
         return new WiiCombinedOutput(model, microcontroller, Sda, Scl, Outputs.Select(s => s.Generate(model, microcontroller)).ToList());
     }
 }

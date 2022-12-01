@@ -33,11 +33,11 @@ public class EmptyOutput : Output
     }
 
     private readonly ObservableAsPropertyHelper<bool> _isController;
-    public bool IsController => _isController.Value;
+    public override bool IsController => _isController.Value;
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
-    public bool IsKeyboard => _isKeyboard.Value;
+    public override bool IsKeyboard => _isKeyboard.Value;
     private readonly ObservableAsPropertyHelper<bool> _isMidi;
-    public bool IsMidi => _isMidi.Value;
+    public override bool IsMidi => _isMidi.Value;
 
     private readonly ObservableAsPropertyHelper<IEnumerable<object>> _combinedTypes;
 
@@ -157,6 +157,7 @@ public class EmptyOutput : Output
     }
 
     public override string? GetLocalisedName() => "Unset";
+    public override string ErrorText => "Input is not bound!";
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 
@@ -164,7 +165,7 @@ public class EmptyOutput : Output
 
     public override SerializedOutput Serialize()
     {
-        throw new IncompleteConfigurationException("Unconfigured output");
+        throw new IncompleteConfigurationException(ErrorText);
     }
 
     public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined)

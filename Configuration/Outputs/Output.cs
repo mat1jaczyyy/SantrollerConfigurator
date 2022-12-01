@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
+using Avalonia.Input;
+using Avalonia.Input.Raw;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -119,7 +124,7 @@ public abstract class Output : ReactiveObject, IDisposable
     }
 
     private byte _ledIndex;
-    
+
     public byte LedIndex
     {
         get => _ledIndex;
@@ -144,6 +149,8 @@ public abstract class Output : ReactiveObject, IDisposable
 
     private readonly ObservableAsPropertyHelper<int> _valueRaw;
     public int ValueRaw => _valueRaw.Value;
+
+    public ICommand AssignByKeyOrAxis { get; }
 
     protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, string name)
     {
@@ -174,18 +181,21 @@ public abstract class Output : ReactiveObject, IDisposable
             .Select(s => (s.Item3 || s.Item2?.IsAnalog == true) ? 1 : ((s.Item1 == 0 ? 0 : 0.35) + 0.65))
             .ToProperty(this, s => s.ImageOpacity);
         _ledIndicesDisplay = this.WhenAnyValue(x => x.LedIndices)
-            .Select(s => string.Join(", ",s))
+            .Select(s => string.Join(", ", s))
             .ToProperty(this, s => s.LedIndicesDisplay);
+        AssignByKeyOrAxis = ReactiveCommand.CreateFromTask(FindAndAssign);
     }
 
     public void AddLed()
     {
         LedIndices = LedIndices.Append(LedIndex).ToArray();
     }
+
     public void RemoveLed()
     {
         LedIndices = LedIndices.Where(s => s != LedIndex).ToArray();
     }
+
     public void ClearLeds()
     {
         LedIndices = Array.Empty<byte>();
@@ -194,6 +204,97 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public abstract string? GetLocalisedName();
     public abstract bool IsStrum { get; }
+
+    public async Task FindAndAssign()
+    {
+        ButtonText = "Move the mouse or click / press any key to use that input";
+        await InputManager.Instance!.Process.FirstAsync();
+        await Task.Delay(200);
+        var lastEvent = await InputManager.Instance.Process.FirstAsync();
+        Console.WriteLine(lastEvent);
+        byte debounce = 1;
+        int min = short.MinValue;
+        int max = short.MaxValue;
+        int deadzone = 0;
+        if (this is OutputAxis axis)
+        {
+            min = axis.Min;
+            max = axis.Max;
+            deadzone = axis.DeadZone;
+        }
+
+        if (this is OutputButton button)
+        {
+            debounce = button.Debounce;
+        }
+
+        if (lastEvent is RawKeyEventArgs keyEventArgs)
+        {
+            Model.Bindings.Add(new KeyboardButton(Model, Input, LedOn, LedOff, LedIndices, debounce, keyEventArgs.Key));
+            Model.RemoveOutput(this);
+        }
+
+        if (lastEvent is RawPointerEventArgs pointerEventArgs)
+        {
+            switch (pointerEventArgs.Type)
+            {
+                case RawPointerEventType.LeftButtonDown:
+                case RawPointerEventType.LeftButtonUp:
+                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices, debounce,
+                        MouseButtonType.Left));
+                    Model.RemoveOutput(this);
+                    break;
+                case RawPointerEventType.RightButtonDown:
+                case RawPointerEventType.RightButtonUp:
+                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices, debounce,
+                        MouseButtonType.Right));
+                    Model.RemoveOutput(this);
+                    break;
+                case RawPointerEventType.MiddleButtonDown:
+                case RawPointerEventType.MiddleButtonUp:
+                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices, debounce,
+                        MouseButtonType.Middle));
+                    Model.RemoveOutput(this);
+                    break;
+                case RawPointerEventType.Move:
+                    await Task.Delay(100);
+                    var last = await InputManager.Instance.Process.Where(s => s is RawPointerEventArgs)
+                        .Cast<RawPointerEventArgs>().FirstAsync();
+                    var diff = last.Position - pointerEventArgs.Position;
+                    if (Math.Abs(diff.X) > Math.Abs(diff.Y))
+                    {
+                        Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices, min, max, deadzone,
+                            MouseAxisType.X));
+                    }
+                    else
+                    {
+                        Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices, min, max, deadzone,
+                            MouseAxisType.Y));
+                    }
+
+                    Model.RemoveOutput(this);
+                    break;
+            }
+        }
+
+        if (lastEvent is RawMouseWheelEventArgs mouseWheelEventArgs)
+        {
+            if (Math.Abs(mouseWheelEventArgs.Delta.X) > Math.Abs(mouseWheelEventArgs.Delta.Y))
+            {
+                Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices, min, max, deadzone,
+                    MouseAxisType.ScrollX));
+            }
+            else
+            {
+                Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices, min, max, deadzone,
+                    MouseAxisType.ScrollY));
+            }
+
+            Model.RemoveOutput(this);
+        }
+
+        ButtonText = "Click to assign";
+    }
 
     private void SetInput(InputType? inputType, WiiInputType? wiiInput, Ps2InputType? ps2InputType,
         GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
@@ -240,7 +341,7 @@ public abstract class Output : ReactiveObject, IDisposable
                 break;
             case InputType.WtNeckInput when Input?.InnermostInput() is GhWtTapInput wt:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                input = new GhWtTapInput(ghWtInputType.Value, Model,  Model.MicroController!, wt.Pin);
+                input = new GhWtTapInput(ghWtInputType.Value, Model, Model.MicroController!, wt.Pin);
                 break;
             case InputType.WiiInput when Input?.InnermostInput() is not WiiInput:
                 wiiInput ??= WiiInputType.ClassicA;
@@ -256,7 +357,8 @@ public abstract class Output : ReactiveObject, IDisposable
                 break;
             case InputType.Ps2Input when Input?.InnermostInput() is Ps2Input ps2:
                 ps2InputType ??= Ps2InputType.Cross;
-                input = new Ps2Input(ps2InputType.Value, Model, Model.MicroController!, ps2.Miso, ps2.Mosi, ps2.Sck, ps2.Att,
+                input = new Ps2Input(ps2InputType.Value, Model, Model.MicroController!, ps2.Miso, ps2.Mosi, ps2.Sck,
+                    ps2.Att,
                     ps2.Ack);
                 break;
             default:
@@ -353,9 +455,22 @@ public abstract class Output : ReactiveObject, IDisposable
         Input?.Dispose();
     }
 
+    public abstract bool IsKeyboard { get; }
+    public abstract bool IsController { get; }
+    public abstract bool IsMidi { get; }
+
+    private string _buttonText = "Click to assign";
+
+    public string ButtonText
+    {
+        get => _buttonText;
+        set => this.RaiseAndSetIfChanged(ref _buttonText, value);
+    }
+
     public List<PinConfig> GetPinConfigs() => Outputs
         .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.PinConfigs ?? Array.Empty<PinConfig>()))
         .Distinct().ToList();
+
     public List<DevicePin> GetPins() => Outputs
         .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.Pins ?? Array.Empty<DevicePin>()))
         .Distinct().ToList();
@@ -371,5 +486,19 @@ public abstract class Output : ReactiveObject, IDisposable
                 ghWtRaw,
                 ps2ControllerType, wiiControllerType);
         }
+    }
+    
+    public virtual string ErrorText
+    {
+        get
+        {
+            var text = string.Join(", ", GetPinConfigs().Select(s => s.ErrorText).Distinct().Where(s => !string.IsNullOrEmpty(s)));
+            return string.IsNullOrEmpty(text) ? "" : $"* Error: Conflicting pins: {text}!";
+        }
+    }
+
+    public void UpdateErrors()
+    {
+        this.RaisePropertyChanged(nameof(ErrorText));
     }
 }

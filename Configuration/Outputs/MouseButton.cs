@@ -19,6 +19,9 @@ public class MouseButton : OutputButton
         Type = type;
     }
 
+    public override bool IsKeyboard => true;
+    public override bool IsController => false;
+    public override bool IsMidi => false;
     public MouseButtonType Type { get; }
 
     protected override string GenerateIndex(bool xbox)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 {
@@ -24,10 +25,11 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
             IEnumerable<PinConfig> pinConfigs)
         {
             var selectedConfig = pinConfigs.Where(s => s.Pins.Contains(selectedPin));
+            var apa102 = PinConfigs.Where(s => s.Type == ConfigViewModel.Apa102SpiType && s.Pins.Contains(possiblePin)).Select(s => s.Type);
             var output = string.Join(" - ",
                 outputs.Where(o =>
                         o.GetPinConfigs().Except(selectedConfig).Any(s => s.Pins.Contains(possiblePin) ))
-                    .Select(s => s.Name));
+                    .Select(s => s.Name).Concat(apa102));
             var ret = GetPinForMicrocontroller(possiblePin, twi, spi);
             if (!string.IsNullOrEmpty(output))
             {
@@ -37,14 +39,14 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
             return ret;
         }
 
-        protected abstract string GetPinForMicrocontroller(int pin, bool twi, bool spi);
+        public abstract string GetPinForMicrocontroller(int pin, bool twi, bool spi);
 
         public readonly AvaloniaList<PinConfig> PinConfigs = new();
-        public abstract SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
+        public abstract SpiConfig? AssignSpiPins(ConfigViewModel model, string type, int miso, int sck, int i, bool cpha,
             bool msbfirst,
-            uint clock);
+            bool b, uint clock);
 
-        public abstract TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock);
+        public abstract TwiConfig? AssignTwiPins(ConfigViewModel model, string type, int sda, int scl, int clock);
 
         public TwiConfig? GetTwiForType(string type)
         {
@@ -81,13 +83,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
         public abstract int GetFirstAnalogPin();
         public abstract void AssignPin(PinConfig pinConfig);
 
-        public abstract List<int> GetAllPins();
-
-        public List<int> GetFreePins()
-        {
-            var used = PinConfigs.SelectMany(s => s.Pins).ToHashSet();
-            return GetAllPins().Where(s => !used.Contains(s)).ToList();
-        }
+        public abstract List<int> GetAllPins(bool isAnalog);
         
         public abstract List<int> AnalogPins { get; } 
 
@@ -98,13 +94,14 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public abstract int GetAnalogMask(DevicePin devicePin);
 
-        public DirectPinConfig GetOrSetPin(string type, int pin, DevicePinMode devicePinMode)
+        public DirectPinConfig GetOrSetPin(ConfigViewModel model, string type, int pin, DevicePinMode devicePinMode)
         {
             var existing = PinConfigs.OfType<DirectPinConfig>().FirstOrDefault(s => s.Type == type);
             if (existing != null) return existing;
-            var config = new DirectPinConfig(type, pin, devicePinMode);
+            var config = new DirectPinConfig(model, type, pin, devicePinMode);
             PinConfigs.Add(config);
             return config;
         }
+       
     }
 }

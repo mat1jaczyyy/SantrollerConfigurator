@@ -28,7 +28,7 @@ public abstract class InputWithPin : Input
 
     public DirectPinConfig PinConfig => _pinConfig;
 
-    public List<int> AvailablePins => Microcontroller.GetAllPins();
+    public List<int> AvailablePins => Microcontroller.GetAllPins(IsAnalog);
 
     public int Pin
     {
@@ -37,6 +37,7 @@ public abstract class InputWithPin : Input
         {
             PinConfig.Pin = value;
             this.RaisePropertyChanged();
+            this.RaisePropertyChanged(nameof(PinConfigs));
         }
     }
 
@@ -47,6 +48,7 @@ public abstract class InputWithPin : Input
         {
             PinConfig.PinMode = value;
             this.RaisePropertyChanged();
+            this.RaisePropertyChanged(nameof(PinConfigs));
         }
     }
 

@@ -48,12 +48,12 @@
       <Content Include="Assets\Icons\Readme.txt" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Update="Views\SelectPinWindow.axaml.cs">
-        <DependentUpon>AddInputWindow.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
       <Compile Update="Views\UnoShortWindow.axaml.cs">
         <DependentUpon>UnoShortWindow.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\RaiseIssueWindow.axaml.cs">
+        <DependentUpon>RaiseIssueWindow.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
     </ItemGroup>

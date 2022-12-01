@@ -20,7 +20,7 @@ public class GhWtTapInput : InputWithPin
     public bool Combined { get; }
 
     public GhWtTapInput(GhWtInputType input, ConfigViewModel model, Microcontroller microcontroller, int pin = 0, bool combined = false) : base(model, microcontroller,
-        microcontroller.GetOrSetPin(GhWtTapPinType, pin, DevicePinMode.Floating))
+        microcontroller.GetOrSetPin(model, GhWtTapPinType, pin, DevicePinMode.Floating))
     {
         Combined = combined;
         Input = input;

@@ -28,7 +28,8 @@ public abstract class OutputAxis : Output
 
     protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
-        int deadZone, string name, TriggerDelegate triggerDelegate) : base(model, input, ledOn, ledOff, ledIndices, name)
+        int deadZone, string name, TriggerDelegate triggerDelegate) : base(model, input, ledOn, ledOff, ledIndices,
+        name)
     {
         Input = input;
         _trigger = this.WhenAnyValue(x => x.Model.DeviceType).Select(d => triggerDelegate(d))
@@ -38,7 +39,7 @@ public abstract class OutputAxis : Output
         _calibrationMax = max;
         _calibrationMin = min;
         DeadZone = deadZone;
-        _inputIsUInt = this.WhenAnyValue(x => x.Input).Select(i => i!.IsUint)
+        _inputIsUInt = this.WhenAnyValue(x => x.Input).Select(i => i is {IsUint: true})
             .ToProperty(this, x => x.InputIsUint);
         var calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue);
         calibrationWatcher.Subscribe(ApplyCalibration);
@@ -318,15 +319,16 @@ public abstract class OutputAxis : Output
     public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
-        if (shared) return "";
+        if (shared) return ")";
         if (Input is FixedInput)
         {
             return xbox ? $"{GenerateOutput(xbox)} = {Input.Generate(xbox)}" : "";
-        } 
+        }
+
         var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
                          this is ControllerAxis {Type: StandardAxisType.RightStickY};
         var whammy = Model.DeviceType == DeviceControllerType.Guitar &&
-                            this is ControllerAxis {Type: StandardAxisType.RightStickX};
+                     this is ControllerAxis {Type: StandardAxisType.RightStickX};
         var led = "";
         if (AreLedsEnabled)
         {
@@ -337,7 +339,6 @@ public abstract class OutputAxis : Output
                         {string.Join("", Model.LedType.GetColors(LedOn).Zip(Model.LedType.GetColors(LedOff), new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({ledRead})) >> 8));"))}
                     }}";
             }
-           
         }
 
         if (Input is DigitalToAnalog)
@@ -402,6 +403,7 @@ public abstract class OutputAxis : Output
             {
                 min -= DeadZone;
             }
+
             multiplier = 1f / (max - min) * (ushort.MaxValue);
         }
         else
@@ -418,11 +420,13 @@ public abstract class OutputAxis : Output
             generated += " + INT16_MAX";
             generatedPs3 += " + INT16_MAX";
         }
+
         if (!Trigger && InputIsUint)
         {
             generated += " - INT16_MAX";
             generatedPs3 += " - INT16_MAX";
         }
+
         var mulInt = (short) (multiplier * 1024);
         var ret = normal
             ? $"{GenerateOutput(xbox)} = {function}({generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});"

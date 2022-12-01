@@ -9,6 +9,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Collections;
+using Avalonia.Input;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
@@ -26,8 +27,13 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
     public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
-        public static readonly string Apa102SpiType = "apa102";
-        public Interaction<InputWithPin, SelectPinWindowViewModel?> ShowPinSelectDialog { get; }
+        public static readonly string Apa102SpiType = "APA102";
+
+        public Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?> ShowIssueDialog
+        {
+            get;
+        }
+
         public Interaction<Arduino, ShowUnoShortWindowViewModel?> ShowUnoShortDialog { get; }
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
 
@@ -68,6 +74,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         private LedType _ledType;
 
+        private bool _hasError;
+
+        public bool HasError
+        {
+            get => _hasError;
+            set => this.RaiseAndSetIfChanged(ref _hasError, value);
+        }
+
         public LedType LedType
         {
             get => _ledType;
@@ -82,7 +96,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     var pins = MicroController!.SpiPins(Apa102SpiType);
                     var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                     var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                    _apa102SpiConfig = MicroController.AssignSpiPins(Apa102SpiType, mosi, -1, sck, true, true, true,
+                    _apa102SpiConfig = MicroController.AssignSpiPins(this, Apa102SpiType, mosi, -1, sck, true, true,
+                        true,
                         Math.Min(MicroController.Board.CpuFreq / 2, 12000000))!;
                     this.RaisePropertyChanged(nameof(Apa102Mosi));
                     this.RaisePropertyChanged(nameof(Apa102Sck));
@@ -249,22 +264,21 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private readonly ObservableAsPropertyHelper<bool> _bindableSpi;
         public bool BindableSpi => _bindableSpi.Value;
 
+        private string _platformIoText = "";
+
         public ConfigViewModel(MainWindowViewModel screen)
         {
-            ShowPinSelectDialog = new Interaction<InputWithPin, SelectPinWindowViewModel?>();
+            ShowIssueDialog = new Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>();
             ShowUnoShortDialog = new Interaction<Arduino, ShowUnoShortWindowViewModel?>();
             Main = screen;
             HostScreen = screen;
 
             WriteConfig = ReactiveCommand.CreateFromTask(Write,
-                this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected))
-                    .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
-            GoBack = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
-                this.WhenAnyValue(x => x.Main.Working).CombineLatest(this.WhenAnyValue(x => x.Main.Connected))
-                    .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.First && x.Second));
+                this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
+                    .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.Item1 && x.Item2 && !x.Item3));
+            GoBack = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute);
             Bindings = new AvaloniaList<Output>();
-            ReactiveCommand.CreateFromObservable<InputWithPin, SelectPinWindowViewModel?>(output =>
-                ShowPinSelectDialog.Handle(output));
+
             _isRhythm = this.WhenAnyValue(x => x.DeviceType)
                 .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
                 .ToProperty(this, x => x.IsRhythm);
@@ -290,6 +304,26 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             _availableSckPins = this.WhenAnyValue(x => x.MicroController)
                 .Select(GetSckPins)
                 .ToProperty(this, x => x.AvailableSckPins);
+            Main.Pio.PlatformIoWorking += working =>
+            {
+                if (working)
+                {
+                    _platformIoText = "";
+                }
+            };
+            Main.Pio.TextChanged += (message, clear) =>
+            {
+                _platformIoText += message;
+                _platformIoText += "\n";
+            };
+
+            Main.Pio.PlatformIoError += val =>
+            {
+                if (val)
+                {
+                    ShowIssueDialog.Handle((_platformIoText, this)).ToTask();
+                }
+            };
         }
 
         private readonly ObservableAsPropertyHelper<List<int>> _availableMosiPins;
@@ -349,6 +383,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 await Task.WhenAll(Write(), ShowUnoShortDialog.Handle((Arduino) Main.SelectedDevice!).ToTask());
                 return;
             }
+            UpdateErrors();
 
             await Write();
         }
@@ -374,6 +409,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
                     Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, type));
             }
+            UpdateErrors();
         }
 
         public void Generate(PlatformIo pio)
@@ -477,6 +513,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 binding.Outputs.Remove(output);
             }
+            UpdateErrors();
         }
 
         public void ClearOutputs()
@@ -487,6 +524,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
 
             Bindings.Clear();
+            UpdateErrors();
         }
 
         public void Reset()
@@ -496,7 +534,22 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public void AddOutput()
         {
-            Bindings.Add(new EmptyOutput(this));
+            if (IsController)
+            {
+                Bindings.Add(new EmptyOutput(this));
+            }
+            else if (IsKeyboard)
+            {
+                Bindings.Add(new KeyboardButton(this, new DirectInput(0, DevicePinMode.PullUp, this, _microController!),
+                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, Key.Space));
+            }
+            else if (IsMidi)
+            {
+                Bindings.Add(new MidiOutput(this, new DirectInput(0, DevicePinMode.PullUp, this, _microController!),
+                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 0, 128, 0, MidiType.Note, 64, 0, 0,
+                    1));
+            }
+            UpdateErrors();
         }
 
         private string GenerateLedTick()
@@ -526,10 +579,13 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             if (_microController == null) return "";
             var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
             // If whammy isn't bound, then default to -32767 instead of 0.
-            if (xbox && DeviceType == DeviceControllerType.Guitar && !outputs.Any(output => output is ControllerAxis {Type: StandardAxisType.RightStickX}))
+            if (xbox && DeviceType == DeviceControllerType.Guitar && !outputs.Any(output =>
+                    output is ControllerAxis {Type: StandardAxisType.RightStickX}))
             {
-                outputs.Add(new ControllerAxis(this, new FixedInput(this, -32767), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 0, 0, 0, StandardAxisType.RightStickX));
+                outputs.Add(new ControllerAxis(this, new FixedInput(this, -32767), Colors.Transparent,
+                    Colors.Transparent, Array.Empty<byte>(), 0, 0, 0, StandardAxisType.RightStickX));
             }
+
             var groupedOutputs = outputs.GroupBy(s => s.Input?.InnermostInput().GetType());
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 
@@ -584,6 +640,48 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public bool IsCombinedChild(Output output)
         {
             return Bindings.Contains(output);
+        }
+
+        public Dictionary<string, List<int>> GetPins(string type)
+        {
+            var pins = new Dictionary<string, List<int>>();
+            foreach (var binding in Bindings)
+            {
+                var configs = binding.GetPinConfigs();
+                //Exclude digital or analog pins (which use a guid containing a -
+                if (configs.Any(s => s.Type == type || (type.Contains("-") && s.Type.Contains("-")))) continue;
+                if (!pins.ContainsKey(binding.Name))
+                {
+                    pins[binding.Name] = new();
+                }
+
+                foreach (var pinConfig in configs)
+                {
+                    pins[binding.Name].AddRange(pinConfig.Pins);
+                }
+            }
+
+            if (IsApa102 && _apa102SpiConfig != null)
+            {
+                pins["APA102"] = _apa102SpiConfig.Pins.ToList();
+            }
+
+            return pins;
+        }
+
+        public void UpdateErrors()
+        {
+            bool foundError = false;
+            foreach (var output in Bindings)
+            {
+                output.UpdateErrors();
+                if (!string.IsNullOrEmpty(output.ErrorText))
+                {
+                    foundError = true;
+                }
+            }
+
+            HasError = foundError;
         }
     }
 }

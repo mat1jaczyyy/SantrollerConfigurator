@@ -221,6 +221,9 @@ public class KeyboardButton : OutputButton
         throw new NotImplementedException();
     }
 
+    public override bool IsKeyboard => true;
+    public override bool IsController => false;
+    public override bool IsMidi => false;
     protected override string GenerateOutput(bool xbox)
     {
         var code = 0;

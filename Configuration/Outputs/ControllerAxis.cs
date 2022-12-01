@@ -116,6 +116,10 @@ public class ControllerAxis : OutputAxis
         }
     }
 
+    public override bool IsKeyboard => false;
+    public override bool IsController => true;
+    public override bool IsMidi => false;
+
     protected override bool SupportsCalibration()
     {
         return Type is not (StandardAxisType.AccelerationX or StandardAxisType.AccelerationY

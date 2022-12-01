@@ -33,7 +33,7 @@ public class SerializedGh5CombinedOutput : SerializedOutput
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
         // Since we filter out sda and scl from wii inputs for size, we need to make sure its assigned before we construct the inputs.
-        microcontroller.AssignTwiPins(Gh5NeckInput.Gh5TwiType, Sda, Scl, Gh5NeckInput.Gh5TwiFreq);
+        microcontroller.AssignTwiPins(model, Gh5NeckInput.Gh5TwiType, Sda, Scl, Gh5NeckInput.Gh5TwiFreq);
         return new Gh5CombinedOutput(model, microcontroller, Sda, Scl,
             Outputs.Select(s => s.Generate(model, microcontroller)).ToList());
     }

@@ -37,7 +37,7 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
                 sda = pins.First(pair => pair.Value is TwiPinType.Sda).Key;
             }
 
-            _twiConfig = microcontroller.AssignTwiPins(_twiType, sda.Value, scl.Value, twiFreq)!;
+            _twiConfig = microcontroller.AssignTwiPins(model, _twiType, sda.Value, scl.Value, twiFreq)!;
         }
 
 

@@ -23,6 +23,9 @@ public class MouseAxis : OutputAxis
         Type = type;
     }
 
+    public override bool IsKeyboard => true;
+    public override bool IsController => false;
+    public override bool IsMidi => false;
     public MouseAxisType Type { get; }
 
     protected override string GenerateOutput(bool xbox)

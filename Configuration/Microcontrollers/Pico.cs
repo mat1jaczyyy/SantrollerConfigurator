@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 
@@ -142,13 +143,14 @@ public class Pico : Microcontroller
     };
 
 
-    public override SpiConfig? AssignSpiPins(string type, int mosi, int miso, int sck, bool cpol, bool cpha,
+    public override SpiConfig? AssignSpiPins(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol,
+        bool cpha,
         bool msbfirst,
         uint clock)
     {
         //Some things don't need MISO (like apa102s)
         if (mosi != -1 && SpiTypesByPin[mosi] != SpiPinType.Mosi ||
-           miso != -1 && SpiTypesByPin[miso] != SpiPinType.Miso)
+            miso != -1 && SpiTypesByPin[miso] != SpiPinType.Miso)
         {
             return null;
         }
@@ -158,12 +160,13 @@ public class Pico : Microcontroller
         {
             return config;
         }
-        config = new PicoSpiConfig(type, mosi, miso, sck, cpol, cpha, msbfirst, clock);
+
+        config = new PicoSpiConfig(model, type, mosi, miso, sck, cpol, cpha, msbfirst, clock);
         PinConfigs.Add(config);
         return config;
     }
 
-    public override TwiConfig? AssignTwiPins(string type, int sda, int scl, int clock)
+    public override TwiConfig? AssignTwiPins(ConfigViewModel model, string type, int sda, int scl, int clock)
     {
         var pin = TwiIndexByPin[sda];
         if (pin != TwiIndexByPin[scl] || TwiTypeByPin[sda] != TwiPinType.Sda || TwiTypeByPin[scl] != TwiPinType.Scl)
@@ -178,7 +181,7 @@ public class Pico : Microcontroller
         }
 
         if (PinConfigs.Any(c => c is PicoTwiConfig s && s.Index == pin)) return null;
-        config = new PicoTwiConfig(type, sda, scl, clock);
+        config = new PicoTwiConfig(model, type, sda, scl, clock);
         PinConfigs.Add(config);
         return config;
     }
@@ -208,6 +211,7 @@ public class Pico : Microcontroller
         UnAssignPins(pinConfig.Type);
         PinConfigs.Add(pinConfig);
     }
+
     public override string GenerateInit()
     {
         var ret = "";
@@ -237,17 +241,19 @@ public class Pico : Microcontroller
         return pin - PinA0;
     }
 
-    protected override string GetPinForMicrocontroller(int pin, bool twi, bool spi)
+    public override string GetPinForMicrocontroller(int pin, bool twi, bool spi)
     {
         var ret = $"GP{pin}";
         if (twi && TwiIndexByPin.ContainsKey(pin))
         {
             ret += $" / TWI{TwiIndexByPin[pin]} {TwiTypeByPin[pin].ToString().ToUpper()}";
         }
+
         if (spi && SpiIndexByPin.ContainsKey(pin))
         {
             ret += $" / SPI{SpiIndexByPin[pin]} {SpiTypesByPin[pin].ToString().ToUpper()}";
         }
+
         if (pin >= 26)
         {
             ret += $" / ADC{pin - 26}";
@@ -256,8 +262,10 @@ public class Pico : Microcontroller
         return ret;
     }
 
-    public override List<int> GetAllPins() => Enumerable.Range(0, GpioCount).ToList();
-    public override List<int> AnalogPins => new() { 26,27,28,29 };
+    public override List<int> GetAllPins(bool isAnalog) =>
+        isAnalog ? AnalogPins : Enumerable.Range(0, GpioCount).ToList();
+
+    public override List<int> AnalogPins => new() {26, 27, 28, 29};
 
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)

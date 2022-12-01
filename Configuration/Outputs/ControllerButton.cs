@@ -86,6 +86,9 @@ public class ControllerButton : OutputButton
         return "report->buttons";
     }
 
+    public override bool IsKeyboard => false;
+    public override bool IsController => true;
+    public override bool IsMidi => false;
     public override bool IsStrum => Type is StandardButtonType.Up or StandardButtonType.Down;
 
     public override bool IsCombined => false;

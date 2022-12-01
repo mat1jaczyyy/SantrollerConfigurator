@@ -239,7 +239,7 @@ public class Santroller : ConfigurableUsbDevice
             }
         }
 
-        var allPins = microcontroller.GetAllPins().Except(importantPins)
+        var allPins = microcontroller.GetAllPins(false).Except(importantPins)
             .Select(s => new DevicePin(s, DevicePinMode.PullUp));
         var ports = microcontroller.GetPortsForTicking(allPins);
 

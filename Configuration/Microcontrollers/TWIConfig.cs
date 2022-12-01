@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -11,7 +12,7 @@ public abstract class TwiConfig : PinConfig
     protected int _clock;
     protected string _type;
 
-    protected TwiConfig(string type, int sda, int scl, int clock)
+    protected TwiConfig(ConfigViewModel model, string type, int sda, int scl, int clock): base(model)
     {
         _type = type;
         _sda = sda;

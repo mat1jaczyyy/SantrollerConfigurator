@@ -83,7 +83,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     private readonly Microcontroller _microcontroller;
 
     private readonly AvaloniaList<Output> _outputs = new();
-    public List<int> AvailablePins => Microcontroller.GetAllPins();
+    public List<int> AvailablePins => Microcontroller.GetAllPins(false);
 
     public Ps2CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? miso = null, int? mosi = null,
         int? sck = null, int? att = null, int? ack = null,
@@ -92,8 +92,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     {
         _microcontroller = microcontroller;
         _ackConfig = microcontroller
-            .GetOrSetPin(Ps2Input.Ps2AckType, ack ?? microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);
-        _attConfig = microcontroller.GetOrSetPin(Ps2Input.Ps2AttType, att ?? 0, DevicePinMode.Output);
+            .GetOrSetPin(model, Ps2Input.Ps2AckType, ack ?? microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);
+        _attConfig = microcontroller.GetOrSetPin(model, Ps2Input.Ps2AttType, att ?? 0, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         if (outputs != null)

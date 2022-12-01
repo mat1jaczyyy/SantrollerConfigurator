@@ -1,11 +1,9 @@
 using System;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
@@ -22,7 +20,7 @@ namespace GuitarConfiguratorSharp.NetCore.Views
         {
             this.WhenActivated(disposables =>
             {
-                disposables(ViewModel!.ShowPinSelectDialog.RegisterHandler(DoShowDialogAsync));
+                disposables(ViewModel!.ShowIssueDialog.RegisterHandler(DoShowDialogAsync));
                 disposables(ViewModel!.ShowUnoShortDialog.RegisterHandler(DoShowUnoDialogAsync));
                 disposables(Observable.StartAsync(() => ViewModel!.Main.SelectedDevice!.LoadConfiguration(ViewModel))
                     .Subscribe());
@@ -44,15 +42,14 @@ namespace GuitarConfiguratorSharp.NetCore.Views
             interaction.SetOutput(result);
         }
 
-        private async Task DoShowDialogAsync(InteractionContext<InputWithPin, SelectPinWindowViewModel?> interaction)
+        private async Task DoShowDialogAsync(InteractionContext<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?> interaction)
         {
-            var model = new SelectPinWindowViewModel(interaction.Input);
-            var dialog = new SelectPinWindow
+            var model = new RaiseIssueWindowViewModel(interaction.Input);
+            var dialog = new RaiseIssueWindow()
             {
                 DataContext = model
             };
-
-            var result = await dialog.ShowDialog<SelectPinWindowViewModel?>((Window) VisualRoot!);
+            var result = await dialog.ShowDialog<RaiseIssueWindowViewModel?>((Window) VisualRoot!);
             interaction.SetOutput(result);
         }
     }

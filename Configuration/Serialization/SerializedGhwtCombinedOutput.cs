@@ -30,7 +30,7 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        microcontroller.AssignPin(new DirectPinConfig(GhWtTapInput.GhWtTapPinType, Pin, DevicePinMode.Floating));
+        microcontroller.AssignPin(new DirectPinConfig(model, GhWtTapInput.GhWtTapPinType, Pin, DevicePinMode.Floating));
         return new GhwtCombinedOutput(model, microcontroller, Pin, Outputs.Select(s => s.Generate(model, microcontroller)).ToList());
     }
 }

@@ -35,7 +35,7 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
                 sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
             }
 
-            _spiConfig = microcontroller.AssignSpiPins(SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha, msbFirst, spiFreq)!;
+            _spiConfig = microcontroller.AssignSpiPins(model, SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha, msbFirst, spiFreq)!;
         }
 
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
