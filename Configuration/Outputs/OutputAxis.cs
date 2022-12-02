@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing.Printing;
 using System.Linq;
 using System.Reactive.Linq;
@@ -316,10 +317,10 @@ public abstract class OutputAxis : Output
 
     private const string Ps3GuitarTilt = "report->accel[0]";
 
-    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined)
+    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined, string extra)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
-        if (shared) return ")";
+        if (shared) return "";
         if (Input is FixedInput)
         {
             return xbox ? $"{GenerateOutput(xbox)} = {Input.Generate(xbox)}" : "";

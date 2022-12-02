@@ -12,6 +12,7 @@ using Avalonia.Collections;
 using Avalonia.Input;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
@@ -53,7 +54,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public bool KvEnabled { get; set; } = false;
         public int[] KvKey1 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
         public int[] KvKey2 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
-        
+
         public ICommand WriteConfig { get; }
 
         public ICommand GoBack { get; }
@@ -336,6 +337,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 }
             };
         }
+
         private readonly ObservableAsPropertyHelper<string?> _writeToolTip;
         public string? WriteToolTip => _writeToolTip.Value;
         private readonly ObservableAsPropertyHelper<List<int>> _availableMosiPins;
@@ -395,6 +397,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 await Task.WhenAll(Write(), ShowUnoShortDialog.Handle((Arduino) Main.SelectedDevice!).ToTask());
                 return;
             }
+
             UpdateErrors();
 
             await Write();
@@ -421,6 +424,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
                     Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, type));
             }
+
             UpdateErrors();
         }
 
@@ -530,10 +534,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 UpdateErrors();
                 return;
             }
+
             foreach (var binding in Bindings)
             {
                 binding.Outputs.Remove(output);
             }
+
             UpdateErrors();
         }
 
@@ -570,6 +576,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 0, 128, 0, MidiType.Note, 64, 0, 0,
                     1));
             }
+
             UpdateErrors();
         }
 
@@ -607,7 +614,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     Colors.Transparent, Array.Empty<byte>(), 0, 0, 0, StandardAxisType.RightStickX));
             }
 
-            var groupedOutputs = outputs.GroupBy(s => s.Input?.InnermostInput().GetType());
+            var groupedOutputs = outputs
+                .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
+                .GroupBy(s => s!.GetType()).ToList();
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 
             Dictionary<string, int> debounces = new();
@@ -618,14 +627,50 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     debounces[output.Name] = debounces.Count;
                 }
             }
-
-            var ret = groupedOutputs.Aggregate("", (current, group) => current + (group.First()
-                .Input?.InnermostInput()
-                .GenerateAll(Bindings.ToList(), group.Select(output =>
+            // Pass 1: work out debounces and map inputs to debounces
+            var inputs = new Dictionary<string, List<int>>();
+            foreach (var groupedOutput in groupedOutputs)
+            {
+                foreach (var (input, output) in groupedOutput)
+                {
+                    var generatedInput = input.Generate(xbox);
+                    if (input == null) throw new IncompleteConfigurationException("Missing input!");
+                    if (output is not OutputButton) continue;
+                    
+                    if (output.Input is MacroInput)
                     {
-                        var input = output.Input?.InnermostInput();
+                        if (!debounces.ContainsKey(output.Name+generatedInput))
+                        {
+                            debounces[output.Name+generatedInput] = debounces.Count;
+                        }
+                    }
+                    else
+                    {
+                        if (!debounces.ContainsKey(output.Name))
+                        {
+                            debounces[output.Name] = debounces.Count;
+                        }
+                    }
+
+                    if (!inputs.ContainsKey(generatedInput))
+                    {
+                        inputs[generatedInput] = new List<int>();
+                    }
+
+                    inputs[generatedInput].Add(debounces[output.Name]);
+                }
+            }
+            // Do the base mappings
+            var ret = groupedOutputs.Aggregate("", (current, group) => current + (group
+                .First().First
+                .GenerateAll(Bindings.ToList(), group.Select((s) =>
+                    {
+                        var output = s.Second;
+                        var input = s.First;
+                        var generatedInput = input.Generate(xbox);
                         if (input == null) throw new IncompleteConfigurationException("Missing input!");
                         var index = 0;
+                        var extra = "";
                         if (output is OutputButton button)
                         {
                             if (!debounces.ContainsKey(output.Name))
@@ -633,10 +678,16 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                                 debounces[output.Name] = debounces.Count;
                             }
 
+                            if (!inputs.ContainsKey(generatedInput))
+                            {
+                                inputs[generatedInput] = new List<int>();
+                            }
+
+                            inputs[generatedInput].Add(debounces[output.Name]);
                             index = debounces[output.Name];
                         }
 
-                        var generated = output.Generate(xbox, shared, index, combined);
+                        var generated = output.Generate(xbox, shared, index, combined, extra);
                         return new Tuple<Input, string>(input, generated);
                     })
                     .Where(s => !string.IsNullOrEmpty(s.Item2))

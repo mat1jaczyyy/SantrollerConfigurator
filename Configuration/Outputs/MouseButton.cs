@@ -24,12 +24,12 @@ public class MouseButton : OutputButton
     public override bool IsMidi => false;
     public MouseButtonType Type { get; }
 
-    protected override string GenerateIndex(bool xbox)
+    public override string GenerateIndex(bool xbox)
     {
         return _order.IndexOf(Type).ToString();
     }
 
-    protected override string GenerateOutput(bool xbox)
+    public override string GenerateOutput(bool xbox)
     {
         return "report->buttons";
     }

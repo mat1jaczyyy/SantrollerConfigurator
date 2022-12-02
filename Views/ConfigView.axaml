@@ -314,6 +314,16 @@
                     </ContentControl>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type conversions:MacroInput}">
+                <StackPanel Orientation="Horizontal">
+                    <ContentControl Content="{Binding Child1}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                    <ContentControl Content="{Binding Child2}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
                 <StackPanel Orientation="Horizontal">
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"

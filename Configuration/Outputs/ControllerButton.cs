@@ -65,7 +65,7 @@ public class ControllerButton : OutputButton
     public override string? GetLocalisedName() =>
         ControllerEnumConverter.GetButtonText(Model.DeviceType, Model.RhythmType, Type);
 
-    protected override string GenerateIndex(bool xbox)
+    public override string GenerateIndex(bool xbox)
     {
         if (xbox)
         {
@@ -76,7 +76,7 @@ public class ControllerButton : OutputButton
         return HatOrder.Contains(Type) ? HatOrder.IndexOf(Type).ToString() : Order.IndexOf(Type).ToString();
     }
 
-    protected override string GenerateOutput(bool xbox)
+    public override string GenerateOutput(bool xbox)
     {
         if (!xbox && HatOrder.Contains(Type))
         {

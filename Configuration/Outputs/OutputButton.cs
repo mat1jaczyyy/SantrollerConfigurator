@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -18,14 +21,14 @@ public abstract class OutputButton : Output
     }
 
     public byte Debounce { get; set; }
-    protected abstract string GenerateIndex(bool xbox);
+    public abstract string GenerateIndex(bool xbox);
 
-    protected abstract string GenerateOutput(bool xbox);
+    public abstract string GenerateOutput(bool xbox);
 
 
     public override bool IsCombined => false;
 
-    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined)
+    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined, string extra)
     {
         if (Input==null) throw new IncompleteConfigurationException("Missing input!");
         var outputBit = GenerateIndex(xbox);
@@ -70,14 +73,19 @@ public abstract class OutputButton : Output
             ";
             }
         }
-
-        if (combined && IsStrum)
-        {
-            var otherIndex = debounceIndex == 1 ? 0 : 1;
-            return
-                $"if (({Input.Generate(xbox)}) && (!debounce[{otherIndex}])) {{ {led2}; debounce[{debounceIndex}] = {Debounce + 1};}} {led}";
+        var ret = "";
+        foreach (var input in Input.Inputs()) {
+            if (combined && IsStrum)
+            {
+                var otherIndex = debounceIndex == 1 ? 0 : 1;
+                ret +=
+                    $"if (({input.Generate(xbox)}) && (!debounce[{otherIndex}])) {{ {led2}; debounce[{debounceIndex}] = {Debounce + 1};}} {led}";
+            }
+            else
+            {
+                ret += $"if (({input.Generate(xbox)})) {{ {led2}; debounce[{debounceIndex}] = {Debounce + 1}; }} {led}";
+            }
         }
-
-        return $"if (({Input.Generate(xbox)})) {{ {led2}; debounce[{debounceIndex}] = {Debounce + 1}; }} {led}";
+        return ret;
     }
 }

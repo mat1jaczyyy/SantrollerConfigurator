@@ -8,5 +8,6 @@ public enum InputType
     Ps2Input,
     TurntableInput,
     WtNeckInput,
-    Gh5NeckInput
+    Gh5NeckInput,
+    MacroInput
 }

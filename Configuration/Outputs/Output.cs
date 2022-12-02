@@ -90,7 +90,7 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
 
-    public IEnumerable<InputType> InputTypes => Enum.GetValues<InputType>();
+    public IEnumerable<InputType> InputTypes => Enum.GetValues<InputType>().Where(s => s is not InputType.MacroInput || this is OutputButton);
 
     private readonly ObservableAsPropertyHelper<bool> _isDj;
     private readonly ObservableAsPropertyHelper<bool> _isWii;
@@ -316,6 +316,9 @@ public abstract class Output : ReactiveObject, IDisposable
             case InputType.AnalogPinInput:
                 input = new DirectInput(lastPin, DevicePinMode.Analog, Model, Model.MicroController!);
                 break;
+            case InputType.MacroInput:
+                input = new MacroInput(new DirectInput(lastPin, pinMode, Model, Model.MicroController!), new DirectInput(lastPin, pinMode, Model, Model.MicroController!), Model);
+                break;
             case InputType.DigitalPinInput:
                 input = new DirectInput(lastPin, pinMode, Model, Model.MicroController!);
                 break;
@@ -441,7 +444,7 @@ public abstract class Output : ReactiveObject, IDisposable
         }
     }
 
-    public abstract string Generate(bool xbox, bool shared, int debounceIndex, bool combined);
+    public abstract string Generate(bool xbox, bool shared, int debounceIndex, bool combined, string extra);
 
     public virtual AvaloniaList<Output> Outputs => new() {this};
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
@@ -10,7 +11,7 @@ public abstract class CombinedOutput : Output
     {
     }
 
-    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined)
+    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined, string extra)
     {
         return "";
     }

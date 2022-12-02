@@ -44,6 +44,11 @@ public abstract class Input : ReactiveObject, IDisposable
         return this;
     }
 
+    public virtual IList<Input> Inputs()
+    {
+        return new List<Input>{this};
+    }
+
     public abstract IList<DevicePin> Pins { get; }
     public abstract IList<PinConfig> PinConfigs { get; }
     public abstract InputType? InputType { get; }

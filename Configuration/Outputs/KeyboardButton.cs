@@ -216,7 +216,7 @@ public class KeyboardButton : OutputButton
 
     public Key Key;
 
-    protected override string GenerateIndex(bool xbox)
+    public override string GenerateIndex(bool xbox)
     {
         throw new NotImplementedException();
     }
@@ -224,7 +224,8 @@ public class KeyboardButton : OutputButton
     public override bool IsKeyboard => true;
     public override bool IsController => false;
     public override bool IsMidi => false;
-    protected override string GenerateOutput(bool xbox)
+
+    public override string GenerateOutput(bool xbox)
     {
         var code = 0;
         return $"report->keys[{code >> 3}] |= {1 << (code & 7)}";
