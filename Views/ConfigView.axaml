@@ -540,6 +540,7 @@
                         <Button x:CompileBindings="False" Content="Revert device to Arduino" Command="{Binding Reset}" />
                         <Button Content="Configure another device" Command="{Binding GoBack}" />
                     </WrapPanel>
+                    <TextBlock IsVisible="{Binding WriteToolTip, Converter={x:Static ObjectConverters.IsNotNull}}" Foreground="Red" HorizontalAlignment="Center" Text="{Binding WriteToolTip}" />
                     <WrapPanel HorizontalAlignment="Center">
                         <TextBlock Text="Status: " />
                         <TextBlock Text="{Binding Main.Message}" />

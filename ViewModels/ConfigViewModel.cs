@@ -53,7 +53,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public bool KvEnabled { get; set; } = false;
         public int[] KvKey1 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
         public int[] KvKey2 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
-
+        
         public ICommand WriteConfig { get; }
 
         public ICommand GoBack { get; }
@@ -80,6 +80,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         {
             get => _hasError;
             set => this.RaiseAndSetIfChanged(ref _hasError, value);
+        }
+
+        private bool _fininalised;
+
+        public bool Finalised
+        {
+            get => _fininalised;
+            set => this.RaiseAndSetIfChanged(ref _fininalised, value);
         }
 
         public LedType LedType
@@ -279,6 +287,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             GoBack = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute);
             Bindings = new AvaloniaList<Output>();
 
+            _writeToolTip = this.WhenAnyValue(x => x.HasError)
+                .Select(s => s ? "There are errors in your configuration" : null).ToProperty(this, s => s.WriteToolTip);
+
             _isRhythm = this.WhenAnyValue(x => x.DeviceType)
                 .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
                 .ToProperty(this, x => x.IsRhythm);
@@ -325,7 +336,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 }
             };
         }
-
+        private readonly ObservableAsPropertyHelper<string?> _writeToolTip;
+        public string? WriteToolTip => _writeToolTip.Value;
         private readonly ObservableAsPropertyHelper<List<int>> _availableMosiPins;
         private readonly ObservableAsPropertyHelper<List<int>> _availableSckPins;
         public List<int> AvailableMosiPins => _availableMosiPins.Value;
@@ -410,6 +422,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, type));
             }
             UpdateErrors();
+        }
+
+        public void Finalise()
+        {
+            Finalised = true;
         }
 
         public void Generate(PlatformIo pio)
@@ -508,7 +525,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public void RemoveOutput(Output output)
         {
             output.Dispose();
-            if (Bindings.Remove(output)) return;
+            if (Bindings.Remove(output))
+            {
+                UpdateErrors();
+                return;
+            }
             foreach (var binding in Bindings)
             {
                 binding.Outputs.Remove(output);
