@@ -317,7 +317,7 @@ public abstract class OutputAxis : Output
 
     private const string Ps3GuitarTilt = "report->accel[0]";
 
-    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined, string extra)
+    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         if (shared) return "";

@@ -28,18 +28,22 @@ public abstract class OutputButton : Output
 
     public override bool IsCombined => false;
 
-    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined, string extra)
+    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
     {
         if (Input==null) throw new IncompleteConfigurationException("Missing input!");
         var outputBit = GenerateIndex(xbox);
         if (string.IsNullOrEmpty(outputBit)) return "";
+        
+        var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
+        var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
+        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce+1};");
         if (!shared)
         {
             var outputVar = GenerateOutput(xbox);
             var leds = "";
             if (AreLedsEnabled && LedIndices.Any())
             {
-                leds += $@"if (!debounce[{debounceIndex}]) {{
+                leds += $@"if (!{ifStatement}) {{
                         {LedIndices.Aggregate("", (s, index) => s += @$"if (ledState[{index}].select == 1) {{
                             ledState[{index}].select = 0; 
                             {string.Join("\n", Model.LedType.GetColors(LedOff).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))};
@@ -47,8 +51,8 @@ public abstract class OutputButton : Output
                     }}";
             }
             return
-                @$"if (debounce[{debounceIndex}]) {{ 
-                    debounce[{debounceIndex}]--; 
+                @$"if ({ifStatement}) {{ 
+                    {decrement} 
                     {outputVar} |= (1 << {outputBit}); 
                     {leds}
                 }}";
@@ -61,31 +65,26 @@ public abstract class OutputButton : Output
             foreach (var index in LedIndices)
             {
                 led += $@"
-                if (ledState[{index}].select == 0 && debounce[{debounceIndex}]) {{
+                if (ledState[{index}].select == 0 && {ifStatement}) {{
                     ledState[{index}].select = 1;
                     {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))}
                 }}";
                 led2 += $@"
-                if (!debounce[{debounceIndex}] && ledState[{index}].select == 1) {{
+                if (!{ifStatement} && ledState[{index}].select == 1) {{
                     ledState[{index}].select = 1;
                     {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))}
                 }}
             ";
             }
         }
-        var ret = "";
-        foreach (var input in Input.Inputs()) {
-            if (combined && IsStrum)
-            {
-                var otherIndex = debounceIndex == 1 ? 0 : 1;
-                ret +=
-                    $"if (({input.Generate(xbox)}) && (!debounce[{otherIndex}])) {{ {led2}; debounce[{debounceIndex}] = {Debounce + 1};}} {led}";
-            }
-            else
-            {
-                ret += $"if (({input.Generate(xbox)})) {{ {led2}; debounce[{debounceIndex}] = {Debounce + 1}; }} {led}";
-            }
+
+        if (combined && IsStrum)
+        {
+            var otherIndex = debounceIndex[0] == 1 ? 0 : 1;
+            return
+                $"if (({Input.Generate(xbox)}) && (!debounce[{otherIndex}])) {{ {led2}; {reset};}} {led}";
         }
-        return ret;
+
+        return $"if (({Input.Generate(xbox)})) {{ {led2}; {reset}; }} {led}";
     }
 }

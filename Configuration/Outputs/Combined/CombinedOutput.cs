@@ -11,7 +11,7 @@ public abstract class CombinedOutput : Output
     {
     }
 
-    public override string Generate(bool xbox, bool shared, int debounceIndex, bool combined, string extra)
+    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
     {
         return "";
     }

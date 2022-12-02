@@ -444,7 +444,7 @@ public abstract class Output : ReactiveObject, IDisposable
         }
     }
 
-    public abstract string Generate(bool xbox, bool shared, int debounceIndex, bool combined, string extra);
+    public abstract string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra);
 
     public virtual AvaloniaList<Output> Outputs => new() {this};
 

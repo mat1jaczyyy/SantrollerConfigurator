@@ -629,6 +629,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
             // Pass 1: work out debounces and map inputs to debounces
             var inputs = new Dictionary<string, List<int>>();
+            var macros = new List<Output>();
             foreach (var groupedOutput in groupedOutputs)
             {
                 foreach (var (input, output) in groupedOutput)
@@ -643,6 +644,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         {
                             debounces[output.Name+generatedInput] = debounces.Count;
                         }
+                        macros.Add(output);
                     }
                     else
                     {
@@ -660,31 +662,37 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     inputs[generatedInput].Add(debounces[output.Name]);
                 }
             }
-            // Do the base mappings
+
+            var seen = new HashSet<Output>();
+            // Handle most mappings
             var ret = groupedOutputs.Aggregate("", (current, group) => current + (group
                 .First().First
                 .GenerateAll(Bindings.ToList(), group.Select((s) =>
                     {
-                        var output = s.Second;
                         var input = s.First;
+                        var output = s.Second;
                         var generatedInput = input.Generate(xbox);
-                        if (input == null) throw new IncompleteConfigurationException("Missing input!");
-                        var index = 0;
+                        var index = new List<int>{0};
                         var extra = "";
-                        if (output is OutputButton button)
+                        if (output is OutputButton)
                         {
-                            if (!debounces.ContainsKey(output.Name))
+                            index = new List<int>{debounces[output.Name]};
+                            if (output.Input is MacroInput)
                             {
-                                debounces[output.Name] = debounces.Count;
+                                if (shared)
+                                {
+                                    output = output.Serialize().Generate(this, _microController);
+                                    output.Input = input;
+                                    index = new List<int>{debounces[output.Name + generatedInput]};
+                                }
+                                else
+                                {
+                                    if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
+                                    seen.Add(output);
+                                    index = output.Input!.Inputs()
+                                        .Select(s => debounces[output.Name + s.Generate(xbox)]).ToList();
+                                }
                             }
-
-                            if (!inputs.ContainsKey(generatedInput))
-                            {
-                                inputs[generatedInput] = new List<int>();
-                            }
-
-                            inputs[generatedInput].Add(debounces[output.Name]);
-                            index = debounces[output.Name];
                         }
 
                         var generated = output.Generate(xbox, shared, index, combined, extra);
@@ -692,6 +700,17 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     })
                     .Where(s => !string.IsNullOrEmpty(s.Item2))
                     .ToList()) + ";"));
+            // Flick off intersecting outputs when multiple buttons are pressed
+            if (shared)
+            {
+                foreach (var output in macros)
+                {
+                    var ifStatement = string.Join(" && ", output.Input!.Inputs().Select(input => $"debounce[{debounces[output.Name + input.Generate(xbox)]}]"));
+                    var sharedReset = output.Input!.Inputs().Aggregate("",
+                        (current, input) => current + string.Join("", inputs[input.Generate(xbox)].Select(s => $"debounce[{s}]=0;").Distinct()));
+                    ret += @$"if ({ifStatement}) {{{sharedReset}}}";
+                }
+            }
             return ret.Replace('\n', ' ');
         }
 
