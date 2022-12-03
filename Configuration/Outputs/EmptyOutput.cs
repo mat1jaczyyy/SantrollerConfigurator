@@ -155,8 +155,6 @@ public class EmptyOutput : Output
 
         Dispatcher.UIThread.InvokeAsync(() => Model.Bindings.Remove(this));
     }
-
-    public override string? GetLocalisedName() => "Unset";
     public override string ErrorText => "Input is not bound!";
     public override bool IsCombined => false;
     public override bool IsStrum => false;

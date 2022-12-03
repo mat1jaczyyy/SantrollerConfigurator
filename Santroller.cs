@@ -185,8 +185,6 @@ public class Santroller : ConfigurableUsbDevice
 
     public async Task<int> DetectPin(bool analog, int original, Microcontroller microcontroller)
     {
-        //TODO: this
-        //TODO: do we support a timeout?
         _picking = true;
         var importantPins = new List<int>();
         foreach (var config in microcontroller.PinConfigs)

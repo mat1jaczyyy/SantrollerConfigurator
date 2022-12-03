@@ -21,6 +21,7 @@ public class MouseAxis : OutputAxis
         deadZone, type.ToString(), (_) => false)
     {
         Type = type;
+        ControllerType = type.ToString();
     }
 
     public override bool IsKeyboard => true;
@@ -71,8 +72,6 @@ public class MouseAxis : OutputAxis
     {
         return true;
     }
-
-    public override string? GetLocalisedName() => Name;
 
     public override SerializedOutput Serialize()
     {

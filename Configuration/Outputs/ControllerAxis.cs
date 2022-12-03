@@ -37,6 +37,7 @@ public class ControllerAxis : OutputAxis
         type.ToString(), (s) => IsTrigger(s, type))
     {
         Type = type;
+        ControllerType = type.ToString();
     }
 
     public static bool IsTrigger(DeviceControllerType s, StandardAxisType type)
@@ -58,9 +59,6 @@ public class ControllerAxis : OutputAxis
 
         return "report->" + Mappings[Type];
     }
-
-    public override string? GetLocalisedName() =>
-        ControllerEnumConverter.GetAxisText(Model.DeviceType, Model.RhythmType, Type);
 
     public override bool IsCombined => false;
 

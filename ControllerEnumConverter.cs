@@ -5,7 +5,9 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Avalonia.Data.Converters;
+using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
+using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore;
 
@@ -14,7 +16,10 @@ public class ControllerEnumConverter : IMultiValueConverter
     private static readonly Dictionary<Tuple<DeviceControllerType, RhythmType?, StandardAxisType>, string> AxisLabels =
         new()
         {
-            {new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardAxisType.LeftStickX), "Touch / Slider Bar"},
+            {
+                new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardAxisType.LeftStickX),
+                "Touch / Slider Bar"
+            },
             {new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardAxisType.RightStickX), "Whammy Axis"},
             {new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardAxisType.RightStickY), "Tilt Axis"},
             {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardAxisType.RightStickX), "Whammy Axis"},
@@ -133,23 +138,41 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {new(DeviceControllerType.Gamepad, null, StandardButtonType.Left), "D-pad Left"},
                 {new(DeviceControllerType.Gamepad, null, StandardButtonType.Right), "D-pad Right"},
             };
-    public static string? GetAxisText(DeviceControllerType deviceControllerType, RhythmType? rhythmType, StandardAxisType axis) {
+
+    public static string? GetAxisText(DeviceControllerType deviceControllerType, RhythmType? rhythmType,
+        StandardAxisType axis)
+    {
         if (deviceControllerType is not DeviceControllerType.Guitar or DeviceControllerType.Drum)
             rhythmType = null;
-        if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick or DeviceControllerType.DancePad
+        if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick
+            or DeviceControllerType.DancePad
             or DeviceControllerType.Wheel or DeviceControllerType.FlightStick)
             deviceControllerType = DeviceControllerType.Gamepad;
         return AxisLabels.GetValueOrDefault(new(deviceControllerType, rhythmType, axis));
     }
+
     public static string? GetButtonText(DeviceControllerType deviceControllerType, RhythmType? rhythmType,
-        StandardButtonType button) {
+        StandardButtonType button)
+    {
         if (deviceControllerType is not DeviceControllerType.Guitar or DeviceControllerType.Drum)
             rhythmType = null;
-        if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick or DeviceControllerType.DancePad
+        if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick
+            or DeviceControllerType.DancePad
             or DeviceControllerType.Wheel or DeviceControllerType.FlightStick)
             deviceControllerType = DeviceControllerType.Gamepad;
         return ButtonLabels.GetValueOrDefault(new(deviceControllerType, rhythmType, button));
     }
+
+    public static string GetText(Output output, DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return output switch
+        {
+            ControllerAxis axis => GetAxisText(deviceControllerType, rhythmType, axis.Type) ?? output.Name,
+            ControllerButton button => GetButtonText(deviceControllerType, rhythmType, button.Type) ?? output.Name,
+            _ => output.Name
+        };
+    }
+
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
         if (values[0] == null || values[1] == null || values[2] == null)
@@ -195,7 +218,8 @@ public class ControllerEnumConverter : IMultiValueConverter
         RhythmType? rhythmType = arg.Item2;
         if (deviceControllerType is not DeviceControllerType.Guitar or DeviceControllerType.Drum)
             rhythmType = null;
-        if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick or DeviceControllerType.DancePad
+        if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick
+            or DeviceControllerType.DancePad
             or DeviceControllerType.Wheel or DeviceControllerType.FlightStick)
             deviceControllerType = DeviceControllerType.Gamepad;
         return Enum.GetValues<SimpleType>().Cast<object>()

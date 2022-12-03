@@ -212,6 +212,7 @@ public class KeyboardButton : OutputButton
         debounce, type.ToString())
     {
         Key = type;
+        ControllerType = type.ToString();
     }
 
     public Key Key;
@@ -239,7 +240,6 @@ public class KeyboardButton : OutputButton
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;
-    public override string? GetLocalisedName() => Name;
 
     public override SerializedOutput Serialize()
     {

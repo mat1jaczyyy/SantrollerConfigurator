@@ -22,14 +22,15 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
         public abstract string GenerateInit();
 
         public string GetPin(int possiblePin, int selectedPin, IEnumerable<Output> outputs, bool twi, bool spi,
-            IEnumerable<PinConfig> pinConfigs)
+            IEnumerable<PinConfig> pinConfigs, ConfigViewModel model)
         {
             var selectedConfig = pinConfigs.Where(s => s.Pins.Contains(selectedPin));
             var apa102 = PinConfigs.Where(s => s.Type == ConfigViewModel.Apa102SpiType && s.Pins.Contains(possiblePin)).Select(s => s.Type);
+            
             var output = string.Join(" - ",
                 outputs.Where(o =>
                         o.GetPinConfigs().Except(selectedConfig).Any(s => s.Pins.Contains(possiblePin) ))
-                    .Select(s => s.Name).Concat(apa102));
+                    .Select(s => ControllerEnumConverter.GetText(s, model.DeviceType, model.RhythmType)).Concat(apa102));
             var ret = GetPinForMicrocontroller(possiblePin, twi, spi);
             if (!string.IsNullOrEmpty(output))
             {

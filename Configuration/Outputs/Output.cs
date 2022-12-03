@@ -44,6 +44,14 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public string Name { get; }
 
+    private string _controllerType;
+
+    public string ControllerType
+    {
+        get => _controllerType;
+        set => this.RaiseAndSetIfChanged(ref _controllerType, value);
+    }
+
     public InputType? SelectedInputType
     {
         get => Input?.InputType;
@@ -90,7 +98,8 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
 
-    public IEnumerable<InputType> InputTypes => Enum.GetValues<InputType>().Where(s => s is not InputType.MacroInput || this is OutputButton);
+    public IEnumerable<InputType> InputTypes =>
+        Enum.GetValues<InputType>().Where(s => s is not InputType.MacroInput || this is OutputButton);
 
     private readonly ObservableAsPropertyHelper<bool> _isDj;
     private readonly ObservableAsPropertyHelper<bool> _isWii;
@@ -98,9 +107,9 @@ public abstract class Output : ReactiveObject, IDisposable
     private readonly ObservableAsPropertyHelper<bool> _isGh5;
     private readonly ObservableAsPropertyHelper<bool> _isWt;
     private readonly ObservableAsPropertyHelper<bool> _areLedsEnabled;
-    private readonly ObservableAsPropertyHelper<string?> _localisedName;
+    private readonly ObservableAsPropertyHelper<string> _localisedName;
 
-    public string? LocalisedName => _localisedName.Value;
+    public string LocalisedName => _localisedName.Value;
     public bool IsDj => _isDj.Value;
     public bool IsWii => _isWii.Value;
     public bool IsPs2 => _isPs2.Value;
@@ -157,7 +166,7 @@ public abstract class Output : ReactiveObject, IDisposable
         Input = input;
         LedOn = ledOn;
         LedOff = ledOff;
-        LedIndices = ledIndices;
+        _ledIndices = ledIndices;
         Name = name;
         Model = model;
         _image = this.WhenAnyValue(x => x.Model.DeviceType).Select(GetImage).ToProperty(this, x => x.Image);
@@ -173,8 +182,8 @@ public abstract class Output : ReactiveObject, IDisposable
             .ToProperty(this, x => x.IsWt);
         _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToProperty(this, x => x.AreLedsEnabled);
-        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType)
-            .Select(x => GetLocalisedName())
+        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ControllerType)
+            .Select(x => ControllerEnumConverter.GetText(this, x.Item1, x.Item2))
             .ToProperty(this, x => x.LocalisedName);
         _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue).ToProperty(this, x => x.ValueRaw);
         _imageOpacity = this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
@@ -201,8 +210,6 @@ public abstract class Output : ReactiveObject, IDisposable
         LedIndices = Array.Empty<byte>();
     }
 
-
-    public abstract string? GetLocalisedName();
     public abstract bool IsStrum { get; }
 
     public async Task FindAndAssign()
@@ -317,7 +324,8 @@ public abstract class Output : ReactiveObject, IDisposable
                 input = new DirectInput(lastPin, DevicePinMode.Analog, Model, Model.MicroController!);
                 break;
             case InputType.MacroInput:
-                input = new MacroInput(new DirectInput(lastPin, pinMode, Model, Model.MicroController!), new DirectInput(lastPin, pinMode, Model, Model.MicroController!), Model);
+                input = new MacroInput(new DirectInput(lastPin, pinMode, Model, Model.MicroController!),
+                    new DirectInput(lastPin, pinMode, Model, Model.MicroController!), Model);
                 break;
             case InputType.DigitalPinInput:
                 input = new DirectInput(lastPin, pinMode, Model, Model.MicroController!);
@@ -490,12 +498,13 @@ public abstract class Output : ReactiveObject, IDisposable
                 ps2ControllerType, wiiControllerType);
         }
     }
-    
+
     public virtual string ErrorText
     {
         get
         {
-            var text = string.Join(", ", GetPinConfigs().Select(s => s.ErrorText).Distinct().Where(s => !string.IsNullOrEmpty(s)));
+            var text = string.Join(", ",
+                GetPinConfigs().Select(s => s.ErrorText).Distinct().Where(s => !string.IsNullOrEmpty(s)));
             return string.IsNullOrEmpty(text) ? "" : $"* Error: Conflicting pins: {text}!";
         }
     }

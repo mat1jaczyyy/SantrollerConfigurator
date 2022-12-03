@@ -58,12 +58,10 @@ public class ControllerButton : OutputButton
         byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, type.ToString())
     {
         Type = type;
+        ControllerType = type.ToString();
     }
 
     public StandardButtonType Type { get; }
-
-    public override string? GetLocalisedName() =>
-        ControllerEnumConverter.GetButtonText(Model.DeviceType, Model.RhythmType, Type);
 
     public override string GenerateIndex(bool xbox)
     {

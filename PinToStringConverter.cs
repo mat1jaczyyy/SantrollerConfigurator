@@ -29,6 +29,6 @@ public class PinToStringConverter : IMultiValueConverter
             Output output => output.GetPinConfigs(),
             _ => new List<PinConfig>()
         };
-        return microcontroller.GetPin(pin, selectedPin, model.Bindings, twi, spi, configs);
+        return microcontroller.GetPin(pin, selectedPin, model.Bindings, twi, spi, configs, model);
     }
 }

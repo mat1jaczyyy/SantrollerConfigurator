@@ -17,6 +17,7 @@ public class MouseButton : OutputButton
     public MouseButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce, MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, type.ToString())
     {
         Type = type;
+        ControllerType = type.ToString();
     }
 
     public override bool IsKeyboard => true;
@@ -37,7 +38,6 @@ public class MouseButton : OutputButton
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;
-    public override string? GetLocalisedName() => Name;
 
     public override SerializedOutput Serialize()
     {
