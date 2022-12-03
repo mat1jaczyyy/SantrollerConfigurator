@@ -56,6 +56,10 @@
         <DependentUpon>RaiseIssueWindow.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\AreYouSureDialog.axaml.cs">
+        <DependentUpon>AreYouSureDialog.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
     <ItemGroup>
       <Reference Include="Avalonia.Themes.Fluent">

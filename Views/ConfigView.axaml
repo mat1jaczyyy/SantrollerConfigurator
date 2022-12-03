@@ -533,7 +533,7 @@
                                 HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Add Binding
                         </Button>
-                        <Button x:CompileBindings="False" Command="{Binding ClearOutputs}"
+                        <Button x:CompileBindings="False" Command="{Binding ClearOutputsWithConfirmation}"
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Clear
                         </Button>

@@ -36,6 +36,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         }
 
         public Interaction<Arduino, ShowUnoShortWindowViewModel?> ShowUnoShortDialog { get; }
+
+        public Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel> ShowYesNoDialog
+        {
+            get;
+        }
+
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
 
         public IScreen HostScreen { get; }
@@ -149,11 +155,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public EmulationType EmulationType
         {
             get => _emulationType;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _emulationType, value);
-                SetDefaultBindings();
-            }
+            set => SetDefaultBindings(value);
         }
 
         private RhythmType _rhythmType;
@@ -178,7 +180,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         private void UpdateBindings()
         {
-            Bindings.RemoveAll(Bindings.Where(binding => binding.LocalisedName == null).ToList());
             // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
             if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput))
             {
@@ -279,6 +280,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         {
             ShowIssueDialog = new Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>();
             ShowUnoShortDialog = new Interaction<Arduino, ShowUnoShortWindowViewModel?>();
+            ShowYesNoDialog =
+                new Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>();
             Main = screen;
             HostScreen = screen;
 
@@ -380,7 +383,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             switch (Main.DeviceInputType)
             {
                 case DeviceInputType.Direct:
-                    SetDefaultBindings();
+                    SetDefaultBindings(EmulationType);
                     break;
                 case DeviceInputType.Wii:
                     Bindings.Add(new WiiCombinedOutput(this, microcontroller));
@@ -403,8 +406,20 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             await Write();
         }
 
-        public void SetDefaultBindings()
+        private async void SetDefaultBindings(EmulationType emulationType)
         {
+            if (Bindings.Any())
+            {
+                var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
+                    "The following action will clear all your bindings, are you sure you want to do this?")).ToTask();
+                if (!yesNo.Response)
+                {
+                    return;
+                }
+            }
+
+            _emulationType = emulationType;
+            this.RaisePropertyChanged(nameof(EmulationType));
             ClearOutputs();
             if (EmulationType != EmulationType.Controller) return;
             foreach (var type in Enum.GetValues<StandardAxisType>())
@@ -554,9 +569,34 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             UpdateErrors();
         }
 
-        public void Reset()
+        public async void ClearOutputsWithConfirmation()
         {
-            SetDefaultBindings();
+            var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
+                "The following action will clear all your inputs, are you sure you want to do this?")).ToTask();
+            if (!yesNo.Response)
+            {
+                return;
+            }
+
+            foreach (var binding in Bindings)
+            {
+                binding.Dispose();
+            }
+
+            Bindings.Clear();
+            UpdateErrors();
+        }
+
+        public async void Reset()
+        {
+            var yesNo = await ShowYesNoDialog.Handle(("Reset", "Cancel",
+                "The following action will revert your device back to an Arduino, are you sure you want to do this?")).ToTask();
+            if (!yesNo.Response)
+            {
+                return;
+            }
+            //TODO: actually revert the device to an arduino
+            //TODO: probably don't offer this for the pico since you can just use bootsel on those
         }
 
         public void AddOutput()
@@ -627,6 +667,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     debounces[output.Name] = debounces.Count;
                 }
             }
+
             // Pass 1: work out debounces and map inputs to debounces
             var inputs = new Dictionary<string, List<int>>();
             var macros = new List<Output>();
@@ -637,13 +678,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     var generatedInput = input.Generate(xbox);
                     if (input == null) throw new IncompleteConfigurationException("Missing input!");
                     if (output is not OutputButton) continue;
-                    
+
                     if (output.Input is MacroInput)
                     {
-                        if (!debounces.ContainsKey(output.Name+generatedInput))
+                        if (!debounces.ContainsKey(output.Name + generatedInput))
                         {
-                            debounces[output.Name+generatedInput] = debounces.Count;
+                            debounces[output.Name + generatedInput] = debounces.Count;
                         }
+
                         macros.Add(output);
                     }
                     else
@@ -672,18 +714,18 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         var input = s.First;
                         var output = s.Second;
                         var generatedInput = input.Generate(xbox);
-                        var index = new List<int>{0};
+                        var index = new List<int> {0};
                         var extra = "";
                         if (output is OutputButton)
                         {
-                            index = new List<int>{debounces[output.Name]};
+                            index = new List<int> {debounces[output.Name]};
                             if (output.Input is MacroInput)
                             {
                                 if (shared)
                                 {
                                     output = output.Serialize().Generate(this, _microController);
                                     output.Input = input;
-                                    index = new List<int>{debounces[output.Name + generatedInput]};
+                                    index = new List<int> {debounces[output.Name + generatedInput]};
                                 }
                                 else
                                 {
@@ -705,12 +747,16 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 foreach (var output in macros)
                 {
-                    var ifStatement = string.Join(" && ", output.Input!.Inputs().Select(input => $"debounce[{debounces[output.Name + input.Generate(xbox)]}]"));
+                    var ifStatement = string.Join(" && ",
+                        output.Input!.Inputs().Select(input =>
+                            $"debounce[{debounces[output.Name + input.Generate(xbox)]}]"));
                     var sharedReset = output.Input!.Inputs().Aggregate("",
-                        (current, input) => current + string.Join("", inputs[input.Generate(xbox)].Select(s => $"debounce[{s}]=0;").Distinct()));
+                        (current, input) => current + string.Join("",
+                            inputs[input.Generate(xbox)].Select(s => $"debounce[{s}]=0;").Distinct()));
                     ret += @$"if ({ifStatement}) {{{sharedReset}}}";
                 }
             }
+
             return ret.Replace('\n', ' ');
         }
 

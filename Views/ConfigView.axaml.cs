@@ -22,6 +22,7 @@ namespace GuitarConfiguratorSharp.NetCore.Views
             {
                 disposables(ViewModel!.ShowIssueDialog.RegisterHandler(DoShowDialogAsync));
                 disposables(ViewModel!.ShowUnoShortDialog.RegisterHandler(DoShowUnoDialogAsync));
+                disposables(ViewModel!.ShowYesNoDialog.RegisterHandler(DoShowYesNoDialogAsync));
                 disposables(Observable.StartAsync(() => ViewModel!.Main.SelectedDevice!.LoadConfiguration(ViewModel))
                     .Subscribe());
                 disposables(
@@ -51,6 +52,17 @@ namespace GuitarConfiguratorSharp.NetCore.Views
             };
             var result = await dialog.ShowDialog<RaiseIssueWindowViewModel?>((Window) VisualRoot!);
             interaction.SetOutput(result);
+        }
+
+        private async Task DoShowYesNoDialogAsync(InteractionContext<(string yesText, string noText, string text), AreYouSureWindowViewModel> interaction)
+        {
+            var model = new AreYouSureWindowViewModel(interaction.Input.yesText, interaction.Input.noText, interaction.Input.text);
+            var dialog = new AreYouSureWindow()
+            {
+                DataContext = model
+            };
+            await dialog.ShowDialog<AreYouSureWindowViewModel?>((Window) VisualRoot!);
+            interaction.SetOutput(model);
         }
     }
 }

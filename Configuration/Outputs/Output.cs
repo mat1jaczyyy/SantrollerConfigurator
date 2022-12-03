@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -426,27 +425,29 @@ public abstract class Output : ReactiveObject, IDisposable
         }
         else
         {
-            switch (type)
+            bitmap = type switch
             {
-                case DeviceControllerType.Guitar:
-                    bitmap = $"GH/{Name}.png";
-                    break;
-                case DeviceControllerType.Gamepad:
-                    bitmap = $"Others/Xbox360/360_{Name}.png";
-                    break;
-            }
+                DeviceControllerType.Guitar => $"GH/{Name}.png",
+                DeviceControllerType.Gamepad => $"Others/Xbox360/360_{Name}.png",
+                _ => bitmap
+            };
         }
 
         var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
         try
         {
-            var asset = assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{bitmap}"));
-            return new Bitmap(asset);
+            return new Bitmap(assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{bitmap}")));
         }
         catch (FileNotFoundException)
         {
-            var asset = assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/None.png"));
-            return new Bitmap(asset);
+            try
+            {
+                return new Bitmap(assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Others/Xbox360/360_{Name}.png")));
+            }
+            catch (FileNotFoundException)
+            {
+                return new Bitmap(assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/None.png")));
+            }
         }
     }
 
