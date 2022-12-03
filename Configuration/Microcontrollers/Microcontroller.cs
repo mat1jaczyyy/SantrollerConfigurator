@@ -30,7 +30,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
             var output = string.Join(" - ",
                 outputs.Where(o =>
                         o.GetPinConfigs().Except(selectedConfig).Any(s => s.Pins.Contains(possiblePin) ))
-                    .Select(s => ControllerEnumConverter.GetText(s, model.DeviceType, model.RhythmType)).Concat(apa102));
+                    .Select(s => s.GetName(model.DeviceType, model.RhythmType)).Concat(apa102));
             var ret = GetPinForMicrocontroller(possiblePin, twi, spi);
             if (!string.IsNullOrEmpty(output))
             {

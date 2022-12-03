@@ -212,7 +212,6 @@ public class KeyboardButton : OutputButton
         debounce, type.ToString())
     {
         Key = type;
-        ControllerType = type.ToString();
     }
 
     public Key Key;

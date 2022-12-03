@@ -44,14 +44,6 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public string Name { get; }
 
-    private string _controllerType;
-
-    public string ControllerType
-    {
-        get => _controllerType;
-        set => this.RaiseAndSetIfChanged(ref _controllerType, value);
-    }
-
     public InputType? SelectedInputType
     {
         get => Input?.InputType;
@@ -182,8 +174,8 @@ public abstract class Output : ReactiveObject, IDisposable
             .ToProperty(this, x => x.IsWt);
         _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToProperty(this, x => x.AreLedsEnabled);
-        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ControllerType)
-            .Select(x => ControllerEnumConverter.GetText(this, x.Item1, x.Item2))
+        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType)
+            .Select(x => GetName(x.Item1, x.Item2))
             .ToProperty(this, x => x.LocalisedName);
         _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue).ToProperty(this, x => x.ValueRaw);
         _imageOpacity = this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
@@ -193,6 +185,7 @@ public abstract class Output : ReactiveObject, IDisposable
             .Select(s => string.Join(", ", s))
             .ToProperty(this, s => s.LedIndicesDisplay);
         AssignByKeyOrAxis = ReactiveCommand.CreateFromTask(FindAndAssign);
+        Outputs = new AvaloniaList<Output> {this};
     }
 
     public void AddLed()
@@ -211,6 +204,11 @@ public abstract class Output : ReactiveObject, IDisposable
     }
 
     public abstract bool IsStrum { get; }
+
+    public virtual string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return Name;
+    }
 
     public async Task FindAndAssign()
     {
@@ -454,7 +452,7 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public abstract string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra);
 
-    public virtual AvaloniaList<Output> Outputs => new() {this};
+    public virtual AvaloniaList<Output> Outputs { get; }
 
     public void Remove()
     {

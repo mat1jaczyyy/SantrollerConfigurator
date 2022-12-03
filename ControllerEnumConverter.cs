@@ -163,16 +163,6 @@ public class ControllerEnumConverter : IMultiValueConverter
         return ButtonLabels.GetValueOrDefault(new(deviceControllerType, rhythmType, button));
     }
 
-    public static string GetText(Output output, DeviceControllerType deviceControllerType, RhythmType? rhythmType)
-    {
-        return output switch
-        {
-            ControllerAxis axis => GetAxisText(deviceControllerType, rhythmType, axis.Type) ?? output.Name,
-            ControllerButton button => GetButtonText(deviceControllerType, rhythmType, button.Type) ?? output.Name,
-            _ => output.Name
-        };
-    }
-
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
         if (values[0] == null || values[1] == null || values[2] == null)

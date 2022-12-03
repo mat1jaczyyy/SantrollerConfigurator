@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -58,7 +59,11 @@ public class ControllerButton : OutputButton
         byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, type.ToString())
     {
         Type = type;
-        ControllerType = type.ToString();
+    }
+    
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return ControllerEnumConverter.GetButtonText(deviceControllerType, rhythmType, Enum.Parse<StandardButtonType>(Name)) ?? Name;
     }
 
     public StandardButtonType Type { get; }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -37,7 +38,11 @@ public class ControllerAxis : OutputAxis
         type.ToString(), (s) => IsTrigger(s, type))
     {
         Type = type;
-        ControllerType = type.ToString();
+    }
+
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return ControllerEnumConverter.GetAxisText(deviceControllerType, rhythmType, Enum.Parse<StandardAxisType>(Name)) ?? Name;
     }
 
     public static bool IsTrigger(DeviceControllerType s, StandardAxisType type)
