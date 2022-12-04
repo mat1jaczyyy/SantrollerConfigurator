@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using GuitarConfiguratorSharp.NetCore.Configuration;
+using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 using ReactiveUI;
 
@@ -23,6 +26,7 @@ namespace GuitarConfiguratorSharp.NetCore.Views
                 disposables(ViewModel!.ShowIssueDialog.RegisterHandler(DoShowDialogAsync));
                 disposables(ViewModel!.ShowUnoShortDialog.RegisterHandler(DoShowUnoDialogAsync));
                 disposables(ViewModel!.ShowYesNoDialog.RegisterHandler(DoShowYesNoDialogAsync));
+                disposables(ViewModel!.ShowBindAllDialog.RegisterHandler(DoShowBindAllDialog));
                 disposables(Observable.StartAsync(() => ViewModel!.Main.SelectedDevice!.LoadConfiguration(ViewModel))
                     .Subscribe());
                 disposables(
@@ -62,6 +66,17 @@ namespace GuitarConfiguratorSharp.NetCore.Views
                 DataContext = model
             };
             await dialog.ShowDialog<AreYouSureWindowViewModel?>((Window) VisualRoot!);
+            interaction.SetOutput(model);
+        }
+
+        private async Task DoShowBindAllDialog(InteractionContext<(ConfigViewModel model, Microcontroller microcontroller, Output output, DirectInput input), BindAllWindowViewModel> interaction)
+        {
+            var model = new BindAllWindowViewModel(interaction.Input.model, interaction.Input.microcontroller, interaction.Input.output, interaction.Input.input);
+            var dialog = new BindAllWindow()
+            {
+                DataContext = model
+            };
+            await dialog.ShowDialog<BindAllWindowViewModel?>((Window) VisualRoot!);
             interaction.SetOutput(model);
         }
     }

@@ -60,6 +60,10 @@
         <DependentUpon>AreYouSureDialog.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\BindAllDialog.axaml.cs">
+        <DependentUpon>BindAllDialog.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
     <ItemGroup>
       <Reference Include="Avalonia.Themes.Fluent">

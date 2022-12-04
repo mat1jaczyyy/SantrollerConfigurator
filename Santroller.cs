@@ -183,6 +183,11 @@ public class Santroller : ConfigurableUsbDevice
         _ = Dispatcher.UIThread.InvokeAsync(() => Tick(model));
     }
 
+    public void cancelDetection()
+    {
+        _picking = false;
+    }
+
     public async Task<int> DetectPin(bool analog, int original, Microcontroller microcontroller)
     {
         _picking = true;
@@ -209,9 +214,9 @@ public class Santroller : ConfigurableUsbDevice
 
         if (analog)
         {
-            var pins = microcontroller.AnalogPins.Except(importantPins);
+            var pins = microcontroller.AnalogPins.Except(importantPins).ToList();
             var analogVals = new Dictionary<int, int>();
-            while (true)
+            while (_picking)
             {
                 foreach (var pin in pins)
                 {
@@ -235,6 +240,8 @@ public class Santroller : ConfigurableUsbDevice
 
                 await Task.Delay(100);
             }
+
+            return original;
         }
 
         var allPins = microcontroller.GetAllPins(false).Except(importantPins)
@@ -242,7 +249,7 @@ public class Santroller : ConfigurableUsbDevice
         var ports = microcontroller.GetPortsForTicking(allPins);
 
         Dictionary<int, byte> tickedPorts = new();
-        while (true)
+        while (_picking)
         {
             foreach (var (port, mask) in ports)
             {
@@ -254,7 +261,9 @@ public class Santroller : ConfigurableUsbDevice
                     {
                         Dictionary<int, bool> outPins = new();
                         // Xor the old and new values to work out what changed, and then return the first changed bit
-                        microcontroller.PinsFromPortMask(port, mask, (byte) (pins ^ tickedPorts[port]), outPins);
+                        // Note that we also need to invert this, as pinsFromPortMask is configured assuming a pull up is in place,
+                        // Which would then be expecting a zero for a active pin and a 1 for a inactive pin.
+                        microcontroller.PinsFromPortMask(port, mask, (byte) ~(pins ^ tickedPorts[port]), outPins);
                         return outPins.First(s => s.Value).Key;
                     }
                 }
@@ -264,6 +273,7 @@ public class Santroller : ConfigurableUsbDevice
 
             await Task.Delay(100);
         }
+        return original;
     }
 
     public override string ToString()

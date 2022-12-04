@@ -411,7 +411,7 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public abstract SerializedOutput Serialize();
 
-    private Bitmap? GetImage(DeviceControllerType type)
+    public Bitmap? GetImage(DeviceControllerType type)
     {
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         string? bitmap = null;

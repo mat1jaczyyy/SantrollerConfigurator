@@ -42,6 +42,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             get;
         }
 
+        public Interaction<(ConfigViewModel model,  Microcontroller microcontroller, Output output, DirectInput input), BindAllWindowViewModel>
+            ShowBindAllDialog
+        {
+            get;
+        }
+        
+        public ICommand BindAllCommand { get; }
+
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
 
         public IScreen HostScreen { get; }
@@ -282,6 +290,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             ShowUnoShortDialog = new Interaction<Arduino, ShowUnoShortWindowViewModel?>();
             ShowYesNoDialog =
                 new Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>();
+            ShowBindAllDialog =
+                new Interaction<(ConfigViewModel model, Microcontroller microcontroller, Output output, DirectInput input), BindAllWindowViewModel>();
+            BindAllCommand = ReactiveCommand.CreateFromTask(BindAll);
             Main = screen;
             HostScreen = screen;
 
@@ -541,6 +552,18 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
         }
 
+        private async Task BindAll()
+        {
+            foreach (var binding in Bindings)
+            {
+                if (binding.Input?.InnermostInput() is not DirectInput direct) continue;
+                var response = await ShowBindAllDialog.Handle((this, MicroController!, binding, direct)).ToTask();
+                if (!response.Response)
+                {
+                    return;
+                }
+            }
+        }
         public void RemoveOutput(Output output)
         {
             output.Dispose();

@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:netCore="clr-namespace:GuitarConfiguratorSharp.NetCore"
+        xmlns:viewModels="clr-namespace:GuitarConfiguratorSharp.NetCore.ViewModels"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="GuitarConfiguratorSharp.NetCore.Views.BindAllWindow"
+        TransparencyLevelHint="AcrylicBlur"
+        WindowStartupLocation="CenterOwner"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="GuitarConfiguratorSharp"
+        Background="Transparent"
+        Width="800"
+        Height="600"
+        MinWidth="800"
+        MinHeight="600"
+        x:CompileBindings="True"
+        x:DataType="viewModels:BindAllWindowViewModel"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowState="Maximized">
+    <Panel>
+        <Panel.Resources>
+            <netCore:EnumToStringConverter x:Key="EnumToStringConverter" />
+            <netCore:PinToStringConverter x:Key="PinToStringConverter" />
+            <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
+            <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
+                <TextBlock x:CompileBindings="False">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource PinToStringConverter }">
+                            <Binding></Binding>
+                            <Binding Path="$parent[Panel].DataContext.Microcontroller"></Binding>
+                            <Binding Path="$parent[Panel].DataContext.Model"></Binding>
+                            <Binding Path="$parent[ComboBox].SelectedItem"></Binding>
+                            <Binding Path="$parent[Panel].DataContext.Output"></Binding>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+        </Panel.Resources>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="0.65" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        <Panel Margin="40">
+            <DockPanel HorizontalAlignment="Stretch">
+                <StackPanel Height="50" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
+                    <Button Margin="0 0 5 0" Command="{Binding YesCommand}" Content="Continue" Classes="accent"></Button>
+                    <Button Command="{Binding NoCommand}" Content="Abort"></Button>
+                </StackPanel>
+                <ScrollViewer>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Binding:"></Label>
+                            <Label Content="{Binding LocalisedName}"></Label>
+                        </StackPanel>
+                        <Image ToolTip.Tip="{Binding LocalisedName}"
+                               HorizontalAlignment="Center" Width="75"
+                               Source="{Binding Image}">
+                        </Image>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Input.Pin}"
+                                  Items="{Binding Input.AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}">
+                        </ComboBox>
+                        <Label IsVisible="{Binding IsAnalog}" Content="Move the axis you want to use"></Label>
+                        <Label IsVisible="{Binding !IsAnalog}" Content="Press the button you want to use"></Label>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Panel>
+    </Panel>
+</Window>

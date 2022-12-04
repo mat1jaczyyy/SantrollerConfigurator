@@ -14,7 +14,7 @@ public class AreYouSureWindowViewModel : ReactiveObject
 {
     public ICommand YesCommand { get; }
     public ICommand NoCommand { get; }
-    public Interaction<Unit, Unit> CloseWindowInteraction = new();
+    public readonly Interaction<Unit, Unit> CloseWindowInteraction = new();
     public bool Response { get; set; }
     public string YesText { get; }
     public string NoText { get; }
