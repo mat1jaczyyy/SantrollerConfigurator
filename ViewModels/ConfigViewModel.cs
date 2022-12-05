@@ -206,7 +206,22 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     case ControllerAxis axis:
                         types.Remove(axis.Type);
                         break;
+                    case DrumAxis axis:
+                        types.Remove(axis.Type);
+                        break;
                 }
+            }
+
+            if (_deviceControllerType == DeviceControllerType.Drum)
+            {
+                IEnumerable<DrumAxisType> difference = _rhythmType == RhythmType.GuitarHero
+                    ? DrumAxisTypeMethods.RbTypes().Except(DrumAxisTypeMethods.GhTypes())
+                    : DrumAxisTypeMethods.GhTypes().Except(DrumAxisTypeMethods.RbTypes()).ToHashSet();
+                Bindings.RemoveAll(Bindings.Where(s => s is DrumAxis axis && difference.Contains(axis.Type)));
+            }
+            else
+            {
+                Bindings.RemoveAll(Bindings.Where(s => s is DrumAxis));
             }
 
             if (_deviceControllerType == DeviceControllerType.TurnTable)
@@ -215,26 +230,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 {
                     Bindings.Add(new DjCombinedOutput(this, MicroController!));
                 }
-
-                var combined = Bindings.OfType<DjCombinedOutput>().First();
-                var outputs = combined.Outputs;
-                foreach (var output in outputs)
-                {
-                    switch (output)
-                    {
-                        case ControllerButton button:
-                            types.Remove(button.Type);
-                            break;
-                        case ControllerAxis axis:
-                            types.Remove(axis.Type);
-                            break;
-                    }
-                }
-            }
-
-            if (_deviceControllerType == DeviceControllerType.TurnTable && !Bindings.Any(s => s is DjCombinedOutput))
-            {
-                Bindings.Add(new DjCombinedOutput(this, MicroController!));
             }
 
             foreach (var type in types)
@@ -248,7 +243,13 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         break;
                     case StandardAxisType axisType:
                         Bindings.Add(new ControllerAxis(this,
-                            new DirectInput(0, DevicePinMode.Analog, this, MicroController!),
+                            new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
+                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                            0, axisType));
+                        break;
+                    case DrumAxisType axisType:
+                        Bindings.Add(new DrumAxis(this,
+                            new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
                             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, axisType));
                         break;
