@@ -93,35 +93,6 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {new(DeviceControllerType.TurnTable, null, StandardButtonType.Start), "Start Button"},
                 {new(DeviceControllerType.TurnTable, null, StandardButtonType.Select), "Select Button"},
                 {new(DeviceControllerType.TurnTable, null, StandardButtonType.Home), "Home Button"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.A), "Green Drum"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.B), "Red Drum"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Y), "Yellow Drum"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.X), "Blue Cymbal"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Lb), "Kick Pedal"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Rb), "Orange Cymbal"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Up), "D-pad Up"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Down), "D-pad Down"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Left), "D-pad Left"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Right), "D-pad Right"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Start), "Start Button"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Select), "Select Button"},
-                {new(DeviceControllerType.Drum, RhythmType.GuitarHero, StandardButtonType.Home), "Home Button"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.A), "Green Drum"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.B), "Red Drum"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Y), "Yellow Drum"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.X), "Blue Drum"},
-                // {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.A | StandardButtonType.RightClick ), "Green Cymbal"},
-                // {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Y | StandardButtonType.RightClick ), "Yellow Cymbal"},
-                // {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.X | StandardButtonType.RightClick ), "Blue Cymbal"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Lb), "Kick Pedal"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.LeftStick), "Hi-Hat Pedal"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Up), "D-pad Up"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Down), "D-pad Down"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Left), "D-pad Left"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Right), "D-pad Right"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Start), "Start Button"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Select), "Select Button"},
-                {new(DeviceControllerType.Drum, RhythmType.RockBand, StandardButtonType.Home), "Home Button"},
                 {new(DeviceControllerType.Gamepad, null, StandardButtonType.A), "A Button"},
                 {new(DeviceControllerType.Gamepad, null, StandardButtonType.B), "B Button"},
                 {new(DeviceControllerType.Gamepad, null, StandardButtonType.X), "X Button"},
@@ -180,26 +151,19 @@ public class ControllerEnumConverter : IMultiValueConverter
 
         var deviceControllerType = (DeviceControllerType) values[1]!;
         var rhythmType = (RhythmType) values[2]!;
-        if (values[0] is StandardAxisType axis)
+        switch (values[0])
         {
-            return GetAxisText(deviceControllerType, rhythmType, axis);
-        }
-
-        if (values[0] is StandardButtonType button)
-        {
-            return GetButtonText(deviceControllerType, rhythmType, button);
+            case StandardAxisType axis:
+                return GetAxisText(deviceControllerType, rhythmType, axis);
+            case StandardButtonType button:
+                return GetButtonText(deviceControllerType, rhythmType, button);
         }
 
         var valueType = values[0]!.GetType();
         var fieldInfo = valueType.GetField(values[0]!.ToString()!, BindingFlags.Static | BindingFlags.Public)!;
         var attributes = (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
-        if (attributes.Length > 0)
-        {
-            return attributes[0].Description;
-        }
-
-        return fieldInfo.Name;
+        return attributes.Length > 0 ? attributes[0].Description : fieldInfo.Name;
     }
 
     public static IEnumerable<object> GetTypes((DeviceControllerType, RhythmType) arg)

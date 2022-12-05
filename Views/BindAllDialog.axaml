@@ -52,8 +52,8 @@
         <Panel Margin="40">
             <DockPanel HorizontalAlignment="Stretch">
                 <StackPanel Height="50" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
-                    <Button Margin="0 0 5 0" Command="{Binding YesCommand}" Content="Continue" Classes="accent"></Button>
-                    <Button Command="{Binding NoCommand}" Content="Abort"></Button>
+                    <Button Margin="0 0 5 0" Command="{Binding ContinueCommand}" Content="Continue" Classes="accent"></Button>
+                    <Button Command="{Binding AbortCommand}" Content="Abort"></Button>
                 </StackPanel>
                 <ScrollViewer>
                     <StackPanel>

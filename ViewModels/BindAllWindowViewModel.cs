@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Web;
@@ -21,8 +22,8 @@ public class BindAllWindowViewModel : ReactiveObject
     public DirectInput Input { get; }
 
     public Microcontroller Microcontroller { get; }
-    public ICommand YesCommand { get; }
-    public ICommand NoCommand { get; }
+    public ICommand ContinueCommand { get; }
+    public ICommand AbortCommand { get; }
     public readonly Interaction<Unit, Unit> CloseWindowInteraction = new();
     public bool Response { get; set; }
     public bool IsAnalog { get; }
@@ -31,6 +32,8 @@ public class BindAllWindowViewModel : ReactiveObject
     public Bitmap? Image { get; }
 
     private volatile bool _picking = true;
+
+    private Santroller? _santroller;
 
     public BindAllWindowViewModel(ConfigViewModel model, Microcontroller microcontroller, Output output,
         DirectInput input)
@@ -43,40 +46,32 @@ public class BindAllWindowViewModel : ReactiveObject
         Image = output.GetImage(model.DeviceType);
         LocalisedName = output.GetName(model.DeviceType, model.RhythmType);
 
+        ContinueCommand = ReactiveCommand.CreateFromObservable(() => Close(true));
+        AbortCommand = ReactiveCommand.CreateFromObservable(() => Close(false));
+
         if (Model.Main.SelectedDevice is not Santroller santroller)
         {
             CloseWindowInteraction.Handle(new Unit());
+            _santroller = null;
             return;
         }
-        YesCommand = ReactiveCommand.CreateFromObservable(() =>
-        {
-            _picking = false;
-            santroller.cancelDetection();
-            Response = true;
-            return CloseWindowInteraction.Handle(new Unit());
-        });
-        NoCommand = ReactiveCommand.CreateFromObservable(() =>
-        {
-            _picking = false;
-            santroller.cancelDetection();
-            Response = false;
-            return CloseWindowInteraction.Handle(new Unit());
-        });
+
+        _santroller = santroller;
         Task.Run(async () =>
         {
             while (_picking)
             {
-                try
-                {
-                    input.Pin = await santroller.DetectPin(IsAnalog, input.Pin, Microcontroller);
-                    await Task.Delay(100);
-                    Console.WriteLine(_picking);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
+                input.Pin = await santroller.DetectPin(IsAnalog, input.Pin, Microcontroller);
+                await Task.Delay(100);
             }
         });
+    }
+
+    private IObservable<Unit> Close(bool response)
+    {
+        _picking = false;
+        _santroller?.cancelDetection();
+        Response = response;
+        return CloseWindowInteraction.Handle(new Unit());
     }
 }
