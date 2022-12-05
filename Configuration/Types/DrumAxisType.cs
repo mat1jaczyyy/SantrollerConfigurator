@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Types;
 
@@ -46,5 +47,19 @@ public static class DrumAxisTypeMethods
     public static IEnumerable<DrumAxisType> GetTypeFor(RhythmType type)
     {
         return type == RhythmType.GuitarHero ? GhTypes() : RbTypes();
+    }
+
+    public static IEnumerable<DrumAxisType> GetInvalidTypesFor(RhythmType type)
+    {
+        return type == RhythmType.GuitarHero ? RbTypes() : GhTypes();
+    }
+
+    public static IEnumerable<DrumAxisType> GetDifferenceFor(RhythmType rhythmType)
+    {
+        return GetInvalidTypesFor(rhythmType).Except(GetTypeFor(rhythmType));
+    }
+    public static IEnumerable<DrumAxisType> GetDifferenceInverseFor(RhythmType rhythmType)
+    {
+        return GetTypeFor(rhythmType).Except(GetInvalidTypesFor(rhythmType));
     }
 }

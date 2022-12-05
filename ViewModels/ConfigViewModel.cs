@@ -191,6 +191,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
             if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput))
             {
+                Bindings.OfType<WiiCombinedOutput>().First().UpdateBindings();
                 return;
             }
 
@@ -214,9 +215,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             if (_deviceControllerType == DeviceControllerType.Drum)
             {
-                IEnumerable<DrumAxisType> difference = _rhythmType == RhythmType.GuitarHero
-                    ? DrumAxisTypeMethods.RbTypes().Except(DrumAxisTypeMethods.GhTypes())
-                    : DrumAxisTypeMethods.GhTypes().Except(DrumAxisTypeMethods.RbTypes()).ToHashSet();
+                IEnumerable<DrumAxisType> difference = DrumAxisTypeMethods.GetDifferenceFor(_rhythmType).ToHashSet();
                 Bindings.RemoveAll(Bindings.Where(s => s is DrumAxis axis && difference.Contains(axis.Type)));
             }
             else
