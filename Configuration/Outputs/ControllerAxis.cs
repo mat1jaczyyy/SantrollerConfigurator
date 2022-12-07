@@ -18,8 +18,8 @@ public class ControllerAxis : OutputAxis
         {StandardAxisType.LeftTrigger, "axis[4]"},
         {StandardAxisType.RightTrigger, "axis[5]"},
         {StandardAxisType.AccelerationX, "accel[0]"},
-        {StandardAxisType.AccelerationY, "accel[1]"},
-        {StandardAxisType.AccelerationZ, "accel[2]"},
+        {StandardAxisType.AccelerationZ, "accel[1]"},
+        {StandardAxisType.AccelerationY, "accel[2]"},
     };
 
     private static readonly Dictionary<StandardAxisType, string> MappingsXbox = new()
@@ -56,13 +56,10 @@ public class ControllerAxis : OutputAxis
 
     protected override string GenerateOutput(bool xbox)
     {
-        if (xbox)
-        {
-            if (!MappingsXbox.ContainsKey(Type)) return "";
-            return "report->" + MappingsXbox[Type];
-        }
+        if (!xbox) return "report->" + Mappings[Type];
+        if (!MappingsXbox.ContainsKey(Type)) return "";
+        return "report->" + MappingsXbox[Type];
 
-        return "report->" + Mappings[Type];
     }
 
     public override bool IsCombined => false;

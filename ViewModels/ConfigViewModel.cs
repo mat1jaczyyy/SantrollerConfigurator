@@ -250,7 +250,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         Bindings.Add(new DrumAxis(this,
                             new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
                             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
-                            0, axisType));
+                            0, 64, 10, axisType));
                         break;
                 }
             }
@@ -700,7 +700,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 {
                     var generatedInput = input.Generate(xbox);
                     if (input == null) throw new IncompleteConfigurationException("Missing input!");
-                    if (output is not OutputButton) continue;
+                    if (output is not OutputButton and not DrumAxis) continue;
 
                     if (output.Input is MacroInput)
                     {
@@ -739,7 +739,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         var generatedInput = input.Generate(xbox);
                         var index = new List<int> {0};
                         var extra = "";
-                        if (output is OutputButton)
+                        if (output is OutputButton or DrumAxis)
                         {
                             index = new List<int> {debounces[output.Name]};
                             if (output.Input is MacroInput)

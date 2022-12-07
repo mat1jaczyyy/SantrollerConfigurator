@@ -115,6 +115,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.GuitarJoystickY, StandardAxisType.LeftStickY},
         {WiiInputType.GuitarWhammy, StandardAxisType.RightStickX}
     };
+
     private static readonly Dictionary<WiiInputType, DrumAxisType> DrumAxisGh = new()
     {
         {WiiInputType.DrumGreenPressure, DrumAxisType.Green},
@@ -125,6 +126,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.DrumKickPedal, DrumAxisType.Kick},
         // {WiiInputType.DrumHiHatPedal, DrumAxisType.Kick2},
     };
+
     private static readonly Dictionary<WiiInputType, DrumAxisType> DrumAxisRb = new()
     {
         {WiiInputType.DrumGreenPressure, DrumAxisType.Green},
@@ -174,11 +176,11 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
         foreach (var pair in Axis)
         {
-            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model,_microcontroller, Sda, Scl, true),
+            _outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
                 Colors.Transparent,
                 Colors.Transparent, Array.Empty<byte>(), -30000, 30000, 10, pair.Value));
         }
-        
+
         // _outputs.Add(new ControllerButton(Model,
         //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, Model,_microcontroller, Sda, Scl),
         //         AnalogToDigitalType.JoyLow, 32),
@@ -197,7 +199,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, Model,_microcontroller, Sda, Scl),
         //         AnalogToDigitalType.JoyLow, 32),
         //     Colors.Transparent, Colors.Transparent, null, 10, StandardButtonType.Down));
-        
+
         _outputs.Add(new ControllerAxis(Model,
             new WiiInput(WiiInputType.GuitarTapBar, Model, _microcontroller, Sda, Scl, true),
             Colors.Transparent,
@@ -209,7 +211,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         foreach (var pair in Tap)
         {
-            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true), Colors.Transparent,
+            _outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
+                Colors.Transparent,
                 Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
     }
@@ -241,7 +244,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType,
+        base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+            ps2ControllerType,
             wiiControllerType);
         if (!wiiControllerType.Any())
         {
@@ -250,6 +254,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             this.RaisePropertyChanged(nameof(DetectedType));
             return;
         }
+
         var type = BitConverter.ToUInt16(wiiControllerType);
         var newType = ControllerTypeById.GetValueOrDefault(type);
         if (newType == _detectedType) return;
@@ -266,24 +271,31 @@ public class WiiCombinedOutput : CombinedTwiOutput
             {
                 foreach (var pair in Model.RhythmType == RhythmType.GuitarHero ? DrumAxisGh : DrumAxisRb)
                 {
-                    _outputs.Add(new DrumAxis(Model, new WiiInput(pair.Key, Model,_microcontroller, Sda, Scl, true),
+                    _outputs.Add(new DrumAxis(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
                         Colors.Transparent,
-                        Colors.Transparent, Array.Empty<byte>(), -30000, 30000, 10, pair.Value));
+                        Colors.Transparent, Array.Empty<byte>(), -30000, 30000, 10, 64, 10, pair.Value));
                 }
             }
 
-            var first = (_outputs.First(s => s.Input is WiiInput {Input: WiiInputType.DrumOrangePressure}) as DrumAxis)!;
+            var first = (_outputs.First(s => s.Input is WiiInput
+            {
+                Input: WiiInputType.DrumOrangePressure
+            }) as DrumAxis)!;
             _outputs.Remove(first);
             // Rb maps orange to green, while gh maps orange to orange
             if (Model.RhythmType == RhythmType.GuitarHero)
             {
-                _outputs.Add(new DrumAxis(Model, new WiiInput(WiiInputType.DrumOrangePressure, Model,_microcontroller, Sda, Scl, true),
-                    first.LedOn, first.LedOff, first.LedIndices, first.Min, first.Max, first.DeadZone, DrumAxisType.Orange));
+                _outputs.Add(new DrumAxis(Model,
+                    new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
+                    first.LedOn, first.LedOff, first.LedIndices, first.Min, first.Max, first.DeadZone, 64, 10,
+                    DrumAxisType.Orange));
             }
             else
             {
-                _outputs.Add(new DrumAxis(Model, new WiiInput(WiiInputType.DrumOrangePressure, Model,_microcontroller, Sda, Scl, true),
-                    first.LedOn, first.LedOff, first.LedIndices, first.Min, first.Max, first.DeadZone, DrumAxisType.Green));
+                _outputs.Add(new DrumAxis(Model,
+                    new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
+                    first.LedOn, first.LedOff, first.LedIndices, first.Min, first.Max, first.DeadZone, 64, 10,
+                    DrumAxisType.Green));
             }
         }
         else

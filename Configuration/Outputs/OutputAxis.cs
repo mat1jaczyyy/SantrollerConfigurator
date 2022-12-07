@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing.Printing;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
@@ -16,11 +14,11 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
 public enum OutputAxisCalibrationState
 {
-    NONE,
-    MIN,
-    MAX,
-    DEADZONE,
-    LAST
+    None,
+    Min,
+    Max,
+    DeadZone,
+    Last
 }
 
 public abstract class OutputAxis : Output
@@ -121,13 +119,13 @@ public abstract class OutputAxis : Output
     {
         switch (_calibrationState)
         {
-            case OutputAxisCalibrationState.MIN:
+            case OutputAxisCalibrationState.Min:
                 Min = rawValue;
                 break;
-            case OutputAxisCalibrationState.MAX:
+            case OutputAxisCalibrationState.Max:
                 Max = rawValue;
                 break;
-            case OutputAxisCalibrationState.DEADZONE:
+            case OutputAxisCalibrationState.DeadZone:
                 var min = Math.Min(Min, Max);
                 var max = Math.Max(Min, Max);
                 var valRaw = rawValue;
@@ -174,9 +172,9 @@ public abstract class OutputAxis : Output
         }
 
         _calibrationState++;
-        if (_calibrationState == OutputAxisCalibrationState.LAST)
+        if (_calibrationState == OutputAxisCalibrationState.Last)
         {
-            _calibrationState = OutputAxisCalibrationState.NONE;
+            _calibrationState = OutputAxisCalibrationState.None;
         }
 
         ApplyCalibration(ValueRaw);
@@ -295,7 +293,7 @@ public abstract class OutputAxis : Output
     protected abstract string GenerateOutput(bool xbox);
     public override bool IsCombined => false;
     public override bool IsStrum => false;
-    private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.NONE;
+    private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.None;
     private readonly ObservableAsPropertyHelper<bool> _isDigitalToAnalog;
     public bool IsDigitalToAnalog => _isDigitalToAnalog.Value;
 
@@ -308,57 +306,25 @@ public abstract class OutputAxis : Output
     {
         return _calibrationState switch
         {
-            OutputAxisCalibrationState.MIN => MinCalibrationText(),
-            OutputAxisCalibrationState.MAX => MaxCalibrationText(),
-            OutputAxisCalibrationState.DEADZONE => "Set Deadzone",
+            OutputAxisCalibrationState.Min => MinCalibrationText(),
+            OutputAxisCalibrationState.Max => MaxCalibrationText(),
+            OutputAxisCalibrationState.DeadZone => "Set Deadzone",
             _ => null
         };
     }
 
     private const string Ps3GuitarTilt = "report->accel[0]";
 
-    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
+    protected string GenerateAssignment(bool xbox)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
-        if (shared) return "";
-        if (Input is FixedInput)
+        if (Input is FixedInput or DigitalToAnalog)
         {
-            return xbox ? $"{GenerateOutput(xbox)} = {Input.Generate(xbox)}" : "";
+            return Input.Generate(xbox);
         }
 
-        var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
-                         this is ControllerAxis {Type: StandardAxisType.RightStickY};
         var whammy = Model.DeviceType == DeviceControllerType.Guitar &&
                      this is ControllerAxis {Type: StandardAxisType.RightStickX};
-        var led = "";
-        if (AreLedsEnabled)
-        {
-            foreach (var index in LedIndices)
-            {
-                var ledRead = xbox ? $"{GenerateOutput(xbox)} << 8" : GenerateOutput(xbox);
-                led += $@"if (!ledState[{index}].select) {{
-                        {string.Join("", Model.LedType.GetColors(LedOn).Zip(Model.LedType.GetColors(LedOff), new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({ledRead})) >> 8));"))}
-                    }}";
-            }
-        }
-
-        if (Input is DigitalToAnalog)
-        {
-            // No calibration, we just want raw values here
-            if (!tiltForPs3)
-            {
-                return $"{GenerateOutput(xbox)} = {Input.Generate(xbox)};";
-            }
-
-            //Thanks to clone hero, we need to invert the tilt axis for only hid
-            var hidInput = (DigitalToAnalog) Input.Serialise().Generate(Model.MicroController!, Model);
-            hidInput.On = -hidInput.On;
-            hidInput.Off = -hidInput.Off;
-            var retPs3Dta = $"{Ps3GuitarTilt} = {Input.Generate(true)};";
-            var retHidDta = $"{GenerateOutput(xbox)} = {hidInput.Generate(xbox)};";
-            return $"if (consoleType == PS3) {{{retPs3Dta}}} else {{{retHidDta}}}";
-        }
-
         string function;
         var normal = false;
         if (xbox)
@@ -415,29 +381,70 @@ public abstract class OutputAxis : Output
         }
 
         var generated = Input.Generate(xbox);
-        var generatedPs3 = Input.Generate(true);
         if (Trigger && !InputIsUint)
         {
             generated += " + INT16_MAX";
-            generatedPs3 += " + INT16_MAX";
         }
 
         if (!Trigger && InputIsUint)
         {
             generated += " - INT16_MAX";
-            generatedPs3 += " - INT16_MAX";
         }
 
         var mulInt = (short) (multiplier * 1024);
-        var ret = normal
-            ? $"{GenerateOutput(xbox)} = {function}({generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});"
-            : $"{GenerateOutput(xbox)} = {function}({generated}, {min}, {mulInt}, {DeadZone});";
-        if (!tiltForPs3) return ret + led;
+        return normal
+            ? $"{function}({generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
+            : $"{function}({generated}, {min}, {mulInt}, {DeadZone})";
+    }
+
+    protected string CalculateLeds(bool xbox)
+    {
+        var led = "";
+        if (AreLedsEnabled)
+        {
+            foreach (var index in LedIndices)
+            {
+                var ledRead = xbox ? $"{GenerateOutput(xbox)} << 8" : GenerateOutput(xbox);
+                led += $@"if (!ledState[{index}].select) {{
+                        {string.Join("", Model.LedType.GetColors(LedOn).Zip(Model.LedType.GetColors(LedOff), new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({ledRead})) >> 8));"))}
+                    }}";
+            }
+        }
+
+        return led;
+    }
+    
+    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
+    {
+        if (Input == null) throw new IncompleteConfigurationException("Missing input!");
+        if (shared) return "";
+        if (Input is FixedInput)
+        {
+            return $"{GenerateOutput(xbox)} = {GenerateAssignment(xbox)}";
+        }
+
+        var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
+                         this is ControllerAxis {Type: StandardAxisType.RightStickY};
+        var led = CalculateLeds(xbox);
+
+        if (!tiltForPs3 || xbox) return $"{GenerateOutput(xbox)} = {GenerateAssignment(xbox)}; {led}";
+        // if (Input is DigitalToAnalog)
+        // {
+            //Thanks to clone hero, we need to invert the tilt axis for only hid
+            // var hidInput = (DigitalToAnalog) Input.Serialise().Generate(Model.MicroController!, Model);
+            // hidInput.On = -hidInput.On;
+            // hidInput.Off = -hidInput.Off;
+        //     var retPs3Dta = $"{Ps3GuitarTilt} = {Input.Generate(true)};";
+        //     var retHidDta = $"{GenerateOutput(xbox)} = -{Input.Generate(xbox)};";
+        //     return $"if (consoleType == PS3) {{{retPs3Dta}}} else {{{retHidDta}}} {led}";
+        // }
+        
+        //Thanks to clone hero, we need to invert the tilt axis for only hid
         //Funnily enough, we actually want the xbox version, as the tilt axis is 16 bit
-        var retPs3Gh =
-            normal
-                ? $"{Ps3GuitarTilt} = {function}({generatedPs3}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone});"
-                : $"{Ps3GuitarTilt} = {function}({generatedPs3}, {min}, {mulInt}, {DeadZone});";
-        return $"if (consoleType == PS3) {{{retPs3Gh}}} else {{{ret}}} {led}";
+        return $@"if (consoleType == PS3) {{
+            {Ps3GuitarTilt} = {GenerateAssignment(true)};
+        }} else {{
+            {GenerateOutput(xbox)} = -{GenerateAssignment(xbox)};
+        }} {led}";
     }
 }
