@@ -53,6 +53,11 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                    <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsDfu}"
+                              SelectedItem="{Binding Main.UnoMegaType}"
+                              Items="{Binding Main.UnoMegaTypes}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}">
+                    </ComboBox>
                     <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsMega}"
                               SelectedItem="{Binding Main.MegaType}"
                               Items="{Binding Main.MegaTypes}"

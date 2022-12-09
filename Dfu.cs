@@ -66,7 +66,25 @@ public class Dfu : IConfigurableDevice
 
     public async Task LoadConfiguration(ConfigViewModel model)
     {
-        await model.SetDefaults(Board.FindMicrocontroller(Board));
+        Board board = Board;
+        if (Board.ArdwiinoName == "usb")
+        {
+            switch (model.Main.UnoMegaType)
+            {
+                case UnoMegaType.Uno:
+                    board = Board.Uno;
+                    break;
+                case UnoMegaType.MegaAdk:
+                    board = Board.MegaBoards[1];
+                    break;
+                case UnoMegaType.Mega:
+                    board = Board.MegaBoards[0];
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        await model.SetDefaults(Board.FindMicrocontroller(board));
     }
 
     public Task<string?> GetUploadPort()

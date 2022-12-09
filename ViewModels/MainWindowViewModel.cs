@@ -52,6 +52,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private readonly ObservableAsPropertyHelper<bool> _isMega;
         public bool IsMega => _isMega.Value;
 
+        private readonly ObservableAsPropertyHelper<bool> _isDfu;
+        public bool IsDfu => _isDfu.Value;
+
         private readonly ObservableAsPropertyHelper<bool> _newDevice;
         public bool NewDevice => _newDevice.Value;
 
@@ -60,8 +63,17 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public IEnumerable<Arduino32U4Type> Arduino32U4Types => Enum.GetValues<Arduino32U4Type>();
         public IEnumerable<MegaType> MegaTypes => Enum.GetValues<MegaType>();
+        public IEnumerable<UnoMegaType> UnoMegaTypes => Enum.GetValues<UnoMegaType>();
         public IEnumerable<Board> PicoTypes => Board.Rp2040Boards;
         public IEnumerable<DeviceInputType> DeviceInputTypes => Enum.GetValues<DeviceInputType>();
+
+        private UnoMegaType _unoMegaType;
+
+        public UnoMegaType UnoMegaType
+        {
+            get => _unoMegaType;
+            set => this.RaiseAndSetIfChanged(ref _unoMegaType, value);
+        }
 
         private MegaType _megaType;
 
@@ -245,6 +257,9 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             _isMega = this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is Arduino arduino && arduino.IsMega())
                 .ToProperty(this, s => s.IsMega);
+            _isDfu = this.WhenAnyValue(x => x.SelectedDevice)
+                .Select(s => s is Dfu)
+                .ToProperty(this, s => s.IsDfu);
             _newDevice = this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s != null && s is not Ardwiino && s is not Santroller)
                 .ToProperty(this, s => s.NewDevice);

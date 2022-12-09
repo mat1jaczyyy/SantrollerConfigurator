@@ -189,14 +189,14 @@ public abstract class AvrController : Microcontroller
         }
 
         var ret = "uint8_t oldSREG = SREG;cli();";
-        foreach (var port in portByPort)
-        {
-            ret += $"PORT{port.Key} = {port.Value};";
-        }
 
         foreach (var port in ddrByPort)
         {
             ret += $"DDR{port.Key} = {port.Value};";
+        }
+        foreach (var port in portByPort)
+        {
+            ret += $"PORT{port.Key} = {port.Value};";
         }
 
         ret += "SREG = oldSREG;";
