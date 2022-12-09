@@ -20,6 +20,7 @@ public class ControllerAxis : OutputAxis
         {StandardAxisType.AccelerationX, "accel[0]"},
         {StandardAxisType.AccelerationZ, "accel[1]"},
         {StandardAxisType.AccelerationY, "accel[2]"},
+        {StandardAxisType.Gyro, "accel[3]"},
     };
 
     private static readonly Dictionary<StandardAxisType, string> MappingsXbox = new()
@@ -33,7 +34,8 @@ public class ControllerAxis : OutputAxis
     };
 
 
-    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
+    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
+        int max,
         int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
         type.ToString(), (s) => IsTrigger(s, type))
     {
@@ -42,12 +44,14 @@ public class ControllerAxis : OutputAxis
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return ControllerEnumConverter.GetAxisText(deviceControllerType, rhythmType, Enum.Parse<StandardAxisType>(Name)) ?? Name;
+        return ControllerEnumConverter.GetAxisText(deviceControllerType, rhythmType,
+            Enum.Parse<StandardAxisType>(Name)) ?? Name;
     }
 
     public static bool IsTrigger(DeviceControllerType s, StandardAxisType type)
     {
-        return (s is DeviceControllerType.Guitar && type is StandardAxisType.RightStickX) ||
+        return (s is DeviceControllerType.Guitar && type is StandardAxisType.RightStickX)
+               || (s is DeviceControllerType.LiveGuitar && type is StandardAxisType.RightStickY) ||
                type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
     }
 
@@ -56,10 +60,28 @@ public class ControllerAxis : OutputAxis
 
     protected override string GenerateOutput(bool xbox)
     {
-        if (!xbox) return "report->" + Mappings[Type];
+        if (!xbox)
+        {
+            if (Model.DeviceType == DeviceControllerType.TurnTable)
+            {
+                switch (Type)
+                {
+                    case StandardAxisType.LeftStickX:
+                        return "report->" + Mappings[StandardAxisType.RightStickX];
+                    case StandardAxisType.LeftStickY:
+                        return "report->" + Mappings[StandardAxisType.RightStickY];
+                    case StandardAxisType.RightStickX:
+                        return "report->" + Mappings[StandardAxisType.AccelerationX];
+                    case StandardAxisType.RightStickY:
+                        return "report->" + Mappings[StandardAxisType.AccelerationZ];
+                }
+            }
+
+            return "report->" + Mappings[Type];
+        }
+
         if (!MappingsXbox.ContainsKey(Type)) return "";
         return "report->" + MappingsXbox[Type];
-
     }
 
     public override bool IsCombined => false;
@@ -68,6 +90,10 @@ public class ControllerAxis : OutputAxis
     {
         switch (Model.DeviceType)
         {
+            case DeviceControllerType.LiveGuitar when Type is StandardAxisType.RightStickY:
+                return "Release the whammy";
+            case DeviceControllerType.LiveGuitar when Type is StandardAxisType.RightStickX:
+                return "Leave the guitar in a neutral position";
             case DeviceControllerType.Guitar when Type is StandardAxisType.RightStickX:
                 return "Release the whammy";
             case DeviceControllerType.Guitar when Type is StandardAxisType.RightStickY:
@@ -94,6 +120,10 @@ public class ControllerAxis : OutputAxis
     {
         switch (Model.DeviceType)
         {
+            case DeviceControllerType.LiveGuitar when Type is StandardAxisType.RightStickX:
+                return "Tilt the guitar up";
+            case DeviceControllerType.LiveGuitar when Type is StandardAxisType.RightStickY:
+                return "Push the whammy all the way in";
             case DeviceControllerType.Guitar when Type is StandardAxisType.RightStickX:
                 return "Push the whammy all the way in";
             case DeviceControllerType.Guitar when Type is StandardAxisType.RightStickY:
@@ -130,5 +160,9 @@ public class ControllerAxis : OutputAxis
     {
         return new SerializedControllerAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices, Min, Max,
             DeadZone);
+    }
+
+    public override void UpdateBindings()
+    {
     }
 }

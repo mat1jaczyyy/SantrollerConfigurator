@@ -14,17 +14,6 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 
 public class DjCombinedOutput : CombinedTwiOutput
 {
-    private static readonly Dictionary<DjInputType, StandardButtonType> Buttons = new()
-    {
-        {DjInputType.LeftAny, StandardButtonType.Lb},
-        {DjInputType.LeftGreen, StandardButtonType.A},
-        {DjInputType.LeftRed, StandardButtonType.B},
-        {DjInputType.LeftBlue, StandardButtonType.X},
-        {DjInputType.RightAny, StandardButtonType.Rb},
-        {DjInputType.RightGreen, StandardButtonType.A},
-        {DjInputType.RightRed, StandardButtonType.B},
-        {DjInputType.RightBlue, StandardButtonType.X},
-    };
 
     private readonly Microcontroller _microcontroller;
     private readonly AvaloniaList<Output> _outputs = new();
@@ -47,15 +36,21 @@ public class DjCombinedOutput : CombinedTwiOutput
     public void CreateDefaults()
     {
         _outputs.Clear();
-        _outputs.AddRange(Buttons.Select(pair => new ControllerButton(Model,
-            new DjInput(pair.Key, Model, _microcontroller, combined: true),
-            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 5, pair.Value)));
+        
+        _outputs.AddRange(DjInputTypes.Select(button => new DjButton(Model,
+            new DjInput(button, Model, _microcontroller, combined: true),
+            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 5, button)));
         _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickX));
-        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurnable, Model, _microcontroller, combined: true),
+        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurntable, Model, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickY));
+    }
+
+    public override void UpdateBindings()
+    {
+        
     }
 
     public override SerializedOutput Serialize()

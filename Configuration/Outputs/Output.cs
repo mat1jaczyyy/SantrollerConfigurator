@@ -512,4 +512,6 @@ public abstract class Output : ReactiveObject, IDisposable
     {
         this.RaisePropertyChanged(nameof(ErrorText));
     }
+
+    public abstract void UpdateBindings();
 }

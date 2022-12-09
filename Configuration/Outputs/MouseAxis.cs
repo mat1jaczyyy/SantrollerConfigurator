@@ -26,6 +26,10 @@ public class MouseAxis : OutputAxis
     public override bool IsKeyboard => true;
     public override bool IsController => false;
     public override bool IsMidi => false;
+    public override void UpdateBindings()
+    {
+    }
+
     public MouseAxisType Type { get; }
 
     protected override string GenerateOutput(bool xbox)

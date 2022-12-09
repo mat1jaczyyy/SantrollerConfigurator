@@ -188,10 +188,13 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         private void UpdateBindings()
         {
+            foreach (var binding in Bindings)
+            {
+                binding.UpdateBindings();
+            }
             // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
             if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput))
             {
-                Bindings.OfType<WiiCombinedOutput>().First().UpdateBindings();
                 return;
             }
 
@@ -383,13 +386,16 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public async Task SetDefaults(Microcontroller microcontroller)
         {
+            ClearOutputs();
             MicroController = microcontroller;
             LedType = LedType.None;
-            DeviceType = DeviceControllerType.Gamepad;
-            EmulationType = EmulationType.Controller;
-            RhythmType = RhythmType.GuitarHero;
+            _deviceControllerType = DeviceControllerType.Gamepad;
+            _emulationType = EmulationType.Controller;
+            _rhythmType = RhythmType.GuitarHero;
+            this.RaisePropertyChanged(nameof(DeviceType));
+            this.RaisePropertyChanged(nameof(EmulationType));
+            this.RaisePropertyChanged(nameof(RhythmType));
             XInputOnWindows = false;
-            ClearOutputs();
 
             switch (Main.DeviceInputType)
             {
@@ -463,12 +469,34 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         {
             if (_microController == null) return;
             var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
+            // GHL guitars require mapping the strum to left joy Y
+            if (DeviceType == DeviceControllerType.LiveGuitar)
+            {
+                foreach (var output in outputs)
+                {
+                    switch (output)
+                    {
+                        case ControllerButton {Type: StandardButtonType.Down}:
+                            outputs.Add(new ControllerAxis(this, new DigitalToAnalog(output.Input!, short.MaxValue, 0, this), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickY));
+                            break;
+                        case ControllerButton {Type: StandardButtonType.Up}:
+                            outputs.Add(new ControllerAxis(this, new DigitalToAnalog(output.Input!, short.MinValue, 0, this), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickY));
+                            break;
+                    }
+                }
+
+                
+            }
             var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
             var configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
             var lines = new List<string>();
-            var ledCount = outputs.SelectMany(s => s.Outputs).SelectMany(s => s.LedIndices).Max();
-            if (outputs.Any(s => s.LedIndices.Any())) ledCount++;
+            var leds = outputs.SelectMany(s => s.Outputs).SelectMany(s => s.LedIndices).ToList();
+            var ledCount = 0;
+            if (leds.Any())
+            {
+                ledCount = leds.Max() + 1;
+            }
             using (var outputStream = new MemoryStream())
             {
                 using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
@@ -679,7 +707,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             var groupedOutputs = outputs
                 .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
-                .GroupBy(s => s!.GetType()).ToList();
+                .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 
             Dictionary<string, int> debounces = new();
@@ -729,42 +757,47 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             }
 
             var seen = new HashSet<Output>();
+            var seenDebounce = new HashSet<int>();
             // Handle most mappings
-            var ret = groupedOutputs.Aggregate("", (current, group) => current + (group
-                .First().First
-                .GenerateAll(Bindings.ToList(), group.Select((s) =>
-                    {
-                        var input = s.First;
-                        var output = s.Second;
-                        var generatedInput = input.Generate(xbox);
-                        var index = new List<int> {0};
-                        var extra = "";
-                        if (output is OutputButton or DrumAxis)
+            var ret = groupedOutputs.Aggregate("", (current, group) =>
+            {
+                return current + (group
+                    .First().First.InnermostInput()
+                    .GenerateAll(Bindings.ToList(), group.Select((s) =>
                         {
-                            index = new List<int> {debounces[output.Name]};
-                            if (output.Input is MacroInput)
+                            var input = s.First;
+                            var output = s.Second;
+                            var generatedInput = input.Generate(xbox);
+                            var index = new List<int> {0};
+                            var extra = "";
+                            if (output is OutputButton or DrumAxis)
                             {
-                                if (shared)
+                                index = new List<int> {debounces[output.Name]};
+                                if (output.Input is MacroInput)
                                 {
-                                    output = output.Serialize().Generate(this, _microController);
-                                    output.Input = input;
-                                    index = new List<int> {debounces[output.Name + generatedInput]};
-                                }
-                                else
-                                {
-                                    if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
-                                    seen.Add(output);
-                                    index = output.Input!.Inputs()
-                                        .Select(s => debounces[output.Name + s.Generate(xbox)]).ToList();
+                                    if (shared)
+                                    {
+                                        output = output.Serialize().Generate(this, _microController);
+                                        output.Input = input;
+                                        index = new List<int> {debounces[output.Name + generatedInput]};
+                                    }
+                                    else
+                                    {
+                                        if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
+                                        seen.Add(output);
+                                        index = output.Input!.Inputs()
+                                            .Select(input1 => debounces[output.Name + input1.Generate(xbox)]).ToList();
+                                    }
                                 }
                             }
-                        }
 
-                        var generated = output.Generate(xbox, shared, index, combined, extra);
-                        return new Tuple<Input, string>(input, generated);
-                    })
-                    .Where(s => !string.IsNullOrEmpty(s.Item2))
-                    .ToList()) + ";"));
+                            var generated = output.Generate(xbox, shared, index, combined, extra);
+
+                            return new Tuple<Input, string>(input, generated);
+                        })
+                        .Where(s => !string.IsNullOrEmpty(s.Item2))
+                        .ToList()) + ";");
+            });
             // Flick off intersecting outputs when multiple buttons are pressed
             if (shared)
             {

@@ -44,7 +44,7 @@ public abstract class OutputButton : Output
             if (AreLedsEnabled && LedIndices.Any())
             {
                 leds += $@"if (!{ifStatement}) {{
-                        {LedIndices.Aggregate("", (s, index) => s += @$"if (ledState[{index}].select == 1) {{
+                        {LedIndices.Aggregate("", (s, index) => s + @$"if (ledState[{index}].select == 1) {{
                             ledState[{index}].select = 0; 
                             {string.Join("\n", Model.LedType.GetColors(LedOff).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))};
                         }}")}
@@ -86,5 +86,10 @@ public abstract class OutputButton : Output
         }
 
         return $"if (({Input.Generate(xbox)})) {{ {led2}; {reset}; }} {led}";
+    }
+
+    public override void UpdateBindings()
+    {
+        throw new NotImplementedException();
     }
 }

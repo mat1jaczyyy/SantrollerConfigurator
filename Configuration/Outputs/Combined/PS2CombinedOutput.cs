@@ -169,4 +169,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         this.RaisePropertyChanged(nameof(DetectedType));
 
     }
+
+    public override void UpdateBindings()
+    {
+    }
 }

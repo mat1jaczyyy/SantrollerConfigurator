@@ -36,7 +36,7 @@ public class DjInput : TwiInput
         {
             case DjInputType.LeftTurntable:
                 return "((int8_t)dj_left[2])";
-            case DjInputType.RightTurnable:
+            case DjInputType.RightTurntable:
                 return "((int8_t)dj_right[2])";
             case DjInputType.LeftAny:
                 return "dj_left[0]";
@@ -55,7 +55,7 @@ public class DjInput : TwiInput
         throw new InvalidOperationException("Shouldn't get here!");
     }
 
-    public override bool IsAnalog => Input <= DjInputType.RightTurnable;
+    public override bool IsAnalog => Input <= DjInputType.RightTurntable;
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
@@ -75,7 +75,7 @@ public class DjInput : TwiInput
             case DjInputType.LeftTurntable:
                 RawValue = (sbyte) djLeftRaw[2];
                 break;
-            case DjInputType.RightTurnable:
+            case DjInputType.RightTurntable:
                 RawValue = (sbyte) djRightRaw[2];
                 break;
             case DjInputType.LeftAny:

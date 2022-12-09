@@ -73,4 +73,8 @@ public class GhwtCombinedOutput : CombinedOutput
     }
 
     public override AvaloniaList<Output> Outputs => _outputs;
+
+    public override void UpdateBindings()
+    {
+    }
 }

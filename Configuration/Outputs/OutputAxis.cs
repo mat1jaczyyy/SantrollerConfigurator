@@ -380,16 +380,13 @@ public abstract class OutputAxis : Output
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
 
-        var generated = Input.Generate(xbox);
-        if (Trigger && !InputIsUint)
+        var generated = "(" + Input.Generate(xbox);
+        generated += Trigger switch
         {
-            generated += " + INT16_MAX";
-        }
-
-        if (!Trigger && InputIsUint)
-        {
-            generated += " - INT16_MAX";
-        }
+            true when !InputIsUint => ") + INT16_MAX",
+            false when InputIsUint => ") - INT16_MAX",
+            _ => ")"
+        };
 
         var mulInt = (short) (multiplier * 1024);
         return normal
@@ -413,7 +410,7 @@ public abstract class OutputAxis : Output
 
         return led;
     }
-    
+
     public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
@@ -430,15 +427,15 @@ public abstract class OutputAxis : Output
         if (!tiltForPs3 || xbox) return $"{GenerateOutput(xbox)} = {GenerateAssignment(xbox)}; {led}";
         // if (Input is DigitalToAnalog)
         // {
-            //Thanks to clone hero, we need to invert the tilt axis for only hid
-            // var hidInput = (DigitalToAnalog) Input.Serialise().Generate(Model.MicroController!, Model);
-            // hidInput.On = -hidInput.On;
-            // hidInput.Off = -hidInput.Off;
+        //Thanks to clone hero, we need to invert the tilt axis for only hid
+        // var hidInput = (DigitalToAnalog) Input.Serialise().Generate(Model.MicroController!, Model);
+        // hidInput.On = -hidInput.On;
+        // hidInput.Off = -hidInput.Off;
         //     var retPs3Dta = $"{Ps3GuitarTilt} = {Input.Generate(true)};";
         //     var retHidDta = $"{GenerateOutput(xbox)} = -{Input.Generate(xbox)};";
         //     return $"if (consoleType == PS3) {{{retPs3Dta}}} else {{{retHidDta}}} {led}";
         // }
-        
+
         //Thanks to clone hero, we need to invert the tilt axis for only hid
         //Funnily enough, we actually want the xbox version, as the tilt axis is 16 bit
         return $@"if (consoleType == PS3) {{
@@ -446,5 +443,9 @@ public abstract class OutputAxis : Output
         }} else {{
             {GenerateOutput(xbox)} = -{GenerateAssignment(xbox)};
         }} {led}";
+    }
+
+    public override void UpdateBindings()
+    {
     }
 }

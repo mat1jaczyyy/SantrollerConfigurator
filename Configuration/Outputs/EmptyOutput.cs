@@ -4,9 +4,11 @@ using System.Reactive.Linq;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
+using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
+using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -100,36 +102,49 @@ public class EmptyOutput : Output
         switch (Model.EmulationType)
         {
             case EmulationType.Controller:
-                if (value is SimpleType simpleType)
+                switch (value)
                 {
-                    switch (simpleType)
-                    {
-                        case SimpleType.WiiInputSimple:
-                            Model.Bindings.Add(new WiiCombinedOutput(Model, Model.MicroController!));
-                            break;
-                        case SimpleType.Gh5NeckSimple:
-                            Model.Bindings.Add(new Gh5CombinedOutput(Model, Model.MicroController!));
-                            break;
-                        case SimpleType.Ps2InputSimple:
-                            Model.Bindings.Add(new Ps2CombinedOutput(Model, Model.MicroController!));
-                            break;
-                        case SimpleType.WtNeckSimple:
-                            Model.Bindings.Add(new GhwtCombinedOutput(Model, Model.MicroController!));
-                            break;
-                        case SimpleType.DjTurntableSimple:
-                            Model.Bindings.Add(new DjCombinedOutput(Model, Model.MicroController!));
-                            break;
-                    }
-                }
-                else if (value is StandardAxisType standardAxisType)
-                {
-                    Model.Bindings.Add(new ControllerAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),short.MinValue, short.MaxValue, 0,
-                        standardAxisType));
-                }
-                else if (value is StandardButtonType standardButtonType)
-                {
-                    Model.Bindings.Add(new ControllerButton(Model, new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 5,
-                        standardButtonType));
+                    case SimpleType simpleType:
+                        switch (simpleType)
+                        {
+                            case SimpleType.WiiInputSimple:
+                                Model.Bindings.Add(new WiiCombinedOutput(Model, Model.MicroController!));
+                                break;
+                            case SimpleType.Gh5NeckSimple:
+                                Model.Bindings.Add(new Gh5CombinedOutput(Model, Model.MicroController!));
+                                break;
+                            case SimpleType.Ps2InputSimple:
+                                Model.Bindings.Add(new Ps2CombinedOutput(Model, Model.MicroController!));
+                                break;
+                            case SimpleType.WtNeckSimple:
+                                Model.Bindings.Add(new GhwtCombinedOutput(Model, Model.MicroController!));
+                                break;
+                            case SimpleType.DjTurntableSimple:
+                                Model.Bindings.Add(new DjCombinedOutput(Model, Model.MicroController!));
+                                break;
+                        }
+
+                        break;
+                    case StandardAxisType standardAxisType:
+                        Model.Bindings.Add(new ControllerAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),short.MinValue, short.MaxValue, 0,
+                            standardAxisType));
+                        break;
+                    case StandardButtonType standardButtonType:
+                        Model.Bindings.Add(new ControllerButton(Model, new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 5,
+                            standardButtonType));
+                        break;
+                    case DrumAxisType drumAxisType:
+                        Model.Bindings.Add(new DrumAxis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),short.MinValue, short.MaxValue, 0,
+                            1000, 10, drumAxisType));
+                        break;
+                    case Ps3AxisType ps3AxisType:
+                        Model.Bindings.Add(new PS3Axis(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),short.MinValue, short.MaxValue, 0,
+                            ps3AxisType));
+                        break;
+                    case DjInputType djInputType:
+                        Model.Bindings.Add(new DjButton(Model, new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model, Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),10,
+                            djInputType));
+                        break;
                 }
 
                 break;
@@ -156,6 +171,10 @@ public class EmptyOutput : Output
         Dispatcher.UIThread.InvokeAsync(() => Model.Bindings.Remove(this));
     }
     public override string ErrorText => "Input is not bound!";
+    public override void UpdateBindings()
+    {
+    }
+
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 

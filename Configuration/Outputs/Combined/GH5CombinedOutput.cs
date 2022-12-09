@@ -103,4 +103,8 @@ public class Gh5CombinedOutput : CombinedTwiOutput
             wiiControllerType);
         _detected = gh5Raw.Any();
     }
+
+    public override void UpdateBindings()
+    {
+    }
 }

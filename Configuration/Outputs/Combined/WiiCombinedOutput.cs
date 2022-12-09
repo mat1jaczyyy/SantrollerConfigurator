@@ -205,6 +205,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             Colors.Transparent,
             Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
             StandardAxisType.RightStickY));
+        UpdateBindings();
     }
 
     public void AddTapBarFrets()
@@ -263,7 +264,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         this.RaisePropertyChanged(nameof(DetectedType));
     }
 
-    public void UpdateBindings()
+    public override void UpdateBindings()
     {
         if (Model.DeviceType == DeviceControllerType.Drum)
         {

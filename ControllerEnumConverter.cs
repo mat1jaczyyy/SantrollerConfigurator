@@ -5,7 +5,9 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Avalonia.Data.Converters;
+using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
@@ -25,8 +27,8 @@ public class ControllerEnumConverter : IMultiValueConverter
             {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardAxisType.RightStickX), "Whammy Axis"},
             {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardAxisType.RightStickY), "Tilt Axis"},
             {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardAxisType.LeftTrigger), "Effects Switch"},
-            {new(DeviceControllerType.LiveGuitar, null, StandardAxisType.RightStickX), "Whammy Axis"},
-            {new(DeviceControllerType.LiveGuitar, null, StandardAxisType.RightStickY), "Tilt Axis"},
+            {new(DeviceControllerType.LiveGuitar, null, StandardAxisType.RightStickX), "Tilt Axis"},
+            {new(DeviceControllerType.LiveGuitar, null, StandardAxisType.RightStickY), "Whammy Axis"},
             {new(DeviceControllerType.TurnTable, null, StandardAxisType.RightStickX), "Crossfader"},
             {new(DeviceControllerType.TurnTable, null, StandardAxisType.RightStickY), "Effects knob"},
             {new(DeviceControllerType.TurnTable, null, StandardAxisType.LeftStickX), "Left Turntable Spin"},
@@ -82,7 +84,7 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Home), "Home Button"},
                 {new(DeviceControllerType.TurnTable, null, StandardButtonType.A), "Green Fret / A Button"},
                 {new(DeviceControllerType.TurnTable, null, StandardButtonType.B), "Red Fret / B Button"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Y), "Y/Euphoria Button"},
+                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Y), "Euphoria / Y Button"},
                 {new(DeviceControllerType.TurnTable, null, StandardButtonType.X), "Blue Fret / X Button"},
                 {new(DeviceControllerType.TurnTable, null, StandardButtonType.Lb), "Left Turntable Fret Flag"},
                 {new(DeviceControllerType.TurnTable, null, StandardButtonType.Rb), "Right Turntable Fret Flag"},
@@ -181,10 +183,18 @@ public class ControllerEnumConverter : IMultiValueConverter
     {
         var deviceControllerType = arg.Item1;
         RhythmType? rhythmType = arg.Item2;
-        IEnumerable<object> drumBindings = Enumerable.Empty<object>();
+        IEnumerable<object> otherBindings = Enumerable.Empty<object>();
         if (deviceControllerType is DeviceControllerType.Drum)
         {
-            drumBindings = DrumAxisTypeMethods.GetTypeFor(rhythmType.Value).Cast<object>();
+            otherBindings = DrumAxisTypeMethods.GetTypeFor(rhythmType.Value).Cast<object>();
+        }
+        if (deviceControllerType is DeviceControllerType.Gamepad)
+        {
+            otherBindings = Enum.GetValues<Ps3AxisType>().Cast<object>();
+        }
+        if (deviceControllerType is DeviceControllerType.TurnTable)
+        {
+            otherBindings = Enum.GetValues<DjInputType>().Where(s => s is not DjInputType.LeftTurntable or DjInputType.RightTurntable).Cast<object>();
         }
         if (deviceControllerType is not DeviceControllerType.Guitar)
             rhythmType = null;
@@ -193,7 +203,7 @@ public class ControllerEnumConverter : IMultiValueConverter
             or DeviceControllerType.Wheel or DeviceControllerType.FlightStick)
             deviceControllerType = DeviceControllerType.Gamepad;
         return Enum.GetValues<SimpleType>().Cast<object>()
-            .Concat(drumBindings)
+            .Concat(otherBindings)
             .Concat(Enum.GetValues<StandardAxisType>()
                 .Where(type => AxisLabels.ContainsKey(new(deviceControllerType, rhythmType, type))).Cast<object>())
             .Concat(Enum.GetValues<StandardButtonType>()

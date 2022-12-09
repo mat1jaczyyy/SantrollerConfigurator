@@ -12,4 +12,5 @@ public enum StandardAxisType
     AccelerationX,
     AccelerationY,
     AccelerationZ,
+    Gyro,
 }

@@ -255,6 +255,9 @@ public class DrumAxis : OutputAxis
     public override bool IsKeyboard => false;
     public override bool IsController => true;
     public override bool IsMidi => false;
+    public override void UpdateBindings()
+    {
+    }
 
     private int _threshold;
     private int _debounce;

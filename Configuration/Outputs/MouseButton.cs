@@ -22,6 +22,11 @@ public class MouseButton : OutputButton
     public override bool IsKeyboard => true;
     public override bool IsController => false;
     public override bool IsMidi => false;
+    public override void UpdateBindings()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public MouseButtonType Type { get; }
 
     public override string GenerateIndex(bool xbox)
