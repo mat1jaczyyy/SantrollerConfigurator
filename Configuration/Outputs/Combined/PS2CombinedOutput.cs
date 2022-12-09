@@ -64,6 +64,22 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {Ps2InputType.NegConL, StandardAxisType.LeftTrigger},
     };
 
+    public static readonly Dictionary<Ps2InputType, Ps3AxisType> Ps3Axis = new()
+    {
+        {Ps2InputType.Dualshock2UpButton, Ps3AxisType.UpButton},
+        {Ps2InputType.Dualshock2RightButton, Ps3AxisType.RightButton},
+        {Ps2InputType.Dualshock2LeftButton, Ps3AxisType.LeftButton},
+        {Ps2InputType.Dualshock2DownButton, Ps3AxisType.DownButton},
+        {Ps2InputType.Dualshock2L2, Ps3AxisType.L2},
+        {Ps2InputType.Dualshock2R2, Ps3AxisType.R2},
+        {Ps2InputType.Dualshock2L1, Ps3AxisType.L1},
+        {Ps2InputType.Dualshock2R1, Ps3AxisType.R1},
+        {Ps2InputType.Dualshock2Triangle, Ps3AxisType.Triangle},
+        {Ps2InputType.Dualshock2Circle, Ps3AxisType.Circle},
+        {Ps2InputType.Dualshock2Cross, Ps3AxisType.Cross},
+        {Ps2InputType.Dualshock2Square, Ps3AxisType.Square}
+    };
+
 
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
@@ -138,6 +154,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                 Colors.Transparent,
                 Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
         }
+        UpdateBindings();
     }
 
     public override SerializedOutput Serialize()
@@ -172,5 +189,17 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public override void UpdateBindings()
     {
+        if (Model.DeviceType == DeviceControllerType.Gamepad)
+        {
+            if (_outputs.Any(s => s is PS3Axis)) return;
+            foreach (var pair in Ps3Axis)
+            {
+                _outputs.Add(new PS3Axis(Model, new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+                    Colors.Transparent,
+                    Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
+            }
+            return;
+        }
+        _outputs.RemoveAll(_outputs.Where(s => s is PS3Axis));
     }
 }
