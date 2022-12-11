@@ -42,13 +42,14 @@ public class DirectInput : InputWithPin
     public override string Generate(bool xbox)
     {
         return IsAnalog
-            ? Microcontroller.GenerateAnalogRead()
+            ? Microcontroller.GenerateAnalogRead(PinConfig.Pin)
             : Microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
     }
 
     public override InputType? InputType => IsAnalog ? Types.InputType.AnalogPinInput : Types.InputType.DigitalPinInput;
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
+        bool xbox)
     {
         if (Microcontroller is not AvrController) return string.Join(";\n", bindings.Select(binding => binding.Item2));
         var replacements = new Dictionary<string, string>();

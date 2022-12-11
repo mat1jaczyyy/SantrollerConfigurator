@@ -212,9 +212,11 @@ public class Mega : AvrController
         return Ports[pin];
     }
 
-    public override int GetChannel(int pin)
+    public override int GetChannel(int pin, bool reconfigurePin)
     {
-        return PinA0 - pin;
+        var chan = PinA0 - pin;
+        if (reconfigurePin) chan |= 1 << 7;
+        return chan;
     }
 
     public override List<int> AnalogPins => Enumerable.Range(PinA0, 5).ToList();

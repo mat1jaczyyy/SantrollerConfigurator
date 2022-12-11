@@ -366,7 +366,8 @@ public class Ps2Input : SpiInput
         };
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
+        bool xbox)
     {
         Dictionary<Ps2InputType, string> ds2Axis = new();
         Dictionary<Ps2ControllerType, List<string>> mappedBindings = new();

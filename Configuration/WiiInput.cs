@@ -543,7 +543,8 @@ public class WiiInput : TwiInput
         }
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
+        bool xbox)
     {
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
         var hasTapBar = false;

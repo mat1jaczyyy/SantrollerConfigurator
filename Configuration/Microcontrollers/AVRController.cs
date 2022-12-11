@@ -202,7 +202,10 @@ public abstract class AvrController : Microcontroller
         ret += "SREG = oldSREG;";
         return ret;
     }
-
+    public override string GenerateAnalogRead(int pin)
+    {
+        return "adc({pin})";
+    }
     public override string GetPinForMicrocontroller(int pin, bool spi, bool twi)
     {
         var ret = $"{pin}";

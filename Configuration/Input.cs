@@ -58,7 +58,8 @@ public abstract class Input : ReactiveObject, IDisposable
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
         byte[] wiiControllerType);
 
-    public abstract string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings);
+    public abstract string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
+        bool xbox);
 
     public abstract void Dispose();
 }

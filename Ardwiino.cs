@@ -447,19 +447,26 @@ public class Ardwiino : ConfigurableUsbDevice
                 }
 
                 var off = Color.FromRgb(0, 0, 0);
-                if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxWhammy)
+                switch (deviceType)
                 {
-                    isTrigger = true;
+                    case DeviceControllerType.Guitar when (ControllerAxisType) axis == XboxWhammy:
+                    case DeviceControllerType.LiveGuitar when (ControllerAxisType) axis == XboxTilt:
+                        isTrigger = true;
+                        break;
                 }
 
-                if (deviceType == DeviceControllerType.Guitar && (ControllerAxisType) axis == XboxTilt &&
+                if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
+                    (ControllerAxisType) axis == XboxTilt &&
                     config.all.main.tiltType == 2)
                 {
                     bindings.Add(new ControllerAxis(model,
                         new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
                             -32767, 0, model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
-                        0, StandardAxisType.RightStickY));
+                        0,
+                        deviceType is DeviceControllerType.Guitar
+                            ? StandardAxisType.RightStickY
+                            : StandardAxisType.RightStickX));
                 }
                 else
                 {
@@ -472,6 +479,11 @@ public class Ardwiino : ConfigurableUsbDevice
                     {
                         min += short.MaxValue;
                         max += short.MaxValue;
+                    }
+
+                    if (deviceType is DeviceControllerType.LiveGuitar && genAxis == StandardAxisType.RightStickX)
+                    {
+                        genAxis = StandardAxisType.RightStickY;
                     }
 
                     bindings.Add(new ControllerAxis(model,
@@ -527,7 +539,7 @@ public class Ardwiino : ConfigurableUsbDevice
         }
         else if (config.all.main.tiltType == 2)
         {
-            if (deviceType == DeviceControllerType.Guitar)
+            if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar)
             {
                 var pin = config.all.pins.axis![(int) XboxTilt];
                 if (pin.pin != NotUsed)
@@ -549,7 +561,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
                             -32767, 0, model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
-                        0, StandardAxisType.RightStickY));
+                        0, deviceType is DeviceControllerType.Guitar ? StandardAxisType.RightStickY : StandardAxisType.RightStickX));
                 }
             }
 

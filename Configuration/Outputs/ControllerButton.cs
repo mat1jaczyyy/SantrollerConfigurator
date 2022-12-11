@@ -11,10 +11,10 @@ public class ControllerButton : OutputButton
 {
     public static readonly List<StandardButtonType> Order = new()
     {
-        StandardButtonType.Y,
-        StandardButtonType.B,
-        StandardButtonType.A,
         StandardButtonType.X,
+        StandardButtonType.A,
+        StandardButtonType.B,
+        StandardButtonType.Y,
         StandardButtonType.Lb,
         StandardButtonType.Rb,
         StandardButtonType.Lt,

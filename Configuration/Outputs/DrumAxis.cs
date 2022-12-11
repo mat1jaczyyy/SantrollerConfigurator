@@ -99,7 +99,7 @@ public class DrumAxis : OutputAxis
     public DrumAxisType Type { get; }
 
 
-    protected override string GenerateOutput(bool xbox)
+    public override string GenerateOutput(bool xbox, bool useReal)
     {
         if (xbox)
         {
@@ -122,7 +122,7 @@ public class DrumAxis : OutputAxis
 
     public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
     {
-        if (shared || string.IsNullOrEmpty(GenerateOutput(xbox)))
+        if (shared || string.IsNullOrEmpty(GenerateOutput(xbox, false)))
         {
             return "";
         }
@@ -229,7 +229,7 @@ public class DrumAxis : OutputAxis
             {reset}
         }}
         {valType} val = {assignedVal};
-        {GenerateOutput(xbox)} = val;
+        {GenerateOutput(xbox, false)} = val;
         {led}
     }}
     if ({ifStatement}) {{

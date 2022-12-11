@@ -20,8 +20,4 @@ public enum DjInputType
     RightRed,
     [Description("Left Turntable Blue Fret")]
     RightBlue,
-    [Description("Left Turntable Fret Flag")]
-    LeftAny,
-    [Description("Right Turntable Fret Flag")]
-    RightAny
 }

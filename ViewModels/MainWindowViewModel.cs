@@ -134,7 +134,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             set => this.RaiseAndSetIfChanged(ref _installed, value);
         }
 
-        private string _progressbarcolor = "PrimaryColor";
+        private string _progressbarcolor = "#FF0078D7";
 
         public string ProgressbarColor
         {
@@ -265,7 +265,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 .ToProperty(this, s => s.NewDevice);
             Pio.TextChanged += (message, clear) => { Console.WriteLine(message); };
 
-            Pio.PlatformIoError += val => { ProgressbarColor = val ? "red" : "PrimaryColor"; };
+            Pio.PlatformIoError += val => { ProgressbarColor = val ? "red" : "#FF0078D7"; };
 
             Pio.ProgressChanged += (message, val, val2) =>
             {

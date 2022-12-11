@@ -16,10 +16,11 @@ public class DjInput : TwiInput
     public static readonly int DjTwiFreq = 150000;
 
     public bool Combined { get; }
-    
+
     public bool BindableTwi { get; }
 
-    public DjInput(DjInputType input, ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null, bool combined = false) : base(
+    public DjInput(DjInputType input, ConfigViewModel model, Microcontroller microcontroller, int? sda = null,
+        int? scl = null, bool combined = false) : base(
         microcontroller, DjTwiType, DjTwiFreq, sda, scl, model)
     {
         Combined = combined;
@@ -38,10 +39,6 @@ public class DjInput : TwiInput
                 return "((int8_t)dj_left[2])";
             case DjInputType.RightTurntable:
                 return "((int8_t)dj_right[2])";
-            case DjInputType.LeftAny:
-                return "dj_left[0]";
-            case DjInputType.RightAny:
-                return "dj_right[0]";
             case DjInputType.LeftBlue:
             case DjInputType.LeftGreen:
             case DjInputType.LeftRed:
@@ -62,42 +59,29 @@ public class DjInput : TwiInput
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        if (!djLeftRaw.Any())
-        {
-            djLeftRaw = new byte[] {0, 0, 0};
-        }
-        if (!djRightRaw.Any())
-        {
-            djRightRaw = new byte[] {0, 0, 0};
-        }
         switch (Input)
         {
-            case DjInputType.LeftTurntable:
+            case DjInputType.LeftTurntable when djLeftRaw.Any():
                 RawValue = (sbyte) djLeftRaw[2];
                 break;
-            case DjInputType.RightTurntable:
+            case DjInputType.RightTurntable when djRightRaw.Any():
                 RawValue = (sbyte) djRightRaw[2];
                 break;
-            case DjInputType.LeftAny:
-                RawValue = djLeftRaw[0] != 0 ? 1 : 0;
-                break;
-            case DjInputType.RightAny:
-                RawValue = djRightRaw[0] != 0 ? 1 : 0;
-                break;
-            case DjInputType.LeftBlue:
-            case DjInputType.LeftGreen:
-            case DjInputType.LeftRed:
+            case DjInputType.LeftBlue when djLeftRaw.Any():
+            case DjInputType.LeftGreen when djLeftRaw.Any():
+            case DjInputType.LeftRed when djLeftRaw.Any():
                 RawValue = (djLeftRaw[0] & 1 << ((byte) Input - (byte) DjInputType.LeftGreen + 4)) != 0 ? 1 : 0;
                 break;
-            case DjInputType.RightGreen:
-            case DjInputType.RightRed:
-            case DjInputType.RightBlue:
+            case DjInputType.RightGreen when djRightRaw.Any():
+            case DjInputType.RightRed when djRightRaw.Any():
+            case DjInputType.RightBlue when djRightRaw.Any():
                 RawValue = (djRightRaw[0] & 1 << ((byte) Input - (byte) DjInputType.RightGreen + 4)) != 0 ? 1 : 0;
                 break;
         }
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
+        bool xbox)
     {
         var left = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
@@ -105,7 +89,16 @@ public class DjInput : TwiInput
         var right = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
                 .Select(binding => binding.Item2));
-        return $"if (djLeftValid) {{{left}}} if (djRightValid) {{{right}}}";
+        var leftTrigger = shared ? "" : ControllerAxis.GetMapping(StandardAxisType.LeftTrigger, xbox) + "=0;";
+        var rightTrigger = shared ? "" : ControllerAxis.GetMapping(StandardAxisType.RightTrigger, xbox) + "=0;";
+        return $@"if (djLeftValid) {{
+                    {leftTrigger}
+                    {left}
+                  }} 
+                  if (djRightValid) {{
+                    {rightTrigger}
+                    {right}
+                  }}";
     }
 
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
@@ -122,6 +115,7 @@ public class DjInput : TwiInput
         {
             return new SerializedDjInputCombined(Input);
         }
+
         return new SerializedDjInput(Sda, Scl, Input);
     }
 }

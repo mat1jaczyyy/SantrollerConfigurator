@@ -2,62 +2,68 @@ using System.Collections.Generic;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
-public class DjButton : ControllerButton
+public class DjButton : OutputButton
 {
-    private static readonly Dictionary<DjInputType, StandardButtonType> Buttons = new()
+    private static readonly Dictionary<DjInputType, string> Buttons = new()
     {
-        {DjInputType.LeftAny, StandardButtonType.Lb},
-        {DjInputType.LeftGreen, StandardButtonType.A},
-        {DjInputType.LeftRed, StandardButtonType.B},
-        {DjInputType.LeftBlue, StandardButtonType.X},
-        {DjInputType.RightAny, StandardButtonType.Rb},
-        {DjInputType.RightGreen, StandardButtonType.A},
-        {DjInputType.RightRed, StandardButtonType.B},
-        {DjInputType.RightBlue, StandardButtonType.X},
+        {DjInputType.LeftGreen, "0"},
+        {DjInputType.LeftRed, "1"},
+        {DjInputType.LeftBlue, "2"},
+        {DjInputType.RightGreen, "0"},
+        {DjInputType.RightRed, "1"},
+        {DjInputType.RightBlue, "2"},
     };
 
-    private readonly DjInputType _djButtonType;
-    public DjButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce, DjInputType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, Buttons[type])
+    private static readonly Dictionary<DjInputType, string> ButtonsPs3 = new()
     {
-        _djButtonType = type;
+        {DjInputType.LeftGreen, "0"},
+        {DjInputType.LeftRed, "1"},
+        {DjInputType.LeftBlue, "2"},
+        {DjInputType.RightGreen, "4"},
+        {DjInputType.RightRed, "5"},
+        {DjInputType.RightBlue, "6"},
+    };
+
+    private static readonly Dictionary<DjInputType, string> Axis = new()
+    {
+        {DjInputType.LeftGreen, "report->lt"},
+        {DjInputType.LeftRed, "report->lt"},
+        {DjInputType.LeftBlue, "report->lt"},
+        {DjInputType.RightGreen, "report->rt"},
+        {DjInputType.RightRed, "report->rt"},
+        {DjInputType.RightBlue, "report->rt"},
+    };
+
+    public readonly DjInputType Type;
+
+    public DjButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce,
+        DjInputType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, type.ToString())
+    {
+        Type = type;
     }
 
     public override string GenerateOutput(bool xbox)
     {
-        return xbox ? base.GenerateOutput(xbox) : "report->accel[2]";
+        return xbox ? Axis[Type] : "report->accel[2]";
     }
 
     public override string GenerateIndex(bool xbox)
     {
-        if (xbox) return base.GenerateIndex(xbox);
-        return _djButtonType switch
-        {
-            DjInputType.RightGreen => "0",
-            DjInputType.RightRed => "1",
-            DjInputType.RightBlue => "2",
-            DjInputType.LeftGreen => "4",
-            DjInputType.LeftRed => "5",
-            DjInputType.LeftBlue => "6",
-            _ => ""
-        };
+        return xbox ? Buttons[Type] : ButtonsPs3[Type];
     }
 
-    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
-    {
-        if (!xbox && _djButtonType is DjInputType.LeftAny or DjInputType.RightAny)
-        {
-            return "";
-        }
-        return base.Generate(xbox, shared, debounceIndex, combined, extra);
-    }
+    public override bool IsKeyboard => false;
+    public override bool IsController => true;
+    public override bool IsMidi => false;
+
+    public override bool IsStrum => false;
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDjButton(Input?.Serialise(), LedOn, LedOff, LedIndices, Debounce, _djButtonType);
+        return new SerializedDjButton(Input?.Serialise(), LedOn, LedOff, LedIndices, Debounce, Type);
     }
 }

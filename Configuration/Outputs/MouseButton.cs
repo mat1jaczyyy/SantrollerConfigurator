@@ -24,7 +24,6 @@ public class MouseButton : OutputButton
     public override bool IsMidi => false;
     public override void UpdateBindings()
     {
-        throw new System.NotImplementedException();
     }
 
     public MouseButtonType Type { get; }

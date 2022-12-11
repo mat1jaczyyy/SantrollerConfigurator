@@ -88,7 +88,7 @@ public class Santroller : ConfigurableUsbDevice
                 await Task.Delay(TimeSpan.FromMilliseconds(50));
                 continue;
             }
-            
+
             try
             {
                 var direct = model.Bindings.Where(s => s.Input != null).Select(s => s.Input!.InnermostInput())
@@ -104,6 +104,7 @@ public class Santroller : ConfigurableUsbDevice
                     {
                         return;
                     }
+
                     var pins = data[0];
                     model.MicroController!.PinsFromPortMask(port, mask, pins, _digitalRaw);
                 }
@@ -111,7 +112,7 @@ public class Santroller : ConfigurableUsbDevice
                 foreach (var devicePin in analog)
                 {
                     var mask = model.MicroController!.GetAnalogMask(devicePin);
-                    var wValue = (ushort) (model.MicroController!.GetChannel(devicePin.Pin) | (mask << 8));
+                    var wValue = (ushort) (model.MicroController!.GetChannel(devicePin.Pin, false) | (mask << 8));
                     var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     _analogRaw[devicePin.Pin] = val;
@@ -220,9 +221,9 @@ public class Santroller : ConfigurableUsbDevice
             {
                 foreach (var pin in pins)
                 {
-                    DevicePin devicePin = new DevicePin(pin, DevicePinMode.PullUp);
+                    var devicePin = new DevicePin(pin, DevicePinMode.PullUp);
                     var mask = microcontroller.GetAnalogMask(devicePin);
-                    var wValue = (ushort) (microcontroller.GetChannel(pin) | (mask << 8));
+                    var wValue = (ushort) (microcontroller.GetChannel(pin, true) | (mask << 8));
                     var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     if (analogVals.ContainsKey(pin))
@@ -234,7 +235,6 @@ public class Santroller : ConfigurableUsbDevice
                             return pin;
                         }
                     }
-
                     analogVals[pin] = val;
                 }
 
@@ -264,6 +264,7 @@ public class Santroller : ConfigurableUsbDevice
                         // Note that we also need to invert this, as pinsFromPortMask is configured assuming a pull up is in place,
                         // Which would then be expecting a zero for a active pin and a 1 for a inactive pin.
                         microcontroller.PinsFromPortMask(port, mask, (byte) ~(pins ^ tickedPorts[port]), outPins);
+                        _picking = false;
                         return outPins.First(s => s.Value).Key;
                     }
                 }
@@ -273,6 +274,7 @@ public class Santroller : ConfigurableUsbDevice
 
             await Task.Delay(100);
         }
+
         return original;
     }
 

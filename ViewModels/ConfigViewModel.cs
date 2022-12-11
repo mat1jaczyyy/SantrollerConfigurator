@@ -13,6 +13,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
+using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
@@ -42,12 +43,10 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             get;
         }
 
-        public Interaction<(ConfigViewModel model,  Microcontroller microcontroller, Output output, DirectInput input), BindAllWindowViewModel>
-            ShowBindAllDialog
-        {
-            get;
-        }
-        
+        public Interaction<(ConfigViewModel model, Microcontroller microcontroller, Output output, DirectInput input),
+                BindAllWindowViewModel>
+            ShowBindAllDialog { get; }
+
         public ICommand BindAllCommand { get; }
 
         public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
@@ -192,6 +191,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 binding.UpdateBindings();
             }
+
             // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
             if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput))
             {
@@ -245,13 +245,15 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                         break;
                     case StandardAxisType axisType:
                         Bindings.Add(new ControllerAxis(this,
-                            new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
+                            new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
+                                MicroController!),
                             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, axisType));
                         break;
                     case DrumAxisType axisType:
                         Bindings.Add(new DrumAxis(this,
-                            new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
+                            new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
+                                MicroController!),
                             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, 64, 10, axisType));
                         break;
@@ -294,7 +296,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             ShowYesNoDialog =
                 new Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>();
             ShowBindAllDialog =
-                new Interaction<(ConfigViewModel model, Microcontroller microcontroller, Output output, DirectInput input), BindAllWindowViewModel>();
+                new Interaction<(ConfigViewModel model, Microcontroller microcontroller, Output output, DirectInput
+                    input), BindAllWindowViewModel>();
             BindAllCommand = ReactiveCommand.CreateFromTask(BindAll);
             Main = screen;
             HostScreen = screen;
@@ -442,6 +445,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             foreach (var type in Enum.GetValues<StandardAxisType>())
             {
                 if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
+                if (DeviceType == DeviceControllerType.TurnTable &&
+                    type is StandardAxisType.LeftStickX or StandardAxisType.LeftStickY) continue;
                 Bindings.Add(new ControllerAxis(this,
                     new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
                     Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
@@ -469,24 +474,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         {
             if (_microController == null) return;
             var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
-            // GHL guitars require mapping the strum to left joy Y
-            if (DeviceType == DeviceControllerType.LiveGuitar)
-            {
-                foreach (var output in outputs)
-                {
-                    switch (output)
-                    {
-                        case ControllerButton {Type: StandardButtonType.Down}:
-                            outputs.Add(new ControllerAxis(this, new DigitalToAnalog(output.Input!, short.MaxValue, 0, this), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickY));
-                            break;
-                        case ControllerButton {Type: StandardButtonType.Up}:
-                            outputs.Add(new ControllerAxis(this, new DigitalToAnalog(output.Input!, short.MinValue, 0, this), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickY));
-                            break;
-                    }
-                }
-
-                
-            }
             var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
             var configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
@@ -497,6 +484,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 ledCount = leds.Max() + 1;
             }
+
             using (var outputStream = new MemoryStream())
             {
                 using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
@@ -550,7 +538,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             // Sort by pin index, and then map to adc number and turn into an array
             lines.Add(
-                $"#define ADC_PINS {{{string.Join(",", directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin).Select(s => _microController.GetChannel(s.PinConfig.Pin).ToString()).Distinct())}}}");
+                $"#define ADC_PINS {{{string.Join(",", directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin).Select(s => _microController.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct())}}}");
 
             lines.Add($"#define PIN_INIT {_microController.GenerateInit()}");
 
@@ -592,6 +580,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 }
             }
         }
+
         public void RemoveOutput(Output output)
         {
             output.Dispose();
@@ -641,7 +630,8 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public async void Reset()
         {
             var yesNo = await ShowYesNoDialog.Handle(("Reset", "Cancel",
-                "The following action will revert your device back to an Arduino, are you sure you want to do this?")).ToTask();
+                    "The following action will revert your device back to an Arduino, are you sure you want to do this?"))
+                .ToTask();
             if (!yesNo.Response)
             {
                 return;
@@ -705,6 +695,106 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     Colors.Transparent, Array.Empty<byte>(), 0, 0, 0, StandardAxisType.RightStickX));
             }
 
+            if (DeviceType == DeviceControllerType.TurnTable)
+            {
+                var outputsToAdd = new List<Output>();
+                foreach (var output in outputs.SelectMany(s => s.Outputs))
+                {
+                    switch (output)
+                    {
+                        case DjButton {Type: DjInputType.LeftGreen}:
+                        case DjButton {Type: DjInputType.RightGreen}:
+                            outputsToAdd.Add(new ControllerButton(this, output.Input!, Colors.Transparent,
+                                Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.A));
+                            break;
+                        case DjButton {Type: DjInputType.LeftRed}:
+                        case DjButton {Type: DjInputType.RightRed}:
+                            outputsToAdd.Add(new ControllerButton(this, output.Input!, Colors.Transparent,
+                                Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.B));
+                            break;
+                        case DjButton {Type: DjInputType.LeftBlue}:
+                        case DjButton {Type: DjInputType.RightBlue}:
+                            outputsToAdd.Add(new ControllerButton(this, output.Input!, Colors.Transparent,
+                                Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.X));
+                            break;
+                    }
+                }
+
+                outputs.AddRange(outputsToAdd);
+            }
+
+            // GHL guitars require mapping the strum to left joy Y
+            if (DeviceType == DeviceControllerType.LiveGuitar)
+            {
+                var outputsToAdd = new List<Output>();
+                foreach (var output in outputs)
+                {
+                    switch (output)
+                    {
+                        case ControllerButton {Type: StandardButtonType.Down}:
+                            outputsToAdd.Add(new ControllerAxis(this,
+                                new DigitalToAnalog(output.Input!, short.MaxValue, 0, this), Colors.Transparent,
+                                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                                StandardAxisType.LeftStickY));
+                            break;
+                        case ControllerButton {Type: StandardButtonType.Up}:
+                            outputsToAdd.Add(new ControllerAxis(this,
+                                new DigitalToAnalog(output.Input!, short.MinValue, 0, this), Colors.Transparent,
+                                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                                StandardAxisType.LeftStickY));
+                            break;
+                    }
+                }
+
+                outputs.AddRange(outputsToAdd);
+            }
+
+            if (!xbox)
+            {
+                var toTest = new List<StandardAxisType>()
+                {
+                    StandardAxisType.LeftStickX, StandardAxisType.LeftStickY, StandardAxisType.RightStickX,
+                    StandardAxisType.RightStickY, StandardAxisType.AccelerationX, StandardAxisType.AccelerationY,
+                    StandardAxisType.AccelerationZ, StandardAxisType.Gyro
+                };
+                
+                foreach (var output in outputs.SelectMany(s => s.Outputs))
+                {
+                    switch (output)
+                    {
+                        case ControllerAxis axis:
+                            toTest.Remove(axis.GetRealAxis(xbox));
+                            break;
+                        case DjButton:
+                            toTest.Remove(StandardAxisType.AccelerationY);
+                            break;
+                    }
+                }
+
+                foreach (var standardAxisType in toTest)
+                {
+                    switch (standardAxisType)
+                    {
+                        case StandardAxisType.Gyro:
+                        case StandardAxisType.AccelerationX:
+                        case StandardAxisType.AccelerationY:
+                        case StandardAxisType.AccelerationZ:
+                            outputs.Add(new ControllerAxis(this, new FixedInput(this, 0x0200),
+                                Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue,
+                                short.MaxValue, 0, standardAxisType));
+                            break;
+                        case StandardAxisType.LeftStickX:
+                        case StandardAxisType.LeftStickY:
+                        case StandardAxisType.RightStickX:
+                        case StandardAxisType.RightStickY:
+                            outputs.Add(new ControllerAxis(this, new FixedInput(this, sbyte.MaxValue),
+                                Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), byte.MinValue,
+                                byte.MaxValue, 0, standardAxisType));
+                            break;
+                    }
+                }
+            }
+
             var groupedOutputs = outputs
                 .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
                 .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
@@ -758,46 +848,64 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             var seen = new HashSet<Output>();
             var seenDebounce = new HashSet<int>();
+            var seenAnalog = new HashSet<string>();
             // Handle most mappings
-            var ret = groupedOutputs.Aggregate("", (current, group) =>
-            {
-                return current + (group
-                    .First().First.InnermostInput()
-                    .GenerateAll(Bindings.ToList(), group.Select((s) =>
-                        {
-                            var input = s.First;
-                            var output = s.Second;
-                            var generatedInput = input.Generate(xbox);
-                            var index = new List<int> {0};
-                            var extra = "";
-                            if (output is OutputButton or DrumAxis)
+            // Sort in a way that any digital to analog based groups are last. This is so that seenAnalog will be filled in when necessary.
+            var ret = groupedOutputs.OrderByDescending(s => s.Count(s2 => s2.Second.Input is DigitalToAnalog))
+                .Aggregate("", (current, group) =>
+                {
+                    // we need to ensure that DigitalToAnalog is last
+                    return current + (group
+                        .First().First.InnermostInput()
+                        .GenerateAll(Bindings.ToList(), group.OrderByDescending(s => s.First is DigitalToAnalog ? 0 : 1)
+                            .Select((s) =>
                             {
-                                index = new List<int> {debounces[output.Name]};
-                                if (output.Input is MacroInput)
+                                var input = s.First;
+                                var output = s.Second;
+                                var generatedInput = input.Generate(xbox);
+                                var index = new List<int> {0};
+                                var extra = "";
+                                if (output is OutputButton or DrumAxis)
                                 {
-                                    if (shared)
+                                    index = new List<int> {debounces[output.Name]};
+                                    if (output.Input is MacroInput)
                                     {
-                                        output = output.Serialize().Generate(this, _microController);
-                                        output.Input = input;
-                                        index = new List<int> {debounces[output.Name + generatedInput]};
-                                    }
-                                    else
-                                    {
-                                        if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
-                                        seen.Add(output);
-                                        index = output.Input!.Inputs()
-                                            .Select(input1 => debounces[output.Name + input1.Generate(xbox)]).ToList();
+                                        if (shared)
+                                        {
+                                            output = output.Serialize().Generate(this, _microController);
+                                            output.Input = input;
+                                            index = new List<int> {debounces[output.Name + generatedInput]};
+                                        }
+                                        else
+                                        {
+                                            if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
+                                            seen.Add(output);
+                                            index = output.Input!.Inputs()
+                                                .Select(input1 => debounces[output.Name + input1.Generate(xbox)])
+                                                .ToList();
+                                        }
                                     }
                                 }
-                            }
 
-                            var generated = output.Generate(xbox, shared, index, combined, extra);
+                                var generated = output.Generate(xbox, shared, index, combined, extra);
 
-                            return new Tuple<Input, string>(input, generated);
-                        })
-                        .Where(s => !string.IsNullOrEmpty(s.Item2))
-                        .ToList()) + ";");
-            });
+                                if (output is OutputAxis axis && !shared)
+                                {
+                                    generated = generated.Replace("{output}", axis.GenerateOutput(xbox, false));
+                                    if (!seenAnalog.Contains(output.Name) && input is DigitalToAnalog dta)
+                                    {
+                                        generated =
+                                            $"{axis.GenerateOutput(xbox, false)} = {dta.GenerateOff(xbox)}; {generated}";
+                                    }
+
+                                    seenAnalog.Add(output.Name);
+                                }
+
+                                return new Tuple<Input, string>(input, generated);
+                            })
+                            .Where(s => !string.IsNullOrEmpty(s.Item2))
+                            .ToList(), shared, xbox) + ";");
+                });
             // Flick off intersecting outputs when multiple buttons are pressed
             if (shared)
             {

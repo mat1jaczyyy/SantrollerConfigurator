@@ -22,6 +22,11 @@ public class Pico : Microcontroller
         return PinA0;
     }
 
+    public override string GenerateAnalogRead(int pin)
+    {
+        return $"adc({pin - PinA0})";
+    }
+
     public Pico(Board board)
     {
         Board = board;
@@ -236,9 +241,11 @@ public class Pico : Microcontroller
         return ret;
     }
 
-    public override int GetChannel(int pin)
+    public override int GetChannel(int pin, bool reconfigurePin)
     {
-        return pin - PinA0;
+        var chan = pin - PinA0;
+        if (reconfigurePin) chan |= 1 << 7;
+        return chan;
     }
 
     public override string GetPinForMicrocontroller(int pin, bool twi, bool spi)
@@ -270,11 +277,11 @@ public class Pico : Microcontroller
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)
     {
-        for (int i = 0; i < 8; i++)
+        for (var i = 0; i < 8; i++)
         {
             if ((mask & (1 << i)) != 0)
             {
-                digitalRaw[(port * 8) + i] = (pins & (1 << i)) != 0;
+                digitalRaw[(port * 8) + i] = (pins & (1 << i)) == 0;
             }
         }
     }

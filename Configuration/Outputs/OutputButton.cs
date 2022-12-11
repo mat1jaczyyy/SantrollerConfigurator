@@ -90,6 +90,5 @@ public abstract class OutputButton : Output
 
     public override void UpdateBindings()
     {
-        throw new NotImplementedException();
     }
 }

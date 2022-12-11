@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
+using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
@@ -27,16 +28,18 @@ public abstract class OutputAxis : Output
 
     protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
-        int deadZone, string name, TriggerDelegate triggerDelegate) : base(model, input, ledOn, ledOff, ledIndices,
+        int deadZone, string name, TriggerDelegate triggerDelegate, bool dj = false) : base(model, input, ledOn, ledOff,
+        ledIndices,
         name)
     {
+        InputIsDj = dj;
         Input = input;
         _trigger = this.WhenAnyValue(x => x.Model.DeviceType).Select(d => triggerDelegate(d))
             .ToProperty(this, x => x.Trigger);
         LedOn = ledOn;
         LedOff = ledOff;
-        _calibrationMax = max;
-        _calibrationMin = min;
+        Max = max;
+        Min = min;
         DeadZone = deadZone;
         _inputIsUInt = this.WhenAnyValue(x => x.Input).Select(i => i is {IsUint: true})
             .ToProperty(this, x => x.InputIsUint);
@@ -52,17 +55,18 @@ public abstract class OutputAxis : Output
                 x => x.Model.DeviceType).Select(Calculate).ToProperty(this, x => x.Value);
         _valueLower = this.WhenAnyValue(x => x.Value).Select(s => (s < 0 ? -s : 0)).ToProperty(this, x => x.ValueLower);
         _valueUpper = this.WhenAnyValue(x => x.Value).Select(s => (s > 0 ? s : 0)).ToProperty(this, x => x.ValueUpper);
-        _computedDeadZoneMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.Trigger, x => x.DeadZone)
+        _computedDeadZoneMargin = this
+            .WhenAnyValue(x => x.Min, x => x.Max, x => x.Trigger, x => x.InputIsUint, x => x.DeadZone)
             .Select(ComputeDeadZoneMargin).ToProperty(this, x => x.ComputedDeadZoneMargin);
-        _computedMinMaxMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.Trigger)
+        _computedMinMaxMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.InputIsUint)
             .Select(ComputeMinMaxMargin).ToProperty(this, x => x.CalibrationMinMaxMargin);
         _isDigitalToAnalog = this.WhenAnyValue(x => x.Input).Select(s => s is DigitalToAnalog)
             .ToProperty(this, x => x.IsDigitalToAnalog);
     }
 
-    private Thickness ComputeDeadZoneMargin((int, int, bool, int) s)
+    private Thickness ComputeDeadZoneMargin((int, int, bool, bool, int) s)
     {
-        if (!s.Item3)
+        if (!s.Item4)
         {
             s.Item1 += short.MaxValue;
             s.Item2 += short.MaxValue;
@@ -75,18 +79,18 @@ public abstract class OutputAxis : Output
         {
             if (s.Item1 < s.Item2)
             {
-                max = min + s.Item4;
+                max = min + s.Item5;
             }
             else
             {
-                min = max - s.Item4;
+                min = max - s.Item5;
             }
         }
         else
         {
             var mid = (max + min) / 2;
-            min = mid - s.Item4;
-            max = mid + s.Item4;
+            min = mid - s.Item5;
+            max = mid + s.Item5;
         }
 
         var left = Math.Min(min / (ushort.MaxValue) * 500, 500f);
@@ -185,15 +189,23 @@ public abstract class OutputAxis : Output
     private int Calculate((int, int, int, int, bool, DeviceControllerType) values)
     {
         double val = values.Item1;
+
         var min = (float) values.Item2;
         var max = (float) values.Item3;
         var deadZone = (float) values.Item4;
         var trigger = values.Item5;
+        if (InputIsDj)
+        {
+            return (int) (val * max);
+        }
+
         if (trigger)
         {
             if (!InputIsUint)
             {
                 val += short.MaxValue;
+                min += short.MaxValue;
+                max += short.MaxValue;
             }
 
             if (max > min)
@@ -218,6 +230,8 @@ public abstract class OutputAxis : Output
             if (InputIsUint)
             {
                 val -= short.MaxValue;
+                min -= short.MaxValue;
+                max -= short.MaxValue;
             }
 
             var deadZoneCalc = val - ((max + min) / 2);
@@ -259,6 +273,7 @@ public abstract class OutputAxis : Output
     public int ValueUpper => _valueUpper.Value;
     private readonly ObservableAsPropertyHelper<bool> _inputIsUInt;
     public bool InputIsUint => _inputIsUInt.Value;
+    public bool InputIsDj { get; }
     private int _calibrationMin;
     private int _calibrationMax;
 
@@ -290,7 +305,7 @@ public abstract class OutputAxis : Output
 
     private readonly ObservableAsPropertyHelper<bool> _trigger;
     public bool Trigger => _trigger.Value;
-    protected abstract string GenerateOutput(bool xbox);
+    public abstract string GenerateOutput(bool xbox, bool useReal);
     public override bool IsCombined => false;
     public override bool IsStrum => false;
     private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.None;
@@ -298,6 +313,12 @@ public abstract class OutputAxis : Output
     public bool IsDigitalToAnalog => _isDigitalToAnalog.Value;
 
     public string? CalibrationText => GetCalibrationText();
+    public int DjValue
+    {
+        get => Max;
+        set => _calibrationMax = InputIsDj ? value : _calibrationMax;
+    }
+
     protected abstract string MinCalibrationText();
     protected abstract string MaxCalibrationText();
     protected abstract bool SupportsCalibration();
@@ -317,14 +338,28 @@ public abstract class OutputAxis : Output
 
     protected string GenerateAssignment(bool xbox)
     {
-        if (Input == null) throw new IncompleteConfigurationException("Missing input!");
-        if (Input is FixedInput or DigitalToAnalog)
+        switch (Input)
         {
-            return Input.Generate(xbox);
+            case null:
+                throw new IncompleteConfigurationException("Missing input!");
+            case FixedInput or DigitalToAnalog:
+                return Input.Generate(xbox);
         }
 
-        var whammy = Model.DeviceType == DeviceControllerType.Guitar &&
-                     this is ControllerAxis {Type: StandardAxisType.RightStickX};
+        if (InputIsDj)
+        {
+            var gen = $"({Input.Generate(xbox)} * {Max})";
+            return xbox ? gen : $"{gen} + {sbyte.MaxValue}";
+        }
+
+        var whammy = Model.DeviceType switch
+        {
+            DeviceControllerType.Guitar when this is ControllerAxis {Type: StandardAxisType.RightStickX} => true,
+            DeviceControllerType.LiveGuitar when this is ControllerAxis {Type: StandardAxisType.RightStickY} => true,
+            _ => false
+        };
+        var accel = this is ControllerAxis axis && axis.GetRealAxis(xbox) is StandardAxisType.Gyro or StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
+            or StandardAxisType.AccelerationZ;
         string function;
         var normal = false;
         if (xbox)
@@ -349,6 +384,10 @@ public abstract class OutputAxis : Output
             {
                 function = "handle_calibration_ps3_whammy";
             }
+            else if (accel)
+            {
+                function = "handle_calibration_ps3_accel";
+            }
             else if (Trigger)
             {
                 function = "handle_calibration_ps3_trigger";
@@ -362,10 +401,14 @@ public abstract class OutputAxis : Output
 
         var min = Min;
         var max = Max;
-
         float multiplier;
-        if (Trigger)
+        if (Trigger || accel)
         {
+            if (!InputIsUint)
+            {
+                min += short.MaxValue;
+                max += short.MaxValue;
+            }
             if (max <= min)
             {
                 min -= DeadZone;
@@ -375,20 +418,26 @@ public abstract class OutputAxis : Output
         }
         else
         {
+            
+            if (InputIsUint)
+            {
+                min -= short.MaxValue;
+                max -= short.MaxValue;
+            }
             min += DeadZone;
             max -= DeadZone;
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
 
         var generated = "(" + Input.Generate(xbox);
-        generated += Trigger switch
+        generated += (Trigger || accel) switch
         {
             true when !InputIsUint => ") + INT16_MAX",
             false when InputIsUint => ") - INT16_MAX",
             _ => ")"
         };
 
-        var mulInt = (short) (multiplier * 1024);
+        var mulInt = (short) (multiplier * 512);
         return normal
             ? $"{function}({generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
             : $"{function}({generated}, {min}, {mulInt}, {DeadZone})";
@@ -401,7 +450,7 @@ public abstract class OutputAxis : Output
         {
             foreach (var index in LedIndices)
             {
-                var ledRead = xbox ? $"{GenerateOutput(xbox)} << 8" : GenerateOutput(xbox);
+                var ledRead = xbox ? $"{GenerateOutput(xbox, false)} << 8" : GenerateOutput(xbox, false);
                 led += $@"if (!ledState[{index}].select) {{
                         {string.Join("", Model.LedType.GetColors(LedOn).Zip(Model.LedType.GetColors(LedOff), new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({ledRead})) >> 8));"))}
                     }}";
@@ -415,16 +464,16 @@ public abstract class OutputAxis : Output
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         if (shared) return "";
-        if (Input is FixedInput)
+        if (Input is FixedInput || InputIsDj)
         {
-            return $"{GenerateOutput(xbox)} = {GenerateAssignment(xbox)}";
+            return $"{GenerateOutput(xbox, Input is FixedInput)} = {GenerateAssignment(xbox)};";
         }
 
         var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
                          this is ControllerAxis {Type: StandardAxisType.RightStickY};
         var led = CalculateLeds(xbox);
 
-        if (!tiltForPs3 || xbox) return $"{GenerateOutput(xbox)} = {GenerateAssignment(xbox)}; {led}";
+        if (!tiltForPs3 || xbox) return $"{GenerateOutput(xbox, false)} = {GenerateAssignment(xbox)}; {led}";
         // if (Input is DigitalToAnalog)
         // {
         //Thanks to clone hero, we need to invert the tilt axis for only hid
@@ -441,7 +490,7 @@ public abstract class OutputAxis : Output
         return $@"if (consoleType == PS3) {{
             {Ps3GuitarTilt} = {GenerateAssignment(true)};
         }} else {{
-            {GenerateOutput(xbox)} = -{GenerateAssignment(xbox)};
+            {GenerateOutput(xbox, false)} = -{GenerateAssignment(xbox)};
         }} {led}";
     }
 

@@ -17,6 +17,6 @@ public class SerializedGhWtInputCombined : SerializedInput
 
     public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new GhWtTapInput(Type, model, microcontroller);
+        return new GhWtTapInput(Type, model, microcontroller, combined: true);
     }
 }

@@ -65,7 +65,8 @@ public class MacroInput : Input
             ps2ControllerType, wiiControllerType);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
+        bool xbox)
     {
         throw new InvalidOperationException("Never call GenerateAll on MacroInput, call it on its children");
     }

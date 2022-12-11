@@ -32,7 +32,7 @@ public class MouseAxis : OutputAxis
 
     public MouseAxisType Type { get; }
 
-    protected override string GenerateOutput(bool xbox)
+    public override string GenerateOutput(bool xbox, bool useReal)
     {
         return "report->" + Mappings[Type];
     }

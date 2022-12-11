@@ -93,7 +93,7 @@ public class Micro : AvrController
         'D', // D29 / D12 - A11 - 'D'6
         'D' // D30 / TX Led - 'D'5            
     };
-    protected override char[] PortNames => new []{ 'B', 'C', 'D', 'E', 'F' };
+    protected override char[] PortNames { get; } = {'B', 'C', 'D', 'E', 'F'};
 
     private static readonly int[] Channels = {
         7,	// A0				PF7					ADC7
@@ -119,9 +119,8 @@ public class Micro : AvrController
         {7, "INT4"},
     };
     //Skip the duplicate analog pins
-    private Dictionary<Tuple<char, int>, int> _pinByMask = Ports.Zip(PinIndex).Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i)).DistinctBy(s => new Tuple<char, int>(s.Item1, s.Item2)).ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s=>s.Item3);
-    protected override Dictionary<Tuple<char, int>, int> PinByMask => _pinByMask;
-    
+    protected override Dictionary<Tuple<char, int>, int> PinByMask { get; } = Ports.Zip(PinIndex).Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i)).DistinctBy(s => new Tuple<char, int>(s.Item1, s.Item2)).ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s=>s.Item3);
+
     protected override string GetInterruptForPin(int ack)
     {
         return Interrupts[ack];
@@ -147,9 +146,11 @@ public class Micro : AvrController
     {
         return Ports[pin];
     }
-    public override int GetChannel(int pin)
+    public override int GetChannel(int pin, bool reconfigurePin)
     {
-        return Channels[pin - PinA0];
+        var chan = Channels[pin - PinA0];
+        if (reconfigurePin) chan |= 1 << 7;
+        return chan;
     }
 
     public override AvrPinMode? ForcedMode(int pin)

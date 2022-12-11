@@ -45,7 +45,8 @@ public class FixedInput : Input
     {
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
+        bool xbox)
     {
         return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }

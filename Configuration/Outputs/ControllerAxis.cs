@@ -33,13 +33,27 @@ public class ControllerAxis : OutputAxis
         {StandardAxisType.RightTrigger, "rt"},
     };
 
+    private static readonly Dictionary<StandardAxisType, StandardAxisType> TurntableMap = new()
+    {
+        {StandardAxisType.LeftStickX, StandardAxisType.RightStickX},
+        {StandardAxisType.LeftStickY, StandardAxisType.RightStickY},
+        {StandardAxisType.RightStickX, StandardAxisType.AccelerationX},
+        {StandardAxisType.RightStickY, StandardAxisType.AccelerationZ}
+    };
+
 
     public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
-        int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
-        type.ToString(), (s) => IsTrigger(s, type))
+        int deadZone, StandardAxisType type, bool dj = false) : base(model, input, ledOn, ledOff, ledIndices, min, max,
+        deadZone,
+        type.ToString(), (s) => IsTrigger(s, type), dj)
     {
         Type = type;
+    }
+
+    public static string GetMapping(StandardAxisType type, bool xbox)
+    {
+        return "report->" + (xbox ? MappingsXbox[type] : Mappings[type]);
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
@@ -57,27 +71,22 @@ public class ControllerAxis : OutputAxis
 
     public StandardAxisType Type { get; }
 
+    public StandardAxisType GetRealAxis(bool xbox)
+    {
+        if (xbox) return Type;
+        if (Model.DeviceType == DeviceControllerType.TurnTable && TurntableMap.ContainsKey(Type))
+        {
+            return TurntableMap[Type];
+        }
 
-    protected override string GenerateOutput(bool xbox)
+        return Type;
+    }
+
+    public override string GenerateOutput(bool xbox, bool useReal)
     {
         if (!xbox)
         {
-            if (Model.DeviceType == DeviceControllerType.TurnTable)
-            {
-                switch (Type)
-                {
-                    case StandardAxisType.LeftStickX:
-                        return "report->" + Mappings[StandardAxisType.RightStickX];
-                    case StandardAxisType.LeftStickY:
-                        return "report->" + Mappings[StandardAxisType.RightStickY];
-                    case StandardAxisType.RightStickX:
-                        return "report->" + Mappings[StandardAxisType.AccelerationX];
-                    case StandardAxisType.RightStickY:
-                        return "report->" + Mappings[StandardAxisType.AccelerationZ];
-                }
-            }
-
-            return "report->" + Mappings[Type];
+            return "report->" + Mappings[useReal ? Type : GetRealAxis(xbox)];
         }
 
         if (!MappingsXbox.ContainsKey(Type)) return "";

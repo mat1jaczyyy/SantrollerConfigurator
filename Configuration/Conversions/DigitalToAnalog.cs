@@ -37,17 +37,15 @@ public class DigitalToAnalog : Input
 
     public override string Generate(bool xbox)
     {
-        if (xbox)
-        {
-            return $"({Child.Generate(xbox)})?{On}:{Off}";
-        }
+        // We want to be able to handle multiple things at once. Therefore, we should not use off, and instead just return the original value here
+        // Then, we can do some logic to work out what the first generated digitaltoanalog is and set its value if necessary.
+        var gen = Child.Generate(xbox);
+        return xbox ? $"({gen})?{On}:{{output}}" : $"({gen})?{(On >> 8) + 128}:{{output}}";
+    }
 
-        if (IsUint)
-        {
-            return $"({Child.Generate(xbox)})?{On >> 8}:{Off >> 8}";
-        }
-
-        return $"({Child.Generate(xbox)})?{(On >> 8) + 128}:{(Off >> 8) + 128}";
+    public string GenerateOff(bool xbox)
+    {
+        return (xbox ? Off : (Off >> 8) + 128).ToString();
     }
 
     public override SerializedInput Serialise()
@@ -76,7 +74,8 @@ public class DigitalToAnalog : Input
             ps2ControllerType, wiiControllerType);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
+        bool xbox)
     {
         throw new InvalidOperationException("Never call GenerateAll on DigitalToAnalog, call it on its children");
     }

@@ -17,7 +17,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
             return PinConfigs.Aggregate("", (current, config) => current + config.Generate());
         }
 
-        public abstract int GetChannel(int pin);
+        public abstract int GetChannel(int pin, bool reconfigurePin);
 
         public abstract string GenerateInit();
 
@@ -75,10 +75,7 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
 
         public abstract Board Board { get; }
 
-        public string GenerateAnalogRead()
-        {
-            return "adc({pin})";
-        }
+        public abstract string GenerateAnalogRead(int pin);
 
         public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);
         public abstract int GetFirstAnalogPin();

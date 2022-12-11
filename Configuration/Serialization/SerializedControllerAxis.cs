@@ -1,4 +1,5 @@
 using Avalonia.Media;
+using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
@@ -34,7 +35,8 @@ public class SerializedControllerAxis : SerializedOutput
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new ControllerAxis(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
-            Type);
+        var input = Input?.Generate(microcontroller, model);
+        return new ControllerAxis(model, input, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
+            Type, input is DjInput);
     }
 }

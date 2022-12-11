@@ -27,7 +27,7 @@ public class PS3Axis : OutputAxis
     public Ps3AxisType Type { get; }
 
 
-    protected override string GenerateOutput(bool xbox)
+    public override string GenerateOutput(bool xbox, bool useReal)
     {
         return xbox ? "" : $"report->axis[{(byte)Type}]";
     }
