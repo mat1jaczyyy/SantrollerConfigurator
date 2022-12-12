@@ -223,7 +223,7 @@ public class DrumAxis : OutputAxis
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
 {{
-    uint16_t val_real = {GenerateAssignment(xbox)};
+    uint16_t val_real = {GenerateAssignment(xbox, false)};
     if (val_real) {{
         if (val_real > {Threshold}) {{
             {reset}

@@ -336,7 +336,7 @@ public abstract class OutputAxis : Output
 
     private const string Ps3GuitarTilt = "report->accel[0]";
 
-    protected string GenerateAssignment(bool xbox)
+    protected string GenerateAssignment(bool xbox, bool forceAccel)
     {
         switch (Input)
         {
@@ -358,7 +358,7 @@ public abstract class OutputAxis : Output
             DeviceControllerType.LiveGuitar when this is ControllerAxis {Type: StandardAxisType.RightStickY} => true,
             _ => false
         };
-        var accel = this is ControllerAxis axis && axis.GetRealAxis(xbox) is StandardAxisType.Gyro or StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
+        var accel = forceAccel || this is ControllerAxis axis && axis.GetRealAxis(xbox) is StandardAxisType.Gyro or StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
             or StandardAxisType.AccelerationZ;
         string function;
         var normal = false;
@@ -466,14 +466,14 @@ public abstract class OutputAxis : Output
         if (shared) return "";
         if (Input is FixedInput || InputIsDj)
         {
-            return $"{GenerateOutput(xbox, Input is FixedInput)} = {GenerateAssignment(xbox)};";
+            return $"{GenerateOutput(xbox, Input is FixedInput)} = {GenerateAssignment(xbox, false)};";
         }
 
         var tiltForPs3 = !xbox && Model.DeviceType == DeviceControllerType.Guitar &&
                          this is ControllerAxis {Type: StandardAxisType.RightStickY};
         var led = CalculateLeds(xbox);
 
-        if (!tiltForPs3 || xbox) return $"{GenerateOutput(xbox, false)} = {GenerateAssignment(xbox)}; {led}";
+        if (!tiltForPs3 || xbox) return $"{GenerateOutput(xbox, false)} = {GenerateAssignment(xbox, false)}; {led}";
         // if (Input is DigitalToAnalog)
         // {
         //Thanks to clone hero, we need to invert the tilt axis for only hid
@@ -486,11 +486,11 @@ public abstract class OutputAxis : Output
         // }
 
         //Thanks to clone hero, we need to invert the tilt axis for only hid
-        //Funnily enough, we actually want the xbox version, as the tilt axis is 16 bit
+        //Ps3 tilt goes to the accelerometer, so force use of that here
         return $@"if (consoleType == PS3) {{
-            {Ps3GuitarTilt} = {GenerateAssignment(true)};
+            {Ps3GuitarTilt} = {GenerateAssignment(xbox, true)};
         }} else {{
-            {GenerateOutput(xbox, false)} = -{GenerateAssignment(xbox)};
+            {GenerateOutput(xbox, false)} = -{GenerateAssignment(xbox, false)};
         }} {led}";
     }
 
