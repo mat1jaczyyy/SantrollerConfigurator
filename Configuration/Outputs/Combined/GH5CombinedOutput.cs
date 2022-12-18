@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
 using Avalonia.Media;
+using DynamicData;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -15,8 +16,6 @@ namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
 public class Gh5CombinedOutput : CombinedTwiOutput
 {
     private readonly Microcontroller _microcontroller;
-
-    private readonly AvaloniaList<Output> _outputs = new();
 
     private static readonly Dictionary<Gh5NeckInputType, StandardButtonType> Buttons = new()
     {
@@ -42,9 +41,10 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         "gh5", 100000, "GH5", sda, scl)
     {
         _microcontroller = microcontroller;
+        Outputs.Clear();
         if (outputs != null)
         {
-            _outputs = new AvaloniaList<Output>(outputs);
+            Outputs.AddRange(outputs);
         }
         else
         {
@@ -54,15 +54,15 @@ public class Gh5CombinedOutput : CombinedTwiOutput
 
     public void CreateDefaults()
     {
-        _outputs.Clear();
+        Outputs.Clear();
         foreach (var pair in Buttons)
         {
-            _outputs.Add(new ControllerButton(Model,
+            Outputs.Add(new ControllerButton(Model,
                 new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Green,
                 Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
 
-        _outputs.Add(new ControllerAxis(Model,
+        Outputs.Add(new ControllerAxis(Model,
             new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY));
@@ -72,7 +72,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     {
         foreach (var pair in Taps)
         {
-            _outputs.Add(new ControllerButton(Model,
+            Outputs.Add(new ControllerButton(Model,
                 new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Transparent,
                 Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
@@ -80,10 +80,9 @@ public class Gh5CombinedOutput : CombinedTwiOutput
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedGh5CombinedOutput(Sda, Scl, _outputs.ToList());
+        return new SerializedGh5CombinedOutput(Sda, Scl, Outputs.Items.ToList());
     }
 
-    public override AvaloniaList<Output> Outputs => _outputs;
 
     private bool _detected;
 

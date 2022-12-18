@@ -26,6 +26,8 @@ public class MouseAxis : OutputAxis
     public override bool IsKeyboard => true;
     public override bool IsController => false;
     public override bool IsMidi => false;
+
+    public override bool Valid => true;
     public override void UpdateBindings()
     {
     }

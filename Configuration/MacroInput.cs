@@ -25,6 +25,7 @@ public class MacroInput : Input
         this.WhenAnyValue(x => x.Child1, x => x.Child2)
             .Select(x => x.Item1.RawValue > 0 && x.Item2.RawValue > 0 ? 1 : 0).ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(s => RawValue = s);
+        IsAnalog = false;
     }
 
 
@@ -51,7 +52,6 @@ public class MacroInput : Input
     public override IList<DevicePin> Pins => Child1.Pins.Concat(Child2.Pins).ToList();
     public override IList<PinConfig> PinConfigs => Child1.PinConfigs.Concat(Child2.PinConfigs).ToList();
 
-    public override bool IsAnalog => false;
     public override bool IsUint => false;
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,

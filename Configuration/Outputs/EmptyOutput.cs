@@ -41,6 +41,8 @@ public class EmptyOutput : Output
     private readonly ObservableAsPropertyHelper<bool> _isMidi;
     public override bool IsMidi => _isMidi.Value;
 
+    public override bool Valid => true;
+
     private readonly ObservableAsPropertyHelper<IEnumerable<object>> _combinedTypes;
 
     public IEnumerable<object> CombinedTypes => _combinedTypes.Value;
@@ -177,8 +179,6 @@ public class EmptyOutput : Output
 
     public override bool IsCombined => false;
     public override bool IsStrum => false;
-
-    public virtual bool RequiresInput => false;
 
     public override SerializedOutput Serialize()
     {

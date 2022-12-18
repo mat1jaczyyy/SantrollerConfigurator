@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
 using Avalonia.Media;
+using DynamicData;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -15,8 +16,6 @@ public class GhwtCombinedOutput : CombinedOutput
 {
     public int Pin { get; set; }
     private readonly Microcontroller _microcontroller;
-
-    private readonly AvaloniaList<Output> _outputs = new();
 
     private static readonly Dictionary<GhWtInputType, StandardButtonType> Taps = new()
     {
@@ -35,10 +34,10 @@ public class GhwtCombinedOutput : CombinedOutput
         {
             Pin = pin.Value;
         }
-
+        Outputs.Clear();
         if (outputs != null)
         {
-            _outputs = new AvaloniaList<Output>(outputs);
+            Outputs.AddRange(outputs);
         }
         else
         {
@@ -48,8 +47,8 @@ public class GhwtCombinedOutput : CombinedOutput
 
     public void CreateDefaults()
     {
-        _outputs.Clear();
-        _outputs.Add(new ControllerAxis(Model,
+        Outputs.Clear();
+        Outputs.Add(new ControllerAxis(Model,
             new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
                 combined: true),
             Colors.Transparent,
@@ -60,7 +59,7 @@ public class GhwtCombinedOutput : CombinedOutput
     {
         foreach (var pair in Taps)
         {
-            _outputs.Add(new ControllerButton(Model,
+            Outputs.Add(new ControllerButton(Model,
                 new GhWtTapInput(pair.Key, Model, _microcontroller,
                     combined: true), Colors.Transparent,
                 Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
@@ -69,10 +68,8 @@ public class GhwtCombinedOutput : CombinedOutput
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedGhwtCombinedOutput(Pin, _outputs.ToList());
+        return new SerializedGhwtCombinedOutput(Pin, Outputs.Items.ToList());
     }
-
-    public override AvaloniaList<Output> Outputs => _outputs;
 
     public override void UpdateBindings()
     {

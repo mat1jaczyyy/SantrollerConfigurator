@@ -16,6 +16,7 @@ public class DirectInput : InputWithPin
         model, microcontroller,
         new DirectPinConfig(model, Guid.NewGuid().ToString(), pin, pinMode))
     {
+        IsAnalog = PinConfig.PinMode == DevicePinMode.Analog;
     }
 
 
@@ -35,8 +36,6 @@ public class DirectInput : InputWithPin
     {
         return new SerializedDirectInput(PinConfig.Pin, PinConfig.PinMode);
     }
-
-    public override bool IsAnalog => PinConfig.PinMode == DevicePinMode.Analog;
 
     public override bool IsUint => true;
     public override string Generate(bool xbox)

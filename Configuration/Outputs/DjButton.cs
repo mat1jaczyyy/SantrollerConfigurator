@@ -62,6 +62,8 @@ public class DjButton : OutputButton
 
     public override bool IsStrum => false;
 
+    public override bool Valid => true;
+
     public override SerializedOutput Serialize()
     {
         return new SerializedDjButton(Input?.Serialise(), LedOn, LedOff, LedIndices, Debounce, Type);

@@ -16,6 +16,7 @@ public class FixedInput : Input
     public FixedInput(ConfigViewModel model, int value) : base(model)
     {
         Value = value;
+        IsAnalog = true;
     }
 
     public override IReadOnlyList<string> RequiredDefines()
@@ -32,8 +33,6 @@ public class FixedInput : Input
     {
         throw new NotImplementedException();
     }
-
-    public override bool IsAnalog => true;
     public override bool IsUint => true;
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
     public override IList<PinConfig> PinConfigs => Array.Empty<PinConfig>();

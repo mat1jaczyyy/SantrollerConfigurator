@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
@@ -15,6 +17,42 @@ public class ControllerButton : OutputButton
         StandardButtonType.A,
         StandardButtonType.B,
         StandardButtonType.Y,
+        StandardButtonType.Lb,
+        StandardButtonType.Rb,
+        StandardButtonType.Lt,
+        StandardButtonType.Rt,
+        StandardButtonType.Select,
+        StandardButtonType.Start,
+        StandardButtonType.LeftStick,
+        StandardButtonType.RightStick,
+        StandardButtonType.Home,
+        StandardButtonType.Capture
+    };
+
+    public static readonly List<StandardButtonType> OrderGh = new()
+    {
+        StandardButtonType.Y,
+        StandardButtonType.A,
+        StandardButtonType.B,
+        StandardButtonType.X,
+        StandardButtonType.Lb,
+        StandardButtonType.Rb,
+        StandardButtonType.Lt,
+        StandardButtonType.Rt,
+        StandardButtonType.Select,
+        StandardButtonType.Start,
+        StandardButtonType.LeftStick,
+        StandardButtonType.RightStick,
+        StandardButtonType.Home,
+        StandardButtonType.Capture
+    };
+    
+    public static readonly List<StandardButtonType> OrderSwitch = new()
+    {
+        StandardButtonType.Y,
+        StandardButtonType.B,
+        StandardButtonType.A,
+        StandardButtonType.X,
         StandardButtonType.Lb,
         StandardButtonType.Rb,
         StandardButtonType.Lt,
@@ -56,14 +94,19 @@ public class ControllerButton : OutputButton
     };
 
     public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
-        byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, type.ToString())
+        byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce,
+        type.ToString())
     {
         Type = type;
+        _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
+            .Select(s => ControllerEnumConverter.GetButtonText(s.Item1, s.Item2, s.Item3) != null)
+            .ToProperty(this, s => s.Valid);
     }
-    
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return ControllerEnumConverter.GetButtonText(deviceControllerType, rhythmType, Enum.Parse<StandardButtonType>(Name)) ?? Name;
+        return ControllerEnumConverter.GetButtonText(deviceControllerType, rhythmType,
+            Enum.Parse<StandardButtonType>(Name)) ?? Name;
     }
 
     public StandardButtonType Type { get; }
@@ -76,7 +119,15 @@ public class ControllerButton : OutputButton
             return XboxOrder.Contains(Type) ? XboxOrder.IndexOf(Type).ToString() : "";
         }
 
-        return HatOrder.Contains(Type) ? HatOrder.IndexOf(Type).ToString() : Order.IndexOf(Type).ToString();
+        if (Model.DeviceType == DeviceControllerType.Guitar && Model.RhythmType == RhythmType.GuitarHero)
+        {
+            if (Type is StandardButtonType.X or StandardButtonType.Y)
+            {
+                return $"(consoleType == PS3 ? {OrderGh.IndexOf(Type).ToString()}) : {Order.IndexOf(Type).ToString()})";
+            }
+        }
+
+        return HatOrder.Contains(Type) ? HatOrder.IndexOf(Type).ToString() : $"(consoleType == SWITCH ? {OrderSwitch.IndexOf(Type).ToString()}) : {Order.IndexOf(Type).ToString()})";
     }
 
     public override string GenerateOutput(bool xbox)
@@ -95,6 +146,9 @@ public class ControllerButton : OutputButton
     public override bool IsStrum => Type is StandardButtonType.Up or StandardButtonType.Down;
 
     public override bool IsCombined => false;
+
+    private readonly ObservableAsPropertyHelper<bool> _valid;
+    public override bool Valid => _valid.Value;
 
     public override SerializedOutput Serialize()
     {

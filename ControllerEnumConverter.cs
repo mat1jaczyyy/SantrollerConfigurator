@@ -29,10 +29,10 @@ public class ControllerEnumConverter : IMultiValueConverter
             {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardAxisType.LeftTrigger), "Effects Switch"},
             {new(DeviceControllerType.LiveGuitar, null, StandardAxisType.RightStickX), "Tilt Axis"},
             {new(DeviceControllerType.LiveGuitar, null, StandardAxisType.RightStickY), "Whammy Axis"},
-            {new(DeviceControllerType.TurnTable, null, StandardAxisType.RightStickX), "Effects knob"},
-            {new(DeviceControllerType.TurnTable, null, StandardAxisType.RightStickY), "Crossfader"},
-            {new(DeviceControllerType.TurnTable, null, StandardAxisType.LeftStickX), "Left Turntable Spin"},
-            {new(DeviceControllerType.TurnTable, null, StandardAxisType.LeftStickY), "Right Turntable Spin"},
+            {new(DeviceControllerType.Turntable, null, StandardAxisType.RightStickX), "Effects knob"},
+            {new(DeviceControllerType.Turntable, null, StandardAxisType.RightStickY), "Crossfader"},
+            {new(DeviceControllerType.Turntable, null, StandardAxisType.LeftStickX), "Left Turntable Spin"},
+            {new(DeviceControllerType.Turntable, null, StandardAxisType.LeftStickY), "Right Turntable Spin"},
             {new(DeviceControllerType.Gamepad, null, StandardAxisType.LeftStickX), "Left Joystick X Axis"},
             {new(DeviceControllerType.Gamepad, null, StandardAxisType.LeftStickY), "Left Joystick Y Axis"},
             {new(DeviceControllerType.Gamepad, null, StandardAxisType.RightStickX), "Right Joystick X Axis"},
@@ -82,19 +82,19 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Start), "Start Button"},
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Select), "Select Button"},
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Home), "Home Button"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.A), "Green Fret / A Button"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.B), "Red Fret / B Button"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Y), "Euphoria / Y Button"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.X), "Blue Fret / X Button"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Lb), "Left Turntable Fret Flag"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Rb), "Right Turntable Fret Flag"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Up), "D-pad Up"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Down), "D-pad Down"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Left), "D-pad Left"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Right), "D-pad Right"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Start), "Start Button"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Select), "Select Button"},
-                {new(DeviceControllerType.TurnTable, null, StandardButtonType.Home), "Home Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.A), "Green Fret / A Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.B), "Red Fret / B Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Y), "Euphoria / Y Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.X), "Blue Fret / X Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Lb), "Left Turntable Fret Flag"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Rb), "Right Turntable Fret Flag"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Up), "D-pad Up"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Down), "D-pad Down"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Left), "D-pad Left"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Right), "D-pad Right"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Start), "Start Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Select), "Select Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Home), "Home Button"},
                 {new(DeviceControllerType.Gamepad, null, StandardButtonType.A), "A Button"},
                 {new(DeviceControllerType.Gamepad, null, StandardButtonType.B), "B Button"},
                 {new(DeviceControllerType.Gamepad, null, StandardButtonType.X), "X Button"},
@@ -192,7 +192,7 @@ public class ControllerEnumConverter : IMultiValueConverter
         {
             otherBindings = Enum.GetValues<Ps3AxisType>().Cast<object>();
         }
-        if (deviceControllerType is DeviceControllerType.TurnTable)
+        if (deviceControllerType is DeviceControllerType.Turntable)
         {
             otherBindings = Enum.GetValues<DjInputType>().Where(s => s is not DjInputType.LeftTurntable or DjInputType.RightTurntable).Cast<object>();
         }

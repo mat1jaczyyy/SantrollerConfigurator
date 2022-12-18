@@ -34,6 +34,8 @@ public class PS3Axis : OutputAxis
 
     public override bool IsCombined => false;
 
+    public override bool Valid => true; 
+
     protected override string MinCalibrationText()
     {
         return "Release the button";

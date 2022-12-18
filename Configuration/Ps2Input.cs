@@ -231,6 +231,7 @@ public class Ps2Input : SpiInput
         _attConfig = microcontroller.GetOrSetPin(model, Ps2AttType, att ?? 0, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
+        IsAnalog = Input <= Ps2InputType.Dualshock2R2;
     }
 
     public override string Generate(bool xbox)
@@ -250,7 +251,6 @@ public class Ps2Input : SpiInput
         }
     }
 
-    public override bool IsAnalog => Input <= Ps2InputType.Dualshock2R2;
     public override bool IsUint => !IntInputs.Contains(Input);
 
     public override InputType? InputType => Types.InputType.Ps2Input;
@@ -306,7 +306,7 @@ public class Ps2Input : SpiInput
         var ds2 = realType is Ps2ControllerType.Dualshock2;
         if (ds2 && Dualshock2Order.Contains(Input))
         {
-            var inputs = modelBindings.SelectMany(s => s.Outputs).Select(s => s.Input).OfType<Ps2Input>()
+            var inputs = modelBindings.SelectMany(s => s.Outputs.Items).Select(s => s.Input).OfType<Ps2Input>()
                 .Select(s => s.Input).ToHashSet();
             var i = Dualshock2Order.Intersect(inputs).Select((s, idx) => (s, idx))
                 .FirstOrOptional(s => s.s == Input);

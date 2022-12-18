@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using Avalonia.Data.Converters;
+using Humanizer;
 
 namespace GuitarConfiguratorSharp.NetCore;
 
@@ -21,8 +22,7 @@ public class EnumToStringConverter : IValueConverter
         {
             return attributes[0].Description;
         }
-
-        return fieldInfo.Name;
+        return fieldInfo.Name.Humanize();
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

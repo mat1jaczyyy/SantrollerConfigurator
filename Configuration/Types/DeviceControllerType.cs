@@ -11,5 +11,5 @@ public enum DeviceControllerType
     Guitar = 7,
     LiveGuitar = 8,
     Drum = 9,
-    TurnTable = 10
+    Turntable = 10
 }

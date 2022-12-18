@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
 using Avalonia.Media;
+using DynamicData;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
@@ -97,8 +98,6 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     }
 
     private readonly Microcontroller _microcontroller;
-
-    private readonly AvaloniaList<Output> _outputs = new();
     public List<int> AvailablePins => Microcontroller.GetAllPins(false);
 
     public Ps2CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? miso = null, int? mosi = null,
@@ -112,9 +111,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         _attConfig = microcontroller.GetOrSetPin(model, Ps2Input.Ps2AttType, att ?? 0, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
+        Outputs.Clear();
         if (outputs != null)
         {
-            _outputs = new AvaloniaList<Output>(outputs);
+            Outputs.AddRange(outputs);
         }
         else
         {
@@ -124,10 +124,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public void CreateDefaults()
     {
-        _outputs.Clear();
+        Outputs.Clear();
         foreach (var pair in Buttons)
         {
-            _outputs.Add(new ControllerButton(Model,
+            Outputs.Add(new ControllerButton(Model,
                 new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
                 Colors.Transparent, Array.Empty<byte>(),
@@ -135,22 +135,22 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                 pair.Value));
         }
 
-        _outputs.Add(new ControllerButton(Model,
+        Outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.NegConI, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 128, Model),
             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.A));
-        _outputs.Add(new ControllerButton(Model,
+        Outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.NegConIi, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 128, Model),
             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.X));
-        _outputs.Add(new ControllerButton(Model,
+        Outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.NegConL, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 AnalogToDigitalType.Trigger, 240, Model),
             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.Lb));
 
         foreach (var pair in Axis)
         {
-            _outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+            Outputs.Add(new ControllerAxis(Model, new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                 Colors.Transparent,
                 Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
         }
@@ -159,10 +159,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedPs2CombinedOutput(Miso, Mosi, Sck, Att, Ack, _outputs.ToList());
+        return new SerializedPs2CombinedOutput(Miso, Mosi, Sck, Att, Ack, Outputs.Items.ToList());
     }
-
-    public override AvaloniaList<Output> Outputs => _outputs;
     
 
     private Ps2ControllerType? _detectedType;
@@ -191,15 +189,15 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     {
         if (Model.DeviceType == DeviceControllerType.Gamepad)
         {
-            if (_outputs.Any(s => s is PS3Axis)) return;
+            if (Outputs.Items.Any(s => s is PS3Axis)) return;
             foreach (var pair in Ps3Axis)
             {
-                _outputs.Add(new PS3Axis(Model, new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
+                Outputs.Add(new PS3Axis(Model, new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined:true),
                     Colors.Transparent,
                     Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
             }
             return;
         }
-        _outputs.RemoveAll(_outputs.Where(s => s is PS3Axis));
+        Outputs.RemoveMany(Outputs.Items.Where(s => s is PS3Axis));
     }
 }

@@ -28,6 +28,8 @@ public class MouseButton : OutputButton
 
     public MouseButtonType Type { get; }
 
+    public override bool Valid => true;
+
     public override string GenerateIndex(bool xbox)
     {
         return _order.IndexOf(Type).ToString();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
 using Avalonia.Media;
+using DynamicData;
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
@@ -16,16 +17,16 @@ public class DjCombinedOutput : CombinedTwiOutput
 {
 
     private readonly Microcontroller _microcontroller;
-    private readonly AvaloniaList<Output> _outputs = new();
 
     public DjCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
         IReadOnlyCollection<Output>? outputs = null) :
         base(model, microcontroller, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ", sda, scl)
     {
         _microcontroller = microcontroller;
+        Outputs.Clear();
         if (outputs != null)
         {
-            _outputs = new AvaloniaList<Output>(outputs);
+            Outputs.AddRange(outputs);
         }
         else
         {
@@ -35,15 +36,15 @@ public class DjCombinedOutput : CombinedTwiOutput
 
     public void CreateDefaults()
     {
-        _outputs.Clear();
+        Outputs.Clear();
         
-        _outputs.AddRange(DjInputTypes.Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable)).Select(button => new DjButton(Model,
+        Outputs.AddRange(DjInputTypes.Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable)).Select(button => new DjButton(Model,
             new DjInput(button, Model, _microcontroller, combined: true),
             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 5, button)));
-        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, _microcontroller, combined: true),
+        Outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, Array.Empty<byte>(), 0, 16, 0, StandardAxisType.LeftStickX, true));
-        _outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurntable, Model, _microcontroller, combined: true),
+        Outputs.Add(new ControllerAxis(Model, new DjInput(DjInputType.RightTurntable, Model, _microcontroller, combined: true),
             Colors.Transparent,
             Colors.Transparent, Array.Empty<byte>(), 0, 16, 0, StandardAxisType.LeftStickY, true));
     }
@@ -55,7 +56,7 @@ public class DjCombinedOutput : CombinedTwiOutput
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDjCombinedOutput(Sda, Scl, _outputs.ToList());
+        return new SerializedDjCombinedOutput(Sda, Scl, Outputs.Items.ToList());
     }
 
     private bool _detectedLeft;
@@ -85,6 +86,4 @@ public class DjCombinedOutput : CombinedTwiOutput
         DetectedLeft = djLeftRaw.Any();
         DetectedRight = djRightRaw.Any();
     }
-
-    public override AvaloniaList<Output> Outputs => _outputs;
 }

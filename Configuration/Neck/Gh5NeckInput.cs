@@ -85,6 +85,7 @@ public class Gh5NeckInput : TwiInput
         Combined = combined;
         BindableTwi = !combined && controller is not AvrController;
         Input = input;
+        IsAnalog = Input == Gh5NeckInputType.TapBar;
     }
 
     public override InputType? InputType => Types.InputType.Gh5NeckInput;
@@ -115,8 +116,6 @@ public class Gh5NeckInput : TwiInput
         }
         return new SerializedGh5NeckInput(Sda, Scl, Input);
     }
-
-    public override bool IsAnalog => Input == Gh5NeckInputType.TapBar;
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,

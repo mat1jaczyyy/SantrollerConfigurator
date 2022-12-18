@@ -11,6 +11,7 @@ using System.Windows.Input;
 using Avalonia.Collections;
 using Avalonia.Input;
 using Avalonia.Media;
+using DynamicData;
 using GuitarConfiguratorSharp.NetCore.Configuration;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
@@ -226,7 +227,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 Bindings.RemoveAll(Bindings.Where(s => s is DrumAxis));
             }
 
-            if (_deviceControllerType == DeviceControllerType.TurnTable)
+            if (_deviceControllerType == DeviceControllerType.Turntable)
             {
                 if (!Bindings.Any(s => s is DjCombinedOutput))
                 {
@@ -445,7 +446,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             foreach (var type in Enum.GetValues<StandardAxisType>())
             {
                 if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
-                if (DeviceType == DeviceControllerType.TurnTable &&
+                if (DeviceType == DeviceControllerType.Turntable &&
                     type is StandardAxisType.LeftStickX or StandardAxisType.LeftStickY) continue;
                 Bindings.Add(new ControllerAxis(this,
                     new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
@@ -473,12 +474,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         public void Generate(PlatformIo pio)
         {
             if (_microController == null) return;
-            var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
+            var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
             var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
             var configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
             var lines = new List<string>();
-            var leds = outputs.SelectMany(s => s.Outputs).SelectMany(s => s.LedIndices).ToList();
+            var leds = outputs.SelectMany(s => s.Outputs.Items).SelectMany(s => s.LedIndices).ToList();
             var ledCount = 0;
             if (leds.Any())
             {
@@ -663,7 +664,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         private string GenerateLedTick()
         {
-            var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
+            var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
             if (_microController == null || _ledType == LedType.None ||
                 !outputs.Any(s => s.LedIndices.Any())) return "";
             var ledMax = outputs.SelectMany(output => output.LedIndices).Max();
@@ -686,7 +687,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private string GenerateTick(bool xbox, bool shared)
         {
             if (_microController == null) return "";
-            var outputs = Bindings.SelectMany(binding => binding.Outputs).ToList();
+            var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
             // If whammy isn't bound, then default to -32767 instead of 0.
             if (xbox && DeviceType == DeviceControllerType.Guitar && !outputs.Any(output =>
                     output is ControllerAxis {Type: StandardAxisType.RightStickX}))
@@ -695,10 +696,10 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     Colors.Transparent, Array.Empty<byte>(), 0, 0, 0, StandardAxisType.RightStickX));
             }
 
-            if (DeviceType == DeviceControllerType.TurnTable)
+            if (DeviceType == DeviceControllerType.Turntable)
             {
                 var outputsToAdd = new List<Output>();
-                foreach (var output in outputs.SelectMany(s => s.Outputs))
+                foreach (var output in outputs.SelectMany(s => s.Outputs.Items))
                 {
                     switch (output)
                     {
@@ -758,7 +759,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                     StandardAxisType.AccelerationZ, StandardAxisType.Gyro
                 };
                 
-                foreach (var output in outputs.SelectMany(s => s.Outputs))
+                foreach (var output in outputs.SelectMany(s => s.Outputs.Items))
                 {
                     switch (output)
                     {
@@ -927,7 +928,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private int CalculateDebounceTicks()
         {
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
-            var count = Bindings.SelectMany(binding => binding.Outputs)
+            var count = Bindings.SelectMany(binding => binding.Outputs.Items)
                 .Where(s => s is OutputButton button && (!combined || !button.IsStrum)).Select(s => s.Name).Distinct()
                 .Count();
             if (combined)

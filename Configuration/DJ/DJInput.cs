@@ -26,6 +26,7 @@ public class DjInput : TwiInput
         Combined = combined;
         BindableTwi = !combined && microcontroller is not AvrController;
         Input = input;
+        IsAnalog = Input <= DjInputType.RightTurntable;
     }
 
     public DjInputType Input { get; set; }
@@ -51,8 +52,6 @@ public class DjInput : TwiInput
 
         throw new InvalidOperationException("Shouldn't get here!");
     }
-
-    public override bool IsAnalog => Input <= DjInputType.RightTurntable;
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,

@@ -25,6 +25,7 @@ public class AnalogToDigital : Input
         Child = child;
         AnalogToDigitalType = analogToDigitalType;
         Threshold = threshold;
+        IsAnalog = Child.IsAnalog;
         this.WhenAnyValue(x => x.Child.RawValue).ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => RawValue = Calculate(s));
     }
 
@@ -100,8 +101,6 @@ public class AnalogToDigital : Input
 
     public override IList<DevicePin> Pins => Child.Pins;
     public override IList<PinConfig> PinConfigs => Child.PinConfigs;
-
-    public override bool IsAnalog => Child.IsAnalog;
     public override bool IsUint => Child.IsUint;
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,

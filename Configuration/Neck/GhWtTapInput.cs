@@ -24,6 +24,7 @@ public class GhWtTapInput : InputWithPin
     {
         Combined = combined;
         Input = input;
+        IsAnalog = Input == GhWtInputType.TapBar;
     }
 
     static readonly Dictionary<int, BarButton> Mappings = new()
@@ -78,7 +79,6 @@ public class GhWtTapInput : InputWithPin
         return new SerializedGhWtInput(PinConfig.Pin, Input);
     }
 
-    public override bool IsAnalog => Input == GhWtInputType.TapBar;
     public override InputType? InputType => Types.InputType.WtNeckInput;
     public override bool IsUint => true;
     protected override string DetectionText => "Tap on the tap bar";

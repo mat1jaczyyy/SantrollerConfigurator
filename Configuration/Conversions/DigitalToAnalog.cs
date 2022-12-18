@@ -33,6 +33,7 @@ public class DigitalToAnalog : Input
             .ToProperty(this, x => x.Minimum);
         _maximum = this.WhenAnyValue(x => x.Child.IsUint).Select(s => s ? (int) ushort.MaxValue : short.MaxValue)
             .ToProperty(this, x => x.Maximum);
+        IsAnalog = Child.IsAnalog;
     }
 
     public override string Generate(bool xbox)
@@ -61,8 +62,6 @@ public class DigitalToAnalog : Input
     public override IList<DevicePin> Pins => Child.Pins;
     public override IList<PinConfig> PinConfigs => Child.PinConfigs;
     public override InputType? InputType => Child.InputType;
-
-    public override bool IsAnalog => Child.IsAnalog;
     public override bool IsUint => Child.IsUint;
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,

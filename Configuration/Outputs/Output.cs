@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -13,6 +14,8 @@ using Avalonia.Input.Raw;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using DynamicData;
+using DynamicData.Binding;
 using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
 using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
 using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
@@ -184,7 +187,14 @@ public abstract class Output : ReactiveObject, IDisposable
             .Select(s => string.Join(", ", s))
             .ToProperty(this, s => s.LedIndicesDisplay);
         AssignByKeyOrAxis = ReactiveCommand.CreateFromTask(FindAndAssign);
-        Outputs = new AvaloniaList<Output> {this};
+        Outputs = new SourceList<Output>();
+        Outputs.Add(this);
+        AnalogOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
+        DigitalOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
+        _ledOnLabel = this.WhenAnyValue(x => x.Input!.IsAnalog)
+            .Select(s => s ? "Highest LED Colour" : "Pressed LED Colour").ToProperty(this, x => x.LedOnLabel);
+        _ledOffLabel = this.WhenAnyValue(x => x.Input!.IsAnalog)
+            .Select(s => s ? "Lowest LED Colour" : "Released LED Colour").ToProperty(this, x => x.LedOffLabel);
     }
 
     public void AddLed()
@@ -442,7 +452,8 @@ public abstract class Output : ReactiveObject, IDisposable
         {
             try
             {
-                return new Bitmap(assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Others/Xbox360/360_{Name}.png")));
+                return new Bitmap(
+                    assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Others/Xbox360/360_{Name}.png")));
             }
             catch (FileNotFoundException)
             {
@@ -453,7 +464,10 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public abstract string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra);
 
-    public virtual AvaloniaList<Output> Outputs { get; }
+    public SourceList<Output> Outputs { get; }
+
+    public ReadOnlyObservableCollection<Output> AnalogOutputs { get; set; }
+    public ReadOnlyObservableCollection<Output> DigitalOutputs  { get; set; }
 
     public void Remove()
     {
@@ -468,6 +482,9 @@ public abstract class Output : ReactiveObject, IDisposable
     public abstract bool IsKeyboard { get; }
     public abstract bool IsController { get; }
     public abstract bool IsMidi { get; }
+    public bool IsEmpty => this is EmptyOutput;
+
+    public abstract bool Valid { get; }
 
     private string _buttonText = "Click to assign";
 
@@ -477,12 +494,12 @@ public abstract class Output : ReactiveObject, IDisposable
         set => this.RaiseAndSetIfChanged(ref _buttonText, value);
     }
 
-    public List<PinConfig> GetPinConfigs() => Outputs
-        .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.PinConfigs ?? Array.Empty<PinConfig>()))
+    public List<PinConfig> GetPinConfigs() => Outputs.Items
+        .SelectMany(s => s.Outputs.Items).SelectMany(s => (s.Input?.PinConfigs ?? Array.Empty<PinConfig>()))
         .Distinct().ToList();
 
-    public List<DevicePin> GetPins() => Outputs
-        .SelectMany(s => s.Outputs).SelectMany(s => (s.Input?.Pins ?? Array.Empty<DevicePin>()))
+    public List<DevicePin> GetPins() => Outputs.Items
+        .SelectMany(s => s.Outputs.Items).SelectMany(s => (s.Input?.Pins ?? Array.Empty<DevicePin>()))
         .Distinct().ToList();
 
     public virtual void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
@@ -490,7 +507,7 @@ public abstract class Output : ReactiveObject, IDisposable
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
         byte[] wiiControllerType)
     {
-        foreach (var output in Outputs)
+        foreach (var output in Outputs.Items)
         {
             output.Input?.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                 ghWtRaw,
@@ -507,6 +524,13 @@ public abstract class Output : ReactiveObject, IDisposable
             return string.IsNullOrEmpty(text) ? "" : $"* Error: Conflicting pins: {text}!";
         }
     }
+
+    private ObservableAsPropertyHelper<string> _ledOnLabel;
+
+    public string LedOnLabel => _ledOnLabel.Value;
+    private ObservableAsPropertyHelper<string> _ledOffLabel;
+
+    public string LedOffLabel => _ledOffLabel.Value;
 
     public void UpdateErrors()
     {

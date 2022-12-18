@@ -272,6 +272,7 @@ public class WiiInput : TwiInput
         Input = input;
         Combined = combined;
         BindableTwi = !combined && microcontroller is not AvrController;
+        IsAnalog = Input <= WiiInputType.DrawsomePenPressure;
         Image = GetImage();
     }
 
@@ -291,8 +292,7 @@ public class WiiInput : TwiInput
 
         return new SerializedWiiInput(Sda, Scl, Input);
     }
-
-    public override bool IsAnalog => Input <= WiiInputType.DrawsomePenPressure;
+    
     public override bool IsUint => !Input.ToString().ToLower().Contains("stick");
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
 

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using Avalonia.Media;
 using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
 using GuitarConfiguratorSharp.NetCore.Configuration.Types;
 using GuitarConfiguratorSharp.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
 
@@ -49,6 +51,9 @@ public class ControllerAxis : OutputAxis
         type.ToString(), (s) => IsTrigger(s, type), dj)
     {
         Type = type;
+        _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
+            .Select(s => ControllerEnumConverter.GetAxisText(s.Item1, s.Item2, s.Item3) != null)
+            .ToProperty(this, s => s.Valid);
     }
 
     public static string GetMapping(StandardAxisType type, bool xbox)
@@ -74,7 +79,7 @@ public class ControllerAxis : OutputAxis
     public StandardAxisType GetRealAxis(bool xbox)
     {
         if (xbox) return Type;
-        if (Model.DeviceType == DeviceControllerType.TurnTable && TurntableMap.ContainsKey(Type))
+        if (Model.DeviceType == DeviceControllerType.Turntable && TurntableMap.ContainsKey(Type))
         {
             return TurntableMap[Type];
         }
@@ -158,6 +163,9 @@ public class ControllerAxis : OutputAxis
     public override bool IsKeyboard => false;
     public override bool IsController => true;
     public override bool IsMidi => false;
+
+    private readonly ObservableAsPropertyHelper<bool> _valid;
+    public override bool Valid => _valid.Value;
 
     protected override bool SupportsCalibration()
     {

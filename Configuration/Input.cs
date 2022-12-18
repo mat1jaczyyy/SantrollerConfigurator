@@ -18,23 +18,32 @@ public abstract class Input : ReactiveObject, IDisposable
     protected Input(ConfigViewModel model)
     {
         Model = model;
-        _imageOpacity = this.WhenAnyValue(x => x.RawValue).Select(s => (s == 0?0:0.25) + 0.75).ToProperty(this, s => s.ImageOpacity);
+        _imageOpacity = this.WhenAnyValue(x => x.RawValue, x => x.IsAnalog, (i, b) => b ? 1 : i)
+            .Select(s => (s == 0 ? 0 : 0.25) + 0.75).ToProperty(this, s => s.ImageOpacity);
     }
+
     public abstract IReadOnlyList<string> RequiredDefines();
     public abstract string Generate(bool xbox);
 
     public abstract SerializedInput Serialise();
+    private bool _analog;
 
-    public abstract bool IsAnalog { get; }
+    public bool IsAnalog
+    {
+        get => _analog;
+        set => this.RaiseAndSetIfChanged(ref _analog, value);
+    }
+
     public abstract bool IsUint { get; }
 
     private int _rawValue;
+
     public int RawValue
     {
         get => _rawValue;
         set => this.RaiseAndSetIfChanged(ref _rawValue, value);
     }
-    
+
     private readonly ObservableAsPropertyHelper<double> _imageOpacity;
 
     public double ImageOpacity => _imageOpacity.Value;
@@ -46,7 +55,7 @@ public abstract class Input : ReactiveObject, IDisposable
 
     public virtual IList<Input> Inputs()
     {
-        return new List<Input>{this};
+        return new List<Input> {this};
     }
 
     public abstract IList<DevicePin> Pins { get; }

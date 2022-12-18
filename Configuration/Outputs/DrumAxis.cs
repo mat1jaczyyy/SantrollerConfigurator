@@ -98,6 +98,8 @@ public class DrumAxis : OutputAxis
 
     public DrumAxisType Type { get; }
 
+    public override bool Valid => true;
+
 
     public override string GenerateOutput(bool xbox, bool useReal)
     {

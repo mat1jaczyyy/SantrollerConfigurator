@@ -312,7 +312,7 @@ public class Ardwiino : ConfigurableUsbDevice
         {
             case SubType.XinputTurntable:
             case SubType.Ps3Turntable:
-                deviceType = DeviceControllerType.TurnTable;
+                deviceType = DeviceControllerType.Turntable;
                 break;
             case SubType.XinputGamepad:
             case SubType.Ps3Gamepad:
@@ -416,7 +416,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 }
             }
 
-            if (deviceType == DeviceControllerType.TurnTable)
+            if (deviceType == DeviceControllerType.Turntable)
             {
                 bindings.Add(new DjCombinedOutput(model, controller, sda, scl));
             }
@@ -528,7 +528,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     debounce = config.debounce.strum;
                 }
 
-                if (deviceType == DeviceControllerType.TurnTable && genButton == StandardButtonType.LeftStick)
+                if (deviceType == DeviceControllerType.Turntable && genButton == StandardButtonType.LeftStick)
                 {
                     genButton = StandardButtonType.Y;
                 }

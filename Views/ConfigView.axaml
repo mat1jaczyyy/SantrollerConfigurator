@@ -55,27 +55,55 @@
         <DataTemplate x:Key="EnumToStringTemplate" DataType="system:Object">
             <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
         </DataTemplate>
-        <netCore:OutputTemplateSelector x:Key="OutputTemplates">
-            <DataTemplate DataType="output:EmptyOutput">
-                <StackPanel Orientation="Horizontal">
-                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsController}">
-                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding CombinedType}"
-                                  Items="{Binding CombinedTypes}"
-                                  ItemTemplate="{StaticResource ControllerEnumTemplate}">
-                        </ComboBox>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
-                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding MouseAxisType}"
-                                  Items="{Binding MouseAxisTypes}">
-                        </ComboBox>
-                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding MouseButtonType}"
-                                  Items="{Binding MouseButtonTypes}">
-                        </ComboBox>
-                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Key}" Items="{Binding Keys}">
-                        </ComboBox>
-                    </StackPanel>
+        <netCore:OutputTemplateSelector x:Key="OutputHeaderTemplates">
+            <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
+                <StackPanel>
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedItem="{Binding AnalogToDigitalType}" Items="{Binding AnalogToDigitalTypes}">
+                    </ComboBox>
+                    <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
+                    <ContentControl Content="{Binding Child}"
+                                    ContentTemplate="{StaticResource OutputHeaderTemplates}">
+                    </ContentControl>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding DetectedLeft}" IsEnabled="False">Left Turntable Found</CheckBox>
+                    <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False">Right Turntable Found</CheckBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding Detected}" IsEnabled="False">Detected</CheckBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                           Content="Detected PS2 Controller Type">
+                    </Label>
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding DetectedType}">
+                    </TextBlock>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                           Content="Detected Wii Extension: ">
+                    </Label>
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding DetectedType}">
+                    </TextBlock>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputAxis}">
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputButton}">
+            </DataTemplate>
+        </netCore:OutputTemplateSelector>
+        <netCore:OutputTemplateSelector x:Key="OutputTemplates">
             <DataTemplate DataType="{x:Type neck:GhWtTapInput}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="GH WT Tap Input: "></TextBlock>
@@ -134,10 +162,6 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type wii:WiiInput}">
                 <StackPanel Orientation="Horizontal">
-                    <Image ToolTip.Tip="{Binding Input}"
-                           HorizontalAlignment="Center" Width="75"
-                           Source="{Binding Image}" Opacity="{Binding ImageOpacity}">
-                    </Image>
                     <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
@@ -147,19 +171,23 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type configuration:DirectInput}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="Direct Input: "></TextBlock>
+                <StackPanel>
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
+                        <Label VerticalAlignment="Center" Width="150">Pin Mode</Label>
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding PinMode}"
                                   Items="{Binding DevicePinModes}">
                         </ComboBox>
                     </StackPanel>
-                    <Button
-                        Command="{Binding DetectPinCommand}" Content="{Binding PinConfigText}">
-                    </Button>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Pin}" Items="{Binding AvailablePins}"
-                              ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Width="150">Pin</Label>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Pin}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}">
+                        </ComboBox>
+                        <Button
+                            Command="{Binding DetectPinCommand}" Content="{Binding PinConfigText}">
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:MidiOutput}">
@@ -312,7 +340,8 @@
                             </StackPanel>
 
                         </StackPanel>
-                        <Button x:CompileBindings="False" Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
+                        <Button x:CompileBindings="False" IsVisible="{Binding !IsDigitalToAnalog}"
+                                Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center">
                             Calibrate
                         </Button>
@@ -362,13 +391,39 @@
             <DataTemplate DataType="{x:Type output:OutputButton}">
                 <NumericUpDown Value="{Binding Debounce}" VerticalAlignment="Center"></NumericUpDown>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type conversions:DigitalToAnalog}">
+
+            <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
                 <StackPanel Orientation="Horizontal">
-                    <NumericUpDown Value="{Binding On}" Minimum="{Binding Minimum}" VerticalAlignment="Center"></NumericUpDown>
-                    <NumericUpDown Value="{Binding Off}" Maximum="{Binding Maximum}" VerticalAlignment="Center"></NumericUpDown>
+                    <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding AnalogToDigitalType}"
+                              Items="{Binding AnalogToDigitalTypes}">
+                    </ComboBox>
+                    <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
                     <ContentControl Content="{Binding Child}"
                                     ContentTemplate="{StaticResource OutputTemplates}">
                     </ContentControl>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type conversions:DigitalToAnalog}">
+                <StackPanel>
+                    <ContentControl Content="{Binding Child}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="150">
+                            Active Value
+                        </Label>
+                        <NumericUpDown Value="{Binding Off}" Maximum="{Binding Maximum}" VerticalAlignment="Center"></NumericUpDown>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="150">
+                            Inactive Value
+                        </Label>
+                        <NumericUpDown Value="{Binding On}" Minimum="{Binding Minimum}" VerticalAlignment="Center"></NumericUpDown>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type conversions:MacroInput}">
@@ -381,31 +436,14 @@
                     </ContentControl>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
-                <StackPanel Orientation="Horizontal">
-                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                              SelectedItem="{Binding AnalogToDigitalType}" Items="{Binding AnalogToDigitalTypes}">
-                    </ComboBox>
-                    <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
-                    <ContentControl Content="{Binding Child}"
-                                    ContentTemplate="{StaticResource OutputTemplates}">
-                    </ContentControl>
-                </StackPanel>
-            </DataTemplate>
             <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
-                           Content="DJ Hero Turntable Input">
-                    </Label>
                     <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
                     <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
                               Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
-
-                    <CheckBox IsChecked="{Binding DetectedLeft}" IsEnabled="False">Left Turntable Found</CheckBox>
-                    <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False">Right Turntable Found</CheckBox>
 
                     <Button
                         x:CompileBindings="False"
@@ -416,8 +454,6 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input"></Label>
-                    <CheckBox IsChecked="{Binding Detected}" IsEnabled="False">Detected</CheckBox>
                     <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Scl}"
                               Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
                     </ComboBox>
@@ -490,22 +526,31 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
-                <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="Wii Controller Input"></Label>
-
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
-                           Content="Detected Controller Type">
-                    </Label>
-                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
-                               Text="{Binding DetectedType}">
-                    </TextBlock>
-                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Scl}"
-                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Sda}"
-                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-
+                <StackPanel>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="150">
+                            SCL Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Scl}"
+                                  Items="{Binding AvailableSclPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}">
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="150">
+                            SDA Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Sda}"
+                                  Items="{Binding AvailableSdaPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}">
+                        </ComboBox>
+                    </StackPanel>
                     <Button
                         x:CompileBindings="False"
                         Command="{Binding AddTapBarFrets}">
@@ -524,6 +569,51 @@
                 </StackPanel>
             </DataTemplate>
         </netCore:OutputTemplateSelector>
+        <netCore:OutputTemplateSelector x:Key="InputTemplatesCombined">
+            <DataTemplate DataType="{x:Type neck:GhWtTapInput}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="GH WT Tap Input: "></TextBlock>
+                    <TextBlock Text="{Binding Input}"></TextBlock>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type neck:Gh5NeckInput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input: "></Label>
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="{Binding Input}"></Label>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type dj:DjInput}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="DJ Controller Input: "></TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type ps2:Ps2Input}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="PS2 Controller Input: "></TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type wii:WiiInput}">
+                <StackPanel Orientation="Horizontal">
+                    <Image ToolTip.Tip="{Binding Input}"
+                           HorizontalAlignment="Center" Width="75"
+                           Source="{Binding Image}" Opacity="{Binding ImageOpacity}">
+                    </Image>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedItem="{Binding AnalogToDigitalType}" Items="{Binding AnalogToDigitalTypes}">
+                    </ComboBox>
+                    <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
+                    <ContentControl Content="{Binding Child}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                </StackPanel>
+            </DataTemplate>
+        </netCore:OutputTemplateSelector>
     </UserControl.Resources>
     <Panel>
         <DockPanel HorizontalAlignment="Stretch">
@@ -537,14 +627,18 @@
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Emulation Type"
                                        TextAlignment="Center" />
                             <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding EmulationType}" Items="{Binding EmulationTypes}">
+                                      SelectedItem="{Binding EmulationType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                      Items="{Binding EmulationTypes}">
                             </ComboBox>
                         </StackPanel>
                         <StackPanel IsVisible="{Binding IsController}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type"
                                        TextAlignment="Center" />
                             <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding DeviceType}" Items="{Binding DeviceControllerTypes}">
+                                      SelectedItem="{Binding DeviceType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                      Items="{Binding DeviceControllerTypes}">
                             </ComboBox>
                         </StackPanel>
                         <StackPanel>
@@ -557,14 +651,17 @@
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Rhythm Game Type"
                                        TextAlignment="Center" />
                             <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding RhythmType}" Items="{Binding RhythmTypes}">
+                                      SelectedItem="{Binding RhythmType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                      Items="{Binding RhythmTypes}">
                             </ComboBox>
                         </StackPanel>
                         <StackPanel>
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="LED Type"
                                        TextAlignment="Center" />
                             <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding LedType}" Items="{Binding LedTypes}">
+                                      SelectedItem="{Binding LedType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}" Items="{Binding LedTypes}">
                             </ComboBox>
                         </StackPanel>
                         <StackPanel IsVisible="{Binding BindableSpi}">
@@ -630,164 +727,312 @@
                     <ItemsControl Items="{Binding Bindings}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="output:Output">
-                                <StackPanel Background="Black" MinHeight="75">
-                                    <WrapPanel Margin="20 20 20 0">
-                                        <Image ToolTip.Tip="{Binding LocalisedName}"
-                                               IsVisible="{Binding IsController}"
-                                               HorizontalAlignment="Center" Width="75"
-                                               Source="{Binding Image}"
-                                               Opacity="{Binding ImageOpacity}">
-                                        </Image>
-                                        <Label IsVisible="{Binding IsKeyboard}" Content="{Binding Name}"></Label>
-                                        <Button Command="{Binding AssignByKeyOrAxis}"
-                                                IsVisible="{Binding IsKeyboard}"
-                                                IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                                Content="{Binding ButtonText}">
-                                        </Button>
-                                        <StackPanel Orientation="Horizontal">
-                                            <StackPanel.IsVisible>
-                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="Input"
-                                                             Converter="{x:Static  ObjectConverters.IsNotNull}" />
-                                                    <Binding Path="!IsCombined" />
-                                                </MultiBinding>
-                                            </StackPanel.IsVisible>
-                                            <ComboBox VerticalAlignment="Center"
-                                                      SelectedItem="{Binding SelectedInputType}"
-                                                      Items="{Binding InputTypes}">
-                                            </ComboBox>
-                                            <ComboBox VerticalAlignment="Center" IsVisible="{Binding IsWii}"
-                                                      SelectedItem="{Binding WiiInputType}"
-                                                      Items="{Binding WiiInputTypes}">
-                                            </ComboBox>
-                                            <ComboBox VerticalAlignment="Center" IsVisible="{Binding IsDj}"
-                                                      SelectedItem="{Binding DjInputType}"
-                                                      Items="{Binding DjInputTypes}">
-                                            </ComboBox>
-                                            <ComboBox VerticalAlignment="Center" IsVisible="{Binding IsPs2}"
-                                                      SelectedItem="{Binding Ps2InputType}"
-                                                      Items="{Binding Ps2InputTypes}">
-                                            </ComboBox>
-                                            <ComboBox VerticalAlignment="Center" IsVisible="{Binding IsGh5}"
-                                                      SelectedItem="{Binding Gh5NeckInputType}"
-                                                      Items="{Binding Gh5NeckInputTypes}">
-                                            </ComboBox>
-                                            <ComboBox VerticalAlignment="Center" IsVisible="{Binding IsWt}"
-                                                      SelectedItem="{Binding GhWtInputType}"
-                                                      Items="{Binding GhWtInputTypes}">
-                                            </ComboBox>
-                                        </StackPanel>
-                                        <ContentControl Content="{Binding}"
-                                                        ContentTemplate="{StaticResource OutputTemplates}">
-                                        </ContentControl>
-                                        <ContentControl Content="{Binding Input}"
-                                                        ContentTemplate="{StaticResource OutputTemplates}">
-                                        </ContentControl>
-                                        <StackPanel Orientation="Horizontal">
-                                            <StackPanel.IsVisible>
-                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="AreLedsEnabled" />
-                                                    <Binding Path="!IsCombined" />
-                                                </MultiBinding>
-                                            </StackPanel.IsVisible>
-                                            <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
-                                                   Content="Led Indexes">
-                                            </Label>
-                                            <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
-                                                   Content="{Binding LedIndicesDisplay}">
-                                            </Label>
-                                            <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
-                                                           Value="{Binding LedIndex}" VerticalAlignment="Center">
-                                            </NumericUpDown>
-                                            <Button x:CompileBindings="False"
-                                                    Command="{Binding AddLed}">
-                                                Add Led
-                                            </Button>
-                                            <Button x:CompileBindings="False"
-                                                    Command="{Binding RemoveLed}">
-                                                Remove Led
-                                            </Button>
-                                            <Button x:CompileBindings="False"
-                                                    Command="{Binding ClearLeds}">
-                                                Clear Leds
-                                            </Button>
-                                            <ColorPicker Color="{Binding LedOn}"></ColorPicker>
-                                            <ColorPicker Color="{Binding LedOff}"></ColorPicker>
-                                        </StackPanel>
-                                        <Button
-                                            x:CompileBindings="False"
-                                            Command="{Binding Remove}">
-                                            Remove
-                                        </Button>
-                                    </WrapPanel>
-                                    <Label Foreground="Red" Margin="20 20 20 0" Content="{Binding ErrorText}"
-                                           IsVisible="{Binding ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}">
-                                    </Label>
-                                    <Expander IsVisible="{Binding IsCombined}" HorizontalAlignment="Stretch">
-                                        <ItemsControl Items="{Binding Outputs}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <WrapPanel />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate DataType="output:Output">
-                                                    <WrapPanel Margin="20 20 20 0">
+                                <StackPanel>
+                                    <Expander IsVisible="{Binding !IsEmpty}" HorizontalAlignment="Stretch"
+                                              Header="{Binding}">
+                                        <Expander.HeaderTemplate>
+                                            <DataTemplate DataType="output:Output">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal">
                                                         <Image ToolTip.Tip="{Binding LocalisedName}"
-                                                               HorizontalAlignment="Center" Width="75"
+                                                               IsVisible="{Binding IsController}" Width="75"
                                                                Source="{Binding Image}"
                                                                Opacity="{Binding ImageOpacity}">
                                                         </Image>
-                                                        <ContentControl Content="{Binding}"
-                                                                        ContentTemplate="{StaticResource OutputTemplates}">
-                                                        </ContentControl>
-                                                        <ContentControl Content="{Binding Input}"
-                                                                        ContentTemplate="{StaticResource OutputTemplates}">
-                                                        </ContentControl>
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <StackPanel.IsVisible>
+                                                        <Label VerticalAlignment="Center"
+                                                               VerticalContentAlignment="Center"
+                                                               Content="{Binding LocalisedName}">
+
+                                                            <Label.IsVisible>
                                                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                                    <Binding Path="AreLedsEnabled" />
+                                                                    <Binding Path="Input"
+                                                                             Converter="{x:Static  ObjectConverters.IsNotNull}" />
                                                                     <Binding Path="!IsCombined" />
+                                                                    <Binding Path="IsController" />
                                                                 </MultiBinding>
-                                                            </StackPanel.IsVisible>
-                                                            <Label VerticalAlignment="Center"
-                                                                   VerticalContentAlignment="Center"
-                                                                   Content="Led Numbers">
-                                                            </Label>
-                                                            <Label VerticalAlignment="Center"
-                                                                   VerticalContentAlignment="Center"
-                                                                   Content="{Binding LedIndicesDisplay}">
-                                                            </Label>
-                                                            <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
-                                                                           Value="{Binding LedIndex}"
-                                                                           VerticalAlignment="Center">
-                                                            </NumericUpDown>
-                                                            <Button x:CompileBindings="False"
-                                                                    Command="{Binding AddLed}">
-                                                                Add Led
-                                                            </Button>
-                                                            <Button x:CompileBindings="False"
-                                                                    Command="{Binding RemoveLed}">
-                                                                Remove Led
-                                                            </Button>
-                                                            <Button x:CompileBindings="False"
-                                                                    Command="{Binding ClearLeds}">
-                                                                Clear Leds
-                                                            </Button>
-                                                            <ColorPicker Color="{Binding LedOn}"></ColorPicker>
-                                                            <ColorPicker Color="{Binding LedOff}"></ColorPicker>
-                                                        </StackPanel>
+                                                            </Label.IsVisible>
+                                                        </Label>
+                                                        <Label VerticalAlignment="Center"
+                                                               VerticalContentAlignment="Center"
+                                                               IsVisible="{Binding IsKeyboard}"
+                                                               Content="{Binding Name}">
+                                                        </Label>
+                                                        <ContentControl Content="{Binding}"
+                                                                        ContentTemplate="{StaticResource OutputHeaderTemplates}">
+                                                        </ContentControl>
                                                         <Button
                                                             x:CompileBindings="False"
                                                             Command="{Binding Remove}">
                                                             Remove
                                                         </Button>
-                                                    </WrapPanel>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                                    </StackPanel>
+                                                    <Label Foreground="Red" Margin="20 0 20 0"
+                                                           Content="{Binding ErrorText}"
+                                                           IsVisible="{Binding ErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                    </Label>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </Expander.HeaderTemplate>
+                                        <StackPanel>
+                                            <Button Command="{Binding AssignByKeyOrAxis}"
+                                                    IsVisible="{Binding IsKeyboard}"
+                                                    IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                                    Content="{Binding ButtonText}">
+                                            </Button>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Label VerticalAlignment="Center"
+                                                       VerticalContentAlignment="Center"
+                                                       Width="150">
+                                                    Input Type
+                                                </Label>
+                                                <StackPanel.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="Input"
+                                                                 Converter="{x:Static  ObjectConverters.IsNotNull}" />
+                                                        <Binding Path="!IsCombined" />
+                                                    </MultiBinding>
+                                                </StackPanel.IsVisible>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          SelectedItem="{Binding SelectedInputType}"
+                                                          Items="{Binding InputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsWii}"
+                                                          SelectedItem="{Binding WiiInputType}"
+                                                          Items="{Binding WiiInputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsDj}"
+                                                          SelectedItem="{Binding DjInputType}"
+                                                          Items="{Binding DjInputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsPs2}"
+                                                          SelectedItem="{Binding Ps2InputType}"
+                                                          Items="{Binding Ps2InputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsGh5}"
+                                                          SelectedItem="{Binding Gh5NeckInputType}"
+                                                          Items="{Binding Gh5NeckInputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsWt}"
+                                                          SelectedItem="{Binding GhWtInputType}"
+                                                          Items="{Binding GhWtInputTypes}">
+                                                </ComboBox>
+                                            </StackPanel>
+                                            <ContentControl Content="{Binding Input}"
+                                                            ContentTemplate="{StaticResource OutputTemplates}">
+                                            </ContentControl>
+                                            <ContentControl Content="{Binding}"
+                                                            ContentTemplate="{StaticResource OutputTemplates}">
+                                            </ContentControl>
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="AreLedsEnabled" />
+                                                        <Binding Path="!IsCombined" />
+                                                    </MultiBinding>
+                                                </StackPanel.IsVisible>
+                                                <Label VerticalAlignment="Center"
+                                                       VerticalContentAlignment="Center" Width="150">
+                                                    Selected LEDs
+                                                </Label>
+                                                <Label VerticalAlignment="Center"
+                                                       VerticalContentAlignment="Center"
+                                                       Content="{Binding LedIndicesDisplay}">
+                                                </Label>
+                                                <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
+                                                               Value="{Binding LedIndex}"
+                                                               VerticalAlignment="Center">
+                                                </NumericUpDown>
+                                                <Button x:CompileBindings="False"
+                                                        Command="{Binding AddLed}">
+                                                    Add Led
+                                                </Button>
+                                                <Button x:CompileBindings="False"
+                                                        Command="{Binding RemoveLed}">
+                                                    Remove Led
+                                                </Button>
+                                                <Button x:CompileBindings="False"
+                                                        Command="{Binding ClearLeds}">
+                                                    Clear
+                                                </Button>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="AreLedsEnabled" />
+                                                        <Binding Path="!IsCombined" />
+                                                    </MultiBinding>
+                                                </StackPanel.IsVisible>
+                                                <Label VerticalAlignment="Center"
+                                                       VerticalContentAlignment="Center" Width="150"
+                                                       Content="{Binding LedOnLabel}">
+                                                </Label>
+                                                <ColorPicker Color="{Binding LedOn}"></ColorPicker>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="AreLedsEnabled" />
+                                                        <Binding Path="!IsCombined" />
+                                                    </MultiBinding>
+                                                </StackPanel.IsVisible>
+                                                <Label VerticalAlignment="Center"
+                                                       VerticalContentAlignment="Center" Width="150"
+                                                       Content="{Binding LedOffLabel}">
+                                                </Label>
+                                                <ColorPicker Color="{Binding LedOff}"></ColorPicker>
+                                            </StackPanel>
+                                            <ItemsControl IsVisible="{Binding IsCombined}"
+                                                          HorizontalAlignment="Stretch"
+                                                          IsEnabled="{Binding IsCombined}"
+                                                          Items="{Binding DigitalOutputs}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate DataType="output:Output">
+                                                        <WrapPanel IsVisible="{Binding Valid}">
+                                                            <ContentControl Content="{Binding Input}"
+                                                                            ContentTemplate="{StaticResource InputTemplatesCombined}">
+                                                            </ContentControl>
+                                                            <ContentControl Content="{Binding}"
+                                                                            ContentTemplate="{StaticResource OutputTemplates}">
+                                                            </ContentControl>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <StackPanel.IsVisible>
+                                                                    <MultiBinding
+                                                                        Converter="{x:Static BoolConverters.And}">
+                                                                        <Binding Path="AreLedsEnabled" />
+                                                                        <Binding Path="!IsCombined" />
+                                                                    </MultiBinding>
+                                                                </StackPanel.IsVisible>
+                                                                <Label VerticalAlignment="Center"
+                                                                       VerticalContentAlignment="Center"
+                                                                       Content="{Binding LedIndicesDisplay}">
+                                                                </Label>
+                                                                <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
+                                                                               Value="{Binding LedIndex}"
+                                                                               VerticalAlignment="Center">
+                                                                </NumericUpDown>
+                                                                <Button x:CompileBindings="False"
+                                                                        Command="{Binding AddLed}">
+                                                                    Add Led
+                                                                </Button>
+                                                                <Button x:CompileBindings="False"
+                                                                        Command="{Binding RemoveLed}">
+                                                                    Remove Led
+                                                                </Button>
+                                                                <Button x:CompileBindings="False"
+                                                                        Command="{Binding ClearLeds}">
+                                                                    Clear Leds
+                                                                </Button>
+                                                                <ColorPicker Color="{Binding LedOn}"></ColorPicker>
+                                                                <ColorPicker Color="{Binding LedOff}"></ColorPicker>
+                                                            </StackPanel>
+                                                            <Button
+                                                                x:CompileBindings="False"
+                                                                Command="{Binding Remove}">
+                                                                Remove
+                                                            </Button>
+                                                        </WrapPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            <ItemsControl IsVisible="{Binding IsCombined}"
+                                                          HorizontalAlignment="Stretch"
+                                                          IsEnabled="{Binding IsCombined}"
+                                                          Items="{Binding AnalogOutputs}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate DataType="output:Output">
+                                                        <WrapPanel IsVisible="{Binding Valid}">
+                                                            <ContentControl Content="{Binding Input}"
+                                                                            ContentTemplate="{StaticResource InputTemplatesCombined}">
+                                                            </ContentControl>
+                                                            <ContentControl Content="{Binding}"
+                                                                            ContentTemplate="{StaticResource OutputTemplates}">
+                                                            </ContentControl>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <StackPanel.IsVisible>
+                                                                    <MultiBinding
+                                                                        Converter="{x:Static BoolConverters.And}">
+                                                                        <Binding Path="AreLedsEnabled" />
+                                                                        <Binding Path="!IsCombined" />
+                                                                    </MultiBinding>
+                                                                </StackPanel.IsVisible>
+                                                                <Label VerticalAlignment="Center"
+                                                                       VerticalContentAlignment="Center"
+                                                                       Content="Led Numbers">
+                                                                </Label>
+                                                                <Label VerticalAlignment="Center"
+                                                                       VerticalContentAlignment="Center"
+                                                                       Content="{Binding LedIndicesDisplay}">
+                                                                </Label>
+                                                                <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
+                                                                               Value="{Binding LedIndex}"
+                                                                               VerticalAlignment="Center">
+                                                                </NumericUpDown>
+                                                                <Button x:CompileBindings="False"
+                                                                        Command="{Binding AddLed}">
+                                                                    Add Led
+                                                                </Button>
+                                                                <Button x:CompileBindings="False"
+                                                                        Command="{Binding RemoveLed}">
+                                                                    Remove Led
+                                                                </Button>
+                                                                <Button x:CompileBindings="False"
+                                                                        Command="{Binding ClearLeds}">
+                                                                    Clear Leds
+                                                                </Button>
+                                                                <ColorPicker Color="{Binding LedOn}"></ColorPicker>
+                                                                <ColorPicker Color="{Binding LedOff}"></ColorPicker>
+                                                            </StackPanel>
+                                                            <Button
+                                                                x:CompileBindings="False"
+                                                                Command="{Binding Remove}">
+                                                                Remove
+                                                            </Button>
+                                                        </WrapPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
                                     </Expander>
+                                    <StackPanel IsVisible="{Binding IsEmpty}" Background="Black" MinHeight="75">
+                                        <WrapPanel Margin="20 20 20 0">
+                                            <Image ToolTip.Tip="{Binding LocalisedName}"
+                                                   IsVisible="{Binding IsController}"
+                                                   HorizontalAlignment="Center" Width="75"
+                                                   Source="{Binding Image}"
+                                                   Opacity="{Binding ImageOpacity}">
+                                            </Image>
+                                            <Label IsVisible="{Binding IsKeyboard}"
+                                                   Content="{Binding Name}">
+                                            </Label>
+                                            <ContentControl Content="{Binding}"
+                                                            ContentTemplate="{StaticResource OutputHeaderTemplates}">
+                                            </ContentControl>
+                                            <Button
+                                                x:CompileBindings="False"
+                                                Command="{Binding Remove}">
+                                                Remove
+                                            </Button>
+                                        </WrapPanel>
+                                        <Label Foreground="Red" Margin="20 20 20 0"
+                                               Content="{Binding ErrorText}"
+                                               IsVisible="{Binding ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        </Label>
+                                    </StackPanel>
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

@@ -144,8 +144,8 @@ public class Santroller : ConfigurableUsbDevice
 
     public override async Task LoadConfiguration(ConfigViewModel model)
     {
-        try
-        {
+        // try
+        // {
             var fCpuStr = Encoding.UTF8.GetString(ReadData(0, ((byte) Commands.CommandReadFCpu), 32)).Replace("\0", "")
                 .Replace("L", "").Trim();
             var fCpu = uint.Parse(fCpuStr);
@@ -167,14 +167,14 @@ public class Santroller : ConfigurableUsbDevice
             await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
             Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
             _deviceControllerType = model.DeviceType;
-        }
-        catch (Exception ex) when (ex is JsonException or FormatException or InvalidOperationException)
-        {
-            Console.WriteLine(ex);
-            throw new NotImplementedException(
-                "Configuration missing from Santroller device, are you sure this is a real santroller device?");
-            // TODO: throw a better exception here, and handle this in the gui, so that a device that appears to be missing its config doesn't do something weird.
-        }
+        // }
+        // catch (Exception ex) when (ex is JsonException or FormatException or InvalidOperationException)
+        // {
+        //     Console.WriteLine(ex);
+        //     throw new NotImplementedException(
+        //         "Configuration missing from Santroller device, are you sure this is a real santroller device?");
+        //     // TODO: throw a better exception here, and handle this in the gui, so that a device that appears to be missing its config doesn't do something weird.
+        // }
 
         StartTicking(model);
     }

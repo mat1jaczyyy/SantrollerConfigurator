@@ -20,4 +20,6 @@ public abstract class CombinedOutput : Output
     public override bool IsKeyboard => false;
     public override bool IsController => true;
     public override bool IsMidi => false;
+
+    public override bool Valid => true;
 }
