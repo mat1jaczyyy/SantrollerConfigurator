@@ -86,8 +86,6 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.B), "Red Fret / B Button"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.Y), "Euphoria / Y Button"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.X), "Blue Fret / X Button"},
-                {new(DeviceControllerType.Turntable, null, StandardButtonType.Lb), "Left Turntable Fret Flag"},
-                {new(DeviceControllerType.Turntable, null, StandardButtonType.Rb), "Right Turntable Fret Flag"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.Up), "D-pad Up"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.Down), "D-pad Down"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.Left), "D-pad Left"},

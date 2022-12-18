@@ -941,7 +941,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
         public bool IsCombinedChild(Output output)
         {
-            return Bindings.Contains(output);
+            return !Bindings.Contains(output);
         }
 
         public Dictionary<string, List<int>> GetPins(string type)

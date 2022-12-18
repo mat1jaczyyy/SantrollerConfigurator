@@ -481,6 +481,8 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public abstract bool IsKeyboard { get; }
     public abstract bool IsController { get; }
+
+    public bool ChildOfCombined => Model.IsCombinedChild(this);
     public abstract bool IsMidi { get; }
     public bool IsEmpty => this is EmptyOutput;
 
