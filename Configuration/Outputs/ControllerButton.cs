@@ -127,7 +127,7 @@ public class ControllerButton : OutputButton
             }
         }
 
-        return HatOrder.Contains(Type) ? HatOrder.IndexOf(Type).ToString() : $"(consoleType == SWITCH ? {OrderSwitch.IndexOf(Type).ToString()}) : {Order.IndexOf(Type).ToString()})";
+        return HatOrder.Contains(Type) ? HatOrder.IndexOf(Type).ToString() : $"(consoleType == SWITCH ? {OrderSwitch.IndexOf(Type).ToString()} : {Order.IndexOf(Type).ToString()})";
     }
 
     public override string GenerateOutput(bool xbox)
