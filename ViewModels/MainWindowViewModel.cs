@@ -219,7 +219,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             public bool Open(out UsbDevice usbDevice)
             {
                 usbDevice = _dev.Device;
-                return usbDevice.Open();
+                return usbDevice != null && usbDevice.Open();
             }
         }
 

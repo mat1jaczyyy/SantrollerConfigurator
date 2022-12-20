@@ -12,16 +12,12 @@ public class AssetUtils
 {
     public static async Task ExtractFile(string file, string location)
     {
-        using (var f = File.OpenWrite(location))
-        {
-            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-            var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
-            var uri = new Uri($"avares://{assemblyName}/Assets/{file}");
-            using (var target = assets!.Open(uri))
-            {
-                await target.CopyToAsync(f).ConfigureAwait(false);
-            }
-        }
+        await using var f = File.OpenWrite(location);
+        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
+        var uri = new Uri($"avares://{assemblyName}/Assets/{file}");
+        await using var target = assets!.Open(uri);
+        await target.CopyToAsync(f).ConfigureAwait(false);
     }
 
     public static async Task ExtractZip(string zip, string zipLocation, string location)
@@ -35,10 +31,6 @@ public class AssetUtils
     {
         var folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var path = Path.Combine(folder, "SantrollerConfigurator");
-        if (!File.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
 
         return path;
     }

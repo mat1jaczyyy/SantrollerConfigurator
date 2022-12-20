@@ -477,7 +477,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
             var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
-            var configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
+            var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
             var lines = new List<string>();
             var leds = outputs.SelectMany(s => s.Outputs.Items).SelectMany(s => s.LedIndices).ToList();
             var ledCount = 0;
