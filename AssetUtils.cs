@@ -34,6 +34,12 @@ public class AssetUtils
     public static string GetAppDataFolder()
     {
         var folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(folder, "SantrollerConfigurator");
+        var path = Path.Combine(folder, "SantrollerConfigurator");
+        if (!File.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+
+        return path;
     }
 }
