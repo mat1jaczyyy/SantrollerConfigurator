@@ -101,11 +101,11 @@ public class Ardwiino : ConfigurableUsbDevice
         WriteData(JumpBootloaderCommandUno, RequestHidSetReport, Array.Empty<byte>());
     }
 
-    public override async Task LoadConfiguration(ConfigViewModel model)
+    public override void LoadConfiguration(ConfigViewModel model)
     {
         if (!MigrationSupported)
         {
-            await model.SetDefaults(Board.FindMicrocontroller(Board));
+            model.SetDefaults(Board.FindMicrocontroller(Board));
             return;
         }
 
@@ -638,7 +638,7 @@ public class Ardwiino : ConfigurableUsbDevice
         model.XInputOnWindows = xinputOnWindows;
         model.Bindings.Clear();
         model.Bindings.AddRange(bindings);
-        await model.Write();
+        model.Write();
     }
 
     enum SubType

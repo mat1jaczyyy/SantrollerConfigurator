@@ -142,7 +142,7 @@ public class Santroller : ConfigurableUsbDevice
         }
     }
 
-    public override async Task LoadConfiguration(ConfigViewModel model)
+    public override async void LoadConfiguration(ConfigViewModel model)
     {
         // try
         // {

@@ -64,7 +64,7 @@ public class Dfu : IConfigurableDevice
         return false;
     }
 
-    public async Task LoadConfiguration(ConfigViewModel model)
+    public void LoadConfiguration(ConfigViewModel model)
     {
         Board board = Board;
         if (Board.ArdwiinoName == "usb")
@@ -84,7 +84,7 @@ public class Dfu : IConfigurableDevice
                     throw new ArgumentOutOfRangeException();
             }
         }
-        await model.SetDefaults(Board.FindMicrocontroller(board));
+        model.SetDefaults(Board.FindMicrocontroller(board));
     }
 
     public Task<string?> GetUploadPort()

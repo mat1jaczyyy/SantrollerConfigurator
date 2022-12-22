@@ -15,7 +15,7 @@ public interface IConfigurableDevice {
 
     public bool DeviceAdded(IConfigurableDevice device);
 
-    public Task LoadConfiguration(ConfigViewModel model);
+    public void LoadConfiguration(ConfigViewModel model);
 
     public Task<string?> GetUploadPort();
 

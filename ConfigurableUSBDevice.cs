@@ -102,7 +102,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         return false;
     }
 
-    public abstract Task LoadConfiguration(ConfigViewModel model);
+    public abstract void LoadConfiguration(ConfigViewModel model);
 
     public async Task<string?> GetUploadPort()
     {
