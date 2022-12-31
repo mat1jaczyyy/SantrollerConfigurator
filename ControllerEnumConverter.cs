@@ -81,6 +81,7 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Right), "D-pad Right"},
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Start), "Start Button"},
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Select), "Select Button"},
+                {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.LeftStick), "GHTV Button"},
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Home), "Home Button"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.A), "Green Fret / A Button"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.B), "Red Fret / B Button"},
