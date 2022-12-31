@@ -101,9 +101,9 @@ public class Arduino : IConfigurableDevice
         return Board.MegaBoards.Contains(Board);
     }
 
-    public async Task LoadConfiguration(ConfigViewModel model)
+    public void LoadConfiguration(ConfigViewModel model)
     {
-        await model.SetDefaults(Board.FindMicrocontroller(Board));
+        model.SetDefaults(Board.FindMicrocontroller(Board));
     }
 
     public Task<string?> GetUploadPort()

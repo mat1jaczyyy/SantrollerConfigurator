@@ -288,8 +288,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
         private readonly ObservableAsPropertyHelper<bool> _bindableSpi;
         public bool BindableSpi => _bindableSpi.Value;
 
-        private string _platformIoText = "";
-
         public ConfigViewModel(MainWindowViewModel screen)
         {
             ShowIssueDialog = new Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>();
@@ -303,7 +301,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             Main = screen;
             HostScreen = screen;
 
-            WriteConfig = ReactiveCommand.CreateFromTask(Write,
+            WriteConfig = ReactiveCommand.CreateFromObservable(Write,
                 this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
                     .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.Item1 && x.Item2 && !x.Item3));
             GoBack = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute);
@@ -337,26 +335,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             _availableSckPins = this.WhenAnyValue(x => x.MicroController)
                 .Select(GetSckPins)
                 .ToProperty(this, x => x.AvailableSckPins);
-            Main.Pio.PlatformIoWorking += working =>
-            {
-                if (working)
-                {
-                    _platformIoText = "";
-                }
-            };
-            Main.Pio.TextChanged += (message, clear) =>
-            {
-                _platformIoText += message;
-                _platformIoText += "\n";
-            };
-
-            Main.Pio.PlatformIoError += val =>
-            {
-                if (val)
-                {
-                    ShowIssueDialog.Handle((_platformIoText, this)).ToTask();
-                }
-            };
         }
 
         private readonly ObservableAsPropertyHelper<string?> _writeToolTip;
@@ -383,12 +361,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 .Select(s => s.Key).ToList();
         }
 
-        public async Task Write()
+        public IObservable<PlatformIo.PlatformIoState> Write()
         {
-            await Main.Write(this);
+            return Main.Write(this);
         }
 
-        public async Task SetDefaults(Microcontroller microcontroller)
+        public void SetDefaults(Microcontroller microcontroller)
         {
             ClearOutputs();
             MicroController = microcontroller;
@@ -418,13 +396,14 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             if (Main.IsUno || Main.IsMega)
             {
-                await Task.WhenAll(Write(), ShowUnoShortDialog.Handle((Arduino) Main.SelectedDevice!).ToTask());
+                Write();
+                _ = ShowUnoShortDialog.Handle((Arduino) Main.SelectedDevice!).ToTask();
                 return;
             }
 
             UpdateErrors();
 
-            await Write();
+            Write();
         }
 
         private async void SetDefaultBindings(EmulationType emulationType)
@@ -477,7 +456,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
             var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
             var directInputs = inputs.OfType<DirectInput>().ToList();
-            var configFile = Path.Combine(pio.ProjectDir, "include", "config_data.h");
+            var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
             var lines = new List<string>();
             var leds = outputs.SelectMany(s => s.Outputs.Items).SelectMany(s => s.LedIndices).ToList();
             var ledCount = 0;

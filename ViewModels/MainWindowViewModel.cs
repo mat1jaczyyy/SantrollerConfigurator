@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Timers;
@@ -169,11 +170,10 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             set => this.RaiseAndSetIfChanged(ref _message, value);
         }
 
-        internal async Task Write(ConfigViewModel config)
+        internal IObservable<PlatformIo.PlatformIoState> Write(ConfigViewModel config)
         {
-            if (config.MicroController == null) return;
             config.Generate(Pio);
-            var env = config.MicroController.Board.Environment;
+            var env = config.MicroController!.Board.Environment;
             if (config.MicroController.Board.HasUsbmcu)
             {
                 env += "_usb";
@@ -185,9 +185,29 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 env = env.Replace("_16", "");
             }
 
-            await Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
-                "Writing", 0,
+            var output = "";
+            _programming = true;
+            var command = Pio.RunPlatformIo(env, new[] { "run", "--target", "upload" },
+                "Writing",
                 0, 90, SelectedDevice);
+            command.Subscribe(s =>
+                {
+                    UpdateProgress(s);
+                    if (s.Log != null)
+                    {
+                        output += s.Log + "\n";
+                    }
+                }, (_) =>
+                {
+                    ProgressbarColor = "red";
+                    config.ShowIssueDialog.Handle((output, config)).ToTask();
+                    _programming = false;
+                },
+                () =>
+                {
+                    _programming = false;
+                });
+            return command;
         }
 
         private readonly IDeviceNotifier _deviceListener;
@@ -219,7 +239,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             public bool Open(out UsbDevice usbDevice)
             {
                 usbDevice = _dev.Device;
-                return usbDevice.Open();
+                return usbDevice != null && usbDevice.Open();
             }
         }
 
@@ -263,15 +283,6 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             _newDevice = this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s != null && s is not Ardwiino && s is not Santroller)
                 .ToProperty(this, s => s.NewDevice);
-            Pio.TextChanged += (message, clear) => { Console.WriteLine(message); };
-
-            Pio.PlatformIoError += val => { ProgressbarColor = val ? "red" : "#FF0078D7"; };
-
-            Pio.ProgressChanged += (message, val, val2) =>
-            {
-                Message = message;
-                Progress = val2;
-            };
 
             Devices.CollectionChanged += (_, e) =>
             {
@@ -303,8 +314,11 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             _deviceListener.OnDeviceNotify += OnDeviceNotify;
             _timer.Elapsed += DevicePoller_Tick;
             _timer.AutoReset = false;
-            Pio.PlatformIoInstalled += () =>
+            StartWorking();
+            Pio.InitialisePlatformIo().Subscribe(UpdateProgress, (_) => ProgressbarColor = "red", () =>
             {
+                Complete(100);
+                Working = false;
                 Installed = true;
                 foreach (UsbRegistry dev in UsbDevice.AllDevices)
                 {
@@ -312,12 +326,28 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 }
 
                 _timer.Start();
-            };
-            Pio.PlatformIoWorking += working => { Working = working; };
-            Pio.PlatformIoProgramming += programming => { _programming = programming; };
-            _ = Pio.InitialisePlatformIo();
+            });
 
             Task.Run(InstallDependencies);
+        }
+
+        private void Complete(int total)
+        {
+            Working = false;
+            Message = "Done";
+            Progress = total;
+        }
+
+        private void StartWorking()
+        {
+            Working = true;
+            ProgressbarColor = "#FF0078D7";
+        }
+
+        private void UpdateProgress(PlatformIo.PlatformIoState state)
+        {
+            Progress = state.Percentage;
+            Message = state.Message;
         }
 
         private readonly List<string> _currentDrives = new();
@@ -334,14 +364,12 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
             {
                 Devices.Add(device);
             }
-
             if (_disconnectedDevice == null) return;
             if (!_disconnectedDevice.DeviceAdded(device)) return;
             if (device is not ConfigurableUsbDevice) return;
             SelectedDevice = device;
             _disconnectedDevice = null;
-            Message = "Writing - Done";
-            Progress = 100;
+            Complete(100);
         }
 
         private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
@@ -366,7 +394,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
                 _currentDrives.Add(drive.RootDirectory.FullName);
             }
-            
+
             // We removed all valid devices above, so anything left in currentDrivesSet is no longer valid
             Devices.RemoveMany(Devices.Where(x => x is PicoDevice pico && _currentDrivesTemp.Contains(pico.GetPath())));
             _currentDrives.RemoveMany(_currentDrivesTemp);
@@ -418,27 +446,25 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 }
                 else if (e.Device.Open(out var dev))
                 {
-                    var revision = (ushort) dev.Info.Descriptor.BcdDevice;
+                    var revision = (ushort)dev.Info.Descriptor.BcdDevice;
                     var product = dev.Info.ProductString;
                     var serial = dev.Info.SerialString;
-                    if (product == "Santroller")
+                    switch (product)
                     {
-                        if (_programming && !IsPico) return;
-                        AddDevice(new Santroller(Pio, e.Device.Name, dev, product, serial, revision));
-                    }
-                    else if (product == "Ardwiino")
-                    {
-                        if (_programming) return;
-                        if (revision == Ardwiino.SerialArdwiinoRevision)
-                        {
+                        case "Santroller" when _programming && !IsPico:
                             return;
-                        }
-
-                        AddDevice(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
-                    }
-                    else
-                    {
-                        dev.Close();
+                        case "Santroller":
+                            AddDevice(new Santroller(Pio, e.Device.Name, dev, product, serial, revision));
+                            break;
+                        case "Ardwiino" when _programming:
+                        case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
+                            return;
+                        case "Ardwiino":
+                            AddDevice(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
+                            break;
+                        default:
+                            dev.Close();
+                            break;
                     }
                 }
             }
@@ -495,7 +521,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 await AssetUtils.ExtractZip("dfu.zip", driverZip, driverFolder);
 
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
-                info.ArgumentList.AddRange(new[] {"-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf")});
+                info.ArgumentList.AddRange(new[] { "-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf") });
                 info.UseShellExecute = true;
                 info.Verb = "runas";
                 Process.Start(info);
@@ -507,7 +533,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 var rules = Path.Combine(appdataFolder, UdevFile);
                 await AssetUtils.ExtractFile(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
-                info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});
+                info.ArgumentList.AddRange(new[] { "cp", rules, UdevPath });
                 info.UseShellExecute = true;
                 Process.Start(info);
             }
