@@ -26,7 +26,7 @@ jobs:
         with:
           dotnet-version: "7.0"
       - name: Add repo
-        run: dotnet nuget add source "https://nuget.pkg.github.com/sanjay900/index.json" --name "github" --username "sanjay.govind9@gmail.com" --password "${{ secrets.FEED_GITHUB_TOKEN }}"
+        run: dotnet nuget add source "https://nuget.pkg.github.com/sanjay900/index.json" --name "github" --username "sanjay.govind9@gmail.com" --store-password-in-clear-text  --password "${{ secrets.FEED_GITHUB_TOKEN }}"
       - name: Install dependencies
         run: dotnet restore
       - name: Build
@@ -54,7 +54,7 @@ jobs:
         with:
           dotnet-version: "7.0"
       - name: Add repo
-        run: dotnet nuget add source "https://nuget.pkg.github.com/sanjay900/index.json" --name "github" --username "sanjay.govind9@gmail.com" --password "${{ secrets.FEED_GITHUB_TOKEN }}"
+        run: dotnet nuget add source "https://nuget.pkg.github.com/sanjay900/index.json" --name "github" --username "sanjay.govind9@gmail.com" --store-password-in-clear-text  --password "${{ secrets.FEED_GITHUB_TOKEN }}"
       - name: Install dependencies
         run: dotnet restore
       - uses: actions/checkout@v2
@@ -87,7 +87,7 @@ jobs:
         with:
           dotnet-version: "7.0"
       - name: Add repo
-        run: dotnet nuget add source "https://nuget.pkg.github.com/sanjay900/index.json" --name "github" --username "sanjay.govind9@gmail.com" --password "${{ secrets.FEED_GITHUB_TOKEN }}"
+        run: dotnet nuget add source "https://nuget.pkg.github.com/sanjay900/index.json" --name "github" --username "sanjay.govind9@gmail.com" --store-password-in-clear-text  --password "${{ secrets.FEED_GITHUB_TOKEN }}"
       - name: Install dependencies
         run: dotnet restore
       - uses: actions/checkout@v2
