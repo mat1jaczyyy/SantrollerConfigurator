@@ -1,14 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.Serialization;
+using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class DrumAxis : OutputAxis
 {

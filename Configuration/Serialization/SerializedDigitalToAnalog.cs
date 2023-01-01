@@ -1,9 +1,9 @@
-using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.Conversions;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 
 [ProtoContract(SkipConstructor = true)]
 public class SerializedDigitalToAnalog : SerializedInput

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Platform;
 
-namespace GuitarConfiguratorSharp.NetCore;
+namespace GuitarConfigurator.NetCore;
 
 public class AssetUtils
 {

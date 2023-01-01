@@ -1,4 +1,4 @@
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
+namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum WiiInputType
 {

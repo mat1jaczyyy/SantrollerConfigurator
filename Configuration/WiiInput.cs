@@ -2,21 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Reflection;
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
-using ReactiveUI;
-using static GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined.WiiCombinedOutput;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Serialization;
+using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.ViewModels;
+using static GuitarConfigurator.NetCore.Configuration.Outputs.Combined.WiiCombinedOutput;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Wii;
+namespace GuitarConfigurator.NetCore.Configuration;
 
 public class WiiInput : TwiInput
 {

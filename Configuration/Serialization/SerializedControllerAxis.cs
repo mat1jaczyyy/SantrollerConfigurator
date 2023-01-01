@@ -1,12 +1,12 @@
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.DJ;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 
 [ProtoContract(SkipConstructor = true)]
 public class SerializedControllerAxis : SerializedOutput

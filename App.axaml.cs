@@ -2,12 +2,12 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
-using GuitarConfiguratorSharp.NetCore.Views;
+using GuitarConfigurator.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Views;
 using ReactiveUI;
 using Splat;
 
-namespace GuitarConfiguratorSharp.NetCore
+namespace GuitarConfigurator.NetCore
 {
     public class App : Application
     {

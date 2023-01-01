@@ -1,4 +1,4 @@
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
+namespace GuitarConfigurator.NetCore.Configuration.Neck;
 
 public enum GhWtInputType 
 {

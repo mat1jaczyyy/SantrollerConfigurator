@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers
+namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers
 {
     public abstract class Microcontroller
     {

@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfigurator.NetCore.Configuration;
 
 public abstract class SpiInput : Input, ISpi
 {

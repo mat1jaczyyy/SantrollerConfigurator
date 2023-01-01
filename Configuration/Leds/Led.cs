@@ -1,6 +1,6 @@
 using Avalonia.Media;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Leds;
+namespace GuitarConfigurator.NetCore.Configuration.Leds;
 
 public class Led
 {

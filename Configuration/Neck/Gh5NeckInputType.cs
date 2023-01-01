@@ -1,6 +1,6 @@
 using System;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Neck;
+namespace GuitarConfigurator.NetCore.Configuration.Neck;
 
 [Flags]
 public enum BarButton

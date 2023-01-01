@@ -8,7 +8,7 @@ using System.Web;
 using System.Windows.Input;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.ViewModels;
+namespace GuitarConfigurator.NetCore.ViewModels;
 
 public class RaiseIssueWindowViewModel : ReactiveObject
 {

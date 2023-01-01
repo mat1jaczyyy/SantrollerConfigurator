@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public class Mega : AvrController
 {

@@ -2,7 +2,7 @@ using System;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace GuitarConfiguratorSharp.NetCore.Utils
+namespace GuitarConfigurator.NetCore.Utils
 {
     public partial class PlatformIoPort
     {

@@ -1,7 +1,7 @@
 using System;
 using Avalonia.Media;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Types;
+namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum LedType
 {

@@ -9,12 +9,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using GuitarConfiguratorSharp.NetCore.Utils;
+using GuitarConfigurator.NetCore.Utils;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 using Mono.Unix;
 
-namespace GuitarConfiguratorSharp.NetCore
+namespace GuitarConfigurator.NetCore
 {
     public class PlatformIo
     {

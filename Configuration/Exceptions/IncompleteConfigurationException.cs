@@ -1,6 +1,6 @@
 using System;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
+namespace GuitarConfigurator.NetCore.Configuration.Exceptions;
 
 public class IncompleteConfigurationException: Exception
 {

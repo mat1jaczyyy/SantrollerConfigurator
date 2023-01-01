@@ -1,19 +1,14 @@
 using System;
-using System.Diagnostics;
-using System.Net.Http;
 using System.Reactive;
-using System.Reactive.Linq;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using System.Web;
 using System.Windows.Input;
 using Avalonia.Media.Imaging;
-using GuitarConfiguratorSharp.NetCore.Configuration;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.ViewModels;
+namespace GuitarConfigurator.NetCore.ViewModels;
 
 public class BindAllWindowViewModel : ReactiveObject
 {

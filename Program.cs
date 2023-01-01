@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore
+namespace GuitarConfigurator.NetCore
 {
     public static class Program
     {

@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using GuitarConfiguratorSharp.NetCore.Configuration;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Views
+namespace GuitarConfigurator.NetCore.Views
 {
     public class ConfigView : ReactiveUserControl<ConfigViewModel>
     {

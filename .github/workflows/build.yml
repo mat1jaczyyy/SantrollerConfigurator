@@ -190,7 +190,7 @@ jobs:
           name: "Preview Build"
           files: |
             ./windows/*.exe
-            ./mac/*.dmg
-            ./linux/*.AppImage
+            ./mac/*
+            ./linux/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

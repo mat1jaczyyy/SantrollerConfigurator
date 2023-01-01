@@ -1,20 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-using Avalonia.Collections;
 using Avalonia.Media;
 using DynamicData;
-using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Serialization;
+using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
+namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public class WiiCombinedOutput : CombinedTwiOutput
 {

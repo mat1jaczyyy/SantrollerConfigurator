@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Types;
+namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum EmulationType
 {

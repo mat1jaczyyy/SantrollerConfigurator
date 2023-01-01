@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Types;
+namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 
 public enum DrumAxisType

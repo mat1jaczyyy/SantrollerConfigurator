@@ -6,7 +6,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
-namespace GuitarConfiguratorSharp.NetCore;
+namespace GuitarConfigurator.NetCore;
 
 /// <summary>
 /// <para>

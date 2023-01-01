@@ -1,15 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
-using ReactiveUI;
+using GuitarConfigurator.NetCore.Configuration.Exceptions;
+using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public abstract class OutputButton : Output
 {

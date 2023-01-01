@@ -1,11 +1,11 @@
 using System;
 using System.Threading.Tasks;
-using GuitarConfiguratorSharp.NetCore.Utils;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Utils;
+using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
 using LibUsbDotNet.Main;
 
-namespace GuitarConfiguratorSharp.NetCore;
+namespace GuitarConfigurator.NetCore;
 
 public abstract class ConfigurableUsbDevice : IConfigurableDevice
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.ViewModels
+namespace GuitarConfigurator.NetCore.ViewModels
 {
     public class MainViewModel : ReactiveObject, IRoutableViewModel
     {

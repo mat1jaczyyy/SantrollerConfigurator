@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
+namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum Ps3AxisType
 {

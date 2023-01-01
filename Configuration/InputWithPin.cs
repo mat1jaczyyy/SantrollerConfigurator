@@ -1,14 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
-using HidSharp.Reports.Units;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration;
+namespace GuitarConfigurator.NetCore.Configuration;
 
 public abstract class InputWithPin : Input
 {

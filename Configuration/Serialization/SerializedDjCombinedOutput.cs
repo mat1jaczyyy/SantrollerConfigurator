@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.DJ;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
+using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 
 [ProtoContract(SkipConstructor = true)]
 public class SerializedDjCombinedOutput : SerializedOutput

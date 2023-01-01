@@ -1,13 +1,11 @@
-using System;
 using System.IO.Ports;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using GuitarConfiguratorSharp.NetCore.Utils;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Utils;
+using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore;
+namespace GuitarConfigurator.NetCore;
 
 public class Arduino : IConfigurableDevice
 {

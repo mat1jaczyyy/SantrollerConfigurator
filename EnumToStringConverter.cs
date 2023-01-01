@@ -5,7 +5,7 @@ using System.Reflection;
 using Avalonia.Data.Converters;
 using Humanizer;
 
-namespace GuitarConfiguratorSharp.NetCore;
+namespace GuitarConfigurator.NetCore;
 
 public class EnumToStringConverter : IValueConverter
 {

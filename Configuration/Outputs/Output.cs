@@ -8,26 +8,22 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using DynamicData;
-using DynamicData.Binding;
-using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
-using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
-using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.Configuration.Wii;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.Conversions;
+using GuitarConfigurator.NetCore.Configuration.DJ;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Neck;
+using GuitarConfigurator.NetCore.Configuration.Serialization;
+using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
+namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public abstract class Output : ReactiveObject, IDisposable
 {

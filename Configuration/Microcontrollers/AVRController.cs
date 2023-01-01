@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DynamicData;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public abstract class AvrController : Microcontroller
 {

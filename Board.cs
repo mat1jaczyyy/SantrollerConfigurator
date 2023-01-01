@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
-namespace GuitarConfiguratorSharp.NetCore
+namespace GuitarConfigurator.NetCore
 {
     public struct Board
     {

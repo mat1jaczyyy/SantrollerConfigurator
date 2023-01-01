@@ -1,19 +1,17 @@
 <UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:netCore="clr-namespace:GuitarConfiguratorSharp.NetCore"
-             xmlns:viewModels="clr-namespace:GuitarConfiguratorSharp.NetCore.ViewModels"
-             xmlns:configuration="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration"
-             xmlns:neck="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Neck"
-             xmlns:conversions="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Conversions"
-             xmlns:dj="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.DJ"
-             xmlns:ps2="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.PS2"
-             xmlns:wii="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Wii"
-             xmlns:output="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Outputs"
-             xmlns:combined="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:viewModels="clr-namespace:GuitarConfigurator.NetCore.ViewModels"
+             xmlns:netCore="clr-namespace:GuitarConfigurator.NetCore"
+             xmlns:conversions="clr-namespace:GuitarConfigurator.NetCore.Configuration.Conversions"
+             xmlns:combined="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs.Combined"
+             xmlns:output="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs"
+             xmlns:neck="clr-namespace:GuitarConfigurator.NetCore.Configuration.Neck"
+             xmlns:dj="clr-namespace:GuitarConfigurator.NetCore.Configuration.DJ"
+             xmlns:ps2="clr-namespace:GuitarConfigurator.NetCore.Configuration"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
-             x:Class="GuitarConfiguratorSharp.NetCore.Views.ConfigView"
+             x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
              Background="Transparent">
     <UserControl.Styles>
@@ -165,7 +163,7 @@
                     </ComboBox>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type wii:WiiInput}">
+            <DataTemplate DataType="{x:Type ps2:WiiInput}">
                 <StackPanel Orientation="Horizontal">
                     <Image IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Center" Width="75"
@@ -179,7 +177,7 @@
                     </ComboBox>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type configuration:DirectInput}">
+            <DataTemplate DataType="{x:Type ps2:DirectInput}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
                         <Label VerticalAlignment="Center" Width="150">Pin Mode</Label>
@@ -442,7 +440,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type conversions:MacroInput}">
+            <DataTemplate DataType="{x:Type ps2:MacroInput}">
                 <StackPanel Orientation="Horizontal">
                     <ContentControl Content="{Binding Child1}"
                                     ContentTemplate="{StaticResource OutputTemplates}">

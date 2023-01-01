@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Collections;
 using Avalonia.Media;
 using DynamicData;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Neck;
-using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Neck;
+using GuitarConfigurator.NetCore.Configuration.Serialization;
+using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
+namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public class GhwtCombinedOutput : CombinedOutput
 {

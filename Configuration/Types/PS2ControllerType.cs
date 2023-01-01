@@ -1,4 +1,4 @@
-namespace GuitarConfiguratorSharp.NetCore.Configuration.PS2;
+namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum Ps2ControllerType: byte
 {

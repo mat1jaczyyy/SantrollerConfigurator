@@ -1,10 +1,9 @@
-using Avalonia.Media;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 
 [ProtoInclude(100, typeof(SerializedKeyboardButton))]
 [ProtoInclude(101, typeof(SerializedMouseAxis))]

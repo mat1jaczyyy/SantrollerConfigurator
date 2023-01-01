@@ -1,10 +1,6 @@
-using System;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
-using ReactiveUI;
+using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public class PicoSpiConfig : SpiConfig
 {

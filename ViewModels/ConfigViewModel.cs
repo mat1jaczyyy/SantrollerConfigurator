@@ -12,21 +12,19 @@ using Avalonia.Collections;
 using Avalonia.Input;
 using Avalonia.Media;
 using DynamicData;
-using GuitarConfiguratorSharp.NetCore.Configuration;
-using GuitarConfiguratorSharp.NetCore.Configuration.Conversions;
-using GuitarConfiguratorSharp.NetCore.Configuration.DJ;
-using GuitarConfiguratorSharp.NetCore.Configuration.Exceptions;
-using GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs;
-using GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined;
-using GuitarConfiguratorSharp.NetCore.Configuration.PS2;
-using GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.Utils;
+using GuitarConfigurator.NetCore.Configuration;
+using GuitarConfigurator.NetCore.Configuration.Conversions;
+using GuitarConfigurator.NetCore.Configuration.DJ;
+using GuitarConfigurator.NetCore.Configuration.Exceptions;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
+using GuitarConfigurator.NetCore.Configuration.Serialization;
+using GuitarConfigurator.NetCore.Configuration.Types;
 using ProtoBuf;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.ViewModels
+namespace GuitarConfigurator.NetCore.ViewModels
 {
     public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {

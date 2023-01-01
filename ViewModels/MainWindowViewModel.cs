@@ -23,7 +23,7 @@ using Timer = System.Timers.Timer;
 using GuitarConfigurator.NetCore.Notify;
 #endif
 
-namespace GuitarConfiguratorSharp.NetCore.ViewModels
+namespace GuitarConfigurator.NetCore.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     {
@@ -288,23 +288,23 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
 
             Devices.CollectionChanged += (_, e) =>
             {
-                if (e.Action == NotifyCollectionChangedAction.Add)
+                switch (e.Action)
                 {
-                    if (SelectedDevice == null)
+                    case NotifyCollectionChangedAction.Add:
+                        SelectedDevice ??= Devices.First();
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
                     {
-                        SelectedDevice = Devices.First();
-                    }
-                }
-
-                if (e.Action == NotifyCollectionChangedAction.Remove)
-                {
-                    if (Devices.Any())
-                    {
-                        if (e.OldItems!.Contains(SelectedDevice))
+                        if (Devices.Any())
                         {
-                            _ = Task.Delay(1)
-                                .ContinueWith(_ => SelectedDevice = Devices.FirstOrDefault(x => true, null));
+                            if (e.OldItems!.Contains(SelectedDevice))
+                            {
+                                _ = Task.Delay(1)
+                                    .ContinueWith(_ => SelectedDevice = Devices.FirstOrDefault(_ => true, null));
+                            }
                         }
+
+                        break;
                     }
                 }
             };

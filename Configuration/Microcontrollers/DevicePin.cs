@@ -1,6 +1,6 @@
 using System;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public class DevicePin
 {

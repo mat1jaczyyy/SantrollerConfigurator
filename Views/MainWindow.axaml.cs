@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Views
+namespace GuitarConfigurator.NetCore.Views
 {
     public class MainWindow : ReactiveWindow<MainWindowViewModel>
     {

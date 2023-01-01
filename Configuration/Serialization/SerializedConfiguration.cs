@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfiguratorSharp.NetCore.Configuration.Types;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Serialization;
+namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 
 [ProtoContract(SkipConstructor = true)]
 public class SerializedConfiguration

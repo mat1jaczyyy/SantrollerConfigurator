@@ -1,14 +1,8 @@
-using System;
-using System.Diagnostics;
-using System.Net.Http;
 using System.Reactive;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
-using System.Web;
 using System.Windows.Input;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.ViewModels;
+namespace GuitarConfigurator.NetCore.ViewModels;
 
 public class AreYouSureWindowViewModel : ReactiveObject
 {

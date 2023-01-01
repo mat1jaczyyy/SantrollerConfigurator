@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using GuitarConfiguratorSharp.NetCore.ViewModels;
+using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public class DirectPinConfig : PinConfig
 {
