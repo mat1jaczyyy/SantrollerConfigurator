@@ -3,7 +3,7 @@
         <OutputType>WinExe</OutputType>
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <RootNamespace>GuitarConfiguratorSharp.NetCore</RootNamespace>
+        <RootNamespace>GuitarConfigurator.NetCore</RootNamespace>
         <AvaloniaVersion>11.0.0-preview4</AvaloniaVersion>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
