@@ -307,7 +307,7 @@ namespace GuitarConfiguratorSharp.NetCore.ViewModels
                 }
             };
 #if Windows
-            _deviceListener = new WindowsDeviceNotifier();
+            _deviceListener = new WindowsDeviceNotifierAvalonia();
 #else
             _deviceListener = new LinuxDeviceNotifier();
 #endif

@@ -37,7 +37,6 @@ jobs:
         run: |
           mkdir out
           lipo -create bin/Release/net7.0/osx-arm64/publish/GuitarConfigurator bin/Release/net7.0/osx-x64/publish/GuitarConfigurator -output out/GuitarConfigurator-macos
-          codesign --entitlements entitlements.xml -s "guitar-configurator" "out/GuitarConfigurator-macos" --deep
       - uses: actions/upload-artifact@v1
         with:
           name: mac
