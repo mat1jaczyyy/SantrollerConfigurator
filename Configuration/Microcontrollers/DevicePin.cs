@@ -1,0 +1,33 @@
+using System;
+
+namespace GuitarConfiguratorSharp.NetCore.Configuration.Microcontrollers;
+
+public class DevicePin
+{
+    public int Pin { get; }
+    public DevicePinMode PinMode { get; }
+
+    public DevicePin(int pin, DevicePinMode pinMode)
+    {
+        Pin = pin;
+        PinMode = pinMode;
+    }
+
+    private bool Equals(DevicePin other)
+    {
+        return Pin == other.Pin && PinMode == other.PinMode;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((DevicePin) obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Pin, (int) PinMode);
+    }
+}

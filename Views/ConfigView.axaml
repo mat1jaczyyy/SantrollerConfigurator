@@ -1,0 +1,950 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:netCore="clr-namespace:GuitarConfiguratorSharp.NetCore"
+             xmlns:viewModels="clr-namespace:GuitarConfiguratorSharp.NetCore.ViewModels"
+             xmlns:configuration="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration"
+             xmlns:neck="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Neck"
+             xmlns:conversions="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Conversions"
+             xmlns:dj="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.DJ"
+             xmlns:ps2="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.PS2"
+             xmlns:wii="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Wii"
+             xmlns:output="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Outputs"
+             xmlns:combined="clr-namespace:GuitarConfiguratorSharp.NetCore.Configuration.Outputs.Combined"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
+             x:Class="GuitarConfiguratorSharp.NetCore.Views.ConfigView"
+             x:CompileBindings="True"
+             Background="Transparent">
+    <UserControl.Styles>
+        <Style Selector="ComboBoxItem">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ComboBoxItem TextBlock">
+            <Setter Property="Padding" Value="{DynamicResource ComboBoxItemThemePadding}" />
+        </Style>
+    </UserControl.Styles>
+    <UserControl.Resources>
+        <netCore:EnumToStringConverter x:Key="EnumToStringConverter" />
+        <netCore:PinToStringConverter x:Key="PinToStringConverter" />
+        <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
+        <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
+            <TextBlock x:CompileBindings="False">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource PinToStringConverter }">
+                        <Binding></Binding>
+                        <Binding Path="$parent[UserControl].DataContext.MicroController"></Binding>
+                        <Binding Path="$parent[UserControl].DataContext"></Binding>
+                        <Binding Path="$parent[ComboBox].SelectedItem"></Binding>
+                        <Binding Path="$parent[ComboBox].DataContext"></Binding>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DataTemplate>
+        <DataTemplate x:Key="ControllerEnumTemplate" DataType="system:Object">
+            <TextBlock x:CompileBindings="False">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
+                        <Binding></Binding>
+                        <Binding Path="$parent[UserControl].DataContext.DeviceType"></Binding>
+                        <Binding Path="$parent[UserControl].DataContext.RhythmType"></Binding>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DataTemplate>
+        <DataTemplate x:Key="EnumToStringTemplate" DataType="system:Object">
+            <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
+        </DataTemplate>
+        <netCore:OutputTemplateSelector x:Key="OutputHeaderTemplates">
+            <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
+                <StackPanel>
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedItem="{Binding AnalogToDigitalType}" Items="{Binding AnalogToDigitalTypes}">
+                    </ComboBox>
+                    <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
+                    <ContentControl Content="{Binding Child}"
+                                    ContentTemplate="{StaticResource OutputHeaderTemplates}">
+                    </ContentControl>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding DetectedLeft}" IsEnabled="False">Left Turntable Found</CheckBox>
+                    <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False">Right Turntable Found</CheckBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding Detected}" IsEnabled="False">Detected</CheckBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                           Content="Detected PS2 Controller Type">
+                    </Label>
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding DetectedType}">
+                    </TextBlock>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                           Content="Detected Wii Extension: ">
+                    </Label>
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding DetectedType}">
+                    </TextBlock>
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset
+                    </Button>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputAxis}">
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputButton}">
+            </DataTemplate>
+        </netCore:OutputTemplateSelector>
+        <netCore:OutputTemplateSelector x:Key="OutputTemplates">
+            <DataTemplate DataType="{x:Type neck:GhWtTapInput}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="GH WT Tap Input: "></TextBlock>
+                    <TextBlock Text="{Binding Input}"></TextBlock>
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Pin}"
+                              Items="{Binding AvailablePins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type neck:Gh5NeckInput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input: "></Label>
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="{Binding Input}"></Label>
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type dj:DjInput}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="DJ Controller Input: "></TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                              Items="{Binding AvailableSclPins}">
+                    </ComboBox>
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                              Items="{Binding AvailableSdaPins}">
+                    </ComboBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type ps2:Ps2Input}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="PS2 Controller Input: "></TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
+                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center"
+                              SelectedItem="{Binding Mosi}"
+                              Items="{Binding AvailableMosiPins}">
+                    </ComboBox>
+                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center"
+                              SelectedItem="{Binding Miso}"
+                              Items="{Binding AvailableMisoPins}">
+                    </ComboBox>
+                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center" SelectedItem="{Binding Sck}"
+                              Items="{Binding AvailableSckPins}">
+                    </ComboBox>
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Ack}"
+                              Items="{Binding AvailablePins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Att}"
+                              Items="{Binding AvailablePins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type wii:WiiInput}">
+                <StackPanel Orientation="Horizontal">
+                    <Image IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                           HorizontalAlignment="Center" Width="75"
+                           Source="{Binding Image}" Opacity="{Binding ImageOpacity}">
+                    </Image>
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type configuration:DirectInput}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
+                        <Label VerticalAlignment="Center" Width="150">Pin Mode</Label>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding PinMode}"
+                                  Items="{Binding DevicePinModes}">
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Width="150">Pin</Label>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Pin}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}">
+                        </ComboBox>
+                        <Button
+                            Command="{Binding DetectPinCommand}" Content="{Binding PinConfigText}">
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:MidiOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <NumericUpDown Value="{Binding Command}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown Value="{Binding Channel}" VerticalAlignment="Center"></NumericUpDown>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ProgressBar HorizontalAlignment="Stretch" Value="{Binding ValueMidi}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="127" Height="30"
+                                                     Width="500" />
+                                    </StackPanel>
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               Text="{Binding ValueMidi}">
+                                    </TextBlock>
+                                </Grid>
+
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid>
+                                    <Rectangle Margin="{Binding CalibrationMinMaxMargin}" HorizontalAlignment="Stretch"
+                                               Fill="Green" Height="30">
+                                    </Rectangle>
+                                    <Rectangle Margin="{Binding ComputedDeadZoneMargin}" Fill="Red"
+                                               HorizontalAlignment="Stretch" Height="30">
+                                    </Rectangle>
+                                    <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsUint}">
+                                        <ProgressBar Opacity="0.6" HorizontalAlignment="Stretch"
+                                                     Value="{Binding ValueRaw}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="65536" Height="30"
+                                                     Width="500" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}">
+                                        <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                                     Value="{Binding ValueRawLower}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30"
+                                                     Width="250">
+                                            <ProgressBar.RenderTransform>
+                                                <ScaleTransform ScaleX="-1"></ScaleTransform>
+                                            </ProgressBar.RenderTransform>
+                                        </ProgressBar>
+                                        <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                                     Value="{Binding ValueRawUpper}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30"
+                                                     Width="250" />
+                                    </StackPanel>
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               Text="{Binding ValueRaw}">
+                                    </TextBlock>
+                                </Grid>
+
+                            </StackPanel>
+                            <TextBlock
+                                IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                VerticalAlignment="Center" HorizontalAlignment="Center"
+                                Text="{Binding CalibrationText}">
+                            </TextBlock>
+
+                        </StackPanel>
+                        <Button x:CompileBindings="False" Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center">
+                            Calibrate
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputAxis}">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsDj}">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid>
+                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding Trigger}">
+                                            <ProgressBar HorizontalAlignment="Stretch" Value="{Binding Value}"
+                                                         IsIndeterminate="False" Minimum="0" Maximum="65536"
+                                                         Height="30"
+                                                         Width="500" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}">
+                                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                                         Value="{Binding ValueLower}"
+                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                         Height="30"
+                                                         Width="250">
+                                                <ProgressBar.RenderTransform>
+                                                    <ScaleTransform ScaleX="-1"></ScaleTransform>
+                                                </ProgressBar.RenderTransform>
+                                            </ProgressBar>
+                                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                                         Value="{Binding ValueUpper}"
+                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                         Height="30"
+                                                         Width="250" />
+                                        </StackPanel>
+                                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                   Text="{Binding Value}">
+                                        </TextBlock>
+                                    </Grid>
+
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid>
+                                        <Rectangle Margin="{Binding CalibrationMinMaxMargin}"
+                                                   HorizontalAlignment="Stretch"
+                                                   Fill="Green" Height="30">
+                                        </Rectangle>
+                                        <Rectangle Margin="{Binding ComputedDeadZoneMargin}" Fill="Red"
+                                                   HorizontalAlignment="Stretch" Height="30">
+                                        </Rectangle>
+                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsUint}">
+                                            <ProgressBar Opacity="0.6" HorizontalAlignment="Stretch"
+                                                         Value="{Binding ValueRaw}"
+                                                         IsIndeterminate="False" Minimum="0" Maximum="65536"
+                                                         Height="30"
+                                                         Width="500" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}">
+                                            <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
+                                                         HorizontalAlignment="Stretch"
+                                                         Value="{Binding ValueRawLower}"
+                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                         Height="30"
+                                                         Width="250">
+                                                <ProgressBar.RenderTransform>
+                                                    <ScaleTransform ScaleX="-1"></ScaleTransform>
+                                                </ProgressBar.RenderTransform>
+                                            </ProgressBar>
+                                            <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
+                                                         HorizontalAlignment="Stretch"
+                                                         Value="{Binding ValueRawUpper}"
+                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                         Height="30"
+                                                         Width="250" />
+                                        </StackPanel>
+                                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                   Text="{Binding ValueRaw}">
+                                        </TextBlock>
+                                    </Grid>
+
+                                </StackPanel>
+                                <TextBlock
+                                    IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                    VerticalAlignment="Center" HorizontalAlignment="Center"
+                                    Text="{Binding CalibrationText}">
+                                </TextBlock>
+                            </StackPanel>
+
+                        </StackPanel>
+                        <Button x:CompileBindings="False" IsVisible="{Binding !IsDigitalToAnalog}"
+                                Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center">
+                            Calibrate
+                        </Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsDj}">
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid>
+                                        <StackPanel Orientation="Horizontal">
+                                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                                         Value="{Binding ValueLower}"
+                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                         Height="30"
+                                                         Width="250">
+                                                <ProgressBar.RenderTransform>
+                                                    <ScaleTransform ScaleX="-1"></ScaleTransform>
+                                                </ProgressBar.RenderTransform>
+                                            </ProgressBar>
+                                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                                         Value="{Binding ValueUpper}"
+                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                         Height="30"
+                                                         Width="250" />
+                                        </StackPanel>
+                                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                   Text="{Binding Value}">
+                                        </TextBlock>
+                                    </Grid>
+
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Height="50">
+                                    <Slider Value="{Binding DjValue}"
+                                            Minimum="1"
+                                            Maximum="8192"
+                                            IsSnapToTickEnabled="True"
+                                            TickFrequency="1" Width="350" />
+                                    <NumericUpDown Value="{Binding DjValue}" Minimum="1"
+                                                   Maximum="8192" Width="150" Height="30">
+                                    </NumericUpDown>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:OutputButton}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center"
+                           Width="150">
+                        Debounce
+                    </Label>
+                    <NumericUpDown Value="{Binding Debounce}" VerticalAlignment="Center"></NumericUpDown>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding AnalogToDigitalType}"
+                              Items="{Binding AnalogToDigitalTypes}">
+                    </ComboBox>
+                    <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
+                    <ContentControl Content="{Binding Child}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type conversions:DigitalToAnalog}">
+                <StackPanel>
+                    <ContentControl Content="{Binding Child}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="150">
+                            Active Value
+                        </Label>
+                        <NumericUpDown Value="{Binding Off}" Maximum="{Binding Maximum}" VerticalAlignment="Center"></NumericUpDown>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="150">
+                            Inactive Value
+                        </Label>
+                        <NumericUpDown Value="{Binding On}" Minimum="{Binding Minimum}" VerticalAlignment="Center"></NumericUpDown>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type conversions:MacroInput}">
+                <StackPanel Orientation="Horizontal">
+                    <ContentControl Content="{Binding Child1}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                    <ContentControl Content="{Binding Child2}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
+                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
+                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset bindings
+                    </Button>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Scl}"
+                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Sda}"
+                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding AddTapBarFrets}">
+                        Map Tap Bar to Frets
+                    </Button>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset bindings
+                    </Button>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GHWT TapBar Input"></Label>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding AddTapBarFrets}">
+                        Map Tap Bar to Frets
+                    </Button>
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset bindings
+                    </Button>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="PS2 Controller Input"></Label>
+
+                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                           Content="Detected Controller Type">
+                    </Label>
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding DetectedType}">
+                    </TextBlock>
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}"
+                              SelectedItem="{Binding Mosi}"
+                              Items="{Binding AvailableMosiPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}"
+                              SelectedItem="{Binding Miso}"
+                              Items="{Binding AvailableMisoPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}" SelectedItem="{Binding Sck}"
+                              Items="{Binding AvailableSckPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Ack}" Items="{Binding AvailablePins}"
+                              ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Att}" Items="{Binding AvailablePins}"
+                              ItemTemplate="{StaticResource PinToStringTemplate}">
+                    </ComboBox>
+
+                    <Button
+                        x:CompileBindings="False"
+                        Command="{Binding CreateDefaults}">
+                        Reset bindings
+                    </Button>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Button
+                            x:CompileBindings="False"
+                            Command="{Binding AddTapBarFrets}">
+                            Map Tap Bar to Frets
+                        </Button>
+                        <Button
+                            x:CompileBindings="False"
+                            Command="{Binding AddNunchukAcceleration}">
+                            Map Nunchuk to Left Joystick
+                        </Button>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="150">
+                            SCL Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Scl}"
+                                  Items="{Binding AvailableSclPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}">
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="150">
+                            SDA Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Sda}"
+                                  Items="{Binding AvailableSdaPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}">
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+        </netCore:OutputTemplateSelector>
+
+        <DataTemplate DataType="output:Output" x:Key="OutputTemplate">
+            <StackPanel IsVisible="{Binding Valid}">
+                <Panel>
+                    <ContentControl Content="{Binding Input}"
+                                    ContentTemplate="{StaticResource OutputTemplates}">
+                    </ContentControl>
+
+                    <Button HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
+                            x:CompileBindings="False"
+                            Command="{Binding Remove}">
+                        Remove
+                    </Button>
+                </Panel>
+                <ContentControl Content="{Binding}"
+                                ContentTemplate="{StaticResource OutputTemplates}">
+                </ContentControl>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="AreLedsEnabled" />
+                            <Binding Path="!IsCombined" />
+                        </MultiBinding>
+                    </StackPanel.IsVisible>
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center" Width="150">
+                        Selected LEDs
+                    </Label>
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center"
+                           Content="{Binding LedIndicesDisplay}">
+                    </Label>
+                    <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
+                                   Value="{Binding LedIndex}"
+                                   VerticalAlignment="Center">
+                    </NumericUpDown>
+                    <Button x:CompileBindings="False"
+                            Command="{Binding AddLed}">
+                        Add Led
+                    </Button>
+                    <Button x:CompileBindings="False"
+                            Command="{Binding RemoveLed}">
+                        Remove Led
+                    </Button>
+                    <Button x:CompileBindings="False"
+                            Command="{Binding ClearLeds}">
+                        Clear
+                    </Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="AreLedsEnabled" />
+                            <Binding Path="!IsCombined" />
+                        </MultiBinding>
+                    </StackPanel.IsVisible>
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center" Width="150"
+                           Content="{Binding LedOnLabel}">
+                    </Label>
+                    <ColorPicker Color="{Binding LedOn}"></ColorPicker>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="AreLedsEnabled" />
+                            <Binding Path="!IsCombined" />
+                        </MultiBinding>
+                    </StackPanel.IsVisible>
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center" Width="150"
+                           Content="{Binding LedOffLabel}">
+                    </Label>
+                    <ColorPicker Color="{Binding LedOff}"></ColorPicker>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Panel>
+        <DockPanel HorizontalAlignment="Stretch">
+            <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="240">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+                <ScrollViewer VerticalAlignment="Center" Margin="0 50 0 0">
+                    <StackPanel Margin="0 0 0 40">
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Emulation Type"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedItem="{Binding EmulationType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                      Items="{Binding EmulationTypes}">
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel IsVisible="{Binding IsController}">
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedItem="{Binding DeviceType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                      Items="{Binding DeviceControllerTypes}">
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel>
+                            <StackPanel.IsVisible>
+                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                    <Binding Path="IsRhythm" />
+                                    <Binding Path="IsController" />
+                                </MultiBinding>
+                            </StackPanel.IsVisible>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Rhythm Game Type"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedItem="{Binding RhythmType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                      Items="{Binding RhythmTypes}">
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="LED Type"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedItem="{Binding LedType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}" Items="{Binding LedTypes}">
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel IsVisible="{Binding BindableSpi}">
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 CI / SCK Pin"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedItem="{Binding Apa102Mosi}"
+                                      Items="{Binding AvailableMosiPins}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}">
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel IsVisible="{Binding BindableSpi}">
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 DI / MOSI Pin"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedItem="{Binding Apa102Sck}"
+                                      Items="{Binding AvailableSckPins}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}">
+                            </ComboBox>
+
+                        </StackPanel>
+                        <Button x:CompileBindings="False" Command="{Binding AddOutput}" HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                            Add Binding
+                        </Button>
+                        <Button Command="{Binding BindAllCommand}" HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                            Bind All
+                        </Button>
+                        <Button x:CompileBindings="False" Command="{Binding ClearOutputsWithConfirmation}"
+                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                            Clear
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
+            </ExperimentalAcrylicBorder>
+            <ExperimentalAcrylicBorder DockPanel.Dock="Bottom">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+                <StackPanel>
+                    <WrapPanel Margin="10" HorizontalAlignment="Center">
+                        <Button Content="Write Configuration" Command="{Binding WriteConfig}" />
+                        <Button x:CompileBindings="False" Content="Revert device to Arduino" Command="{Binding Reset}" />
+                        <Button Content="Configure another device" Command="{Binding GoBack}" />
+                    </WrapPanel>
+                    <TextBlock IsVisible="{Binding WriteToolTip, Converter={x:Static ObjectConverters.IsNotNull}}"
+                               Foreground="Red" HorizontalAlignment="Center" Text="{Binding WriteToolTip}" />
+                    <WrapPanel HorizontalAlignment="Center">
+                        <TextBlock Text="Status: " />
+                        <TextBlock Text="{Binding Main.Message}" />
+                    </WrapPanel>
+                    <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress"
+                                 Foreground="{Binding Main.ProgressbarColor}" Value="{Binding Main.Progress}"
+                                 IsIndeterminate="False" Minimum="0" Maximum="100" Height="30" />
+                </StackPanel>
+            </ExperimentalAcrylicBorder>
+            <ExperimentalAcrylicBorder>
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+                <ScrollViewer VerticalContentAlignment="Center">
+                    <ItemsControl Items="{Binding Bindings}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="output:Output">
+                                <StackPanel>
+                                    <Expander IsVisible="{Binding !IsEmpty}" HorizontalAlignment="Stretch"
+                                              Header="{Binding}">
+                                        <Expander.HeaderTemplate>
+                                            <DataTemplate DataType="output:Output">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Image ToolTip.Tip="{Binding LocalisedName}"
+                                                               IsVisible="{Binding IsController}" Width="75"
+                                                               Source="{Binding Image}"
+                                                               Opacity="{Binding ImageOpacity}">
+                                                        </Image>
+                                                        <Label VerticalAlignment="Center"
+                                                               VerticalContentAlignment="Center"
+                                                               Content="{Binding LocalisedName}">
+
+                                                            <Label.IsVisible>
+                                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                                    <Binding Path="Input"
+                                                                             Converter="{x:Static  ObjectConverters.IsNotNull}" />
+                                                                    <Binding Path="!IsCombined" />
+                                                                    <Binding Path="IsController" />
+                                                                </MultiBinding>
+                                                            </Label.IsVisible>
+                                                        </Label>
+                                                        <Label VerticalAlignment="Center"
+                                                               VerticalContentAlignment="Center"
+                                                               IsVisible="{Binding IsKeyboard}"
+                                                               Content="{Binding Name}">
+                                                        </Label>
+                                                        <ContentControl Content="{Binding}"
+                                                                        ContentTemplate="{StaticResource OutputHeaderTemplates}">
+                                                        </ContentControl>
+                                                        <Button
+                                                            x:CompileBindings="False"
+                                                            Command="{Binding Remove}">
+                                                            Remove
+                                                        </Button>
+                                                    </StackPanel>
+                                                    <Label Foreground="Red" Margin="20 0 20 0"
+                                                           Content="{Binding ErrorText}"
+                                                           IsVisible="{Binding ErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                    </Label>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </Expander.HeaderTemplate>
+                                        <StackPanel>
+                                            <Button Command="{Binding AssignByKeyOrAxis}"
+                                                    IsVisible="{Binding IsKeyboard}"
+                                                    IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                                    Content="{Binding ButtonText}">
+                                            </Button>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Label VerticalAlignment="Center"
+                                                       VerticalContentAlignment="Center"
+                                                       Width="150">
+                                                    Input Type
+                                                </Label>
+                                                <StackPanel.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="Input"
+                                                                 Converter="{x:Static  ObjectConverters.IsNotNull}" />
+                                                        <Binding Path="!IsCombined" />
+                                                    </MultiBinding>
+                                                </StackPanel.IsVisible>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          SelectedItem="{Binding SelectedInputType}"
+                                                          Items="{Binding InputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsWii}"
+                                                          SelectedItem="{Binding WiiInputType}"
+                                                          Items="{Binding WiiInputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsDj}"
+                                                          SelectedItem="{Binding DjInputType}"
+                                                          Items="{Binding DjInputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsPs2}"
+                                                          SelectedItem="{Binding Ps2InputType}"
+                                                          Items="{Binding Ps2InputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsGh5}"
+                                                          SelectedItem="{Binding Gh5NeckInputType}"
+                                                          Items="{Binding Gh5NeckInputTypes}">
+                                                </ComboBox>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          IsVisible="{Binding IsWt}"
+                                                          SelectedItem="{Binding GhWtInputType}"
+                                                          Items="{Binding GhWtInputTypes}">
+                                                </ComboBox>
+                                            </StackPanel>
+                                            <ContentControl ContentTemplate="{StaticResource OutputTemplate}"
+                                                            Content="{Binding}">
+                                            </ContentControl>
+                                            <ItemsControl IsVisible="{Binding IsCombined}"
+                                                          HorizontalAlignment="Stretch"
+                                                          IsEnabled="{Binding IsCombined}"
+                                                          Items="{Binding DigitalOutputs}"
+                                                          ItemTemplate="{StaticResource OutputTemplate}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                            </ItemsControl>
+                                            <ItemsControl IsVisible="{Binding IsCombined}"
+                                                          HorizontalAlignment="Stretch"
+                                                          IsEnabled="{Binding IsCombined}"
+                                                          Items="{Binding AnalogOutputs}"
+                                                          ItemTemplate="{StaticResource OutputTemplate}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Expander>
+                                    <StackPanel IsVisible="{Binding IsEmpty}" Background="Black" MinHeight="75"
+                                                x:DataType="output:EmptyOutput">
+                                        <WrapPanel Margin="20 20 20 0">
+                                            <Image ToolTip.Tip="{Binding LocalisedName}"
+                                                   IsVisible="{Binding IsController}"
+                                                   HorizontalAlignment="Center" Width="75"
+                                                   Source="{Binding Image}"
+                                                   Opacity="{Binding ImageOpacity}">
+                                            </Image>
+                                            <Label IsVisible="{Binding IsKeyboard}"
+                                                   Content="{Binding Name}">
+                                            </Label>
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsController}">
+                                                    <ComboBox VerticalAlignment="Center"
+                                                              SelectedItem="{Binding CombinedType}"
+                                                              Items="{Binding CombinedTypes}"
+                                                              ItemTemplate="{StaticResource ControllerEnumTemplate}">
+                                                    </ComboBox>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
+                                                    <ComboBox VerticalAlignment="Center"
+                                                              SelectedItem="{Binding MouseAxisType}"
+                                                              Items="{Binding MouseAxisTypes}">
+                                                    </ComboBox>
+                                                    <ComboBox VerticalAlignment="Center"
+                                                              SelectedItem="{Binding MouseButtonType}"
+                                                              Items="{Binding MouseButtonTypes}">
+                                                    </ComboBox>
+                                                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Key}"
+                                                              Items="{Binding Keys}">
+                                                    </ComboBox>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <Button
+                                                x:CompileBindings="False"
+                                                Command="{Binding Remove}">
+                                                Remove
+                                            </Button>
+                                        </WrapPanel>
+                                        <Label Foreground="Red" Margin="20 20 20 0"
+                                               Content="{Binding ErrorText}"
+                                               IsVisible="{Binding ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        </Label>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </ExperimentalAcrylicBorder>
+        </DockPanel>
+    </Panel>
+</UserControl>
