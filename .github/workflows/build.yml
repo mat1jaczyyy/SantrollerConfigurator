@@ -102,7 +102,7 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: windows
-          path: artifacts
+          path: out
   release:
     if: contains(github.ref, 'tags/v')
     name: Release Build
