@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Collections;
 using DynamicData;
-using GuitarConfiguratorSharp.NetCore.Utils;
 using LibUsbDotNet;
 using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Info;
@@ -20,6 +19,9 @@ using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
 using ReactiveUI;
 using Timer = System.Timers.Timer;
+#if Windows
+using GuitarConfigurator.NetCore.Notify;
+#endif
 
 namespace GuitarConfiguratorSharp.NetCore.ViewModels
 {
