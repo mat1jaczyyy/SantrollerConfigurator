@@ -12,7 +12,7 @@ public class OutputTemplateSelector : IDataTemplate
     [Content] 
     public List<IDataTemplate> Templates { get; } = new ();
     
-    public IControl Build(object? data)
+    public Control Build(object? data)
     {
         return Templates.First(t => t.Match(data)).Build(data)!;
     }

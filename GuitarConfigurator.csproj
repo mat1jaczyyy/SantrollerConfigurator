@@ -27,12 +27,12 @@
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.0.999-cibuild0028022-beta" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.999-cibuild0028022-beta" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.999-cibuild0028022-beta" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.999-cibuild0028022-beta" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.999-cibuild0028022-beta" />
         <PackageReference Include="Dahomey.Json" Version="1.12.2" />
         <PackageReference Include="HidSharp" Version="2.1.0" />
         <PackageReference Include="Humanizer" Version="2.14.1" />
@@ -47,25 +47,37 @@
         <PackageReference Include="System.Text.Json" Version="7.0.1" />
     </ItemGroup>
     <ItemGroup>
-      <Content Include="Assets\Icons\Readme.txt" />
+        <Content Include="Assets\Icons\Readme.txt" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Update="Views\UnoShortWindow.axaml.cs">
-        <DependentUpon>UnoShortWindow.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\RaiseIssueWindow.axaml.cs">
-        <DependentUpon>RaiseIssueWindow.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\AreYouSureDialog.axaml.cs">
-        <DependentUpon>AreYouSureDialog.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Views\BindAllDialog.axaml.cs">
-        <DependentUpon>BindAllDialog.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
+        <Compile Update="Views\UnoShortWindow.axaml.cs">
+            <DependentUpon>UnoShortWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\RaiseIssueWindow.axaml.cs">
+            <DependentUpon>RaiseIssueWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\AreYouSureDialog.axaml.cs">
+            <DependentUpon>AreYouSureDialog.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\BindAllDialog.axaml.cs">
+            <DependentUpon>BindAllDialog.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\MainView.axaml.cs">
+            <DependentUpon>MainView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\MainWindow.axaml.cs">
+            <DependentUpon>MainWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="App.axaml.cs">
+            <DependentUpon>App.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
     <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(RuntimeIdentifier)' == ''">
         <Copy SourceFiles="$(TargetDir)\runtimes\unix\lib\net6.0\System.IO.Ports.dll" DestinationFolder="$(TargetDir)" Condition="'$(OS)' != 'Windows_NT' " />
