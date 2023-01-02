@@ -449,8 +449,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 else if (e.Device.Open(out var dev))
                 {
                     var revision = (ushort)dev.Info.Descriptor.BcdDevice;
-                    var product = dev.Info.ProductString;
-                    var serial = dev.Info.SerialString;
+                    var product = dev.Info.ProductString.Split(new[] { '\0' }, 2)[0];
+                    var serial = dev.Info.SerialString.Split(new[] { '\0' }, 2)[0];
                     switch (product)
                     {
                         case "Santroller" when _programming && !IsPico:
@@ -489,10 +489,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
             // Call check dependencies on startup, and pop up a dialog saying drivers are missing would you like to install if they are missing
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
+                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.Add("-e");
-                info.UseShellExecute = true;
                 info.RedirectStandardOutput = true;
                 var process = Process.Start(info);
                 if (process == null) return false;

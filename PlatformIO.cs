@@ -44,8 +44,11 @@ namespace GuitarConfigurator.NetCore
             }
 
             var pioFolder = Path.Combine(appdataFolder, "platformio");
-            //TODO: is this correct for windows?
             var pioExecutablePath = Path.Combine(appdataFolder, "python", "bin", "platformio");
+             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                pioExecutablePath = Path.Combine(appdataFolder, "python", "Scripts", "platformio.exe");
+            }
             _pioExecutable = pioExecutablePath;
             FirmwareDir = Path.Combine(appdataFolder, "firmware");
 
@@ -553,7 +556,7 @@ namespace GuitarConfigurator.NetCore
             var executables = new[] { "python3", "python", Path.Combine("bin", "python3.10") };
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                executables = new[] { "python.exe" };
+                executables = new[] { "python.exe", Path.Combine("Scripts", "python.exe") };
             }
 
             return executables;
