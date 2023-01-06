@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Collections;
 using DynamicData;
+using DynamicData.Kernel;
 using LibUsbDotNet;
 using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Info;
@@ -21,6 +22,7 @@ using ReactiveUI;
 using Timer = System.Timers.Timer;
 #if Windows
 using GuitarConfigurator.NetCore.Notify;
+using LibUsbDotNet.WinUsb;
 #endif
 
 namespace GuitarConfigurator.NetCore.ViewModels
@@ -322,12 +324,22 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 Complete(100);
                 Working = false;
                 Installed = true;
-                // TODO: why does the below not work on windows?
-                foreach (UsbRegistry dev in UsbDevice.AllDevices)
+                List<UsbRegistry> deviceListAll = new List<UsbRegistry>();
+                #if Windows
+                    List<WinUsbRegistry> deviceList = new List<WinUsbRegistry>();
+                    WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.UsbGUID, out deviceList);
+                    deviceListAll.AddRange(deviceList);
+                    WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.ArdwiinoGUID, out deviceList);
+                    deviceListAll.AddRange(deviceList);
+                    WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.SantrollerGUID, out deviceList);
+                    deviceListAll.AddRange(deviceList);
+                #else
+                    deviceListAll = UsbDevice.AllDevices.AsList();
+                #endif
+                foreach (var dev in deviceListAll)
                 {
                     OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
-                }
-
+                } 
                 _timer.Start();
             });
 
