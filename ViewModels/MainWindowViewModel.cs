@@ -322,6 +322,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 Complete(100);
                 Working = false;
                 Installed = true;
+                // TODO: why does the below not work on windows?
                 foreach (UsbRegistry dev in UsbDevice.AllDevices)
                 {
                     OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
