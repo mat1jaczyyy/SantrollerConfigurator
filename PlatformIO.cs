@@ -134,7 +134,7 @@ namespace GuitarConfigurator.NetCore
             return output != "" ? PlatformIoPort.FromJson(output) : null;
         }
 
-        public IObservable<PlatformIoState> RunPlatformIo(string? environment, string[] command, string progressMessage,
+        public BehaviorSubject<PlatformIoState> RunPlatformIo(string? environment, string[] command, string progressMessage,
             double progressStartingPercentage, double progressEndingPercentage,
             IConfigurableDevice? device)
         {

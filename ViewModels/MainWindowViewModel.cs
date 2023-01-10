@@ -8,6 +8,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Collections;
@@ -176,6 +177,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         internal IObservable<PlatformIo.PlatformIoState> Write(ConfigViewModel config)
         {
+            StartWorking();
             config.Generate(Pio);
             var env = config.MicroController!.Board.Environment;
             if (config.MicroController.Board.HasUsbmcu)
@@ -189,29 +191,28 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 env = env.Replace("_16", "");
             }
 
-            var output = "";
+            var output = new StringBuilder();
             _programming = true;
             var command = Pio.RunPlatformIo(env, new[] { "run", "--target", "upload" },
                 "Writing",
                 0, 90, SelectedDevice);
-            command.Subscribe(s =>
+            command.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
                 {
                     UpdateProgress(s);
                     if (s.Log != null)
                     {
-                        output += s.Log + "\n";
+                        output.Append(s.Log + "\n");
                     }
                 }, (_) =>
                 {
                     ProgressbarColor = "red";
-                    config.ShowIssueDialog.Handle((output, config)).ToTask();
-                    _programming = false;
+                    config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => _programming=false);
                 },
                 () =>
                 {
                     _programming = false;
                 });
-            return command;
+            return command.OnErrorResumeNext(Observable.Return(command.Value));
         }
 
         private readonly IDeviceNotifier _deviceListener;
@@ -324,7 +325,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 Complete(100);
                 Working = false;
                 Installed = true;
-                List<UsbRegistry> deviceListAll = new List<UsbRegistry>();
+                List<UsbRegistry> deviceListAll;
                 #if Windows
                     List<WinUsbRegistry> deviceList = new List<WinUsbRegistry>();
                     WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.UsbGUID, out deviceList);
@@ -462,8 +463,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 else if (e.Device.Open(out var dev))
                 {
                     var revision = (ushort)dev.Info.Descriptor.BcdDevice;
-                    var product = dev.Info.ProductString.Split(new[] { '\0' }, 2)[0];
-                    var serial = dev.Info.SerialString.Split(new[] { '\0' }, 2)[0];
+                    var product = dev.Info.ProductString?.Split(new[] { '\0' }, 2)[0];
+                    var serial = dev.Info.SerialString?.Split(new[] { '\0' }, 2)[0];
                     switch (product)
                     {
                         case "Santroller" when _programming && !IsPico:

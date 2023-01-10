@@ -904,16 +904,59 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         private int CalculateDebounceTicks()
         {
+            var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
+             var groupedOutputs = outputs
+                .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
+                .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
-            var count = Bindings.SelectMany(binding => binding.Outputs.Items)
-                .Where(s => s is OutputButton button && (!combined || !button.IsStrum)).Select(s => s.Name).Distinct()
-                .Count();
+
+            Dictionary<string, int> debounces = new();
             if (combined)
             {
-                count++;
+                foreach (var output in outputs.Where(output => output.IsStrum))
+                {
+                    debounces[output.Name] = debounces.Count;
+                }
             }
 
-            return count;
+            // Pass 1: work out debounces and map inputs to debounces
+            var inputs = new Dictionary<string, List<int>>();
+            var macros = new List<Output>();
+            foreach (var groupedOutput in groupedOutputs)
+            {
+                foreach (var (input, output) in groupedOutput)
+                {
+                    var generatedInput = input.Generate(true);
+                    if (input == null) throw new IncompleteConfigurationException("Missing input!");
+                    if (output is not OutputButton and not DrumAxis) continue;
+
+                    if (output.Input is MacroInput)
+                    {
+                        if (!debounces.ContainsKey(output.Name + generatedInput))
+                        {
+                            debounces[output.Name + generatedInput] = debounces.Count;
+                        }
+
+                        macros.Add(output);
+                    }
+                    else
+                    {
+                        if (!debounces.ContainsKey(output.Name))
+                        {
+                            debounces[output.Name] = debounces.Count;
+                        }
+                    }
+
+                    if (!inputs.ContainsKey(generatedInput))
+                    {
+                        inputs[generatedInput] = new List<int>();
+                    }
+
+                    inputs[generatedInput].Add(debounces[output.Name]);
+                }
+            }
+
+            return debounces.Count;
         }
 
         public bool IsCombinedChild(Output output)
