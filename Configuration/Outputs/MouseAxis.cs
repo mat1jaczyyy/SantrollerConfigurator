@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -79,6 +80,6 @@ public class MouseAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedMouseAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices, Min, Max, DeadZone);
+        return new SerializedMouseAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone);
     }
 }

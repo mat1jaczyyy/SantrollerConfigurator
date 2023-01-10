@@ -305,14 +305,14 @@ public class WiiCombinedOutput : CombinedTwiOutput
             {
                 Outputs.Add(new DrumAxis(Model,
                     new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
-                    first.LedOn, first.LedOff, first.LedIndices, first.Min, first.Max, first.DeadZone, 64, 10,
+                    first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64, 10,
                     DrumAxisType.Orange));
             }
             else
             {
                 Outputs.Add(new DrumAxis(Model,
                     new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
-                    first.LedOn, first.LedOff, first.LedIndices, first.Min, first.Max, first.DeadZone, 64, 10,
+                    first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64, 10,
                     DrumAxisType.Green));
             }
         }

@@ -281,7 +281,7 @@ public class DrumAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDrumAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices, Min, Max,
+        return new SerializedDrumAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
             DeadZone, Threshold, Debounce);
     }
 }

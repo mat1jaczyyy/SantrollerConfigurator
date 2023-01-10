@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -175,7 +176,7 @@ public class ControllerAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedControllerAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices, Min, Max,
+        return new SerializedControllerAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
             DeadZone);
     }
 

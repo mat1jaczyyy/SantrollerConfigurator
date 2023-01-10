@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -46,6 +47,6 @@ public class MouseButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedMouseButton(Input?.Serialise(), LedOn, LedOff, LedIndices, Debounce, Type);
+        return new SerializedMouseButton(Input?.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);
     }
 }

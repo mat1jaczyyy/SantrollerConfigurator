@@ -47,7 +47,7 @@ public abstract class OutputButton : Output
                     }}";
             }
             return
-                @$"ifa ({ifStatement}) {{ 
+                @$"if ({ifStatement}) {{ 
                     {decrement} 
                     {outputVar} |= (1 << {outputBit}); 
                     {leds}

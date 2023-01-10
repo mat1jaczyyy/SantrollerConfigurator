@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
+using Avalonia.Controls.Selection;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
 using Avalonia.Media;
@@ -24,6 +25,35 @@ using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
+
+public class LedIndex: ReactiveObject
+{
+    public Output Output { get; }
+    public byte Index { get; }
+
+    public LedIndex(Output output, byte i)
+    {
+        Output = output;
+        Index = i;
+    }
+
+    public bool Selected
+    {
+        get => Output.LedIndices.Contains(Index);
+        set
+        {
+            if (value)
+            {
+                Output.LedIndices.Add(Index);
+            }
+            else
+            {
+                Output.LedIndices.Remove(Index);
+            }
+            this.RaisePropertyChanged();
+        }
+    }
+}
 
 public abstract class Output : ReactiveObject, IDisposable
 {
@@ -114,13 +144,13 @@ public abstract class Output : ReactiveObject, IDisposable
 
     private readonly ObservableAsPropertyHelper<string> _ledIndicesDisplay;
     public string LedIndicesDisplay => _ledIndicesDisplay.Value;
-    private byte[] _ledIndices;
 
-    public byte[] LedIndices
-    {
-        get => _ledIndices;
-        set => this.RaiseAndSetIfChanged(ref _ledIndices, value);
-    }
+    private readonly ObservableAsPropertyHelper<LedIndex[]> _avaliableIndices;
+    public LedIndex[] AvailableIndices => _avaliableIndices.Value;
+    public ObservableCollection<byte> LedIndices { get; set; }
+
+    private readonly Guid _id = new Guid();
+    public string Id => _id.ToString();
 
     private byte _ledIndex;
 
@@ -156,9 +186,12 @@ public abstract class Output : ReactiveObject, IDisposable
         Input = input;
         LedOn = ledOn;
         LedOff = ledOff;
-        _ledIndices = ledIndices;
+        LedIndices = new ObservableCollection<byte>(ledIndices);
         Name = name;
         Model = model;
+        _avaliableIndices = this.WhenAnyValue(x => x.Model.LedCount)
+            .Select(x => Enumerable.Range(1, x).Select(s => new LedIndex(this, (byte)s)).ToArray())
+            .ToProperty(this, x => x.AvailableIndices);
         _image = this.WhenAnyValue(x => x.Model.DeviceType).Select(GetImage).ToProperty(this, x => x.Image);
         _isDj = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is DjInput)
             .ToProperty(this, x => x.IsDj);
@@ -193,20 +226,10 @@ public abstract class Output : ReactiveObject, IDisposable
             .Select(s => s ? "Lowest LED Colour" : "Released LED Colour").ToProperty(this, x => x.LedOffLabel);
     }
 
-    public void AddLed()
+    void LedSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
     {
-        LedIndices = LedIndices.Append(LedIndex).ToArray();
     }
 
-    public void RemoveLed()
-    {
-        LedIndices = LedIndices.Where(s => s != LedIndex).ToArray();
-    }
-
-    public void ClearLeds()
-    {
-        LedIndices = Array.Empty<byte>();
-    }
 
     public abstract bool IsStrum { get; }
 
@@ -240,7 +263,8 @@ public abstract class Output : ReactiveObject, IDisposable
 
         if (lastEvent is RawKeyEventArgs keyEventArgs)
         {
-            Model.Bindings.Add(new KeyboardButton(Model, Input, LedOn, LedOff, LedIndices, debounce, keyEventArgs.Key));
+            Model.Bindings.Add(new KeyboardButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), debounce,
+                keyEventArgs.Key));
             Model.RemoveOutput(this);
         }
 
@@ -250,19 +274,19 @@ public abstract class Output : ReactiveObject, IDisposable
             {
                 case RawPointerEventType.LeftButtonDown:
                 case RawPointerEventType.LeftButtonUp:
-                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices, debounce,
+                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), debounce,
                         MouseButtonType.Left));
                     Model.RemoveOutput(this);
                     break;
                 case RawPointerEventType.RightButtonDown:
                 case RawPointerEventType.RightButtonUp:
-                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices, debounce,
+                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), debounce,
                         MouseButtonType.Right));
                     Model.RemoveOutput(this);
                     break;
                 case RawPointerEventType.MiddleButtonDown:
                 case RawPointerEventType.MiddleButtonUp:
-                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices, debounce,
+                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), debounce,
                         MouseButtonType.Middle));
                     Model.RemoveOutput(this);
                     break;
@@ -273,12 +297,14 @@ public abstract class Output : ReactiveObject, IDisposable
                     var diff = last.Position - pointerEventArgs.Position;
                     if (Math.Abs(diff.X) > Math.Abs(diff.Y))
                     {
-                        Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices, min, max, deadzone,
+                        Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices.ToArray(), min, max,
+                            deadzone,
                             MouseAxisType.X));
                     }
                     else
                     {
-                        Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices, min, max, deadzone,
+                        Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices.ToArray(), min, max,
+                            deadzone,
                             MouseAxisType.Y));
                     }
 
@@ -291,12 +317,12 @@ public abstract class Output : ReactiveObject, IDisposable
         {
             if (Math.Abs(mouseWheelEventArgs.Delta.X) > Math.Abs(mouseWheelEventArgs.Delta.Y))
             {
-                Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices, min, max, deadzone,
+                Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices.ToArray(), min, max, deadzone,
                     MouseAxisType.ScrollX));
             }
             else
             {
-                Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices, min, max, deadzone,
+                Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices.ToArray(), min, max, deadzone,
                     MouseAxisType.ScrollY));
             }
 
@@ -463,7 +489,7 @@ public abstract class Output : ReactiveObject, IDisposable
     public SourceList<Output> Outputs { get; }
 
     public ReadOnlyObservableCollection<Output> AnalogOutputs { get; set; }
-    public ReadOnlyObservableCollection<Output> DigitalOutputs  { get; set; }
+    public ReadOnlyObservableCollection<Output> DigitalOutputs { get; set; }
 
     public void Remove()
     {

@@ -193,7 +193,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             var output = new StringBuilder();
             _programming = true;
-            var command = Pio.RunPlatformIo(env, new[] { "run", "--target", "upload" },
+            var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
                 "Writing",
                 0, 90, SelectedDevice);
             command.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
@@ -206,12 +206,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 }, (_) =>
                 {
                     ProgressbarColor = "red";
-                    config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => _programming=false);
+                    config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => _programming = false);
                 },
-                () =>
-                {
-                    _programming = false;
-                });
+                () => { _programming = false; });
             return command.OnErrorResumeNext(Observable.Return(command.Value));
         }
 
@@ -325,22 +322,23 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 Complete(100);
                 Working = false;
                 Installed = true;
-                List<UsbRegistry> deviceListAll;
-                #if Windows
-                    List<WinUsbRegistry> deviceList = new List<WinUsbRegistry>();
-                    WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.UsbGUID, out deviceList);
-                    deviceListAll.AddRange(deviceList);
-                    WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.ArdwiinoGUID, out deviceList);
-                    deviceListAll.AddRange(deviceList);
-                    WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.SantrollerGUID, out deviceList);
-                    deviceListAll.AddRange(deviceList);
-                #else
-                    deviceListAll = UsbDevice.AllDevices.AsList();
-                #endif
+#if Windows
+                List<UsbRegistry> deviceListAll = new List<UsbRegistry>();
+                List<WinUsbRegistry> deviceList = new List<WinUsbRegistry>();
+                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.UsbGUID, out deviceList);
+                deviceListAll.AddRange(deviceList);
+                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.ArdwiinoGUID, out deviceList);
+                deviceListAll.AddRange(deviceList);
+                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.SantrollerGUID, out deviceList);
+                deviceListAll.AddRange(deviceList);
+#else
+                List<UsbRegistry> deviceListAll = UsbDevice.AllDevices.AsList();
+#endif
                 foreach (var dev in deviceListAll)
                 {
                     OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
-                } 
+                }
+
                 _timer.Start();
             });
 
@@ -380,6 +378,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 Devices.Add(device);
             }
+
             if (_disconnectedDevice == null) return;
             if (!_disconnectedDevice.DeviceAdded(device)) return;
             if (device is not ConfigurableUsbDevice) return;
@@ -462,9 +461,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 }
                 else if (e.Device.Open(out var dev))
                 {
-                    var revision = (ushort)dev.Info.Descriptor.BcdDevice;
-                    var product = dev.Info.ProductString?.Split(new[] { '\0' }, 2)[0];
-                    var serial = dev.Info.SerialString?.Split(new[] { '\0' }, 2)[0];
+                    var revision = (ushort) dev.Info.Descriptor.BcdDevice;
+                    var product = dev.Info.ProductString?.Split(new[] {'\0'}, 2)[0];
+                    var serial = dev.Info.SerialString?.Split(new[] {'\0'}, 2)[0];
                     switch (product)
                     {
                         case "Santroller" when _programming && !IsPico:
@@ -536,7 +535,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 await AssetUtils.ExtractZip("dfu.zip", driverZip, driverFolder);
 
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
-                info.ArgumentList.AddRange(new[] { "-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf") });
+                info.ArgumentList.AddRange(new[] {"-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf")});
                 info.UseShellExecute = true;
                 info.Verb = "runas";
                 Process.Start(info);
@@ -548,7 +547,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var rules = Path.Combine(appdataFolder, UdevFile);
                 await AssetUtils.ExtractFile(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
-                info.ArgumentList.AddRange(new[] { "cp", rules, UdevPath });
+                info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});
                 info.UseShellExecute = true;
                 Process.Start(info);
             }

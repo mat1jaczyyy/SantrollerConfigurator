@@ -1,3 +1,4 @@
+using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -54,7 +55,7 @@ public class PS3Axis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedPS3Axis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices, Min, Max,
+        return new SerializedPS3Axis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
             DeadZone);
     }
 

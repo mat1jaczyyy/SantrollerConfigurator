@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.DJ;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -66,6 +67,6 @@ public class DjButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDjButton(Input?.Serialise(), LedOn, LedOff, LedIndices, Debounce, Type);
+        return new SerializedDjButton(Input?.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);
     }
 }

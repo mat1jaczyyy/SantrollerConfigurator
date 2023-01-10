@@ -18,6 +18,7 @@ public class SerializedConfiguration
     [ProtoMember(7)] public List<SerializedOutput> Bindings { get; }
     [ProtoMember(8)] public int Apa102Mosi { get; }
     [ProtoMember(9)] public int Apa102Sck { get; }
+    [ProtoMember(10)] public byte LedCount { get; }
     
     public SerializedConfiguration(ConfigViewModel model)
     {
@@ -30,6 +31,7 @@ public class SerializedConfiguration
         CombinedDebounce = model.CombinedDebounce;
         Apa102Mosi = model.Apa102Mosi;
         Apa102Sck = model.Apa102Sck;
+        LedCount = model.LedCount;
     }
 
     public void LoadConfiguration(ConfigViewModel model)
@@ -41,6 +43,7 @@ public class SerializedConfiguration
         model.Bindings.Clear();
         model.Bindings.AddRange(Bindings.Select(s => s.Generate(model, model.MicroController!)));
         model.LedType = LedType;
+        model.LedCount = LedCount < 1 ? (byte) 1 : LedCount;
         if (!model.IsApa102) return;
         model.Apa102Mosi = Apa102Mosi;
         model.Apa102Sck = Apa102Sck;

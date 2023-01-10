@@ -597,38 +597,31 @@
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource OutputTemplates}">
                 </ContentControl>
-                <StackPanel Orientation="Horizontal">
-                    <StackPanel.IsVisible>
+                <WrapPanel Orientation="Horizontal">
+                    <WrapPanel.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding Path="AreLedsEnabled" />
                             <Binding Path="!IsCombined" />
                         </MultiBinding>
-                    </StackPanel.IsVisible>
+                    </WrapPanel.IsVisible>
                     <Label VerticalAlignment="Center"
                            VerticalContentAlignment="Center" Width="150">
                         Selected LEDs
                     </Label>
-                    <Label VerticalAlignment="Center"
-                           VerticalContentAlignment="Center"
-                           Content="{Binding LedIndicesDisplay}">
-                    </Label>
-                    <NumericUpDown FormatString="{}{0:#,0}" Minimum="0"
-                                   Value="{Binding LedIndex}"
-                                   VerticalAlignment="Center">
-                    </NumericUpDown>
-                    <Button x:CompileBindings="False"
-                            Command="{Binding AddLed}">
-                        Add Led
-                    </Button>
-                    <Button x:CompileBindings="False"
-                            Command="{Binding RemoveLed}">
-                        Remove Led
-                    </Button>
-                    <Button x:CompileBindings="False"
-                            Command="{Binding ClearLeds}">
-                        Clear
-                    </Button>
-                </StackPanel>
+                    <ItemsControl Items="{Binding AvailableIndices}" >
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="output:LedIndex">
+                                <ToggleButton x:CompileBindings="False" IsChecked="{Binding Selected }"
+                                             Content="{Binding Index}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </WrapPanel>
                 <StackPanel Orientation="Horizontal">
                     <StackPanel.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
@@ -675,7 +668,7 @@
                                       Items="{Binding EmulationTypes}">
                             </ComboBox>
                         </StackPanel>
-                        <StackPanel IsVisible="{Binding IsController}">
+                        <StackPanel IsVisible="{Binding }">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type"
                                        TextAlignment="Center" />
                             <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
@@ -706,6 +699,14 @@
                                       SelectedItem="{Binding LedType}"
                                       ItemTemplate="{StaticResource EnumToStringTemplate}" Items="{Binding LedTypes}">
                             </ComboBox>
+                        </StackPanel>
+                        <StackPanel IsVisible="{Binding IsApa102}">
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Led Count"
+                                       TextAlignment="Center" />
+                            <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding LedCount}"
+                                           Minimum="1"
+                                           Maximum="180" HorizontalAlignment="Stretch" />
+
                         </StackPanel>
                         <StackPanel IsVisible="{Binding BindableSpi}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 CI / SCK Pin"

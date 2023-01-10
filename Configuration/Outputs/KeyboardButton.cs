@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Avalonia.Input;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -247,6 +248,6 @@ public class KeyboardButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedKeyboardButton(Input?.Serialise(), LedOn, LedOff, LedIndices, Debounce, Key);
+        return new SerializedKeyboardButton(Input?.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Key);
     }
 }

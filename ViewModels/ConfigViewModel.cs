@@ -85,6 +85,14 @@ namespace GuitarConfigurator.NetCore.ViewModels
             set => _apa102SpiConfig!.Sck = value;
         }
 
+        private byte _ledCount;
+
+        public byte LedCount
+        {
+            get => _ledCount;
+            set => this.RaiseAndSetIfChanged(ref _ledCount, value);
+        }
+
         private LedType _ledType;
 
         private bool _hasError;
@@ -457,11 +465,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
             var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
             var lines = new List<string>();
             var leds = outputs.SelectMany(s => s.Outputs.Items).SelectMany(s => s.LedIndices).ToList();
-            var ledCount = 0;
-            if (leds.Any())
-            {
-                ledCount = leds.Max() + 1;
-            }
 
             using (var outputStream = new MemoryStream())
             {
@@ -488,7 +491,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 $"#define ADC_COUNT {directInputs.DistinctBy(s => s.PinConfig.Pin).Count(input => input.IsAnalog)}");
 
             lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
-            lines.Add($"#define LED_COUNT {ledCount}");
+            lines.Add($"#define LED_COUNT {LedCount}");
 
             lines.Add($"#define LED_TYPE {GetLedType()}");
 
