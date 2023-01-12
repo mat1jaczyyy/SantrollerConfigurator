@@ -1,6 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using DynamicData;
 using DynamicData.Kernel;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -22,6 +28,7 @@ public class Ps2Input : SpiInput
     public static readonly string Ps2AttType = "ps2_att";
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
+    public Bitmap? Image { get; }
 
     public int Ack
     {
@@ -75,16 +82,16 @@ public class Ps2Input : SpiInput
 
     public static readonly List<Ps2InputType> GuitarButtons = new()
     {
-        Ps2InputType.Start,
-        Ps2InputType.Select,
-        Ps2InputType.Up,
-        Ps2InputType.Down,
-        Ps2InputType.L2,
-        Ps2InputType.R2,
-        Ps2InputType.Triangle,
-        Ps2InputType.Circle,
-        Ps2InputType.Cross,
-        Ps2InputType.Square
+        Ps2InputType.GuitarGreen,
+        Ps2InputType.GuitarRed,
+        Ps2InputType.GuitarYellow,
+        Ps2InputType.GuitarBlue,
+        Ps2InputType.GuitarOrange,
+        Ps2InputType.GuitarSelect,
+        Ps2InputType.GuitarStart,
+        Ps2InputType.GuitarTilt,
+        Ps2InputType.GuitarStrumUp,
+        Ps2InputType.GuitarStrumDown,
     };
 
     public static readonly List<Ps2InputType> DigitalButtons = new()
@@ -154,6 +161,7 @@ public class Ps2Input : SpiInput
         {Ps2InputType.GuitarYellow, "(~ps2Data[4]) & (1 << 4)"},
         {Ps2InputType.GuitarBlue, "(~ps2Data[4]) & (1 << 6)"},
         {Ps2InputType.GuitarOrange, "(~ps2Data[4]) & (1 << 7)"},
+        {Ps2InputType.GuitarTilt, "(~ps2Data[4]) & (1 << 0)"},
         {Ps2InputType.GuitarSelect, "(~ps2Data[3]) & (1 << 0)"},
         {Ps2InputType.GuitarStart, "(~ps2Data[3]) & (1 << 3)"},
         {Ps2InputType.NegConStart, "(~ps2Data[3]) & (1 << 3)"},
@@ -214,13 +222,14 @@ public class Ps2Input : SpiInput
     };
 
     public bool Combined { get; }
-    
+
     public bool BindableSpi { get; }
 
-    public Ps2Input(Ps2InputType input, ConfigViewModel model, Microcontroller microcontroller, int? miso = null, int? mosi = null,
+    public Ps2Input(Ps2InputType input, ConfigViewModel model, Microcontroller microcontroller, int? miso = null,
+        int? mosi = null,
         int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(microcontroller, Ps2SpiType,
         Ps2SpiFreq, Ps2SpiCpol,
-        Ps2SpiCpha, Ps2SpiMsbFirst, miso: miso, mosi: mosi, sck: sck, model:model)
+        Ps2SpiCpha, Ps2SpiMsbFirst, miso: miso, mosi: mosi, sck: sck, model: model)
     {
         Combined = combined;
         BindableSpi = !Combined && microcontroller is not AvrController;
@@ -231,6 +240,7 @@ public class Ps2Input : SpiInput
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         IsAnalog = Input <= Ps2InputType.Dualshock2R2;
+        Image = GetImage();
     }
 
     public override string Generate(bool xbox)
@@ -341,6 +351,7 @@ public class Ps2Input : SpiInput
             Ps2InputType.GuitarBlue when guitar => (~ps2Data[4]) & (1 << 6),
             Ps2InputType.GuitarOrange when guitar => (~ps2Data[4]) & (1 << 7),
             Ps2InputType.GuitarSelect when guitar => (~ps2Data[3]) & (1 << 0),
+            Ps2InputType.GuitarTilt when guitar => (~ps2Data[4]) & (1 << 0),
             Ps2InputType.GuitarStart when guitar => (~ps2Data[3]) & (1 << 3),
             Ps2InputType.GuitarStrumUp when guitar => (~ps2Data[3]) & (1 << 4),
             Ps2InputType.GuitarStrumDown when guitar => (~ps2Data[3]) & (1 << 6),
@@ -365,6 +376,39 @@ public class Ps2Input : SpiInput
         };
     }
 
+    public bool SupportsType(Ps2ControllerType type)
+    {
+        var types = new List<Ps2ControllerType>();
+        if (AxisToType.ContainsKey(Input))
+        {
+            types.Add(AxisToType[Input]);
+        }
+        else if (Dualshock2Order.Contains(Input))
+        {
+            types.Add(Ps2ControllerType.Dualshock2);
+        }
+        else if (DigitalButtons.Contains(Input))
+        {
+            types.Add(Ps2ControllerType.Digital);
+            types.Add(Ps2ControllerType.Dualshock);
+            types.Add(Ps2ControllerType.Dualshock2);
+            types.Add(Ps2ControllerType.FlightStick);
+        }
+
+        if (GuitarButtons.Contains(Input))
+        {
+            types.Add(Ps2ControllerType.Guitar);
+        }
+
+        if (Dualshock.Contains(Input))
+        {
+            types.Add(Ps2ControllerType.Dualshock);
+            types.Add(Ps2ControllerType.FlightStick);
+        }
+
+        return types.Contains(type);
+    }
+
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
         bool xbox)
     {
@@ -372,7 +416,7 @@ public class Ps2Input : SpiInput
         Dictionary<Ps2ControllerType, List<string>> mappedBindings = new();
         foreach (var binding in bindings)
         {
-            if (binding.Item1 is Ps2Input input)
+            if (binding.Item1.InnermostInput() is Ps2Input input)
             {
                 var types = new List<Ps2ControllerType>();
                 if (AxisToType.ContainsKey(input.Input))
@@ -449,7 +493,6 @@ public class Ps2Input : SpiInput
     {
         new(Att, DevicePinMode.Output),
         new(Ack, DevicePinMode.Floating),
-        
     };
 
     public override IReadOnlyList<string> RequiredDefines()
@@ -468,5 +511,21 @@ public class Ps2Input : SpiInput
         return defines;
     }
 
-    public override IList<PinConfig> PinConfigs => base.PinConfigs.Concat(new List<PinConfig>() { _ackConfig, _attConfig}).ToList();
+    private Bitmap? GetImage()
+    {
+        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
+        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+        try
+        {
+            var asset = assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/PS2/{Input}.png"));
+            return new Bitmap(asset);
+        }
+        catch (FileNotFoundException)
+        {
+            return null;
+        }
+    }
+
+    public override IList<PinConfig> PinConfigs =>
+        base.PinConfigs.Concat(new List<PinConfig>() {_ackConfig, _attConfig}).ToList();
 }

@@ -124,7 +124,7 @@ public class ControllerButton : OutputButton
         {
             if (Type is StandardButtonType.X or StandardButtonType.Y)
             {
-                return $"(consoleType == PS3 ? {OrderGh.IndexOf(Type).ToString()}) : {Order.IndexOf(Type).ToString()})";
+                return $"(consoleType == PS3 ? {OrderGh.IndexOf(Type).ToString()} : {Order.IndexOf(Type).ToString()})";
             }
         }
 

@@ -41,6 +41,7 @@ public enum Ps2InputType
     GuitarStrumDown,
     GuitarSelect,
     GuitarStart,
+    GuitarTilt,
     Select,
     L3,
     R3,
