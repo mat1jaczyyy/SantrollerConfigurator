@@ -22,7 +22,7 @@ namespace GuitarConfigurator.NetCore
         {
             public PlatformIoState WithLog(string log)
             {
-                return this with { Log = log };
+                return this with {Log = log};
             }
         }
 
@@ -32,6 +32,7 @@ namespace GuitarConfigurator.NetCore
 
         //TODO: probably have a nice script to update this, but for now: ` pio pkg list | grep "@"|cut -f1 -d"(" |cut -c 11- | sort -u | wc -l`
         private const int PackageCount = 17;
+        private string PlatformIOVersion = "6.1.5";
 
         private readonly Process _portProcess;
 
@@ -45,10 +46,11 @@ namespace GuitarConfigurator.NetCore
 
             var pioFolder = Path.Combine(appdataFolder, "platformio");
             var pioExecutablePath = Path.Combine(appdataFolder, "python", "bin", "platformio");
-             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 pioExecutablePath = Path.Combine(appdataFolder, "python", "Scripts", "platformio.exe");
             }
+
             _pioExecutable = pioExecutablePath;
             FirmwareDir = Path.Combine(appdataFolder, "firmware");
 
@@ -90,14 +92,13 @@ namespace GuitarConfigurator.NetCore
                     (await File.ReadAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"))).Replace(
                         "post:ardwiino_script_post.py",
                         "post:ardwiino_script_post_tool.py"));
-                if (!File.Exists(_pioExecutable))
+                if (File.Exists(_pioExecutable))
                 {
-                    platformIoOutput.OnNext(new PlatformIoState(0, "Searching for python", null));
+                    // Make sure to update platform.io to whatever version we require. This is a noop and doesn't even require internet if the version is up to date.
                     var python = await FindPython(platformIoOutput);
-                    platformIoOutput.OnNext(new PlatformIoState(60, "Installing Platform.IO", null));
                     var installerProcess = new Process();
                     installerProcess.StartInfo.FileName = python;
-                    installerProcess.StartInfo.Arguments = $"-m pip install platformio==6.1.5";
+                    installerProcess.StartInfo.Arguments = $"-m pip install platformio=={PlatformIOVersion}";
                     installerProcess.StartInfo.UseShellExecute = false;
                     installerProcess.StartInfo.RedirectStandardOutput = true;
                     installerProcess.StartInfo.RedirectStandardError = true;
@@ -109,12 +110,32 @@ namespace GuitarConfigurator.NetCore
                     installerProcess.BeginOutputReadLine();
                     installerProcess.BeginErrorReadLine();
                     await installerProcess.WaitForExitAsync().ConfigureAwait(false);
-                    var task = RunPlatformIo(null, new[] { "pkg", "install" },
+                }
+                else
+                {
+                    platformIoOutput.OnNext(new PlatformIoState(0, "Searching for python", null));
+                    var python = await FindPython(platformIoOutput);
+                    platformIoOutput.OnNext(new PlatformIoState(60, "Installing Platform.IO", null));
+                    var installerProcess = new Process();
+                    installerProcess.StartInfo.FileName = python;
+                    installerProcess.StartInfo.Arguments = $"-m pip install platformio=={PlatformIOVersion}";
+                    installerProcess.StartInfo.UseShellExecute = false;
+                    installerProcess.StartInfo.RedirectStandardOutput = true;
+                    installerProcess.StartInfo.RedirectStandardError = true;
+                    installerProcess.OutputDataReceived += (_, e) =>
+                        platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
+                    installerProcess.ErrorDataReceived += (_, e) =>
+                        platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
+                    installerProcess.Start();
+                    installerProcess.BeginOutputReadLine();
+                    installerProcess.BeginErrorReadLine();
+                    await installerProcess.WaitForExitAsync().ConfigureAwait(false);
+                    var task = RunPlatformIo(null, new[] {"pkg", "install"},
                         "Installing packages (This may take a while)",
                         60, 90, null);
                     task.Subscribe(platformIoOutput.OnNext);
                     await task.ToTask();
-                    task = RunPlatformIo(null, new[] { "system", "prune", "-f" },
+                    task = RunPlatformIo(null, new[] {"system", "prune", "-f"},
                         "Cleaning up", 90,
                         90, null);
                     task.Subscribe(platformIoOutput.OnNext);
@@ -134,7 +155,8 @@ namespace GuitarConfigurator.NetCore
             return output != "" ? PlatformIoPort.FromJson(output) : null;
         }
 
-        public BehaviorSubject<PlatformIoState> RunPlatformIo(string? environment, string[] command, string progressMessage,
+        public BehaviorSubject<PlatformIoState> RunPlatformIo(string? environment, string[] command,
+            string progressMessage,
             double progressStartingPercentage, double progressEndingPercentage,
             IConfigurableDevice? device)
         {
@@ -553,10 +575,10 @@ namespace GuitarConfigurator.NetCore
 
         private string[] GetPythonExecutables()
         {
-            var executables = new[] { "python3", "python", Path.Combine("bin", "python3.10") };
+            var executables = new[] {"python3", "python", Path.Combine("bin", "python3.10")};
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                executables = new[] { "python.exe", Path.Combine("Scripts", "python.exe") };
+                executables = new[] {"python.exe", Path.Combine("Scripts", "python.exe")};
             }
 
             return executables;

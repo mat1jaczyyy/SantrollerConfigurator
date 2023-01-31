@@ -159,8 +159,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {
             CreateDefaults();
         }
-        Outputs.Connect().Filter(x => x is OutputAxis).Filter(this.WhenAnyValue(x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs).Subscribe();
-        Outputs.Connect().Filter(x => x is OutputButton).Filter(this.WhenAnyValue(x => x.DetectedType).Select(CreateFilter)).Bind(out var digitalOutputs).Subscribe();
+
+        Outputs.Connect().Filter(x => x is OutputAxis)
+            .Filter(this.WhenAnyValue(x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs)
+            .Subscribe();
+        Outputs.Connect().Filter(x => x is OutputButton)
+            .Filter(this.WhenAnyValue(x => x.DetectedType).Select(CreateFilter)).Bind(out var digitalOutputs)
+            .Subscribe();
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
     }
@@ -319,6 +324,25 @@ public class WiiCombinedOutput : CombinedTwiOutput
         else
         {
             Outputs.RemoveMany(Outputs.Items.Where(s => s is DrumAxis));
+            // Flip guitar bindings for live guitar
+            Outputs.RemoveMany(Outputs.Items.Where(s => s.WiiInputType == WiiInputType.GuitarWhammy));
+            switch (Model.DeviceType)
+            {
+                case DeviceControllerType.LiveGuitar:
+                    Outputs.Add(new ControllerAxis(Model,
+                        new WiiInput(WiiInputType.GuitarWhammy, Model, _microcontroller, Sda, Scl, combined: true),
+                        Colors.Transparent,
+                        Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
+                        0, StandardAxisType.RightStickY));
+                    break;
+                default:
+                    Outputs.Add(new ControllerAxis(Model,
+                        new WiiInput(WiiInputType.GuitarWhammy, Model, _microcontroller, Sda, Scl, combined: true),
+                        Colors.Transparent,
+                        Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
+                        0, StandardAxisType.RightStickX));
+                    break;
+            }
         }
     }
 }

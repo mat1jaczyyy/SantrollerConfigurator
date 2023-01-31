@@ -134,7 +134,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     private static Func<Output, bool> CreateFilter(string? s)
     {
         return output => s is "None" or null ||
-                         output.Input?.InnermostInput() is Ps2Input ps2Input && ps2Input.SupportsType(Enum.Parse<Ps2ControllerType>(s));
+                         output.Input?.InnermostInput() is Ps2Input ps2Input &&
+                         ps2Input.SupportsType(Enum.Parse<Ps2ControllerType>(s));
     }
 
     public void CreateDefaults()
@@ -221,6 +222,41 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public override void UpdateBindings()
     {
+        // Flip guitar bindings for live guitar
+        Outputs.RemoveMany(Outputs.Items.Where(s => s.Ps2InputType == Ps2InputType.GuitarTilt));
+        Outputs.RemoveMany(Outputs.Items.Where(s => s.Ps2InputType == Ps2InputType.GuitarWhammy));
+        switch (Model.DeviceType)
+        {
+            case DeviceControllerType.LiveGuitar:
+                Outputs.Add(new ControllerAxis(Model,
+                    new DigitalToAnalog(
+                        new Ps2Input(Ps2InputType.GuitarTilt, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
+                            combined: true),
+                        -32767, 0, Model), Colors.Transparent,
+                    Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
+                    0, StandardAxisType.RightStickX));
+                Outputs.Add(new ControllerAxis(Model,
+                    new Ps2Input(Ps2InputType.GuitarWhammy, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
+                        combined: true), Colors.Transparent,
+                    Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
+                    0, StandardAxisType.RightStickY));
+                break;
+            default:
+                Outputs.Add(new ControllerAxis(Model,
+                    new DigitalToAnalog(
+                        new Ps2Input(Ps2InputType.GuitarTilt, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
+                            combined: true),
+                        -32767, 0, Model), Colors.Transparent,
+                    Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
+                    0, StandardAxisType.RightStickY));
+                Outputs.Add(new ControllerAxis(Model,
+                    new Ps2Input(Ps2InputType.GuitarWhammy, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
+                        combined: true), Colors.Transparent,
+                    Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
+                    0, StandardAxisType.RightStickX));
+                break;
+        }
+
         if (Model.DeviceType == DeviceControllerType.Gamepad)
         {
             if (Outputs.Items.Any(s => s is PS3Axis)) return;

@@ -6,7 +6,6 @@ using System.Reflection;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using DynamicData;
 using DynamicData.Kernel;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
