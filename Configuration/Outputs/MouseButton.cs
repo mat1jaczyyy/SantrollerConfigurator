@@ -31,12 +31,12 @@ public class MouseButton : OutputButton
 
     public override bool Valid => true;
 
-    public override string GenerateIndex(bool xbox)
+    public override string GenerateIndex(DeviceEmulationMode mode)
     {
         return _order.IndexOf(Type).ToString();
     }
 
-    public override string GenerateOutput(bool xbox)
+    public override string GenerateOutput(DeviceEmulationMode mode)
     {
         return "report->buttons";
     }

@@ -24,7 +24,7 @@ public class FixedInput : Input
         return Array.Empty<string>();
     }
 
-    public override string Generate(bool xbox)
+    public override string Generate(DeviceEmulationMode mode)
     {
         return Value.ToString();
     }
@@ -44,8 +44,8 @@ public class FixedInput : Input
     {
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
-        bool xbox)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+        DeviceEmulationMode mode)
     {
         return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }

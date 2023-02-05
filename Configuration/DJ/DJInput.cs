@@ -31,7 +31,7 @@ public class DjInput : TwiInput
     public DjInputType Input { get; set; }
     public override InputType? InputType => Types.InputType.TurntableInput;
 
-    public override string Generate(bool xbox)
+    public override string Generate(DeviceEmulationMode mode)
     {
         switch (Input)
         {
@@ -78,8 +78,8 @@ public class DjInput : TwiInput
         }
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
-        bool xbox)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+        DeviceEmulationMode mode)
     {
         var left = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
@@ -87,8 +87,8 @@ public class DjInput : TwiInput
         var right = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
                 .Select(binding => binding.Item2));
-        var leftTrigger = shared ? "" : ControllerAxis.GetMapping(StandardAxisType.LeftTrigger, xbox) + "=0;";
-        var rightTrigger = shared ? "" : ControllerAxis.GetMapping(StandardAxisType.RightTrigger, xbox) + "=0;";
+        var leftTrigger = mode == DeviceEmulationMode.Shared ? "" : ControllerAxis.GetMapping(StandardAxisType.LeftTrigger, mode) + "=0;";
+        var rightTrigger = mode == DeviceEmulationMode.Shared ? "" : ControllerAxis.GetMapping(StandardAxisType.RightTrigger, mode) + "=0;";
         return $@"if (djLeftValid) {{
                     {leftTrigger}
                     {left}

@@ -29,7 +29,7 @@ public class AnalogToDigital : Input
     }
 
 
-    public override string Generate(bool xbox)
+    public override string Generate(DeviceEmulationMode mode)
     {
         if (Child.IsUint)
         {
@@ -37,9 +37,9 @@ public class AnalogToDigital : Input
             {
                 case AnalogToDigitalType.Trigger:
                 case AnalogToDigitalType.JoyHigh:
-                    return $"({Child.Generate(xbox)}) > {short.MaxValue + Threshold}";
+                    return $"({Child.Generate(mode)}) > {short.MaxValue + Threshold}";
                 case AnalogToDigitalType.JoyLow:
-                    return $"({Child.Generate(xbox)}) < {short.MaxValue - Threshold}";
+                    return $"({Child.Generate(mode)}) < {short.MaxValue - Threshold}";
             }
         }
         else
@@ -49,9 +49,9 @@ public class AnalogToDigital : Input
             {
                 case AnalogToDigitalType.Trigger:
                 case AnalogToDigitalType.JoyHigh:
-                    return $"({Child.Generate(xbox)}) > {Threshold}";
+                    return $"({Child.Generate(mode)}) > {Threshold}";
                 case AnalogToDigitalType.JoyLow:
-                    return $"({Child.Generate(xbox)}) < {-Threshold}";
+                    return $"({Child.Generate(mode)}) < {-Threshold}";
             }
         }
 
@@ -110,8 +110,8 @@ public class AnalogToDigital : Input
         Child.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType, wiiControllerType);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
-        bool xbox)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+        DeviceEmulationMode mode)
     {
         throw new InvalidOperationException("Never call GenerateAll on AnalogToDigital, call it on its children");
     }

@@ -3,6 +3,7 @@ using System.Linq;
 using Avalonia.Input;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
+using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -217,7 +218,7 @@ public class KeyboardButton : OutputButton
 
     public Key Key;
 
-    public override string GenerateIndex(bool xbox)
+    public override string GenerateIndex(DeviceEmulationMode mode)
     {
         throw new NotImplementedException();
     }
@@ -231,7 +232,7 @@ public class KeyboardButton : OutputButton
     {
     }
 
-    public override string GenerateOutput(bool xbox)
+    public override string GenerateOutput(DeviceEmulationMode mode)
     {
         var code = 0;
         return $"report->keys[{code >> 3}] |= {1 << (code & 7)}";

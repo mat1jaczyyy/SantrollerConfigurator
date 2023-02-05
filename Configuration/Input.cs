@@ -22,7 +22,7 @@ public abstract class Input : ReactiveObject, IDisposable
     }
 
     public abstract IReadOnlyList<string> RequiredDefines();
-    public abstract string Generate(bool xbox);
+    public abstract string Generate(DeviceEmulationMode mode);
 
     public abstract SerializedInput Serialise();
     private bool _analog;
@@ -66,8 +66,8 @@ public abstract class Input : ReactiveObject, IDisposable
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
         byte[] wiiControllerType);
 
-    public abstract string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
-        bool xbox);
+    public abstract string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+        DeviceEmulationMode mode);
 
     public abstract void Dispose();
 }

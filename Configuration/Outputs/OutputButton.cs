@@ -17,25 +17,25 @@ public abstract class OutputButton : Output
     }
 
     public byte Debounce { get; set; }
-    public abstract string GenerateIndex(bool xbox);
+    public abstract string GenerateIndex(DeviceEmulationMode mode);
 
-    public abstract string GenerateOutput(bool xbox);
+    public abstract string GenerateOutput(DeviceEmulationMode mode);
 
 
     public override bool IsCombined => false;
 
-    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(DeviceEmulationMode mode,  List<int> debounceIndex, bool combined, string extra)
     {
         if (Input==null) throw new IncompleteConfigurationException("Missing input!");
-        var outputBit = GenerateIndex(xbox);
+        var outputBit = GenerateIndex(mode);
         if (string.IsNullOrEmpty(outputBit)) return "";
         
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce+1};");
-        if (!shared)
+        if (mode != DeviceEmulationMode.Shared)
         {
-            var outputVar = GenerateOutput(xbox);
+            var outputVar = GenerateOutput(mode);
             var leds = "";
             if (AreLedsEnabled && LedIndices.Any())
             {
@@ -78,10 +78,10 @@ public abstract class OutputButton : Output
         {
             var otherIndex = debounceIndex[0] == 1 ? 0 : 1;
             return
-                $"if (({Input.Generate(xbox)}) && (!debounce[{otherIndex}])) {{ {led2}; {reset};}} {led}";
+                $"if (({Input.Generate(mode)}) && (!debounce[{otherIndex}])) {{ {led2}; {reset};}} {led}";
         }
 
-        return $"if (({Input.Generate(xbox)})) {{ {led2}; {reset}; }} {led}";
+        return $"if (({Input.Generate(mode)})) {{ {led2}; {reset}; }} {led}";
     }
 
     public override void UpdateBindings()

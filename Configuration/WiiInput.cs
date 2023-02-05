@@ -275,7 +275,7 @@ public class WiiInput : TwiInput
 
     public override InputType? InputType => Types.InputType.WiiInput;
 
-    public override string Generate(bool xbox)
+    public override string Generate(DeviceEmulationMode mode)
     {
         return Mappings[Input];
     }
@@ -540,8 +540,8 @@ public class WiiInput : TwiInput
         }
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
-        bool xbox)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+        DeviceEmulationMode mode)
     {
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
         var hasTapBar = false;

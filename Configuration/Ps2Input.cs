@@ -242,7 +242,7 @@ public class Ps2Input : SpiInput
         Image = GetImage();
     }
 
-    public override string Generate(bool xbox)
+    public override string Generate(DeviceEmulationMode mode)
     {
         return Mappings[Input];
     }
@@ -408,8 +408,8 @@ public class Ps2Input : SpiInput
         return types.Contains(type);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
-        bool xbox)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+        DeviceEmulationMode mode)
     {
         Dictionary<Ps2InputType, string> ds2Axis = new();
         Dictionary<Ps2ControllerType, List<string>> mappedBindings = new();

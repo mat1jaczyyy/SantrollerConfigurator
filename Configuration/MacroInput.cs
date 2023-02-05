@@ -29,9 +29,9 @@ public class MacroInput : Input
     }
 
 
-    public override string Generate(bool xbox)
+    public override string Generate(DeviceEmulationMode mode)
     {
-        return $"{Child1.Generate(xbox)} && {Child2.Generate(xbox)}";
+        return $"{Child1.Generate(mode)} && {Child2.Generate(mode)}";
     }
 
     public override SerializedInput Serialise()
@@ -65,8 +65,8 @@ public class MacroInput : Input
             ps2ControllerType, wiiControllerType);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
-        bool xbox)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+        DeviceEmulationMode mode)
     {
         throw new InvalidOperationException("Never call GenerateAll on MacroInput, call it on its children");
     }

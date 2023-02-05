@@ -25,9 +25,9 @@ public class PS3Axis : OutputAxis
     public Ps3AxisType Type { get; }
 
 
-    public override string GenerateOutput(bool xbox, bool useReal)
+    public override string GenerateOutput(DeviceEmulationMode mode, bool useReal)
     {
-        return xbox ? "" : $"report->axis[{(byte)Type}]";
+        return mode == DeviceEmulationMode.Ps3 ? $"report->axis[{(byte)Type}]" : "" ;
     }
 
     public override bool IsCombined => false;

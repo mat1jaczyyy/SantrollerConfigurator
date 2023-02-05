@@ -184,7 +184,7 @@ public class EmptyOutput : Output
         throw new IncompleteConfigurationException(ErrorText);
     }
 
-    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
     {
         throw new IncompleteConfigurationException("Unconfigured output");
     }

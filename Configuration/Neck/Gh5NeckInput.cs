@@ -90,7 +90,7 @@ public class Gh5NeckInput : TwiInput
     public override InputType? InputType => Types.InputType.Gh5NeckInput;
     public Gh5NeckInputType Input { get; set; }
 
-    public override string Generate(bool xbox)
+    public override string Generate(DeviceEmulationMode mode)
     {
         if (Input <= Gh5NeckInputType.Orange)
         {
@@ -139,8 +139,8 @@ public class Gh5NeckInput : TwiInput
         }
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
-        bool xbox)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+        DeviceEmulationMode mode)
     {
         return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }

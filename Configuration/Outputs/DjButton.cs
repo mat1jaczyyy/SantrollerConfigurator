@@ -3,6 +3,7 @@ using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.DJ;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
+using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -47,14 +48,14 @@ public class DjButton : OutputButton
         Type = type;
     }
 
-    public override string GenerateOutput(bool xbox)
+    public override string GenerateOutput(DeviceEmulationMode mode)
     {
-        return xbox ? Axis[Type] : "report->accel[2]";
+        return mode == DeviceEmulationMode.Xbox360 ? Axis[Type] : "report->accel[2]";
     }
 
-    public override string GenerateIndex(bool xbox)
+    public override string GenerateIndex(DeviceEmulationMode mode)
     {
-        return xbox ? Buttons[Type] : ButtonsPs3[Type];
+        return mode == DeviceEmulationMode.Xbox360 ? Buttons[Type] : ButtonsPs3[Type];
     }
 
     public override bool IsKeyboard => false;

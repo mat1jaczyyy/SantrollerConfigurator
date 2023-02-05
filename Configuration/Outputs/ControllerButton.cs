@@ -112,15 +112,15 @@ public class ControllerButton : OutputButton
 
     public StandardButtonType Type { get; }
 
-    public override string GenerateIndex(bool xbox)
+    public override string GenerateIndex(DeviceEmulationMode mode)
     {
-        if (xbox)
+        if (mode == DeviceEmulationMode.Xbox360)
         {
             //On the xbox, LT and RT are analog only.
             return XboxOrder.Contains(Type) ? XboxOrder.IndexOf(Type).ToString() : "";
         }
 
-        if (Model.DeviceType == DeviceControllerType.Guitar && Model.RhythmType == RhythmType.GuitarHero)
+        if (Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.GuitarHero})
         {
             if (Type is StandardButtonType.X or StandardButtonType.Y)
             {
@@ -131,9 +131,9 @@ public class ControllerButton : OutputButton
         return HatOrder.Contains(Type) ? HatOrder.IndexOf(Type).ToString() : $"(consoleType == SWITCH ? {OrderSwitch.IndexOf(Type).ToString()} : {Order.IndexOf(Type).ToString()})";
     }
 
-    public override string GenerateOutput(bool xbox)
+    public override string GenerateOutput(DeviceEmulationMode mode)
     {
-        if (!xbox && HatOrder.Contains(Type))
+        if (mode == DeviceEmulationMode.Ps3 && HatOrder.Contains(Type))
         {
             return "report->hat";
         }

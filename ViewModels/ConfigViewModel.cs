@@ -481,11 +481,13 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
 
-            lines.Add($"#define TICK_SHARED {GenerateTick(false, true)}");
+            lines.Add($"#define TICK_SHARED {GenerateTick(DeviceEmulationMode.Shared, true)}");
 
-            lines.Add($"#define TICK_PS3 {GenerateTick(false, false)}");
+            lines.Add($"#define TICK_PS3 {GenerateTick(DeviceEmulationMode.Ps3, false)}");
 
-            lines.Add($"#define TICK_XINPUT {GenerateTick(true, false)}");
+            lines.Add($"#define TICK_XINPUT {GenerateTick(DeviceEmulationMode.Xbox360, false)}");
+
+            lines.Add($"#define TICK_XBOX_ONE {GenerateTick(DeviceEmulationMode.XboxOne, false)}");
 
             lines.Add(
                 $"#define ADC_COUNT {directInputs.DistinctBy(s => s.PinConfig.Pin).Count(input => input.IsAnalog)}");
@@ -501,7 +503,13 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
                 lines.Add($"#define TICK_LED {GenerateLedTick()}");
             }
-
+            //TODO: these
+            lines.Add($"#define HANDLE_AUTH_LED");
+            
+            lines.Add($"#define HANDLE_PLAYER_LED");
+            
+            lines.Add($"#define HANDLE_RUMBLE");
+            
             lines.Add($"#define CONSOLE_TYPE {((byte) EmulationType)}");
 
             lines.Add($"#define DEVICE_TYPE {((byte) DeviceType)}");
@@ -664,12 +672,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
             return ret.Replace('\n', ' ');
         }
 
-        private string GenerateTick(bool xbox, bool shared)
+        private string GenerateTick(DeviceEmulationMode mode, bool shared)
         {
             if (_microController == null) return "";
             var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
             // If whammy isn't bound, then default to -32767 instead of 0.
-            if (xbox && DeviceType == DeviceControllerType.Guitar && !outputs.Any(output =>
+            if (mode == DeviceEmulationMode.Xbox360 && DeviceType == DeviceControllerType.Guitar && !outputs.Any(output =>
                     output is ControllerAxis {Type: StandardAxisType.RightStickX}))
             {
                 outputs.Add(new ControllerAxis(this, new FixedInput(this, -32767), Colors.Transparent,
@@ -730,7 +738,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 outputs.AddRange(outputsToAdd);
             }
 
-            if (!xbox)
+            if (mode == DeviceEmulationMode.Ps3)
             {
                 var toTest = new List<StandardAxisType>()
                 {
@@ -744,7 +752,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     switch (output)
                     {
                         case ControllerAxis axis:
-                            toTest.Remove(axis.GetRealAxis(xbox));
+                            toTest.Remove(axis.GetRealAxis(mode));
                             break;
                         case DjButton:
                             toTest.Remove(StandardAxisType.AccelerationY);
@@ -797,7 +805,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 foreach (var (input, output) in groupedOutput)
                 {
-                    var generatedInput = input.Generate(xbox);
+                    var generatedInput = input.Generate(mode);
                     if (input == null) throw new IncompleteConfigurationException("Missing input!");
                     if (output is not OutputButton and not DrumAxis) continue;
 
@@ -843,7 +851,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                             {
                                 var input = s.First;
                                 var output = s.Second;
-                                var generatedInput = input.Generate(xbox);
+                                var generatedInput = input.Generate(mode);
                                 var index = new List<int> {0};
                                 var extra = "";
                                 if (output is OutputButton or DrumAxis)
@@ -862,21 +870,21 @@ namespace GuitarConfigurator.NetCore.ViewModels
                                             if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
                                             seen.Add(output);
                                             index = output.Input!.Inputs()
-                                                .Select(input1 => debounces[output.Name + input1.Generate(xbox)])
+                                                .Select(input1 => debounces[output.Name + input1.Generate(mode)])
                                                 .ToList();
                                         }
                                     }
                                 }
 
-                                var generated = output.Generate(xbox, shared, index, combined, extra);
+                                var generated = output.Generate(mode, index, combined, extra);
 
                                 if (output is OutputAxis axis && !shared)
                                 {
-                                    generated = generated.Replace("{output}", axis.GenerateOutput(xbox, false));
+                                    generated = generated.Replace("{output}", axis.GenerateOutput(mode, false));
                                     if (!seenAnalog.Contains(output.Name) && input is DigitalToAnalog dta)
                                     {
                                         generated =
-                                            $"{axis.GenerateOutput(xbox, false)} = {dta.GenerateOff(xbox)}; {generated}";
+                                            $"{axis.GenerateOutput(mode, false)} = {dta.GenerateOff(mode)}; {generated}";
                                     }
 
                                     seenAnalog.Add(output.Name);
@@ -885,7 +893,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                                 return new Tuple<Input, string>(input, generated);
                             })
                             .Where(s => !string.IsNullOrEmpty(s.Item2))
-                            .ToList(), shared, xbox) + ";");
+                            .ToList(), mode) + ";");
                 });
             // Flick off intersecting outputs when multiple buttons are pressed
             if (shared)
@@ -894,10 +902,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 {
                     var ifStatement = string.Join(" && ",
                         output.Input!.Inputs().Select(input =>
-                            $"debounce[{debounces[output.Name + input.Generate(xbox)]}]"));
+                            $"debounce[{debounces[output.Name + input.Generate(mode)]}]"));
                     var sharedReset = output.Input!.Inputs().Aggregate("",
                         (current, input) => current + string.Join("",
-                            inputs[input.Generate(xbox)].Select(s => $"debounce[{s}]=0;").Distinct()));
+                            inputs[input.Generate(mode)].Select(s => $"debounce[{s}]=0;").Distinct()));
                     ret += @$"if ({ifStatement}) {{{sharedReset}}}";
                 }
             }
@@ -929,7 +937,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 foreach (var (input, output) in groupedOutput)
                 {
-                    var generatedInput = input.Generate(true);
+                    var generatedInput = input.Generate(DeviceEmulationMode.Xbox360);
                     if (input == null) throw new IncompleteConfigurationException("Missing input!");
                     if (output is not OutputButton and not DrumAxis) continue;
 

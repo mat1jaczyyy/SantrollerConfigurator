@@ -58,7 +58,7 @@ public class GhWtTapInput : InputWithPin
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public override string Generate(bool xbox)
+    public override string Generate(DeviceEmulationMode mode)
     {
         if (Input == GhWtInputType.TapBar)
         {
@@ -92,8 +92,8 @@ public class GhWtTapInput : InputWithPin
         RawValue = BitConverter.ToInt32(ghWtRaw);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, bool shared,
-        bool xbox)
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+        DeviceEmulationMode mode)
     {
         return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }

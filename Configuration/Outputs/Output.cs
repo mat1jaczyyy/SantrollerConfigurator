@@ -145,8 +145,8 @@ public abstract class Output : ReactiveObject, IDisposable
     private readonly ObservableAsPropertyHelper<string> _ledIndicesDisplay;
     public string LedIndicesDisplay => _ledIndicesDisplay.Value;
 
-    private readonly ObservableAsPropertyHelper<LedIndex[]> _avaliableIndices;
-    public LedIndex[] AvailableIndices => _avaliableIndices.Value;
+    private readonly ObservableAsPropertyHelper<LedIndex[]> _availableIndices;
+    public LedIndex[] AvailableIndices => _availableIndices.Value;
     public ObservableCollection<byte> LedIndices { get; set; }
 
     private readonly Guid _id = new Guid();
@@ -189,7 +189,7 @@ public abstract class Output : ReactiveObject, IDisposable
         LedIndices = new ObservableCollection<byte>(ledIndices);
         Name = name;
         Model = model;
-        _avaliableIndices = this.WhenAnyValue(x => x.Model.LedCount)
+        _availableIndices = this.WhenAnyValue(x => x.Model.LedCount)
             .Select(x => Enumerable.Range(1, x).Select(s => new LedIndex(this, (byte)s)).ToArray())
             .ToProperty(this, x => x.AvailableIndices);
         _image = this.WhenAnyValue(x => x.Model.DeviceType).Select(GetImage).ToProperty(this, x => x.Image);
@@ -484,7 +484,7 @@ public abstract class Output : ReactiveObject, IDisposable
         }
     }
 
-    public abstract string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra);
+    public abstract string Generate(DeviceEmulationMode mode,  List<int> debounceIndex, bool combined, string extra);
 
     public SourceList<Output> Outputs { get; }
 

@@ -57,9 +57,9 @@ public class ControllerAxis : OutputAxis
             .ToProperty(this, s => s.Valid);
     }
 
-    public static string GetMapping(StandardAxisType type, bool xbox)
+    public static string GetMapping(StandardAxisType type, DeviceEmulationMode mode)
     {
-        return "report->" + (xbox ? MappingsXbox[type] : Mappings[type]);
+        return "report->" + (mode == DeviceEmulationMode.Xbox360 ? MappingsXbox[type] : Mappings[type]);
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
@@ -77,9 +77,9 @@ public class ControllerAxis : OutputAxis
 
     public StandardAxisType Type { get; }
 
-    public StandardAxisType GetRealAxis(bool xbox)
+    public StandardAxisType GetRealAxis(DeviceEmulationMode mode)
     {
-        if (xbox) return Type;
+        if (mode == DeviceEmulationMode.Xbox360) return Type;
         if (Model.DeviceType == DeviceControllerType.Turntable && TurntableMap.ContainsKey(Type))
         {
             return TurntableMap[Type];
@@ -88,11 +88,11 @@ public class ControllerAxis : OutputAxis
         return Type;
     }
 
-    public override string GenerateOutput(bool xbox, bool useReal)
+    public override string GenerateOutput(DeviceEmulationMode mode, bool useReal)
     {
-        if (!xbox)
+        if (mode == DeviceEmulationMode.Ps3)
         {
-            return "report->" + Mappings[useReal ? Type : GetRealAxis(xbox)];
+            return "report->" + Mappings[useReal ? Type : GetRealAxis(mode)];
         }
 
         if (!MappingsXbox.ContainsKey(Type)) return "";

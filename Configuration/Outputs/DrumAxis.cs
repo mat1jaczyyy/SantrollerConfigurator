@@ -99,9 +99,9 @@ public class DrumAxis : OutputAxis
     public override bool Valid => true;
 
 
-    public override string GenerateOutput(bool xbox, bool useReal)
+    public override string GenerateOutput(DeviceEmulationMode mode, bool useReal)
     {
-        if (xbox)
+        if (mode == DeviceEmulationMode.Xbox360)
         {
             switch (Model.RhythmType)
             {
@@ -120,9 +120,9 @@ public class DrumAxis : OutputAxis
     }
 
 
-    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(DeviceEmulationMode mode,  List<int> debounceIndex, bool combined, string extra)
     {
-        if (shared || string.IsNullOrEmpty(GenerateOutput(xbox, false)))
+        if (mode == DeviceEmulationMode.Shared || string.IsNullOrEmpty(GenerateOutput(mode, false)))
         {
             return "";
         }
@@ -134,7 +134,7 @@ public class DrumAxis : OutputAxis
         var hats = 0;
         var tom = ps3Tom;
         var cymbal = ps3Cymbal;
-        if (xbox)
+        if (mode == DeviceEmulationMode.Xbox360)
         {
             tom = xboxTom;
             cymbal = xboxCymbal;
@@ -195,7 +195,7 @@ public class DrumAxis : OutputAxis
         var outputHats = hats > 0 ? $" report->hat |= {hats};" : "";
         var assignedVal = "val_real";
         var valType = "uint16_t";
-        if (Model.RhythmType == RhythmType.GuitarHero || !xbox)
+        if (Model.RhythmType == RhythmType.GuitarHero || mode != DeviceEmulationMode.Xbox360)
         {
             assignedVal = $"val_real >> 8";
         }
@@ -218,18 +218,18 @@ public class DrumAxis : OutputAxis
                     break;
             }
         }
-        var led = CalculateLeds(xbox);
+        var led = CalculateLeds(mode);
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
 {{
-    uint16_t val_real = {GenerateAssignment(xbox, false)};
+    uint16_t val_real = {GenerateAssignment(mode, false)};
     if (val_real) {{
         if (val_real > {Threshold}) {{
             {reset}
         }}
         {valType} val = {assignedVal};
-        {GenerateOutput(xbox, false)} = val;
+        {GenerateOutput(mode, false)} = val;
         {led}
     }}
     if ({ifStatement}) {{

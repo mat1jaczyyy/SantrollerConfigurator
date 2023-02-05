@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
@@ -11,7 +12,7 @@ public abstract class CombinedOutput : Output
     {
     }
 
-    public override string Generate(bool xbox, bool shared, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(DeviceEmulationMode mode,  List<int> debounceIndex, bool combined, string extra)
     {
         return "";
     }

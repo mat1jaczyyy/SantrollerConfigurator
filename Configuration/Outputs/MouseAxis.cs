@@ -34,7 +34,7 @@ public class MouseAxis : OutputAxis
 
     public MouseAxisType Type { get; }
 
-    public override string GenerateOutput(bool xbox, bool useReal)
+    public override string GenerateOutput(DeviceEmulationMode mode, bool useReal)
     {
         return "report->" + Mappings[Type];
     }
