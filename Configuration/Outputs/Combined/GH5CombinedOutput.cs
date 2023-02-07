@@ -22,7 +22,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         {Gh5NeckInputType.Red, StandardButtonType.B},
         {Gh5NeckInputType.Yellow, StandardButtonType.Y},
         {Gh5NeckInputType.Blue, StandardButtonType.X},
-        {Gh5NeckInputType.Orange, StandardButtonType.Lb},
+        {Gh5NeckInputType.Orange, StandardButtonType.LeftShoulder},
     };
 
     private static readonly Dictionary<Gh5NeckInputType, StandardButtonType> Taps = new()
@@ -31,7 +31,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         {Gh5NeckInputType.TapRed, StandardButtonType.B},
         {Gh5NeckInputType.TapYellow, StandardButtonType.Y},
         {Gh5NeckInputType.TapBlue, StandardButtonType.X},
-        {Gh5NeckInputType.TapOrange, StandardButtonType.Lb},
+        {Gh5NeckInputType.TapOrange, StandardButtonType.LeftShoulder},
     };
 
     public Gh5CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,

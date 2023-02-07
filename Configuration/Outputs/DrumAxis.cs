@@ -10,79 +10,65 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class DrumAxis : OutputAxis
 {
-    private int xboxCymbal = 5;
-    private int xboxTom = 9;
-    private int ps3Tom = 10;
+    private readonly StandardButtonType Xbox360CymbalFlag = StandardButtonType.LeftShoulder;
+    private readonly StandardButtonType Xbox360PadFlag = StandardButtonType.RightThumbClick;
 
-    private int ps3Cymbal = 11;
+    private readonly StandardButtonType Ps3CymbalFlag = StandardButtonType.RightThumbClick;
+    private readonly StandardButtonType Ps3PadFlag = StandardButtonType.LeftThumbClick;
 
-    //For xbox, this is in buttons
-    //For ps3, this is in hat
-    private int yellowCymbal = 1;
-    private int blueCymbal = 2;
+    private readonly StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
+    private readonly StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
 
-    public static Dictionary<DrumAxisType, int> ButtonsXbox = new()
+    private static readonly Dictionary<DrumAxisType, StandardButtonType> ButtonsXbox360 = new()
     {
-        {DrumAxisType.Green, 1},
-        {DrumAxisType.Red, 2},
-        {DrumAxisType.Blue, 3},
-        {DrumAxisType.Yellow, 4},
-        {DrumAxisType.GreenCymbal, 1},
-        {DrumAxisType.BlueCymbal, 3},
-        {DrumAxisType.YellowCymbal, 4},
-        {DrumAxisType.Kick, 5},
-        {DrumAxisType.Orange, 6},
-        {DrumAxisType.Kick2, 8},
+        {DrumAxisType.Green, StandardButtonType.A},
+        {DrumAxisType.Red, StandardButtonType.B},
+        {DrumAxisType.Blue, StandardButtonType.X},
+        {DrumAxisType.Yellow, StandardButtonType.Y},
+        {DrumAxisType.GreenCymbal, StandardButtonType.A},
+        {DrumAxisType.BlueCymbal, StandardButtonType.X},
+        {DrumAxisType.YellowCymbal, StandardButtonType.Y},
+        {DrumAxisType.Orange, StandardButtonType.RightShoulder},
+        {DrumAxisType.Kick, StandardButtonType.LeftShoulder},
+        {DrumAxisType.Kick2, StandardButtonType.LeftThumbClick},
     };
 
-    public static Dictionary<DrumAxisType, int> ButtonsPs3 = new()
+    private static readonly Dictionary<DrumAxisType, StandardButtonType> ButtonsXboxOne = new()
     {
-        {DrumAxisType.Blue, 1},
-        {DrumAxisType.Green, 2},
-        {DrumAxisType.Red, 3},
-        {DrumAxisType.Yellow, 4},
-        {DrumAxisType.BlueCymbal, 1},
-        {DrumAxisType.GreenCymbal, 2},
-        {DrumAxisType.YellowCymbal, 4},
-        {DrumAxisType.Kick, 5},
-        {DrumAxisType.Orange, 6},
-        {DrumAxisType.Kick2, 6},
+        {DrumAxisType.Green, StandardButtonType.A},
+        {DrumAxisType.Red, StandardButtonType.B},
+        {DrumAxisType.Kick, StandardButtonType.LeftShoulder},
+        {DrumAxisType.Kick2, StandardButtonType.RightShoulder},
     };
 
-    //int16, yellow and green need a - sign in front, so you would want to shift >> 1 and then prepend the - sign
-    private static Dictionary<DrumAxisType, string> AxisMappingsRbXbox = new()
+    private static readonly Dictionary<DrumAxisType, StandardButtonType> ButtonsPs3 = new()
     {
-        {DrumAxisType.Red, "report->l_x"},
-        {DrumAxisType.Yellow, "report->l_y"},
-        {DrumAxisType.Blue, "report->r_x"},
-        {DrumAxisType.Green, "report->r_y"},
+        {DrumAxisType.Green, StandardButtonType.A},
+        {DrumAxisType.Red, StandardButtonType.B},
+        {DrumAxisType.Blue, StandardButtonType.X},
+        {DrumAxisType.Yellow, StandardButtonType.Y},
+        {DrumAxisType.GreenCymbal, StandardButtonType.A},
+        {DrumAxisType.BlueCymbal, StandardButtonType.X},
+        {DrumAxisType.YellowCymbal, StandardButtonType.Y},
+        {DrumAxisType.Kick, StandardButtonType.LeftShoulder},
+        {DrumAxisType.Orange, StandardButtonType.RightShoulder},
+        {DrumAxisType.Kick2, StandardButtonType.RightShoulder},
     };
 
-    private static Dictionary<DrumAxisType, string> AxisMappingsGhXbox = new()
+    private static readonly Dictionary<DrumAxisType, string> AxisMappings = new()
     {
-        {DrumAxisType.Green, "reportGhDrum->greenVelocity"},
-        {DrumAxisType.Red, "reportGhDrum->redVelocity"},
-        {DrumAxisType.Yellow, "reportGhDrum->yellowVelocity"},
-        {DrumAxisType.Blue, "reportGhDrum->blueVelocity"},
-        {DrumAxisType.Orange, "reportGhDrum->orangeVelocity"},
-        {DrumAxisType.Kick, "reportGhDrum->kickVelocity"},
-    };
-
-    private static Dictionary<DrumAxisType, string> AxisMappingsPs3 = new Dictionary<DrumAxisType, string>()
-    {
-        {DrumAxisType.Yellow, "report->axis[4]"},
-        {DrumAxisType.Red, "report->axis[5]"},
-        {DrumAxisType.Green, "report->axis[6]"},
-        {DrumAxisType.Blue, "report->axis[7]"},
-        {DrumAxisType.Kick, "report->axis[8]"},
-        {DrumAxisType.Orange, "report->axis[9]"},
-        {DrumAxisType.Kick2, "report->axis[9]"},
+        {DrumAxisType.Green, "report->greenVelocity"},
+        {DrumAxisType.Red, "report->redVelocity"},
+        {DrumAxisType.Yellow, "report->yellowVelocity"},
+        {DrumAxisType.Blue, "report->blueVelocity"},
+        {DrumAxisType.Orange, "report->orangeVelocity"},
+        {DrumAxisType.Kick, "report->kickVelocity"},
     };
 
     public DrumAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
         int deadZone, int threshold, int debounce, DrumAxisType type) : base(model, input, ledOn, ledOff, ledIndices,
         min, max, deadZone,
-        "Drum"+type, (s) => true)
+        "Drum" + type, true)
     {
         Type = type;
         Threshold = threshold;
@@ -99,30 +85,15 @@ public class DrumAxis : OutputAxis
     public override bool Valid => true;
 
 
-    public override string GenerateOutput(DeviceEmulationMode mode, bool useReal)
+    public override string GenerateOutput(DeviceEmulationMode mode)
     {
-        if (mode == DeviceEmulationMode.Xbox360)
-        {
-            switch (Model.RhythmType)
-            {
-                case RhythmType.GuitarHero when AxisMappingsGhXbox.ContainsKey(Type):
-                    return AxisMappingsGhXbox[Type];
-                case RhythmType.RockBand when AxisMappingsRbXbox.ContainsKey(Type):
-                    return AxisMappingsRbXbox[Type];
-            }
-        }
-        else if (AxisMappingsPs3.ContainsKey(Type))
-        {
-            return AxisMappingsPs3[Type];
-        }
-
-        return "";
+        return AxisMappings.ContainsKey(Type) ? AxisMappings[Type] : "";
     }
 
 
-    public override string Generate(DeviceEmulationMode mode,  List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode == DeviceEmulationMode.Shared || string.IsNullOrEmpty(GenerateOutput(mode, false)))
+        if (mode == DeviceEmulationMode.Shared || string.IsNullOrEmpty(GenerateOutput(mode)))
         {
             return "";
         }
@@ -130,75 +101,80 @@ public class DrumAxis : OutputAxis
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce + 1};");
-        var buttons = 0;
-        var hats = 0;
-        var tom = ps3Tom;
-        var cymbal = ps3Cymbal;
-        if (mode == DeviceEmulationMode.Xbox360)
+        var padFlag = Ps3PadFlag;
+        var cymbalFlag = Ps3CymbalFlag;
+        var outputButtons = "";
+        switch (mode)
         {
-            tom = xboxTom;
-            cymbal = xboxCymbal;
-            if (!ButtonsXbox.ContainsKey(Type))
+            case DeviceEmulationMode.Xbox360:
             {
-                return "";
-            }
+                padFlag = Xbox360PadFlag;
+                cymbalFlag = Xbox360CymbalFlag;
+                if (ButtonsXbox360.ContainsKey(Type))
+                {
+                    outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = 1";
+                }
 
-            buttons |= ButtonsXbox[Type];
-            switch (Type)
-            {
-                case DrumAxisType.YellowCymbal:
-                    buttons |= 1 << yellowCymbal;
-                    break;
-                case DrumAxisType.BlueCymbal:
-                    buttons |= 1 << blueCymbal;
-                    break;
+                break;
             }
-        }
-        else
-        {
-            if (!ButtonsPs3.ContainsKey(Type))
+            case DeviceEmulationMode.XboxOne:
             {
-                return "";
-            }
+                if (ButtonsXboxOne.ContainsKey(Type))
+                {
+                    outputButtons += $"\n{GetReportField(ButtonsXboxOne[Type])} = 1";
+                }
 
-            buttons |= 1 << ButtonsPs3[Type];
-            switch (Type)
+                break;
+            }
+            case DeviceEmulationMode.Ps3:
             {
-                case DrumAxisType.YellowCymbal:
-                    hats |= 1 << yellowCymbal;
-                    break;
-                case DrumAxisType.BlueCymbal:
-                    hats |= 1 << blueCymbal;
-                    break;
+                if (ButtonsPs3.ContainsKey(Type))
+                {
+                    outputButtons += $"\n{GetReportField(ButtonsPs3[Type])} = 1";
+                }
+
+                break;
             }
         }
 
-        if (Model.RhythmType == RhythmType.RockBand)
+        if (Model.RhythmType == RhythmType.RockBand && mode != DeviceEmulationMode.XboxOne)
         {
             switch (Type)
             {
                 case DrumAxisType.YellowCymbal:
+                    outputButtons += $"\n{GetReportField(YellowCymbalFlag)} = 1";
+                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+                    break;
                 case DrumAxisType.BlueCymbal:
+                    outputButtons += $"\n{GetReportField(BlueCymbalFlag)} = 1";
+                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+                    break;
                 case DrumAxisType.GreenCymbal:
-                    buttons |= cymbal;
+                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
                     break;
                 case DrumAxisType.Green:
                 case DrumAxisType.Red:
                 case DrumAxisType.Yellow:
                 case DrumAxisType.Blue:
-                    buttons |= tom;
+                    outputButtons += $"\n{GetReportField(padFlag)} = 1";
                     break;
             }
         }
 
-        var outputButtons = buttons > 0 ? $" report->buttons |= {buttons};" : "";
-        var outputHats = hats > 0 ? $" report->hat |= {hats};" : "";
         var assignedVal = "val_real";
         var valType = "uint16_t";
-        if (Model.RhythmType == RhythmType.GuitarHero || mode != DeviceEmulationMode.Xbox360)
+        // Xbox one uses 4 bit velocities
+        if (mode == DeviceEmulationMode.XboxOne)
+        {
+            valType = "uint8_t";
+            assignedVal = $"val_real >> 12";
+        }
+        // Xbox 360 GH and PS3 use uint16_t velocities
+        else if (Model.RhythmType == RhythmType.GuitarHero || mode != DeviceEmulationMode.Xbox360)
         {
             assignedVal = $"val_real >> 8";
         }
+        // And then 360 RB use inverted int16_t values, though the first bit is specified based on the type
         else
         {
             valType = "int16_t";
@@ -218,24 +194,24 @@ public class DrumAxis : OutputAxis
                     break;
             }
         }
+
         var led = CalculateLeds(mode);
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
 {{
-    uint16_t val_real = {GenerateAssignment(mode, false)};
+    uint16_t val_real = {GenerateAssignment(mode, false, false, false)};
     if (val_real) {{
         if (val_real > {Threshold}) {{
             {reset}
         }}
         {valType} val = {assignedVal};
-        {GenerateOutput(mode, false)} = val;
+        {GenerateOutput(mode)} = val;
         {led}
     }}
     if ({ifStatement}) {{
         {decrement} 
         {outputButtons}
-        {outputHats}
     }}
 }}";
     }
@@ -255,6 +231,7 @@ public class DrumAxis : OutputAxis
     public override bool IsKeyboard => false;
     public override bool IsController => true;
     public override bool IsMidi => false;
+
     public override void UpdateBindings()
     {
     }

@@ -21,26 +21,26 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {Ps2InputType.Circle, StandardButtonType.B},
         {Ps2InputType.Square, StandardButtonType.X},
         {Ps2InputType.Triangle, StandardButtonType.Y},
-        {Ps2InputType.L2, StandardButtonType.Lb},
-        {Ps2InputType.R2, StandardButtonType.Rb},
-        {Ps2InputType.L3, StandardButtonType.LeftStick},
-        {Ps2InputType.R3, StandardButtonType.RightStick},
-        {Ps2InputType.Select, StandardButtonType.Select},
+        {Ps2InputType.L2, StandardButtonType.LeftShoulder},
+        {Ps2InputType.R2, StandardButtonType.RightShoulder},
+        {Ps2InputType.L3, StandardButtonType.LeftThumbClick},
+        {Ps2InputType.R3, StandardButtonType.RightThumbClick},
+        {Ps2InputType.Select, StandardButtonType.Back},
         {Ps2InputType.Start, StandardButtonType.Start},
-        {Ps2InputType.Down, StandardButtonType.Down},
-        {Ps2InputType.Up, StandardButtonType.Up},
-        {Ps2InputType.Left, StandardButtonType.Left},
-        {Ps2InputType.Right, StandardButtonType.Right},
+        {Ps2InputType.Down, StandardButtonType.DpadDown},
+        {Ps2InputType.Up, StandardButtonType.DpadUp},
+        {Ps2InputType.Left, StandardButtonType.DpadLeft},
+        {Ps2InputType.Right, StandardButtonType.DpadRight},
         {Ps2InputType.GuitarGreen, StandardButtonType.A},
         {Ps2InputType.GuitarRed, StandardButtonType.B},
         {Ps2InputType.GuitarYellow, StandardButtonType.Y},
         {Ps2InputType.GuitarBlue, StandardButtonType.X},
-        {Ps2InputType.GuitarOrange, StandardButtonType.Lb},
-        {Ps2InputType.GuitarStrumDown, StandardButtonType.Down},
-        {Ps2InputType.GuitarStrumUp, StandardButtonType.Up},
-        {Ps2InputType.GuitarSelect, StandardButtonType.Select},
+        {Ps2InputType.GuitarOrange, StandardButtonType.LeftShoulder},
+        {Ps2InputType.GuitarStrumDown, StandardButtonType.DpadDown},
+        {Ps2InputType.GuitarStrumUp, StandardButtonType.DpadUp},
+        {Ps2InputType.GuitarSelect, StandardButtonType.Back},
         {Ps2InputType.GuitarStart, StandardButtonType.Start},
-        {Ps2InputType.NegConR, StandardButtonType.Rb},
+        {Ps2InputType.NegConR, StandardButtonType.RightShoulder},
         {Ps2InputType.NegConA, StandardButtonType.B},
         {Ps2InputType.NegConB, StandardButtonType.Y},
         {Ps2InputType.NegConStart, StandardButtonType.Start},
@@ -66,18 +66,16 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public static readonly Dictionary<Ps2InputType, Ps3AxisType> Ps3Axis = new()
     {
-        {Ps2InputType.Dualshock2UpButton, Ps3AxisType.UpButton},
-        {Ps2InputType.Dualshock2RightButton, Ps3AxisType.RightButton},
-        {Ps2InputType.Dualshock2LeftButton, Ps3AxisType.LeftButton},
-        {Ps2InputType.Dualshock2DownButton, Ps3AxisType.DownButton},
-        {Ps2InputType.Dualshock2L2, Ps3AxisType.L2},
-        {Ps2InputType.Dualshock2R2, Ps3AxisType.R2},
-        {Ps2InputType.Dualshock2L1, Ps3AxisType.L1},
-        {Ps2InputType.Dualshock2R1, Ps3AxisType.R1},
-        {Ps2InputType.Dualshock2Triangle, Ps3AxisType.Triangle},
-        {Ps2InputType.Dualshock2Circle, Ps3AxisType.Circle},
-        {Ps2InputType.Dualshock2Cross, Ps3AxisType.Cross},
-        {Ps2InputType.Dualshock2Square, Ps3AxisType.Square}
+        {Ps2InputType.Dualshock2UpButton, Ps3AxisType.PressureDpadUp},
+        {Ps2InputType.Dualshock2RightButton, Ps3AxisType.PressureDpadRight},
+        {Ps2InputType.Dualshock2LeftButton, Ps3AxisType.PressureDpadLeft},
+        {Ps2InputType.Dualshock2DownButton, Ps3AxisType.PressureDpadDown},
+        {Ps2InputType.Dualshock2L1, Ps3AxisType.PressureL1},
+        {Ps2InputType.Dualshock2R1, Ps3AxisType.PressureR1},
+        {Ps2InputType.Dualshock2Triangle, Ps3AxisType.PressureTriangle},
+        {Ps2InputType.Dualshock2Circle, Ps3AxisType.PressureCircle},
+        {Ps2InputType.Dualshock2Cross, Ps3AxisType.PressureCross},
+        {Ps2InputType.Dualshock2Square, Ps3AxisType.PressureSquare}
     };
 
 
@@ -165,7 +163,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             new AnalogToDigital(
                 new Ps2Input(Ps2InputType.NegConL, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
                 AnalogToDigitalType.Trigger, 240, Model),
-            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.Lb));
+            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.LeftShoulder));
 
         Outputs.Add(new ControllerAxis(Model,
             new DigitalToAnalog(

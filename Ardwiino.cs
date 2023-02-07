@@ -428,8 +428,10 @@ public class Ardwiino : ConfigurableUsbDevice
 
                 var genAxis = AxisToStandard[(ControllerAxisType) axis];
                 var scale = config.axisScale.axis[axis];
-                var isTrigger = axis == (int) ControllerAxisType.XboxLt ||
-                                axis == (int) ControllerAxisType.XboxRt;
+                var isTrigger = axis is (int) ControllerAxisType.XboxLt or (int) ControllerAxisType.XboxRt ||
+                                (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
+                                 ((ControllerAxisType) axis ==
+                                     XboxWhammy || (ControllerAxisType) axis == XboxTilt));
 
                 var on = Color.FromRgb(0, 0, 0);
                 if (colors.ContainsKey(axis + XboxBtnCount))
@@ -444,13 +446,6 @@ public class Ardwiino : ConfigurableUsbDevice
                 }
 
                 var off = Color.FromRgb(0, 0, 0);
-                switch (deviceType)
-                {
-                    case DeviceControllerType.Guitar when (ControllerAxisType) axis == XboxWhammy:
-                    case DeviceControllerType.LiveGuitar when (ControllerAxisType) axis == XboxTilt:
-                        isTrigger = true;
-                        break;
-                }
 
                 if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
                     (ControllerAxisType) axis == XboxTilt &&
@@ -460,10 +455,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
                             -32767, 0, model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
-                        0,
-                        deviceType is DeviceControllerType.Guitar
-                            ? StandardAxisType.RightStickY
-                            : StandardAxisType.RightStickX));
+                        0, StandardAxisType.RightStickY));
                 }
                 else
                 {
@@ -476,11 +468,6 @@ public class Ardwiino : ConfigurableUsbDevice
                     {
                         min += short.MaxValue;
                         max += short.MaxValue;
-                    }
-
-                    if (deviceType is DeviceControllerType.LiveGuitar && genAxis == StandardAxisType.RightStickX)
-                    {
-                        genAxis = StandardAxisType.RightStickY;
                     }
 
                     bindings.Add(new ControllerAxis(model,
@@ -520,12 +507,12 @@ public class Ardwiino : ConfigurableUsbDevice
 
                 var debounce = config.debounce.buttons;
                 if (deviceType == DeviceControllerType.Guitar &&
-                    (genButton == StandardButtonType.Up || genButton == StandardButtonType.Down))
+                    (genButton == StandardButtonType.DpadUp || genButton == StandardButtonType.DpadDown))
                 {
                     debounce = config.debounce.strum;
                 }
 
-                if (deviceType == DeviceControllerType.Turntable && genButton == StandardButtonType.LeftStick)
+                if (deviceType == DeviceControllerType.Turntable && genButton == StandardButtonType.LeftThumbClick)
                 {
                     genButton = StandardButtonType.Y;
                 }
@@ -558,7 +545,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
                             -32767, 0, model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
-                        0, deviceType is DeviceControllerType.Guitar ? StandardAxisType.RightStickY : StandardAxisType.RightStickX));
+                        0, StandardAxisType.RightStickY));
                 }
             }
 
@@ -605,10 +592,10 @@ public class Ardwiino : ConfigurableUsbDevice
                 var ledOff = lx.LedOff;
                 bindings.Add(new ControllerButton(model,
                     new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
-                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.Left));
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadLeft));
                 bindings.Add(new ControllerButton(model,
                     new AnalogToDigital(lx.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
-                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.Right));
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadRight));
             }
 
             if (ly != null && ly.Input != null)
@@ -617,10 +604,10 @@ public class Ardwiino : ConfigurableUsbDevice
                 var ledOff = ly.LedOff;
                 bindings.Add(new ControllerButton(model,
                     new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
-                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.Up));
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadUp));
                 bindings.Add(new ControllerButton(model,
                     new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
-                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.Down));
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadDown));
             }
         }
 
@@ -723,17 +710,17 @@ public class Ardwiino : ConfigurableUsbDevice
     private static readonly Dictionary<ControllerButtons, StandardButtonType> ButtonToStandard =
         new()
         {
-            {ControllerButtons.XboxDpadUp, StandardButtonType.Up},
-            {ControllerButtons.XboxDpadDown, StandardButtonType.Down},
-            {ControllerButtons.XboxDpadLeft, StandardButtonType.Left},
-            {ControllerButtons.XboxDpadRight, StandardButtonType.Right},
+            {ControllerButtons.XboxDpadUp, StandardButtonType.DpadUp},
+            {ControllerButtons.XboxDpadDown, StandardButtonType.DpadDown},
+            {ControllerButtons.XboxDpadLeft, StandardButtonType.DpadLeft},
+            {ControllerButtons.XboxDpadRight, StandardButtonType.DpadRight},
             {ControllerButtons.XboxStart, StandardButtonType.Start},
-            {ControllerButtons.XboxBack, StandardButtonType.Select},
-            {ControllerButtons.XboxLeftStick, StandardButtonType.LeftStick},
-            {ControllerButtons.XboxRightStick, StandardButtonType.RightStick},
-            {ControllerButtons.XboxLb, StandardButtonType.Lb},
-            {ControllerButtons.XboxRb, StandardButtonType.Rb},
-            {ControllerButtons.XboxHome, StandardButtonType.Home},
+            {ControllerButtons.XboxBack, StandardButtonType.Back},
+            {ControllerButtons.XboxLeftStick, StandardButtonType.LeftThumbClick},
+            {ControllerButtons.XboxRightStick, StandardButtonType.RightThumbClick},
+            {ControllerButtons.XboxLb, StandardButtonType.LeftShoulder},
+            {ControllerButtons.XboxRb, StandardButtonType.RightShoulder},
+            {ControllerButtons.XboxHome, StandardButtonType.Guide},
             {ControllerButtons.XboxUnused, StandardButtonType.Capture},
             {ControllerButtons.XboxA, StandardButtonType.A},
             {ControllerButtons.XboxB, StandardButtonType.B},
@@ -743,8 +730,9 @@ public class Ardwiino : ConfigurableUsbDevice
 
     readonly List<StandardButtonType> _frets = new()
     {
-        StandardButtonType.A, StandardButtonType.B, StandardButtonType.X, StandardButtonType.Y, StandardButtonType.Lb,
-        StandardButtonType.Rb
+        StandardButtonType.A, StandardButtonType.B, StandardButtonType.X, StandardButtonType.Y,
+        StandardButtonType.LeftShoulder,
+        StandardButtonType.RightShoulder
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

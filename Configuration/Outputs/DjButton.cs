@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -10,36 +11,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class DjButton : OutputButton
 {
-    private static readonly Dictionary<DjInputType, string> Buttons = new()
-    {
-        {DjInputType.LeftGreen, "0"},
-        {DjInputType.LeftRed, "1"},
-        {DjInputType.LeftBlue, "2"},
-        {DjInputType.RightGreen, "0"},
-        {DjInputType.RightRed, "1"},
-        {DjInputType.RightBlue, "2"},
-    };
-
-    private static readonly Dictionary<DjInputType, string> ButtonsPs3 = new()
-    {
-        {DjInputType.LeftGreen, "0"},
-        {DjInputType.LeftRed, "1"},
-        {DjInputType.LeftBlue, "2"},
-        {DjInputType.RightGreen, "4"},
-        {DjInputType.RightRed, "5"},
-        {DjInputType.RightBlue, "6"},
-    };
-
-    private static readonly Dictionary<DjInputType, string> Axis = new()
-    {
-        {DjInputType.LeftGreen, "report->lt"},
-        {DjInputType.LeftRed, "report->lt"},
-        {DjInputType.LeftBlue, "report->lt"},
-        {DjInputType.RightGreen, "report->rt"},
-        {DjInputType.RightRed, "report->rt"},
-        {DjInputType.RightBlue, "report->rt"},
-    };
-
     public readonly DjInputType Type;
 
     public DjButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce,
@@ -50,12 +21,7 @@ public class DjButton : OutputButton
 
     public override string GenerateOutput(DeviceEmulationMode mode)
     {
-        return mode == DeviceEmulationMode.Xbox360 ? Axis[Type] : "report->accel[2]";
-    }
-
-    public override string GenerateIndex(DeviceEmulationMode mode)
-    {
-        return mode == DeviceEmulationMode.Xbox360 ? Buttons[Type] : ButtonsPs3[Type];
+        return GetReportField(Type);
     }
 
     public override bool IsKeyboard => false;
@@ -66,6 +32,29 @@ public class DjButton : OutputButton
 
     public override bool Valid => true;
 
+    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
+    {
+        // Turntables also hit the standard buttons when you push each button
+        switch (Type)
+        {
+            case DjInputType.LeftGreen:
+            case DjInputType.RightGreen:
+                extra = "report->a = true;";
+                break;
+            case DjInputType.LeftRed:
+            case DjInputType.RightRed:
+                extra = "report->b = true;";
+                break;
+            case DjInputType.LeftBlue:
+            case DjInputType.RightBlue:
+                extra = "report->x = true;";
+                break;
+            default:
+                return "";
+        }
+        return base.Generate(mode, debounceIndex, combined, extra);
+    }
+    
     public override SerializedOutput Serialize()
     {
         return new SerializedDjButton(Input?.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);

@@ -4,28 +4,24 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum Ps3AxisType
 {
-    [Description("Up Pressure")]
-    UpButton,
-    [Description("Right Pressure")]
-    RightButton,
-    [Description("Left Pressure")]
-    LeftButton,
-    [Description("Down Pressure")]
-    DownButton,
-    [Description("L2 Pressure")]
-    L2,
-    [Description("R2 Pressure")]
-    R2,
+    [Description("Dpad Up Pressure")]
+    PressureDpadUp,
+    [Description("Dpad Right Pressure")]
+    PressureDpadRight,
+    [Description("Dpad Left Pressure")]
+    PressureDpadLeft,
+    [Description("Dpad Down Pressure")]
+    PressureDpadDown,
     [Description("L1 Pressure")]
-    L1,
+    PressureL1,
     [Description("R1 Pressure")]
-    R1,
+    PressureR1,
     [Description("Triangle Pressure")]
-    Triangle,
+    PressureTriangle,
     [Description("Circle Pressure")]
-    Circle,
+    PressureCircle,
     [Description("Cross Pressure")]
-    Cross,
+    PressureCross,
     [Description("Square Pressure")]
-    Square,
+    PressureSquare,
 }

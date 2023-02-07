@@ -503,7 +503,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
                 lines.Add($"#define TICK_LED {GenerateLedTick()}");
             }
-            //TODO: these
+            //TODO: these, will need to generate if statements that fill the led array, depending on what the user is doing with things.
             lines.Add($"#define HANDLE_AUTH_LED");
             
             lines.Add($"#define HANDLE_PLAYER_LED");
@@ -720,13 +720,13 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 {
                     switch (output)
                     {
-                        case ControllerButton {Type: StandardButtonType.Down}:
+                        case ControllerButton {Type: StandardButtonType.DpadDown}:
                             outputsToAdd.Add(new ControllerAxis(this,
                                 new DigitalToAnalog(output.Input!, short.MaxValue, 0, this), Colors.Transparent,
                                 Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                                 StandardAxisType.LeftStickY));
                             break;
-                        case ControllerButton {Type: StandardButtonType.Up}:
+                        case ControllerButton {Type: StandardButtonType.DpadUp}:
                             outputsToAdd.Add(new ControllerAxis(this,
                                 new DigitalToAnalog(output.Input!, short.MinValue, 0, this), Colors.Transparent,
                                 Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
@@ -752,7 +752,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     switch (output)
                     {
                         case ControllerAxis axis:
-                            toTest.Remove(axis.GetRealAxis(mode));
+                            toTest.Remove(axis.Type);
                             break;
                         case DjButton:
                             toTest.Remove(StandardAxisType.AccelerationY);
@@ -880,11 +880,11 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
                                 if (output is OutputAxis axis && !shared)
                                 {
-                                    generated = generated.Replace("{output}", axis.GenerateOutput(mode, false));
+                                    generated = generated.Replace("{output}", axis.GenerateOutput(mode));
                                     if (!seenAnalog.Contains(output.Name) && input is DigitalToAnalog dta)
                                     {
                                         generated =
-                                            $"{axis.GenerateOutput(mode, false)} = {dta.GenerateOff(mode)}; {generated}";
+                                            $"{axis.GenerateOutput(mode)} = {dta.GenerateOff(mode)}; {generated}";
                                     }
 
                                     seenAnalog.Add(output.Name);

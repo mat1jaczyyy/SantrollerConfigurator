@@ -22,7 +22,7 @@ public class GhwtCombinedOutput : CombinedOutput
         {GhWtInputType.TapRed, StandardButtonType.B},
         {GhWtInputType.TapYellow, StandardButtonType.Y},
         {GhWtInputType.TapBlue, StandardButtonType.X},
-        {GhWtInputType.TapOrange, StandardButtonType.Lb},
+        {GhWtInputType.TapOrange, StandardButtonType.LeftShoulder},
     };
 
     public GhwtCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null,

@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -217,11 +216,6 @@ public class KeyboardButton : OutputButton
     }
 
     public Key Key;
-
-    public override string GenerateIndex(DeviceEmulationMode mode)
-    {
-        throw new NotImplementedException();
-    }
 
     public override bool IsKeyboard => true;
     public override bool IsController => false;

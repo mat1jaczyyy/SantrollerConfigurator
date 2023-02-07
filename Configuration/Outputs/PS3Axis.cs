@@ -12,7 +12,7 @@ public class PS3Axis : OutputAxis
     public PS3Axis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
         int deadZone, Ps3AxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
-        type.ToString(), (s) => true)
+        type.ToString(), true)
     {
         Type = type;
     }
@@ -25,9 +25,9 @@ public class PS3Axis : OutputAxis
     public Ps3AxisType Type { get; }
 
 
-    public override string GenerateOutput(DeviceEmulationMode mode, bool useReal)
+    public override string GenerateOutput(DeviceEmulationMode mode)
     {
-        return mode == DeviceEmulationMode.Ps3 ? $"report->axis[{(byte)Type}]" : "" ;
+        return mode == DeviceEmulationMode.Ps3 ? GetReportField(Type) : "" ;
     }
 
     public override bool IsCombined => false;

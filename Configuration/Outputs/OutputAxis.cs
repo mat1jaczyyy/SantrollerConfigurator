@@ -23,18 +23,15 @@ public enum OutputAxisCalibrationState
 
 public abstract class OutputAxis : Output
 {
-    protected delegate bool TriggerDelegate(DeviceControllerType type);
-
     protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
-        int deadZone, string name, TriggerDelegate triggerDelegate, bool dj = false) : base(model, input, ledOn, ledOff,
+        int deadZone, string name, bool trigger, bool dj = false) : base(model, input, ledOn, ledOff,
         ledIndices,
         name)
     {
         InputIsDj = dj;
         Input = input;
-        _trigger = this.WhenAnyValue(x => x.Model.DeviceType).Select(d => triggerDelegate(d))
-            .ToProperty(this, x => x.Trigger);
+        Trigger = trigger;
         LedOn = ledOn;
         LedOff = ledOff;
         Max = max;
@@ -302,9 +299,8 @@ public abstract class OutputAxis : Output
     }
 
 
-    private readonly ObservableAsPropertyHelper<bool> _trigger;
-    public bool Trigger => _trigger.Value;
-    public abstract string GenerateOutput(DeviceEmulationMode mode, bool useReal);
+    public bool Trigger { get; }
+    public abstract string GenerateOutput(DeviceEmulationMode mode);
     public override bool IsCombined => false;
     public override bool IsStrum => false;
     private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.None;
@@ -312,6 +308,7 @@ public abstract class OutputAxis : Output
     public bool IsDigitalToAnalog => _isDigitalToAnalog.Value;
 
     public string? CalibrationText => GetCalibrationText();
+
     public int DjValue
     {
         get => Max;
@@ -332,10 +329,7 @@ public abstract class OutputAxis : Output
             _ => null
         };
     }
-
-    private const string Ps3GuitarTilt = "report->accel[0]";
-
-    protected string GenerateAssignment(DeviceEmulationMode mode, bool forceAccel)
+    protected string GenerateAssignment(DeviceEmulationMode mode, bool forceAccel, bool forceTrigger, bool whammy)
     {
         switch (Input)
         {
@@ -351,63 +345,65 @@ public abstract class OutputAxis : Output
             return mode == DeviceEmulationMode.Xbox360 ? gen : $"{gen} + {sbyte.MaxValue}";
         }
 
-        var whammy = Model.DeviceType switch
+        var accel = forceAccel || this is ControllerAxis
         {
-            DeviceControllerType.Guitar when this is ControllerAxis {Type: StandardAxisType.RightStickX} => true,
-            DeviceControllerType.LiveGuitar when this is ControllerAxis {Type: StandardAxisType.RightStickY} => true,
-            _ => false
+            Type: StandardAxisType.Gyro or StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
+            or StandardAxisType.AccelerationZ
         };
-        var accel = forceAccel || this is ControllerAxis axis && axis.GetRealAxis(mode) is StandardAxisType.Gyro or StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
-            or StandardAxisType.AccelerationZ;
         string function;
+        bool trigger = Trigger || forceTrigger;
         var normal = false;
-        if (mode == DeviceEmulationMode.Xbox360)
+
+        switch (mode)
         {
-            if (whammy)
-            {
+            case DeviceEmulationMode.XboxOne when whammy:
                 function = "handle_calibration_xbox_whammy";
-            }
-            else if (Trigger)
-            {
-                function = "handle_calibration_xbox_trigger";
-            }
-            else
-            {
+                break;
+            case DeviceEmulationMode.XboxOne when trigger:
+                function = "handle_calibration_xbox_one_trigger";
+                break;
+            case DeviceEmulationMode.XboxOne:
                 normal = true;
                 function = "handle_calibration_xbox";
-            }
-        }
-        else
-        {
-            if (whammy)
-            {
+                break;
+            case DeviceEmulationMode.Xbox360 when whammy:
+                function = "handle_calibration_xbox_whammy";
+                break;
+            case DeviceEmulationMode.Xbox360 when trigger:
+                function = "handle_calibration_ps3_360_trigger";
+                break;
+            case DeviceEmulationMode.Xbox360:
+                normal = true;
+                function = "handle_calibration_xbox";
+                break;
+            case DeviceEmulationMode.Ps3 when whammy:
                 function = "handle_calibration_ps3_whammy";
-            }
-            else if (accel)
-            {
+                break;
+            case DeviceEmulationMode.Ps3 when accel:
                 function = "handle_calibration_ps3_accel";
-            }
-            else if (Trigger)
-            {
+                break;
+            case DeviceEmulationMode.Ps3 when trigger:
                 function = "handle_calibration_ps3_trigger";
-            }
-            else
-            {
+                break;
+            case DeviceEmulationMode.Ps3:
                 normal = true;
                 function = "handle_calibration_ps3";
-            }
+                break;
+            default:
+                return "";
         }
 
         var min = Min;
         var max = Max;
         float multiplier;
-        if (Trigger || accel)
+        if (Trigger)
         {
             if (!InputIsUint)
             {
                 min += short.MaxValue;
                 max += short.MaxValue;
             }
+
             if (max <= min)
             {
                 min -= DeadZone;
@@ -417,12 +413,12 @@ public abstract class OutputAxis : Output
         }
         else
         {
-            
             if (InputIsUint)
             {
                 min -= short.MaxValue;
                 max -= short.MaxValue;
             }
+
             min += DeadZone;
             max -= DeadZone;
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
@@ -445,52 +441,26 @@ public abstract class OutputAxis : Output
     protected string CalculateLeds(DeviceEmulationMode mode)
     {
         var led = "";
-        if (AreLedsEnabled)
+        if (!AreLedsEnabled) return led;
+        foreach (var index in LedIndices)
         {
-            foreach (var index in LedIndices)
-            {
-                var ledRead = mode == DeviceEmulationMode.Xbox360 ? $"{GenerateOutput(mode, false)} << 8" : GenerateOutput(mode, false);
-                led += $@"if (!ledState[{index}].select) {{
+            var ledRead = mode == DeviceEmulationMode.Xbox360
+                ? $"{GenerateOutput(mode)} << 8"
+                : GenerateOutput(mode);
+            led += $@"if (!ledState[{index}].select) {{
                         {string.Join("", Model.LedType.GetColors(LedOn).Zip(Model.LedType.GetColors(LedOff), new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({ledRead})) >> 8));"))}
                     }}";
-            }
         }
 
         return led;
     }
 
-    public override string Generate(DeviceEmulationMode mode,  List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         if (mode == DeviceEmulationMode.Shared) return "";
-        if (Input is FixedInput || InputIsDj)
-        {
-            return $"{GenerateOutput(mode, Input is FixedInput)} = {GenerateAssignment(mode, false)};";
-        }
-
-        var tiltForPs3 = mode == DeviceEmulationMode.Ps3 && Model.DeviceType == DeviceControllerType.Guitar &&
-                         this is ControllerAxis {Type: StandardAxisType.RightStickY};
-        var led = CalculateLeds(mode);
-
-        if (!tiltForPs3 || mode != DeviceEmulationMode.Ps3) return $"{GenerateOutput(mode, false)} = {GenerateAssignment(mode, false)}; {led}";
-        // if (Input is DigitalToAnalog)
-        // {
-        //Thanks to clone hero, we need to invert the tilt axis for only hid
-        // var hidInput = (DigitalToAnalog) Input.Serialise().Generate(Model.MicroController!, Model);
-        // hidInput.On = -hidInput.On;
-        // hidInput.Off = -hidInput.Off;
-        //     var retPs3Dta = $"{Ps3GuitarTilt} = {Input.Generate(true)};";
-        //     var retHidDta = $"{GenerateOutput(xbox)} = -{Input.Generate(xbox)};";
-        //     return $"if (consoleType == PS3) {{{retPs3Dta}}} else {{{retHidDta}}} {led}";
-        // }
-
-        //Thanks to clone hero, we need to invert the tilt axis for only hid
-        //Ps3 tilt goes to the accelerometer, so force use of that here
-        return $@"if (consoleType == PS3) {{
-            {Ps3GuitarTilt} = {GenerateAssignment(mode, true)};
-        }} else {{
-            {GenerateOutput(mode, false)} = -{GenerateAssignment(mode, false)};
-        }} {led}";
+        var led = Input is FixedInput ? "" : CalculateLeds(mode);
+        return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)}; {led}";
     }
 
     public override void UpdateBindings()

@@ -18,7 +18,7 @@ public class MouseAxis : OutputAxis
     };
 
     public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
-        deadZone, type.ToString(), (_) => false)
+        deadZone, type.ToString(), false)
     {
         Type = type;
     }
@@ -34,7 +34,7 @@ public class MouseAxis : OutputAxis
 
     public MouseAxisType Type { get; }
 
-    public override string GenerateOutput(DeviceEmulationMode mode, bool useReal)
+    public override string GenerateOutput(DeviceEmulationMode mode)
     {
         return "report->" + Mappings[Type];
     }

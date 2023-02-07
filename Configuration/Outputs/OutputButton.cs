@@ -17,19 +17,25 @@ public abstract class OutputButton : Output
     }
 
     public byte Debounce { get; set; }
-    public abstract string GenerateIndex(DeviceEmulationMode mode);
 
     public abstract string GenerateOutput(DeviceEmulationMode mode);
 
 
     public override bool IsCombined => false;
 
+    /// <summary>
+    /// Generate bindings
+    /// </summary>
+    /// <param name="mode"></param>
+    /// <param name="debounceIndex"></param>
+    /// <param name="combined"></param>
+    /// <param name="extra">Used to provide extra statements that are called if the button is pressed</param>
+    /// <returns></returns>
+    /// <exception cref="IncompleteConfigurationException"></exception>
     public override string Generate(DeviceEmulationMode mode,  List<int> debounceIndex, bool combined, string extra)
     {
         if (Input==null) throw new IncompleteConfigurationException("Missing input!");
-        var outputBit = GenerateIndex(mode);
-        if (string.IsNullOrEmpty(outputBit)) return "";
-        
+       
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce+1};");
@@ -49,7 +55,7 @@ public abstract class OutputButton : Output
             return
                 @$"if ({ifStatement}) {{ 
                     {decrement} 
-                    {outputVar} |= (1 << {outputBit}); 
+                    {outputVar} = true; 
                     {leds}
                 }}";
         }
@@ -78,10 +84,10 @@ public abstract class OutputButton : Output
         {
             var otherIndex = debounceIndex[0] == 1 ? 0 : 1;
             return
-                $"if (({Input.Generate(mode)}) && (!debounce[{otherIndex}])) {{ {led2}; {reset};}} {led}";
+                $"if (({Input.Generate(mode)}) && (!debounce[{otherIndex}])) {{ {led2}; {reset}; {extra};}} {led}";
         }
 
-        return $"if (({Input.Generate(mode)})) {{ {led2}; {reset}; }} {led}";
+        return $"if (({Input.Generate(mode)})) {{ {led2}; {reset}; {extra}; }} {led}";
     }
 
     public override void UpdateBindings()

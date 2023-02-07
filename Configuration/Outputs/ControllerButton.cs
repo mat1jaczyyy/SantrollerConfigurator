@@ -12,88 +12,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class ControllerButton : OutputButton
 {
-    public static readonly List<StandardButtonType> Order = new()
-    {
-        StandardButtonType.X,
-        StandardButtonType.A,
-        StandardButtonType.B,
-        StandardButtonType.Y,
-        StandardButtonType.Lb,
-        StandardButtonType.Rb,
-        StandardButtonType.Lt,
-        StandardButtonType.Rt,
-        StandardButtonType.Select,
-        StandardButtonType.Start,
-        StandardButtonType.LeftStick,
-        StandardButtonType.RightStick,
-        StandardButtonType.Home,
-        StandardButtonType.Capture
-    };
-
-    public static readonly List<StandardButtonType> OrderGh = new()
-    {
-        StandardButtonType.Y,
-        StandardButtonType.A,
-        StandardButtonType.B,
-        StandardButtonType.X,
-        StandardButtonType.Lb,
-        StandardButtonType.Rb,
-        StandardButtonType.Lt,
-        StandardButtonType.Rt,
-        StandardButtonType.Select,
-        StandardButtonType.Start,
-        StandardButtonType.LeftStick,
-        StandardButtonType.RightStick,
-        StandardButtonType.Home,
-        StandardButtonType.Capture
-    };
-    
-    public static readonly List<StandardButtonType> OrderSwitch = new()
-    {
-        StandardButtonType.Y,
-        StandardButtonType.B,
-        StandardButtonType.A,
-        StandardButtonType.X,
-        StandardButtonType.Lb,
-        StandardButtonType.Rb,
-        StandardButtonType.Lt,
-        StandardButtonType.Rt,
-        StandardButtonType.Select,
-        StandardButtonType.Start,
-        StandardButtonType.LeftStick,
-        StandardButtonType.RightStick,
-        StandardButtonType.Home,
-        StandardButtonType.Capture
-    };
-
-    public static readonly List<StandardButtonType> XboxOrder = new()
-    {
-        StandardButtonType.Up,
-        StandardButtonType.Down,
-        StandardButtonType.Left,
-        StandardButtonType.Right,
-        StandardButtonType.Start,
-        StandardButtonType.Select,
-        StandardButtonType.LeftStick,
-        StandardButtonType.RightStick,
-        StandardButtonType.Lb,
-        StandardButtonType.Rb,
-        StandardButtonType.Home,
-        StandardButtonType.Capture,
-        StandardButtonType.A,
-        StandardButtonType.B,
-        StandardButtonType.X,
-        StandardButtonType.Y
-    };
-
-    public static readonly List<StandardButtonType> HatOrder = new()
-    {
-        StandardButtonType.Up,
-        StandardButtonType.Down,
-        StandardButtonType.Left,
-        StandardButtonType.Right,
-    };
-
     public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
         byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce,
         type.ToString())
@@ -112,39 +30,15 @@ public class ControllerButton : OutputButton
 
     public StandardButtonType Type { get; }
 
-    public override string GenerateIndex(DeviceEmulationMode mode)
-    {
-        if (mode == DeviceEmulationMode.Xbox360)
-        {
-            //On the xbox, LT and RT are analog only.
-            return XboxOrder.Contains(Type) ? XboxOrder.IndexOf(Type).ToString() : "";
-        }
-
-        if (Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.GuitarHero})
-        {
-            if (Type is StandardButtonType.X or StandardButtonType.Y)
-            {
-                return $"(consoleType == PS3 ? {OrderGh.IndexOf(Type).ToString()} : {Order.IndexOf(Type).ToString()})";
-            }
-        }
-
-        return HatOrder.Contains(Type) ? HatOrder.IndexOf(Type).ToString() : $"(consoleType == SWITCH ? {OrderSwitch.IndexOf(Type).ToString()} : {Order.IndexOf(Type).ToString()})";
-    }
-
     public override string GenerateOutput(DeviceEmulationMode mode)
     {
-        if (mode == DeviceEmulationMode.Ps3 && HatOrder.Contains(Type))
-        {
-            return "report->hat";
-        }
-
-        return "report->buttons";
+        return GetReportField(Type);
     }
 
     public override bool IsKeyboard => false;
     public override bool IsController => true;
     public override bool IsMidi => false;
-    public override bool IsStrum => Type is StandardButtonType.Up or StandardButtonType.Down;
+    public override bool IsStrum => Type is StandardButtonType.DpadUp or StandardButtonType.DpadDown;
 
     public override bool IsCombined => false;
 

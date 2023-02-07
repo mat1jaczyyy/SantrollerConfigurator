@@ -238,6 +238,12 @@ public abstract class Output : ReactiveObject, IDisposable
         return Name;
     }
 
+    public static string GetReportField(object type)
+    {
+        var typeName = type.ToString()!;
+        return $"report->{char.ToLower(typeName[0])}{typeName[1..]}";
+    }
+
     public async Task FindAndAssign()
     {
         ButtonText = "Move the mouse or click / press any key to use that input";
