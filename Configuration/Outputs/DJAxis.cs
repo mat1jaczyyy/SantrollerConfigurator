@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -7,19 +8,20 @@ using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
-public class DJAxis : OutputAxis
+public class DjAxis : OutputAxis
 {
     public DjAxisType Type { get; }
 
-    public DJAxis(ConfigViewModel model, DjAxisType type, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max, int deadZone, string name, bool dj = false) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone, name, false, dj)
+    public DjAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
+        int deadZone, DjAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone, "DJ" + type, false, true)
     {
         Type = type;
     }
 
     public override SerializedOutput Serialize()
     {
-        
-        throw new System.NotImplementedException();
+
+        return new SerializedDjAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone);
     }
 
     public override bool IsKeyboard => false;

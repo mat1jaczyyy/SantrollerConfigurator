@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Avalonia.Data.Converters;
 using GuitarConfigurator.NetCore.Configuration.DJ;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 
 namespace GuitarConfigurator.NetCore;
@@ -15,21 +16,6 @@ public class ControllerEnumConverter : IMultiValueConverter
     private static readonly Dictionary<Tuple<DeviceControllerType, RhythmType?, StandardAxisType>, string> AxisLabels =
         new()
         {
-            {
-                new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardAxisType.LeftStickX),
-                "Touch / Slider Bar"
-            },
-            {new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardAxisType.RightStickX), "Whammy Axis"},
-            {new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardAxisType.RightStickY), "Tilt Axis"},
-            {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardAxisType.RightStickX), "Whammy Axis"},
-            {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardAxisType.RightStickY), "Tilt Axis"},
-            {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardAxisType.LeftTrigger), "Effects Switch"},
-            {new(DeviceControllerType.LiveGuitar, null, StandardAxisType.RightStickX), "Tilt Axis"},
-            {new(DeviceControllerType.LiveGuitar, null, StandardAxisType.RightStickY), "Whammy Axis"},
-            {new(DeviceControllerType.Turntable, null, StandardAxisType.RightStickX), "Effects knob"},
-            {new(DeviceControllerType.Turntable, null, StandardAxisType.RightStickY), "Crossfader"},
-            {new(DeviceControllerType.Turntable, null, StandardAxisType.LeftStickX), "Left Turntable Spin"},
-            {new(DeviceControllerType.Turntable, null, StandardAxisType.LeftStickY), "Right Turntable Spin"},
             {new(DeviceControllerType.Gamepad, null, StandardAxisType.LeftStickX), "Left Joystick X Axis"},
             {new(DeviceControllerType.Gamepad, null, StandardAxisType.LeftStickY), "Left Joystick Y Axis"},
             {new(DeviceControllerType.Gamepad, null, StandardAxisType.RightStickX), "Right Joystick X Axis"},
@@ -54,11 +40,11 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardButtonType.Start), "Start Button"},
                 {new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardButtonType.Back), "Select Button"},
                 {new(DeviceControllerType.Guitar, RhythmType.GuitarHero, StandardButtonType.Guide), "Home Button"},
-                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.A), "Green Fret"},
-                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.B), "Red Fret"},
-                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.Y), "Yellow Fret"},
-                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.X), "Blue Fret"},
-                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.LeftShoulder), "Orange Fret"},
+                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.A), "Lower Green Fret"},
+                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.B), "Lower Red Fret"},
+                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.Y), "Lower Yellow Fret"},
+                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.X), "Lower Blue Fret"},
+                {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.LeftShoulder), "Lower Orange Fret"},
                 {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.DpadUp), "Strum Up"},
                 {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.DpadDown), "Strum Down"},
                 {new(DeviceControllerType.Guitar, RhythmType.RockBand, StandardButtonType.DpadLeft), "D-pad Left"},
@@ -80,10 +66,10 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Back), "Select Button"},
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.LeftThumbClick), "GHTV Button"},
                 {new(DeviceControllerType.LiveGuitar, null, StandardButtonType.Guide), "Home Button"},
-                {new(DeviceControllerType.Turntable, null, StandardButtonType.A), "Green Fret / A Button"},
-                {new(DeviceControllerType.Turntable, null, StandardButtonType.B), "Red Fret / B Button"},
-                {new(DeviceControllerType.Turntable, null, StandardButtonType.Y), "Euphoria / Y Button"},
-                {new(DeviceControllerType.Turntable, null, StandardButtonType.X), "Blue Fret / X Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.A), "A Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.B), "B Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.X), "X Button"},
+                {new(DeviceControllerType.Turntable, null, StandardButtonType.Y), "Y Button"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.DpadUp), "D-pad Up"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.DpadDown), "D-pad Down"},
                 {new(DeviceControllerType.Turntable, null, StandardButtonType.DpadLeft), "D-pad Left"},
@@ -175,22 +161,74 @@ public class ControllerEnumConverter : IMultiValueConverter
         return attributes.Length > 0 ? attributes[0].Description : fieldInfo.Name;
     }
 
+    public static (List<Output>, List<object>) FilterValidOutputs(DeviceControllerType controllerType, RhythmType rhythmType, IEnumerable<Output> outputs)
+    {
+        var types = GetTypes((controllerType, rhythmType))
+            .Where(s => s is not SimpleType).ToList();
+        List<Output> extra = new List<Output>();
+        foreach (var binding in outputs)
+        {
+            switch (binding)
+            {
+                case ControllerButton button:
+                    if (!types.Remove(button.Type))
+                    {
+                        extra.Add(binding);
+                    }
+                    break;
+                case RbButton button:
+                    if (!types.Remove(button.Type))
+                    {
+                        extra.Add(binding);
+                    }
+                    break;
+                case ControllerAxis axis:
+                    if (!types.Remove(axis.Type))
+                    {
+                        extra.Add(binding);
+                    }
+                    break;
+                case GuitarAxis axis:
+                    types.Remove(axis.Type);
+                    if (!types.Remove(axis.Type))
+                    {
+                        extra.Add(binding);
+                    }
+                    break;
+                case DrumAxis axis:
+                    types.Remove(axis.Type);
+                    if (!types.Remove(axis.Type))
+                    {
+                        extra.Add(binding);
+                    }
+                    break;
+            }
+        }
+
+        return (extra, types);
+    }
+
     public static IEnumerable<object> GetTypes((DeviceControllerType, RhythmType) arg)
     {
         var deviceControllerType = arg.Item1;
         RhythmType? rhythmType = arg.Item2;
         IEnumerable<object> otherBindings = Enumerable.Empty<object>();
-        if (deviceControllerType is DeviceControllerType.Drum)
+        otherBindings = deviceControllerType switch
         {
-            otherBindings = DrumAxisTypeMethods.GetTypeFor(rhythmType.Value).Cast<object>();
-        }
-        if (deviceControllerType is DeviceControllerType.Gamepad)
+            DeviceControllerType.Drum => DrumAxisTypeMethods.GetTypeFor(rhythmType.Value).Cast<object>(),
+            DeviceControllerType.Gamepad => Enum.GetValues<Ps3AxisType>().Cast<object>(),
+            DeviceControllerType.Turntable => Enum.GetValues<DjInputType>()
+                .Where(s => s is not DjInputType.LeftTurntable or DjInputType.RightTurntable)
+                .Cast<object>().Concat(Enum.GetValues<DjAxisType>().Cast<object>()),
+            DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar => GuitarAxisTypeMethods
+                .GetTypeFor(deviceControllerType, rhythmType.Value)
+                .Cast<object>()
+                .Concat(otherBindings),
+            _ => otherBindings
+        };
+        if (deviceControllerType is DeviceControllerType.Guitar && rhythmType == RhythmType.RockBand)
         {
-            otherBindings = Enum.GetValues<Ps3AxisType>().Cast<object>();
-        }
-        if (deviceControllerType is DeviceControllerType.Turntable)
-        {
-            otherBindings = Enum.GetValues<DjInputType>().Where(s => s is not DjInputType.LeftTurntable or DjInputType.RightTurntable).Cast<object>();
+            otherBindings = Enum.GetValues<RBButtonType>().Cast<object>().Concat(otherBindings);
         }
         if (deviceControllerType is not DeviceControllerType.Guitar)
             rhythmType = null;

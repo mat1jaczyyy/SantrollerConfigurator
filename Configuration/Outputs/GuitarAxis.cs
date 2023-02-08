@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -11,16 +12,16 @@ public class GuitarAxis : OutputAxis
 {
     public GuitarAxisType Type { get; }
 
-    public GuitarAxis(ConfigViewModel model, GuitarAxisType type, Input? input, Color ledOn, Color ledOff,
-        byte[] ledIndices, int min, int max, int deadZone, string name, bool dj = false) : base(model, input, ledOn,
-        ledOff, ledIndices, min, max, deadZone, name, false, dj)
+    public GuitarAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff,
+        byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type) : base(model, input, ledOn,
+        ledOff, ledIndices, min, max, deadZone, "Guitar" + type, false)
     {
         Type = type;
     }
 
     public override SerializedOutput Serialize()
     {
-        throw new System.NotImplementedException();
+        return new SerializedGuitarAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone);
     }
 
     public override bool IsKeyboard => false;

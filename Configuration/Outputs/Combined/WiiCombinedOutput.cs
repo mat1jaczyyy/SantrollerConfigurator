@@ -115,6 +115,14 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.GuitarWhammy, StandardAxisType.RightStickX}
     };
 
+    private static readonly Dictionary<DjAxisType, StandardAxisType> DjToStandard = new()
+    {
+        {DjAxisType.Crossfader, StandardAxisType.RightStickY},
+        {DjAxisType.EffectsKnob, StandardAxisType.RightStickX},
+        {DjAxisType.LeftTableVelocity, StandardAxisType.LeftStickX},
+        {DjAxisType.RightTableVelocity, StandardAxisType.LeftStickY},
+    };
+
     private static readonly Dictionary<WiiInputType, DrumAxisType> DrumAxisGh = new()
     {
         {WiiInputType.DrumGreenPressure, DrumAxisType.Green},
@@ -299,50 +307,110 @@ public class WiiCombinedOutput : CombinedTwiOutput
                         Colors.Transparent, Array.Empty<byte>(), -30000, 30000, 10, 64, 10, pair.Value));
                 }
             }
-
-            var first = (Outputs.Items.First(s => s.Input is WiiInput
-            {
-                Input: WiiInputType.DrumOrangePressure
-            }) as DrumAxis)!;
-            Outputs.Remove(first);
-            // Rb maps orange to green, while gh maps orange to orange
-            if (Model.RhythmType == RhythmType.GuitarHero)
-            {
-                Outputs.Add(new DrumAxis(Model,
-                    new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
-                    first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64, 10,
-                    DrumAxisType.Orange));
-            }
             else
             {
-                Outputs.Add(new DrumAxis(Model,
-                    new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
-                    first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64, 10,
-                    DrumAxisType.Green));
+                var first = (Outputs.Items.First(s => s.Input is WiiInput
+                {
+                    Input: WiiInputType.DrumOrangePressure
+                }) as DrumAxis)!;
+                Outputs.Remove(first);
+                // Rb maps orange to green, while gh maps orange to orange
+                if (Model.RhythmType == RhythmType.GuitarHero)
+                {
+                    Outputs.Add(new DrumAxis(Model,
+                        new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
+                        first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64,
+                        10,
+                        DrumAxisType.Orange));
+                }
+                else
+                {
+                    Outputs.Add(new DrumAxis(Model,
+                        new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
+                        first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64,
+                        10,
+                        DrumAxisType.Green));
+                }
             }
         }
         else
         {
             Outputs.RemoveMany(Outputs.Items.Where(s => s is DrumAxis));
-            // Flip guitar bindings for live guitar
-            Outputs.RemoveMany(Outputs.Items.Where(s => s.WiiInputType == WiiInputType.GuitarWhammy));
-            switch (Model.DeviceType)
+        }
+
+        // Map the Whammy axis to a standard controller output on anything that isnt a guitar, and whammy on a guitar
+        if (Model.DeviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar)
+        {
+            if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))
             {
-                case DeviceControllerType.LiveGuitar:
-                    Outputs.Add(new ControllerAxis(Model,
-                        new WiiInput(WiiInputType.GuitarWhammy, Model, _microcontroller, Sda, Scl, combined: true),
-                        Colors.Transparent,
-                        Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, StandardAxisType.RightStickY));
-                    break;
-                default:
-                    Outputs.Add(new ControllerAxis(Model,
-                        new WiiInput(WiiInputType.GuitarWhammy, Model, _microcontroller, Sda, Scl, combined: true),
-                        Colors.Transparent,
-                        Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, StandardAxisType.RightStickX));
-                    break;
+                var items = Outputs.Items.Where(s => s is ControllerAxis {Type: StandardAxisType.RightStickX}).ToList();
+                Outputs.RemoveMany(items);
+                Outputs.AddRange(items.Cast<ControllerAxis>().Select(item => new GuitarAxis(Model, item.Input,
+                    item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
+                    GuitarAxisType.Whammy)));
             }
         }
+        else
+        {
+            var items2 = Outputs.Items.Where(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}).ToList();
+            if (items2.Any())
+            {
+                Outputs.RemoveMany(items2);
+                Outputs.AddRange(items2.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input,
+                    item.LedOn,
+                    item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
+                    StandardAxisType.RightStickX)));
+            }
+        }
+
+        if (Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.GuitarHero)
+        {
+            if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Slider}))
+            {
+                var items = Outputs.Items.Where(s => s is ControllerAxis {Type: StandardAxisType.RightStickY}).ToList();
+                Outputs.RemoveMany(items);
+                Outputs.AddRange(items.Cast<ControllerAxis>().Select(item => new GuitarAxis(Model, item.Input,
+                    item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
+                    GuitarAxisType.Slider)));
+            }
+        }
+        else
+        {
+            var items2 = Outputs.Items.Where(s => s is GuitarAxis {Type: GuitarAxisType.Slider}).ToList();
+            if (items2.Any())
+            {
+                Outputs.RemoveMany(items2);
+                Outputs.AddRange(items2.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input,
+                    item.LedOn,
+                    item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
+                    StandardAxisType.RightStickY)));
+            }
+        }
+
+
+        var currentAxisDj = Outputs.Items.OfType<DjAxis>();
+        var currentAxisStandard = Outputs.Items.OfType<ControllerAxis>().ToList();
+        if (Model.DeviceType is DeviceControllerType.Turntable)
+        {
+            foreach (var (dj, standard) in DjToStandard)
+            {
+                var items = currentAxisStandard.Where(s => s.Type == standard).ToList();
+                Outputs.RemoveMany(items);
+                Outputs.AddRange(items.Select(item => new DjAxis(Model, item.Input,
+                    item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
+                    dj)));
+            }
+        }
+        else
+        {
+            foreach (var djAxis in currentAxisDj)
+            {
+                Outputs.Remove(djAxis);
+                Outputs.Add(new ControllerAxis(Model, djAxis.Input,
+                    djAxis.LedOn, djAxis.LedOff, djAxis.LedIndices.ToArray(), djAxis.Min, djAxis.Max, djAxis.DeadZone,
+                    DjToStandard[djAxis.Type]));
+            }
+        }
+        
     }
 }

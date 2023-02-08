@@ -13,9 +13,9 @@ public class ControllerAxis : OutputAxis
 {
     public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
-        int deadZone, StandardAxisType type, bool dj = false) : base(model, input, ledOn, ledOff, ledIndices, min, max,
+        int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
         deadZone,
-        type.ToString(), IsTrigger(type), dj)
+        type.ToString(), IsTrigger(type))
     {
         Type = type;
         _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)

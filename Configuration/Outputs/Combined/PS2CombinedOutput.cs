@@ -46,6 +46,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {Ps2InputType.NegConStart, StandardButtonType.Start},
     };
 
+
     public static readonly Dictionary<Ps2InputType, StandardAxisType> Axis = new()
     {
         {Ps2InputType.LeftX, StandardAxisType.LeftStickX},
@@ -169,7 +170,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             new DigitalToAnalog(
                 new Ps2Input(Ps2InputType.GuitarTilt, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
                     combined: true),
-                -32767, 0, Model), Colors.Transparent,
+                -32767, Model), Colors.Transparent,
             Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
             0, StandardAxisType.RightStickY));
         foreach (var pair in Axis)
@@ -220,39 +221,24 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public override void UpdateBindings()
     {
-        // Flip guitar bindings for live guitar
-        Outputs.RemoveMany(Outputs.Items.Where(s => s.Ps2InputType == Ps2InputType.GuitarTilt));
-        Outputs.RemoveMany(Outputs.Items.Where(s => s.Ps2InputType == Ps2InputType.GuitarWhammy));
-        switch (Model.DeviceType)
+        if (Model.DeviceType != DeviceControllerType.Guitar)
         {
-            case DeviceControllerType.LiveGuitar:
-                Outputs.Add(new ControllerAxis(Model,
-                    new DigitalToAnalog(
-                        new Ps2Input(Ps2InputType.GuitarTilt, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
-                            combined: true),
-                        -32767, 0, Model), Colors.Transparent,
-                    Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                    0, StandardAxisType.RightStickX));
-                Outputs.Add(new ControllerAxis(Model,
-                    new Ps2Input(Ps2InputType.GuitarWhammy, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
-                        combined: true), Colors.Transparent,
-                    Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                    0, StandardAxisType.RightStickY));
-                break;
-            default:
-                Outputs.Add(new ControllerAxis(Model,
-                    new DigitalToAnalog(
-                        new Ps2Input(Ps2InputType.GuitarTilt, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
-                            combined: true),
-                        -32767, 0, Model), Colors.Transparent,
-                    Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                    0, StandardAxisType.RightStickY));
-                Outputs.Add(new ControllerAxis(Model,
-                    new Ps2Input(Ps2InputType.GuitarWhammy, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
-                        combined: true), Colors.Transparent,
-                    Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                    0, StandardAxisType.RightStickX));
-                break;
+            if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))
+            {
+                var items = Outputs.Items.Where(s => s is ControllerAxis {Type: StandardAxisType.RightStickX}).ToList();
+                Outputs.RemoveMany(items);
+                Outputs.AddRange(items.Cast<ControllerAxis>().Select(item => new GuitarAxis(Model, item.Input,
+                    item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
+                    GuitarAxisType.Whammy)));
+            }
+        }
+        else if (Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))
+        {
+            var items = Outputs.Items.Where(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}).ToList();
+            Outputs.RemoveMany(items);
+            Outputs.AddRange(items.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input, item.LedOn,
+                item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
+                StandardAxisType.RightStickX)));
         }
 
         if (Model.DeviceType == DeviceControllerType.Gamepad)

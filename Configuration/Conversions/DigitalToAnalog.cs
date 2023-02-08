@@ -14,7 +14,6 @@ public class DigitalToAnalog : Input
 {
     public Input Child { get; }
     public int On { get; set; }
-    public int Off { get; set; }
 
     private readonly ObservableAsPropertyHelper<int> _minimum;
     public int Minimum => _minimum.Value;
@@ -22,12 +21,11 @@ public class DigitalToAnalog : Input
     private readonly ObservableAsPropertyHelper<int> _maximum;
     public int Maximum => _maximum.Value;
 
-    public DigitalToAnalog(Input child, int on, int off, ConfigViewModel model) : base(model)
+    public DigitalToAnalog(Input child, int on, ConfigViewModel model) : base(model)
     {
         Child = child;
         On = on;
-        Off = off;
-        this.WhenAnyValue(x => x.Child.RawValue).Subscribe(s => RawValue = s > 0 ? On : Off);
+        this.WhenAnyValue(x => x.Child.RawValue).Subscribe(s => RawValue = s > 0 ? On : 0);
         _minimum = this.WhenAnyValue(x => x.Child.IsUint).Select(s => s ? (int) ushort.MinValue : short.MinValue)
             .ToProperty(this, x => x.Minimum);
         _maximum = this.WhenAnyValue(x => x.Child.IsUint).Select(s => s ? (int) ushort.MaxValue : short.MaxValue)
@@ -43,14 +41,9 @@ public class DigitalToAnalog : Input
         return mode == DeviceEmulationMode.Xbox360 ? $"({gen})?{On}:{{output}}" : $"({gen})?{(On >> 8) + 128}:{{output}}";
     }
 
-    public string GenerateOff(DeviceEmulationMode mode)
-    {
-        return (mode == DeviceEmulationMode.Xbox360 ? Off : (Off >> 8) + 128).ToString();
-    }
-
     public override SerializedInput Serialise()
     {
-        return new SerializedDigitalToAnalog(Child.Serialise(), On, Off);
+        return new SerializedDigitalToAnalog(Child.Serialise(), On);
     }
 
     public override Input InnermostInput()

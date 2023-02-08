@@ -428,14 +428,12 @@ public abstract class Output : ReactiveObject, IDisposable
                 break;
             case false when this is OutputAxis:
                 var oldOn = 0;
-                var oldOff = 0;
                 if (Input is DigitalToAnalog dta)
                 {
                     oldOn = dta.On;
-                    oldOff = dta.Off;
                 }
 
-                Input = new DigitalToAnalog(input, oldOn, oldOff, Model);
+                Input = new DigitalToAnalog(input, oldOn, Model);
                 break;
         }
 
@@ -496,6 +494,12 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public ReadOnlyObservableCollection<Output> AnalogOutputs { get; set; }
     public ReadOnlyObservableCollection<Output> DigitalOutputs { get; set; }
+
+    public IEnumerable<Output> ValidOutputs()
+    {
+        var (extra, types) = ControllerEnumConverter.FilterValidOutputs(Model.DeviceType, Model.RhythmType, Outputs.Items);
+        return Outputs.Items.Except(extra);
+    }
 
     public void Remove()
     {

@@ -426,17 +426,9 @@
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="150">
-                            Active Value
+                            Value
                         </Label>
-                        <NumericUpDown Value="{Binding Off}" Maximum="{Binding Maximum}" VerticalAlignment="Center"></NumericUpDown>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center"
-                               VerticalContentAlignment="Center"
-                               Width="150">
-                            Inactive Value
-                        </Label>
-                        <NumericUpDown Value="{Binding On}" Minimum="{Binding Minimum}" VerticalAlignment="Center"></NumericUpDown>
+                        <NumericUpDown Value="{Binding On}" Maximum="{Binding Maximum}" VerticalAlignment="Center"></NumericUpDown>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>

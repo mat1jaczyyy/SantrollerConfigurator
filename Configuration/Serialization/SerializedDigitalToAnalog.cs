@@ -10,17 +10,15 @@ public class SerializedDigitalToAnalog : SerializedInput
 {
     [ProtoMember(1)] private SerializedInput Child { get; }
     [ProtoMember(2)] private int On { get; }
-    [ProtoMember(3)] private int Off { get; }
 
-    public SerializedDigitalToAnalog(SerializedInput child, int on, int off)
+    public SerializedDigitalToAnalog(SerializedInput child, int on)
     {
         Child = child;
         On = on;
-        Off = off;
     }
 
     public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
     {
-        return new DigitalToAnalog(Child.Generate(microcontroller, model), On, Off, model);
+        return new DigitalToAnalog(Child.Generate(microcontroller, model), On, model);
     }
 }

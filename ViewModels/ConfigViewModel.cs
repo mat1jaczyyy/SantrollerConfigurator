@@ -199,29 +199,15 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 binding.UpdateBindings();
             }
 
+            var (extra, types) = ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings);
+            Bindings.RemoveAll(extra);
             // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
             if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput))
             {
                 return;
             }
 
-            var types = ControllerEnumConverter.GetTypes((_deviceControllerType, _rhythmType))
-                .Where(s => s is not SimpleType).ToList();
-            foreach (var binding in Bindings)
-            {
-                switch (binding)
-                {
-                    case ControllerButton button:
-                        types.Remove(button.Type);
-                        break;
-                    case ControllerAxis axis:
-                        types.Remove(axis.Type);
-                        break;
-                    case DrumAxis axis:
-                        types.Remove(axis.Type);
-                        break;
-                }
-            }
+            
 
             if (_deviceControllerType == DeviceControllerType.Drum)
             {
@@ -231,6 +217,21 @@ namespace GuitarConfigurator.NetCore.ViewModels
             else
             {
                 Bindings.RemoveAll(Bindings.Where(s => s is DrumAxis));
+            }
+            
+            if (_deviceControllerType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar)
+            {
+                IEnumerable<GuitarAxisType> difference = GuitarAxisTypeMethods.GetDifferenceFor(_rhythmType, _deviceControllerType).ToHashSet();
+                Bindings.RemoveAll(Bindings.Where(s => s is GuitarAxis axis && difference.Contains(axis.Type)));
+            }
+            else
+            {
+                Bindings.RemoveAll(Bindings.Where(s => s is GuitarAxis));
+            }
+            
+            if (_deviceControllerType is not DeviceControllerType.Guitar || _rhythmType is not RhythmType.RockBand)
+            {
+                Bindings.RemoveAll(Bindings.Where(s => s is RbButton));
             }
 
             if (_deviceControllerType == DeviceControllerType.Turntable)
@@ -250,9 +251,20 @@ namespace GuitarConfigurator.NetCore.ViewModels
                             new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
                             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, buttonType));
                         break;
+                    case RBButtonType buttonType:
+                        Bindings.Add(new RbButton(this,
+                            new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
+                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, buttonType));
+                        break;
                     case StandardAxisType axisType:
                         Bindings.Add(new ControllerAxis(this,
                             new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
+                                MicroController!),
+                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                            0, axisType));
+                        break;
+                    case GuitarAxisType axisType:
+                        Bindings.Add(new GuitarAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
                                 MicroController!),
                             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, axisType));
@@ -652,7 +664,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         private string GenerateLedTick()
         {
-            var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
+            var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
             if (_microController == null || _ledType == LedType.None ||
                 !outputs.Any(s => s.LedIndices.Any())) return "";
             var ledMax = outputs.SelectMany(output => output.LedIndices).Max();
@@ -675,115 +687,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private string GenerateTick(DeviceEmulationMode mode, bool shared)
         {
             if (_microController == null) return "";
-            var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
-            // If whammy isn't bound, then default to -32767 instead of 0.
-            if (mode == DeviceEmulationMode.Xbox360 && DeviceType == DeviceControllerType.Guitar && !outputs.Any(output =>
-                    output is ControllerAxis {Type: StandardAxisType.RightStickX}))
-            {
-                outputs.Add(new ControllerAxis(this, new FixedInput(this, -32767), Colors.Transparent,
-                    Colors.Transparent, Array.Empty<byte>(), 0, 0, 0, StandardAxisType.RightStickX));
-            }
-
-            if (DeviceType == DeviceControllerType.Turntable)
-            {
-                var outputsToAdd = new List<Output>();
-                foreach (var output in outputs.SelectMany(s => s.Outputs.Items))
-                {
-                    switch (output)
-                    {
-                        case DjButton {Type: DjInputType.LeftGreen}:
-                        case DjButton {Type: DjInputType.RightGreen}:
-                            outputsToAdd.Add(new ControllerButton(this, output.Input!, Colors.Transparent,
-                                Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.A));
-                            break;
-                        case DjButton {Type: DjInputType.LeftRed}:
-                        case DjButton {Type: DjInputType.RightRed}:
-                            outputsToAdd.Add(new ControllerButton(this, output.Input!, Colors.Transparent,
-                                Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.B));
-                            break;
-                        case DjButton {Type: DjInputType.LeftBlue}:
-                        case DjButton {Type: DjInputType.RightBlue}:
-                            outputsToAdd.Add(new ControllerButton(this, output.Input!, Colors.Transparent,
-                                Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.X));
-                            break;
-                    }
-                }
-
-                outputs.AddRange(outputsToAdd);
-            }
-
-            // GHL guitars require mapping the strum to left joy Y
-            if (DeviceType == DeviceControllerType.LiveGuitar)
-            {
-                var outputsToAdd = new List<Output>();
-                foreach (var output in outputs)
-                {
-                    switch (output)
-                    {
-                        case ControllerButton {Type: StandardButtonType.DpadDown}:
-                            outputsToAdd.Add(new ControllerAxis(this,
-                                new DigitalToAnalog(output.Input!, short.MaxValue, 0, this), Colors.Transparent,
-                                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                                StandardAxisType.LeftStickY));
-                            break;
-                        case ControllerButton {Type: StandardButtonType.DpadUp}:
-                            outputsToAdd.Add(new ControllerAxis(this,
-                                new DigitalToAnalog(output.Input!, short.MinValue, 0, this), Colors.Transparent,
-                                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                                StandardAxisType.LeftStickY));
-                            break;
-                    }
-                }
-
-                outputs.AddRange(outputsToAdd);
-            }
-
-            if (mode == DeviceEmulationMode.Ps3)
-            {
-                var toTest = new List<StandardAxisType>()
-                {
-                    StandardAxisType.LeftStickX, StandardAxisType.LeftStickY, StandardAxisType.RightStickX,
-                    StandardAxisType.RightStickY, StandardAxisType.AccelerationX, StandardAxisType.AccelerationY,
-                    StandardAxisType.AccelerationZ, StandardAxisType.Gyro
-                };
-                
-                foreach (var output in outputs.SelectMany(s => s.Outputs.Items))
-                {
-                    switch (output)
-                    {
-                        case ControllerAxis axis:
-                            toTest.Remove(axis.Type);
-                            break;
-                        case DjButton:
-                            toTest.Remove(StandardAxisType.AccelerationY);
-                            break;
-                    }
-                }
-
-                foreach (var standardAxisType in toTest)
-                {
-                    switch (standardAxisType)
-                    {
-                        case StandardAxisType.Gyro:
-                        case StandardAxisType.AccelerationX:
-                        case StandardAxisType.AccelerationY:
-                        case StandardAxisType.AccelerationZ:
-                            outputs.Add(new ControllerAxis(this, new FixedInput(this, 0x0200),
-                                Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue,
-                                short.MaxValue, 0, standardAxisType));
-                            break;
-                        case StandardAxisType.LeftStickX:
-                        case StandardAxisType.LeftStickY:
-                        case StandardAxisType.RightStickX:
-                        case StandardAxisType.RightStickY:
-                            outputs.Add(new ControllerAxis(this, new FixedInput(this, sbyte.MaxValue),
-                                Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), byte.MinValue,
-                                byte.MaxValue, 0, standardAxisType));
-                            break;
-                    }
-                }
-            }
-
+            var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
             var groupedOutputs = outputs
                 .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
                 .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
@@ -837,7 +741,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             var seen = new HashSet<Output>();
             var seenDebounce = new HashSet<int>();
-            var seenAnalog = new HashSet<string>();
             // Handle most mappings
             // Sort in a way that any digital to analog based groups are last. This is so that seenAnalog will be filled in when necessary.
             var ret = groupedOutputs.OrderByDescending(s => s.Count(s2 => s2.Second.Input is DigitalToAnalog))
@@ -881,13 +784,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
                                 if (output is OutputAxis axis && !shared)
                                 {
                                     generated = generated.Replace("{output}", axis.GenerateOutput(mode));
-                                    if (!seenAnalog.Contains(output.Name) && input is DigitalToAnalog dta)
-                                    {
-                                        generated =
-                                            $"{axis.GenerateOutput(mode)} = {dta.GenerateOff(mode)}; {generated}";
-                                    }
-
-                                    seenAnalog.Add(output.Name);
                                 }
 
                                 return new Tuple<Input, string>(input, generated);
@@ -915,7 +811,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         private int CalculateDebounceTicks()
         {
-            var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
+            var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
              var groupedOutputs = outputs
                 .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
                 .GroupBy(s => s.First.InnermostInput().GetType()).ToList();

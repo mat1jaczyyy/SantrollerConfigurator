@@ -33,6 +33,7 @@ public class GhwtCombinedOutput : CombinedOutput
         {
             Pin = pin.Value;
         }
+
         Outputs.Clear();
         if (outputs != null)
         {
@@ -46,12 +47,7 @@ public class GhwtCombinedOutput : CombinedOutput
 
     public void CreateDefaults()
     {
-        Outputs.Clear();
-        Outputs.Add(new ControllerAxis(Model,
-            new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
-                combined: true),
-            Colors.Transparent,
-            Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.LeftStickX));
+        UpdateBindings();
     }
 
     public void AddTapBarFrets()
@@ -72,5 +68,35 @@ public class GhwtCombinedOutput : CombinedOutput
 
     public override void UpdateBindings()
     {
+        if (Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType == RhythmType.GuitarHero)
+        {
+            if (Outputs.Items.Any(s => s is GuitarAxis))
+            {
+                return;
+            }
+
+            Outputs.Clear();
+            Outputs.Add(new GuitarAxis(Model,
+                new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
+                    combined: true),
+                Colors.Transparent,
+                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                GuitarAxisType.Slider));
+        }
+        else
+        {
+            if (Outputs.Items.Any(s => s is ControllerAxis))
+            {
+                return;
+            }
+
+            Outputs.Clear();
+            Outputs.Add(new ControllerAxis(Model,
+                new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
+                    combined: true),
+                Colors.Transparent,
+                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                StandardAxisType.LeftStickX));
+        }
     }
 }
