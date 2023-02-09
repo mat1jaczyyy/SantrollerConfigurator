@@ -138,7 +138,7 @@ public abstract class Output : ReactiveObject, IDisposable
     public bool AreLedsEnabled => _areLedsEnabled.Value;
 
     public abstract bool IsCombined { get; }
-
+    
     private Color _ledOn;
     private Color _ledOff;
 
@@ -497,7 +497,7 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public IEnumerable<Output> ValidOutputs()
     {
-        var (extra, types) = ControllerEnumConverter.FilterValidOutputs(Model.DeviceType, Model.RhythmType, Outputs.Items);
+        var (extra, _) = ControllerEnumConverter.FilterValidOutputs(Model.DeviceType, Model.RhythmType, Outputs.Items);
         return Outputs.Items.Except(extra);
     }
 

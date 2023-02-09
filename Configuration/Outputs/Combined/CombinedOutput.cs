@@ -16,6 +16,7 @@ public abstract class CombinedOutput : Output
     {
         return "";
     }
+
     public override bool IsCombined => true;
     public override bool IsStrum => false;
     public override bool IsKeyboard => false;

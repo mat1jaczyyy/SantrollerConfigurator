@@ -1,4 +1,6 @@
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;

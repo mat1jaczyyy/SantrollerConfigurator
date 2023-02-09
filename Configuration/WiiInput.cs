@@ -8,6 +8,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -611,6 +612,7 @@ break;
 ";
             }
         }
+        
 
         foreach (var (input, mappings) in mappedBindings)
         {

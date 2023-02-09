@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -51,6 +52,11 @@ public class PS3Axis : OutputAxis
     protected override bool SupportsCalibration()
     {
         return true;
+    }
+
+    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
+    {
+        return mode != DeviceEmulationMode.Ps3 ? "" : base.Generate(mode, debounceIndex, combined, extra);
     }
 
     public override SerializedOutput Serialize()

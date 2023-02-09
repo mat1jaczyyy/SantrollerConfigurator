@@ -107,7 +107,7 @@
             </DataTemplate>
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
-            <DataTemplate DataType="{x:Type neck:GhWtTapInput}">
+            <DataTemplate DataType="{x:Type ps2:GhWtTapInput}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="GH WT Tap Input: "></TextBlock>
                     <TextBlock Text="{Binding Input}"></TextBlock>
@@ -116,7 +116,7 @@
                     </ComboBox>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type neck:Gh5NeckInput}">
+            <DataTemplate DataType="{x:Type ps2:Gh5NeckInput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input: "></Label>
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="{Binding Input}"></Label>

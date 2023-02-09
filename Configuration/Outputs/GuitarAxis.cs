@@ -21,7 +21,7 @@ public class GuitarAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedGuitarAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone);
+        return new SerializedGuitarAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone);
     }
 
     public override bool IsKeyboard => false;
@@ -38,6 +38,8 @@ public class GuitarAxis : OutputAxis
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         if (mode == DeviceEmulationMode.Shared) return "";
+        // Xb1 is RB only, so no slider
+        if (mode == DeviceEmulationMode.XboxOne && Type == GuitarAxisType.Slider) return "";
         var led = Input is FixedInput ? "" : CalculateLeds(mode);
 
         switch (mode)

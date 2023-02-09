@@ -165,39 +165,43 @@ public class ControllerEnumConverter : IMultiValueConverter
     {
         var types = GetTypes((controllerType, rhythmType))
             .Where(s => s is not SimpleType).ToList();
+        var types2 = new List<object>(types);
         List<Output> extra = new List<Output>();
         foreach (var binding in outputs)
         {
             switch (binding)
             {
                 case ControllerButton button:
-                    if (!types.Remove(button.Type))
+                    types.Remove(button.Type);
+                    if (!types2.Contains(button.Type))
                     {
                         extra.Add(binding);
                     }
                     break;
                 case RbButton button:
-                    if (!types.Remove(button.Type))
+                    types.Remove(button.Type);
+                    if (!types2.Contains(button.Type))
                     {
                         extra.Add(binding);
                     }
                     break;
                 case ControllerAxis axis:
-                    if (!types.Remove(axis.Type))
+                    types.Remove(axis.Type);
+                    if (!types2.Contains(axis.Type))
                     {
                         extra.Add(binding);
                     }
                     break;
                 case GuitarAxis axis:
                     types.Remove(axis.Type);
-                    if (!types.Remove(axis.Type))
+                    if (!types2.Contains(axis.Type))
                     {
                         extra.Add(binding);
                     }
                     break;
                 case DrumAxis axis:
                     types.Remove(axis.Type);
-                    if (!types.Remove(axis.Type))
+                    if (!types2.Contains(axis.Type))
                     {
                         extra.Add(binding);
                     }

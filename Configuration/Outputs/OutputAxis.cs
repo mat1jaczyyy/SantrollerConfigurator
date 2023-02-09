@@ -25,11 +25,10 @@ public abstract class OutputAxis : Output
 {
     protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
-        int deadZone, string name, bool trigger, bool dj = false) : base(model, input, ledOn, ledOff,
+        int deadZone, string name, bool trigger) : base(model, input, ledOn, ledOff,
         ledIndices,
         name)
     {
-        InputIsDj = dj;
         Input = input;
         Trigger = trigger;
         LedOn = ledOn;
@@ -339,12 +338,6 @@ public abstract class OutputAxis : Output
                 return Input.Generate(mode);
         }
 
-        if (InputIsDj)
-        {
-            var gen = $"({Input.Generate(mode)} * {Max})";
-            return mode == DeviceEmulationMode.Xbox360 ? gen : $"{gen} + {sbyte.MaxValue}";
-        }
-
         var accel = forceAccel || this is ControllerAxis
         {
             Type: StandardAxisType.Gyro or StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
@@ -383,7 +376,7 @@ public abstract class OutputAxis : Output
                 function = "handle_calibration_ps3_accel";
                 break;
             case DeviceEmulationMode.Ps3 when trigger:
-                function = "handle_calibration_ps3_trigger";
+                function = "handle_calibration_ps3_360_trigger";
                 break;
             case DeviceEmulationMode.Ps3:
                 normal = true;

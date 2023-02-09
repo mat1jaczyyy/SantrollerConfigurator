@@ -9,6 +9,7 @@ using Avalonia.Platform;
 using DynamicData.Kernel;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -226,7 +227,8 @@ public class Ps2Input : SpiInput
 
     public Ps2Input(Ps2InputType input, ConfigViewModel model, Microcontroller microcontroller, int? miso = null,
         int? mosi = null,
-        int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(microcontroller, Ps2SpiType,
+        int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(microcontroller,
+        Ps2SpiType,
         Ps2SpiFreq, Ps2SpiCpol,
         Ps2SpiCpha, Ps2SpiMsbFirst, miso: miso, mosi: mosi, sck: sck, model: model)
     {
@@ -408,7 +410,7 @@ public class Ps2Input : SpiInput
         return types.Contains(type);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         DeviceEmulationMode mode)
     {
         Dictionary<Ps2InputType, string> ds2Axis = new();

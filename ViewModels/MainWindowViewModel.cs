@@ -463,7 +463,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 {
                     var revision = (ushort) dev.Info.Descriptor.BcdDevice;
                     var product = dev.Info.ProductString?.Split(new[] {'\0'}, 2)[0];
-                    var serial = dev.Info.SerialString?.Split(new[] {'\0'}, 2)[0];
+                    var serial = dev.Info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
                     switch (product)
                     {
                         case "Santroller" when _programming && !IsPico:
