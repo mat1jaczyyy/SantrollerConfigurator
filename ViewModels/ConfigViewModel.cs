@@ -627,6 +627,25 @@ namespace GuitarConfigurator.NetCore.ViewModels
             Bindings.Clear();
             UpdateErrors();
         }
+        
+        public async void ResetWithConfirmation()
+        {
+            var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
+                "The following action will clear all your inputs, are you sure you want to do this?")).ToTask();
+            if (!yesNo.Response)
+            {
+                return;
+            }
+
+            foreach (var binding in Bindings)
+            {
+                binding.Dispose();
+            }
+
+            Bindings.Clear();
+            UpdateBindings();
+            UpdateErrors();
+        }
 
         public async void Reset()
         {

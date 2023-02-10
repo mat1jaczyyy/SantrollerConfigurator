@@ -59,7 +59,7 @@ public abstract class OutputAxis : Output
             .ToProperty(this, x => x.IsDigitalToAnalog);
     }
 
-    private const float ProgressWidth = 390;
+    private const float ProgressWidth = 400;
     public float FullProgressWidth => ProgressWidth;
     public float HalfProgressWidth => ProgressWidth/2;
 
@@ -114,7 +114,8 @@ public abstract class OutputAxis : Output
         var left = Math.Min(min / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
 
         var right = ProgressWidth - Math.Min(max / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
-
+        left = Math.Max(0, left);
+        right = Math.Max(0, right);
         return new Thickness(left, 0, right, 0);
     }
 

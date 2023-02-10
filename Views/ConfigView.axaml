@@ -98,14 +98,66 @@
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                Text="{Binding DetectedType}">
                     </TextBlock>
-                    <Button
-                        x:CompileBindings="False"
-                        Command="{Binding CreateDefaults}">
-                        Reset
-                    </Button>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputAxis}">
+                <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding Trigger}">
+                                <ProgressBar Value="{Binding Value}"
+                                             IsIndeterminate="False" Minimum="0" Maximum="65536"
+                                             Height="30"
+                                             Width="{Binding FullProgressWidth}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}"
+                                        Width="{Binding FullProgressWidth}">
+                                <ProgressBar CornerRadius="0 3 3 0"
+                                             Value="{Binding ValueLower}"
+                                             IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                             Height="30"
+                                             Width="{Binding HalfProgressWidth}">
+                                    <ProgressBar.RenderTransform>
+                                        <ScaleTransform ScaleX="-1"></ScaleTransform>
+                                    </ProgressBar.RenderTransform>
+                                </ProgressBar>
+                                <ProgressBar CornerRadius="0 3 3 0"
+                                             Value="{Binding ValueUpper}"
+                                             IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                             Height="30"
+                                             Width="{Binding HalfProgressWidth}" />
+                            </StackPanel>
+                            <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
+                                   Content="{Binding Value}" Width="{Binding FullProgressWidth}">
+                            </Label>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:DjAxis}">
+                <StackPanel Orientation="Horizontal">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                         Value="{Binding ValueLower}"
+                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                         Height="30"
+                                         Width="300">
+                                <ProgressBar.RenderTransform>
+                                    <ScaleTransform ScaleX="-1"></ScaleTransform>
+                                </ProgressBar.RenderTransform>
+                            </ProgressBar>
+                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
+                                         Value="{Binding ValueUpper}"
+                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                         Height="30"
+                                         Width="300" />
+                        </StackPanel>
+                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Text="{Binding Value}">
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputButton}">
             </DataTemplate>
@@ -120,7 +172,7 @@
                         <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                                HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                                Source="{Binding Image}"
-                               Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
+                               Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}">
                         </Image>
                         <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center"
                                   SelectedItem="{Binding Pin}"
@@ -137,7 +189,7 @@
                     <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
-                           Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
+                           Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}">
                     </Image>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
@@ -175,7 +227,7 @@
                     <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
-                           Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
+                           Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}">
                     </Image>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
@@ -213,7 +265,7 @@
                     <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
-                           Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
+                           Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}">
                     </Image>
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
@@ -257,7 +309,7 @@
                         </ComboBox>
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                    <StackPanel IsVisible="{Binding !Combined}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
@@ -271,7 +323,7 @@
                         </ComboBox>
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                    <StackPanel IsVisible="{Binding !Combined}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
@@ -294,7 +346,7 @@
                     <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
-                           Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
+                           Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}">
                     </Image>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
@@ -413,9 +465,13 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputAxis}">
                 <StackPanel Orientation="Horizontal">
-                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsDj}">
-                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Label VerticalAlignment="Center" Width="300"
+                                       IsVisible="{Binding !ChildOfCombined}">
+                                    Calibrated Value
+                                </Label>
                                 <Grid>
                                     <StackPanel Orientation="Horizontal" IsVisible="{Binding Trigger}">
                                         <ProgressBar Value="{Binding Value}"
@@ -441,10 +497,16 @@
                                                      Width="{Binding HalfProgressWidth}" />
                                     </StackPanel>
                                     <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
-                                               Content="{Binding Value}" Width="{Binding FullProgressWidth}">
+                                           Content="{Binding Value}" Width="{Binding FullProgressWidth}">
                                     </Label>
                                 </Grid>
+                            </StackPanel>
 
+                            <StackPanel Orientation="Horizontal">
+                                <Label VerticalAlignment="Center" Width="300"
+                                       IsVisible="{Binding !ChildOfCombined}">
+                                    Original Value
+                                </Label>
                                 <Grid>
                                     <Rectangle Margin="{Binding CalibrationMinMaxMargin}"
                                                HorizontalAlignment="Stretch"
@@ -477,65 +539,64 @@
                                                      Height="30"
                                                      Width="{Binding HalfProgressWidth}" />
                                     </StackPanel>
-                                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                                               Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth}">
+                                    <Label VerticalAlignment="Center" HorizontalAlignment="Center"
+                                           HorizontalContentAlignment="Center"
+                                           Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth}">
                                     </Label>
                                 </Grid>
-
-                                <TextBlock
-                                    IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                    VerticalAlignment="Center" HorizontalAlignment="Center"
-                                    Text="{Binding CalibrationText}">
-                                </TextBlock>
                             </StackPanel>
 
+                            <TextBlock
+                                IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                VerticalAlignment="Center" HorizontalAlignment="Center"
+                                Text="{Binding CalibrationText}">
+                            </TextBlock>
                         </StackPanel>
-                        <Button x:CompileBindings="False" IsVisible="{Binding !IsDigitalToAnalog}"
-                                Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
-                                Margin="10 0 0 0">
-                            Calibrate
-                        </Button>
+
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsDj}">
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal">
-                                    <Grid>
-                                        <StackPanel Orientation="Horizontal">
-                                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
-                                                         Value="{Binding ValueLower}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="300">
-                                                <ProgressBar.RenderTransform>
-                                                    <ScaleTransform ScaleX="-1"></ScaleTransform>
-                                                </ProgressBar.RenderTransform>
-                                            </ProgressBar>
-                                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
-                                                         Value="{Binding ValueUpper}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="300" />
-                                        </StackPanel>
-                                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                   Text="{Binding Value}">
-                                        </TextBlock>
-                                    </Grid>
-
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Height="50">
-                                    <Slider Value="{Binding DjValue}"
-                                            Minimum="1"
-                                            Maximum="8192"
-                                            IsSnapToTickEnabled="True"
-                                            TickFrequency="1" Width="350" />
-                                    <NumericUpDown Value="{Binding DjValue}" Minimum="1"
-                                                   Maximum="8192" Width="150" Height="30">
-                                    </NumericUpDown>
-                                </StackPanel>
+                    <Button x:CompileBindings="False" IsVisible="{Binding !IsDigitalToAnalog}"
+                            Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
+                            Margin="10 0 0 0">
+                        Calibrate
+                    </Button>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:DjAxis}">
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" Width="{Binding FullProgressWidth}">
+                                <ProgressBar CornerRadius="0 3 3 0"
+                                             Value="{Binding ValueLower}"
+                                             IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                             Height="30"
+                                             Width="{Binding HalfProgressWidth}">
+                                    <ProgressBar.RenderTransform>
+                                        <ScaleTransform ScaleX="-1"></ScaleTransform>
+                                    </ProgressBar.RenderTransform>
+                                </ProgressBar>
+                                <ProgressBar CornerRadius="0 3 3 0"
+                                             Value="{Binding ValueUpper}"
+                                             IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                             Height="30"
+                                             Width="{Binding HalfProgressWidth}" />
                             </StackPanel>
-                        </StackPanel>
+                            <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
+                                   Content="{Binding Value}">
+                            </Label>
+                        </Grid>
+
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Height="50">
+                        <Slider Value="{Binding DjValue}"
+                                Minimum="1"
+                                Maximum="8192"
+                                IsSnapToTickEnabled="True"
+                                TickFrequency="1" Width="350" />
+                        <NumericUpDown Value="{Binding DjValue}" Minimum="1"
+                                       Maximum="8192" Width="150" Height="30">
+                        </NumericUpDown>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -721,12 +782,6 @@
                 </StackPanel>
             </DataTemplate>
         </netCore:OutputTemplateSelector>
-        <DataTemplate DataType="output:Output" x:Key="CombinedOutputTemplate">
-            <ContentControl IsVisible="{Binding Valid}" Content="{Binding}"
-                            ContentTemplate="{StaticResource OutputTemplate}" Background="{Binding CombinedBackground}"
-                            Padding="10" Margin="0 5 10 5" Width="520">
-            </ContentControl>
-        </DataTemplate>
         <DataTemplate DataType="output:Output" x:Key="OutputTemplate">
             <StackPanel IsVisible="{Binding Valid}" Opacity="{Binding CombinedOpacity}">
                 <Panel>
@@ -794,6 +849,12 @@
                     <ColorPicker Color="{Binding LedOff}"></ColorPicker>
                 </StackPanel>
             </StackPanel>
+        </DataTemplate>
+        <DataTemplate DataType="output:Output" x:Key="CombinedOutputTemplate">
+            <ContentControl IsVisible="{Binding Valid}" Content="{Binding}"
+                            ContentTemplate="{StaticResource OutputTemplate}" Background="{Binding CombinedBackground}"
+                            Padding="10" Margin="0 5 10 5" Width="520">
+            </ContentControl>
         </DataTemplate>
     </UserControl.Resources>
     <Panel>
@@ -884,6 +945,10 @@
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Clear
                         </Button>
+                        <Button x:CompileBindings="False" Command="{Binding ResetWithConfirmation}"
+                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                            Reset
+                        </Button>
                     </StackPanel>
                 </ScrollViewer>
             </ExperimentalAcrylicBorder>
@@ -918,10 +983,10 @@
                             <DataTemplate DataType="output:Output">
                                 <StackPanel>
                                     <Expander IsVisible="{Binding !IsEmpty}" HorizontalAlignment="Stretch"
-                                              Header="{Binding}">
+                                              Header="{Binding}" IsExpanded="{Binding !IsCombined, Mode=OneTime}">
                                         <Expander.HeaderTemplate>
                                             <DataTemplate DataType="output:Output">
-                                                <StackPanel>
+                                                <Panel>
                                                     <StackPanel Orientation="Horizontal">
                                                         <Image ToolTip.Tip="{Binding LocalisedName}"
                                                                IsVisible="{Binding IsController}" Width="75"
@@ -930,7 +995,7 @@
                                                         </Image>
                                                         <Label VerticalAlignment="Center"
                                                                VerticalContentAlignment="Center"
-                                                               Content="{Binding LocalisedName}">
+                                                               Content="{Binding LocalisedName}" Width="225">
 
                                                             <Label.IsVisible>
                                                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
@@ -949,17 +1014,18 @@
                                                         <ContentControl Content="{Binding}"
                                                                         ContentTemplate="{StaticResource OutputHeaderTemplates}">
                                                         </ContentControl>
-                                                        <Button
-                                                            x:CompileBindings="False"
-                                                            Command="{Binding Remove}">
-                                                            Remove
-                                                        </Button>
+                                                        <Label Foreground="Red" Margin="20 0 20 0"
+                                                               Content="{Binding ErrorText}"
+                                                               IsVisible="{Binding ErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                        </Label>
                                                     </StackPanel>
-                                                    <Label Foreground="Red" Margin="20 0 20 0"
-                                                           Content="{Binding ErrorText}"
-                                                           IsVisible="{Binding ErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                                    </Label>
-                                                </StackPanel>
+                                                    <Button
+                                                        HorizontalAlignment="Right"
+                                                        x:CompileBindings="False"
+                                                        Command="{Binding Remove}">
+                                                        Remove
+                                                    </Button>
+                                                </Panel>
                                             </DataTemplate>
                                         </Expander.HeaderTemplate>
                                         <StackPanel>
