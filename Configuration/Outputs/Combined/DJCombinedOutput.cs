@@ -41,6 +41,11 @@ public class DjCombinedOutput : CombinedTwiOutput
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
     }
+    
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return "DJ Turntable Inputs";
+    }
 
     public void CreateDefaults()
     {

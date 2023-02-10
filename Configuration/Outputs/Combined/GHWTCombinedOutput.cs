@@ -32,6 +32,11 @@ public class GhwtCombinedOutput : CombinedOutput
         {GhWtInputType.TapBlue, RBButtonType.UpperBlue},
         {GhWtInputType.TapOrange, RBButtonType.UpperOrange},
     };
+    
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return "GHWT Slider Inputs";
+    }
 
     public GhwtCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, null, "GHWT")

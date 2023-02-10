@@ -136,6 +136,11 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                          output.Input?.InnermostInput() is Ps2Input ps2Input &&
                          ps2Input.SupportsType(Enum.Parse<Ps2ControllerType>(s));
     }
+    
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return "PS2 Controller Inputs";
+    }
 
     public void CreateDefaults()
     {

@@ -199,7 +199,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 binding.UpdateBindings();
             }
 
-            var (extra, types) = ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings);
+            var (extra, types) =
+                ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings);
             Bindings.RemoveAll(extra);
             // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
             if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput))
@@ -207,7 +208,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 return;
             }
 
-            
 
             if (_deviceControllerType == DeviceControllerType.Drum)
             {
@@ -218,17 +218,18 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 Bindings.RemoveAll(Bindings.Where(s => s is DrumAxis));
             }
-            
+
             if (_deviceControllerType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar)
             {
-                IEnumerable<GuitarAxisType> difference = GuitarAxisTypeMethods.GetDifferenceFor(_rhythmType, _deviceControllerType).ToHashSet();
+                IEnumerable<GuitarAxisType> difference = GuitarAxisTypeMethods
+                    .GetDifferenceFor(_rhythmType, _deviceControllerType).ToHashSet();
                 Bindings.RemoveAll(Bindings.Where(s => s is GuitarAxis axis && difference.Contains(axis.Type)));
             }
             else
             {
                 Bindings.RemoveAll(Bindings.Where(s => s is GuitarAxis));
             }
-            
+
             if (_deviceControllerType is not DeviceControllerType.Guitar || _rhythmType is not RhythmType.RockBand)
             {
                 Bindings.RemoveAll(Bindings.Where(s => s is RbButton));
@@ -264,7 +265,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
                             0, axisType));
                         break;
                     case GuitarAxisType axisType:
-                        Bindings.Add(new GuitarAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
+                        Bindings.Add(new GuitarAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(),
+                                DevicePinMode.Analog, this,
                                 MicroController!),
                             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, axisType));
@@ -275,6 +277,14 @@ namespace GuitarConfigurator.NetCore.ViewModels
                                 MicroController!),
                             Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, 64, 10, axisType));
+                        break;
+                    case DjAxisType axisType:
+                        if (axisType is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity) continue;
+                        Bindings.Add(new DjAxis(this,
+                            new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
+                                MicroController!),
+                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                            0, axisType));
                         break;
                 }
             }
@@ -515,13 +525,14 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
                 lines.Add($"#define TICK_LED {GenerateLedTick()}");
             }
+
             //TODO: these, will need to generate if statements that fill the led array, depending on what the user is doing with things.
             lines.Add($"#define HANDLE_AUTH_LED");
-            
+
             lines.Add($"#define HANDLE_PLAYER_LED");
-            
+
             lines.Add($"#define HANDLE_RUMBLE");
-            
+
             lines.Add($"#define CONSOLE_TYPE {((byte) EmulationType)}");
 
             lines.Add($"#define DEVICE_TYPE {((byte) DeviceType)}");
@@ -627,7 +638,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             Bindings.Clear();
             UpdateErrors();
         }
-        
+
         public async void ResetWithConfirmation()
         {
             var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
@@ -831,7 +842,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private int CalculateDebounceTicks()
         {
             var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
-             var groupedOutputs = outputs
+            var groupedOutputs = outputs
                 .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
                 .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
             var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;

@@ -222,7 +222,7 @@ public class ControllerEnumConverter : IMultiValueConverter
             DeviceControllerType.Drum => DrumAxisTypeMethods.GetTypeFor(rhythmType.Value).Cast<object>(),
             DeviceControllerType.Gamepad => Enum.GetValues<Ps3AxisType>().Cast<object>(),
             DeviceControllerType.Turntable => Enum.GetValues<DjInputType>()
-                .Where(s => s is not DjInputType.LeftTurntable or DjInputType.RightTurntable)
+                .Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable))
                 .Cast<object>().Concat(Enum.GetValues<DjAxisType>().Cast<object>()),
             DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar => GuitarAxisTypeMethods
                 .GetTypeFor(deviceControllerType, rhythmType.Value)

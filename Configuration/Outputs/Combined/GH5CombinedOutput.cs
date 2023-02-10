@@ -57,6 +57,11 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
     }
+    
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return "GH5 Slider Inputs";
+    }
 
     public void CreateDefaults()
     {

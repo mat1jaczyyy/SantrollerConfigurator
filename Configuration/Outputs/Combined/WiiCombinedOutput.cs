@@ -201,6 +201,11 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         return output => s == "None" || output.Input is WiiInput wiiInput && wiiInput.WiiControllerType.ToString() == s;
     }
+    
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return "Wii Extension Inputs";
+    }
 
     public void CreateDefaults()
     {

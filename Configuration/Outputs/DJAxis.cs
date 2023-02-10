@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -76,8 +77,12 @@ public class DjAxis : OutputAxis
         };
     }
 
+    public bool IsVelocity => Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity;
+
+    public bool IsFader => Type is DjAxisType.Crossfader;
+
     protected override bool SupportsCalibration()
     {
-        return Type is DjAxisType.Crossfader;
+        return IsVelocity;
     }
 }
