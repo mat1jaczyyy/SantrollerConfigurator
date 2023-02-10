@@ -48,6 +48,14 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         {
             CreateDefaults();
         }
+        Outputs.Connect().Filter(x => x is OutputAxis)
+            .Bind(out var analogOutputs)
+            .Subscribe();
+        Outputs.Connect().Filter(x => x is OutputButton)
+            .Bind(out var digitalOutputs)
+            .Subscribe();
+        AnalogOutputs = analogOutputs;
+        DigitalOutputs = digitalOutputs;
     }
 
     public void CreateDefaults()
@@ -59,21 +67,17 @@ public class Gh5CombinedOutput : CombinedTwiOutput
                 new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Green,
                 Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
-
-        Outputs.Add(new ControllerAxis(Model,
-            new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, _microcontroller, combined: true),
-            Colors.Transparent,
-            Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY));
-    }
-
-    public void AddTapBarFrets()
-    {
         foreach (var pair in Taps)
         {
             Outputs.Add(new ControllerButton(Model,
                 new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Transparent,
                 Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
+
+        Outputs.Add(new ControllerAxis(Model,
+            new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, _microcontroller, combined: true),
+            Colors.Transparent,
+            Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY));
     }
 
     public override SerializedOutput Serialize()

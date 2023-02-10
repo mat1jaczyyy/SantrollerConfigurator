@@ -17,8 +17,6 @@ public abstract class Input : ReactiveObject, IDisposable
     protected Input(ConfigViewModel model)
     {
         Model = model;
-        _imageOpacity = this.WhenAnyValue(x => x.RawValue, x => x.IsAnalog, (i, b) => b ? 1 : i)
-            .Select(s => (s == 0 ? 0 : 0.25) + 0.75).ToProperty(this, s => s.ImageOpacity);
     }
 
     public abstract IReadOnlyList<string> RequiredDefines();
@@ -42,10 +40,6 @@ public abstract class Input : ReactiveObject, IDisposable
         get => _rawValue;
         set => this.RaiseAndSetIfChanged(ref _rawValue, value);
     }
-
-    private readonly ObservableAsPropertyHelper<double> _imageOpacity;
-
-    public double ImageOpacity => _imageOpacity.Value;
 
     public virtual Input InnermostInput()
     {

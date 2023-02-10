@@ -1,3 +1,4 @@
+using System.Collections;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -16,13 +17,11 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoInclude(113, typeof(SerializedGuitarAxis))]
 [ProtoInclude(114, typeof(SerializedDjAxis))]
 [ProtoInclude(115, typeof(SerializedRBButton))]
-
 [ProtoInclude(105, typeof(SerializedDjCombinedOutput))]
 [ProtoInclude(106, typeof(SerializedGh5CombinedOutput))]
 [ProtoInclude(107, typeof(SerializedGhwtCombinedOutput))]
 [ProtoInclude(108, typeof(SerializedPs2CombinedOutput))]
 [ProtoInclude(109, typeof(SerializedWiiCombinedOutput))]
-
 [ProtoContract]
 public abstract class SerializedOutput
 {
@@ -31,4 +30,11 @@ public abstract class SerializedOutput
     public abstract uint LedOff { get; }
     public abstract byte[] LedIndex { get; }
     public abstract Output Generate(ConfigViewModel model, Microcontroller microcontroller);
+
+    protected byte[] GetBytes(BitArray bits)
+    {
+        var ret = new byte[(bits.Length - 1) / 8 + 1];
+        bits.CopyTo(ret, 0);
+        return ret;
+    }
 }

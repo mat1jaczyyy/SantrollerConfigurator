@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -18,6 +19,8 @@ public class SerializedDjCombinedOutput : SerializedOutput
     [ProtoMember(4)] public int Sda { get; }
     [ProtoMember(5)] public int Scl { get; }
     [ProtoMember(6)] public List<SerializedOutput> Outputs { get; }
+    
+    [ProtoMember(7)] public byte[] Enabled { get; }
     public override uint LedOn => Colors.Transparent.ToUint32();
     public override uint LedOff => Colors.Transparent.ToUint32();
     public override byte[] LedIndex => Array.Empty<byte>();
@@ -27,12 +30,19 @@ public class SerializedDjCombinedOutput : SerializedOutput
         Sda = sda;
         Scl = scl;
         Outputs = outputs.Select(s => s.Serialize()).ToList();
+        Enabled = GetBytes(new BitArray(outputs.Select(s => s.Enabled).ToArray()));
     }
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
         // Since we filter out sda and scl from inputs for size, we need to make sure its assigned before we construct the inputs.
         microcontroller.AssignTwiPins(model, DjInput.DjTwiType, Sda, Scl, DjInput.DjTwiFreq);
-        return new DjCombinedOutput(model, microcontroller, Sda, Scl, Outputs.Select(s => s.Generate(model, microcontroller)).ToList());
+        var array = new BitArray(Enabled);
+        var outputs = Outputs.Select(s => s.Generate(model, microcontroller)).ToList();
+        for (var i = 0; i < outputs.Count; i++)
+        {
+            outputs[i].Enabled = array[i];
+        }
+        return new DjCombinedOutput(model, microcontroller, Sda, Scl, outputs);
     }
 }

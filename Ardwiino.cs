@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration;
@@ -554,7 +555,10 @@ public class Ardwiino : ConfigurableUsbDevice
                 var wii = new WiiCombinedOutput(model, controller, sda, scl);
                 if (config.all.main.mapNunchukAccelToRightJoy != 0)
                 {
-                    wii.AddNunchukAcceleration();
+                    foreach (var output in wii.Outputs.Items.Where(output => output is { Input: WiiInput {Input: WiiInputType.NunchukRotationRoll or WiiInputType.NunchukRotationPitch}}))
+                    {
+                        output.Enabled = false;
+                    }
                 }
 
                 bindings.Add(wii);

@@ -31,6 +31,15 @@ public class DjCombinedOutput : CombinedTwiOutput
         {
             CreateDefaults();
         }
+
+        Outputs.Connect().Filter(x => x is OutputAxis)
+            .Bind(out var analogOutputs)
+            .Subscribe();
+        Outputs.Connect().Filter(x => x is OutputButton)
+            .Bind(out var digitalOutputs)
+            .Subscribe();
+        AnalogOutputs = analogOutputs;
+        DigitalOutputs = digitalOutputs;
     }
 
     public void CreateDefaults()

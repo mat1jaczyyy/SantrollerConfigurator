@@ -24,6 +24,15 @@ public class GhwtCombinedOutput : CombinedOutput
         {GhWtInputType.TapOrange, StandardButtonType.LeftShoulder},
     };
 
+    private static readonly Dictionary<GhWtInputType, RBButtonType> TapRb = new()
+    {
+        {GhWtInputType.TapGreen, RBButtonType.UpperGreen},
+        {GhWtInputType.TapRed, RBButtonType.UpperRed},
+        {GhWtInputType.TapYellow, RBButtonType.UpperYellow},
+        {GhWtInputType.TapBlue, RBButtonType.UpperBlue},
+        {GhWtInputType.TapOrange, RBButtonType.UpperOrange},
+    };
+
     public GhwtCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, null, "GHWT")
     {
@@ -42,14 +51,19 @@ public class GhwtCombinedOutput : CombinedOutput
         {
             CreateDefaults();
         }
+        Outputs.Connect().Filter(x => x is OutputAxis)
+            .Bind(out var analogOutputs)
+            .Subscribe();
+        Outputs.Connect().Filter(x => x is OutputButton)
+            .Bind(out var digitalOutputs)
+            .Subscribe();
+        AnalogOutputs = analogOutputs;
+        DigitalOutputs = digitalOutputs;
     }
+
+    public List<int> AvailablePins => _microcontroller.GetAllPins(false);
 
     public void CreateDefaults()
-    {
-        UpdateBindings();
-    }
-
-    public void AddTapBarFrets()
     {
         foreach (var pair in Taps)
         {
@@ -58,6 +72,12 @@ public class GhwtCombinedOutput : CombinedOutput
                     combined: true), Colors.Transparent,
                 Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
         }
+
+        UpdateBindings();
+    }
+
+    public void AddTapBarFrets()
+    {
     }
 
     public override SerializedOutput Serialize()
@@ -69,33 +89,51 @@ public class GhwtCombinedOutput : CombinedOutput
     {
         if (Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType == RhythmType.GuitarHero)
         {
-            if (Outputs.Items.Any(s => s is GuitarAxis))
+            if (!Outputs.Items.Any(s => s is GuitarAxis))
             {
-                return;
+                Outputs.Clear();
+                Outputs.Add(new GuitarAxis(Model,
+                    new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
+                        combined: true),
+                    Colors.Transparent,
+                    Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                    GuitarAxisType.Slider));
             }
-
-            Outputs.Clear();
-            Outputs.Add(new GuitarAxis(Model,
-                new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
-                    combined: true),
-                Colors.Transparent,
-                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                GuitarAxisType.Slider));
         }
         else
         {
-            if (Outputs.Items.Any(s => s is ControllerAxis))
+            if (!Outputs.Items.Any(s => s is ControllerAxis))
             {
-                return;
+                Outputs.Clear();
+                Outputs.Add(new ControllerAxis(Model,
+                    new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
+                        combined: true),
+                    Colors.Transparent,
+                    Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                    StandardAxisType.LeftStickX));
             }
+        }
 
-            Outputs.Clear();
-            Outputs.Add(new ControllerAxis(Model,
-                new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
-                    combined: true),
-                Colors.Transparent,
-                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                StandardAxisType.LeftStickX));
+        // Map Tap bar to Upper frets on RB guitars, and standard frets on anything else
+        if (Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
+        {
+            var items = Outputs.Items.Where(s => s is ControllerButton).ToList();
+            if (!items.Any()) return;
+            Outputs.RemoveMany(items);
+            Outputs.AddRange(items.Cast<RbButton>().Select(item => new RbButton(Model, item.Input,
+                item.LedOn,
+                item.LedOff, item.LedIndices.ToArray(), item.Debounce,
+                TapRb[item.GhWtInputType])));
+        }
+        else
+        {
+            var items2 = Outputs.Items.Where(s => s is RbButton).ToList();
+            if (!items2.Any()) return;
+            Outputs.RemoveMany(items2);
+            Outputs.AddRange(items2.Cast<RbButton>().Select(item => new ControllerButton(Model, item.Input,
+                item.LedOn,
+                item.LedOff, item.LedIndices.ToArray(), item.Debounce,
+                Taps[item.GhWtInputType])));
         }
     }
 }

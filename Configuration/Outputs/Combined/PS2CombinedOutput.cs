@@ -129,7 +129,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
     }
-
+    
     private static Func<Output, bool> CreateFilter(string? s)
     {
         return output => s is "None" or null ||

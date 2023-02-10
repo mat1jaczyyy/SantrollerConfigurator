@@ -18,6 +18,7 @@ using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.DJ;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -25,7 +26,7 @@ using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
-public class LedIndex: ReactiveObject
+public class LedIndex : ReactiveObject
 {
     public Output Output { get; }
     public byte Index { get; }
@@ -49,6 +50,7 @@ public class LedIndex: ReactiveObject
             {
                 Output.LedIndices.Remove(Index);
             }
+
             this.RaisePropertyChanged();
         }
     }
@@ -70,6 +72,14 @@ public abstract class Output : ReactiveObject, IDisposable
     public Bitmap? Image => _image.Value;
 
     public string Name { get; }
+
+    private bool _enabled = true;
+
+    public bool Enabled
+    {
+        get => _enabled;
+        set { this.RaiseAndSetIfChanged(ref _enabled, value); }
+    }
 
     public InputType? SelectedInputType
     {
@@ -137,7 +147,7 @@ public abstract class Output : ReactiveObject, IDisposable
     public bool AreLedsEnabled => _areLedsEnabled.Value;
 
     public abstract bool IsCombined { get; }
-    
+
     private Color _ledOn;
     private Color _ledOff;
 
@@ -150,14 +160,6 @@ public abstract class Output : ReactiveObject, IDisposable
 
     private readonly Guid _id = new Guid();
     public string Id => _id.ToString();
-
-    private byte _ledIndex;
-
-    public byte LedIndex
-    {
-        get => _ledIndex;
-        set => this.RaiseAndSetIfChanged(ref _ledIndex, value);
-    }
 
     public Color LedOn
     {
@@ -189,7 +191,7 @@ public abstract class Output : ReactiveObject, IDisposable
         Name = name;
         Model = model;
         _availableIndices = this.WhenAnyValue(x => x.Model.LedCount)
-            .Select(x => Enumerable.Range(1, x).Select(s => new LedIndex(this, (byte)s)).ToArray())
+            .Select(x => Enumerable.Range(1, x).Select(s => new LedIndex(this, (byte) s)).ToArray())
             .ToProperty(this, x => x.AvailableIndices);
         _image = this.WhenAnyValue(x => x.Model.DeviceType).Select(GetImage).ToProperty(this, x => x.Image);
         _isDj = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is DjInput)
@@ -207,10 +209,17 @@ public abstract class Output : ReactiveObject, IDisposable
         _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType)
             .Select(x => GetName(x.Item1, x.Item2))
             .ToProperty(this, x => x.LocalisedName);
-        _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue).ToProperty(this, x => x.ValueRaw);
+        _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
+            .ToProperty(this, x => x.ValueRaw);
         _imageOpacity = this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
             .Select(s => (s.Item3 || s.Item2?.IsAnalog == true) ? 1 : ((s.Item1 == 0 ? 0 : 0.35) + 0.65))
             .ToProperty(this, s => s.ImageOpacity);
+        _combinedOpacity = this.WhenAnyValue(x => x.Enabled)
+            .Select(s => s ? 1 : 0.5)
+            .ToProperty(this, s => s.CombinedOpacity);
+        _combinedBackground = this.WhenAnyValue(x => x.Enabled)
+            .Select(enabled => enabled ? Brush.Parse("#99000000") : Brush.Parse("#33000000"))
+            .ToProperty(this, s => s.CombinedBackground);
         _ledIndicesDisplay = this.WhenAnyValue(x => x.LedIndices)
             .Select(s => string.Join(", ", s))
             .ToProperty(this, s => s.LedIndicesDisplay);
@@ -341,14 +350,17 @@ public abstract class Output : ReactiveObject, IDisposable
         GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
     {
         Input input;
-        var lastPin = 0;
+        var lastPin = inputType == InputType.AnalogPinInput ? Model.MicroController!.GetFirstAnalogPin() : 0;
         var pinMode = DevicePinMode.PullUp;
         if (Input?.InnermostInput() is DirectInput direct)
         {
-            lastPin = direct.Pin;
-            if (!direct.IsAnalog)
+            if (direct.IsAnalog || inputType != InputType.AnalogPinInput)
             {
-                pinMode = direct.PinMode;
+                lastPin = direct.Pin;
+                if (!direct.IsAnalog)
+                {
+                    pinMode = direct.PinMode;
+                }
             }
         }
 
@@ -487,7 +499,7 @@ public abstract class Output : ReactiveObject, IDisposable
         }
     }
 
-    public abstract string Generate(DeviceEmulationMode mode,  List<int> debounceIndex, bool combined, string extra);
+    public abstract string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra);
 
     public SourceList<Output> Outputs { get; }
 
@@ -497,7 +509,7 @@ public abstract class Output : ReactiveObject, IDisposable
     public IEnumerable<Output> ValidOutputs()
     {
         var (extra, _) = ControllerEnumConverter.FilterValidOutputs(Model.DeviceType, Model.RhythmType, Outputs.Items);
-        return Outputs.Items.Except(extra);
+        return Outputs.Items.Except(extra).Where(output => output.Enabled);
     }
 
     public void Remove()
@@ -564,6 +576,17 @@ public abstract class Output : ReactiveObject, IDisposable
     private ObservableAsPropertyHelper<string> _ledOffLabel;
 
     public string LedOffLabel => _ledOffLabel.Value;
+
+    private ObservableAsPropertyHelper<double> _combinedOpacity;
+
+    public double CombinedOpacity => _combinedOpacity.Value;
+
+    private ObservableAsPropertyHelper<IBrush> _combinedBackground;
+
+    public IBrush CombinedBackground
+    {
+        get => _combinedBackground.Value;
+    }
 
     public void UpdateErrors()
     {

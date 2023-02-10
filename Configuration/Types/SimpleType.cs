@@ -8,7 +8,7 @@ public enum SimpleType
     WiiInputSimple,
     [Description("Automatic PS2 Inputs")]
     Ps2InputSimple,
-    [Description("Automatic Guitar Hero World Tour Tap Bar Inputs")]
+    [Description("Automatic Guitar Hero World Tour Slider Bar Inputs")]
     WtNeckSimple,
     [Description("Automatic Guitar Hero 5 Neck Inputs")]
     Gh5NeckSimple,

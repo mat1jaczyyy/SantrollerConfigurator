@@ -8,7 +8,7 @@
              xmlns:combined="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs.Combined"
              xmlns:output="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs"
              xmlns:dj="clr-namespace:GuitarConfigurator.NetCore.Configuration.DJ"
-             xmlns:ps2="clr-namespace:GuitarConfigurator.NetCore.Configuration"
+             xmlns:confnig="clr-namespace:GuitarConfigurator.NetCore.Configuration"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
@@ -75,10 +75,15 @@
                     <CheckBox IsChecked="{Binding Detected}" IsEnabled="False">Detected</CheckBox>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}">
+                <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                       Content="Guitar Hero World Tour Slider Bar">
+                </Label>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
-                           Content="Detected PS2 Controller Type">
+                           Content="Detected PS2 Controller Type: ">
                     </Label>
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                Text="{Binding DetectedType}">
@@ -106,86 +111,229 @@
             </DataTemplate>
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
-            <DataTemplate DataType="{x:Type ps2:GhWtTapInput}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="GH WT Tap Input: "></TextBlock>
-                    <TextBlock Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Pin}"
-                              Items="{Binding AvailablePins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
+            <DataTemplate DataType="{x:Type confnig:GhWtTapInput}">
+                <StackPanel Orientation="Vertical">
+                    <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
+                           Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}">
+                    </Label>
+                    <StackPanel Orientation="Horizontal">
+                        <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                               HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                               Source="{Binding Image}"
+                               Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
+                        </Image>
+                        <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center"
+                                  SelectedItem="{Binding Pin}"
+                                  Items="{Binding AvailablePins}">
+                        </ComboBox>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type ps2:Gh5NeckInput}">
-                <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GH5 Neck Input: "></Label>
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="{Binding Input}"></Label>
-                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
-                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
-                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
+            <DataTemplate DataType="{x:Type confnig:Gh5NeckInput}">
+                <StackPanel Orientation="Vertical">
+                    <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
+                           Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}">
+                    </Label>
+                    <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                           HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                           Source="{Binding Image}"
+                           Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
+                    </Image>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            SCL Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Scl}"
+                                  Items="{Binding AvailableSclPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            SDA Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Sda}"
+                                  Items="{Binding AvailableSdaPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type dj:DjInput}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="DJ Controller Input: "></TextBlock>
-                    <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
-                              Items="{Binding AvailableSclPins}">
-                    </ComboBox>
-                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
-                              Items="{Binding AvailableSdaPins}">
-                    </ComboBox>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type ps2:Ps2Input}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="PS2 Controller Input: "></TextBlock>
-                    <TextBlock VerticalAlignment="Center" Text="{Binding Input}"></TextBlock>
-                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center"
-                              SelectedItem="{Binding Mosi}"
-                              Items="{Binding AvailableMosiPins}">
-                    </ComboBox>
-                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center"
-                              SelectedItem="{Binding Miso}"
-                              Items="{Binding AvailableMisoPins}">
-                    </ComboBox>
-                    <ComboBox IsVisible="{Binding BindableSpi}" VerticalAlignment="Center" SelectedItem="{Binding Sck}"
-                              Items="{Binding AvailableSckPins}">
-                    </ComboBox>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Ack}"
-                              Items="{Binding AvailablePins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center" SelectedItem="{Binding Att}"
-                              Items="{Binding AvailablePins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type ps2:WiiInput}">
-                <StackPanel Orientation="Horizontal">
-                    <Image IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
-                           HorizontalAlignment="Center" Width="75"
-                           Source="{Binding Image}" Opacity="{Binding ImageOpacity}">
+                <StackPanel Orientation="Vertical">
+                    <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
+                           Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}">
+                    </Label>
+                    <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                           HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                           Source="{Binding Image}"
+                           Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
                     </Image>
-                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
-                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
-                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            SCL Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Scl}"
+                                  Items="{Binding AvailableSclPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            SDA Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Sda}"
+                                  Items="{Binding AvailableSdaPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type ps2:DirectInput}">
-                <StackPanel>
+            <DataTemplate DataType="{x:Type confnig:Ps2Input}">
+                <StackPanel Orientation="Vertical">
+                    <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
+                           Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}">
+                    </Label>
+                    <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                           HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                           Source="{Binding Image}"
+                           Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
+                    </Image>
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            MOSI / Command (Orange) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Mosi}"
+                                  Items="{Binding AvailableMosiPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            MISO / Data (Brown) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Miso}"
+                                  Items="{Binding AvailableMisoPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            Sck / Clock (Blue) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Sck}"
+                                  Items="{Binding AvailableSckPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            Acknowledge (Green) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Ack}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            Attention (Yellow) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Att}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type confnig:WiiInput}">
+                <StackPanel Orientation="Vertical">
+                    <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
+                           Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}">
+                    </Label>
+                    <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                           HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                           Source="{Binding Image}"
+                           Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
+                    </Image>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            SCL Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Scl}"
+                                  Items="{Binding AvailableSclPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            SDA Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Sda}"
+                                  Items="{Binding AvailableSdaPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type confnig:DirectInput}">
+                <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
-                        <Label VerticalAlignment="Center" Width="150">Pin Mode</Label>
+                        <Label VerticalAlignment="Center" Width="250">Pin Mode</Label>
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding PinMode}"
                                   Items="{Binding DevicePinModes}">
                         </ComboBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center" Width="150">Pin</Label>
+                        <Label VerticalAlignment="Center" Width="250">Pin</Label>
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Pin}"
                                   Items="{Binding AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}">
@@ -348,7 +496,7 @@
                         </StackPanel>
                         <Button x:CompileBindings="False" IsVisible="{Binding !IsDigitalToAnalog}"
                                 Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Center">
+                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom">
                             Calibrate
                         </Button>
                     </StackPanel>
@@ -398,7 +546,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center"
                            VerticalContentAlignment="Center"
-                           Width="150">
+                           Width="250">
                         Debounce
                     </Label>
                     <NumericUpDown Value="{Binding Debounce}" VerticalAlignment="Center"></NumericUpDown>
@@ -406,11 +554,25 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
-                <StackPanel Orientation="Horizontal">
-                    <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding AnalogToDigitalType}"
-                              Items="{Binding AnalogToDigitalTypes}">
-                    </ComboBox>
-                    <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            Type
+                        </Label>
+                        <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding AnalogToDigitalType}"
+                                  Items="{Binding AnalogToDigitalTypes}">
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            Threshold
+                        </Label>
+                        <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
+                    </StackPanel>
                     <ContentControl Content="{Binding Child}"
                                     ContentTemplate="{StaticResource OutputTemplates}">
                     </ContentControl>
@@ -424,14 +586,14 @@
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="150">
+                               Width="250">
                             Value
                         </Label>
                         <NumericUpDown Value="{Binding On}" Maximum="{Binding Maximum}" VerticalAlignment="Center"></NumericUpDown>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type ps2:MacroInput}">
+            <DataTemplate DataType="{x:Type confnig:MacroInput}">
                 <StackPanel Orientation="Horizontal">
                     <ContentControl Content="{Binding Child1}"
                                     ContentTemplate="{StaticResource OutputTemplates}">
@@ -441,149 +603,142 @@
                     </ContentControl>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
-                <StackPanel Orientation="Horizontal">
-                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Scl}"
-                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox IsVisible="{Binding BindableTwi}" VerticalAlignment="Center" SelectedItem="{Binding Sda}"
-                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-
-                    <Button
-                        x:CompileBindings="False"
-                        Command="{Binding CreateDefaults}">
-                        Reset bindings
-                    </Button>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
-                <StackPanel Orientation="Horizontal">
-                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Scl}"
-                              Items="{Binding AvailableSclPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableTwi}" SelectedItem="{Binding Sda}"
-                              Items="{Binding AvailableSdaPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-
-                    <Button
-                        x:CompileBindings="False"
-                        Command="{Binding AddTapBarFrets}">
-                        Map Tap Bar to Frets
-                    </Button>
-
-                    <Button
-                        x:CompileBindings="False"
-                        Command="{Binding CreateDefaults}">
-                        Reset bindings
-                    </Button>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}">
-                <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="GHWT TapBar Input"></Label>
-
-                    <Button
-                        x:CompileBindings="False"
-                        Command="{Binding AddTapBarFrets}">
-                        Map Tap Bar to Frets
-                    </Button>
-                    <Button
-                        x:CompileBindings="False"
-                        Command="{Binding CreateDefaults}">
-                        Reset bindings
-                    </Button>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
-                <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Content="PS2 Controller Input"></Label>
-
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
-                           Content="Detected Controller Type">
-                    </Label>
-                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
-                               Text="{Binding DetectedType}">
-                    </TextBlock>
-                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}"
-                              SelectedItem="{Binding Mosi}"
-                              Items="{Binding AvailableMosiPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}"
-                              SelectedItem="{Binding Miso}"
-                              Items="{Binding AvailableMisoPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox VerticalAlignment="Center" IsVisible="{Binding BindableSpi}" SelectedItem="{Binding Sck}"
-                              Items="{Binding AvailableSckPins}" ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Ack}" Items="{Binding AvailablePins}"
-                              ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Att}" Items="{Binding AvailablePins}"
-                              ItemTemplate="{StaticResource PinToStringTemplate}">
-                    </ComboBox>
-
-                    <Button
-                        x:CompileBindings="False"
-                        Command="{Binding CreateDefaults}">
-                        Reset bindings
-                    </Button>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
+            <DataTemplate DataType="{x:Type combined:CombinedTwiOutput}">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Button
-                            x:CompileBindings="False"
-                            Command="{Binding AddTapBarFrets}">
-                            Map Tap Bar to Frets
-                        </Button>
-                        <Button
-                            x:CompileBindings="False"
-                            Command="{Binding AddNunchukAcceleration}">
-                            Map Nunchuk to Left Joystick
-                        </Button>
-                    </StackPanel>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="150">
+                               Width="250">
                             SCL Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
                                   SelectedItem="{Binding Scl}"
                                   Items="{Binding AvailableSclPins}"
-                                  ItemTemplate="{StaticResource PinToStringTemplate}">
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
                         </ComboBox>
                     </StackPanel>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="150">
+                               Width="250">
                             SDA Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
                                   SelectedItem="{Binding Sda}"
                                   Items="{Binding AvailableSdaPins}"
-                                  ItemTemplate="{StaticResource PinToStringTemplate}">
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center"
+                           Width="250">
+                        Pin
+                    </Label>
+                    <ComboBox VerticalAlignment="Center"
+                              SelectedItem="{Binding Pin}"
+                              Items="{Binding AvailablePins}"
+                              ItemTemplate="{StaticResource PinToStringTemplate}"
+                              Width="200">
+                    </ComboBox>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
+                <StackPanel>
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            MOSI / Command (Orange) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Mosi}"
+                                  Items="{Binding AvailableMosiPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            MISO / Data (Brown) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Miso}"
+                                  Items="{Binding AvailableMisoPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            Sck / Clock (Blue) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Sck}"
+                                  Items="{Binding AvailableSckPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            Acknowledge (Green) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Ack}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="250">
+                            Attention (Yellow) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Att}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200">
                         </ComboBox>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
         </netCore:OutputTemplateSelector>
-
+        <DataTemplate DataType="output:Output" x:Key="CombinedOutputTemplate">
+            <ContentControl IsVisible="{Binding Valid}" Content="{Binding}"
+                            ContentTemplate="{StaticResource OutputTemplate}" Background="{Binding CombinedBackground}"
+                            Padding="10" Margin="0 5 10 5">
+            </ContentControl>
+        </DataTemplate>
         <DataTemplate DataType="output:Output" x:Key="OutputTemplate">
-            <StackPanel IsVisible="{Binding Valid}">
+            <StackPanel IsVisible="{Binding Valid}" Opacity="{Binding CombinedOpacity}">
                 <Panel>
                     <ContentControl Content="{Binding Input}"
                                     ContentTemplate="{StaticResource OutputTemplates}">
                     </ContentControl>
 
-                    <Button HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
-                            x:CompileBindings="False"
-                            Command="{Binding Remove}">
-                        Remove
-                    </Button>
+                    <ToggleSwitch HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
+                                  x:CompileBindings="False"
+                                  IsChecked="{Binding Enabled}" OnContent="Enabled" OffContent="Disabled">
+                    </ToggleSwitch>
                 </Panel>
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource OutputTemplates}">
@@ -599,7 +754,7 @@
                            VerticalContentAlignment="Center" Width="150">
                         Selected LEDs
                     </Label>
-                    <ItemsControl Items="{Binding AvailableIndices}" >
+                    <ItemsControl Items="{Binding AvailableIndices}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel />
@@ -608,7 +763,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="output:LedIndex">
                                 <ToggleButton x:CompileBindings="False" IsChecked="{Binding Selected }"
-                                             Content="{Binding Index}" />
+                                              Content="{Binding Index}" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -815,11 +970,6 @@
                                                     Content="{Binding ButtonText}">
                                             </Button>
                                             <StackPanel Orientation="Horizontal">
-                                                <Label VerticalAlignment="Center"
-                                                       VerticalContentAlignment="Center"
-                                                       Width="150">
-                                                    Input Type
-                                                </Label>
                                                 <StackPanel.IsVisible>
                                                     <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                         <Binding Path="Input"
@@ -827,10 +977,36 @@
                                                         <Binding Path="!IsCombined" />
                                                     </MultiBinding>
                                                 </StackPanel.IsVisible>
+                                                <Label VerticalAlignment="Center"
+                                                       VerticalContentAlignment="Center"
+                                                       Width="250">
+                                                    Input Type
+                                                </Label>
                                                 <ComboBox VerticalAlignment="Center"
                                                           SelectedItem="{Binding SelectedInputType}"
                                                           Items="{Binding InputTypes}">
                                                 </ComboBox>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="Input"
+                                                                 Converter="{x:Static  ObjectConverters.IsNotNull}" />
+                                                        <Binding Path="!IsCombined" />
+                                                        <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                                                            <Binding Path="IsWii" />
+                                                            <Binding Path="IsDj" />
+                                                            <Binding Path="IsPs2" />
+                                                            <Binding Path="IsGh5" />
+                                                            <Binding Path="IsWt" />
+                                                        </MultiBinding>
+                                                    </MultiBinding>
+                                                </StackPanel.IsVisible>
+                                                <Label VerticalAlignment="Center"
+                                                       VerticalContentAlignment="Center"
+                                                       Width="250">
+                                                    Input
+                                                </Label>
                                                 <ComboBox VerticalAlignment="Center"
                                                           IsVisible="{Binding IsWii}"
                                                           SelectedItem="{Binding WiiInputType}"
@@ -864,7 +1040,7 @@
                                                           HorizontalAlignment="Stretch"
                                                           IsEnabled="{Binding IsCombined}"
                                                           Items="{Binding DigitalOutputs}"
-                                                          ItemTemplate="{StaticResource OutputTemplate}">
+                                                          ItemTemplate="{StaticResource CombinedOutputTemplate}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
                                                         <WrapPanel />
@@ -875,7 +1051,7 @@
                                                           HorizontalAlignment="Stretch"
                                                           IsEnabled="{Binding IsCombined}"
                                                           Items="{Binding AnalogOutputs}"
-                                                          ItemTemplate="{StaticResource OutputTemplate}">
+                                                          ItemTemplate="{StaticResource CombinedOutputTemplate}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
                                                         <WrapPanel />

@@ -46,7 +46,7 @@ public abstract class OutputAxis : Output
             .ToProperty(this, x => x.ValueRawUpper);
 
         _value = this
-            .WhenAnyValue(x => x.ValueRaw, x => x.Min, x => x.Max, x => x.DeadZone, x => x.Trigger,
+            .WhenAnyValue(x => x.Enabled, x => x.ValueRaw, x => x.Min, x => x.Max, x => x.DeadZone, x => x.Trigger,
                 x => x.Model.DeviceType).Select(Calculate).ToProperty(this, x => x.Value);
         _valueLower = this.WhenAnyValue(x => x.Value).Select(s => (s < 0 ? -s : 0)).ToProperty(this, x => x.ValueLower);
         _valueUpper = this.WhenAnyValue(x => x.Value).Select(s => (s > 0 ? s : 0)).ToProperty(this, x => x.ValueUpper);
@@ -181,14 +181,15 @@ public abstract class OutputAxis : Output
         this.RaisePropertyChanged(nameof(CalibrationText));
     }
 
-    private int Calculate((int, int, int, int, bool, DeviceControllerType) values)
+    private int Calculate((bool, int, int, int, int, bool, DeviceControllerType) values)
     {
-        double val = values.Item1;
+        if (!values.Item1) return 0;
+        double val = values.Item2;
 
-        var min = (float) values.Item2;
-        var max = (float) values.Item3;
-        var deadZone = (float) values.Item4;
-        var trigger = values.Item5;
+        var min = (float) values.Item3;
+        var max = (float) values.Item4;
+        var deadZone = (float) values.Item5;
+        var trigger = values.Item6;
         if (InputIsDj)
         {
             return (int) (val * max);

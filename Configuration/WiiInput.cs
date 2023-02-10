@@ -85,8 +85,6 @@ public class WiiInput : TwiInput
             {WiiInputType.DjHeroLeftRed, WiiControllerType.Dj},
             {WiiInputType.DjHeroRightBlue, WiiControllerType.Dj},
             {WiiInputType.DjHeroLeftGreen, WiiControllerType.Dj},
-            {WiiInputType.DjHeroLeftAny, WiiControllerType.Dj},
-            {WiiInputType.DjHeroRightAny, WiiControllerType.Dj},
             {WiiInputType.DjHeroEuphoria, WiiControllerType.Dj},
             {WiiInputType.DjHeroRightGreen, WiiControllerType.Dj},
             {WiiInputType.DjHeroLeftBlue, WiiControllerType.Dj},
@@ -122,7 +120,7 @@ public class WiiInput : TwiInput
             {WiiInputType.UDrawPenButton2, WiiControllerType.UDraw},
             {WiiInputType.UDrawPenClick, WiiControllerType.UDraw}
         };
-
+    
     private static readonly Dictionary<WiiInputType, string> Mappings = new()
     {
         {WiiInputType.ClassicLeftStickX, "((wiiData[0] & 0x3f) - 32) << 9"},
@@ -186,11 +184,9 @@ public class WiiInput : TwiInput
         {WiiInputType.DjHeroLeftBlue, "((wiiButtonsHigh) & (1 << 7))"},
         {WiiInputType.DjHeroLeftRed, "((wiiButtonsLow) & (1 << 5))"},
         {WiiInputType.DjHeroLeftGreen, "((wiiButtonsHigh) & (1 << 3))"},
-        {WiiInputType.DjHeroLeftAny, "(((wiiButtonsHigh) & ((1 << 3)|1 << 7)) | ((wiiButtonsLow) & (1 << 5)))"},
         {WiiInputType.DjHeroRightGreen, "((wiiButtonsHigh) & (1 << 5))"},
         {WiiInputType.DjHeroRightRed, "((wiiButtonsLow) & (1 << 1))"},
         {WiiInputType.DjHeroRightBlue, "((wiiButtonsHigh) & (1 << 2))"},
-        {WiiInputType.DjHeroRightAny, "(((wiiButtonsHigh) & ((1 << 5)|1 << 2)) | ((wiiButtonsLow) & (1 << 1)))"},
         {WiiInputType.DjHeroEuphoria, "((wiiButtonsHigh) & (1 << 4))"},
         {WiiInputType.DrumPlus, "((wiiButtonsLow) & (1 << 2))"},
         {WiiInputType.DrumMinus, "((wiiButtonsLow) & (1 << 4))"},
@@ -505,13 +501,9 @@ public class WiiInput : TwiInput
                     WiiInputType.DjHeroLeftBlue => ((wiiButtonsHigh) & (1 << 7)),
                     WiiInputType.DjHeroLeftRed => ((wiiButtonsLow) & (1 << 5)),
                     WiiInputType.DjHeroLeftGreen => ((wiiButtonsHigh) & (1 << 3)),
-                    WiiInputType.DjHeroLeftAny => (((wiiButtonsHigh) & ((1 << 3) | 1 << 7)) |
-                                                   ((wiiButtonsLow) & (1 << 5))),
                     WiiInputType.DjHeroRightGreen => ((wiiButtonsHigh) & (1 << 5)),
                     WiiInputType.DjHeroRightRed => ((wiiButtonsLow) & (1 << 1)),
                     WiiInputType.DjHeroRightBlue => ((wiiButtonsHigh) & (1 << 2)),
-                    WiiInputType.DjHeroRightAny => (((wiiButtonsHigh) & ((1 << 5) | 1 << 2)) |
-                                                    ((wiiButtonsLow) & (1 << 1))),
                     WiiInputType.DjHeroEuphoria => ((wiiButtonsHigh) & (1 << 4)),
                     WiiInputType.DjCrossfadeSlider => (wiiData[2] & 0x1E) >> 1,
                     WiiInputType.DjEffectDial => (wiiData[3] & 0xE0) >> 5 | (wiiData[2] & 0x60) >> 2,
