@@ -37,6 +37,7 @@ public class DirectInput : InputWithPin
     }
 
     public override bool IsUint => true;
+
     public override string Generate(DeviceEmulationMode mode)
     {
         return IsAnalog
@@ -46,13 +47,14 @@ public class DirectInput : InputWithPin
 
     public override InputType? InputType => IsAnalog ? Types.InputType.AnalogPinInput : Types.InputType.DigitalPinInput;
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         DeviceEmulationMode mode)
     {
         if (Microcontroller is not AvrController) return string.Join(";\n", bindings.Select(binding => binding.Item2));
         var replacements = new Dictionary<string, string>();
         var seenPins = allBindings.Select(s => s.Input?.InnermostInput()).OfType<DirectInput>().Where(s => s.IsAnalog)
-            .Select(s => s.Pin).Distinct().OrderBy(s => s).Select((pin, index) => (pin, index)).ToDictionary(s => s.pin, s => s.index);
+            .Select(s => s.Pin).Distinct().OrderBy(s => s).Select((pin, index) => (pin, index))
+            .ToDictionary(s => s.pin, s => s.index);
         foreach (var (item1, item2) in bindings)
         {
             var pin = item1.Pins.First().Pin;
@@ -88,11 +90,16 @@ public class DirectInput : InputWithPin
     {
         if (IsAnalog)
         {
-            RawValue =  analogRaw.GetValueOrDefault(Pin, 0);
+            RawValue = analogRaw.GetValueOrDefault(Pin, 0);
         }
         else
         {
             RawValue = digitalRaw.GetValueOrDefault(Pin, true) ? 0 : 1;
         }
+    }
+
+    public override string GetImagePath()
+    {
+        return "";
     }
 }

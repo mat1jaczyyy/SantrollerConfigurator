@@ -159,4 +159,9 @@ public class Gh5NeckInput : TwiInput
 
         return base.RequiredDefines().Concat(new[] {"INPUT_GH5_NECK", "INPUT_GH5_NECK_TAP_BAR"}).ToList();
     }
+
+    public override string GetImagePath()
+    {
+        return $"GH/{Input}.png";
+    }
 }

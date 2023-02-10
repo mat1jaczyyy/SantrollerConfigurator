@@ -121,6 +121,11 @@ public class AnalogToDigital : Input
         Child.Dispose();
     }
 
+    public override string GetImagePath()
+    {
+        return Child.GetImagePath();
+    }
+
     public override IReadOnlyList<string> RequiredDefines()
     {
         return Child.RequiredDefines();

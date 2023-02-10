@@ -24,8 +24,6 @@ public class WiiInput : TwiInput
 
     public WiiControllerType WiiControllerType => AxisToType[Input];
 
-    public Bitmap? Image { get; }
-
     private static readonly Dictionary<WiiInputType, WiiControllerType> AxisToType =
         new()
         {
@@ -267,7 +265,6 @@ public class WiiInput : TwiInput
         Combined = combined;
         BindableTwi = !combined && microcontroller is not AvrController;
         IsAnalog = Input <= WiiInputType.DrawsomePenPressure;
-        Image = GetImage();
     }
 
     public override InputType? InputType => Types.InputType.WiiInput;
@@ -616,6 +613,11 @@ break;
         return ret + "}}";
     }
 
+    public override string GetImagePath()
+    {
+        return $"Wii/{Input}.png";
+    }
+
     public override IReadOnlyList<string> RequiredDefines()
     {
         return WiiControllerType switch
@@ -628,18 +630,5 @@ break;
         };
     }
 
-    private Bitmap? GetImage()
-    {
-        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
-        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-        try
-        {
-            var asset = assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Wii/{Input}.png"));
-            return new Bitmap(asset);
-        }
-        catch (FileNotFoundException)
-        {
-            return null;
-        }
-    }
+    
 }

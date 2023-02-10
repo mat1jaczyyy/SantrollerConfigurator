@@ -118,7 +118,7 @@
                     </Label>
                     <StackPanel Orientation="Horizontal">
                         <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
-                               HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                               HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                                Source="{Binding Image}"
                                Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
                         </Image>
@@ -135,14 +135,14 @@
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}">
                     </Label>
                     <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
-                           HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                           HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
                            Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
                     </Image>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             SCL Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -155,7 +155,7 @@
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             SDA Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -173,14 +173,14 @@
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}">
                     </Label>
                     <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
-                           HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                           HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
                            Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
                     </Image>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             SCL Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -193,7 +193,7 @@
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             SDA Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -211,14 +211,14 @@
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}">
                     </Label>
                     <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
-                           HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                           HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
                            Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
                     </Image>
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             MOSI / Command (Orange) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -232,7 +232,7 @@
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             MISO / Data (Brown) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -246,7 +246,7 @@
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             Sck / Clock (Blue) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -260,7 +260,7 @@
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             Acknowledge (Green) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -274,7 +274,7 @@
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             Attention (Yellow) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -292,14 +292,14 @@
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}">
                     </Label>
                     <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
-                           HorizontalAlignment="Center" Width="75" Margin="0 0 10 10"
+                           HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
                            Opacity="{Binding $parent[StackPanel;2].DataContext.ImageOpacity}">
                     </Image>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             SCL Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -312,7 +312,7 @@
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             SDA Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -327,13 +327,13 @@
             <DataTemplate DataType="{x:Type confnig:DirectInput}">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
-                        <Label VerticalAlignment="Center" Width="250">Pin Mode</Label>
+                        <Label VerticalAlignment="Center" Width="300">Pin Mode</Label>
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding PinMode}"
                                   Items="{Binding DevicePinModes}">
                         </ComboBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center" Width="250">Pin</Label>
+                        <Label VerticalAlignment="Center" Width="300">Pin</Label>
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Pin}"
                                   Items="{Binding AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}">
@@ -355,7 +355,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <ProgressBar HorizontalAlignment="Stretch" Value="{Binding ValueMidi}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="127" Height="30"
-                                                     Width="500" />
+                                                     Width="{Binding FullProgressWidth}" />
                                     </StackPanel>
                                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                                Text="{Binding ValueMidi}">
@@ -375,13 +375,13 @@
                                         <ProgressBar Opacity="0.6" HorizontalAlignment="Stretch"
                                                      Value="{Binding ValueRaw}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="65536" Height="30"
-                                                     Width="500" />
+                                                     Width="{Binding FullProgressWidth}" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}">
                                         <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
                                                      Value="{Binding ValueRawLower}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30"
-                                                     Width="250">
+                                                     Width="{Binding HalfProgressWidth}">
                                             <ProgressBar.RenderTransform>
                                                 <ScaleTransform ScaleX="-1"></ScaleTransform>
                                             </ProgressBar.RenderTransform>
@@ -389,7 +389,7 @@
                                         <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
                                                      Value="{Binding ValueRawUpper}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="32768" Height="30"
-                                                     Width="250" />
+                                                     Width="{Binding HalfProgressWidth}" />
                                     </StackPanel>
                                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                                Text="{Binding ValueRaw}">
@@ -416,76 +416,72 @@
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsDj}">
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
                             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal">
-                                    <Grid>
-                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding Trigger}">
-                                            <ProgressBar HorizontalAlignment="Stretch" Value="{Binding Value}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="65536"
-                                                         Height="30"
-                                                         Width="500" />
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}">
-                                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
-                                                         Value="{Binding ValueLower}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="250">
-                                                <ProgressBar.RenderTransform>
-                                                    <ScaleTransform ScaleX="-1"></ScaleTransform>
-                                                </ProgressBar.RenderTransform>
-                                            </ProgressBar>
-                                            <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
-                                                         Value="{Binding ValueUpper}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="250" />
-                                        </StackPanel>
-                                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                   Text="{Binding Value}">
-                                        </TextBlock>
-                                    </Grid>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" IsVisible="{Binding Trigger}">
+                                        <ProgressBar Value="{Binding Value}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="65536"
+                                                     Height="30"
+                                                     Width="{Binding FullProgressWidth}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}"
+                                                Width="{Binding FullProgressWidth}">
+                                        <ProgressBar CornerRadius="0 3 3 0"
+                                                     Value="{Binding ValueLower}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                     Height="30"
+                                                     Width="{Binding HalfProgressWidth}">
+                                            <ProgressBar.RenderTransform>
+                                                <ScaleTransform ScaleX="-1"></ScaleTransform>
+                                            </ProgressBar.RenderTransform>
+                                        </ProgressBar>
+                                        <ProgressBar CornerRadius="0 3 3 0"
+                                                     Value="{Binding ValueUpper}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                     Height="30"
+                                                     Width="{Binding HalfProgressWidth}" />
+                                    </StackPanel>
+                                    <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
+                                               Content="{Binding Value}" Width="{Binding FullProgressWidth}">
+                                    </Label>
+                                </Grid>
 
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Grid>
-                                        <Rectangle Margin="{Binding CalibrationMinMaxMargin}"
-                                                   HorizontalAlignment="Stretch"
-                                                   Fill="Green" Height="30">
-                                        </Rectangle>
-                                        <Rectangle Margin="{Binding ComputedDeadZoneMargin}" Fill="Red"
-                                                   HorizontalAlignment="Stretch" Height="30">
-                                        </Rectangle>
-                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsUint}">
-                                            <ProgressBar Opacity="0.6" HorizontalAlignment="Stretch"
-                                                         Value="{Binding ValueRaw}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="65536"
-                                                         Height="30"
-                                                         Width="500" />
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}">
-                                            <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
-                                                         HorizontalAlignment="Stretch"
-                                                         Value="{Binding ValueRawLower}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="250">
-                                                <ProgressBar.RenderTransform>
-                                                    <ScaleTransform ScaleX="-1"></ScaleTransform>
-                                                </ProgressBar.RenderTransform>
-                                            </ProgressBar>
-                                            <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
-                                                         HorizontalAlignment="Stretch"
-                                                         Value="{Binding ValueRawUpper}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="250" />
-                                        </StackPanel>
-                                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                   Text="{Binding ValueRaw}">
-                                        </TextBlock>
-                                    </Grid>
+                                <Grid>
+                                    <Rectangle Margin="{Binding CalibrationMinMaxMargin}"
+                                               HorizontalAlignment="Stretch"
+                                               Fill="Green" Height="30">
+                                    </Rectangle>
+                                    <Rectangle Margin="{Binding ComputedDeadZoneMargin}" Fill="Red"
+                                               HorizontalAlignment="Stretch" Height="30">
+                                    </Rectangle>
+                                    <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsUint}">
+                                        <ProgressBar Opacity="0.6"
+                                                     Value="{Binding ValueRaw}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="65536"
+                                                     Height="30"
+                                                     Width="{Binding FullProgressWidth}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}"
+                                                Width="{Binding FullProgressWidth}">
+                                        <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
+                                                     Value="{Binding ValueRawLower}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                     Height="30"
+                                                     Width="{Binding HalfProgressWidth}">
+                                            <ProgressBar.RenderTransform>
+                                                <ScaleTransform ScaleX="-1"></ScaleTransform>
+                                            </ProgressBar.RenderTransform>
+                                        </ProgressBar>
+                                        <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
+                                                     Value="{Binding ValueRawUpper}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                     Height="30"
+                                                     Width="{Binding HalfProgressWidth}" />
+                                    </StackPanel>
+                                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                                               Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth}">
+                                    </Label>
+                                </Grid>
 
-                                </StackPanel>
                                 <TextBlock
                                     IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
                                     VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -496,7 +492,8 @@
                         </StackPanel>
                         <Button x:CompileBindings="False" IsVisible="{Binding !IsDigitalToAnalog}"
                                 Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom">
+                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
+                                Margin="10 0 0 0">
                             Calibrate
                         </Button>
                     </StackPanel>
@@ -510,7 +507,7 @@
                                                          Value="{Binding ValueLower}"
                                                          IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                          Height="30"
-                                                         Width="250">
+                                                         Width="300">
                                                 <ProgressBar.RenderTransform>
                                                     <ScaleTransform ScaleX="-1"></ScaleTransform>
                                                 </ProgressBar.RenderTransform>
@@ -519,7 +516,7 @@
                                                          Value="{Binding ValueUpper}"
                                                          IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                          Height="30"
-                                                         Width="250" />
+                                                         Width="300" />
                                         </StackPanel>
                                         <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                                    Text="{Binding Value}">
@@ -546,10 +543,10 @@
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center"
                            VerticalContentAlignment="Center"
-                           Width="250">
+                           Width="300">
                         Debounce
                     </Label>
-                    <NumericUpDown Value="{Binding Debounce}" VerticalAlignment="Center"></NumericUpDown>
+                    <NumericUpDown Value="{Binding Debounce}" VerticalAlignment="Center" Width="200"></NumericUpDown>
                 </StackPanel>
             </DataTemplate>
 
@@ -558,7 +555,7 @@
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             Type
                         </Label>
                         <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding AnalogToDigitalType}"
@@ -568,10 +565,10 @@
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             Threshold
                         </Label>
-                        <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center"></NumericUpDown>
+                        <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center" Width="200"></NumericUpDown>
                     </StackPanel>
                     <ContentControl Content="{Binding Child}"
                                     ContentTemplate="{StaticResource OutputTemplates}">
@@ -586,10 +583,12 @@
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             Value
                         </Label>
-                        <NumericUpDown Value="{Binding On}" Maximum="{Binding Maximum}" VerticalAlignment="Center"></NumericUpDown>
+                        <NumericUpDown Value="{Binding On}" Maximum="{Binding Maximum}" VerticalAlignment="Center"
+                                       Width="200">
+                        </NumericUpDown>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -608,7 +607,7 @@
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             SCL Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -621,7 +620,7 @@
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             SDA Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -637,7 +636,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center"
                            VerticalContentAlignment="Center"
-                           Width="250">
+                           Width="300">
                         Pin
                     </Label>
                     <ComboBox VerticalAlignment="Center"
@@ -653,7 +652,7 @@
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             MOSI / Command (Orange) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -667,7 +666,7 @@
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             MISO / Data (Brown) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -681,7 +680,7 @@
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             Sck / Clock (Blue) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -695,7 +694,7 @@
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             Acknowledge (Green) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -709,7 +708,7 @@
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
-                               Width="250">
+                               Width="300">
                             Attention (Yellow) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
@@ -725,7 +724,7 @@
         <DataTemplate DataType="output:Output" x:Key="CombinedOutputTemplate">
             <ContentControl IsVisible="{Binding Valid}" Content="{Binding}"
                             ContentTemplate="{StaticResource OutputTemplate}" Background="{Binding CombinedBackground}"
-                            Padding="10" Margin="0 5 10 5">
+                            Padding="10" Margin="0 5 10 5" Width="520">
             </ContentControl>
         </DataTemplate>
         <DataTemplate DataType="output:Output" x:Key="OutputTemplate">
@@ -763,7 +762,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="output:LedIndex">
                                 <ToggleButton x:CompileBindings="False" IsChecked="{Binding Selected }"
-                                              Content="{Binding Index}" />
+                                              Content="{Binding Index}" Width="50" HorizontalContentAlignment="Center" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -979,7 +978,7 @@
                                                 </StackPanel.IsVisible>
                                                 <Label VerticalAlignment="Center"
                                                        VerticalContentAlignment="Center"
-                                                       Width="250">
+                                                       Width="300">
                                                     Input Type
                                                 </Label>
                                                 <ComboBox VerticalAlignment="Center"
@@ -1004,7 +1003,7 @@
                                                 </StackPanel.IsVisible>
                                                 <Label VerticalAlignment="Center"
                                                        VerticalContentAlignment="Center"
-                                                       Width="250">
+                                                       Width="300">
                                                     Input
                                                 </Label>
                                                 <ComboBox VerticalAlignment="Center"

@@ -28,8 +28,6 @@ public class Ps2Input : SpiInput
     public static readonly string Ps2AttType = "ps2_att";
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
-    public Bitmap? Image { get; }
-
     public int Ack
     {
         get => _ackConfig.Pin;
@@ -241,7 +239,6 @@ public class Ps2Input : SpiInput
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         IsAnalog = Input <= Ps2InputType.Dualshock2R2;
-        Image = GetImage();
     }
 
     public override string Generate(DeviceEmulationMode mode)
@@ -512,19 +509,9 @@ public class Ps2Input : SpiInput
         return defines;
     }
 
-    private Bitmap? GetImage()
+    public override string GetImagePath()
     {
-        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
-        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-        try
-        {
-            var asset = assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/PS2/{Input}.png"));
-            return new Bitmap(asset);
-        }
-        catch (FileNotFoundException)
-        {
-            return null;
-        }
+        return $"PS2/{Input}.png";
     }
 
     public override IList<PinConfig> PinConfigs =>

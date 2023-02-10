@@ -59,6 +59,10 @@ public abstract class OutputAxis : Output
             .ToProperty(this, x => x.IsDigitalToAnalog);
     }
 
+    private const float ProgressWidth = 390;
+    public float FullProgressWidth => ProgressWidth;
+    public float HalfProgressWidth => ProgressWidth/2;
+
     private Thickness ComputeDeadZoneMargin((int, int, bool, bool, int) s)
     {
         if (!s.Item4)
@@ -88,9 +92,9 @@ public abstract class OutputAxis : Output
             max = mid + s.Item5;
         }
 
-        var left = Math.Min(min / (ushort.MaxValue) * 500, 500f);
+        var left = Math.Min(min / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
 
-        var right = 500 - Math.Min(max / (ushort.MaxValue) * 500, 500f);
+        var right = ProgressWidth - Math.Min(max / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
 
         return new Thickness(left, 0, right, 0);
     }
@@ -107,9 +111,9 @@ public abstract class OutputAxis : Output
         float min = Math.Min(s.Item1, s.Item2);
         float max = Math.Max(s.Item1, s.Item2);
 
-        var left = Math.Min(min / (ushort.MaxValue) * 500, 500f);
+        var left = Math.Min(min / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
 
-        var right = 500 - Math.Min(max / (ushort.MaxValue) * 500, 500f);
+        var right = ProgressWidth - Math.Min(max / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
 
         return new Thickness(left, 0, right, 0);
     }

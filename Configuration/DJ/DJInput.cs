@@ -98,6 +98,10 @@ public class DjInput : TwiInput
                     {right}
                   }}";
     }
+    public override string GetImagePath()
+    {
+        return $"DJ/{Input}.png";
+    }
 
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
     public override bool IsUint => false;

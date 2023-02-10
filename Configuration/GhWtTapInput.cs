@@ -109,4 +109,9 @@ public class GhWtTapInput : InputWithPin
     {
         new(PinConfig.Pin, DevicePinMode.Floating),
     };
+
+    public override string GetImagePath()
+    {
+        return $"GH/{Input}.png";
+    }
 }

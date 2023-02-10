@@ -77,6 +77,11 @@ public class MacroInput : Input
         Child2.Dispose();
     }
 
+    public override string GetImagePath()
+    {
+        return "";
+    }
+
     public override IReadOnlyList<string> RequiredDefines()
     {
         return Child1.RequiredDefines().Concat(Child2.RequiredDefines()).ToList();
