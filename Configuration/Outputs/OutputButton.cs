@@ -42,6 +42,7 @@ public abstract class OutputButton : Output
         if (mode != DeviceEmulationMode.Shared)
         {
             var outputVar = GenerateOutput(mode);
+            if (!outputVar.Any()) return "";
             var leds = "";
             if (AreLedsEnabled && LedIndices.Any())
             {

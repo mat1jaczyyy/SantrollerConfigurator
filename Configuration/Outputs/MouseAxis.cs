@@ -9,14 +9,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class MouseAxis : OutputAxis
 {
-    private static readonly Dictionary<MouseAxisType, string> Mappings = new()
-    {
-        {MouseAxisType.X, "X"},
-        {MouseAxisType.Y, "Y"},
-        {MouseAxisType.ScrollX, "ScrollX"},
-        {MouseAxisType.ScrollY, "ScrollY"},
-    };
-
     public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
         deadZone, type.ToString(), false)
     {
@@ -36,7 +28,8 @@ public class MouseAxis : OutputAxis
 
     public override string GenerateOutput(DeviceEmulationMode mode)
     {
-        return "report->" + Mappings[Type];
+        if (mode != DeviceEmulationMode.Mouse) return "";
+        return GetReportField(Type);
     }
 
     public override bool IsCombined => false;

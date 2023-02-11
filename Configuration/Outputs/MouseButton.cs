@@ -33,7 +33,8 @@ public class MouseButton : OutputButton
 
     public override string GenerateOutput(DeviceEmulationMode mode)
     {
-        return "report->buttons";
+        if (mode != DeviceEmulationMode.Mouse) return "";
+        return GetReportField(Type);
     }
 
     public override bool IsStrum => false;

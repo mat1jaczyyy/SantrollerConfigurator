@@ -502,6 +502,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
 
             lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
+            // TODO this
+            lines.Add($"#define ABSOLUTE_MOUSE_COORDS true");
 
             lines.Add($"#define TICK_SHARED {GenerateTick(DeviceEmulationMode.Shared, true)}");
 
@@ -510,6 +512,24 @@ namespace GuitarConfigurator.NetCore.ViewModels
             lines.Add($"#define TICK_XINPUT {GenerateTick(DeviceEmulationMode.Xbox360, false)}");
 
             lines.Add($"#define TICK_XBOX_ONE {GenerateTick(DeviceEmulationMode.XboxOne, false)}");
+
+            var nkro_tick = GenerateTick(DeviceEmulationMode.Keyboard, false);
+            if (nkro_tick.Any())
+            {
+                lines.Add($"#define TICK_NKRO {nkro_tick}");
+            }
+
+            var consumer_tick = GenerateTick(DeviceEmulationMode.Consumer, false);
+            if (consumer_tick.Any())
+            {
+                lines.Add($"#define TICK_CONSUMER {consumer_tick}");
+            }
+
+            var mouse_tick = GenerateTick(DeviceEmulationMode.Mouse, false);
+            if (mouse_tick.Any())
+            {
+                lines.Add($"#define TICK_MOUSE {GenerateTick(DeviceEmulationMode.Mouse, false)}");
+            }
 
             lines.Add(
                 $"#define ADC_COUNT {directInputs.DistinctBy(s => s.PinConfig.Pin).Count(input => input.IsAnalog)}");

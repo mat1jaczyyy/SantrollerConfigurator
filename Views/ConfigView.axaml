@@ -1088,7 +1088,7 @@
                             <DataTemplate DataType="output:Output">
                                 <StackPanel>
                                     <Expander IsVisible="{Binding !IsEmpty}" HorizontalAlignment="Stretch"
-                                              Header="{Binding}">
+                                              Header="{Binding}" IsExpanded="{Binding Expanded}">
                                         <Expander.HeaderTemplate>
                                             <DataTemplate DataType="output:Output">
                                                 <Panel>
@@ -1129,11 +1129,22 @@
                                             </DataTemplate>
                                         </Expander.HeaderTemplate>
                                         <StackPanel>
-                                            <Button Command="{Binding AssignByKeyOrAxis}"
-                                                    IsVisible="{Binding IsKeyboard}"
-                                                    IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                                    Content="{Binding ButtonText}">
-                                            </Button>
+                                            
+                                            <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
+                                                <Label VerticalAlignment="Center"
+                                                       VerticalContentAlignment="Center"
+                                                       Width="300">
+                                                    Output Type
+                                                </Label>
+                                                <ComboBox VerticalAlignment="Center"
+                                                          SelectedItem="{Binding KeyOrMouse}"
+                                                          Items="{Binding KeyOrMouseInputs}">
+                                                </ComboBox>
+                                                <Button Command="{Binding AssignByKeyOrAxis}"
+                                                        IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                                        Content="{Binding ButtonText}">
+                                                </Button>
+                                            </StackPanel>
                                             <StackPanel Orientation="Horizontal">
                                                 <StackPanel.IsVisible>
                                                     <MultiBinding Converter="{x:Static BoolConverters.And}">

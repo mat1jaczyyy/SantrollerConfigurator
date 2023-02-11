@@ -78,7 +78,15 @@ public abstract class Output : ReactiveObject, IDisposable
     public bool Enabled
     {
         get => _enabled;
-        set { this.RaiseAndSetIfChanged(ref _enabled, value); }
+        set => this.RaiseAndSetIfChanged(ref _enabled, value);
+    }
+
+    private bool _expanded;
+
+    public bool Expanded
+    {
+        get => _expanded;
+        set => this.RaiseAndSetIfChanged(ref _expanded, value);
     }
 
     public InputType? SelectedInputType
@@ -99,16 +107,78 @@ public abstract class Output : ReactiveObject, IDisposable
         set => SetInput(SelectedInputType, null, value, null, null, null);
     }
 
-    public Gh5NeckInputType Gh5NeckInputType
+    public object KeyOrMouse
     {
-        get => (Input?.InnermostInput() as Gh5NeckInput)?.Input ?? Gh5NeckInputType.Green;
-        set => SetInput(SelectedInputType, null, null, null, value, null);
+        get => GetKey() ?? Key.Space;
+        set => SetKey(value);
+    }
+
+    private object? GetKey()
+    {
+        switch (this)
+        {
+            case KeyboardButton button:
+                return button.Key;
+            case MouseAxis axis:
+                return axis.Type;
+            case MouseButton button:
+                return button.Type;
+        }
+
+        return null;
+    }
+
+    private void SetKey(object value)
+    {
+        var current = GetKey();
+        if (current == null) return;
+        if (current.GetType() == value.GetType() && (int) current == (int) value)
+        {
+            return;
+        }
+
+        byte debounce = 1;
+        int min = short.MinValue;
+        int max = short.MaxValue;
+        var deadzone = 0;
+        switch (this)
+        {
+            case OutputAxis axis:
+                min = axis.Min;
+                max = axis.Max;
+                deadzone = axis.DeadZone;
+                break;
+            case OutputButton button:
+                debounce = button.Debounce;
+                break;
+        }
+
+        Output? newOutput = value switch
+        {
+            Key key => new KeyboardButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), debounce, key),
+            MouseButtonType mouseButtonType => new MouseButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(),
+                debounce, mouseButtonType),
+            MouseAxisType axisType => new MouseAxis(Model, Input, LedOn, LedOff, LedIndices.ToArray(), min, max,
+                deadzone, axisType),
+            _ => null
+        };
+
+        if (newOutput == null) return;
+        newOutput.Expanded = Expanded;
+        Model.Bindings.Insert(Model.Bindings.IndexOf(this),newOutput);
+        Model.RemoveOutput(this);
     }
 
     public DjInputType DjInputType
     {
         get => (Input?.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
         set => SetInput(SelectedInputType, null, null, null, null, value);
+    }
+
+    public Gh5NeckInputType Gh5NeckInputType
+    {
+        get => (Input?.InnermostInput() as Gh5NeckInput)?.Input ?? Gh5NeckInputType.Green;
+        set => SetInput(SelectedInputType, null, null, null, value, null);
     }
 
     public GhWtInputType GhWtInputType
@@ -120,6 +190,9 @@ public abstract class Output : ReactiveObject, IDisposable
     public IEnumerable<GhWtInputType> GhWtInputTypes => Enum.GetValues<GhWtInputType>();
 
     public IEnumerable<Gh5NeckInputType> Gh5NeckInputTypes => Enum.GetValues<Gh5NeckInputType>();
+
+    public IEnumerable<object> KeyOrMouseInputs => Enum.GetValues<MouseButtonType>().Cast<object>()
+        .Concat(Enum.GetValues<MouseAxisType>().Cast<object>()).Concat(KeyboardButton.Keys.Cast<object>());
 
     public IEnumerable<Ps2InputType> Ps2InputTypes => Enum.GetValues<Ps2InputType>();
 
@@ -259,88 +332,45 @@ public abstract class Output : ReactiveObject, IDisposable
         await Task.Delay(200);
         var lastEvent = await InputManager.Instance.Process.FirstAsync();
         Console.WriteLine(lastEvent);
-        byte debounce = 1;
-        int min = short.MinValue;
-        int max = short.MaxValue;
-        int deadzone = 0;
-        if (this is OutputAxis axis)
+        switch (lastEvent)
         {
-            min = axis.Min;
-            max = axis.Max;
-            deadzone = axis.DeadZone;
-        }
-
-        if (this is OutputButton button)
-        {
-            debounce = button.Debounce;
-        }
-
-        if (lastEvent is RawKeyEventArgs keyEventArgs)
-        {
-            Model.Bindings.Add(new KeyboardButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), debounce,
-                keyEventArgs.Key));
-            Model.RemoveOutput(this);
-        }
-
-        if (lastEvent is RawPointerEventArgs pointerEventArgs)
-        {
-            switch (pointerEventArgs.Type)
-            {
-                case RawPointerEventType.LeftButtonDown:
-                case RawPointerEventType.LeftButtonUp:
-                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), debounce,
-                        MouseButtonType.Left));
-                    Model.RemoveOutput(this);
-                    break;
-                case RawPointerEventType.RightButtonDown:
-                case RawPointerEventType.RightButtonUp:
-                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), debounce,
-                        MouseButtonType.Right));
-                    Model.RemoveOutput(this);
-                    break;
-                case RawPointerEventType.MiddleButtonDown:
-                case RawPointerEventType.MiddleButtonUp:
-                    Model.Bindings.Add(new MouseButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), debounce,
-                        MouseButtonType.Middle));
-                    Model.RemoveOutput(this);
-                    break;
-                case RawPointerEventType.Move:
-                    await Task.Delay(100);
-                    var last = await InputManager.Instance.Process.Where(s => s is RawPointerEventArgs)
-                        .Cast<RawPointerEventArgs>().FirstAsync();
-                    var diff = last.Position - pointerEventArgs.Position;
-                    if (Math.Abs(diff.X) > Math.Abs(diff.Y))
+            case RawKeyEventArgs keyEventArgs:
+                KeyOrMouse = keyEventArgs.Key;
+                break;
+            case RawPointerEventArgs pointerEventArgs:
+                if (pointerEventArgs is RawMouseWheelEventArgs wheelEventArgs)
+                {
+                    KeyOrMouse = Math.Abs(wheelEventArgs.Delta.X) > Math.Abs(wheelEventArgs.Delta.Y)
+                        ? MouseAxisType.ScrollX
+                        : MouseAxisType.ScrollY;
+                }
+                else
+                {
+                    switch (pointerEventArgs.Type)
                     {
-                        Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices.ToArray(), min, max,
-                            deadzone,
-                            MouseAxisType.X));
+                        case RawPointerEventType.LeftButtonDown:
+                        case RawPointerEventType.LeftButtonUp:
+                            KeyOrMouse = MouseButtonType.Left;
+                            break;
+                        case RawPointerEventType.RightButtonDown:
+                        case RawPointerEventType.RightButtonUp:
+                            KeyOrMouse = MouseButtonType.Right;
+                            break;
+                        case RawPointerEventType.MiddleButtonDown:
+                        case RawPointerEventType.MiddleButtonUp:
+                            KeyOrMouse = MouseButtonType.Middle;
+                            break;
+                        case RawPointerEventType.Move:
+                            await Task.Delay(100);
+                            var last = await InputManager.Instance.Process.Where(s => s is RawPointerEventArgs)
+                                .Cast<RawPointerEventArgs>().FirstAsync();
+                            var diff = last.Position - pointerEventArgs.Position;
+                            KeyOrMouse = Math.Abs(diff.X) > Math.Abs(diff.Y) ? MouseAxisType.X : MouseAxisType.Y;
+                            break;
                     }
-                    else
-                    {
-                        Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices.ToArray(), min, max,
-                            deadzone,
-                            MouseAxisType.Y));
-                    }
+                }
 
-                    Model.RemoveOutput(this);
-                    break;
-            }
-        }
-
-        if (lastEvent is RawMouseWheelEventArgs mouseWheelEventArgs)
-        {
-            if (Math.Abs(mouseWheelEventArgs.Delta.X) > Math.Abs(mouseWheelEventArgs.Delta.Y))
-            {
-                Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices.ToArray(), min, max, deadzone,
-                    MouseAxisType.ScrollX));
-            }
-            else
-            {
-                Model.Bindings.Add(new MouseAxis(Model, Input, LedOn, LedOff, LedIndices.ToArray(), min, max, deadzone,
-                    MouseAxisType.ScrollY));
-            }
-
-            Model.RemoveOutput(this);
+                break;
         }
 
         ButtonText = "Click to assign";
