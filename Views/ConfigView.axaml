@@ -980,6 +980,16 @@
                                       Items="{Binding EmulationTypes}">
                             </ComboBox>
                         </StackPanel>
+                        
+                        <StackPanel IsVisible="{Binding IsKeyboard}">
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Mouse Movement Type"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedItem="{Binding MouseMovementType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                      Items="{Binding MouseMovementTypes}">
+                            </ComboBox>
+                        </StackPanel>
                         <StackPanel IsVisible="{Binding IsController}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type"
                                        TextAlignment="Center" />

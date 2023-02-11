@@ -19,6 +19,7 @@ public class SerializedConfiguration
     [ProtoMember(8)] public int Apa102Mosi { get; }
     [ProtoMember(9)] public int Apa102Sck { get; }
     [ProtoMember(10)] public byte LedCount { get; }
+    [ProtoMember(11)] public MouseMovementType MouseMovementType { get; }
     
     public SerializedConfiguration(ConfigViewModel model)
     {
@@ -32,6 +33,7 @@ public class SerializedConfiguration
         Apa102Mosi = model.Apa102Mosi;
         Apa102Sck = model.Apa102Sck;
         LedCount = model.LedCount;
+        MouseMovementType = model.MouseMovementType;
     }
 
     public void LoadConfiguration(ConfigViewModel model)
@@ -44,6 +46,7 @@ public class SerializedConfiguration
         model.Bindings.AddRange(Bindings.Select(s => s.Generate(model, model.MicroController!)));
         model.LedType = LedType;
         model.LedCount = LedCount < 1 ? (byte) 1 : LedCount;
+        model.MouseMovementType = MouseMovementType;
         if (!model.IsApa102) return;
         model.Apa102Mosi = Apa102Mosi;
         model.Apa102Sck = Apa102Sck;

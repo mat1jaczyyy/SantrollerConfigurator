@@ -61,6 +61,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>();
 
         public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
+        
+        public IEnumerable<MouseMovementType> MouseMovementTypes => Enum.GetValues<MouseMovementType>();
 
         //TODO: actually read and write this as part of the config
         public bool KvEnabled { get; set; } = false;
@@ -70,6 +72,13 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public ICommand WriteConfig { get; }
 
         public ICommand GoBack { get; }
+
+        private MouseMovementType _mouseMovementType;
+        public MouseMovementType MouseMovementType
+        {
+            get => _mouseMovementType;
+            set => this.RaiseAndSetIfChanged(ref _mouseMovementType, value);
+        }
 
         private SpiConfig? _apa102SpiConfig;
 
@@ -406,6 +415,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             this.RaisePropertyChanged(nameof(EmulationType));
             this.RaisePropertyChanged(nameof(RhythmType));
             XInputOnWindows = false;
+            MouseMovementType = MouseMovementType.Relative;
 
             switch (Main.DeviceInputType)
             {
@@ -502,8 +512,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
 
             lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
-            // TODO this
-            lines.Add($"#define ABSOLUTE_MOUSE_COORDS true");
+
+            lines.Add($"#define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}");
 
             lines.Add($"#define TICK_SHARED {GenerateTick(DeviceEmulationMode.Shared, true)}");
 
@@ -702,7 +712,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 return;
             }
             //TODO: actually revert the device to an arduino
-            //TODO: probably don't offer this for the pico since you can just use bootsel on those
         }
 
         public void AddOutput()
@@ -804,7 +813,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
             }
 
             var seen = new HashSet<Output>();
-            var seenDebounce = new HashSet<int>();
             // Handle most mappings
             // Sort in a way that any digital to analog based groups are last. This is so that seenAnalog will be filled in when necessary.
             var ret = groupedOutputs.OrderByDescending(s => s.Count(s2 => s2.Second.Input is DigitalToAnalog))
