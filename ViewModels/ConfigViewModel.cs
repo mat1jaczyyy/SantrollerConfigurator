@@ -659,6 +659,20 @@ namespace GuitarConfigurator.NetCore.ViewModels
             UpdateErrors();
         }
 
+        public void ExpandAll()
+        {
+            foreach (var binding in Bindings)
+            {
+                binding.Expanded = true;
+            }
+        }
+        public void CollapseAll()
+        {
+            foreach (var binding in Bindings)
+            {
+                binding.Expanded = false;
+            }
+        }
         public async void ResetWithConfirmation()
         {
             var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",

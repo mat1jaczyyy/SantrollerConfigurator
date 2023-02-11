@@ -21,7 +21,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers
         public abstract string GenerateInit();
 
         public string GetPin(int possiblePin, int selectedPin, IEnumerable<Output> outputs, bool twi, bool spi,
-            IEnumerable<PinConfig> pinConfigs, ConfigViewModel model)
+            IEnumerable<PinConfig> pinConfigs, ConfigViewModel model, bool addText)
         {
             var selectedConfig = pinConfigs.Where(s => s.Pins.Contains(selectedPin));
             var apa102 = PinConfigs.Where(s => s.Type == ConfigViewModel.Apa102SpiType && s.Pins.Contains(possiblePin)).Select(s => s.Type);
@@ -31,7 +31,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers
                         o.GetPinConfigs().Except(selectedConfig).Any(s => s.Pins.Contains(possiblePin) ))
                     .Select(s => s.GetName(model.DeviceType, model.RhythmType)).Concat(apa102));
             var ret = GetPinForMicrocontroller(possiblePin, twi, spi);
-            if (!string.IsNullOrEmpty(output))
+            if (!string.IsNullOrEmpty(output) && addText)
             {
                 return "* " + ret + " - " + output;
             }

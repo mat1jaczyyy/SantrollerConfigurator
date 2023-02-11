@@ -8,14 +8,7 @@ using GuitarConfigurator.NetCore.ViewModels;
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public class MouseButton : OutputButton
 {
-    private static List<MouseButtonType> _order = new()
-    {
-        MouseButtonType.Left,
-        MouseButtonType.Right,
-        MouseButtonType.Middle
-    };
-
-    public MouseButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce, MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, type.ToString())
+    public MouseButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce, MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, EnumToStringConverter.Convert(type))
     {
         Type = type;
     }

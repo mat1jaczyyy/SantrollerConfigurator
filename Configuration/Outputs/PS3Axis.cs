@@ -13,7 +13,7 @@ public class PS3Axis : OutputAxis
     public PS3Axis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
         int deadZone, Ps3AxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
-        type.ToString(), true)
+        EnumToStringConverter.Convert(type), true)
     {
         Type = type;
     }

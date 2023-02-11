@@ -14,7 +14,7 @@ public class DjButton : OutputButton
     public readonly DjInputType Type;
 
     public DjButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce,
-        DjInputType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, type.ToString())
+        DjInputType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, EnumToStringConverter.Convert(type))
     {
         Type = type;
     }

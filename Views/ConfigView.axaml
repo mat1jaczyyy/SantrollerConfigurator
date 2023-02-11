@@ -34,6 +34,7 @@
                         <Binding Path="$parent[UserControl].DataContext"></Binding>
                         <Binding Path="$parent[ComboBox].SelectedItem"></Binding>
                         <Binding Path="$parent[ComboBox].DataContext"></Binding>
+                        <Binding Path="$parent"></Binding>
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
@@ -979,7 +980,7 @@
                                       Items="{Binding EmulationTypes}">
                             </ComboBox>
                         </StackPanel>
-                        <StackPanel IsVisible="{Binding }">
+                        <StackPanel IsVisible="{Binding IsController}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type"
                                        TextAlignment="Center" />
                             <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
@@ -1038,7 +1039,7 @@
                             </ComboBox>
 
                         </StackPanel>
-                        <Button x:CompileBindings="False" Command="{Binding AddOutput}" HorizontalAlignment="Stretch"
+                        <Button Command="{Binding AddOutput}" HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Add Binding
                         </Button>
@@ -1046,13 +1047,17 @@
                                 HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Bind All
                         </Button>
-                        <Button x:CompileBindings="False" Command="{Binding ClearOutputsWithConfirmation}"
+                        <Button Command="{Binding ResetWithConfirmation}"
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
-                            Clear
+                            Load Defaults
                         </Button>
-                        <Button x:CompileBindings="False" Command="{Binding ResetWithConfirmation}"
+                        <Button Command="{Binding ExpandAll}"
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
-                            Reset
+                            Expand All
+                        </Button>
+                        <Button Command="{Binding CollapseAll}"
+                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                            Collapse All
                         </Button>
                     </StackPanel>
                 </ScrollViewer>
@@ -1093,19 +1098,13 @@
                                             <DataTemplate DataType="output:Output">
                                                 <Panel>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Image ToolTip.Tip="{Binding LocalisedName}"
-                                                               IsVisible="{Binding IsController}" Width="75"
+                                                        <Image Width="75"
                                                                Source="{Binding Image}"
                                                                Opacity="{Binding ImageOpacity}">
                                                         </Image>
                                                         <Label VerticalAlignment="Center"
                                                                VerticalContentAlignment="Center"
-                                                               Content="{Binding LocalisedName}" IsVisible="{Binding IsController}" Width="225">
-                                                        </Label>
-                                                        <Label VerticalAlignment="Center"
-                                                               VerticalContentAlignment="Center"
-                                                               IsVisible="{Binding IsKeyboard}"
-                                                               Content="{Binding Name}">
+                                                               Content="{Binding LocalisedName}">
                                                         </Label>
                                                     </StackPanel>
                                                     <ContentControl Content="{Binding}" HorizontalAlignment="Center"
@@ -1129,7 +1128,7 @@
                                             </DataTemplate>
                                         </Expander.HeaderTemplate>
                                         <StackPanel>
-                                            
+
                                             <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
                                                 <Label VerticalAlignment="Center"
                                                        VerticalContentAlignment="Center"
@@ -1138,7 +1137,8 @@
                                                 </Label>
                                                 <ComboBox VerticalAlignment="Center"
                                                           SelectedItem="{Binding KeyOrMouse}"
-                                                          Items="{Binding KeyOrMouseInputs}">
+                                                          Items="{Binding KeyOrMouseInputs}"
+                                                          ItemTemplate="{StaticResource EnumToStringTemplate}">
                                                 </ComboBox>
                                                 <Button Command="{Binding AssignByKeyOrAxis}"
                                                         IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
@@ -1160,7 +1160,8 @@
                                                 </Label>
                                                 <ComboBox VerticalAlignment="Center"
                                                           SelectedItem="{Binding SelectedInputType}"
-                                                          Items="{Binding InputTypes}">
+                                                          Items="{Binding InputTypes}"
+                                                          ItemTemplate="{StaticResource EnumToStringTemplate}">
                                                 </ComboBox>
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal">
@@ -1186,27 +1187,32 @@
                                                 <ComboBox VerticalAlignment="Center"
                                                           IsVisible="{Binding IsWii}"
                                                           SelectedItem="{Binding WiiInputType}"
-                                                          Items="{Binding WiiInputTypes}">
+                                                          Items="{Binding WiiInputTypes}"
+                                                          ItemTemplate="{StaticResource EnumToStringTemplate}">
                                                 </ComboBox>
                                                 <ComboBox VerticalAlignment="Center"
                                                           IsVisible="{Binding IsDj}"
                                                           SelectedItem="{Binding DjInputType}"
-                                                          Items="{Binding DjInputTypes}">
+                                                          Items="{Binding DjInputTypes}"
+                                                          ItemTemplate="{StaticResource EnumToStringTemplate}">
                                                 </ComboBox>
                                                 <ComboBox VerticalAlignment="Center"
                                                           IsVisible="{Binding IsPs2}"
                                                           SelectedItem="{Binding Ps2InputType}"
-                                                          Items="{Binding Ps2InputTypes}">
+                                                          Items="{Binding Ps2InputTypes}"
+                                                          ItemTemplate="{StaticResource EnumToStringTemplate}">
                                                 </ComboBox>
                                                 <ComboBox VerticalAlignment="Center"
                                                           IsVisible="{Binding IsGh5}"
                                                           SelectedItem="{Binding Gh5NeckInputType}"
-                                                          Items="{Binding Gh5NeckInputTypes}">
+                                                          Items="{Binding Gh5NeckInputTypes}"
+                                                          ItemTemplate="{StaticResource EnumToStringTemplate}">
                                                 </ComboBox>
                                                 <ComboBox VerticalAlignment="Center"
                                                           IsVisible="{Binding IsWt}"
                                                           SelectedItem="{Binding GhWtInputType}"
-                                                          Items="{Binding GhWtInputTypes}">
+                                                          Items="{Binding GhWtInputTypes}"
+                                                          ItemTemplate="{StaticResource EnumToStringTemplate}">
                                                 </ComboBox>
                                             </StackPanel>
                                             <ContentControl ContentTemplate="{StaticResource OutputTemplate}"
@@ -1259,14 +1265,17 @@
                                                 <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
                                                     <ComboBox VerticalAlignment="Center"
                                                               SelectedItem="{Binding MouseAxisType}"
-                                                              Items="{Binding MouseAxisTypes}">
+                                                              Items="{Binding MouseAxisTypes}"
+                                                              ItemTemplate="{StaticResource ControllerEnumTemplate}">
                                                     </ComboBox>
                                                     <ComboBox VerticalAlignment="Center"
                                                               SelectedItem="{Binding MouseButtonType}"
-                                                              Items="{Binding MouseButtonTypes}">
+                                                              Items="{Binding MouseButtonTypes}"
+                                                              ItemTemplate="{StaticResource ControllerEnumTemplate}">
                                                     </ComboBox>
                                                     <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Key}"
-                                                              Items="{Binding Keys}">
+                                                              Items="{Binding Keys}"
+                                                              ItemTemplate="{StaticResource ControllerEnumTemplate}">
                                                     </ComboBox>
                                                 </StackPanel>
                                             </StackPanel>

@@ -165,7 +165,7 @@ public abstract class Output : ReactiveObject, IDisposable
 
         if (newOutput == null) return;
         newOutput.Expanded = Expanded;
-        Model.Bindings.Insert(Model.Bindings.IndexOf(this),newOutput);
+        Model.Bindings.Insert(Model.Bindings.IndexOf(this), newOutput);
         Model.RemoveOutput(this);
     }
 
@@ -192,11 +192,11 @@ public abstract class Output : ReactiveObject, IDisposable
     public IEnumerable<Gh5NeckInputType> Gh5NeckInputTypes => Enum.GetValues<Gh5NeckInputType>();
 
     public IEnumerable<object> KeyOrMouseInputs => Enum.GetValues<MouseButtonType>().Cast<object>()
-        .Concat(Enum.GetValues<MouseAxisType>().Cast<object>()).Concat(KeyboardButton.Keys.Cast<object>());
+        .Concat(Enum.GetValues<MouseAxisType>().Cast<object>()).Concat(KeyboardButton.Keys.Keys.Cast<object>());
 
     public IEnumerable<Ps2InputType> Ps2InputTypes => Enum.GetValues<Ps2InputType>();
 
-    public IEnumerable<WiiInputType> WiiInputTypes => Enum.GetValues<WiiInputType>();
+    public IEnumerable<WiiInputType> WiiInputTypes => Enum.GetValues<WiiInputType>().OrderBy(s => EnumToStringConverter.Convert(s));
 
     public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
 
@@ -492,22 +492,35 @@ public abstract class Output : ReactiveObject, IDisposable
     {
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         string? bitmap = null;
-        if (this is EmptyOutput)
+        switch (this)
         {
-            bitmap = "Generic.png";
-        }
-        else if (IsCombined)
-        {
-            bitmap = $"Combined/{Name}.png";
-        }
-        else
-        {
-            bitmap = type switch
+            case EmptyOutput:
+                bitmap = "Generic.png";
+                break;
+            case MouseAxis or MouseButton:
+                bitmap = "Mouse.png";
+                break;
+            case KeyboardButton:
+                bitmap = "Keyboard.png";
+                break;
+            default:
             {
-                DeviceControllerType.Guitar => $"GH/{Name}.png",
-                DeviceControllerType.Gamepad => $"Others/Xbox360/360_{Name}.png",
-                _ => bitmap
-            };
+                if (IsCombined)
+                {
+                    bitmap = $"Combined/{Name}.png";
+                }
+                else
+                {
+                    bitmap = type switch
+                    {
+                        DeviceControllerType.Guitar => $"GH/{Name}.png",
+                        DeviceControllerType.Gamepad => $"Others/Xbox360/360_{Name}.png",
+                        _ => bitmap
+                    };
+                }
+
+                break;
+            }
         }
 
         var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
