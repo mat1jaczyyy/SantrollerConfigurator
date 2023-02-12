@@ -305,7 +305,7 @@ public abstract class OutputAxis : Output
 
 
     public bool Trigger { get; }
-    public abstract string GenerateOutput(DeviceEmulationMode mode);
+    public abstract string GenerateOutput(ConfigField mode);
     public override bool IsCombined => false;
     public override bool IsStrum => false;
     private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.None;
@@ -334,7 +334,7 @@ public abstract class OutputAxis : Output
             _ => null
         };
     }
-    protected string GenerateAssignment(DeviceEmulationMode mode, bool forceAccel, bool forceTrigger, bool whammy)
+    protected string GenerateAssignment(ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
     {
         switch (Input)
         {
@@ -355,36 +355,36 @@ public abstract class OutputAxis : Output
 
         switch (mode)
         {
-            case DeviceEmulationMode.XboxOne when whammy:
+            case ConfigField.XboxOne when whammy:
                 function = "handle_calibration_xbox_whammy";
                 break;
-            case DeviceEmulationMode.XboxOne when trigger:
+            case ConfigField.XboxOne when trigger:
                 function = "handle_calibration_xbox_one_trigger";
                 break;
-            case DeviceEmulationMode.XboxOne:
+            case ConfigField.XboxOne:
                 normal = true;
                 function = "handle_calibration_xbox";
                 break;
-            case DeviceEmulationMode.Xbox360 when whammy:
+            case ConfigField.Xbox360 when whammy:
                 function = "handle_calibration_xbox_whammy";
                 break;
-            case DeviceEmulationMode.Xbox360 when trigger:
+            case ConfigField.Xbox360 when trigger:
                 function = "handle_calibration_ps3_360_trigger";
                 break;
-            case DeviceEmulationMode.Xbox360:
+            case ConfigField.Xbox360:
                 normal = true;
                 function = "handle_calibration_xbox";
                 break;
-            case DeviceEmulationMode.Ps3 when whammy:
+            case ConfigField.Ps3 when whammy:
                 function = "handle_calibration_ps3_whammy";
                 break;
-            case DeviceEmulationMode.Ps3 when accel:
+            case ConfigField.Ps3 when accel:
                 function = "handle_calibration_ps3_accel";
                 break;
-            case DeviceEmulationMode.Ps3 when trigger:
+            case ConfigField.Ps3 when trigger:
                 function = "handle_calibration_ps3_360_trigger";
                 break;
-            case DeviceEmulationMode.Ps3:
+            case ConfigField.Ps3:
                 normal = true;
                 function = "handle_calibration_ps3";
                 break;
@@ -437,27 +437,27 @@ public abstract class OutputAxis : Output
             : $"{function}({generated}, {min}, {mulInt}, {DeadZone})";
     }
 
-    protected string CalculateLeds(DeviceEmulationMode mode)
+    protected string CalculateLeds(ConfigField mode)
     {
         var led = "";
         if (!AreLedsEnabled) return led;
         foreach (var index in LedIndices)
         {
-            var ledRead = mode == DeviceEmulationMode.Xbox360
+            var ledRead = mode == ConfigField.Xbox360
                 ? $"{GenerateOutput(mode)} << 8"
                 : GenerateOutput(mode);
-            led += $@"if (!ledState[{index}].select) {{
-                        {string.Join("", Model.LedType.GetColors(LedOn).Zip(Model.LedType.GetColors(LedOff), new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({ledRead})) >> 8));"))}
+            led += $@"if (!ledState[{index-1}].select) {{
+                        {Model.LedType.GetLedAssignment(LedOn, LedOff, ledRead, index)}
                     }}";
         }
 
         return led;
     }
 
-    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
-        if (mode == DeviceEmulationMode.Shared) return "";
+        if (mode is ConfigField.Shared or ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse) return "";
         var led = Input is FixedInput ? "" : CalculateLeds(mode);
         return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)}; {led}";
     }

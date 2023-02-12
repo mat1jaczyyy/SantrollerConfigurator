@@ -24,8 +24,8 @@ public class SerializedPs2CombinedOutput : SerializedOutput
     [ProtoMember(9)] public List<SerializedOutput> Outputs { get; }
 
     [ProtoMember(10)] public byte[] Enabled { get; }
-    public override uint LedOn => Colors.Transparent.ToUint32();
-    public override uint LedOff => Colors.Transparent.ToUint32();
+    public override uint LedOn => Colors.Black.ToUint32();
+    public override uint LedOff => Colors.Black.ToUint32();
     public override byte[] LedIndex => Array.Empty<byte>();
 
     public SerializedPs2CombinedOutput(int miso, int mosi, int sck, int att, int ack, List<Output> outputs)

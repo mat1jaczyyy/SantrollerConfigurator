@@ -29,7 +29,7 @@ public class MacroInput : Input
     }
 
 
-    public override string Generate(DeviceEmulationMode mode)
+    public override string Generate(ConfigField mode)
     {
         return $"{Child1.Generate(mode)} && {Child2.Generate(mode)}";
     }
@@ -66,7 +66,7 @@ public class MacroInput : Input
     }
 
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
-        DeviceEmulationMode mode)
+        ConfigField mode)
     {
         throw new InvalidOperationException("Never call GenerateAll on MacroInput, call it on its children");
     }

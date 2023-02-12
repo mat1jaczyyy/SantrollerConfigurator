@@ -29,43 +29,50 @@ public class GuitarAxis : OutputAxis
     public override bool IsMidi => false;
     public override bool Valid => true;
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
         return GetReportField(Type);
     }
 
-    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
-        if (mode == DeviceEmulationMode.Shared) return "";
-        // Xb1 is RB only, so no slider
-        if (mode == DeviceEmulationMode.XboxOne && Type == GuitarAxisType.Slider) return "";
-        var led = Input is FixedInput ? "" : CalculateLeds(mode);
-
         switch (mode)
         {
-            // PS3 GH expects tilt on the accel byte, so force accelerometer values here
-            // On pc, we use a standard axis because that works better in games like clone hero
-            case DeviceEmulationMode.Ps3 when Model is {DeviceType: DeviceControllerType.LiveGuitar} && Type == GuitarAxisType.Tilt:
-            case DeviceEmulationMode.Ps3 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.GuitarHero} && Type == GuitarAxisType.Tilt:
-                return $@"if (consoleType == PS3) {{
+            case ConfigField.Shared or ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse:
+            // Xb1 is RB only, so no slider
+            case ConfigField.XboxOne when Type == GuitarAxisType.Slider:
+                return "";
+            default:
+            {
+                var led = Input is FixedInput ? "" : CalculateLeds(mode);
+
+                switch (mode)
+                {
+                    // PS3 GH expects tilt on the accel byte, so force accelerometer values here
+                    // On pc, we use a standard axis because that works better in games like clone hero
+                    case ConfigField.Ps3 when Model is {DeviceType: DeviceControllerType.LiveGuitar} && Type == GuitarAxisType.Tilt:
+                    case ConfigField.Ps3 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.GuitarHero} && Type == GuitarAxisType.Tilt:
+                        return $@"if (consoleType == PS3) {{
                          {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
                       }} else {{
                          report->tilt_pc = -{GenerateAssignment(mode, false, false, false)};
                       }} {led}";
-            // PS3 RB expects tilt as a digital bit, so map that here
-            // On pc, we use a standard axis because that works better in games like clone hero
-            case DeviceEmulationMode.Ps3 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} && Type == GuitarAxisType.Tilt:
-                return $@"if (consoleType == PS3) {{
+                    // PS3 RB expects tilt as a digital bit, so map that here
+                    // On pc, we use a standard axis because that works better in games like clone hero
+                    case ConfigField.Ps3 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} && Type == GuitarAxisType.Tilt:
+                        return $@"if (consoleType == PS3) {{
                          {GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)} == 0xFF;
                       }} else {{
                          report->tilt_pc = -{GenerateAssignment(mode, false, false, false)};
                       }} {led}";
-            // Xbox 360 Pickup Selector is actually on one of the triggers.
-            case DeviceEmulationMode.Xbox360 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} && Type == GuitarAxisType.Pickup:
-                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)}; {led}";
-            default:
-                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)}; {led}";
+                    // Xbox 360 Pickup Selector is actually on one of the triggers.
+                    case ConfigField.Xbox360 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} && Type == GuitarAxisType.Pickup:
+                        return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)}; {led}";
+                    default:
+                        return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)}; {led}";
+                }
+            }
         }
     }
 
@@ -87,6 +94,32 @@ public class GuitarAxis : OutputAxis
             GuitarAxisType.Whammy => "Push the whammy all the way in",
             _ => ""
         };
+    }
+    
+    public override string LedOnLabel
+    {
+        get
+        {
+            return Type switch
+            {
+                GuitarAxisType.Tilt => "Highest Tilt LED Colour",
+                GuitarAxisType.Whammy => "Whammy Pressed LED Colour",
+                _ => ""
+            };
+        }
+    }
+
+    public override string LedOffLabel
+    {
+        get
+        {
+            return Type switch
+            {
+                GuitarAxisType.Tilt => "Lowest Tilt LED Colour",
+                GuitarAxisType.Whammy => "Whammy Released LED Colour",
+                _ => ""
+            };
+        }
     }
 
     protected override bool SupportsCalibration()

@@ -17,8 +17,8 @@ using Avalonia.Platform;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.DJ;
+using GuitarConfigurator.NetCore.Configuration.Leds;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
-using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -193,7 +193,7 @@ public abstract class Output : ReactiveObject, IDisposable
 
     public IEnumerable<object> KeyOrMouseInputs => Enum.GetValues<MouseButtonType>().Cast<object>()
         .Concat(Enum.GetValues<MouseAxisType>().Cast<object>()).Concat(KeyboardButton.Keys.Keys.Cast<object>());
-
+    
     public IEnumerable<Ps2InputType> Ps2InputTypes => Enum.GetValues<Ps2InputType>();
 
     public IEnumerable<WiiInputType> WiiInputTypes => Enum.GetValues<WiiInputType>().OrderBy(s => EnumToStringConverter.Convert(s));
@@ -301,12 +301,8 @@ public abstract class Output : ReactiveObject, IDisposable
         Outputs.Add(this);
         AnalogOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
         DigitalOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
-        _ledOnLabel = this.WhenAnyValue(x => x.Input!.IsAnalog)
-            .Select(s => s ? "Highest LED Colour" : "Pressed LED Colour").ToProperty(this, x => x.LedOnLabel);
-        _ledOffLabel = this.WhenAnyValue(x => x.Input!.IsAnalog)
-            .Select(s => s ? "Lowest LED Colour" : "Released LED Colour").ToProperty(this, x => x.LedOffLabel);
     }
-
+    
     void LedSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
     {
     }
@@ -542,7 +538,7 @@ public abstract class Output : ReactiveObject, IDisposable
         }
     }
 
-    public abstract string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra);
+    public abstract string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra);
 
     public SourceList<Output> Outputs { get; }
 
@@ -566,6 +562,7 @@ public abstract class Output : ReactiveObject, IDisposable
     }
 
     public abstract bool IsKeyboard { get; }
+    public bool IsLed => this is Led;
     public abstract bool IsController { get; }
 
     public bool ChildOfCombined => Model.IsCombinedChild(this);
@@ -613,12 +610,12 @@ public abstract class Output : ReactiveObject, IDisposable
         }
     }
 
-    private ObservableAsPropertyHelper<string> _ledOnLabel;
 
-    public string LedOnLabel => _ledOnLabel.Value;
-    private ObservableAsPropertyHelper<string> _ledOffLabel;
+    public abstract string LedOnLabel { get; }
 
-    public string LedOffLabel => _ledOffLabel.Value;
+    public abstract string LedOffLabel { get; }
+
+    public virtual bool SupportsLedOff => true;
 
     private ObservableAsPropertyHelper<double> _combinedOpacity;
 

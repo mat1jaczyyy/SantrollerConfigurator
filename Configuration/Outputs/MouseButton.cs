@@ -24,9 +24,9 @@ public class MouseButton : OutputButton
 
     public override bool Valid => true;
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
-        if (mode != DeviceEmulationMode.Mouse) return "";
+        if (mode != ConfigField.Mouse) return "";
         return GetReportField(Type);
     }
 

@@ -26,9 +26,9 @@ public class PS3Axis : OutputAxis
     public Ps3AxisType Type { get; }
 
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
-        return mode == DeviceEmulationMode.Ps3 ? GetReportField(Type) : "" ;
+        return mode == ConfigField.Ps3 ? GetReportField(Type) : "" ;
     }
 
     public override bool IsCombined => false;
@@ -54,9 +54,9 @@ public class PS3Axis : OutputAxis
         return true;
     }
 
-    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        return mode != DeviceEmulationMode.Ps3 ? "" : base.Generate(mode, debounceIndex, combined, extra);
+        return mode != ConfigField.Ps3 ? "" : base.Generate(mode, debounceIndex, combined, extra);
     }
 
     public override SerializedOutput Serialize()
@@ -64,6 +64,8 @@ public class PS3Axis : OutputAxis
         return new SerializedPS3Axis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
             DeadZone);
     }
+    public override string LedOnLabel => "Pressed LED Colour";
+    public override string LedOffLabel => "Released LED Colour";
 
     public override void UpdateBindings()
     {

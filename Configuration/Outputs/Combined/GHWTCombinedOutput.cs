@@ -74,8 +74,8 @@ public class GhwtCombinedOutput : CombinedOutput
         {
             Outputs.Add(new ControllerButton(Model,
                 new GhWtTapInput(pair.Key, Model, _microcontroller,
-                    combined: true), Colors.Transparent,
-                Colors.Transparent, Array.Empty<byte>(), 5, pair.Value));
+                    combined: true), Colors.Black,
+                Colors.Black, Array.Empty<byte>(), 5, pair.Value));
         }
 
         UpdateBindings();
@@ -100,8 +100,8 @@ public class GhwtCombinedOutput : CombinedOutput
                 Outputs.Add(new GuitarAxis(Model,
                     new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
                         combined: true),
-                    Colors.Transparent,
-                    Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                     GuitarAxisType.Slider));
             }
         }
@@ -113,8 +113,8 @@ public class GhwtCombinedOutput : CombinedOutput
                 Outputs.Add(new ControllerAxis(Model,
                     new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
                         combined: true),
-                    Colors.Transparent,
-                    Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                     StandardAxisType.LeftStickX));
             }
         }

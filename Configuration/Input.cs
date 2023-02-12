@@ -29,7 +29,7 @@ public abstract class Input : ReactiveObject, IDisposable
     public Bitmap Image => GetImage();
 
     public abstract IReadOnlyList<string> RequiredDefines();
-    public abstract string Generate(DeviceEmulationMode mode);
+    public abstract string Generate(ConfigField mode);
 
     public abstract SerializedInput Serialise();
     private bool _analog;
@@ -70,7 +70,7 @@ public abstract class Input : ReactiveObject, IDisposable
         byte[] wiiControllerType);
 
     public abstract string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
-        DeviceEmulationMode mode);
+        ConfigField mode);
 
     public abstract void Dispose();
 

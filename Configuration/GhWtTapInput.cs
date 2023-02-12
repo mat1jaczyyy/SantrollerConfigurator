@@ -59,7 +59,7 @@ public class GhWtTapInput : InputWithPin
             type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public override string Generate(DeviceEmulationMode mode)
+    public override string Generate(ConfigField mode)
     {
         if (Input == GhWtInputType.TapBar)
         {
@@ -94,7 +94,7 @@ public class GhWtTapInput : InputWithPin
     }
 
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
-        DeviceEmulationMode mode)
+        ConfigField mode)
     {
         return string.Join(";\n", bindings.Select(binding => binding.Item2));
     }

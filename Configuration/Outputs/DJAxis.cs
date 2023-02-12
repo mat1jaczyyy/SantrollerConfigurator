@@ -30,23 +30,23 @@ public class DjAxis : OutputAxis
     public override bool IsMidi => false;
     public override bool Valid => true;
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
         return GetReportField(Type);
     }
 
-    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
+        if (mode is ConfigField.Shared or ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse) return "";
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
-        if (mode == DeviceEmulationMode.Shared) return "";
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
-        var accelerometer = mode == DeviceEmulationMode.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
+        var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
         var gen = GenerateAssignment(mode, accelerometer, false, false);
         if (Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity)
         {
             gen = $"({Input.Generate(mode)} * {Max})";
-            gen = mode == DeviceEmulationMode.Xbox360 ? gen : $"{gen} + {sbyte.MaxValue}";
+            gen = mode == ConfigField.Xbox360 ? gen : $"{gen} + {sbyte.MaxValue}";
         }
 
         var led = Input is FixedInput ? "" : CalculateLeds(mode);
@@ -75,6 +75,36 @@ public class DjAxis : OutputAxis
             DjAxisType.RightTableVelocity => "Spin the right table the fastest you can to the right",
             _ => ""
         };
+    }
+
+    public override string LedOnLabel
+    {
+        get
+        {
+            return Type switch
+            {
+                DjAxisType.Crossfader => "Rightmost LED Colour",
+                DjAxisType.EffectsKnob => "Rightmost LED Colour",
+                DjAxisType.LeftTableVelocity => "Positive Spin Velocity Colour",
+                DjAxisType.RightTableVelocity => "Positive Spin Velocity Colour",
+                _ => ""
+            };
+        }
+    }
+
+    public override string LedOffLabel
+    {
+        get
+        {
+            return Type switch
+            {
+                DjAxisType.Crossfader => "Leftmost LED Colour",
+                DjAxisType.EffectsKnob => "Leftmost LED Colour",
+                DjAxisType.LeftTableVelocity => "Negative Spin Velocity Colour",
+                DjAxisType.RightTableVelocity => "Negative Spin Velocity Colour",
+                _ => ""
+            };
+        }
     }
 
     public bool IsVelocity => Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity;

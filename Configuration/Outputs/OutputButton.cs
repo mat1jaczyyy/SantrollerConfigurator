@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -18,7 +19,7 @@ public abstract class OutputButton : Output
 
     public byte Debounce { get; set; }
 
-    public abstract string GenerateOutput(DeviceEmulationMode mode);
+    public abstract string GenerateOutput(ConfigField mode);
 
 
     public override bool IsCombined => false;
@@ -32,14 +33,14 @@ public abstract class OutputButton : Output
     /// <param name="extra">Used to provide extra statements that are called if the button is pressed</param>
     /// <returns></returns>
     /// <exception cref="IncompleteConfigurationException"></exception>
-    public override string Generate(DeviceEmulationMode mode,  List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (Input==null) throw new IncompleteConfigurationException("Missing input!");
-       
+        if (Input == null) throw new IncompleteConfigurationException("Missing input!");
+
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
-        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce+1};");
-        if (mode != DeviceEmulationMode.Shared)
+        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce + 1};");
+        if (mode != ConfigField.Shared)
         {
             var outputVar = GenerateOutput(mode);
             if (!outputVar.Any()) return "";
@@ -47,12 +48,13 @@ public abstract class OutputButton : Output
             if (AreLedsEnabled && LedIndices.Any())
             {
                 leds += $@"if (!{ifStatement}) {{
-                        {LedIndices.Aggregate("", (s, index) => s + @$"if (ledState[{index}].select == 1) {{
-                            ledState[{index}].select = 0; 
-                            {string.Join("\n", Model.LedType.GetColors(LedOff).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))};
+                        {LedIndices.Aggregate("", (s, index) => s + @$"if (ledState[{index - 1}].select == 1) {{
+                            ledState[{index - 1}].select = 0; 
+                            {Model.LedType.GetLedAssignment(LedOff, index)}
                         }}")}
                     }}";
             }
+
             return
                 @$"if ({ifStatement}) {{ 
                     {decrement} 
@@ -68,14 +70,14 @@ public abstract class OutputButton : Output
             foreach (var index in LedIndices)
             {
                 led += $@"
-                if (ledState[{index}].select == 0 && {ifStatement}) {{
-                    ledState[{index}].select = 1;
-                    {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))}
+                if (ledState[{index - 1}].select == 0 && {ifStatement}) {{
+                    ledState[{index - 1}].select = 1;
+                    {Model.LedType.GetLedAssignment(LedOn, index)}
                 }}";
                 led2 += $@"
-                if (!{ifStatement} && ledState[{index}].select == 1) {{
-                    ledState[{index}].select = 1;
-                    {string.Join("\n", Model.LedType.GetColors(LedOn).Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index}].{b.Second} = {b.First};"))}
+                if (!{ifStatement} && ledState[{index - 1}].select == 1) {{
+                    ledState[{index - 1}].select = 1;
+                    {Model.LedType.GetLedAssignment(LedOn, index)}
                 }}
             ";
             }
@@ -90,6 +92,8 @@ public abstract class OutputButton : Output
 
         return $"if (({Input.Generate(mode)})) {{ {led2}; {reset}; {extra}; }} {led}";
     }
+    public override string LedOnLabel => "Pressed LED Colour";
+    public override string LedOffLabel => "Released LED Colour";
 
     public override void UpdateBindings()
     {

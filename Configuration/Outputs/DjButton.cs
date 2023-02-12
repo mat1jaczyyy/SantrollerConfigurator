@@ -19,10 +19,12 @@ public class DjButton : OutputButton
         Type = type;
     }
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
         return GetReportField(Type);
     }
+    public override string LedOnLabel => "Pressed LED Colour";
+    public override string LedOffLabel => "Released LED Colour";
 
     public override bool IsKeyboard => false;
     public override bool IsController => true;
@@ -32,7 +34,7 @@ public class DjButton : OutputButton
 
     public override bool Valid => true;
 
-    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
         // Turntables also hit the standard buttons when you push each button
         switch (Type)

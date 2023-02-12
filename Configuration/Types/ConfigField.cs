@@ -1,6 +1,6 @@
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
-public enum DeviceEmulationMode
+public enum ConfigField
 {
     Shared,
     Xbox360,
@@ -8,5 +8,10 @@ public enum DeviceEmulationMode
     Ps3,
     Consumer,
     Keyboard,
-    Mouse
+    Mouse,
+    AuthLed,
+    PlayerLed,
+    RumbleLed,
+    KeyboardLed,
+    StrobeLed
 }

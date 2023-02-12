@@ -85,18 +85,15 @@ public class DrumAxis : OutputAxis
     public override bool Valid => true;
 
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
         return AxisMappings.ContainsKey(Type) ? AxisMappings[Type] : "";
     }
 
 
-    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode == DeviceEmulationMode.Shared || string.IsNullOrEmpty(GenerateOutput(mode)))
-        {
-            return "";
-        }
+        if (string.IsNullOrEmpty(GenerateOutput(mode)) || mode is ConfigField.Shared or ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse) return "";
 
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
@@ -106,7 +103,7 @@ public class DrumAxis : OutputAxis
         var outputButtons = "";
         switch (mode)
         {
-            case DeviceEmulationMode.Xbox360:
+            case ConfigField.Xbox360:
             {
                 padFlag = Xbox360PadFlag;
                 cymbalFlag = Xbox360CymbalFlag;
@@ -117,7 +114,7 @@ public class DrumAxis : OutputAxis
 
                 break;
             }
-            case DeviceEmulationMode.XboxOne:
+            case ConfigField.XboxOne:
             {
                 if (ButtonsXboxOne.ContainsKey(Type))
                 {
@@ -126,7 +123,7 @@ public class DrumAxis : OutputAxis
 
                 break;
             }
-            case DeviceEmulationMode.Ps3:
+            case ConfigField.Ps3:
             {
                 if (ButtonsPs3.ContainsKey(Type))
                 {
@@ -137,7 +134,7 @@ public class DrumAxis : OutputAxis
             }
         }
 
-        if (Model.RhythmType == RhythmType.RockBand && mode != DeviceEmulationMode.XboxOne)
+        if (Model.RhythmType == RhythmType.RockBand && mode != ConfigField.XboxOne)
         {
             switch (Type)
             {
@@ -164,13 +161,13 @@ public class DrumAxis : OutputAxis
         var assignedVal = "val_real";
         var valType = "uint16_t";
         // Xbox one uses 4 bit velocities
-        if (mode == DeviceEmulationMode.XboxOne)
+        if (mode == ConfigField.XboxOne)
         {
             valType = "uint8_t";
             assignedVal = $"val_real >> 12";
         }
         // Xbox 360 GH and PS3 use uint16_t velocities
-        else if (Model.RhythmType == RhythmType.GuitarHero || mode != DeviceEmulationMode.Xbox360)
+        else if (Model.RhythmType == RhythmType.GuitarHero || mode != ConfigField.Xbox360)
         {
             assignedVal = $"val_real >> 8";
         }
@@ -227,6 +224,9 @@ public class DrumAxis : OutputAxis
     {
         return "Hit the drum";
     }
+
+    public override string LedOnLabel => "Drum Hit LED Colour";
+    public override string LedOffLabel => "Drum not Hit LED Colour";
 
     public override bool IsKeyboard => false;
     public override bool IsController => true;

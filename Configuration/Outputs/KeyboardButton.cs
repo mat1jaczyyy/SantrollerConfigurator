@@ -158,12 +158,12 @@ public class KeyboardButton : OutputButton
     {
     }
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
         switch (IsMediaKey)
         {
-            case true when mode != DeviceEmulationMode.Consumer:
-            case false when mode != DeviceEmulationMode.Keyboard:
+            case true when mode != ConfigField.Consumer:
+            case false when mode != ConfigField.Keyboard:
                 return "";
             default:
             {

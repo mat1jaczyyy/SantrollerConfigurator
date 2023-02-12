@@ -241,7 +241,7 @@ public class Ps2Input : SpiInput
         IsAnalog = Input <= Ps2InputType.Dualshock2R2;
     }
 
-    public override string Generate(DeviceEmulationMode mode)
+    public override string Generate(ConfigField mode)
     {
         return Mappings[Input];
     }
@@ -408,7 +408,7 @@ public class Ps2Input : SpiInput
     }
 
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
-        DeviceEmulationMode mode)
+        ConfigField mode)
     {
         Dictionary<Ps2InputType, string> ds2Axis = new();
         Dictionary<Ps2ControllerType, List<string>> mappedBindings = new();

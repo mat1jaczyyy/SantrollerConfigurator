@@ -29,7 +29,7 @@ public class AnalogToDigital : Input
     }
 
 
-    public override string Generate(DeviceEmulationMode mode)
+    public override string Generate(ConfigField mode)
     {
         if (Child.IsUint)
         {
@@ -111,7 +111,7 @@ public class AnalogToDigital : Input
     }
 
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
-        DeviceEmulationMode mode)
+        ConfigField mode)
     {
         throw new InvalidOperationException("Never call GenerateAll on AnalogToDigital, call it on its children");
     }

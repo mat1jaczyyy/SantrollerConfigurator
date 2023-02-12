@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Avalonia.Media;
 
 namespace GuitarConfigurator.NetCore.Configuration.Types;
@@ -16,30 +17,30 @@ public enum LedType
 
 public static class LedTypeMethods
 {
-    public static byte[] GetColors(this LedType type, Color color)
+    public static byte[] GetLedBytes(this LedType type, Color color)
     {
-        switch (type)
+        return type switch
         {
-            case LedType.APA102_RGB:
-                return new[] {color.R, color.G, color.B};
-            case LedType.APA102_RBG:
-                return new[] {color.R, color.B, color.G};
-            case LedType.APA102_GRB:
-                return new[] {color.G, color.R, color.B};
-            case LedType.APA102_GBR:
-                return new[] {color.G, color.B, color.R};
-            case LedType.APA102_BRG:
-                return new[] {color.B, color.R, color.G};
-            case LedType.APA102_BGR:
-                return new[] {color.B, color.G, color.R};
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
+            LedType.APA102_RGB => new[] {color.R, color.G, color.B},
+            LedType.APA102_RBG => new[] {color.R, color.B, color.G},
+            LedType.APA102_GRB => new[] {color.G, color.R, color.B},
+            LedType.APA102_GBR => new[] {color.G, color.B, color.R},
+            LedType.APA102_BRG => new[] {color.B, color.R, color.G},
+            LedType.APA102_BGR => new[] {color.B, color.G, color.R},
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+    public static string GetLedAssignment(this LedType type, Color color, byte index)
+    {
+        var data = GetLedBytes(type, color);
+        return string.Join("\n",
+            data.Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index - 1}].{b.Second} = {b.First};"));
     }
 
-    public static int GetColorsAsInt(this LedType type, Color color)
+    public static string GetLedAssignment(this LedType type, Color on, Color off, string value, byte index)
     {
-        var bytes = GetColors(type, color);
-        return bytes[0] | bytes[1] << 8 | bytes[2] << 16;
-    } 
+        return string.Join("",
+            type.GetLedBytes(on).Zip(type.GetLedBytes(off), new[] {'r', 'g', 'b'}).Select(b =>
+                $"ledState[{index - 1}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({value})) >> 8));"));
+    }
 }

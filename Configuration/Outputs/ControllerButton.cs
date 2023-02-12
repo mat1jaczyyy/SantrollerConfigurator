@@ -30,8 +30,10 @@ public class ControllerButton : OutputButton
 
     public StandardButtonType Type { get; }
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
+        if (mode is ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse)
+            return "";
         return GetReportField(Type);
     }
 
@@ -44,6 +46,8 @@ public class ControllerButton : OutputButton
 
     private readonly ObservableAsPropertyHelper<bool> _valid;
     public override bool Valid => _valid.Value;
+    public override string LedOnLabel => "Pressed LED Colour";
+    public override string LedOffLabel => "Released LED Colour";
 
     public override SerializedOutput Serialize()
     {

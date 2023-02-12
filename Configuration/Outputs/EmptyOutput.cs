@@ -17,7 +17,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class EmptyOutput : Output
 {
-    public EmptyOutput(ConfigViewModel model) : base(model, null, Colors.Transparent, Colors.Transparent,
+    public EmptyOutput(ConfigViewModel model) : base(model, null, Colors.Black, Colors.Black,
         Array.Empty<byte>(), "Empty")
     {
         _isController = this.WhenAnyValue(x => x.Model.EmulationType)
@@ -130,52 +130,52 @@ public class EmptyOutput : Output
                     case StandardAxisType standardAxisType:
                         Model.Bindings.Add(new ControllerAxis(Model,
                             new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),
+                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
                             short.MinValue, short.MaxValue, 0,
                             standardAxisType));
                         break;
                     case StandardButtonType standardButtonType:
                         Model.Bindings.Add(new ControllerButton(Model,
-                            new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Transparent,
-                            Colors.Transparent, Array.Empty<byte>(), 5,
+                            new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Black,
+                            Colors.Black, Array.Empty<byte>(), 5,
                             standardButtonType));
                         break;
                     case RBButtonType standardButtonType:
                         Model.Bindings.Add(new RbButton(Model,
-                            new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Transparent,
-                            Colors.Transparent, Array.Empty<byte>(), 5,
+                            new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Black,
+                            Colors.Black, Array.Empty<byte>(), 5,
                             standardButtonType));
                         break;
                     case DrumAxisType drumAxisType:
                         Model.Bindings.Add(new DrumAxis(Model,
                             new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),
+                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
                             short.MinValue, short.MaxValue, 0,
                             1000, 10, drumAxisType));
                         break;
                     case Ps3AxisType ps3AxisType:
                         Model.Bindings.Add(new PS3Axis(Model,
                             new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),
+                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
                             short.MinValue, short.MaxValue, 0,
                             ps3AxisType));
                         break;
                     case GuitarAxisType guitarAxisType:
                         Model.Bindings.Add(new GuitarAxis(Model,
                             new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),
+                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
                             short.MinValue, short.MaxValue, 0, guitarAxisType));
                         break;
                     case DjAxisType djAxisType:
                         Model.Bindings.Add(new DjAxis(Model,
                             new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(),
+                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
                             short.MinValue, short.MaxValue, 0, djAxisType));
                         break;
                     case DjInputType djInputType:
                         Model.Bindings.Add(new DjButton(Model,
                             new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10,
+                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
                             djInputType));
                         break;
                 }
@@ -184,19 +184,19 @@ public class EmptyOutput : Output
             case EmulationType.KeyboardMouse:
                 if (MouseAxisType.HasValue)
                 {
-                    Model.Bindings.Add(new MouseAxis(Model, null, Colors.Transparent, Colors.Transparent,
+                    Model.Bindings.Add(new MouseAxis(Model, null, Colors.Black, Colors.Black,
                         Array.Empty<byte>(), 1, 0, 0,
                         MouseAxisType.Value));
                 }
                 else if (MouseButtonType.HasValue)
                 {
-                    Model.Bindings.Add(new MouseButton(Model, null, Colors.Transparent, Colors.Transparent,
+                    Model.Bindings.Add(new MouseButton(Model, null, Colors.Black, Colors.Black,
                         Array.Empty<byte>(), 5,
                         MouseButtonType.Value));
                 }
                 else if (Key.HasValue)
                 {
-                    Model.Bindings.Add(new KeyboardButton(Model, null, Colors.Transparent, Colors.Transparent,
+                    Model.Bindings.Add(new KeyboardButton(Model, null, Colors.Black, Colors.Black,
                         Array.Empty<byte>(), 5,
                         Key.Value));
                 }
@@ -209,6 +209,8 @@ public class EmptyOutput : Output
 
     public override string ErrorText => "Input is not bound!";
 
+    public override string LedOnLabel => "";
+    public override string LedOffLabel => "";
     public override void UpdateBindings()
     {
     }
@@ -221,7 +223,7 @@ public class EmptyOutput : Output
         throw new IncompleteConfigurationException(ErrorText);
     }
 
-    public override string Generate(DeviceEmulationMode mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
         throw new IncompleteConfigurationException("Unconfigured output");
     }

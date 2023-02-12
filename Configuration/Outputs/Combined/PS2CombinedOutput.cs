@@ -149,8 +149,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {
             Outputs.Add(new ControllerButton(Model,
                 new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
-                Colors.Transparent,
-                Colors.Transparent, Array.Empty<byte>(),
+                Colors.Black,
+                Colors.Black, Array.Empty<byte>(),
                 10,
                 pair.Value));
         }
@@ -159,31 +159,31 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             new AnalogToDigital(
                 new Ps2Input(Ps2InputType.NegConI, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
                 AnalogToDigitalType.Trigger, 128, Model),
-            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.A));
+            Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.A));
         Outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(
                 new Ps2Input(Ps2InputType.NegConIi, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
                 AnalogToDigitalType.Trigger, 128, Model),
-            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.X));
+            Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.X));
         Outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(
                 new Ps2Input(Ps2InputType.NegConL, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
                 AnalogToDigitalType.Trigger, 240, Model),
-            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 10, StandardButtonType.LeftShoulder));
+            Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.LeftShoulder));
 
         Outputs.Add(new ControllerAxis(Model,
             new DigitalToAnalog(
                 new Ps2Input(Ps2InputType.GuitarTilt, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
                     combined: true),
-                -32767, Model), Colors.Transparent,
-            Colors.Transparent, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
+                -32767, Model), Colors.Black,
+            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
             0, StandardAxisType.RightStickY));
         foreach (var pair in Axis)
         {
             Outputs.Add(new ControllerAxis(Model,
                 new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
-                Colors.Transparent,
-                Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
+                Colors.Black,
+                Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
         }
 
         UpdateBindings();
@@ -253,8 +253,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             {
                 Outputs.Add(new PS3Axis(Model,
                     new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
-                    Colors.Transparent,
-                    Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
             }
 
             return;

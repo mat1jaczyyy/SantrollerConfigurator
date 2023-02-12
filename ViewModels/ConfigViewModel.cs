@@ -16,6 +16,7 @@ using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.DJ;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
+using GuitarConfigurator.NetCore.Configuration.Leds;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
@@ -58,7 +59,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
 
-        public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>();
+        public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>().Where(type => Main.IsPico || type != EmulationType.Bluetooth);
 
         public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
         
@@ -118,6 +119,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
         {
             get => _fininalised;
             set => this.RaiseAndSetIfChanged(ref _fininalised, value);
+        }
+
+        public void AddLedBinding()
+        {
+            var first = Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((DeviceType, EmulationType))).First();
+            Bindings.Add(new Led(this, Colors.Black, Colors.Black, Array.Empty<byte>(), first));
         }
 
         public LedType LedType
@@ -259,32 +266,32 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     case StandardButtonType buttonType:
                         Bindings.Add(new ControllerButton(this,
                             new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
-                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, buttonType));
+                            Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType));
                         break;
                     case RBButtonType buttonType:
                         Bindings.Add(new RbButton(this,
                             new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
-                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, buttonType));
+                            Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType));
                         break;
                     case StandardAxisType axisType:
                         Bindings.Add(new ControllerAxis(this,
                             new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
                                 MicroController!),
-                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                            Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, axisType));
                         break;
                     case GuitarAxisType axisType:
                         Bindings.Add(new GuitarAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(),
                                 DevicePinMode.Analog, this,
                                 MicroController!),
-                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                            Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, axisType));
                         break;
                     case DrumAxisType axisType:
                         Bindings.Add(new DrumAxis(this,
                             new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
                                 MicroController!),
-                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                            Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, 64, 10, axisType));
                         break;
                     case DjAxisType axisType:
@@ -292,7 +299,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                         Bindings.Add(new DjAxis(this,
                             new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
                                 MicroController!),
-                            Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                            Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                             0, axisType));
                         break;
                 }
@@ -351,10 +358,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
                 .ToProperty(this, x => x.IsRhythm);
             _isController = this.WhenAnyValue(x => x.EmulationType)
-                .Select(x => x is EmulationType.Controller)
+                .Select(x => x is EmulationType.Controller or EmulationType.Bluetooth)
                 .ToProperty(this, x => x.IsController);
             _isKeyboard = this.WhenAnyValue(x => x.EmulationType)
-                .Select(x => x is EmulationType.KeyboardMouse)
+                .Select(x => x is EmulationType.KeyboardMouse or EmulationType.BluetoothKeyboardMouse)
                 .ToProperty(this, x => x.IsKeyboard);
             _isMidi = this.WhenAnyValue(x => x.EmulationType)
                 .Select(x => x is EmulationType.Midi)
@@ -467,7 +474,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     type is StandardAxisType.LeftStickX or StandardAxisType.LeftStickY) continue;
                 Bindings.Add(new ControllerAxis(this,
                     new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
-                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                    Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                     type));
             }
 
@@ -477,7 +484,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     null) continue;
                 Bindings.Add(new ControllerButton(this,
                     new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
-                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, type));
+                    Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type));
             }
 
             UpdateErrors();
@@ -515,30 +522,30 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             lines.Add($"#define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}");
 
-            lines.Add($"#define TICK_SHARED {GenerateTick(DeviceEmulationMode.Shared, true)}");
+            lines.Add($"#define TICK_SHARED {GenerateTick(ConfigField.Shared)}");
 
-            lines.Add($"#define TICK_PS3 {GenerateTick(DeviceEmulationMode.Ps3, false)}");
+            lines.Add($"#define TICK_PS3 {GenerateTick(ConfigField.Ps3)}");
 
-            lines.Add($"#define TICK_XINPUT {GenerateTick(DeviceEmulationMode.Xbox360, false)}");
+            lines.Add($"#define TICK_XINPUT {GenerateTick(ConfigField.Xbox360)}");
 
-            lines.Add($"#define TICK_XBOX_ONE {GenerateTick(DeviceEmulationMode.XboxOne, false)}");
+            lines.Add($"#define TICK_XBOX_ONE {GenerateTick(ConfigField.XboxOne)}");
 
-            var nkro_tick = GenerateTick(DeviceEmulationMode.Keyboard, false);
-            if (nkro_tick.Any())
+            var nkroTick = GenerateTick(ConfigField.Keyboard);
+            if (nkroTick.Any())
             {
-                lines.Add($"#define TICK_NKRO {nkro_tick}");
+                lines.Add($"#define TICK_NKRO {nkroTick}");
             }
 
-            var consumer_tick = GenerateTick(DeviceEmulationMode.Consumer, false);
-            if (consumer_tick.Any())
+            var consumerTick = GenerateTick(ConfigField.Consumer);
+            if (consumerTick.Any())
             {
-                lines.Add($"#define TICK_CONSUMER {consumer_tick}");
+                lines.Add($"#define TICK_CONSUMER {consumerTick}");
             }
 
-            var mouse_tick = GenerateTick(DeviceEmulationMode.Mouse, false);
-            if (mouse_tick.Any())
+            var mouseTick = GenerateTick(ConfigField.Mouse);
+            if (mouseTick.Any())
             {
-                lines.Add($"#define TICK_MOUSE {GenerateTick(DeviceEmulationMode.Mouse, false)}");
+                lines.Add($"#define TICK_MOUSE {GenerateTick(ConfigField.Mouse)}");
             }
 
             lines.Add(
@@ -556,12 +563,13 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 lines.Add($"#define TICK_LED {GenerateLedTick()}");
             }
 
-            //TODO: these, will need to generate if statements that fill the led array, depending on what the user is doing with things.
-            lines.Add($"#define HANDLE_AUTH_LED");
+            lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
 
-            lines.Add($"#define HANDLE_PLAYER_LED");
+            lines.Add($"#define HANDLE_PLAYER_LED {GenerateTick(ConfigField.PlayerLed)}");
 
-            lines.Add($"#define HANDLE_RUMBLE");
+            lines.Add($"#define HANDLE_RUMBLE {GenerateTick(ConfigField.RumbleLed)}");
+            
+            lines.Add($"define HANDLE_KEYBOARD_LED {GenerateTick(ConfigField.KeyboardLed)}");
 
             lines.Add($"#define CONSOLE_TYPE {((byte) EmulationType)}");
 
@@ -723,12 +731,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
             else if (IsKeyboard)
             {
                 Bindings.Add(new KeyboardButton(this, new DirectInput(0, DevicePinMode.PullUp, this, _microController!),
-                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 1, Key.Space));
+                    Colors.Black, Colors.Black, Array.Empty<byte>(), 1, Key.Space));
             }
             else if (IsMidi)
             {
                 Bindings.Add(new MidiOutput(this, new DirectInput(0, DevicePinMode.PullUp, this, _microController!),
-                    Colors.Transparent, Colors.Transparent, Array.Empty<byte>(), 0, 128, 0, MidiType.Note, 64, 0, 0,
+                    Colors.Black, Colors.Black, Array.Empty<byte>(), 0, 128, 0, MidiType.Note, 64, 0, 0,
                     1));
             }
 
@@ -754,10 +762,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 ret += "spi_transfer(APA102_SPI_PORT, 0xff);";
             }
 
-            return ret.Replace('\n', ' ');
+            return ret.Replace('\n', ' ') + GenerateTick(ConfigField.StrobeLed);
         }
 
-        private string GenerateTick(DeviceEmulationMode mode, bool shared)
+        private string GenerateTick(ConfigField mode)
         {
             if (_microController == null) return "";
             var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
@@ -834,7 +842,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                                     index = new List<int> {debounces[output.Name]};
                                     if (output.Input is MacroInput)
                                     {
-                                        if (shared)
+                                        if (mode == ConfigField.Shared)
                                         {
                                             output = output.Serialize().Generate(this, _microController);
                                             output.Input = input;
@@ -853,7 +861,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
                                 var generated = output.Generate(mode, index, combined, extra);
 
-                                if (output is OutputAxis axis && !shared)
+                                if (output is OutputAxis axis && mode != ConfigField.Shared)
                                 {
                                     generated = generated.Replace("{output}", axis.GenerateOutput(mode));
                                 }
@@ -861,10 +869,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
                                 return new Tuple<Input, string>(input, generated);
                             })
                             .Where(s => !string.IsNullOrEmpty(s.Item2))
-                            .ToList(), mode) + ";");
+                            .ToList(), mode));
                 });
             // Flick off intersecting outputs when multiple buttons are pressed
-            if (shared)
+            if (mode == ConfigField.Shared)
             {
                 foreach (var output in macros)
                 {
@@ -878,7 +886,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 }
             }
 
-            return ret.Replace('\n', ' ');
+            return ret.Replace('\n', ' ').Trim();
         }
 
         private int CalculateDebounceTicks()
@@ -905,7 +913,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 foreach (var (input, output) in groupedOutput)
                 {
-                    var generatedInput = input.Generate(DeviceEmulationMode.Xbox360);
+                    var generatedInput = input.Generate(ConfigField.Xbox360);
                     if (input == null) throw new IncompleteConfigurationException("Missing input!");
                     if (output is not OutputButton and not DrumAxis) continue;
 

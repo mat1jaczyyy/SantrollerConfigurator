@@ -38,7 +38,7 @@ public class DirectInput : InputWithPin
 
     public override bool IsUint => true;
 
-    public override string Generate(DeviceEmulationMode mode)
+    public override string Generate(ConfigField mode)
     {
         return IsAnalog
             ? Microcontroller.GenerateAnalogRead(PinConfig.Pin)
@@ -48,7 +48,7 @@ public class DirectInput : InputWithPin
     public override InputType? InputType => IsAnalog ? Types.InputType.AnalogPinInput : Types.InputType.DigitalPinInput;
 
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
-        DeviceEmulationMode mode)
+        ConfigField mode)
     {
         if (Microcontroller is not AvrController) return string.Join(";\n", bindings.Select(binding => binding.Item2));
         var replacements = new Dictionary<string, string>();

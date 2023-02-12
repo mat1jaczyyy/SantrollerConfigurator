@@ -36,7 +36,7 @@ public class ControllerAxis : OutputAxis
 
     public StandardAxisType Type { get; }
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
         return GetReportField(Type);
     }
@@ -58,6 +58,47 @@ public class ControllerAxis : OutputAxis
                 return "Release the trigger";
             default:
                 return "";
+        }
+    }
+    public override string LedOnLabel
+    {
+        get
+        {
+            switch (Type)
+            {
+                case StandardAxisType.LeftStickX:
+                case StandardAxisType.RightStickX:
+                    return "Right LED Colour";
+                case StandardAxisType.LeftStickY:
+                case StandardAxisType.RightStickY:
+                    return "Highest LED Colour";
+                case StandardAxisType.LeftTrigger:
+                case StandardAxisType.RightTrigger:
+                    return "Pressed LED Color";
+                default:
+                    return "";
+            }
+        }
+    }
+
+    public override string LedOffLabel
+    {
+        get
+        {
+            switch (Type)
+            {
+                case StandardAxisType.LeftStickX:
+                case StandardAxisType.RightStickX:
+                    return "Left LED Colour";
+                case StandardAxisType.LeftStickY:
+                case StandardAxisType.RightStickY:
+                    return "Lowest LED Colour";
+                case StandardAxisType.LeftTrigger:
+                case StandardAxisType.RightTrigger:
+                    return "Released LED Color";
+                default:
+                    return "";
+            }
         }
     }
 

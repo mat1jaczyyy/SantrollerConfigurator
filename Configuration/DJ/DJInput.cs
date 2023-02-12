@@ -31,7 +31,7 @@ public class DjInput : TwiInput
     public DjInputType Input { get; set; }
     public override InputType? InputType => Types.InputType.TurntableInput;
 
-    public override string Generate(DeviceEmulationMode mode)
+    public override string Generate(ConfigField mode)
     {
         switch (Input)
         {
@@ -79,7 +79,7 @@ public class DjInput : TwiInput
     }
 
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
-        DeviceEmulationMode mode)
+        ConfigField mode)
     {
         var left = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
@@ -87,8 +87,8 @@ public class DjInput : TwiInput
         var right = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
                 .Select(binding => binding.Item2));
-        var leftTrigger = mode == DeviceEmulationMode.Shared ? "" : Output.GetReportField(StandardAxisType.LeftTrigger) + "=0;";
-        var rightTrigger = mode == DeviceEmulationMode.Shared ? "" : Output.GetReportField(StandardAxisType.RightTrigger) + "=0;";
+        var leftTrigger = mode == ConfigField.Shared ? "" : Output.GetReportField(StandardAxisType.LeftTrigger) + "=0;";
+        var rightTrigger = mode == ConfigField.Shared ? "" : Output.GetReportField(StandardAxisType.RightTrigger) + "=0;";
         return $@"if (djLeftValid) {{
                     {leftTrigger}
                     {left}

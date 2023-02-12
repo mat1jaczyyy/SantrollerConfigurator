@@ -7,5 +7,11 @@ public enum EmulationType
     Controller,
     [Description("Keyboard + Mouse")]
     KeyboardMouse,
-    Midi
+    Midi,
+    [Description("Bluetooth Controller")]
+    Bluetooth,
+    [Description("Bluetooth Keyboard + Mouse")]
+    BluetoothKeyboardMouse,
+    [Description("RockBand Stage Kit")]
+    StageKit,
 }

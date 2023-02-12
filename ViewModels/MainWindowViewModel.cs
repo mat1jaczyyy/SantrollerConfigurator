@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Collections;
+using Avalonia.Threading;
 using DynamicData;
 using DynamicData.Kernel;
 using LibUsbDotNet;
@@ -450,46 +451,49 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         private void OnDeviceNotify(object? sender, DeviceNotifyEventArgs e)
         {
-            if (e.DeviceType != DeviceType.DeviceInterface) return;
-            if (e.EventType == EventType.DeviceArrival)
+            Dispatcher.UIThread.Post(() =>
             {
-                var vid = e.Device.IdVendor;
-                var pid = e.Device.IdProduct;
-                if (vid == Dfu.DfuVid && (pid == Dfu.DfuPid16U2 || pid == Dfu.DfuPid8U2))
+                if (e.DeviceType != DeviceType.DeviceInterface) return;
+                if (e.EventType == EventType.DeviceArrival)
                 {
-                    AddDevice(new Dfu(e));
-                }
-                else if (e.Device.Open(out var dev))
-                {
-                    var revision = (ushort) dev.Info.Descriptor.BcdDevice;
-                    var product = dev.Info.ProductString?.Split(new[] {'\0'}, 2)[0];
-                    var serial = dev.Info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
-                    switch (product)
+                    var vid = e.Device.IdVendor;
+                    var pid = e.Device.IdProduct;
+                    if (vid == Dfu.DfuVid && (pid == Dfu.DfuPid16U2 || pid == Dfu.DfuPid8U2))
                     {
-                        case "Santroller" when _programming && !IsPico:
-                            return;
-                        case "Santroller":
-                            AddDevice(new Santroller(Pio, e.Device.Name, dev, product, serial, revision));
-                            break;
-                        case "Ardwiino" when _programming:
-                        case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
-                            return;
-                        case "Ardwiino":
-                            AddDevice(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
-                            break;
-                        default:
-                            dev.Close();
-                            break;
+                        AddDevice(new Dfu(e));
+                    }
+                    else if (e.Device.Open(out var dev))
+                    {
+                        var revision = (ushort) dev.Info.Descriptor.BcdDevice;
+                        var product = dev.Info.ProductString?.Split(new[] {'\0'}, 2)[0];
+                        var serial = dev.Info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
+                        switch (product)
+                        {
+                            case "Santroller" when _programming && !IsPico:
+                                return;
+                            case "Santroller":
+                                AddDevice(new Santroller(Pio, e.Device.Name, dev, product, serial, revision));
+                                break;
+                            case "Ardwiino" when _programming:
+                            case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
+                                return;
+                            case "Ardwiino":
+                                AddDevice(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
+                                break;
+                            default:
+                                dev.Close();
+                                break;
+                        }
                     }
                 }
-            }
-            else
-            {
-                Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device.Name)));
-                if (_disconnectedDevice != null || _selectedDevice?.IsSameDevice(e.Device.Name) != true) return;
-                _disconnectedDevice = _selectedDevice;
-                _selectedDevice = null;
-            }
+                else
+                {
+                    Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device.Name)));
+                    if (_disconnectedDevice != null || _selectedDevice?.IsSameDevice(e.Device.Name) != true) return;
+                    _disconnectedDevice = _selectedDevice;
+                    _selectedDevice = null;
+                }
+            });
         }
 
         public void Dispose()

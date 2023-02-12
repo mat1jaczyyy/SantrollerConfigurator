@@ -9,6 +9,7 @@
              xmlns:output="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs"
              xmlns:dj="clr-namespace:GuitarConfigurator.NetCore.Configuration.DJ"
              xmlns:confnig="clr-namespace:GuitarConfigurator.NetCore.Configuration"
+             xmlns:leds="clr-namespace:GuitarConfigurator.NetCore.Configuration.Leds"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
@@ -64,6 +65,8 @@
                                     ContentTemplate="{StaticResource OutputHeaderTemplates}">
                     </ContentControl>
                 </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type leds:Led}">
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
@@ -216,6 +219,20 @@
                                   Width="200">
                         </ComboBox>
                     </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type leds:Led}">
+                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsLed}">
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center"
+                           Width="300">
+                        Led
+                    </Label>
+                    <ComboBox VerticalAlignment="Center"
+                              SelectedItem="{Binding RumbleCommand}"
+                              Items="{Binding RumbleCommands}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}">
+                    </ComboBox>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type dj:DjInput}">
@@ -911,7 +928,7 @@
                         </MultiBinding>
                     </WrapPanel.IsVisible>
                     <Label VerticalAlignment="Center"
-                           VerticalContentAlignment="Center" Width="150">
+                           VerticalContentAlignment="Center" Width="300">
                         Selected LEDs
                     </Label>
                     <ItemsControl Items="{Binding AvailableIndices}">
@@ -936,10 +953,10 @@
                         </MultiBinding>
                     </StackPanel.IsVisible>
                     <Label VerticalAlignment="Center"
-                           VerticalContentAlignment="Center" Width="150"
+                           VerticalContentAlignment="Center" Width="300"
                            Content="{Binding LedOnLabel}">
                     </Label>
-                    <ColorPicker Color="{Binding LedOn}"></ColorPicker>
+                    <ColorPicker IsAlphaEnabled="False" IsAlphaVisible="False" ColorSpectrumShape="Ring" Color="{Binding LedOn}"></ColorPicker>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <StackPanel.IsVisible>
@@ -949,10 +966,10 @@
                         </MultiBinding>
                     </StackPanel.IsVisible>
                     <Label VerticalAlignment="Center"
-                           VerticalContentAlignment="Center" Width="150"
+                           VerticalContentAlignment="Center" Width="300"
                            Content="{Binding LedOffLabel}">
                     </Label>
-                    <ColorPicker Color="{Binding LedOff}"></ColorPicker>
+                    <ColorPicker IsAlphaEnabled="False" IsAlphaVisible="False" ColorSpectrumShape="Ring" Color="{Binding LedOff}"></ColorPicker>
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
@@ -1052,6 +1069,10 @@
                         <Button Command="{Binding AddOutput}" HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Add Binding
+                        </Button>
+                        <Button Command="{Binding AddLedBinding}" HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                            Add LED
                         </Button>
                         <Button Command="{Binding BindAllCommand}" HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center" Margin="20 20 20 0">

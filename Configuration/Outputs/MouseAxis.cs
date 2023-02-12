@@ -9,7 +9,8 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class MouseAxis : OutputAxis
 {
-    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
+    public MouseAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
+        int max, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
         deadZone, EnumToStringConverter.Convert(type), false)
     {
         Type = type;
@@ -20,15 +21,16 @@ public class MouseAxis : OutputAxis
     public override bool IsMidi => false;
 
     public override bool Valid => true;
+
     public override void UpdateBindings()
     {
     }
 
     public MouseAxisType Type { get; }
 
-    public override string GenerateOutput(DeviceEmulationMode mode)
+    public override string GenerateOutput(ConfigField mode)
     {
-        if (mode != DeviceEmulationMode.Mouse) return "";
+        if (mode != ConfigField.Mouse) return "";
         return GetReportField(Type);
     }
 
@@ -47,9 +49,8 @@ public class MouseAxis : OutputAxis
             default:
                 return "";
         }
-
     }
-    
+
     protected override string MaxCalibrationText()
     {
         switch (Type)
@@ -63,7 +64,42 @@ public class MouseAxis : OutputAxis
             default:
                 return "";
         }
+    }
 
+    public override string LedOnLabel
+    {
+        get
+        {
+            switch (Type)
+            {
+                case MouseAxisType.X:
+                case MouseAxisType.ScrollX:
+                    return "Right Movement LED";
+                case MouseAxisType.Y:
+                case MouseAxisType.ScrollY:
+                    return "Up Movement LED";
+                default:
+                    return "";
+            }
+        }
+    }
+
+    public override string LedOffLabel
+    {
+        get
+        {
+            switch (Type)
+            {
+                case MouseAxisType.X:
+                case MouseAxisType.ScrollX:
+                    return "Left Movement LED";
+                case MouseAxisType.Y:
+                case MouseAxisType.ScrollY:
+                    return "Down Movement LED";
+                default:
+                    return "";
+            }
+        }
     }
 
     protected override bool SupportsCalibration()
@@ -73,6 +109,7 @@ public class MouseAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedMouseAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone);
+        return new SerializedMouseAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
+            DeadZone);
     }
 }
