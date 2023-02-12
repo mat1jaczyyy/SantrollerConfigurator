@@ -212,11 +212,11 @@ public class ControllerEnumConverter : IMultiValueConverter
         return (extra, types);
     }
 
-    public static IEnumerable<object> GetTypes((DeviceControllerType, RhythmType) arg)
+    public static IEnumerable<object> GetTypes((DeviceControllerType deviceControllerType, RhythmType rhythmType) arg)
     {
-        var deviceControllerType = arg.Item1;
-        RhythmType? rhythmType = arg.Item2;
-        IEnumerable<object> otherBindings = Enumerable.Empty<object>();
+        var deviceControllerType = arg.deviceControllerType;
+        RhythmType? rhythmType = arg.rhythmType;
+        var otherBindings = Enumerable.Empty<object>();
         otherBindings = deviceControllerType switch
         {
             DeviceControllerType.Drum => DrumAxisTypeMethods.GetTypeFor(rhythmType.Value).Cast<object>(),

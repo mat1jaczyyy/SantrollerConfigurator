@@ -60,7 +60,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
 
         public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>()
-            .Where(type => Main.IsPico || type != EmulationType.Bluetooth);
+            .Where(type => Main.IsPico || type != EmulationType.Bluetooth && type != EmulationType.BluetoothKeyboardMouse);
 
         public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
 
@@ -468,7 +468,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
             _emulationType = emulationType;
             this.RaisePropertyChanged(nameof(EmulationType));
             ClearOutputs();
-            if (EmulationType != EmulationType.Controller) return;
+            if (emulationType == EmulationType.StageKit)
+            {
+                DeviceType = DeviceControllerType.Gamepad;
+                return;
+            }
+            if (EmulationType is EmulationType.KeyboardMouse or EmulationType.BluetoothKeyboardMouse or EmulationType.Midi) return;
             foreach (var type in Enum.GetValues<StandardAxisType>())
             {
                 if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;

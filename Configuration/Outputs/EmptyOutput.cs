@@ -30,7 +30,8 @@ public class EmptyOutput : Output
             .Select(x => x is EmulationType.Midi)
             .ToProperty(this, x => x.IsMidi);
 
-        _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType, vm => vm.Model.RhythmType)
+        _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType,
+                vm => vm.Model.RhythmType)
             .Select(ControllerEnumConverter.GetTypes).ToProperty(this, x => x.CombinedTypes);
     }
 
@@ -211,6 +212,7 @@ public class EmptyOutput : Output
 
     public override string LedOnLabel => "";
     public override string LedOffLabel => "";
+
     public override void UpdateBindings()
     {
     }

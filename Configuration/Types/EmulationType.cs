@@ -12,6 +12,6 @@ public enum EmulationType
     Bluetooth,
     [Description("Bluetooth Keyboard + Mouse")]
     BluetoothKeyboardMouse,
-    [Description("RockBand Stage Kit")]
+    [Description("Rock Band Stage Kit")]
     StageKit,
 }
