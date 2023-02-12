@@ -341,24 +341,21 @@ public class Led : Output
         {
             // Strobe is special because it well... strobes
             case RumbleCommand.StageKitStrobe:
-                // In strobe mode, we just blink the led at a rate of strobe_delay seconds
+                // In strobe mode, we just blink the led at a rate dictate by strobe_delay, only leaving it on for 10ms
                 if (mode == ConfigField.StrobeLed)
                 {
-                    return @$"if (last_strobe && last_strobe - millis() > strobe_delay * 1000) {{
+                    return @$"if (last_strobe && last_strobe - millis() > stage_kit_millis[strobe_delay]) {{
                                 last_strobe = millis();
-                                strobing = !strobing;
-                                if (strobing) {{
-                                    {on}
-                                }} else {{
-                                    {off}
-                                }}
+                                {on}
+                            }} else if (last_strobe && last_strobe - millis() > 10) {{
+                                {off}
                             }}";
                 }
 
                 // In rumble mode, we update strobe_delay based on packets receive, turning strobe off if requested
                 return $@"
                         if (rumble_left == 0 && rumble_right >= 3 && rumble_right <= 7) {{
-                            strobe_delay = 6 - (rumble_right - 2);
+                            strobe_delay = 5 - (rumble_right - 2);
                         }}
                         if (strobe_delay == 0 || {allOff}) {{
                             strobe_delay = 0;
