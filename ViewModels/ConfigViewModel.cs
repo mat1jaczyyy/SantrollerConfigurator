@@ -59,10 +59,11 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
 
-        public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>().Where(type => Main.IsPico || type != EmulationType.Bluetooth);
+        public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>()
+            .Where(type => Main.IsPico || type != EmulationType.Bluetooth);
 
         public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
-        
+
         public IEnumerable<MouseMovementType> MouseMovementTypes => Enum.GetValues<MouseMovementType>();
 
         //TODO: actually read and write this as part of the config
@@ -75,6 +76,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public ICommand GoBack { get; }
 
         private MouseMovementType _mouseMovementType;
+
         public MouseMovementType MouseMovementType
         {
             get => _mouseMovementType;
@@ -520,7 +522,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
 
-            lines.Add($"#define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}");
+            lines.Add(
+                $"#define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}");
 
             lines.Add($"#define TICK_SHARED {GenerateTick(ConfigField.Shared)}");
 
@@ -568,14 +571,14 @@ namespace GuitarConfigurator.NetCore.ViewModels
             lines.Add($"#define HANDLE_PLAYER_LED {GenerateTick(ConfigField.PlayerLed)}");
 
             lines.Add($"#define HANDLE_RUMBLE {GenerateTick(ConfigField.RumbleLed)}");
-            
+
             lines.Add($"define HANDLE_KEYBOARD_LED {GenerateTick(ConfigField.KeyboardLed)}");
 
-            lines.Add($"#define CONSOLE_TYPE {((byte) EmulationType)}");
+            lines.Add($"#define CONSOLE_TYPE {GetEmulationType()}");
 
-            lines.Add($"#define DEVICE_TYPE {((byte) DeviceType)}");
+            lines.Add($"#define DEVICE_TYPE {(byte) DeviceType}");
 
-            lines.Add($"#define RHYTHM_TYPE {((byte) RhythmType)}");
+            lines.Add($"#define RHYTHM_TYPE {(byte) RhythmType}");
             if (KvEnabled)
             {
                 lines.Add(
@@ -599,6 +602,21 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}")));
 
             File.WriteAllLines(configFile, lines);
+        }
+
+        private byte GetEmulationType()
+        {
+            switch (EmulationType)
+            {
+                case EmulationType.Bluetooth:
+                case EmulationType.Controller:
+                    return (byte) EmulationType.Controller;
+                case EmulationType.KeyboardMouse:
+                case EmulationType.BluetoothKeyboardMouse:
+                    return (byte) EmulationType.KeyboardMouse;
+                default:
+                    return (byte) EmulationType;
+            }
         }
 
         private int GetLedType()
@@ -684,6 +702,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 binding.Expanded = true;
             }
         }
+
         public void CollapseAll()
         {
             foreach (var binding in Bindings)
@@ -691,6 +710,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 binding.Expanded = false;
             }
         }
+
         public async void ResetWithConfirmation()
         {
             var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",

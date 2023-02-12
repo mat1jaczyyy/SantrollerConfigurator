@@ -43,10 +43,10 @@ public enum RumbleCommand
     [Description("Blue LED")] SantrollerBlue,
     [Description("Orange LED")] SantrollerOrange,
 
-    [Description("Star Power Status (Fill) LED")]
+    [Description("Star Power Gauge (Inactive) LED")]
     SantrollerStarPowerFill,
 
-    [Description("Star Power Status (Active) LED")]
+    [Description("Star Power Gauge (Active) LED")]
     SantrollerStarPowerActive,
     [Description("Num Lock LED")] KeyboardNumLock,
     [Description("Caps Lock LED")] KeyboardCapsLock,
@@ -357,37 +357,31 @@ public class Led : Output
 
                 // In rumble mode, we update strobe_delay based on packets receive, turning strobe off if requested
                 return $@"
-                        if (controllerType == WINDOWS_XBOX360 && !windows_or_xbox_one) {{
-                            if (rumble_left == 0 && rumble_right >= 3 && rumble_right <= 7) {{
-                                strobe_delay = 6 - (rumble_right - 2);
-                            }}
-                            if (strobe_delay == 0 || {allOff}) {{
-                                strobe_delay = 0;
-                                {off}
-                            }}
+                        if (rumble_left == 0 && rumble_right >= 3 && rumble_right <= 7) {{
+                            strobe_delay = 6 - (rumble_right - 2);
+                        }}
+                        if (strobe_delay == 0 || {allOff}) {{
+                            strobe_delay = 0;
+                            {off}
                         }}
                         ";
 
             // For fog, there is both an on and off command so we can just handle that 
             case RumbleCommand.StageKitFog:
-                return $@"if (controllerType == WINDOWS_XBOX360 && !windows_or_xbox_one) {{
-                    if (rumble_left == 0 && rumble_right == {StageKitFogCommands.Off} || {allOff}) {{
-                        {off}
-                    }} else if (rumble_left == 0 && rumble_right == {StageKitFogCommands.On}) {{
-                        {on}
-                    }}
-                }}";
+                return $@"if (rumble_left == 0 && rumble_right == {StageKitFogCommands.Off} || {allOff}) {{
+                              {off}
+                          }} else if (rumble_left == 0 && rumble_right == {StageKitFogCommands.On}) {{
+                              {on}
+                          }}";
             // for the leds, we need to turn the led on if the bit is set, and off if it is not.
             case >= RumbleCommand.StageKitGreen1:
             {
                 var led = 1 << ((int) Command & 0xf);
                 var group = (int) Command & 0xf0;
-                return @$"if (controllerType == WINDOWS_XBOX360 && !windows_or_xbox_one) {{
-                            if ((rumble_left & {led} == 0) && (rumble_right == {group} || {allOff})) {{
-                                {off}
-                            }} else if (rumble_left & ({led}) && rumble_right == {group}) {{
-                                {on}
-                            }}
+                return @$"if ((rumble_left & {led} == 0) && (rumble_right == {group} || {allOff})) {{
+                              {off}
+                          }} else if (rumble_left & ({led}) && rumble_right == {group}) {{
+                              {on}
                           }}";
             }
             default:
@@ -409,12 +403,26 @@ public class Led : Output
                 return "LED Colour";
             }
 
-            return "Inactive LED Colour";
+            if (Command is RumbleCommand.SantrollerStarPowerActive or RumbleCommand.SantrollerStarPowerFill)
+            {
+                return "Start Power Gauge Full Colour";
+            }
+
+            return "Active LED Colour";
         }
     }
 
-    public override string LedOffLabel =>
-        Command is RumbleCommand.StageKitFog ? "Fog Inactive LED Colour" : "Inactive LED Colour";
+    public override string LedOffLabel
+    {
+        get =>
+            Command switch
+            {
+                RumbleCommand.StageKitFog => "Fog Inactive LED Colour",
+                RumbleCommand.SantrollerStarPowerActive or RumbleCommand.SantrollerStarPowerFill =>
+                    "Start Power Gauge Empty Colour",
+                _ => "Inactive LED Colour"
+            };
+    }
 
     public override bool SupportsLedOff => !Command.IsAuth() && !Command.IsPlayer();
 
