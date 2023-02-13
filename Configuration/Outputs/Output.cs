@@ -579,13 +579,23 @@ public abstract class Output : ReactiveObject, IDisposable
         set => this.RaiseAndSetIfChanged(ref _buttonText, value);
     }
 
+    protected virtual IEnumerable<PinConfig> GetOwnPinConfigs()
+    {
+        return Enumerable.Empty<PinConfig>();
+    }
+    
+    protected virtual IEnumerable<DevicePin> GetOwnPins()
+    {
+        return Enumerable.Empty<DevicePin>();
+    }
+
     public List<PinConfig> GetPinConfigs() => Outputs.Items
         .SelectMany(s => s.Outputs.Items).SelectMany(s => (s.Input?.PinConfigs ?? Array.Empty<PinConfig>()))
-        .Distinct().ToList();
+        .Distinct().Concat(GetOwnPinConfigs()).ToList();
 
     public List<DevicePin> GetPins() => Outputs.Items
         .SelectMany(s => s.Outputs.Items).SelectMany(s => (s.Input?.Pins ?? Array.Empty<DevicePin>()))
-        .Distinct().ToList();
+        .Distinct().Concat(GetOwnPins()).ToList();
 
     public virtual void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,

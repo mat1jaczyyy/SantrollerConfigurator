@@ -205,7 +205,11 @@ public class EmptyOutput : Output
                 break;
         }
 
-        Dispatcher.UIThread.InvokeAsync(() => Model.Bindings.Remove(this));
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            Model.Bindings.Remove(this);
+            Model.UpdateErrors();
+        });
     }
 
     public override string ErrorText => "Input is not bound!";

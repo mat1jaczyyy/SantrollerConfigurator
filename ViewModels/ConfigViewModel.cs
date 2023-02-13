@@ -14,7 +14,6 @@ using Avalonia.Media;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
-using GuitarConfigurator.NetCore.Configuration.DJ;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Leds;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -126,7 +125,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public void AddLedBinding()
         {
             var first = Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((DeviceType, EmulationType))).First();
-            Bindings.Add(new Led(this, Colors.Black, Colors.Black, Array.Empty<byte>(), first));
+            Bindings.Add(new Led(this, MicroController!, false, 0, Colors.Black, Colors.Black, Array.Empty<byte>(), first));
         }
 
         public LedType LedType

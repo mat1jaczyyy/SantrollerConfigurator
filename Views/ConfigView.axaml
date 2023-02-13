@@ -178,6 +178,7 @@
                         </Image>
                         <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center"
                                   SelectedItem="{Binding Pin}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
                                   Items="{Binding AvailablePins}">
                         </ComboBox>
                     </StackPanel>
@@ -222,17 +223,41 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type leds:Led}">
-                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsLed}">
-                    <Label VerticalAlignment="Center"
-                           VerticalContentAlignment="Center"
-                           Width="300">
-                        Led
-                    </Label>
-                    <ComboBox VerticalAlignment="Center"
-                              SelectedItem="{Binding RumbleCommand}"
-                              Items="{Binding RumbleCommands}"
-                              ItemTemplate="{StaticResource EnumToStringTemplate}">
-                    </ComboBox>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsLed}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Led
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding RumbleCommand}"
+                                  Items="{Binding RumbleCommands}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}">
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Enable Digital Output
+                        </Label>
+                        <ToggleSwitch x:CompileBindings="False" IsChecked="{Binding OutputEnabled}" OnContent="Enabled"
+                                      OffContent="Disabled">
+                        </ToggleSwitch>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding OutputEnabled}" >
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Digital Output Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Pin}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Items="{Binding AvailablePins}">
+                        </ComboBox>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type dj:DjInput}">
@@ -956,7 +981,9 @@
                            VerticalContentAlignment="Center" Width="300"
                            Content="{Binding LedOnLabel}">
                     </Label>
-                    <ColorPicker IsAlphaEnabled="False" IsAlphaVisible="False" ColorSpectrumShape="Ring" Color="{Binding LedOn}"></ColorPicker>
+                    <ColorPicker IsAlphaEnabled="False" IsAlphaVisible="False" ColorSpectrumShape="Ring"
+                                 Color="{Binding LedOn}">
+                    </ColorPicker>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <StackPanel.IsVisible>
@@ -969,7 +996,9 @@
                            VerticalContentAlignment="Center" Width="300"
                            Content="{Binding LedOffLabel}">
                     </Label>
-                    <ColorPicker IsAlphaEnabled="False" IsAlphaVisible="False" ColorSpectrumShape="Ring" Color="{Binding LedOff}"></ColorPicker>
+                    <ColorPicker IsAlphaEnabled="False" IsAlphaVisible="False" ColorSpectrumShape="Ring"
+                                 Color="{Binding LedOff}">
+                    </ColorPicker>
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
@@ -997,7 +1026,7 @@
                                       Items="{Binding EmulationTypes}">
                             </ComboBox>
                         </StackPanel>
-                        
+
                         <StackPanel IsVisible="{Binding IsKeyboard}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Mouse Movement Type"
                                        TextAlignment="Center" />

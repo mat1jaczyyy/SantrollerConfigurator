@@ -4,9 +4,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Media;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -189,11 +192,61 @@ public static class RumbleCommandMethods
 
 public class Led : Output
 {
+    protected Microcontroller Microcontroller { get; }
+
+    private DirectPinConfig? _pinConfig;
+    private bool _outputEnabled;
+    public bool OutputEnabled
+    {
+        get => _outputEnabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _outputEnabled, value);
+            if (value)
+            {
+                if (_pinConfig != null) return;
+                _pinConfig = Microcontroller.GetOrSetPin(Model, "led", Pin, DevicePinMode.Output);
+                Microcontroller.AssignPin(_pinConfig);
+            }
+            else
+            {
+                Dispose();
+            }
+            Model.UpdateErrors();
+        }
+    }
+    
+    public List<int> AvailablePins => Microcontroller.GetAllPins(false);
+
+    public DirectPinConfig? PinConfig => _pinConfig;
+
+    private int _pin;
+    public int Pin
+    {
+        get => _pin;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _pin, value);
+            if (_pinConfig == null) return;
+            PinConfig.Pin = value;
+        }
+    }
+
+    public override void Dispose()
+    {
+        if (_pinConfig == null) return;
+        Microcontroller.UnAssignPins(_pinConfig.Type);
+        _pinConfig = null;
+    }
+
     public RumbleCommand Command { get; }
 
-    public Led(ConfigViewModel model, Color ledOn, Color ledOff, byte[] ledIndices, RumbleCommand command) : base(
+    public Led(ConfigViewModel model, Microcontroller microcontroller, bool outputEnabled, int pin, Color ledOn, Color ledOff, byte[] ledIndices, RumbleCommand command) : base(
         model, null, ledOn, ledOff, ledIndices, EnumToStringConverter.Convert(command))
     {
+        Microcontroller = microcontroller;
+        Pin = pin;
+        OutputEnabled = outputEnabled;
         Command = command;
         _rumbleCommands.AddRange(Enum.GetValues<RumbleCommand>());
         _rumbleCommands.Connect()
@@ -201,7 +254,18 @@ public class Led : Output
             .Bind(out var rumbleCommands)
             .Subscribe();
         RumbleCommands = rumbleCommands;
+
     }
+
+    protected override IEnumerable<PinConfig> GetOwnPinConfigs()
+    {
+        return _pinConfig != null ? new[] {_pinConfig} : Enumerable.Empty<PinConfig>();
+    }
+    
+    protected override IEnumerable<DevicePin> GetOwnPins() => new List<DevicePin>()
+    {
+        new(Pin, DevicePinMode.Output)
+    };
 
     public static Func<RumbleCommand, bool> FilterLeds((DeviceControllerType, EmulationType) type)
     {
@@ -239,7 +303,7 @@ public class Led : Output
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command);
+        return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command, OutputEnabled, Pin);
     }
 
 
@@ -253,10 +317,11 @@ public class Led : Output
         set
         {
             if (value == Command) return;
-            var output = new Led(Model, LedOn, LedOff, LedIndices.ToArray(), value);
+            var output = new Led(Model, Microcontroller, OutputEnabled, Pin, LedOn, LedOff, LedIndices.ToArray(), value);
             output.Expanded = Expanded;
             Model.Bindings.Insert(Model.Bindings.IndexOf(this), output);
             Model.RemoveOutput(this);
+            Dispose();
         }
     }
 
@@ -279,6 +344,11 @@ public class Led : Output
         var allOff = "(rumble_left == 0x00 rumble_right == 0xFF)";
         var on = "";
         var off = "";
+        if (_pinConfig != null)
+        {
+            on = Microcontroller.GenerateDigitalWrite(_pinConfig.Pin, true);
+            off = Microcontroller.GenerateDigitalWrite(_pinConfig.Pin, false);
+        }
         var between = "";
         foreach (var index in LedIndices)
         {

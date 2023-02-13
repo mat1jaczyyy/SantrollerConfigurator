@@ -16,16 +16,20 @@ public class SerializedLed : SerializedOutput
     [ProtoMember(2)] public override uint LedOff { get; }
     [ProtoMember(3)] public override byte[] LedIndex { get; }
     [ProtoMember(4)] public RumbleCommand Type { get; }
+    [ProtoMember(5)] public bool OutputEnabled { get; }
+    [ProtoMember(6)] public int Pin { get; }
 
-    public SerializedLed(Color ledOn, Color ledOff, byte[] ledIndex, RumbleCommand type) {
+    public SerializedLed(Color ledOn, Color ledOff, byte[] ledIndex, RumbleCommand type, bool outputEnabled, int pin) {
         LedOn = ledOn.ToUint32();
         LedOff = ledOff.ToUint32();
         LedIndex = ledIndex;
         Type = type;
+        OutputEnabled = outputEnabled;
+        Pin = pin;
     }
 
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new Led(model, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Type);
+        return new Led(model, microcontroller, OutputEnabled, Pin, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Type);
     }
 }
