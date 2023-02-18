@@ -16,8 +16,8 @@ public class SerializedMacroInput : SerializedInput
     [ProtoMember(1)] public SerializedInput Child1 { get; }
     [ProtoMember(2)] public SerializedInput Child2 { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new MacroInput(Child1.Generate(microcontroller, model), Child2.Generate(microcontroller, model), model);
+        return new MacroInput(Child1.Generate(model), Child2.Generate(model), model);
     }
 }

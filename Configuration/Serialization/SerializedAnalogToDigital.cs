@@ -19,8 +19,8 @@ public class SerializedAnalogToDigital : SerializedInput
     [ProtoMember(2)] public AnalogToDigitalType Type { get; }
     [ProtoMember(3)] public int Threshold { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new AnalogToDigital(Child.Generate(microcontroller, model), Type, Threshold, model);
+        return new AnalogToDigital(Child.Generate(model), Type, Threshold, model);
     }
 }

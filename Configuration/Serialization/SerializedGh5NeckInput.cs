@@ -19,8 +19,8 @@ public class SerializedGh5NeckInput : SerializedInput
     [ProtoMember(2)] private int Scl { get; }
     [ProtoMember(3)] private Gh5NeckInputType Type { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new Gh5NeckInput(Type, model, microcontroller, Sda, Scl);
+        return new Gh5NeckInput(Type, model, Sda, Scl);
     }
 }

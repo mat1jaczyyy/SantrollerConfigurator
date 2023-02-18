@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
@@ -64,7 +65,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         };
     }
 
-    public abstract void LoadConfiguration(ConfigViewModel model);
+    public abstract Microcontroller GetMicrocontroller(ConfigViewModel model);
 
     public async Task<string?> GetUploadPort()
     {
@@ -83,6 +84,8 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     {
         return Board.IsPico();
     }
+
+    public abstract bool LoadConfiguration(ConfigViewModel model);
 
     public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
     {

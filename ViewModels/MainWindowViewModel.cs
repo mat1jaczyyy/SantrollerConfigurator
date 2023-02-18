@@ -278,8 +278,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
         {
             StartWorking();
             config.Generate(Pio);
-            var env = config.MicroController!.Board.Environment;
-            if (config.MicroController.Board.HasUsbmcu) env += "_usb";
+            var env = config.Microcontroller.Board.Environment;
+            if (config.Microcontroller.Board.HasUsbmcu) env += "_usb";
 
             if (NewDevice)
             {

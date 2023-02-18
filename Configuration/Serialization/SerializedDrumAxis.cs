@@ -36,9 +36,9 @@ public class SerializedDrumAxis : SerializedOutput
     [ProtoMember(9)] public int Debounce { get; }
     [ProtoMember(10)] public DrumAxisType Type { get; }
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
-        return new DrumAxis(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn),
+        return new DrumAxis(model, Input?.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
             Threshold, Debounce, Type);
     }

@@ -32,9 +32,9 @@ public class SerializedGuitarAxis : SerializedOutput
     [ProtoMember(7)] public int Deadzone { get; }
     [ProtoMember(10)] public GuitarAxisType Type { get; }
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
-        return new GuitarAxis(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn),
+        return new GuitarAxis(model, Input?.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
             Type);
     }

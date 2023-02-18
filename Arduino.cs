@@ -2,6 +2,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 
@@ -74,9 +75,14 @@ public class Arduino : IConfigurableDevice
         // Automagically handled by pio
     }
 
-    public void LoadConfiguration(ConfigViewModel model)
+    public Microcontroller GetMicrocontroller(ConfigViewModel model)
     {
-        model.SetDefaults(Board.FindMicrocontroller(Board));
+        return Board.FindMicrocontroller(Board);
+    }
+
+    public bool LoadConfiguration(ConfigViewModel model)
+    {
+        return false;
     }
 
     public Task<string?> GetUploadPort()

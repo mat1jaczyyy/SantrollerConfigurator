@@ -12,16 +12,14 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 
 public class BindAllWindowViewModel : ReactiveObject
 {
+    private readonly Santroller? _santroller;
     public readonly Interaction<Unit, Unit> CloseWindowInteraction = new();
 
     private volatile bool _picking = true;
 
-    private readonly Santroller? _santroller;
-
-    public BindAllWindowViewModel(ConfigViewModel model, Microcontroller microcontroller, Output output,
+    public BindAllWindowViewModel(ConfigViewModel model, Output output,
         DirectInput input)
     {
-        Microcontroller = microcontroller;
         Model = model;
         Output = output;
         Input = input;
@@ -44,7 +42,7 @@ public class BindAllWindowViewModel : ReactiveObject
         {
             while (_picking)
             {
-                input.Pin = await santroller.DetectPin(IsAnalog, input.Pin, Microcontroller);
+                input.Pin = await santroller.DetectPin(IsAnalog, input.Pin, Model.Microcontroller);
                 await Task.Delay(100);
             }
         });
@@ -53,8 +51,6 @@ public class BindAllWindowViewModel : ReactiveObject
     public ConfigViewModel Model { get; }
     public Output Output { get; }
     public DirectInput Input { get; }
-
-    public Microcontroller Microcontroller { get; }
     public ICommand ContinueCommand { get; }
     public ICommand AbortCommand { get; }
     public bool Response { get; set; }

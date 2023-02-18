@@ -9,11 +9,11 @@ public abstract class SpiConfig : PinConfig
     private readonly uint _clock;
     private readonly bool _cpha;
     private readonly bool _cpol;
+    private readonly bool _msbfirst;
 
     protected int _miso;
 
     protected int _mosi;
-    private readonly bool _msbfirst;
 
     protected int _sck;
 

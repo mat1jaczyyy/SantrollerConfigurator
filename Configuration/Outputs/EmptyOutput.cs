@@ -105,55 +105,48 @@ public class EmptyOutput : Output
 
     private void Generate(object? value)
     {
-        if (Model.MicroController == null) return;
         Output? output = Model.GetSimpleEmulationType() switch
         {
             EmulationType.Controller => value switch
             {
                 SimpleType simpleType => simpleType switch
                 {
-                    SimpleType.WiiInputSimple => new WiiCombinedOutput(Model, Model.MicroController!),
-                    SimpleType.Gh5NeckSimple => new Gh5CombinedOutput(Model, Model.MicroController!),
-                    SimpleType.Ps2InputSimple => new Ps2CombinedOutput(Model, Model.MicroController!),
-                    SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model, Model.MicroController!),
-                    SimpleType.DjTurntableSimple => new DjCombinedOutput(Model, Model.MicroController!),
+                    SimpleType.WiiInputSimple => new WiiCombinedOutput(Model),
+                    SimpleType.Gh5NeckSimple => new Gh5CombinedOutput(Model),
+                    SimpleType.Ps2InputSimple => new Ps2CombinedOutput(Model),
+                    SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model),
+                    SimpleType.DjTurntableSimple => new DjCombinedOutput(Model),
                     SimpleType.RFSimple => new RFRXOutput(Model),
                     _ => null
                 },
                 StandardAxisType standardAxisType => new ControllerAxis(Model,
-                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0,
                     standardAxisType),
                 StandardButtonType standardButtonType => new ControllerButton(Model,
-                    new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Black,
+                    new DirectInput(0, DevicePinMode.PullUp, Model), Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
                     standardButtonType),
                 RBButtonType standardButtonType => new RbButton(Model,
-                    new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Black,
+                    new DirectInput(0, DevicePinMode.PullUp, Model), Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
                     standardButtonType),
                 DrumAxisType drumAxisType => new DrumAxis(Model,
-                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0,
                     1000, 10, drumAxisType),
                 Ps3AxisType ps3AxisType => new PS3Axis(Model,
-                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0,
                     ps3AxisType),
                 GuitarAxisType guitarAxisType => new GuitarAxis(Model,
-                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0, guitarAxisType),
                 DjAxisType djAxisType => new DjAxis(Model,
-                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0, djAxisType),
                 DjInputType djInputType => new DjButton(Model,
-                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
                     djInputType),
                 _ => null
             },

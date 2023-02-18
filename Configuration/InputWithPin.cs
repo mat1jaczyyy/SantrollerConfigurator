@@ -11,22 +11,20 @@ namespace GuitarConfigurator.NetCore.Configuration;
 
 public abstract class InputWithPin : Input
 {
-    protected InputWithPin(ConfigViewModel model, Microcontroller microcontroller, DirectPinConfig pinConfig) :
+    protected InputWithPin(ConfigViewModel model, DirectPinConfig pinConfig) :
         base(model)
     {
-        Microcontroller = microcontroller;
         PinConfig = pinConfig;
-        Microcontroller.AssignPin(PinConfig);
+        Model.Microcontroller.AssignPin(PinConfig);
         DetectPinCommand =
             ReactiveCommand.CreateFromTask(DetectPin, this.WhenAnyValue(s => s.Model.Main.Working).Select(s => !s));
         this.WhenAnyValue(x => x.PinConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
     }
 
-    protected Microcontroller Microcontroller { get; }
 
     public DirectPinConfig PinConfig { get; }
 
-    public List<int> AvailablePins => Microcontroller.GetAllPins(IsAnalog);
+    public List<int> AvailablePins => Model.Microcontroller.GetAllPins(IsAnalog);
 
     public int Pin
     {
@@ -59,7 +57,7 @@ public abstract class InputWithPin : Input
 
     public override void Dispose()
     {
-        Microcontroller.UnAssignPins(PinConfig.Type);
+        Model.Microcontroller.UnAssignPins(PinConfig.Type);
     }
 
     private async Task DetectPin()
@@ -68,7 +66,7 @@ public abstract class InputWithPin : Input
         {
             PinConfigText = DetectionText;
             this.RaisePropertyChanged(nameof(PinConfigText));
-            Pin = await santroller.DetectPin(IsAnalog, Pin, Microcontroller);
+            Pin = await santroller.DetectPin(IsAnalog, Pin, Model.Microcontroller);
             PinConfigText = "Find Pin";
             this.RaisePropertyChanged(nameof(PinConfigText));
         }

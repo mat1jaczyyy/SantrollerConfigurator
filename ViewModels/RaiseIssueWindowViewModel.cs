@@ -31,8 +31,8 @@ Device Type: {_model.DeviceType}
 Emulation Type: {_model.EmulationType}
 Led Type: {_model.LedType}
 
-Microcontroller Type: {_model.MicroController!.Board.Name}
-Microcontroller Frequency: {_model.MicroController!.Board.CpuFreq / 1000}mhz";
+Microcontroller Type: {_model.Microcontroller.Board.Name}
+Microcontroller Frequency: {_model.Microcontroller.Board.CpuFreq / 1000}mhz";
     }
 
     public string Text { get; }
@@ -56,8 +56,8 @@ Device Type: {_model.DeviceType}
 Emulation Type: {_model.EmulationType}
 Led Type: {_model.LedType}
 
-Microcontroller Type: {_model.MicroController!.Board.Name}
-Microcontroller Frequency: {_model.MicroController!.Board.CpuFreq / 1000}mhz
+Microcontroller Type: {_model.Microcontroller.Board.Name}
+Microcontroller Frequency: {_model.Microcontroller.Board.CpuFreq / 1000}mhz
 
 Compilation Log: https://hastebin.com/{paste}";
         var title = "Error building";

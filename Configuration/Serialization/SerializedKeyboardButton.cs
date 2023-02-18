@@ -29,9 +29,9 @@ public class SerializedKeyboardButton : SerializedOutput
     [ProtoMember(4)] public byte Debounce { get; }
     [ProtoMember(5)] public Key Type { get; }
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
-        return new KeyboardButton(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn),
+        return new KeyboardButton(model, Input?.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
     }
 }

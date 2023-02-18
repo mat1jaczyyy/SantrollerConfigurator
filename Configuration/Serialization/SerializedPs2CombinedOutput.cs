@@ -39,17 +39,17 @@ public class SerializedPs2CombinedOutput : SerializedOutput
     public override uint LedOff => Colors.Black.ToUint32();
     public override byte[] LedIndex => Array.Empty<byte>();
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
         // Since we filter out sda and scl from wii inputs for size, we need to make sure its assigned before we construct the inputs.
-        microcontroller.AssignSpiPins(model, Ps2Input.Ps2SpiType, Mosi, Miso, Sck, Ps2Input.Ps2SpiCpol,
+        model.Microcontroller.AssignSpiPins(model, Ps2Input.Ps2SpiType, Mosi, Miso, Sck, Ps2Input.Ps2SpiCpol,
             Ps2Input.Ps2SpiCpha, Ps2Input.Ps2SpiMsbFirst, Ps2Input.Ps2SpiFreq);
-        microcontroller.AssignPin(new DirectPinConfig(model, Ps2Input.Ps2AckType, Ack, DevicePinMode.Floating));
-        microcontroller.AssignPin(new DirectPinConfig(model, Ps2Input.Ps2AttType, Att, DevicePinMode.Output));
-        var outputs = Outputs.Select(s => s.Generate(model, microcontroller)).ToList();
+        model.Microcontroller.AssignPin(new DirectPinConfig(model, Ps2Input.Ps2AckType, Ack, DevicePinMode.Floating));
+        model.Microcontroller.AssignPin(new DirectPinConfig(model, Ps2Input.Ps2AttType, Att, DevicePinMode.Output));
+        var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         var array = new BitArray(Enabled);
         for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
 
-        return new Ps2CombinedOutput(model, microcontroller, Miso, Mosi, Sck, Att, Ack, outputs);
+        return new Ps2CombinedOutput(model, Miso, Mosi, Sck, Att, Ack, outputs);
     }
 }

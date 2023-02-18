@@ -9,21 +9,19 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public abstract class CombinedTwiOutput : CombinedOutput, ITwi
 {
-    private readonly Microcontroller _microcontroller;
 
     private readonly TwiConfig _twiConfig;
 
     private readonly string _twiType;
 
 
-    protected CombinedTwiOutput(ConfigViewModel model, Microcontroller microcontroller, string twiType,
+    protected CombinedTwiOutput(ConfigViewModel model, string twiType,
         int twiFreq, string name, int? sda = null, int? scl = null) : base(model, null, name)
 
     {
-        _microcontroller = microcontroller;
-        BindableTwi = microcontroller.TwiAssignable;
+        BindableTwi = Model.Microcontroller.TwiAssignable;
         _twiType = twiType;
-        var config = microcontroller.GetTwiForType(_twiType);
+        var config = Model.Microcontroller.GetTwiForType(_twiType);
         if (config != null)
         {
             _twiConfig = config;
@@ -32,12 +30,12 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
         {
             if (sda == null || scl == null)
             {
-                var pins = microcontroller.TwiPins(_twiType);
+                var pins = Model.Microcontroller.TwiPins(_twiType);
                 scl = pins.First(pair => pair.Value is TwiPinType.Scl).Key;
                 sda = pins.First(pair => pair.Value is TwiPinType.Sda).Key;
             }
 
-            _twiConfig = microcontroller.AssignTwiPins(model, _twiType, sda.Value, scl.Value, twiFreq)!;
+            _twiConfig = Model.Microcontroller.AssignTwiPins(model, _twiType, sda.Value, scl.Value, twiFreq)!;
         }
 
 
@@ -65,26 +63,26 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
 
     public List<int> TwiPins()
     {
-        return new() {Sda, Scl};
+        return new List<int> {Sda, Scl};
     }
 
     private List<int> GetSdaPins()
     {
-        return _microcontroller.TwiPins(_twiType)
+        return Model.Microcontroller.TwiPins(_twiType)
             .Where(s => s.Value is TwiPinType.Sda)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetSclPins()
     {
-        return _microcontroller.TwiPins(_twiType)
+        return Model.Microcontroller.TwiPins(_twiType)
             .Where(s => s.Value is TwiPinType.Scl)
             .Select(s => s.Key).ToList();
     }
 
     public override void Dispose()
     {
-        _microcontroller.UnAssignPins(_twiType);
+        Model.Microcontroller.UnAssignPins(_twiType);
         base.Dispose();
     }
 }

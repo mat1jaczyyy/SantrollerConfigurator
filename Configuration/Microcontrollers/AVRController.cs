@@ -102,8 +102,8 @@ public abstract class AvrController : Microcontroller
     {
         return new List<KeyValuePair<int, TwiPinType>>
         {
-            new KeyValuePair<int, TwiPinType>(I2CScl, TwiPinType.Scl),
-            new KeyValuePair<int, TwiPinType>(I2CSda, TwiPinType.Sda)
+            new(I2CScl, TwiPinType.Scl),
+            new(I2CSda, TwiPinType.Sda)
         };
     }
 

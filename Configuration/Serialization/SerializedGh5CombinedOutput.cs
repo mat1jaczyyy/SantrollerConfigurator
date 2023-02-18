@@ -33,13 +33,13 @@ public class SerializedGh5CombinedOutput : SerializedOutput
     public override uint LedOff => Colors.Black.ToUint32();
     public override byte[] LedIndex => Array.Empty<byte>();
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
         // Since we filter out sda and scl from wii inputs for size, we need to make sure its assigned before we construct the inputs.
-        microcontroller.AssignTwiPins(model, Gh5NeckInput.Gh5TwiType, Sda, Scl, Gh5NeckInput.Gh5TwiFreq);
+        model.Microcontroller.AssignTwiPins(model, Gh5NeckInput.Gh5TwiType, Sda, Scl, Gh5NeckInput.Gh5TwiFreq);
         var array = new BitArray(Enabled);
-        var outputs = Outputs.Select(s => s.Generate(model, microcontroller)).ToList();
+        var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
-        return new Gh5CombinedOutput(model, microcontroller, Sda, Scl, outputs);
+        return new Gh5CombinedOutput(model, Sda, Scl, outputs);
     }
 }

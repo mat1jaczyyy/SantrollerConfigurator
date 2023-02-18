@@ -170,15 +170,12 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.NunchukRotationPitch, StandardAxisType.RightStickY}
     };
 
-    private readonly Microcontroller _microcontroller;
-
     private WiiControllerType? _detectedType;
 
-    public WiiCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
-        IReadOnlyCollection<Output>? outputs = null) : base(model, microcontroller, WiiInput.WiiTwiType,
+    public WiiCombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
+        IReadOnlyCollection<Output>? outputs = null) : base(model, WiiInput.WiiTwiType,
         WiiInput.WiiTwiFreq, "Wii", sda, scl)
     {
-        _microcontroller = microcontroller;
         Outputs.Clear();
         if (outputs != null)
             Outputs.AddRange(outputs);
@@ -212,46 +209,46 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         Outputs.Clear();
         foreach (var pair in Buttons)
-            Outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
+            Outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), 10,
                 pair.Value));
 
         foreach (var pair in Axis)
-            Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
+            Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model,  Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), -30000, 30000, 10, pair.Value));
 
         // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, Model,_microcontroller, Sda, Scl),
+        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, Model, Sda, Scl),
         //         AnalogToDigitalType.JoyLow, 32),
         //     Colors.Black, Colors.Black, null, 10, StandardButtonType.Left));
         //
         // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, Model,_microcontroller, Sda, Scl),
+        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, Model, Sda, Scl),
         //         AnalogToDigitalType.JoyHigh, 32),
         //     Colors.Black, Colors.Black, null, 10, StandardButtonType.Right));
         // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, Model,_microcontroller, Sda, Scl),
+        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, Model, Sda, Scl),
         //         AnalogToDigitalType.JoyLow, 32),
         //     Colors.Black, Colors.Black, null, 10, StandardButtonType.Up));
         //
         // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, Model,_microcontroller, Sda, Scl),
+        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, Model, Sda, Scl),
         //         AnalogToDigitalType.JoyLow, 32),
         //     Colors.Black, Colors.Black, null, 10, StandardButtonType.Down));
 
         Outputs.Add(new ControllerAxis(Model,
-            new WiiInput(WiiInputType.GuitarTapBar, Model, _microcontroller, Sda, Scl, true),
+            new WiiInput(WiiInputType.GuitarTapBar, Model, Sda, Scl, true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
             StandardAxisType.RightStickY));
         foreach (var pair in AxisAcceleration)
-            Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
+            Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
         foreach (var pair in Tap)
-            Outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
+            Outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), 5, pair.Value));
         UpdateBindings();
@@ -306,7 +303,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             if (!Outputs.Items.Any(s => s is DrumAxis))
             {
                 foreach (var pair in Model.RhythmType == RhythmType.GuitarHero ? DrumAxisGh : DrumAxisRb)
-                    Outputs.Add(new DrumAxis(Model, new WiiInput(pair.Key, Model, _microcontroller, Sda, Scl, true),
+                    Outputs.Add(new DrumAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                         Colors.Black,
                         Colors.Black, Array.Empty<byte>(), -30000, 30000, 10, 64, 10, pair.Value));
             }
@@ -321,13 +318,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 // Rb maps orange to green, while gh maps orange to orange
                 if (Model.RhythmType == RhythmType.GuitarHero)
                     Outputs.Add(new DrumAxis(Model,
-                        new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
+                        new WiiInput(WiiInputType.DrumOrangePressure, Model, Sda, Scl, true),
                         first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64,
                         10,
                         DrumAxisType.Orange));
                 else
                     Outputs.Add(new DrumAxis(Model,
-                        new WiiInput(WiiInputType.DrumOrangePressure, Model, _microcontroller, Sda, Scl, true),
+                        new WiiInput(WiiInputType.DrumOrangePressure, Model, Sda, Scl, true),
                         first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64,
                         10,
                         DrumAxisType.Green));

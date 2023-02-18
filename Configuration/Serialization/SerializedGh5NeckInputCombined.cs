@@ -15,8 +15,8 @@ public class SerializedGh5NeckInputCombined : SerializedInput
 
     [ProtoMember(3)] private Gh5NeckInputType Type { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new Gh5NeckInput(Type, model, microcontroller, combined: true);
+        return new Gh5NeckInput(Type, model, combined: true);
     }
 }

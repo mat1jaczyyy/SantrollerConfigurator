@@ -14,12 +14,12 @@ public class DjInput : TwiInput
     public static readonly string DjTwiType = "dj";
     public static readonly int DjTwiFreq = 150000;
 
-    public DjInput(DjInputType input, ConfigViewModel model, Microcontroller microcontroller, int? sda = null,
+    public DjInput(DjInputType input, ConfigViewModel model, int? sda = null,
         int? scl = null, bool combined = false) : base(
-        microcontroller, DjTwiType, DjTwiFreq, sda, scl, model)
+         DjTwiType, DjTwiFreq, sda, scl, model)
     {
         Combined = combined;
-        BindableTwi = !combined && microcontroller.TwiAssignable;
+        BindableTwi = !combined && Model.Microcontroller.TwiAssignable;
         Input = input;
         IsAnalog = Input <= DjInputType.RightTurntable;
     }

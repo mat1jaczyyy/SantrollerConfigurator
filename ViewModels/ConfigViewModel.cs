@@ -30,29 +30,16 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 {
     public static readonly string Apa102SpiType = "APA102";
     public static readonly string RfSpiType = "RF";
-    private readonly ObservableAsPropertyHelper<List<int>> _availableMosiPins;
-    private readonly ObservableAsPropertyHelper<List<int>> _availableMisoPins;
-    private readonly ObservableAsPropertyHelper<List<int>> _availableSckPins;
-    private readonly ObservableAsPropertyHelper<List<int>> _availablePins;
-
-
-    private readonly ObservableAsPropertyHelper<bool> _bindableSpi;
 
     private readonly ObservableAsPropertyHelper<bool> _isApa102;
     private readonly ObservableAsPropertyHelper<bool> _isController;
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
-    private readonly ObservableAsPropertyHelper<bool> _isRhythm;
     private readonly ObservableAsPropertyHelper<bool> _isRf;
+    private readonly ObservableAsPropertyHelper<bool> _isRhythm;
 
     private readonly ObservableAsPropertyHelper<string?> _writeToolTip;
 
     private SpiConfig? _apa102SpiConfig;
-
-    private SpiConfig? _rfSpiConfig;
-
-    private DirectPinConfig? _rfCsn;
-
-    private DirectPinConfig? _rfCe;
 
     private bool _combinedDebounce;
 
@@ -66,13 +53,17 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private byte _ledCount;
 
-    private byte _rfChannel;
-
     private LedType _ledType;
 
-    private Microcontroller? _microController;
-
     private MouseMovementType _mouseMovementType;
+
+    private DirectPinConfig? _rfCe;
+
+    private byte _rfChannel;
+
+    private DirectPinConfig? _rfCsn;
+
+    private SpiConfig? _rfSpiConfig;
 
     private RhythmType _rhythmType;
 
@@ -82,12 +73,13 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public ConfigViewModel(MainWindowViewModel screen)
     {
+        Microcontroller = screen.SelectedDevice!.GetMicrocontroller(this);
         ShowIssueDialog = new Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>();
         ShowUnoShortDialog = new Interaction<Arduino, ShowUnoShortWindowViewModel?>();
         ShowYesNoDialog =
             new Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>();
         ShowBindAllDialog =
-            new Interaction<(ConfigViewModel model, Microcontroller microcontroller, Output output, DirectInput
+            new Interaction<(ConfigViewModel model, Output output, DirectInput
                 input), BindAllWindowViewModel>();
         BindAllCommand = ReactiveCommand.CreateFromTask(BindAll);
         Main = screen;
@@ -95,7 +87,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         WriteConfig = ReactiveCommand.CreateFromObservable(Write,
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
-                .ObserveOn(RxApp.MainThreadScheduler).Select(x => !x.Item1 && x.Item2 && !x.Item3));
+                .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
         GoBack = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute);
         Bindings = new AvaloniaList<Output>();
 
@@ -118,21 +110,8 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Select(x => x is LedType.APA102_BGR or LedType.APA102_BRG or LedType.APA102_GBR or LedType.APA102_GRB
                 or LedType.APA102_RBG or LedType.APA102_RGB)
             .ToProperty(this, x => x.IsApa102);
-        _bindableSpi = this.WhenAnyValue(x => x.MicroController)
-            .Select(x => x.SpiAssignable)
-            .ToProperty(this, x => x.BindableSpi);
-        _availableMisoPins = this.WhenAnyValue(x => x.MicroController)
-            .Select(GetMisoPins)
-            .ToProperty(this, x => x.AvailableMosiPins);
-        _availableMosiPins = this.WhenAnyValue(x => x.MicroController)
-            .Select(GetMosiPins)
-            .ToProperty(this, x => x.AvailableMosiPins);
-        _availableSckPins = this.WhenAnyValue(x => x.MicroController)
-            .Select(GetSckPins)
-            .ToProperty(this, x => x.AvailableSckPins);
-        _availablePins = this.WhenAnyValue(x => x.MicroController)
-            .Select(GetDigitalPins)
-            .ToProperty(this, x => x.AvailableSckPins);
+
+        if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults();
     }
 
     public Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?> ShowIssueDialog { get; }
@@ -141,7 +120,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel> ShowYesNoDialog { get; }
 
-    public Interaction<(ConfigViewModel model, Microcontroller microcontroller, Output output, DirectInput input),
+    public Interaction<(ConfigViewModel model, Output output, DirectInput input),
             BindAllWindowViewModel>
         ShowBindAllDialog { get; }
 
@@ -250,16 +229,16 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             if (value == LedType.None)
             {
-                MicroController!.UnAssignPins(Apa102SpiType);
+                Microcontroller.UnAssignPins(Apa102SpiType);
             }
             else if (_ledType == LedType.None)
             {
-                var pins = MicroController!.SpiPins(Apa102SpiType);
+                var pins = Microcontroller.SpiPins(Apa102SpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _apa102SpiConfig = MicroController.AssignSpiPins(this, Apa102SpiType, mosi, -1, sck, true, true,
+                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, mosi, -1, sck, true, true,
                     true,
-                    Math.Min(MicroController.Board.CpuFreq / 2, 12000000))!;
+                    Math.Min(Microcontroller.Board.CpuFreq / 2, 12000000))!;
                 this.RaisePropertyChanged(nameof(Apa102Mosi));
                 this.RaisePropertyChanged(nameof(Apa102Sck));
             }
@@ -306,34 +285,48 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
-    public Microcontroller? MicroController
-    {
-        get => _microController;
-        set => this.RaiseAndSetIfChanged(ref _microController, value);
-    }
+    public Microcontroller Microcontroller { get; }
 
     public AvaloniaList<Output> Bindings { get; }
     public bool IsRhythm => _isRhythm.Value;
     public bool IsController => _isController.Value;
     public bool IsKeyboard => _isKeyboard.Value;
     public bool IsApa102 => _isApa102.Value;
-    public bool BindableSpi => _bindableSpi.Value;
+    public bool BindableSpi => Microcontroller.SpiAssignable;
     public bool IsRf => _isRf.Value;
     public string? WriteToolTip => _writeToolTip.Value;
-    public List<int> AvailableMosiPins => _availableMosiPins.Value;
-    public List<int> AvailableMisoPins => _availableMisoPins.Value;
-    public List<int> AvailableSckPins => _availableSckPins.Value;
-    public List<int> AvailablePins => _availablePins.Value;
-    public IEnumerable<PinConfig> PinConfigs => new[] {_apa102SpiConfig!};
 
+    public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
+        .Where(s => s.Value is SpiPinType.Mosi)
+        .Select(s => s.Key).ToList();
+
+    public List<int> AvailableApaSckPins => Microcontroller.SpiPins(Apa102SpiType)
+        .Where(s => s.Value is SpiPinType.Sck)
+        .Select(s => s.Key).ToList();
+
+    public List<int> AvailableRfMosiPins => Microcontroller.SpiPins(RfSpiType)
+        .Where(s => s.Value is SpiPinType.Miso)
+        .Select(s => s.Key).ToList();
+
+    public List<int> AvailableRfMisoPins => Microcontroller.SpiPins(RfSpiType)
+        .Where(s => s.Value is SpiPinType.Mosi)
+        .Select(s => s.Key).ToList();
+
+    public List<int> AvailableRfSckPins => Microcontroller.SpiPins(RfSpiType)
+        .Where(s => s.Value is SpiPinType.Sck)
+        .Select(s => s.Key).ToList();
+
+    public List<int> AvailablePins => Microcontroller.GetAllPins(false);
+    public IEnumerable<PinConfig> PinConfigs => new[] {_apa102SpiConfig!};
     public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
 
     public IScreen HostScreen { get; }
 
+
     public void AddLedBinding()
     {
         var first = Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((DeviceType, EmulationType))).First();
-        Bindings.Add(new Led(this, MicroController!, false, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
+        Bindings.Add(new Led(this,  false, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
             first));
     }
 
@@ -382,92 +375,58 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         if (_deviceControllerType == DeviceControllerType.Turntable)
             if (!Bindings.Any(s => s is DjCombinedOutput))
-                Bindings.Add(new DjCombinedOutput(this, MicroController!));
+                Bindings.Add(new DjCombinedOutput(this));
 
         foreach (var type in types)
             switch (type)
             {
                 case StandardButtonType buttonType:
                     Bindings.Add(new ControllerButton(this,
-                        new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
+                        new DirectInput(0, DevicePinMode.PullUp, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType));
                     break;
                 case RBButtonType buttonType:
                     Bindings.Add(new RbButton(this,
-                        new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
+                        new DirectInput(0, DevicePinMode.PullUp, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType));
                     break;
                 case StandardAxisType axisType:
                     Bindings.Add(new ControllerAxis(this,
-                        new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
-                            MicroController!),
+                        new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                         0, axisType));
                     break;
                 case GuitarAxisType axisType:
-                    Bindings.Add(new GuitarAxis(this, new DirectInput(MicroController!.GetFirstAnalogPin(),
-                            DevicePinMode.Analog, this,
-                            MicroController!),
+                    Bindings.Add(new GuitarAxis(this, new DirectInput(Microcontroller.GetFirstAnalogPin(),
+                            DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                         0, axisType));
                     break;
                 case DrumAxisType axisType:
                     Bindings.Add(new DrumAxis(this,
-                        new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
-                            MicroController!),
+                        new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                         0, 64, 10, axisType));
                     break;
                 case DjAxisType axisType:
                     if (axisType is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity) continue;
                     Bindings.Add(new DjAxis(this,
-                        new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this,
-                            MicroController!),
+                        new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
                         0, axisType));
                     break;
             }
     }
 
-    private List<int> GetMisoPins(Microcontroller? microcontroller)
-    {
-        if (MicroController == null) return new List<int>();
-        return microcontroller!.SpiPins(Apa102SpiType)
-            .Where(s => s.Value is SpiPinType.Miso)
-            .Select(s => s.Key).ToList();
-    }
-
-    private List<int> GetMosiPins(Microcontroller? microcontroller)
-    {
-        if (MicroController == null) return new List<int>();
-        return microcontroller!.SpiPins(Apa102SpiType)
-            .Where(s => s.Value is SpiPinType.Mosi)
-            .Select(s => s.Key).ToList();
-    }
-
-    private List<int> GetDigitalPins(Microcontroller? microcontroller)
-    {
-        if (MicroController == null) return new List<int>();
-        return microcontroller!.GetAllPins(false);
-    }
-
-    private List<int> GetSckPins(Microcontroller? microcontroller)
-    {
-        if (MicroController == null) return new List<int>();
-        return microcontroller!.SpiPins(Apa102SpiType)
-            .Where(s => s.Value is SpiPinType.Sck)
-            .Select(s => s.Key).ToList();
-    }
 
     public IObservable<PlatformIo.PlatformIoState> Write()
     {
         return Main.Write(this);
     }
 
-    public void SetDefaults(Microcontroller microcontroller)
+    public void SetDefaults()
     {
         ClearOutputs();
-        MicroController = microcontroller;
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
         _emulationType = EmulationType.Controller;
@@ -484,10 +443,13 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 SetDefaultBindings(EmulationType);
                 break;
             case DeviceInputType.Wii:
-                Bindings.Add(new WiiCombinedOutput(this, microcontroller));
+                Bindings.Add(new WiiCombinedOutput(this));
                 break;
             case DeviceInputType.Ps2:
-                Bindings.Add(new Ps2CombinedOutput(this, microcontroller));
+                Bindings.Add(new Ps2CombinedOutput(this));
+                break;
+            case DeviceInputType.Rf:
+                Bindings.Add(new RFRXOutput(this));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -511,38 +473,38 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             if (_rfSpiConfig == null)
             {
-                var pins = MicroController!.SpiPins(RfSpiType);
+                var pins = Microcontroller.SpiPins(RfSpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = MicroController.AssignSpiPins(this, RfSpiType, mosi, miso, sck, true, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfSpiType, mosi, miso, sck, true, true,
                     true,
                     4000000);
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
                 this.RaisePropertyChanged(nameof(RfSck));
-                var first = MicroController!.GetAllPins(false).First();
-                _rfCe = MicroController!.GetOrSetPin(this, RfSpiType + "_ce", first, DevicePinMode.PullUp);
-                _rfCsn = MicroController!.GetOrSetPin(this, RfSpiType + "_csn", first, DevicePinMode.Output);
+                var first = Microcontroller.GetAllPins(false).First();
+                _rfCe = Microcontroller.GetOrSetPin(this, RfSpiType + "_ce", first, DevicePinMode.PullUp);
+                _rfCsn = Microcontroller.GetOrSetPin(this, RfSpiType + "_csn", first, DevicePinMode.Output);
             }
         }
         else
         {
             if (_rfSpiConfig != null)
             {
-                MicroController!.UnAssignPins(_rfSpiConfig.Type);
+                Microcontroller.UnAssignPins(_rfSpiConfig.Type);
                 _rfSpiConfig = null;
             }
 
             if (_rfCe != null)
             {
-                MicroController!.UnAssignPins(_rfCe.Type);
+                Microcontroller.UnAssignPins(_rfCe.Type);
                 _rfCe = null;
             }
 
             if (_rfCsn != null)
             {
-                MicroController!.UnAssignPins(_rfCsn.Type);
+                Microcontroller.UnAssignPins(_rfCsn.Type);
                 _rfCsn = null;
             }
         }
@@ -576,7 +538,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             if (DeviceType == DeviceControllerType.Turntable &&
                 type is StandardAxisType.LeftStickX or StandardAxisType.LeftStickY) continue;
             Bindings.Add(new ControllerAxis(this,
-                new DirectInput(MicroController!.GetFirstAnalogPin(), DevicePinMode.Analog, this, MicroController!),
+                new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                 type));
         }
@@ -586,7 +548,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
                 null) continue;
             Bindings.Add(new ControllerButton(this,
-                new DirectInput(0, DevicePinMode.PullUp, this, MicroController!),
+                new DirectInput(0, DevicePinMode.PullUp, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type));
         }
 
@@ -600,7 +562,6 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void Generate(PlatformIo pio)
     {
-        if (_microController == null) return;
         var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
         var inputs = outputs.Select(binding => binding.Input?.InnermostInput()).OfType<Input>().ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
@@ -685,13 +646,13 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         // Sort by pin index, and then map to adc number and turn into an array
         lines.Add(
-            $"#define ADC_PINS {{{string.Join(",", directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin).Select(s => _microController.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct())}}}");
+            $"#define ADC_PINS {{{string.Join(",", directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin).Select(s => Microcontroller.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct())}}}");
 
-        lines.Add($"#define PIN_INIT {_microController.GenerateInit()}");
+        lines.Add($"#define PIN_INIT {Microcontroller.GenerateInit()}");
 
-        lines.Add(_microController.GenerateDefinitions());
+        lines.Add(Microcontroller.GenerateDefinitions());
 
-        lines.Add($"#define ARDWIINO_BOARD \"{_microController.Board.ArdwiinoName}\"");
+        lines.Add($"#define ARDWIINO_BOARD \"{Microcontroller.Board.ArdwiinoName}\"");
         lines.Add(string.Join("\n",
             inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}")));
 
@@ -742,7 +703,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         foreach (var binding in Bindings)
         {
             if (binding.Input?.InnermostInput() is not DirectInput direct) continue;
-            var response = await ShowBindAllDialog.Handle((this, MicroController!, binding, direct)).ToTask();
+            var response = await ShowBindAllDialog.Handle((this, binding, direct)).ToTask();
             if (!response.Response) return;
         }
     }
@@ -818,7 +779,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (IsController)
             Bindings.Add(new EmptyOutput(this));
         else if (IsKeyboard)
-            Bindings.Add(new KeyboardButton(this, new DirectInput(0, DevicePinMode.PullUp, this, _microController!),
+            Bindings.Add(new KeyboardButton(this, new DirectInput(0, DevicePinMode.PullUp, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 1, Key.Space));
 
         UpdateErrors();
@@ -827,7 +788,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private string GenerateLedTick()
     {
         var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
-        if (_microController == null || _ledType == LedType.None ||
+        if (_ledType == LedType.None ||
             !outputs.Any(s => s.LedIndices.Any())) return "";
         var ledMax = outputs.SelectMany(output => output.LedIndices).Max();
         var ret =
@@ -843,7 +804,6 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private string GenerateTick(ConfigField mode)
     {
-        if (_microController == null) return "";
         var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
         var groupedOutputs = outputs
             .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
@@ -906,7 +866,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                 {
                                     if (mode == ConfigField.Shared)
                                     {
-                                        output = output.Serialize().Generate(this, _microController);
+                                        output = output.Serialize().Generate(this);
                                         output.Input = input;
                                         index = new List<int> {debounces[output.Name + generatedInput]};
                                     }

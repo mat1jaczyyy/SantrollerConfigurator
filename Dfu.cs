@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet.DeviceNotify;
@@ -13,9 +14,9 @@ public class Dfu : IConfigurableDevice
     public static readonly uint DfuPid16U2 = 0x2FEF;
     public static readonly uint DfuVid = 0x03eb;
 
-    private readonly string _port;
-
     private readonly DeviceNotifyEventArgs _args;
+
+    private readonly string _port;
 
     public Dfu(DeviceNotifyEventArgs args)
     {
@@ -56,7 +57,7 @@ public class Dfu : IConfigurableDevice
         return false;
     }
 
-    public void LoadConfiguration(ConfigViewModel model)
+    public Microcontroller GetMicrocontroller(ConfigViewModel model)
     {
         var board = Board;
         if (Board.ArdwiinoName == "usb")
@@ -75,7 +76,12 @@ public class Dfu : IConfigurableDevice
                     throw new ArgumentOutOfRangeException();
             }
 
-        model.SetDefaults(Board.FindMicrocontroller(board));
+        return Board.FindMicrocontroller(board);
+    }
+
+    public bool LoadConfiguration(ConfigViewModel model)
+    {
+        return false;
     }
 
     public Task<string?> GetUploadPort()

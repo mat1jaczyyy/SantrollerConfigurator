@@ -8,8 +8,7 @@ public class Pico : Microcontroller
 {
     private const int GpioCount = 30;
     private const int PinA0 = 26;
-    public override bool TwiAssignable => true;
-    public override bool SpiAssignable => true;
+
     public static readonly Dictionary<int, SpiPinType> SpiTypesByPin = new()
     {
         {0, SpiPinType.Miso},
@@ -118,6 +117,9 @@ public class Pico : Microcontroller
     {
         Board = board;
     }
+
+    public override bool TwiAssignable => true;
+    public override bool SpiAssignable => true;
 
     public override Board Board { get; }
 

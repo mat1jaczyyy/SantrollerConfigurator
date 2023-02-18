@@ -17,6 +17,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoInclude(113, typeof(SerializedGuitarAxis))]
 [ProtoInclude(114, typeof(SerializedDjAxis))]
 [ProtoInclude(115, typeof(SerializedRBButton))]
+[ProtoInclude(116, typeof(SerializedRfOutput))]
 [ProtoInclude(105, typeof(SerializedDjCombinedOutput))]
 [ProtoInclude(106, typeof(SerializedGh5CombinedOutput))]
 [ProtoInclude(107, typeof(SerializedGhwtCombinedOutput))]
@@ -29,7 +30,7 @@ public abstract class SerializedOutput
     public abstract uint LedOn { get; }
     public abstract uint LedOff { get; }
     public abstract byte[] LedIndex { get; }
-    public abstract Output Generate(ConfigViewModel model, Microcontroller microcontroller);
+    public abstract Output Generate(ConfigViewModel model);
 
     protected byte[] GetBytes(BitArray bits)
     {

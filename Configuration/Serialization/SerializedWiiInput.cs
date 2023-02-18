@@ -19,8 +19,8 @@ public class SerializedWiiInput : SerializedInput
     [ProtoMember(2)] private int Scl { get; }
     [ProtoMember(3)] private WiiInputType Type { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new WiiInput(Type, model, microcontroller, Sda, Scl);
+        return new WiiInput(Type, model, Sda, Scl);
     }
 }

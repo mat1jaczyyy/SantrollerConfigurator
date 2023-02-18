@@ -15,8 +15,8 @@ public class SerializedPs2InputCombined : SerializedInput
 
     [ProtoMember(6)] private Ps2InputType Type { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new Ps2Input(Type, model, microcontroller, combined: true);
+        return new Ps2Input(Type, model, combined: true);
     }
 }

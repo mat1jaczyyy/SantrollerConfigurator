@@ -27,7 +27,6 @@ public class ConfigView : ReactiveUserControl<ConfigViewModel>
             disposables(ViewModel!.ShowUnoShortDialog.RegisterHandler(DoShowUnoDialogAsync));
             disposables(ViewModel!.ShowYesNoDialog.RegisterHandler(DoShowYesNoDialogAsync));
             disposables(ViewModel!.ShowBindAllDialog.RegisterHandler(DoShowBindAllDialog));
-            ViewModel!.Main.SelectedDevice!.LoadConfiguration(ViewModel);
             disposables(
                 ViewModel!.WhenAnyValue(x => x.Main.SelectedDevice!).OfType<Santroller>()
                     .ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => s.StartTicking(ViewModel)));
@@ -73,10 +72,10 @@ public class ConfigView : ReactiveUserControl<ConfigViewModel>
     }
 
     private async Task DoShowBindAllDialog(
-        InteractionContext<(ConfigViewModel model, Microcontroller microcontroller, Output output, DirectInput input),
+        InteractionContext<(ConfigViewModel model, Output output, DirectInput input),
             BindAllWindowViewModel> interaction)
     {
-        var model = new BindAllWindowViewModel(interaction.Input.model, interaction.Input.microcontroller,
+        var model = new BindAllWindowViewModel(interaction.Input.model, 
             interaction.Input.output, interaction.Input.input);
         var dialog = new BindAllWindow
         {

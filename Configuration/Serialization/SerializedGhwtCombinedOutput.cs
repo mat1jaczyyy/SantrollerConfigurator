@@ -30,12 +30,12 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
     public override uint LedOff => Colors.Black.ToUint32();
     public override byte[] LedIndex => Array.Empty<byte>();
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
-        microcontroller.AssignPin(new DirectPinConfig(model, GhWtTapInput.GhWtTapPinType, Pin, DevicePinMode.Floating));
+        model.Microcontroller.AssignPin(new DirectPinConfig(model, GhWtTapInput.GhWtTapPinType, Pin, DevicePinMode.Floating));
         var array = new BitArray(Enabled);
-        var outputs = Outputs.Select(s => s.Generate(model, microcontroller)).ToList();
+        var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
-        return new GhwtCombinedOutput(model, microcontroller, Pin, outputs);
+        return new GhwtCombinedOutput(model, Pin, outputs);
     }
 }

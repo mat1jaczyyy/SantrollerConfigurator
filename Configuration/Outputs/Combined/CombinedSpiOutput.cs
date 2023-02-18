@@ -10,17 +10,15 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 {
     private readonly SpiConfig _spiConfig;
-    protected readonly Microcontroller Microcontroller;
 
-    protected CombinedSpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, uint spiFreq,
+    protected CombinedSpiOutput(ConfigViewModel model, string spiType, uint spiFreq,
         bool cpol,
         bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null) : base(model, null,
         name)
     {
-        Microcontroller = microcontroller;
         SpiType = spiType;
-        BindableSpi = microcontroller.SpiAssignable;
-        var config = microcontroller.GetSpiForType(SpiType);
+        BindableSpi = Model.Microcontroller.SpiAssignable;
+        var config = Model.Microcontroller.GetSpiForType(SpiType);
         if (config != null)
         {
             _spiConfig = config;
@@ -29,13 +27,13 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
         {
             if (miso == null || mosi == null || sck == null)
             {
-                var pins = microcontroller.SpiPins(SpiType);
+                var pins = Model.Microcontroller.SpiPins(SpiType);
                 miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
             }
 
-            _spiConfig = microcontroller.AssignSpiPins(model, SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha,
+            _spiConfig = Model.Microcontroller.AssignSpiPins(model, SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha,
                 msbFirst, spiFreq)!;
         }
 
@@ -72,33 +70,33 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 
     public List<int> SpiPins()
     {
-        return new() {Mosi, Miso, Sck};
+        return new List<int> {Mosi, Miso, Sck};
     }
 
     private List<int> GetMosiPins()
     {
-        return Microcontroller.SpiPins(SpiType)
+        return Model.Microcontroller.SpiPins(SpiType)
             .Where(s => s.Value is SpiPinType.Mosi)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetMisoPins()
     {
-        return Microcontroller.SpiPins(SpiType)
+        return Model.Microcontroller.SpiPins(SpiType)
             .Where(s => s.Value is SpiPinType.Miso)
             .Select(s => s.Key).ToList();
     }
 
     private List<int> GetSckPins()
     {
-        return Microcontroller.SpiPins(SpiType)
+        return Model.Microcontroller.SpiPins(SpiType)
             .Where(s => s.Value is SpiPinType.Sck)
             .Select(s => s.Key).ToList();
     }
 
     public override void Dispose()
     {
-        Microcontroller.UnAssignPins(SpiType);
+        Model.Microcontroller.UnAssignPins(SpiType);
         base.Dispose();
     }
 }

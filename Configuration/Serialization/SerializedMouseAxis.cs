@@ -34,9 +34,9 @@ public class SerializedMouseAxis : SerializedOutput
 
     public MouseAxisType Type { get; }
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
-        return new MouseAxis(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn),
+        return new MouseAxis(model, Input?.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
             Type);
     }

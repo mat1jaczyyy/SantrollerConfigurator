@@ -21,5 +21,5 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoInclude(114, typeof(SerializedMacroInput))]
 public abstract class SerializedInput
 {
-    public abstract Input Generate(Microcontroller microcontroller1, ConfigViewModel model);
+    public abstract Input Generate(ConfigViewModel model);
 }

@@ -46,9 +46,8 @@ public class GhWtTapInput : InputWithPin
             type => Mappings.Where(mapping => mapping.Value.HasFlag(InputToButton[type]))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public GhWtTapInput(GhWtInputType input, ConfigViewModel model, Microcontroller microcontroller, int pin = 0,
-        bool combined = false) : base(model, microcontroller,
-        microcontroller.GetOrSetPin(model, GhWtTapPinType, pin, DevicePinMode.PullUp))
+    public GhWtTapInput(GhWtInputType input, ConfigViewModel model, int pin = 0,
+        bool combined = false) : base(model, model.Microcontroller.GetOrSetPin(model, GhWtTapPinType, pin, DevicePinMode.PullUp))
     {
         Combined = combined;
         Input = input;
@@ -102,7 +101,7 @@ public class GhWtTapInput : InputWithPin
     public override IReadOnlyList<string> RequiredDefines()
     {
         return new[]
-            {"INPUT_WT_NECK", $"WT_NECK_READ() {Microcontroller.GeneratePulseRead(PinConfig.Pin, PulseMode.LOW, 100)}"};
+            {"INPUT_WT_NECK", $"WT_NECK_READ() {Model.Microcontroller.GeneratePulseRead(PinConfig.Pin, PulseMode.LOW, 100)}"};
     }
 
     public override string GetImagePath()

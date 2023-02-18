@@ -28,9 +28,9 @@ public class SerializedRBButton : SerializedOutput
     [ProtoMember(4)] public byte Debounce { get; }
     [ProtoMember(5)] public RBButtonType Type { get; }
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
-        return new RbButton(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn),
+        return new RbButton(model, Input?.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
     }
 }

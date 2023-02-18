@@ -25,8 +25,8 @@ public class SerializedPs2Input : SerializedInput
     [ProtoMember(5)] private int? Ack { get; }
     [ProtoMember(6)] private Ps2InputType Type { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new Ps2Input(Type, model, microcontroller, Miso, Mosi, Sck, Att, Ack);
+        return new Ps2Input(Type, model, Miso, Mosi, Sck, Att, Ack);
     }
 }

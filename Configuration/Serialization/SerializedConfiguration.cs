@@ -41,9 +41,9 @@ public class SerializedConfiguration
         model.SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceType, RhythmType, EmulationType);
         model.CombinedDebounce = CombinedDebounce;
         model.XInputOnWindows = XInputOnWindows;
-        model.MicroController!.UnAssignAll();
+        model.Microcontroller.UnAssignAll();
         model.Bindings.Clear();
-        model.Bindings.AddRange(Bindings.Select(s => s.Generate(model, model.MicroController!)));
+        model.Bindings.AddRange(Bindings.Select(s => s.Generate(model)));
         model.LedType = LedType;
         model.LedCount = LedCount < 1 ? (byte) 1 : LedCount;
         model.MouseMovementType = MouseMovementType;

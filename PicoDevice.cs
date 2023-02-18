@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 
@@ -42,9 +43,14 @@ public class PicoDevice : IConfigurableDevice
         return false;
     }
 
-    public void LoadConfiguration(ConfigViewModel model)
+    public bool LoadConfiguration(ConfigViewModel model)
     {
-        model.SetDefaults(Board.FindMicrocontroller(Board.FindBoard("pico", 0)));
+        return false;
+    }
+
+    public Microcontroller GetMicrocontroller(ConfigViewModel model)
+    {
+        return Board.FindMicrocontroller(Board.FindBoard("pico", 0));
     }
 
     public Task<string?> GetUploadPort()

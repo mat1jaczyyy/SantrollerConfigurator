@@ -31,15 +31,13 @@ public class GhwtCombinedOutput : CombinedOutput
         {GhWtInputType.TapOrange, RBButtonType.UpperOrange}
     };
 
-    private readonly Microcontroller _microcontroller;
 
     private readonly DirectPinConfig _pin;
 
-    public GhwtCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null,
+    public GhwtCombinedOutput(ConfigViewModel model, int? pin = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, null, "GHWT")
     {
-        _microcontroller = microcontroller;
-        _pin = microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtTapPinType, pin ?? 0, DevicePinMode.PullUp);
+        _pin = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtTapPinType, pin ?? 0, DevicePinMode.PullUp);
         this.WhenAnyValue(x => x._pin.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
         Outputs.Clear();
         if (outputs != null)
@@ -62,7 +60,7 @@ public class GhwtCombinedOutput : CombinedOutput
         set => _pin.Pin = value;
     }
 
-    public List<int> AvailablePins => _microcontroller.GetAllPins(false);
+    public List<int> AvailablePins => Model.Microcontroller.GetAllPins(false);
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
@@ -73,7 +71,7 @@ public class GhwtCombinedOutput : CombinedOutput
     {
         foreach (var pair in Taps)
             Outputs.Add(new ControllerButton(Model,
-                new GhWtTapInput(pair.Key, Model, _microcontroller,
+                new GhWtTapInput(pair.Key, Model,
                     combined: true), Colors.Black,
                 Colors.Black, Array.Empty<byte>(), 5, pair.Value));
 
@@ -97,7 +95,7 @@ public class GhwtCombinedOutput : CombinedOutput
             {
                 Outputs.Clear();
                 Outputs.Add(new GuitarAxis(Model,
-                    new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
+                    new GhWtTapInput(GhWtInputType.TapBar, Model, 
                         combined: true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
@@ -110,7 +108,7 @@ public class GhwtCombinedOutput : CombinedOutput
             {
                 Outputs.Clear();
                 Outputs.Add(new ControllerAxis(Model,
-                    new GhWtTapInput(GhWtInputType.TapBar, Model, _microcontroller,
+                    new GhWtTapInput(GhWtInputType.TapBar, Model, 
                         combined: true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,

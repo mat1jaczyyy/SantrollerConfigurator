@@ -14,17 +14,15 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public class DjCombinedOutput : CombinedTwiOutput
 {
-    private readonly Microcontroller _microcontroller;
 
     private bool _detectedLeft;
 
     private bool _detectedRight;
 
-    public DjCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
+    public DjCombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
         IReadOnlyCollection<Output>? outputs = null) :
-        base(model, microcontroller, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ", sda, scl)
+        base(model, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ", sda, scl)
     {
-        _microcontroller = microcontroller;
         Outputs.Clear();
         if (outputs != null)
             Outputs.AddRange(outputs);
@@ -64,12 +62,12 @@ public class DjCombinedOutput : CombinedTwiOutput
 
         Outputs.AddRange(DjInputTypes.Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable))
             .Select(button => new DjButton(Model,
-                new DjInput(button, Model, _microcontroller, combined: true),
+                new DjInput(button, Model, combined: true),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 5, button)));
-        Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, _microcontroller, combined: true),
+        Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, combined: true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), 0, 16, 0, DjAxisType.LeftTableVelocity));
-        Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.RightTurntable, Model, _microcontroller, combined: true),
+        Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.RightTurntable, Model, combined: true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), 0, 16, 0, DjAxisType.RightTableVelocity));
     }

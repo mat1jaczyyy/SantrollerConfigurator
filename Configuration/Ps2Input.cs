@@ -201,19 +201,19 @@ public class Ps2Input : SpiInput
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
 
-    public Ps2Input(Ps2InputType input, ConfigViewModel model, Microcontroller microcontroller, int? miso = null,
+    public Ps2Input(Ps2InputType input, ConfigViewModel model, int? miso = null,
         int? mosi = null,
-        int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(microcontroller,
+        int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(
         Ps2SpiType,
         Ps2SpiFreq, Ps2SpiCpol,
         Ps2SpiCpha, Ps2SpiMsbFirst, miso: miso, mosi: mosi, sck: sck, model: model)
     {
         Combined = combined;
-        BindableSpi = !Combined && microcontroller.SpiAssignable;
+        BindableSpi = !Combined && Model.Microcontroller.SpiAssignable;
         Input = input;
-        _ackConfig = microcontroller
-            .GetOrSetPin(model, Ps2AckType, ack ?? microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);
-        _attConfig = microcontroller.GetOrSetPin(model, Ps2AttType, att ?? 0, DevicePinMode.Output);
+        _ackConfig = Model.Microcontroller
+            .GetOrSetPin(model, Ps2AckType, ack ?? Model.Microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);
+        _attConfig = Model.Microcontroller.GetOrSetPin(model, Ps2AttType, att ?? 0, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         IsAnalog = Input <= Ps2InputType.Dualshock2R2;
@@ -240,7 +240,7 @@ public class Ps2Input : SpiInput
     public override bool IsUint => !IntInputs.Contains(Input);
 
     public override InputType? InputType => Types.InputType.Ps2Input;
-    public List<int> AvailablePins => Microcontroller.GetAllPins(false);
+    public List<int> AvailablePins => Model.Microcontroller.GetAllPins(false);
 
     public override IList<DevicePin> Pins => new List<DevicePin>
     {
@@ -474,9 +474,9 @@ public class Ps2Input : SpiInput
         var defines = base.RequiredDefines().ToList();
         defines.Add("INPUT_PS2");
         defines.Add($"PS2_ACK {Ack}");
-        defines.Add($"INPUT_PS2_ATT_SET() {Microcontroller.GenerateDigitalWrite(Att, true)}");
-        defines.Add($"INPUT_PS2_ATT_CLEAR() {Microcontroller.GenerateDigitalWrite(Att, false)}");
-        var ack = Microcontroller.GenerateAckDefines(Ack);
+        defines.Add($"INPUT_PS2_ATT_SET() {Model.Microcontroller.GenerateDigitalWrite(Att, true)}");
+        defines.Add($"INPUT_PS2_ATT_CLEAR() {Model.Microcontroller.GenerateDigitalWrite(Att, false)}");
+        var ack = Model.Microcontroller.GenerateAckDefines(Ack);
         if (!string.IsNullOrEmpty(ack)) defines.Add(ack);
 
         return defines;

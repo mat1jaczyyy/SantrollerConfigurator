@@ -11,9 +11,8 @@ namespace GuitarConfigurator.NetCore.Configuration;
 
 public class DirectInput : InputWithPin
 {
-    public DirectInput(int pin, DevicePinMode pinMode, ConfigViewModel model, Microcontroller microcontroller) : base(
-        model, microcontroller,
-        new DirectPinConfig(model, Guid.NewGuid().ToString(), pin, pinMode))
+    public DirectInput(int pin, DevicePinMode pinMode, ConfigViewModel model) : base(
+        model, new DirectPinConfig(model, Guid.NewGuid().ToString(), pin, pinMode))
     {
         IsAnalog = PinConfig.PinMode == DevicePinMode.Analog;
     }
@@ -36,7 +35,7 @@ public class DirectInput : InputWithPin
     {
         var modes = Enum.GetValues(typeof(DevicePinMode)).Cast<DevicePinMode>()
             .Where(mode => mode is not (DevicePinMode.Output or DevicePinMode.Analog));
-        return Microcontroller.Board.IsAvr()
+        return Model.Microcontroller.Board.IsAvr()
             ? modes.Where(mode => mode is not (DevicePinMode.BusKeep or DevicePinMode.PullDown))
             : modes;
     }
@@ -50,14 +49,14 @@ public class DirectInput : InputWithPin
     public override string Generate(ConfigField mode)
     {
         return IsAnalog
-            ? Microcontroller.GenerateAnalogRead(PinConfig.Pin)
-            : Microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
+            ? Model.Microcontroller.GenerateAnalogRead(PinConfig.Pin)
+            : Model.Microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
     }
 
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-        if (Microcontroller is not AvrController) return string.Join("\n", bindings.Select(binding => binding.Item2));
+        if (Model.Microcontroller is not AvrController) return string.Join("\n", bindings.Select(binding => binding.Item2));
         var replacements = new Dictionary<string, string>();
         var seenPins = allBindings.Select(s => s.Input?.InnermostInput()).OfType<DirectInput>().Where(s => s.IsAnalog)
             .Select(s => s.Pin).Distinct().OrderBy(s => s).Select((pin, index) => (pin, index))

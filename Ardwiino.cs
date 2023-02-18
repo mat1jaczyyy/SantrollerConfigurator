@@ -83,6 +83,8 @@ public class Ardwiino : ConfigurableUsbDevice
             {ControllerButtons.XboxY, StandardButtonType.Y}
         };
 
+    private readonly uint _cpuFreq;
+
     private readonly bool _failed = false;
 
     private readonly List<StandardButtonType> _frets = new()
@@ -91,8 +93,6 @@ public class Ardwiino : ConfigurableUsbDevice
         StandardButtonType.LeftShoulder,
         StandardButtonType.RightShoulder
     };
-
-    private readonly uint _cpuFreq;
 
     public Ardwiino(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort versionNumber)
         : base(device, path, product, serial, versionNumber)
@@ -144,14 +144,9 @@ public class Ardwiino : ConfigurableUsbDevice
         WriteData(JumpBootloaderCommandUno, RequestHidSetReport, Array.Empty<byte>());
     }
 
-    public override void LoadConfiguration(ConfigViewModel model)
+    public override bool LoadConfiguration(ConfigViewModel model)
     {
-        if (!MigrationSupported)
-        {
-            model.SetDefaults(Board.FindMicrocontroller(Board));
-            return;
-        }
-
+        if (!MigrationSupported) return false;
         var readConfig = ReadConfigCommand;
         if (Version < new Version(8, 0, 7))
             readConfig = ReadConfigPre807Command;
@@ -279,9 +274,9 @@ public class Ardwiino : ConfigurableUsbDevice
         var bindings = new List<Output>();
         var colors = new Dictionary<int, Color>();
         var ledIndexes = new Dictionary<int, byte>();
-        for (byte index = 0; index < config.all!.leds!.Length; index++)
+        for (byte index = 0; index < config.all.leds!.Length; index++)
         {
-            var led = config.all!.leds![index];
+            var led = config.all.leds[index];
             if (led.pin != 0)
             {
                 colors[led.pin - 1] = Color.FromRgb(led.red, led.green, led.blue);
@@ -416,13 +411,13 @@ public class Ardwiino : ConfigurableUsbDevice
             if (deviceType == DeviceControllerType.Guitar)
             {
                 if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
-                    bindings.Add(new Gh5CombinedOutput(model, controller, sda, scl));
+                    bindings.Add(new Gh5CombinedOutput(model, sda, scl));
 
-                if (config.neck.wtNeck != 0) bindings.Add(new GhwtCombinedOutput(model, controller, 9));
+                if (config.neck.wtNeck != 0) bindings.Add(new GhwtCombinedOutput(model, 9));
             }
 
             if (deviceType == DeviceControllerType.Turntable)
-                bindings.Add(new DjCombinedOutput(model, controller, sda, scl));
+                bindings.Add(new DjCombinedOutput(model, sda, scl));
 
             foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
             {
@@ -449,7 +444,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     config.all.main.tiltType == 2)
                 {
                     bindings.Add(new ControllerAxis(model,
-                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
+                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model),
                             -32767, model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
                         0, StandardAxisType.RightStickY));
@@ -468,7 +463,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     }
 
                     bindings.Add(new ControllerAxis(model,
-                        new DirectInput(pin.pin, DevicePinMode.Analog, model, controller), on, off,
+                        new DirectInput(pin.pin, DevicePinMode.Analog, model), on, off,
                         ledIndex, min, max, axisDeadzone, genAxis));
                 }
             }
@@ -499,7 +494,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 if (deviceType == DeviceControllerType.Turntable && genButton == StandardButtonType.LeftThumbClick)
                     genButton = StandardButtonType.Y;
 
-                bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, model, controller), on, off,
+                bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, model), on, off,
                     ledIndex, debounce, genButton));
             }
         }
@@ -520,7 +515,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         ledIndex = new[] {ledIndexes[(int) (XboxTilt + XboxBtnCount)]};
 
                     bindings.Add(new ControllerAxis(model,
-                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model, controller),
+                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model),
                             -32767, model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
                         0, StandardAxisType.RightStickY));
@@ -529,7 +524,7 @@ public class Ardwiino : ConfigurableUsbDevice
 
             if (config.all.main.inputType == (int) InputControllerType.Wii)
             {
-                var wii = new WiiCombinedOutput(model, controller, sda, scl);
+                var wii = new WiiCombinedOutput(model, sda, scl);
                 if (config.all.main.mapNunchukAccelToRightJoy != 0)
                     foreach (var output in wii.Outputs.Items.Where(output => output is
                              {
@@ -544,7 +539,7 @@ public class Ardwiino : ConfigurableUsbDevice
             }
             else if (config.all.main.inputType == (int) InputControllerType.Ps2)
             {
-                bindings.Add(new Ps2CombinedOutput(model, controller, miso, mosi, sck, att, ack));
+                bindings.Add(new Ps2CombinedOutput(model, miso, mosi, sck, att, ack));
             }
         }
 
@@ -587,7 +582,6 @@ public class Ardwiino : ConfigurableUsbDevice
             }
         }
 
-        model.MicroController = controller;
         model.LedType = ledType;
         if (model.IsApa102)
         {
@@ -600,6 +594,12 @@ public class Ardwiino : ConfigurableUsbDevice
         model.Bindings.Clear();
         model.Bindings.AddRange(bindings);
         model.Write();
+        return true;
+    }
+
+    public override Microcontroller GetMicrocontroller(ConfigViewModel model)
+    {
+        return Board.FindMicrocontroller(Board);
     }
 
     private enum SubType

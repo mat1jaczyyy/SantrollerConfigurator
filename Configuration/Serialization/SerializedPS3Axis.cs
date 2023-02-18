@@ -33,9 +33,9 @@ public class SerializedPS3Axis : SerializedOutput
 
     [ProtoMember(7)] public Ps3AxisType Type { get; }
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
-        return new PS3Axis(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn),
+        return new PS3Axis(model, Input?.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
             Type);
     }

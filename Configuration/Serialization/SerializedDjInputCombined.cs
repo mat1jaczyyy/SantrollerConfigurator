@@ -15,8 +15,8 @@ public class SerializedDjInputCombined : SerializedInput
 
     [ProtoMember(3)] private DjInputType Type { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new DjInput(Type, model, microcontroller, combined: true);
+        return new DjInput(Type, model, combined: true);
     }
 }

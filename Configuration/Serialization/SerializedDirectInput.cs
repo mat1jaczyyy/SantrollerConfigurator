@@ -16,8 +16,8 @@ public class SerializedDirectInput : SerializedInput
     [ProtoMember(1)] private int Pin { get; }
     [ProtoMember(2)] private DevicePinMode PinMode { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new DirectInput(Pin, PinMode, model, microcontroller);
+        return new DirectInput(Pin, PinMode, model);
     }
 }

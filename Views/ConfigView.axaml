@@ -31,7 +31,7 @@
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource PinToStringConverter }">
                         <Binding />
-                        <Binding Path="$parent[UserControl].DataContext.MicroController" />
+                        <Binding Path="$parent[UserControl].DataContext.Microcontroller" />
                         <Binding Path="$parent[UserControl].DataContext" />
                         <Binding Path="$parent[ComboBox].SelectedItem" />
                         <Binding Path="$parent[ComboBox].DataContext" />
@@ -155,6 +155,52 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputButton}" />
+        </netCore:OutputTemplateSelector>
+        <netCore:OutputTemplateSelector x:Key="EmptySelector">
+            <DataTemplate DataType="{x:Type output:EmptyOutput}">
+                <StackPanel IsVisible="{Binding IsEmpty}" Background="Black" MinHeight="75"
+                            x:DataType="output:EmptyOutput">
+                    <WrapPanel Margin="20 20 20 0">
+                        <Image ToolTip.Tip="{Binding LocalisedName}"
+                               IsVisible="{Binding IsController}"
+                               HorizontalAlignment="Center" Width="75"
+                               Source="{Binding Image}"
+                               Opacity="{Binding ImageOpacity}" />
+                        <Label IsVisible="{Binding IsKeyboard}"
+                               Content="{Binding Name}" />
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding IsController}">
+                                <ComboBox VerticalAlignment="Center"
+                                          SelectedItem="{Binding CombinedType}"
+                                          Items="{Binding CombinedTypes}"
+                                          ItemTemplate="{StaticResource ControllerEnumTemplate}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
+                                <ComboBox VerticalAlignment="Center"
+                                          SelectedItem="{Binding MouseAxisType}"
+                                          Items="{Binding MouseAxisTypes}"
+                                          ItemTemplate="{StaticResource ControllerEnumTemplate}" />
+                                <ComboBox VerticalAlignment="Center"
+                                          SelectedItem="{Binding MouseButtonType}"
+                                          Items="{Binding MouseButtonTypes}"
+                                          ItemTemplate="{StaticResource ControllerEnumTemplate}" />
+                                <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Key}"
+                                          Items="{Binding Keys}"
+                                          ItemTemplate="{StaticResource ControllerEnumTemplate}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <Button
+                            x:CompileBindings="False"
+                            Command="{Binding Remove}">
+                            Remove
+                        </Button>
+                    </WrapPanel>
+                    <Label Foreground="Red" Margin="20 20 20 0"
+                           Content="{Binding ErrorText}"
+                           VerticalAlignment="Center" VerticalContentAlignment="Center"
+                           IsVisible="{Binding ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                </StackPanel>
+            </DataTemplate>
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
             <DataTemplate DataType="{x:Type confnig:GhWtTapInput}">
@@ -999,7 +1045,7 @@
                                            TextAlignment="Center" />
                                 <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
                                           SelectedItem="{Binding RfMosi}"
-                                          Items="{Binding AvailableMosiPins}"
+                                          Items="{Binding AvailableRfMosiPins}"
                                           ItemTemplate="{StaticResource PinToStringTemplate}" />
 
                             </StackPanel>
@@ -1008,7 +1054,7 @@
                                            TextAlignment="Center" />
                                 <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
                                           SelectedItem="{Binding RfMiso}"
-                                          Items="{Binding AvailableMisoPins}"
+                                          Items="{Binding AvailableRfMisoPins}"
                                           ItemTemplate="{StaticResource PinToStringTemplate}" />
 
                             </StackPanel>
@@ -1017,7 +1063,7 @@
                                            TextAlignment="Center" />
                                 <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
                                           SelectedItem="{Binding RfSck}"
-                                          Items="{Binding AvailableSckPins}"
+                                          Items="{Binding AvailableRfSckPins}"
                                           ItemTemplate="{StaticResource PinToStringTemplate}" />
                             </StackPanel>
                             <StackPanel>
@@ -1091,7 +1137,7 @@
                                            TextAlignment="Center" />
                                 <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
                                           SelectedItem="{Binding Apa102Mosi}"
-                                          Items="{Binding AvailableMosiPins}"
+                                          Items="{Binding AvailableApaMosiPins}"
                                           ItemTemplate="{StaticResource PinToStringTemplate}" />
                             </StackPanel>
                             <StackPanel IsVisible="{Binding BindableSpi}">
@@ -1100,7 +1146,7 @@
                                            TextAlignment="Center" />
                                 <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
                                           SelectedItem="{Binding Apa102Sck}"
-                                          Items="{Binding AvailableSckPins}"
+                                          Items="{Binding AvailableApaSckPins}"
                                           ItemTemplate="{StaticResource PinToStringTemplate}" />
 
                             </StackPanel>
@@ -1303,48 +1349,7 @@
                                             </ItemsControl>
                                         </StackPanel>
                                     </Expander>
-                                    <StackPanel IsVisible="{Binding IsEmpty}" Background="Black" MinHeight="75"
-                                                x:DataType="output:EmptyOutput">
-                                        <WrapPanel Margin="20 20 20 0">
-                                            <Image ToolTip.Tip="{Binding LocalisedName}"
-                                                   IsVisible="{Binding IsController}"
-                                                   HorizontalAlignment="Center" Width="75"
-                                                   Source="{Binding Image}"
-                                                   Opacity="{Binding ImageOpacity}" />
-                                            <Label IsVisible="{Binding IsKeyboard}"
-                                                   Content="{Binding Name}" />
-                                            <StackPanel Orientation="Horizontal">
-                                                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsController}">
-                                                    <ComboBox VerticalAlignment="Center"
-                                                              SelectedItem="{Binding CombinedType}"
-                                                              Items="{Binding CombinedTypes}"
-                                                              ItemTemplate="{StaticResource ControllerEnumTemplate}" />
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
-                                                    <ComboBox VerticalAlignment="Center"
-                                                              SelectedItem="{Binding MouseAxisType}"
-                                                              Items="{Binding MouseAxisTypes}"
-                                                              ItemTemplate="{StaticResource ControllerEnumTemplate}" />
-                                                    <ComboBox VerticalAlignment="Center"
-                                                              SelectedItem="{Binding MouseButtonType}"
-                                                              Items="{Binding MouseButtonTypes}"
-                                                              ItemTemplate="{StaticResource ControllerEnumTemplate}" />
-                                                    <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Key}"
-                                                              Items="{Binding Keys}"
-                                                              ItemTemplate="{StaticResource ControllerEnumTemplate}" />
-                                                </StackPanel>
-                                            </StackPanel>
-                                            <Button
-                                                x:CompileBindings="False"
-                                                Command="{Binding Remove}">
-                                                Remove
-                                            </Button>
-                                        </WrapPanel>
-                                        <Label Foreground="Red" Margin="20 20 20 0"
-                                               Content="{Binding ErrorText}"
-                                               VerticalAlignment="Center" VerticalContentAlignment="Center"
-                                               IsVisible="{Binding ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                                    </StackPanel>
+                                    <ContentControl IsVisible="{Binding IsEmpty}" ContentTemplate="{StaticResource EmptySelector}" Content="{Binding}"></ContentControl>
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

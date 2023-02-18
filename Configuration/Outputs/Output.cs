@@ -58,6 +58,10 @@ public abstract class Output : ReactiveObject, IDisposable
 
     private readonly ObservableAsPropertyHelper<LedIndex[]> _availableIndices;
 
+    private readonly ObservableAsPropertyHelper<IBrush> _combinedBackground;
+
+    private readonly ObservableAsPropertyHelper<double> _combinedOpacity;
+
     private readonly Guid _id = new();
 
     private readonly ObservableAsPropertyHelper<Bitmap?> _image;
@@ -77,10 +81,6 @@ public abstract class Output : ReactiveObject, IDisposable
     protected readonly ConfigViewModel Model;
 
     private string _buttonText = "Click to assign";
-
-    private readonly ObservableAsPropertyHelper<IBrush> _combinedBackground;
-
-    private readonly ObservableAsPropertyHelper<double> _combinedOpacity;
 
     private bool _enabled = true;
 
@@ -420,7 +420,7 @@ public abstract class Output : ReactiveObject, IDisposable
         GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
     {
         Input input;
-        var lastPin = inputType == InputType.AnalogPinInput ? Model.MicroController!.GetFirstAnalogPin() : 0;
+        var lastPin = inputType == InputType.AnalogPinInput ? Model.Microcontroller.GetFirstAnalogPin() : 0;
         var pinMode = DevicePinMode.PullUp;
         if (Input?.InnermostInput() is DirectInput direct)
             if (direct.IsAnalog || inputType != InputType.AnalogPinInput)
@@ -432,54 +432,54 @@ public abstract class Output : ReactiveObject, IDisposable
         switch (inputType)
         {
             case InputType.AnalogPinInput:
-                input = new DirectInput(lastPin, DevicePinMode.Analog, Model, Model.MicroController!);
+                input = new DirectInput(lastPin, DevicePinMode.Analog, Model);
                 break;
             case InputType.MacroInput:
-                input = new MacroInput(new DirectInput(lastPin, pinMode, Model, Model.MicroController!),
-                    new DirectInput(lastPin, pinMode, Model, Model.MicroController!), Model);
+                input = new MacroInput(new DirectInput(lastPin, pinMode, Model),
+                    new DirectInput(lastPin, pinMode, Model), Model);
                 break;
             case InputType.DigitalPinInput:
-                input = new DirectInput(lastPin, pinMode, Model, Model.MicroController!);
+                input = new DirectInput(lastPin, pinMode, Model);
                 break;
             case InputType.TurntableInput when Input?.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;
-                input = new DjInput(djInputType.Value, Model, Model.MicroController!);
+                input = new DjInput(djInputType.Value, Model);
                 break;
             case InputType.TurntableInput when Input?.InnermostInput() is DjInput dj:
                 djInputType ??= DjInputType.LeftGreen;
-                input = new DjInput(djInputType.Value, Model, Model.MicroController!, dj.Sda, dj.Scl);
+                input = new DjInput(djInputType.Value, Model, dj.Sda, dj.Scl);
                 break;
             case InputType.Gh5NeckInput when Input?.InnermostInput() is not Gh5NeckInput:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
-                input = new Gh5NeckInput(gh5NeckInputType.Value, Model, Model.MicroController!);
+                input = new Gh5NeckInput(gh5NeckInputType.Value, Model);
                 break;
             case InputType.Gh5NeckInput when Input?.InnermostInput() is Gh5NeckInput gh5:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
-                input = new Gh5NeckInput(gh5NeckInputType.Value, Model, Model.MicroController!, gh5.Sda, gh5.Scl);
+                input = new Gh5NeckInput(gh5NeckInputType.Value, Model, gh5.Sda, gh5.Scl);
                 break;
             case InputType.WtNeckInput when Input?.InnermostInput() is not GhWtTapInput:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                input = new GhWtTapInput(ghWtInputType.Value, Model, Model.MicroController!);
+                input = new GhWtTapInput(ghWtInputType.Value, Model);
                 break;
             case InputType.WtNeckInput when Input?.InnermostInput() is GhWtTapInput wt:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                input = new GhWtTapInput(ghWtInputType.Value, Model, Model.MicroController!, wt.Pin);
+                input = new GhWtTapInput(ghWtInputType.Value, Model, wt.Pin);
                 break;
             case InputType.WiiInput when Input?.InnermostInput() is not WiiInput:
                 wiiInput ??= WiiInputType.ClassicA;
-                input = new WiiInput(wiiInput.Value, Model, Model.MicroController!);
+                input = new WiiInput(wiiInput.Value, Model);
                 break;
             case InputType.WiiInput when Input?.InnermostInput() is WiiInput wii:
                 wiiInput ??= WiiInputType.ClassicA;
-                input = new WiiInput(wiiInput.Value, Model, Model.MicroController!, wii.Sda, wii.Scl);
+                input = new WiiInput(wiiInput.Value, Model, wii.Sda, wii.Scl);
                 break;
             case InputType.Ps2Input when Input?.InnermostInput() is not Ps2Input:
                 ps2InputType ??= Ps2InputType.Cross;
-                input = new Ps2Input(ps2InputType.Value, Model, Model.MicroController!);
+                input = new Ps2Input(ps2InputType.Value, Model);
                 break;
             case InputType.Ps2Input when Input?.InnermostInput() is Ps2Input ps2:
                 ps2InputType ??= Ps2InputType.Cross;
-                input = new Ps2Input(ps2InputType.Value, Model, Model.MicroController!, ps2.Miso, ps2.Mosi, ps2.Sck,
+                input = new Ps2Input(ps2InputType.Value, Model, ps2.Miso, ps2.Mosi, ps2.Sck,
                     ps2.Att,
                     ps2.Ack);
                 break;

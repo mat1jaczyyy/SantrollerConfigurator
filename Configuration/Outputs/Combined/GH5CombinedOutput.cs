@@ -31,17 +31,13 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         {Gh5NeckInputType.TapOrange, StandardButtonType.LeftShoulder}
     };
 
-    private readonly Microcontroller _microcontroller;
-
 
     private bool _detected;
 
-    public Gh5CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
+    public Gh5CombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model,
-        microcontroller,
         "gh5", 100000, "GH5", sda, scl)
     {
-        _microcontroller = microcontroller;
         Outputs.Clear();
         if (outputs != null)
             Outputs.AddRange(outputs);
@@ -73,15 +69,15 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         Outputs.Clear();
         foreach (var pair in Buttons)
             Outputs.Add(new ControllerButton(Model,
-                new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Green,
+                new Gh5NeckInput(pair.Key, Model, combined: true), Colors.Green,
                 Colors.Black, Array.Empty<byte>(), 5, pair.Value));
         foreach (var pair in Taps)
             Outputs.Add(new ControllerButton(Model,
-                new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Black,
+                new Gh5NeckInput(pair.Key, Model, combined: true), Colors.Black,
                 Colors.Black, Array.Empty<byte>(), 5, pair.Value));
 
         Outputs.Add(new ControllerAxis(Model,
-            new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, _microcontroller, combined: true),
+            new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, combined: true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY));
     }

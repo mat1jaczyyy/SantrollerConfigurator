@@ -17,8 +17,8 @@ public class SerializedDigitalToAnalog : SerializedInput
     [ProtoMember(1)] private SerializedInput Child { get; }
     [ProtoMember(2)] private int On { get; }
 
-    public override Input Generate(Microcontroller microcontroller, ConfigViewModel model)
+    public override Input Generate(ConfigViewModel model)
     {
-        return new DigitalToAnalog(Child.Generate(microcontroller, model), On, model);
+        return new DigitalToAnalog(Child.Generate(model), On, model);
     }
 }

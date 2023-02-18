@@ -28,9 +28,9 @@ public class SerializedLed : SerializedOutput
     [ProtoMember(5)] public bool OutputEnabled { get; }
     [ProtoMember(6)] public int Pin { get; }
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
-        return new Led(model, microcontroller, OutputEnabled, Pin, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff),
+        return new Led(model, OutputEnabled, Pin, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff),
             LedIndex, Type);
     }
 }

@@ -245,15 +245,14 @@ public class WiiInput : TwiInput
 
     private readonly int[] drumVelocity = new int[8];
 
-    public WiiInput(WiiInputType input, ConfigViewModel model, Microcontroller microcontroller, int? sda = null,
+    public WiiInput(WiiInputType input, ConfigViewModel model, int? sda = null,
         int? scl = null,
         bool combined = false) : base(
-        microcontroller,
         WiiTwiType, WiiTwiFreq, sda, scl, model)
     {
         Input = input;
         Combined = combined;
-        BindableTwi = !combined && microcontroller.TwiAssignable;
+        BindableTwi = !combined && Model.Microcontroller.TwiAssignable;
         IsAnalog = Input <= WiiInputType.DrawsomePenPressure;
     }
 

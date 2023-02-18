@@ -73,13 +73,12 @@ public class Gh5NeckInput : TwiInput
             type => Mappings.Where(mapping => mapping.Value.HasFlag(InputToButton[type]))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public Gh5NeckInput(Gh5NeckInputType input, ConfigViewModel model, Microcontroller controller, int? sda = null,
+    public Gh5NeckInput(Gh5NeckInputType input, ConfigViewModel model, int? sda = null,
         int? scl = null, bool combined = false) : base(
-        controller,
         Gh5TwiType, Gh5TwiFreq, sda, scl, model)
     {
         Combined = combined;
-        BindableTwi = !combined && controller.TwiAssignable;
+        BindableTwi = !combined && Model.Microcontroller.TwiAssignable;
         Input = input;
         IsAnalog = Input == Gh5NeckInputType.TapBar;
     }

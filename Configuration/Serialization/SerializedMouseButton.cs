@@ -28,9 +28,9 @@ public class SerializedMouseButton : SerializedOutput
     [ProtoMember(5)] public MouseButtonType Type { get; }
     [ProtoMember(6)] public override byte[] LedIndex { get; }
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
-        return new MouseButton(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn),
+        return new MouseButton(model, Input?.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
     }
 }

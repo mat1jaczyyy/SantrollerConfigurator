@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 
@@ -15,7 +16,9 @@ public interface IConfigurableDevice
 
     public bool DeviceAdded(IConfigurableDevice device);
 
-    public void LoadConfiguration(ConfigViewModel model);
+    public Microcontroller GetMicrocontroller(ConfigViewModel model);
+
+    public bool LoadConfiguration(ConfigViewModel model);
 
     public Task<string?> GetUploadPort();
 

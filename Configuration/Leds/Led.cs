@@ -190,18 +190,15 @@ public static class RumbleCommandMethods
 
 public class Led : Output
 {
+    private readonly SourceList<RumbleCommand> _rumbleCommands = new();
     private bool _outputEnabled;
 
     private int _pin;
 
-
-    private readonly SourceList<RumbleCommand> _rumbleCommands = new();
-
-    public Led(ConfigViewModel model, Microcontroller microcontroller, bool outputEnabled, int pin, Color ledOn,
+    public Led(ConfigViewModel model, bool outputEnabled, int pin, Color ledOn,
         Color ledOff, byte[] ledIndices, RumbleCommand command) : base(
         model, null, ledOn, ledOff, ledIndices, EnumToStringConverter.Convert(command))
     {
-        Microcontroller = microcontroller;
         Pin = pin;
         OutputEnabled = outputEnabled;
         Command = command;
@@ -213,8 +210,6 @@ public class Led : Output
         RumbleCommands = rumbleCommands;
     }
 
-    protected Microcontroller Microcontroller { get; }
-
     public bool OutputEnabled
     {
         get => _outputEnabled;
@@ -224,8 +219,8 @@ public class Led : Output
             if (value)
             {
                 if (PinConfig != null) return;
-                PinConfig = Microcontroller.GetOrSetPin(Model, "led", Pin, DevicePinMode.Output);
-                Microcontroller.AssignPin(PinConfig);
+                PinConfig = Model.Microcontroller.GetOrSetPin(Model, "led", Pin, DevicePinMode.Output);
+                Model.Microcontroller.AssignPin(PinConfig);
             }
             else
             {
@@ -236,7 +231,7 @@ public class Led : Output
         }
     }
 
-    public List<int> AvailablePins => Microcontroller.GetAllPins(false);
+    public List<int> AvailablePins => Model.Microcontroller.GetAllPins(false);
 
     public DirectPinConfig? PinConfig { get; private set; }
 
@@ -264,7 +259,7 @@ public class Led : Output
         set
         {
             if (value == Command) return;
-            var output = new Led(Model, Microcontroller, OutputEnabled, Pin, LedOn, LedOff, LedIndices.ToArray(),
+            var output = new Led(Model, OutputEnabled, Pin, LedOn, LedOff, LedIndices.ToArray(),
                 value);
             output.Expanded = Expanded;
             Model.Bindings.Insert(Model.Bindings.IndexOf(this), output);
@@ -307,7 +302,7 @@ public class Led : Output
     public override void Dispose()
     {
         if (PinConfig == null) return;
-        Microcontroller.UnAssignPins(PinConfig.Type);
+        Model.Microcontroller.UnAssignPins(PinConfig.Type);
         PinConfig = null;
     }
 
@@ -386,8 +381,8 @@ public class Led : Output
         var off = "";
         if (PinConfig != null)
         {
-            on = Microcontroller.GenerateDigitalWrite(PinConfig.Pin, true);
-            off = Microcontroller.GenerateDigitalWrite(PinConfig.Pin, false);
+            on = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, true);
+            off = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, false);
         }
 
         var between = "";

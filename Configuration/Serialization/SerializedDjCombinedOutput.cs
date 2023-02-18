@@ -33,13 +33,13 @@ public class SerializedDjCombinedOutput : SerializedOutput
     public override uint LedOff => Colors.Black.ToUint32();
     public override byte[] LedIndex => Array.Empty<byte>();
 
-    public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
+    public override Output Generate(ConfigViewModel model)
     {
         // Since we filter out sda and scl from inputs for size, we need to make sure its assigned before we construct the inputs.
-        microcontroller.AssignTwiPins(model, DjInput.DjTwiType, Sda, Scl, DjInput.DjTwiFreq);
+        model.Microcontroller.AssignTwiPins(model, DjInput.DjTwiType, Sda, Scl, DjInput.DjTwiFreq);
         var array = new BitArray(Enabled);
-        var outputs = Outputs.Select(s => s.Generate(model, microcontroller)).ToList();
+        var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
-        return new DjCombinedOutput(model, microcontroller, Sda, Scl, outputs);
+        return new DjCombinedOutput(model, Sda, Scl, outputs);
     }
 }

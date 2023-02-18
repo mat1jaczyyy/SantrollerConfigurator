@@ -20,8 +20,8 @@ public class Santroller : ConfigurableUsbDevice
 {
     public static readonly Guid ControllerGuid = new("DF59037D-7C92-4155-AC12-7D700A313D78");
     private readonly Dictionary<int, int> _analogRaw = new();
-    private DeviceControllerType? _deviceControllerType;
     private readonly Dictionary<int, bool> _digitalRaw = new();
+    private DeviceControllerType? _deviceControllerType;
     private bool _picking;
 
     // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
@@ -70,7 +70,7 @@ public class Santroller : ConfigurableUsbDevice
                     .OfType<DirectInput>().ToList();
                 var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins);
                 var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins);
-                var ports = model.MicroController!.GetPortsForTicking(digital);
+                var ports = model.Microcontroller.GetPortsForTicking(digital);
                 foreach (var (port, mask) in ports)
                 {
                     var wValue = (ushort) (port | (mask << 8));
@@ -78,13 +78,13 @@ public class Santroller : ConfigurableUsbDevice
                     if (data.Length == 0) return;
 
                     var pins = data[0];
-                    model.MicroController!.PinsFromPortMask(port, mask, pins, _digitalRaw);
+                    model.Microcontroller.PinsFromPortMask(port, mask, pins, _digitalRaw);
                 }
 
                 foreach (var devicePin in analog)
                 {
-                    var mask = model.MicroController!.GetAnalogMask(devicePin);
-                    var wValue = (ushort) (model.MicroController!.GetChannel(devicePin.Pin, false) | (mask << 8));
+                    var mask = model.Microcontroller.GetAnalogMask(devicePin);
+                    var wValue = (ushort) (model.Microcontroller.GetChannel(devicePin.Pin, false) | (mask << 8));
                     var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     _analogRaw[devicePin.Pin] = val;
@@ -112,17 +112,8 @@ public class Santroller : ConfigurableUsbDevice
         }
     }
 
-    public override async void LoadConfiguration(ConfigViewModel model)
+    private async Task LoadConfigurationAsync(ConfigViewModel model)
     {
-        // try
-        // {
-        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("\0", "")
-            .Replace("L", "").Trim();
-        var fCpu = uint.Parse(fCpuStr);
-        var board = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadBoard, 32)).Replace("\0", "");
-        var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
-        Board = m.Board;
-        model.MicroController = m;
         ushort start = 0;
         var data = new List<byte>();
         while (true)
@@ -135,7 +126,15 @@ public class Santroller : ConfigurableUsbDevice
 
         using var inputStream = new MemoryStream(data.ToArray());
         await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
-        Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
+        try
+        {
+            Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
         _deviceControllerType = model.DeviceType;
         // }
         // catch (Exception ex) when (ex is JsonException or FormatException or InvalidOperationException)
@@ -147,6 +146,25 @@ public class Santroller : ConfigurableUsbDevice
         // }
 
         StartTicking(model);
+    }
+
+    public override bool LoadConfiguration(ConfigViewModel model)
+    {
+        _ = LoadConfigurationAsync(model);
+        return true;
+    }
+
+    public override Microcontroller GetMicrocontroller(ConfigViewModel model)
+    {
+        // try
+        // {
+        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("\0", "")
+            .Replace("L", "").Trim();
+        var fCpu = uint.Parse(fCpuStr);
+        var board = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadBoard, 32)).Replace("\0", "");
+        var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
+        Board = m.Board;
+        return m;
     }
 
     public void StartTicking(ConfigViewModel model)
