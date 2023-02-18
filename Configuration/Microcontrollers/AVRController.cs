@@ -15,6 +15,9 @@ public abstract class AvrController : Microcontroller
         Output
     }
 
+    public override bool TwiAssignable => false;
+    public override bool SpiAssignable => false;
+
     protected abstract int PinA0 { get; }
     protected abstract int SpiMiso { get; }
 

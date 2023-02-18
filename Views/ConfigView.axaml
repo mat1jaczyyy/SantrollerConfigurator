@@ -985,6 +985,60 @@
                                       ItemTemplate="{StaticResource EnumToStringTemplate}"
                                       Items="{Binding EmulationTypes}" />
                         </StackPanel>
+                        <StackPanel IsVisible="{Binding IsRf}" Orientation="Vertical">
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Channel"
+                                           TextAlignment="Center" />
+                                <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding RfChannel}"
+                                               Minimum="1"
+                                               Maximum="180" HorizontalAlignment="Stretch" />
+
+                            </StackPanel>
+                            <StackPanel IsVisible="{Binding BindableSpi}">
+                                <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF MOSI Pin"
+                                           TextAlignment="Center" />
+                                <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                          SelectedItem="{Binding RfMosi}"
+                                          Items="{Binding AvailableMosiPins}"
+                                          ItemTemplate="{StaticResource PinToStringTemplate}" />
+
+                            </StackPanel>
+                            <StackPanel IsVisible="{Binding BindableSpi}">
+                                <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF MISO Pin"
+                                           TextAlignment="Center" />
+                                <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                          SelectedItem="{Binding RfMiso}"
+                                          Items="{Binding AvailableMisoPins}"
+                                          ItemTemplate="{StaticResource PinToStringTemplate}" />
+
+                            </StackPanel>
+                            <StackPanel IsVisible="{Binding BindableSpi}">
+                                <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF SCK Pin"
+                                           TextAlignment="Center" />
+                                <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                          SelectedItem="{Binding RfSck}"
+                                          Items="{Binding AvailableSckPins}"
+                                          ItemTemplate="{StaticResource PinToStringTemplate}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0"
+                                           Text="RF Chip Select Not (CSN) Pin"
+                                           TextAlignment="Center" />
+                                <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                          SelectedItem="{Binding RfCsn}"
+                                          Items="{Binding AvailablePins}"
+                                          ItemTemplate="{StaticResource PinToStringTemplate}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0"
+                                           Text="RF Chip Enable (CE) Pin"
+                                           TextAlignment="Center" />
+                                <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                          SelectedItem="{Binding RfCe}"
+                                          Items="{Binding AvailablePins}"
+                                          ItemTemplate="{StaticResource PinToStringTemplate}" />
+                            </StackPanel>
+                        </StackPanel>
 
                         <StackPanel IsVisible="{Binding IsKeyboard}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Mouse Movement Type"
@@ -1031,22 +1085,25 @@
                                            Maximum="180" HorizontalAlignment="Stretch" />
 
                         </StackPanel>
-                        <StackPanel IsVisible="{Binding BindableSpi}">
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 CI / SCK Pin"
-                                       TextAlignment="Center" />
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding Apa102Mosi}"
-                                      Items="{Binding AvailableMosiPins}"
-                                      ItemTemplate="{StaticResource PinToStringTemplate}" />
-                        </StackPanel>
-                        <StackPanel IsVisible="{Binding BindableSpi}">
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 DI / MOSI Pin"
-                                       TextAlignment="Center" />
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding Apa102Sck}"
-                                      Items="{Binding AvailableSckPins}"
-                                      ItemTemplate="{StaticResource PinToStringTemplate}" />
+                        <StackPanel Orientation="Vertical" IsVisible="{Binding IsApa102}">
+                            <StackPanel IsVisible="{Binding BindableSpi}">
+                                <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 CI / SCK Pin"
+                                           TextAlignment="Center" />
+                                <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                          SelectedItem="{Binding Apa102Mosi}"
+                                          Items="{Binding AvailableMosiPins}"
+                                          ItemTemplate="{StaticResource PinToStringTemplate}" />
+                            </StackPanel>
+                            <StackPanel IsVisible="{Binding BindableSpi}">
+                                <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0"
+                                           Text="APA102 DI / MOSI Pin"
+                                           TextAlignment="Center" />
+                                <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                          SelectedItem="{Binding Apa102Sck}"
+                                          Items="{Binding AvailableSckPins}"
+                                          ItemTemplate="{StaticResource PinToStringTemplate}" />
 
+                            </StackPanel>
                         </StackPanel>
                         <Button Command="{Binding AddOutput}" HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center" Margin="20 20 20 0">

@@ -19,7 +19,7 @@ public class DjInput : TwiInput
         microcontroller, DjTwiType, DjTwiFreq, sda, scl, model)
     {
         Combined = combined;
-        BindableTwi = !combined && microcontroller is not AvrController;
+        BindableTwi = !combined && microcontroller.TwiAssignable;
         Input = input;
         IsAnalog = Input <= DjInputType.RightTurntable;
     }

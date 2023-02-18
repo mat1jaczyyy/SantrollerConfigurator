@@ -209,7 +209,7 @@ public class Ps2Input : SpiInput
         Ps2SpiCpha, Ps2SpiMsbFirst, miso: miso, mosi: mosi, sck: sck, model: model)
     {
         Combined = combined;
-        BindableSpi = !Combined && microcontroller is not AvrController;
+        BindableSpi = !Combined && microcontroller.SpiAssignable;
         Input = input;
         _ackConfig = microcontroller
             .GetOrSetPin(model, Ps2AckType, ack ?? microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);

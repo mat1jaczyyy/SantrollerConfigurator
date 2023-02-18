@@ -79,7 +79,7 @@ public class Gh5NeckInput : TwiInput
         Gh5TwiType, Gh5TwiFreq, sda, scl, model)
     {
         Combined = combined;
-        BindableTwi = !combined && controller is not AvrController;
+        BindableTwi = !combined && controller.TwiAssignable;
         Input = input;
         IsAnalog = Input == Gh5NeckInputType.TapBar;
     }

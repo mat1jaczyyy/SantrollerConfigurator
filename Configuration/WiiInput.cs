@@ -253,7 +253,7 @@ public class WiiInput : TwiInput
     {
         Input = input;
         Combined = combined;
-        BindableTwi = !combined && microcontroller is not AvrController;
+        BindableTwi = !combined && microcontroller.TwiAssignable;
         IsAnalog = Input <= WiiInputType.DrawsomePenPressure;
     }
 

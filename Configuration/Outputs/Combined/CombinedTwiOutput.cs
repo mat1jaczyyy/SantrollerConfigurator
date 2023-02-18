@@ -21,7 +21,7 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
 
     {
         _microcontroller = microcontroller;
-        BindableTwi = microcontroller is not AvrController;
+        BindableTwi = microcontroller.TwiAssignable;
         _twiType = twiType;
         var config = microcontroller.GetTwiForType(_twiType);
         if (config != null)

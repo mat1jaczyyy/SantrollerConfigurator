@@ -89,6 +89,9 @@ public abstract class Microcontroller
         Dictionary<int, bool> digitalRaw);
 
     public abstract int GetAnalogMask(DevicePin devicePin);
+    
+    public abstract bool TwiAssignable { get; }
+    public abstract bool SpiAssignable { get; }
 
     public DirectPinConfig GetOrSetPin(ConfigViewModel model, string type, int pin, DevicePinMode devicePinMode)
     {

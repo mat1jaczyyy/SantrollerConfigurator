@@ -19,7 +19,7 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
     {
         Microcontroller = microcontroller;
         SpiType = spiType;
-        BindableSpi = microcontroller is not AvrController;
+        BindableSpi = microcontroller.SpiAssignable;
         var config = microcontroller.GetSpiForType(SpiType);
         if (config != null)
         {

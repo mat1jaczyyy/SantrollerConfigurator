@@ -29,8 +29,11 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 {
     public static readonly string Apa102SpiType = "APA102";
+    public static readonly string RfSpiType = "RF";
     private readonly ObservableAsPropertyHelper<List<int>> _availableMosiPins;
+    private readonly ObservableAsPropertyHelper<List<int>> _availableMisoPins;
     private readonly ObservableAsPropertyHelper<List<int>> _availableSckPins;
+    private readonly ObservableAsPropertyHelper<List<int>> _availablePins;
 
 
     private readonly ObservableAsPropertyHelper<bool> _bindableSpi;
@@ -39,10 +42,17 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly ObservableAsPropertyHelper<bool> _isController;
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
     private readonly ObservableAsPropertyHelper<bool> _isRhythm;
+    private readonly ObservableAsPropertyHelper<bool> _isRf;
 
     private readonly ObservableAsPropertyHelper<string?> _writeToolTip;
 
     private SpiConfig? _apa102SpiConfig;
+
+    private SpiConfig? _rfSpiConfig;
+
+    private DirectPinConfig? _rfCsn;
+
+    private DirectPinConfig? _rfCe;
 
     private bool _combinedDebounce;
 
@@ -55,6 +65,8 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private bool _hasError;
 
     private byte _ledCount;
+
+    private byte _rfChannel;
 
     private LedType _ledType;
 
@@ -90,6 +102,9 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _writeToolTip = this.WhenAnyValue(x => x.HasError)
             .Select(s => s ? "There are errors in your configuration" : null).ToProperty(this, s => s.WriteToolTip);
 
+        _isRf = this.WhenAnyValue(x => x.EmulationType)
+            .Select(x => x is EmulationType.RfController or EmulationType.RfKeyboardMouse)
+            .ToProperty(this, x => x.IsRf);
         _isRhythm = this.WhenAnyValue(x => x.DeviceType)
             .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
             .ToProperty(this, x => x.IsRhythm);
@@ -103,14 +118,20 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Select(x => x is LedType.APA102_BGR or LedType.APA102_BRG or LedType.APA102_GBR or LedType.APA102_GRB
                 or LedType.APA102_RBG or LedType.APA102_RGB)
             .ToProperty(this, x => x.IsApa102);
-        _bindableSpi = this.WhenAnyValue(x => x.MicroController, x => x.IsApa102)
-            .Select(x => x.Item1 is not AvrController && x.Item2)
+        _bindableSpi = this.WhenAnyValue(x => x.MicroController)
+            .Select(x => x.SpiAssignable)
             .ToProperty(this, x => x.BindableSpi);
+        _availableMisoPins = this.WhenAnyValue(x => x.MicroController)
+            .Select(GetMisoPins)
+            .ToProperty(this, x => x.AvailableMosiPins);
         _availableMosiPins = this.WhenAnyValue(x => x.MicroController)
             .Select(GetMosiPins)
             .ToProperty(this, x => x.AvailableMosiPins);
         _availableSckPins = this.WhenAnyValue(x => x.MicroController)
             .Select(GetSckPins)
+            .ToProperty(this, x => x.AvailableSckPins);
+        _availablePins = this.WhenAnyValue(x => x.MicroController)
+            .Select(GetDigitalPins)
             .ToProperty(this, x => x.AvailableSckPins);
     }
 
@@ -168,10 +189,46 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => _apa102SpiConfig!.Sck = value;
     }
 
+    public int RfMosi
+    {
+        get => _rfSpiConfig?.Mosi ?? 0;
+        set => _rfSpiConfig!.Mosi = value;
+    }
+
+    public int RfMiso
+    {
+        get => _rfSpiConfig?.Miso ?? 0;
+        set => _rfSpiConfig!.Miso = value;
+    }
+
+    public int RfSck
+    {
+        get => _rfSpiConfig?.Sck ?? 0;
+        set => _rfSpiConfig!.Sck = value;
+    }
+
+    public int RfCe
+    {
+        get => _rfCe?.Pin ?? 0;
+        set => _rfCe!.Pin = value;
+    }
+
+    public int RfCsn
+    {
+        get => _rfCsn?.Pin ?? 0;
+        set => _rfCsn!.Pin = value;
+    }
+
     public byte LedCount
     {
         get => _ledCount;
         set => this.RaiseAndSetIfChanged(ref _ledCount, value);
+    }
+
+    public byte RfChannel
+    {
+        get => _rfChannel;
+        set => this.RaiseAndSetIfChanged(ref _rfChannel, value);
     }
 
     public bool HasError
@@ -261,9 +318,12 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public bool IsKeyboard => _isKeyboard.Value;
     public bool IsApa102 => _isApa102.Value;
     public bool BindableSpi => _bindableSpi.Value;
+    public bool IsRf => _isRf.Value;
     public string? WriteToolTip => _writeToolTip.Value;
     public List<int> AvailableMosiPins => _availableMosiPins.Value;
+    public List<int> AvailableMisoPins => _availableMisoPins.Value;
     public List<int> AvailableSckPins => _availableSckPins.Value;
+    public List<int> AvailablePins => _availablePins.Value;
     public IEnumerable<PinConfig> PinConfigs => new[] {_apa102SpiConfig!};
 
     public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
@@ -369,12 +429,26 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
     }
 
+    private List<int> GetMisoPins(Microcontroller? microcontroller)
+    {
+        if (MicroController == null) return new List<int>();
+        return microcontroller!.SpiPins(Apa102SpiType)
+            .Where(s => s.Value is SpiPinType.Miso)
+            .Select(s => s.Key).ToList();
+    }
+
     private List<int> GetMosiPins(Microcontroller? microcontroller)
     {
         if (MicroController == null) return new List<int>();
         return microcontroller!.SpiPins(Apa102SpiType)
             .Where(s => s.Value is SpiPinType.Mosi)
             .Select(s => s.Key).ToList();
+    }
+
+    private List<int> GetDigitalPins(Microcontroller? microcontroller)
+    {
+        if (MicroController == null) return new List<int>();
+        return microcontroller!.GetAllPins(false);
     }
 
     private List<int> GetSckPins(Microcontroller? microcontroller)
@@ -433,11 +507,57 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private async void SetDefaultBindings(EmulationType emulationType)
     {
+        if (IsRf)
+        {
+            if (_rfSpiConfig == null)
+            {
+                var pins = MicroController!.SpiPins(RfSpiType);
+                var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
+                var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
+                var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
+                _rfSpiConfig = MicroController.AssignSpiPins(this, RfSpiType, mosi, miso, sck, true, true,
+                    true,
+                    4000000);
+                this.RaisePropertyChanged(nameof(RfMiso));
+                this.RaisePropertyChanged(nameof(RfMosi));
+                this.RaisePropertyChanged(nameof(RfSck));
+                var first = MicroController!.GetAllPins(false).First();
+                _rfCe = MicroController!.GetOrSetPin(this, RfSpiType + "_ce", first, DevicePinMode.PullUp);
+                _rfCsn = MicroController!.GetOrSetPin(this, RfSpiType + "_csn", first, DevicePinMode.Output);
+            }
+        }
+        else
+        {
+            if (_rfSpiConfig != null)
+            {
+                MicroController!.UnAssignPins(_rfSpiConfig.Type);
+                _rfSpiConfig = null;
+            }
+
+            if (_rfCe != null)
+            {
+                MicroController!.UnAssignPins(_rfCe.Type);
+                _rfCe = null;
+            }
+
+            if (_rfCsn != null)
+            {
+                MicroController!.UnAssignPins(_rfCsn.Type);
+                _rfCsn = null;
+            }
+        }
+
         if (Bindings.Any())
         {
             var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
                 "The following action will clear all your bindings, are you sure you want to do this?")).ToTask();
-            if (!yesNo.Response) return;
+            if (!yesNo.Response)
+            {
+                this.RaisePropertyChanged(nameof(EmulationType));
+                return;
+            }
+
+            ;
         }
 
         _emulationType = emulationType;
