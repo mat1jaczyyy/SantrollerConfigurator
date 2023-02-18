@@ -3,21 +3,20 @@ using Avalonia.ReactiveUI;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfigurator.NetCore.Views
+namespace GuitarConfigurator.NetCore.Views;
+
+public class BindAllWindow : ReactiveWindow<BindAllWindowViewModel>
 {
-    public class BindAllWindow : ReactiveWindow<BindAllWindowViewModel>
+    public BindAllWindow()
     {
-        public BindAllWindow()
+        this.WhenActivated(disposables =>
         {
-            this.WhenActivated(disposables =>
+            disposables(ViewModel!.CloseWindowInteraction.RegisterHandler(context =>
             {
-                disposables(ViewModel!.CloseWindowInteraction.RegisterHandler(context =>
-                {
-                    context.SetOutput(context.Input);
-                    Close();
-                }));
-            });
-            AvaloniaXamlLoader.Load(this);
-        }
+                context.SetOutput(context.Input);
+                Close();
+            }));
+        });
+        AvaloniaXamlLoader.Load(this);
     }
 }

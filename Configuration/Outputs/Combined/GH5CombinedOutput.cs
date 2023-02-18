@@ -13,15 +13,13 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public class Gh5CombinedOutput : CombinedTwiOutput
 {
-    private readonly Microcontroller _microcontroller;
-
     private static readonly Dictionary<Gh5NeckInputType, StandardButtonType> Buttons = new()
     {
         {Gh5NeckInputType.Green, StandardButtonType.A},
         {Gh5NeckInputType.Red, StandardButtonType.B},
         {Gh5NeckInputType.Yellow, StandardButtonType.Y},
         {Gh5NeckInputType.Blue, StandardButtonType.X},
-        {Gh5NeckInputType.Orange, StandardButtonType.LeftShoulder},
+        {Gh5NeckInputType.Orange, StandardButtonType.LeftShoulder}
     };
 
     private static readonly Dictionary<Gh5NeckInputType, StandardButtonType> Taps = new()
@@ -30,8 +28,13 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         {Gh5NeckInputType.TapRed, StandardButtonType.B},
         {Gh5NeckInputType.TapYellow, StandardButtonType.Y},
         {Gh5NeckInputType.TapBlue, StandardButtonType.X},
-        {Gh5NeckInputType.TapOrange, StandardButtonType.LeftShoulder},
+        {Gh5NeckInputType.TapOrange, StandardButtonType.LeftShoulder}
     };
+
+    private readonly Microcontroller _microcontroller;
+
+
+    private bool _detected;
 
     public Gh5CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model,
@@ -41,13 +44,9 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         _microcontroller = microcontroller;
         Outputs.Clear();
         if (outputs != null)
-        {
             Outputs.AddRange(outputs);
-        }
         else
-        {
             CreateDefaults();
-        }
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Bind(out var analogOutputs)
             .Subscribe();
@@ -57,7 +56,13 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
     }
-    
+
+    public bool Detected
+    {
+        get => _detected;
+        set => this.RaiseAndSetIfChanged(ref _detected, value);
+    }
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return "GH5 Slider Inputs";
@@ -67,17 +72,13 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     {
         Outputs.Clear();
         foreach (var pair in Buttons)
-        {
             Outputs.Add(new ControllerButton(Model,
                 new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Green,
                 Colors.Black, Array.Empty<byte>(), 5, pair.Value));
-        }
         foreach (var pair in Taps)
-        {
             Outputs.Add(new ControllerButton(Model,
                 new Gh5NeckInput(pair.Key, Model, _microcontroller, combined: true), Colors.Black,
                 Colors.Black, Array.Empty<byte>(), 5, pair.Value));
-        }
 
         Outputs.Add(new ControllerAxis(Model,
             new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, _microcontroller, combined: true),
@@ -88,15 +89,6 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     public override SerializedOutput Serialize()
     {
         return new SerializedGh5CombinedOutput(Sda, Scl, Outputs.Items.ToList());
-    }
-
-
-    private bool _detected;
-
-    public bool Detected
-    {
-        get => _detected;
-        set => this.RaiseAndSetIfChanged(ref _detected, value);
     }
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,

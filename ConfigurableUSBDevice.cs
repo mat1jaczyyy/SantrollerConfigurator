@@ -10,12 +10,11 @@ namespace GuitarConfigurator.NetCore;
 public abstract class ConfigurableUsbDevice : IConfigurableDevice
 {
     protected readonly UsbDevice Device;
+    protected readonly string Path;
     protected readonly string Product;
     protected readonly string Serial;
     protected readonly Version Version;
-    protected readonly string Path;
-
-    protected Board Board { get; set; }
+    private TaskCompletionSource<string?>? _bootloaderPath;
 
     protected ConfigurableUsbDevice(UsbDevice device, string path, string product, string serial, ushort version)
     {
@@ -23,8 +22,12 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         Path = path;
         Product = product;
         Serial = serial;
-        Version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, (version) & 0xf);
+        Version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, version & 0xf);
     }
+
+    protected Board Board { get; set; }
+
+    public IConfigurableDevice? BootloaderDevice { get; private set; }
 
     public abstract bool MigrationSupported { get; }
 
@@ -41,51 +44,13 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         return Serial == serialOrPath || Path == serialOrPath;
     }
 
-    public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
-    {
-        if (!Device.IsOpen) return Array.Empty<byte>();
-        var requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
-        var buffer = new byte[size];
-
-        var sp = new UsbSetupPacket(
-            ((byte)requestType),
-            bRequest,
-            wValue,
-            2,
-            buffer.Length);
-        Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
-        Array.Resize(ref buffer, length);
-        return buffer;
-    }
-
-
-    public void WriteData(ushort wValue, byte bRequest, byte[] buffer)
-    {
-        if (!Device.IsOpen) return;
-        var requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class |
-                          UsbCtrlFlags.Recipient_Interface;
-        var sp = new UsbSetupPacket(
-            ((byte)requestType),
-            bRequest,
-            wValue,
-            2,
-            buffer.Length);
-        Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
-    }
-
-    public IConfigurableDevice? BootloaderDevice { get; private set; }
-    private TaskCompletionSource<string?>? _bootloaderPath;
-
     public bool DeviceAdded(IConfigurableDevice device)
     {
         if (Board.ArdwiinoName.Contains("pico"))
         {
-            if (device is PicoDevice pico)
-            {
-                _bootloaderPath?.SetResult(pico.GetPath());
-            }
+            if (device is PicoDevice pico) _bootloaderPath?.SetResult(pico.GetPath());
         }
-        else if (Board.HasUsbmcu && device is Dfu { Board.HasUsbmcu: true } dfu)
+        else if (Board.HasUsbmcu && device is Dfu {Board.HasUsbmcu: true} dfu)
         {
             BootloaderDevice = dfu;
             _bootloaderPath?.SetResult(dfu.Board.Environment);
@@ -112,5 +77,42 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     public bool IsAvr()
     {
         return Board.IsAvr();
+    }
+
+    public bool IsPico()
+    {
+        return Board.IsPico();
+    }
+
+    public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
+    {
+        if (!Device.IsOpen) return Array.Empty<byte>();
+        var requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
+        var buffer = new byte[size];
+
+        var sp = new UsbSetupPacket(
+            (byte) requestType,
+            bRequest,
+            wValue,
+            2,
+            buffer.Length);
+        Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
+        Array.Resize(ref buffer, length);
+        return buffer;
+    }
+
+
+    public void WriteData(ushort wValue, byte bRequest, byte[] buffer)
+    {
+        if (!Device.IsOpen) return;
+        var requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class |
+                          UsbCtrlFlags.Recipient_Interface;
+        var sp = new UsbSetupPacket(
+            (byte) requestType,
+            bRequest,
+            wValue,
+            2,
+            buffer.Length);
+        Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
     }
 }

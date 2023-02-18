@@ -9,9 +9,14 @@ namespace GuitarConfigurator.NetCore.Configuration;
 
 public abstract class SpiInput : Input, ISpi
 {
+    private readonly SpiConfig _spiConfig;
     protected readonly Microcontroller Microcontroller;
+
+    private readonly string _spiType;
+
     protected SpiInput(Microcontroller microcontroller, string spiType, uint spiFreq, bool cpol,
-        bool cpha, bool msbFirst, ConfigViewModel model, int? miso = null, int? mosi = null, int? sck = null) : base(model)
+        bool cpha, bool msbFirst, ConfigViewModel model, int? miso = null, int? mosi = null,
+        int? sck = null) : base(model)
     {
         Microcontroller = microcontroller;
         _spiType = spiType;
@@ -22,7 +27,6 @@ public abstract class SpiInput : Input, ISpi
         }
         else
         {
-
             if (miso == null || mosi == null || sck == null)
             {
                 var pins = microcontroller.SpiPins(_spiType);
@@ -31,7 +35,8 @@ public abstract class SpiInput : Input, ISpi
                 sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
             }
 
-            _spiConfig = microcontroller.AssignSpiPins(model, _spiType, mosi.Value, miso.Value, sck.Value, cpol, cpha, msbFirst, spiFreq)!;
+            _spiConfig = microcontroller.AssignSpiPins(model, _spiType, mosi.Value, miso.Value, sck.Value, cpol, cpha,
+                msbFirst, spiFreq)!;
         }
 
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
@@ -39,15 +44,6 @@ public abstract class SpiInput : Input, ISpi
         this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged(nameof(Sck)));
     }
 
-    private string _spiType;
-
-    private readonly SpiConfig _spiConfig;
-    
-    public override IReadOnlyList<string> RequiredDefines()
-    {
-        return new[] {$"{_spiType.ToUpper()}_SPI_PORT {_spiConfig.Definition}"};
-    }
-    
     public int Mosi
     {
         get => _spiConfig.Mosi;
@@ -69,6 +65,18 @@ public abstract class SpiInput : Input, ISpi
     public List<int> AvailableMosiPins => GetMosiPins();
     public List<int> AvailableMisoPins => GetMisoPins();
     public List<int> AvailableSckPins => GetSckPins();
+
+    public override IList<PinConfig> PinConfigs => new List<PinConfig> {_spiConfig};
+
+    public List<int> SpiPins()
+    {
+        return new() {Mosi, Miso, Sck};
+    }
+
+    public override IReadOnlyList<string> RequiredDefines()
+    {
+        return new[] {$"{_spiType.ToUpper()}_SPI_PORT {_spiConfig.Definition}"};
+    }
 
     private List<int> GetMosiPins()
     {
@@ -95,7 +103,4 @@ public abstract class SpiInput : Input, ISpi
     {
         Microcontroller.UnAssignPins(_spiType);
     }
-
-    public override IList<PinConfig> PinConfigs => new List<PinConfig>() {_spiConfig};
-    public List<int> SpiPins() => new() {Mosi, Miso, Sck};
 }

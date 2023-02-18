@@ -9,10 +9,13 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 {
+    private readonly SpiConfig _spiConfig;
     protected readonly Microcontroller Microcontroller;
 
-    protected CombinedSpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, uint spiFreq, bool cpol,
-        bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null): base(model, null, name)
+    protected CombinedSpiOutput(ConfigViewModel model, Microcontroller microcontroller, string spiType, uint spiFreq,
+        bool cpol,
+        bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null) : base(model, null,
+        name)
     {
         Microcontroller = microcontroller;
         SpiType = spiType;
@@ -24,7 +27,6 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
         }
         else
         {
-
             if (miso == null || mosi == null || sck == null)
             {
                 var pins = microcontroller.SpiPins(SpiType);
@@ -33,7 +35,8 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
                 sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
             }
 
-            _spiConfig = microcontroller.AssignSpiPins(model, SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha, msbFirst, spiFreq)!;
+            _spiConfig = microcontroller.AssignSpiPins(model, SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha,
+                msbFirst, spiFreq)!;
         }
 
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
@@ -44,8 +47,6 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
     public bool BindableSpi { get; }
 
     private string SpiType { get; }
-
-    private readonly SpiConfig _spiConfig;
 
     public int Mosi
     {
@@ -69,6 +70,11 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
     public List<int> AvailableMisoPins => GetMisoPins();
     public List<int> AvailableSckPins => GetSckPins();
 
+    public List<int> SpiPins()
+    {
+        return new() {Mosi, Miso, Sck};
+    }
+
     private List<int> GetMosiPins()
     {
         return Microcontroller.SpiPins(SpiType)
@@ -89,11 +95,10 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
             .Where(s => s.Value is SpiPinType.Sck)
             .Select(s => s.Key).ToList();
     }
+
     public override void Dispose()
     {
         Microcontroller.UnAssignPins(SpiType);
         base.Dispose();
     }
-
-    public List<int> SpiPins() => new() {Mosi, Miso, Sck};
 }

@@ -14,6 +14,17 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoContract(SkipConstructor = true)]
 public class SerializedPs2CombinedOutput : SerializedOutput
 {
+    public SerializedPs2CombinedOutput(int miso, int mosi, int sck, int att, int ack, List<Output> outputs)
+    {
+        Miso = miso;
+        Mosi = mosi;
+        Sck = sck;
+        Att = att;
+        Ack = ack;
+        Outputs = outputs.Select(s => s.Serialize()).ToList();
+        Enabled = GetBytes(new BitArray(outputs.Select(s => s.Enabled).ToArray()));
+    }
+
     [ProtoMember(1)] public override SerializedInput? Input => null;
     [ProtoMember(4)] public int Miso { get; }
     [ProtoMember(5)] public int Mosi { get; }
@@ -28,17 +39,6 @@ public class SerializedPs2CombinedOutput : SerializedOutput
     public override uint LedOff => Colors.Black.ToUint32();
     public override byte[] LedIndex => Array.Empty<byte>();
 
-    public SerializedPs2CombinedOutput(int miso, int mosi, int sck, int att, int ack, List<Output> outputs)
-    {
-        Miso = miso;
-        Mosi = mosi;
-        Sck = sck;
-        Att = att;
-        Ack = ack;
-        Outputs = outputs.Select(s => s.Serialize()).ToList();
-        Enabled = GetBytes(new BitArray(outputs.Select(s => s.Enabled).ToArray()));
-    }
-
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
         // Since we filter out sda and scl from wii inputs for size, we need to make sure its assigned before we construct the inputs.
@@ -48,10 +48,7 @@ public class SerializedPs2CombinedOutput : SerializedOutput
         microcontroller.AssignPin(new DirectPinConfig(model, Ps2Input.Ps2AttType, Att, DevicePinMode.Output));
         var outputs = Outputs.Select(s => s.Generate(model, microcontroller)).ToList();
         var array = new BitArray(Enabled);
-        for (var i = 0; i < outputs.Count; i++)
-        {
-            outputs[i].Enabled = array[i];
-        }
+        for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
 
         return new Ps2CombinedOutput(model, microcontroller, Miso, Mosi, Sck, Att, Ack, outputs);
     }

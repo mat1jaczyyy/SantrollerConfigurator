@@ -4,8 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using Avalonia.Media;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
@@ -154,7 +152,7 @@ public enum RumbleCommand
     StageKitBlue7,
 
     [Description("Stage Kit Strobe Blue Led 8")]
-    StageKitBlue8,
+    StageKitBlue8
 }
 
 public static class RumbleCommandMethods
@@ -192,56 +190,15 @@ public static class RumbleCommandMethods
 
 public class Led : Output
 {
-    protected Microcontroller Microcontroller { get; }
-
-    private DirectPinConfig? _pinConfig;
     private bool _outputEnabled;
-    public bool OutputEnabled
-    {
-        get => _outputEnabled;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _outputEnabled, value);
-            if (value)
-            {
-                if (_pinConfig != null) return;
-                _pinConfig = Microcontroller.GetOrSetPin(Model, "led", Pin, DevicePinMode.Output);
-                Microcontroller.AssignPin(_pinConfig);
-            }
-            else
-            {
-                Dispose();
-            }
-            Model.UpdateErrors();
-        }
-    }
-    
-    public List<int> AvailablePins => Microcontroller.GetAllPins(false);
-
-    public DirectPinConfig? PinConfig => _pinConfig;
 
     private int _pin;
-    public int Pin
-    {
-        get => _pin;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _pin, value);
-            if (_pinConfig == null) return;
-            PinConfig.Pin = value;
-        }
-    }
 
-    public override void Dispose()
-    {
-        if (_pinConfig == null) return;
-        Microcontroller.UnAssignPins(_pinConfig.Type);
-        _pinConfig = null;
-    }
 
-    public RumbleCommand Command { get; }
+    private readonly SourceList<RumbleCommand> _rumbleCommands = new();
 
-    public Led(ConfigViewModel model, Microcontroller microcontroller, bool outputEnabled, int pin, Color ledOn, Color ledOff, byte[] ledIndices, RumbleCommand command) : base(
+    public Led(ConfigViewModel model, Microcontroller microcontroller, bool outputEnabled, int pin, Color ledOn,
+        Color ledOff, byte[] ledIndices, RumbleCommand command) : base(
         model, null, ledOn, ledOff, ledIndices, EnumToStringConverter.Convert(command))
     {
         Microcontroller = microcontroller;
@@ -254,18 +211,118 @@ public class Led : Output
             .Bind(out var rumbleCommands)
             .Subscribe();
         RumbleCommands = rumbleCommands;
+    }
 
+    protected Microcontroller Microcontroller { get; }
+
+    public bool OutputEnabled
+    {
+        get => _outputEnabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _outputEnabled, value);
+            if (value)
+            {
+                if (PinConfig != null) return;
+                PinConfig = Microcontroller.GetOrSetPin(Model, "led", Pin, DevicePinMode.Output);
+                Microcontroller.AssignPin(PinConfig);
+            }
+            else
+            {
+                Dispose();
+            }
+
+            Model.UpdateErrors();
+        }
+    }
+
+    public List<int> AvailablePins => Microcontroller.GetAllPins(false);
+
+    public DirectPinConfig? PinConfig { get; private set; }
+
+    public int Pin
+    {
+        get => _pin;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _pin, value);
+            if (PinConfig == null) return;
+            PinConfig.Pin = value;
+        }
+    }
+
+    public RumbleCommand Command { get; }
+
+    public override bool IsCombined => false;
+    public override bool IsStrum => false;
+
+    public ReadOnlyObservableCollection<RumbleCommand> RumbleCommands { get; }
+
+    public RumbleCommand RumbleCommand
+    {
+        get => Command;
+        set
+        {
+            if (value == Command) return;
+            var output = new Led(Model, Microcontroller, OutputEnabled, Pin, LedOn, LedOff, LedIndices.ToArray(),
+                value);
+            output.Expanded = Expanded;
+            Model.Bindings.Insert(Model.Bindings.IndexOf(this), output);
+            Model.RemoveOutput(this);
+            Dispose();
+        }
+    }
+
+    public override string LedOnLabel
+    {
+        get
+        {
+            if (Command is RumbleCommand.StageKitFog) return "Fog Inactive LED Colour";
+
+            if (Command.IsPlayer() || Command.IsAuth()) return "LED Colour";
+
+            if (Command is RumbleCommand.SantrollerStarPowerActive or RumbleCommand.SantrollerStarPowerFill)
+                return "Start Power Gauge Full Colour";
+
+            return "Active LED Colour";
+        }
+    }
+
+    public override string LedOffLabel =>
+        Command switch
+        {
+            RumbleCommand.StageKitFog => "Fog Inactive LED Colour",
+            RumbleCommand.SantrollerStarPowerActive or RumbleCommand.SantrollerStarPowerFill =>
+                "Start Power Gauge Empty Colour",
+            _ => "Inactive LED Colour"
+        };
+
+    public override bool SupportsLedOff => !Command.IsAuth() && !Command.IsPlayer();
+
+    public override bool IsKeyboard => false;
+    public override bool IsController => false;
+
+    public override bool Valid => true;
+
+    public override void Dispose()
+    {
+        if (PinConfig == null) return;
+        Microcontroller.UnAssignPins(PinConfig.Type);
+        PinConfig = null;
     }
 
     protected override IEnumerable<PinConfig> GetOwnPinConfigs()
     {
-        return _pinConfig != null ? new[] {_pinConfig} : Enumerable.Empty<PinConfig>();
+        return PinConfig != null ? new[] {PinConfig} : Enumerable.Empty<PinConfig>();
     }
-    
-    protected override IEnumerable<DevicePin> GetOwnPins() => new List<DevicePin>()
+
+    protected override IEnumerable<DevicePin> GetOwnPins()
     {
-        new(Pin, DevicePinMode.Output)
-    };
+        return new List<DevicePin>
+        {
+            new(Pin, DevicePinMode.Output)
+        };
+    }
 
     public static Func<RumbleCommand, bool> FilterLeds((DeviceControllerType, EmulationType) type)
     {
@@ -298,31 +355,14 @@ public class Led : Output
         return _ => false;
     }
 
-    public override bool IsCombined => false;
-    public override bool IsStrum => false;
-
     public override SerializedOutput Serialize()
     {
         return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command, OutputEnabled, Pin);
     }
 
-
-    private SourceList<RumbleCommand> _rumbleCommands = new();
-
-    public ReadOnlyObservableCollection<RumbleCommand> RumbleCommands { get; }
-
-    public RumbleCommand RumbleCommand
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
-        get => Command;
-        set
-        {
-            if (value == Command) return;
-            var output = new Led(Model, Microcontroller, OutputEnabled, Pin, LedOn, LedOff, LedIndices.ToArray(), value);
-            output.Expanded = Expanded;
-            Model.Bindings.Insert(Model.Bindings.IndexOf(this), output);
-            Model.RemoveOutput(this);
-            Dispose();
-        }
+        return $"Led/{Name}.png";
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
@@ -344,11 +384,12 @@ public class Led : Output
         var allOff = "(rumble_left == 0x00 rumble_right == 0xFF)";
         var on = "";
         var off = "";
-        if (_pinConfig != null)
+        if (PinConfig != null)
         {
-            on = Microcontroller.GenerateDigitalWrite(_pinConfig.Pin, true);
-            off = Microcontroller.GenerateDigitalWrite(_pinConfig.Pin, false);
+            on = Microcontroller.GenerateDigitalWrite(PinConfig.Pin, true);
+            off = Microcontroller.GenerateDigitalWrite(PinConfig.Pin, false);
         }
+
         var between = "";
         foreach (var index in LedIndices)
         {
@@ -360,30 +401,22 @@ public class Led : Output
 
         // Player and Auth commands are a set and forget type thing, they are never switched off after being turned on
         if (Command.IsPlayer())
-        {
             return $@"
                 if (player == {(int) Command}) {{
                     {on}
                 }}";
-        }
 
-        if (Command.IsAuth())
-        {
-            return on;
-        }
+        if (Command.IsAuth()) return on;
 
         // On PS3 or 360, DJ leds respond to both values being the same. For PC reasons, we have a seperate euphoria command
         if (Command.IsDj())
-        {
             return $@"if (consoleType != UNIVERSAL && (controllerType != WINDOWS_XBOX360 || !windows_or_xbox_one))) {{
                 {between}
             }} else if ((rumble_right == {(int) RumbleCommand.DjEuphoria}) {{
                 {between}
             }}";
-        }
 
         if (Command.IsSantroller())
-        {
             // Only support santroller commands on PC (either universal or xinput + windows)
             return
                 $@"if ((consoleType == UNIVERSAL || (controllerType == WINDOWS_XBOX360 && windows_or_xbox_one)) && rumble_right == {(int) Command}) {{
@@ -393,17 +426,14 @@ public class Led : Output
                         {off}
                     }}
                 }}";
-        }
 
         if (Command.IsKeyboard())
-        {
             return
-                $@"if (leds & {1 << Command - RumbleCommand.KeyboardNumLock}) {{
+                $@"if (leds & {1 << (Command - RumbleCommand.KeyboardNumLock)}) {{
                     {on}
                 }} else {{
                     {off}
                 }}";
-        }
 
 
         if (!Command.IsStageKit()) return "";
@@ -413,14 +443,12 @@ public class Led : Output
             case RumbleCommand.StageKitStrobe:
                 // In strobe mode, we just blink the led at a rate dictate by strobe_delay, only leaving it on for 10ms
                 if (mode == ConfigField.StrobeLed)
-                {
                     return @$"if (last_strobe && last_strobe - millis() > stage_kit_millis[strobe_delay]) {{
                                 last_strobe = millis();
                                 {on}
                             }} else if (last_strobe && last_strobe - millis() > 10) {{
                                 {off}
                             }}";
-                }
 
                 // In rumble mode, we update strobe_delay based on packets receive, turning strobe off if requested
                 return $@"
@@ -455,48 +483,6 @@ public class Led : Output
                 return "";
         }
     }
-
-    public override string LedOnLabel
-    {
-        get
-        {
-            if (Command is RumbleCommand.StageKitFog)
-            {
-                return "Fog Inactive LED Colour";
-            }
-
-            if (Command.IsPlayer() || Command.IsAuth())
-            {
-                return "LED Colour";
-            }
-
-            if (Command is RumbleCommand.SantrollerStarPowerActive or RumbleCommand.SantrollerStarPowerFill)
-            {
-                return "Start Power Gauge Full Colour";
-            }
-
-            return "Active LED Colour";
-        }
-    }
-
-    public override string LedOffLabel
-    {
-        get =>
-            Command switch
-            {
-                RumbleCommand.StageKitFog => "Fog Inactive LED Colour",
-                RumbleCommand.SantrollerStarPowerActive or RumbleCommand.SantrollerStarPowerFill =>
-                    "Start Power Gauge Empty Colour",
-                _ => "Inactive LED Colour"
-            };
-    }
-
-    public override bool SupportsLedOff => !Command.IsAuth() && !Command.IsPlayer();
-
-    public override bool IsKeyboard => false;
-    public override bool IsController => false;
-    public override bool IsMidi => false;
-    public override bool Valid => true;
 
     public override void UpdateBindings()
     {

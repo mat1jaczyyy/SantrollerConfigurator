@@ -13,10 +13,6 @@ namespace GuitarConfigurator.NetCore.Configuration;
 
 public class MacroInput : Input
 {
-    public Input Child1 { get; }
-    public Input Child2 { get; }
-    public override InputType? InputType => Types.InputType.MacroInput;
-
     public MacroInput(Input child1, Input child2,
         ConfigViewModel model) : base(model)
     {
@@ -27,6 +23,15 @@ public class MacroInput : Input
             .Subscribe(s => RawValue = s);
         IsAnalog = false;
     }
+
+    public Input Child1 { get; }
+    public Input Child2 { get; }
+    public override InputType? InputType => Types.InputType.MacroInput;
+
+    public override IList<DevicePin> Pins => Child1.Pins.Concat(Child2.Pins).ToList();
+    public override IList<PinConfig> PinConfigs => Child1.PinConfigs.Concat(Child2.PinConfigs).ToList();
+
+    public override bool IsUint => false;
 
 
     public override string Generate(ConfigField mode)
@@ -49,11 +54,6 @@ public class MacroInput : Input
         return new List<Input> {Child1, Child2};
     }
 
-    public override IList<DevicePin> Pins => Child1.Pins.Concat(Child2.Pins).ToList();
-    public override IList<PinConfig> PinConfigs => Child1.PinConfigs.Concat(Child2.PinConfigs).ToList();
-
-    public override bool IsUint => false;
-
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
@@ -65,7 +65,7 @@ public class MacroInput : Input
             ps2ControllerType, wiiControllerType);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
         throw new InvalidOperationException("Never call GenerateAll on MacroInput, call it on its children");

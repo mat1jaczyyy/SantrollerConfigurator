@@ -6,17 +6,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public class Uno : AvrController
 {
-    protected override int SpiMiso => 12;
-
-    protected override int SpiMosi => 11;
-
-    protected override int SpiCSn => 10;
-    protected override int SpiSck => 13;
-
-    protected override int I2CSda => 18;
-
-    protected override int I2CScl => 19;
-
     private static readonly int[] PinIndex =
     {
         0, /* 0, port D */
@@ -34,23 +23,41 @@ public class Uno : AvrController
         'C', 'C', 'C', 'C', 'C'
     };
 
-    protected override char[] PortNames => new[] {'B', 'C', 'D'};
-
-    private Dictionary<Tuple<char, int>, int> _pinByMask = Enumerable.Zip(Ports, PinIndex)
-        .Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i))
-        .ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s => s.Item3);
-
-    protected override Dictionary<Tuple<char, int>, int> PinByMask => _pinByMask;
-
     public static readonly Dictionary<int, string> Interrupts = new()
     {
         {2, "INT0"},
-        {3, "INT1"},
+        {3, "INT1"}
     };
+
+    public Uno(Board board)
+    {
+        Board = board;
+    }
+
+    protected override int SpiMiso => 12;
+
+    protected override int SpiMosi => 11;
+
+    protected override int SpiCSn => 10;
+    protected override int SpiSck => 13;
+
+    protected override int I2CSda => 18;
+
+    protected override int I2CScl => 19;
+
+    protected override char[] PortNames => new[] {'B', 'C', 'D'};
+
+    protected override Dictionary<Tuple<char, int>, int> PinByMask { get; } = Ports.Zip(PinIndex)
+        .Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i))
+        .ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s => s.Item3);
 
     protected override int PinA0 => 14;
 
     public override int PinCount => PinIndex.Length;
+
+    public override Board Board { get; }
+
+    public override List<int> AnalogPins => Enumerable.Range(PinA0, 4).ToList();
 
     protected override string GetInterruptForPin(int ack)
     {
@@ -60,13 +67,6 @@ public class Uno : AvrController
     public override List<int> SupportedAckPins()
     {
         return Interrupts.Keys.ToList();
-    }
-
-    public override Board Board { get; }
-
-    public Uno(Board board)
-    {
-        Board = board;
     }
 
     public override int GetIndex(int pin)
@@ -86,8 +86,6 @@ public class Uno : AvrController
         return chan;
     }
 
-    public override List<int> AnalogPins => Enumerable.Range(PinA0, 4).ToList();
-
     public override AvrPinMode? ForcedMode(int pin)
     {
         switch (pin)
@@ -103,6 +101,8 @@ public class Uno : AvrController
         }
     }
 
-    public override List<int> GetAllPins(bool isAnalog) =>
-        isAnalog ? AnalogPins : Enumerable.Range(0, PinIndex.Length).ToList();
+    public override List<int> GetAllPins(bool isAnalog)
+    {
+        return isAnalog ? AnalogPins : Enumerable.Range(0, PinIndex.Length).ToList();
+    }
 }

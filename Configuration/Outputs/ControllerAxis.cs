@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
@@ -11,6 +12,8 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class ControllerAxis : OutputAxis
 {
+    private readonly ObservableAsPropertyHelper<bool> _valid;
+
     public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
         int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
@@ -23,43 +26,10 @@ public class ControllerAxis : OutputAxis
             .ToProperty(this, s => s.Valid);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
-    {
-        return ControllerEnumConverter.GetAxisText(deviceControllerType, rhythmType,
-            Enum.Parse<StandardAxisType>(Name)) ?? Name;
-    }
-
-    private static bool IsTrigger(StandardAxisType type)
-    {
-        return type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
-    }
-
     public StandardAxisType Type { get; }
-
-    public override string GenerateOutput(ConfigField mode)
-    {
-        return GetReportField(Type);
-    }
 
     public override bool IsCombined => false;
 
-    protected override string MinCalibrationText()
-    {
-        switch (Type)
-        {
-            case StandardAxisType.LeftStickX:
-            case StandardAxisType.RightStickX:
-                return "Move axis to the leftmost position";
-            case StandardAxisType.LeftStickY:
-            case StandardAxisType.RightStickY:
-                return "Move axis to the lowest position";
-            case StandardAxisType.LeftTrigger:
-            case StandardAxisType.RightTrigger:
-                return "Release the trigger";
-            default:
-                return "";
-        }
-    }
     public override string LedOnLabel
     {
         get
@@ -102,6 +72,67 @@ public class ControllerAxis : OutputAxis
         }
     }
 
+    public override bool IsKeyboard => false;
+    public override bool IsController => true;
+    public override bool Valid => _valid.Value;
+
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return ControllerEnumConverter.GetAxisText(deviceControllerType, rhythmType,
+            Enum.Parse<StandardAxisType>(Name)) ?? Name;
+    }
+
+    private static bool IsTrigger(StandardAxisType type)
+    {
+        return type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
+    }
+
+    public override string GenerateOutput(ConfigField mode)
+    {
+        return GetReportField(Type);
+    }
+
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        switch (type)
+        {
+            case DeviceControllerType.Gamepad:
+            case DeviceControllerType.Wheel:
+            case DeviceControllerType.ArcadeStick:
+            case DeviceControllerType.FlightStick:
+            case DeviceControllerType.DancePad:
+            case DeviceControllerType.ArcadePad:
+                return $"Others/Xbox360/360_{Name}.png";
+            case DeviceControllerType.Guitar:
+            case DeviceControllerType.Drum:
+                return $"{rhythmType}/{Name}.png";
+            case DeviceControllerType.LiveGuitar:
+                return $"GuitarHero/{Name}.png";
+            case DeviceControllerType.Turntable:
+                return $"DJ/{Name}.png";
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
+
+    protected override string MinCalibrationText()
+    {
+        switch (Type)
+        {
+            case StandardAxisType.LeftStickX:
+            case StandardAxisType.RightStickX:
+                return "Move axis to the leftmost position";
+            case StandardAxisType.LeftStickY:
+            case StandardAxisType.RightStickY:
+                return "Move axis to the lowest position";
+            case StandardAxisType.LeftTrigger:
+            case StandardAxisType.RightTrigger:
+                return "Release the trigger";
+            default:
+                return "";
+        }
+    }
+
     protected override string MaxCalibrationText()
     {
         switch (Type)
@@ -120,17 +151,16 @@ public class ControllerAxis : OutputAxis
         }
     }
 
-    public override bool IsKeyboard => false;
-    public override bool IsController => true;
-    public override bool IsMidi => false;
-
-    private readonly ObservableAsPropertyHelper<bool> _valid;
-    public override bool Valid => _valid.Value;
-
     protected override bool SupportsCalibration()
     {
         return Type is not (StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
             or StandardAxisType.AccelerationZ);
+    }
+
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    {
+        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
+        return base.Generate(mode, debounceIndex, combined, extra);
     }
 
     public override SerializedOutput Serialize()

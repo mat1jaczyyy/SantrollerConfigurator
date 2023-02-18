@@ -3,7 +3,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 public enum DeviceControllerType
 {
     Gamepad = 1,
-    Wheel = 2, 
+    Wheel = 2,
     ArcadeStick = 3,
     FlightStick = 4,
     DancePad = 5,

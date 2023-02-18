@@ -9,39 +9,6 @@ public class Pico : Microcontroller
     private const int GpioCount = 30;
     private const int PinA0 = 26;
 
-    public override Board Board { get; }
-
-    public override string GeneratePulseRead(int pin, PulseMode mode, int timeout)
-    {
-        return $"pulseIn({pin},{mode},{timeout})";
-    }
-
-    public override int GetFirstAnalogPin()
-    {
-        return PinA0;
-    }
-
-    public override string GenerateAnalogRead(int pin)
-    {
-        return $"adc({pin - PinA0})";
-    }
-
-    public Pico(Board board)
-    {
-        Board = board;
-    }
-
-    public override string GenerateDigitalRead(int pin, bool pullUp)
-    {
-        // Invert on pullup
-        return pullUp ? $"(sio_hw->gpio_in & (1 << {pin})) == 0" : $"sio_hw->gpio_in & (1 << {pin})";
-    }
-
-    public override string GenerateDigitalWrite(int pin, bool val)
-    {
-        return val ? $"sio_hw->gpio_set = {1 << pin}" : $"sio_hw->gpio_clr = {1 << pin}";
-    }
-
     public static readonly Dictionary<int, SpiPinType> SpiTypesByPin = new()
     {
         {0, SpiPinType.Miso},
@@ -63,7 +30,7 @@ public class Pico : Microcontroller
         {12, SpiPinType.Miso},
         {13, SpiPinType.CSn},
         {14, SpiPinType.Sck},
-        {15, SpiPinType.Mosi},
+        {15, SpiPinType.Mosi}
     };
 
     public static readonly Dictionary<int, int> SpiIndexByPin = new()
@@ -87,7 +54,7 @@ public class Pico : Microcontroller
         {12, 1},
         {13, 1},
         {14, 1},
-        {15, 1},
+        {15, 1}
     };
 
     public static readonly Dictionary<int, int> TwiIndexByPin = new()
@@ -115,7 +82,7 @@ public class Pico : Microcontroller
         {20, 0},
         {21, 0},
         {26, 1},
-        {27, 1},
+        {27, 1}
     };
 
     public static readonly Dictionary<int, TwiPinType> TwiTypeByPin = new()
@@ -143,8 +110,43 @@ public class Pico : Microcontroller
         {20, TwiPinType.Sda},
         {21, TwiPinType.Scl},
         {26, TwiPinType.Sda},
-        {27, TwiPinType.Scl},
+        {27, TwiPinType.Scl}
     };
+
+    public Pico(Board board)
+    {
+        Board = board;
+    }
+
+    public override Board Board { get; }
+
+    public override List<int> AnalogPins => new() {26, 27, 28, 29};
+
+    public override string GeneratePulseRead(int pin, PulseMode mode, int timeout)
+    {
+        return $"pulseIn({pin},{mode},{timeout})";
+    }
+
+    public override int GetFirstAnalogPin()
+    {
+        return PinA0;
+    }
+
+    public override string GenerateAnalogRead(int pin)
+    {
+        return $"adc({pin - PinA0})";
+    }
+
+    public override string GenerateDigitalRead(int pin, bool pullUp)
+    {
+        // Invert on pullup
+        return pullUp ? $"(sio_hw->gpio_in & (1 << {pin})) == 0" : $"sio_hw->gpio_in & (1 << {pin})";
+    }
+
+    public override string GenerateDigitalWrite(int pin, bool val)
+    {
+        return val ? $"sio_hw->gpio_set = {1 << pin}" : $"sio_hw->gpio_clr = {1 << pin}";
+    }
 
 
     public override SpiConfig? AssignSpiPins(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol,
@@ -153,17 +155,12 @@ public class Pico : Microcontroller
         uint clock)
     {
         //Some things don't need MISO (like apa102s)
-        if (mosi != -1 && SpiTypesByPin[mosi] != SpiPinType.Mosi ||
-            miso != -1 && SpiTypesByPin[miso] != SpiPinType.Miso)
-        {
+        if ((mosi != -1 && SpiTypesByPin[mosi] != SpiPinType.Mosi) ||
+            (miso != -1 && SpiTypesByPin[miso] != SpiPinType.Miso))
             return null;
-        }
 
         var config = PinConfigs.OfType<PicoSpiConfig>().FirstOrDefault(c => c.Type == type);
-        if (config != null)
-        {
-            return config;
-        }
+        if (config != null) return config;
 
         config = new PicoSpiConfig(model, type, mosi, miso, sck, cpol, cpha, msbfirst, clock);
         PinConfigs.Add(config);
@@ -173,16 +170,11 @@ public class Pico : Microcontroller
     public override TwiConfig? AssignTwiPins(ConfigViewModel model, string type, int sda, int scl, int clock)
     {
         var pin = TwiIndexByPin[sda];
-        if (pin != TwiIndexByPin[scl] || TwiTypeByPin[sda] != TwiPinType.Sda || TwiTypeByPin[scl] != TwiPinType.Scl)
-        {
-            return null;
-        }
+        if (pin != TwiIndexByPin[scl] || TwiTypeByPin[sda] != TwiPinType.Sda ||
+            TwiTypeByPin[scl] != TwiPinType.Scl) return null;
 
         var config = PinConfigs.OfType<PicoTwiConfig>().FirstOrDefault(c => c.Type == type);
-        if (config != null)
-        {
-            return config;
-        }
+        if (config != null) return config;
 
         if (PinConfigs.Any(c => c is PicoTwiConfig s && s.Index == pin)) return null;
         config = new PicoTwiConfig(model, type, sda, scl, clock);
@@ -200,9 +192,15 @@ public class Pico : Microcontroller
         return Enumerable.Range(0, GpioCount).ToList();
     }
 
-    public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type) => SpiTypesByPin.ToList();
+    public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
+    {
+        return SpiTypesByPin.ToList();
+    }
 
-    public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type) => TwiTypeByPin.ToList();
+    public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type)
+    {
+        return TwiTypeByPin.ToList();
+    }
 
     public override void UnAssignPins(string type)
     {
@@ -221,7 +219,6 @@ public class Pico : Microcontroller
         var ret = "";
         var pins = PinConfigs.OfType<DirectPinConfig>();
         foreach (var devicePin in pins)
-        {
             if (devicePin.PinMode == DevicePinMode.Analog)
             {
                 ret += $"adc_gpio_init({devicePin.Pin});";
@@ -235,7 +232,6 @@ public class Pico : Microcontroller
                     $"gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});";
                 ret += $"gpio_set_pulls({devicePin.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
             }
-        }
 
         return ret;
     }
@@ -251,38 +247,27 @@ public class Pico : Microcontroller
     {
         var ret = $"GP{pin}";
         if (twi && TwiIndexByPin.ContainsKey(pin))
-        {
             ret += $" / TWI{TwiIndexByPin[pin]} {TwiTypeByPin[pin].ToString().ToUpper()}";
-        }
 
         if (spi && SpiIndexByPin.ContainsKey(pin))
-        {
             ret += $" / SPI{SpiIndexByPin[pin]} {SpiTypesByPin[pin].ToString().ToUpper()}";
-        }
 
-        if (pin >= 26)
-        {
-            ret += $" / ADC{pin - 26}";
-        }
+        if (pin >= 26) ret += $" / ADC{pin - 26}";
 
         return ret;
     }
 
-    public override List<int> GetAllPins(bool isAnalog) =>
-        isAnalog ? AnalogPins : Enumerable.Range(0, GpioCount).ToList();
-
-    public override List<int> AnalogPins => new() {26, 27, 28, 29};
+    public override List<int> GetAllPins(bool isAnalog)
+    {
+        return isAnalog ? AnalogPins : Enumerable.Range(0, GpioCount).ToList();
+    }
 
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)
     {
         for (var i = 0; i < 8; i++)
-        {
             if ((mask & (1 << i)) != 0)
-            {
-                digitalRaw[(port * 8) + i] = (pins & (1 << i)) == 0;
-            }
-        }
+                digitalRaw[port * 8 + i] = (pins & (1 << i)) == 0;
     }
 
     public override int GetAnalogMask(DevicePin devicePin)

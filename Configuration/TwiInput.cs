@@ -11,6 +11,10 @@ public abstract class TwiInput : Input, ITwi
 {
     private readonly Microcontroller _microcontroller;
 
+    private readonly TwiConfig _twiConfig;
+
+    private readonly string _twiType;
+
     protected TwiInput(Microcontroller microcontroller, string twiType, int twiFreq, int? sda, int? scl,
         ConfigViewModel model) : base(model)
     {
@@ -33,14 +37,10 @@ public abstract class TwiInput : Input, ITwi
             _twiConfig = microcontroller.AssignTwiPins(model, _twiType, sda.Value, scl.Value, twiFreq)!;
         }
 
-       
+
         this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged(nameof(Scl)));
         this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged(nameof(Sda)));
     }
-
-    private readonly string _twiType;
-
-    private readonly TwiConfig _twiConfig;
 
     public int Sda
     {
@@ -57,6 +57,12 @@ public abstract class TwiInput : Input, ITwi
 
     public List<int> AvailableSdaPins => GetSdaPins();
     public List<int> AvailableSclPins => GetSclPins();
+    public override IList<PinConfig> PinConfigs => new List<PinConfig> {_twiConfig};
+
+    public List<int> TwiPins()
+    {
+        return new() {Sda, Scl};
+    }
 
     private List<int> GetSdaPins()
     {
@@ -71,7 +77,7 @@ public abstract class TwiInput : Input, ITwi
             .Where(s => s.Value is TwiPinType.Scl)
             .Select(s => s.Key).ToList();
     }
-    
+
     public override IReadOnlyList<string> RequiredDefines()
     {
         return new[] {$"{_twiType.ToUpper()}_TWI_PORT {_twiConfig.Definition}"};
@@ -81,6 +87,4 @@ public abstract class TwiInput : Input, ITwi
     {
         _microcontroller.UnAssignPins(_twiType);
     }
-    public override IList<PinConfig> PinConfigs => new List<PinConfig>() {_twiConfig};
-    public List<int> TwiPins() => new() {Sda, Scl};
 }

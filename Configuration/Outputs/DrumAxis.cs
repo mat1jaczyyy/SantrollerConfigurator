@@ -10,15 +10,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class DrumAxis : OutputAxis
 {
-    private readonly StandardButtonType Xbox360CymbalFlag = StandardButtonType.LeftShoulder;
-    private readonly StandardButtonType Xbox360PadFlag = StandardButtonType.RightThumbClick;
-
-    private readonly StandardButtonType Ps3CymbalFlag = StandardButtonType.RightThumbClick;
-    private readonly StandardButtonType Ps3PadFlag = StandardButtonType.LeftThumbClick;
-
-    private readonly StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
-    private readonly StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
-
     private static readonly Dictionary<DrumAxisType, StandardButtonType> ButtonsXbox360 = new()
     {
         {DrumAxisType.Green, StandardButtonType.A},
@@ -30,7 +21,7 @@ public class DrumAxis : OutputAxis
         {DrumAxisType.YellowCymbal, StandardButtonType.Y},
         {DrumAxisType.Orange, StandardButtonType.RightShoulder},
         {DrumAxisType.Kick, StandardButtonType.LeftShoulder},
-        {DrumAxisType.Kick2, StandardButtonType.LeftThumbClick},
+        {DrumAxisType.Kick2, StandardButtonType.LeftThumbClick}
     };
 
     private static readonly Dictionary<DrumAxisType, StandardButtonType> ButtonsXboxOne = new()
@@ -38,7 +29,7 @@ public class DrumAxis : OutputAxis
         {DrumAxisType.Green, StandardButtonType.A},
         {DrumAxisType.Red, StandardButtonType.B},
         {DrumAxisType.Kick, StandardButtonType.LeftShoulder},
-        {DrumAxisType.Kick2, StandardButtonType.RightShoulder},
+        {DrumAxisType.Kick2, StandardButtonType.RightShoulder}
     };
 
     private static readonly Dictionary<DrumAxisType, StandardButtonType> ButtonsPs3 = new()
@@ -52,7 +43,7 @@ public class DrumAxis : OutputAxis
         {DrumAxisType.YellowCymbal, StandardButtonType.Y},
         {DrumAxisType.Kick, StandardButtonType.LeftShoulder},
         {DrumAxisType.Orange, StandardButtonType.RightShoulder},
-        {DrumAxisType.Kick2, StandardButtonType.RightShoulder},
+        {DrumAxisType.Kick2, StandardButtonType.RightShoulder}
     };
 
     private static readonly Dictionary<DrumAxisType, string> AxisMappings = new()
@@ -62,8 +53,20 @@ public class DrumAxis : OutputAxis
         {DrumAxisType.Yellow, "report->yellowVelocity"},
         {DrumAxisType.Blue, "report->blueVelocity"},
         {DrumAxisType.Orange, "report->orangeVelocity"},
-        {DrumAxisType.Kick, "report->kickVelocity"},
+        {DrumAxisType.Kick, "report->kickVelocity"}
     };
+
+    private readonly StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
+
+    private readonly StandardButtonType Ps3CymbalFlag = StandardButtonType.RightThumbClick;
+    private readonly StandardButtonType Ps3PadFlag = StandardButtonType.LeftThumbClick;
+    private readonly StandardButtonType Xbox360CymbalFlag = StandardButtonType.LeftShoulder;
+    private readonly StandardButtonType Xbox360PadFlag = StandardButtonType.RightThumbClick;
+
+    private readonly StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
+    private int _debounce;
+
+    private int _threshold;
 
     public DrumAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
         int deadZone, int threshold, int debounce, DrumAxisType type) : base(model, input, ledOn, ledOff, ledIndices,
@@ -75,14 +78,34 @@ public class DrumAxis : OutputAxis
         Debounce = debounce;
     }
 
+    public DrumAxisType Type { get; }
+
+    public override bool Valid => true;
+
+    public override bool IsCombined => false;
+
+    public override string LedOnLabel => "Drum Hit LED Colour";
+    public override string LedOffLabel => "Drum not Hit LED Colour";
+
+    public override bool IsKeyboard => false;
+    public override bool IsController => true;
+
+    public int Threshold
+    {
+        get => _threshold;
+        set => this.RaiseAndSetIfChanged(ref _threshold, value);
+    }
+
+    public int Debounce
+    {
+        get => _debounce;
+        set => this.RaiseAndSetIfChanged(ref _debounce, value);
+    }
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return Name;
     }
-
-    public DrumAxisType Type { get; }
-
-    public override bool Valid => true;
 
 
     public override string GenerateOutput(ConfigField mode)
@@ -93,7 +116,8 @@ public class DrumAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (string.IsNullOrEmpty(GenerateOutput(mode)) || mode is ConfigField.Shared or ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
+        if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
 
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
@@ -107,35 +131,25 @@ public class DrumAxis : OutputAxis
             {
                 padFlag = Xbox360PadFlag;
                 cymbalFlag = Xbox360CymbalFlag;
-                if (ButtonsXbox360.ContainsKey(Type))
-                {
-                    outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = 1";
-                }
+                if (ButtonsXbox360.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = 1";
 
                 break;
             }
             case ConfigField.XboxOne:
             {
-                if (ButtonsXboxOne.ContainsKey(Type))
-                {
-                    outputButtons += $"\n{GetReportField(ButtonsXboxOne[Type])} = 1";
-                }
+                if (ButtonsXboxOne.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXboxOne[Type])} = 1";
 
                 break;
             }
             case ConfigField.Ps3:
             {
-                if (ButtonsPs3.ContainsKey(Type))
-                {
-                    outputButtons += $"\n{GetReportField(ButtonsPs3[Type])} = 1";
-                }
+                if (ButtonsPs3.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsPs3[Type])} = 1";
 
                 break;
             }
         }
 
         if (Model.RhythmType == RhythmType.RockBand && mode != ConfigField.XboxOne)
-        {
             switch (Type)
             {
                 case DrumAxisType.YellowCymbal:
@@ -156,7 +170,6 @@ public class DrumAxis : OutputAxis
                     outputButtons += $"\n{GetReportField(padFlag)} = 1";
                     break;
             }
-        }
 
         var assignedVal = "val_real";
         var valType = "uint16_t";
@@ -164,12 +177,12 @@ public class DrumAxis : OutputAxis
         if (mode == ConfigField.XboxOne)
         {
             valType = "uint8_t";
-            assignedVal = $"val_real >> 12";
+            assignedVal = "val_real >> 12";
         }
         // Xbox 360 GH and PS3 use uint16_t velocities
         else if (Model.RhythmType == RhythmType.GuitarHero || mode != ConfigField.Xbox360)
         {
-            assignedVal = $"val_real >> 8";
+            assignedVal = "val_real >> 8";
         }
         // And then 360 RB use inverted int16_t values, though the first bit is specified based on the type
         else
@@ -182,12 +195,12 @@ public class DrumAxis : OutputAxis
                 case DrumAxisType.Green:
                 case DrumAxisType.Yellow:
                 case DrumAxisType.YellowCymbal:
-                    assignedVal = $"-(0x7fff - (val >> 1))";
+                    assignedVal = "-(0x7fff - (val >> 1))";
                     break;
                 case DrumAxisType.Red:
                 case DrumAxisType.Blue:
                 case DrumAxisType.BlueCymbal:
-                    assignedVal = $"(0x7fff - (val >> 1))";
+                    assignedVal = "(0x7fff - (val >> 1))";
                     break;
             }
         }
@@ -213,8 +226,6 @@ public class DrumAxis : OutputAxis
 }}";
     }
 
-    public override bool IsCombined => false;
-
     protected override string MinCalibrationText()
     {
         return "Do nothing";
@@ -225,35 +236,19 @@ public class DrumAxis : OutputAxis
         return "Hit the drum";
     }
 
-    public override string LedOnLabel => "Drum Hit LED Colour";
-    public override string LedOffLabel => "Drum not Hit LED Colour";
-
-    public override bool IsKeyboard => false;
-    public override bool IsController => true;
-    public override bool IsMidi => false;
 
     public override void UpdateBindings()
     {
     }
 
-    private int _threshold;
-    private int _debounce;
-
-    public int Threshold
-    {
-        get => _threshold;
-        set => this.RaiseAndSetIfChanged(ref _threshold, value);
-    }
-
-    public int Debounce
-    {
-        get => _debounce;
-        set => this.RaiseAndSetIfChanged(ref _debounce, value);
-    }
-
     protected override bool SupportsCalibration()
     {
         return true;
+    }
+
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return $"{rhythmType}/{Name}.png";
     }
 
     public override SerializedOutput Serialize()

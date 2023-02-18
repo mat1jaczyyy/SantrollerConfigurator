@@ -8,14 +8,11 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public abstract class CombinedOutput : Output
 {
-    protected CombinedOutput(ConfigViewModel model, Input? input, string name) : base(model, input, Colors.Black, Colors.Black, Array.Empty<byte>(), name)
+    protected CombinedOutput(ConfigViewModel model, Input? input, string name) : base(model, input, Colors.Black,
+        Colors.Black, Array.Empty<byte>(), name)
     {
     }
 
-    public override string Generate(ConfigField mode,  List<int> debounceIndex, bool combined, string extra)
-    {
-        return "";
-    }
     public override string LedOnLabel => "";
     public override string LedOffLabel => "";
 
@@ -23,7 +20,17 @@ public abstract class CombinedOutput : Output
     public override bool IsStrum => false;
     public override bool IsKeyboard => false;
     public override bool IsController => true;
-    public override bool IsMidi => false;
+
 
     public override bool Valid => true;
+
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    {
+        return "";
+    }
+
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return $"Combined/{Name}.png";
+    }
 }

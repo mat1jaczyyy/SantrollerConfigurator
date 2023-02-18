@@ -4,11 +4,11 @@ using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore;
 
-public interface IConfigurableDevice {
+public interface IConfigurableDevice
+{
+    public bool MigrationSupported { get; }
     public bool IsSameDevice(PlatformIoPort port);
     public bool IsSameDevice(string serialOrPath);
-
-    public bool MigrationSupported { get; }
 
     public void Bootloader();
     public void BootloaderUsb();
@@ -20,4 +20,5 @@ public interface IConfigurableDevice {
     public Task<string?> GetUploadPort();
 
     public bool IsAvr();
+    public bool IsPico();
 }

@@ -12,12 +12,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Conversions;
 
 public class AnalogToDigital : Input
 {
-    public Input Child { get; }
-    public AnalogToDigitalType AnalogToDigitalType { get; set; }
-    public int Threshold { get; set; }
-    public override InputType? InputType => Child.InputType;
-    public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes => Enum.GetValues<AnalogToDigitalType>();
-
     public AnalogToDigital(Input child, AnalogToDigitalType analogToDigitalType, int threshold,
         ConfigViewModel model) : base(model)
     {
@@ -25,14 +19,24 @@ public class AnalogToDigital : Input
         AnalogToDigitalType = analogToDigitalType;
         Threshold = threshold;
         IsAnalog = Child.IsAnalog;
-        this.WhenAnyValue(x => x.Child.RawValue).ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => RawValue = Calculate(s));
+        this.WhenAnyValue(x => x.Child.RawValue).ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(s => RawValue = Calculate(s));
     }
+
+    public Input Child { get; }
+    public AnalogToDigitalType AnalogToDigitalType { get; set; }
+    public int Threshold { get; set; }
+    public override InputType? InputType => Child.InputType;
+    public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes => Enum.GetValues<AnalogToDigitalType>();
+
+    public override IList<DevicePin> Pins => Child.Pins;
+    public override IList<PinConfig> PinConfigs => Child.PinConfigs;
+    public override bool IsUint => Child.IsUint;
 
 
     public override string Generate(ConfigField mode)
     {
         if (Child.IsUint)
-        {
             switch (AnalogToDigitalType)
             {
                 case AnalogToDigitalType.Trigger:
@@ -41,10 +45,7 @@ public class AnalogToDigital : Input
                 case AnalogToDigitalType.JoyLow:
                     return $"({Child.Generate(mode)}) < {short.MaxValue - Threshold}";
             }
-        }
         else
-        {
-
             switch (AnalogToDigitalType)
             {
                 case AnalogToDigitalType.Trigger:
@@ -53,7 +54,6 @@ public class AnalogToDigital : Input
                 case AnalogToDigitalType.JoyLow:
                     return $"({Child.Generate(mode)}) < {-Threshold}";
             }
-        }
 
         return "";
     }
@@ -67,7 +67,6 @@ public class AnalogToDigital : Input
     private int Calculate(int val)
     {
         if (Child.IsUint)
-        {
             switch (AnalogToDigitalType)
             {
                 case AnalogToDigitalType.Trigger:
@@ -76,10 +75,7 @@ public class AnalogToDigital : Input
                 case AnalogToDigitalType.JoyLow:
                     return val < short.MaxValue - Threshold ? 1 : 0;
             }
-        }
         else
-        {
-
             switch (AnalogToDigitalType)
             {
                 case AnalogToDigitalType.Trigger:
@@ -88,7 +84,6 @@ public class AnalogToDigital : Input
                 case AnalogToDigitalType.JoyLow:
                     return val < -Threshold ? 1 : 0;
             }
-        }
 
         return 0;
     }
@@ -98,19 +93,16 @@ public class AnalogToDigital : Input
         return Child;
     }
 
-    public override IList<DevicePin> Pins => Child.Pins;
-    public override IList<PinConfig> PinConfigs => Child.PinConfigs;
-    public override bool IsUint => Child.IsUint;
-
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        Child.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw, ps2ControllerType, wiiControllerType);
+        Child.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+            ps2ControllerType, wiiControllerType);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
         throw new InvalidOperationException("Never call GenerateAll on AnalogToDigital, call it on its children");

@@ -1,22 +1,20 @@
 ﻿using System;
 using ReactiveUI;
 
-namespace GuitarConfigurator.NetCore.ViewModels
+namespace GuitarConfigurator.NetCore.ViewModels;
+
+public class MainViewModel : ReactiveObject, IRoutableViewModel
 {
-    public class MainViewModel : ReactiveObject, IRoutableViewModel
+    public MainViewModel(MainWindowViewModel screen)
     {
-
-        public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
-
-        public IScreen HostScreen { get; }
-
-        public MainWindowViewModel Main { get; }
-
-        public MainViewModel(MainWindowViewModel screen)
-        {
-            Main = screen;
-            HostScreen = screen;
-            // FretSmasher.StartLinux();
-        }
+        Main = screen;
+        HostScreen = screen;
+        // FretSmasher.StartLinux();
     }
+
+    public MainWindowViewModel Main { get; }
+
+    public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
+
+    public IScreen HostScreen { get; }
 }

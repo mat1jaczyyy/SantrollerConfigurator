@@ -4,101 +4,98 @@ using Avalonia.Collections;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers
+namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+
+public abstract class Microcontroller
 {
-    public abstract class Microcontroller
+    public readonly AvaloniaList<PinConfig> PinConfigs = new();
+
+    public abstract Board Board { get; }
+
+    public abstract List<int> AnalogPins { get; }
+    public abstract string GenerateDigitalRead(int pin, bool pullUp);
+    public abstract string GenerateDigitalWrite(int pin, bool val);
+
+    public string GenerateDefinitions()
     {
-        public abstract string GenerateDigitalRead(int pin, bool pullUp);
-        public abstract string GenerateDigitalWrite(int pin, bool val);
+        return PinConfigs.Aggregate("", (current, config) => current + config.Generate());
+    }
 
-        public string GenerateDefinitions()
-        {
-            return PinConfigs.Aggregate("", (current, config) => current + config.Generate());
-        }
+    public abstract int GetChannel(int pin, bool reconfigurePin);
 
-        public abstract int GetChannel(int pin, bool reconfigurePin);
+    public abstract string GenerateInit();
 
-        public abstract string GenerateInit();
+    public string GetPin(int possiblePin, int selectedPin, IEnumerable<Output> outputs, bool twi, bool spi,
+        IEnumerable<PinConfig> pinConfigs, ConfigViewModel model, bool addText)
+    {
+        var selectedConfig = pinConfigs.Where(s => s.Pins.Contains(selectedPin));
+        var apa102 = PinConfigs.Where(s => s.Type == ConfigViewModel.Apa102SpiType && s.Pins.Contains(possiblePin))
+            .Select(s => s.Type);
 
-        public string GetPin(int possiblePin, int selectedPin, IEnumerable<Output> outputs, bool twi, bool spi,
-            IEnumerable<PinConfig> pinConfigs, ConfigViewModel model, bool addText)
-        {
-            var selectedConfig = pinConfigs.Where(s => s.Pins.Contains(selectedPin));
-            var apa102 = PinConfigs.Where(s => s.Type == ConfigViewModel.Apa102SpiType && s.Pins.Contains(possiblePin)).Select(s => s.Type);
-            
-            var output = string.Join(" - ",
-                outputs.Where(o =>
-                        o.GetPinConfigs().Except(selectedConfig).Any(s => s.Pins.Contains(possiblePin) ))
-                    .Select(s => s.GetName(model.DeviceType, model.RhythmType)).Concat(apa102));
-            var ret = GetPinForMicrocontroller(possiblePin, twi, spi);
-            if (!string.IsNullOrEmpty(output) && addText)
-            {
-                return "* " + ret + " - " + output;
-            }
-            
-            return ret;
-        }
+        var output = string.Join(" - ",
+            outputs.Where(o =>
+                    o.GetPinConfigs().Except(selectedConfig).Any(s => s.Pins.Contains(possiblePin)))
+                .Select(s => s.GetName(model.DeviceType, model.RhythmType)).Concat(apa102));
+        var ret = GetPinForMicrocontroller(possiblePin, twi, spi);
+        if (!string.IsNullOrEmpty(output) && addText) return "* " + ret + " - " + output;
 
-        public abstract string GetPinForMicrocontroller(int pin, bool twi, bool spi);
+        return ret;
+    }
 
-        public readonly AvaloniaList<PinConfig> PinConfigs = new();
-        public abstract SpiConfig? AssignSpiPins(ConfigViewModel model, string type, int miso, int sck, int i, bool cpha,
-            bool msbfirst,
-            bool b, uint clock);
+    public abstract string GetPinForMicrocontroller(int pin, bool twi, bool spi);
 
-        public abstract TwiConfig? AssignTwiPins(ConfigViewModel model, string type, int sda, int scl, int clock);
+    public abstract SpiConfig? AssignSpiPins(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol,
+        bool cpha,
+        bool msbfirst,
+        uint clock);
 
-        public TwiConfig? GetTwiForType(string type)
-        {
-            return (TwiConfig?) PinConfigs.FirstOrDefault(config => config is TwiConfig && config.Type == type);
-        }
+    public abstract TwiConfig? AssignTwiPins(ConfigViewModel model, string type, int sda, int scl, int clock);
 
-        public SpiConfig? GetSpiForType(string type)
-        {
-            return (SpiConfig?) PinConfigs.FirstOrDefault(config => config is SpiConfig && config.Type == type);
-        }
+    public TwiConfig? GetTwiForType(string type)
+    {
+        return (TwiConfig?) PinConfigs.FirstOrDefault(config => config is TwiConfig && config.Type == type);
+    }
 
-        public abstract string GenerateAckDefines(int ack);
+    public SpiConfig? GetSpiForType(string type)
+    {
+        return (SpiConfig?) PinConfigs.FirstOrDefault(config => config is SpiConfig && config.Type == type);
+    }
 
-        public abstract List<int> SupportedAckPins();
+    public abstract string GenerateAckDefines(int ack);
 
-        public abstract List<KeyValuePair<int, SpiPinType>> SpiPins(string type);
-        public abstract List<KeyValuePair<int, TwiPinType>> TwiPins(string type);
+    public abstract List<int> SupportedAckPins();
 
-        public abstract void UnAssignPins(string type);
+    public abstract List<KeyValuePair<int, SpiPinType>> SpiPins(string type);
+    public abstract List<KeyValuePair<int, TwiPinType>> TwiPins(string type);
 
-        public void UnAssignAll()
-        {
-            PinConfigs.Clear();
-        }
+    public abstract void UnAssignPins(string type);
 
-        public abstract Board Board { get; }
+    public void UnAssignAll()
+    {
+        PinConfigs.Clear();
+    }
 
-        public abstract string GenerateAnalogRead(int pin);
+    public abstract string GenerateAnalogRead(int pin);
 
-        public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);
-        public abstract int GetFirstAnalogPin();
-        public abstract void AssignPin(PinConfig pinConfig);
+    public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);
+    public abstract int GetFirstAnalogPin();
+    public abstract void AssignPin(PinConfig pinConfig);
 
-        public abstract List<int> GetAllPins(bool isAnalog);
-        
-        public abstract List<int> AnalogPins { get; } 
+    public abstract List<int> GetAllPins(bool isAnalog);
 
-        public abstract Dictionary<int, int> GetPortsForTicking(IEnumerable<DevicePin> digital);
+    public abstract Dictionary<int, int> GetPortsForTicking(IEnumerable<DevicePin> digital);
 
-        public abstract void PinsFromPortMask(int port, int mask, byte pins,
-            Dictionary<int, bool> digitalRaw);
+    public abstract void PinsFromPortMask(int port, int mask, byte pins,
+        Dictionary<int, bool> digitalRaw);
 
-        public abstract int GetAnalogMask(DevicePin devicePin);
+    public abstract int GetAnalogMask(DevicePin devicePin);
 
-        public DirectPinConfig GetOrSetPin(ConfigViewModel model, string type, int pin, DevicePinMode devicePinMode)
-        {
-            var existing = PinConfigs.OfType<DirectPinConfig>().FirstOrDefault(s => s.Type == type);
-            if (existing != null) return existing;
-            var config = new DirectPinConfig(model, type, pin, devicePinMode);
-            PinConfigs.Add(config);
-            return config;
-        }
-       
+    public DirectPinConfig GetOrSetPin(ConfigViewModel model, string type, int pin, DevicePinMode devicePinMode)
+    {
+        var existing = PinConfigs.OfType<DirectPinConfig>().FirstOrDefault(s => s.Type == type);
+        if (existing != null) return existing;
+        var config = new DirectPinConfig(model, type, pin, devicePinMode);
+        PinConfigs.Add(config);
+        return config;
     }
 }

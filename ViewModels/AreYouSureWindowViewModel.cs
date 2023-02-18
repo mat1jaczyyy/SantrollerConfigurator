@@ -6,13 +6,7 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 
 public class AreYouSureWindowViewModel : ReactiveObject
 {
-    public ICommand YesCommand { get; }
-    public ICommand NoCommand { get; }
     public readonly Interaction<Unit, Unit> CloseWindowInteraction = new();
-    public bool Response { get; set; }
-    public string YesText { get; }
-    public string NoText { get; }
-    public string Text { get; }
 
     public AreYouSureWindowViewModel(string yesText, string noText, string text)
     {
@@ -30,4 +24,11 @@ public class AreYouSureWindowViewModel : ReactiveObject
             return CloseWindowInteraction.Handle(new Unit());
         });
     }
+
+    public ICommand YesCommand { get; }
+    public ICommand NoCommand { get; }
+    public bool Response { get; set; }
+    public string YesText { get; }
+    public string NoText { get; }
+    public string Text { get; }
 }

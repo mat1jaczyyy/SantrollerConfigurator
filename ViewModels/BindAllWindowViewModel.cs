@@ -12,23 +12,11 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 
 public class BindAllWindowViewModel : ReactiveObject
 {
-    public ConfigViewModel Model { get; }
-    public Output Output { get; }
-    public DirectInput Input { get; }
-
-    public Microcontroller Microcontroller { get; }
-    public ICommand ContinueCommand { get; }
-    public ICommand AbortCommand { get; }
     public readonly Interaction<Unit, Unit> CloseWindowInteraction = new();
-    public bool Response { get; set; }
-    public bool IsAnalog { get; }
-    public string LocalisedName { get; }
-
-    public Bitmap? Image { get; }
 
     private volatile bool _picking = true;
 
-    private Santroller? _santroller;
+    private readonly Santroller? _santroller;
 
     public BindAllWindowViewModel(ConfigViewModel model, Microcontroller microcontroller, Output output,
         DirectInput input)
@@ -38,7 +26,7 @@ public class BindAllWindowViewModel : ReactiveObject
         Output = output;
         Input = input;
         IsAnalog = input.IsAnalog;
-        Image = output.GetImage(model.DeviceType);
+        Image = output.GetImage(model.DeviceType, model.RhythmType);
         LocalisedName = output.GetName(model.DeviceType, model.RhythmType);
 
         ContinueCommand = ReactiveCommand.CreateFromObservable(() => Close(true));
@@ -61,6 +49,19 @@ public class BindAllWindowViewModel : ReactiveObject
             }
         });
     }
+
+    public ConfigViewModel Model { get; }
+    public Output Output { get; }
+    public DirectInput Input { get; }
+
+    public Microcontroller Microcontroller { get; }
+    public ICommand ContinueCommand { get; }
+    public ICommand AbortCommand { get; }
+    public bool Response { get; set; }
+    public bool IsAnalog { get; }
+    public string LocalisedName { get; }
+
+    public Bitmap? Image { get; }
 
     private IObservable<Unit> Close(bool response)
     {

@@ -14,6 +14,13 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoContract(SkipConstructor = true)]
 public class SerializedGhwtCombinedOutput : SerializedOutput
 {
+    public SerializedGhwtCombinedOutput(int pin, List<Output> outputs)
+    {
+        Pin = pin;
+        Outputs = outputs.Select(s => s.Serialize()).ToList();
+        Enabled = GetBytes(new BitArray(outputs.Select(s => s.Enabled).ToArray()));
+    }
+
     [ProtoMember(1)] public override SerializedInput? Input => null;
     [ProtoMember(4)] public int Pin { get; }
 
@@ -23,22 +30,12 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
     public override uint LedOff => Colors.Black.ToUint32();
     public override byte[] LedIndex => Array.Empty<byte>();
 
-    public SerializedGhwtCombinedOutput(int pin, List<Output> outputs)
-    {
-        Pin = pin;
-        Outputs = outputs.Select(s => s.Serialize()).ToList();
-        Enabled = GetBytes(new BitArray(outputs.Select(s => s.Enabled).ToArray()));
-    }
-
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
         microcontroller.AssignPin(new DirectPinConfig(model, GhWtTapInput.GhWtTapPinType, Pin, DevicePinMode.Floating));
         var array = new BitArray(Enabled);
         var outputs = Outputs.Select(s => s.Generate(model, microcontroller)).ToList();
-        for (var i = 0; i < outputs.Count; i++)
-        {
-            outputs[i].Enabled = array[i];
-        }
+        for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
         return new GhwtCombinedOutput(model, microcontroller, Pin, outputs);
     }
 }

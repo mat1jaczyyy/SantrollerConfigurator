@@ -9,9 +9,9 @@ namespace GuitarConfigurator.NetCore;
 public class OutputTemplateSelector : IDataTemplate
 {
     public bool SupportsRecycling => false;
-    [Content] 
-    public List<IDataTemplate> Templates { get; } = new ();
-    
+
+    [Content] public List<IDataTemplate> Templates { get; } = new();
+
     public Control Build(object? data)
     {
         return Templates.First(t => t.Match(data)).Build(data)!;

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -16,17 +15,16 @@ public abstract class InputWithPin : Input
         base(model)
     {
         Microcontroller = microcontroller;
-        _pinConfig = pinConfig;
-        Microcontroller.AssignPin(_pinConfig);
+        PinConfig = pinConfig;
+        Microcontroller.AssignPin(PinConfig);
         DetectPinCommand =
             ReactiveCommand.CreateFromTask(DetectPin, this.WhenAnyValue(s => s.Model.Main.Working).Select(s => !s));
+        this.WhenAnyValue(x => x.PinConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
     }
 
     protected Microcontroller Microcontroller { get; }
 
-    private DirectPinConfig _pinConfig;
-
-    public DirectPinConfig PinConfig => _pinConfig;
+    public DirectPinConfig PinConfig { get; }
 
     public List<int> AvailablePins => Microcontroller.GetAllPins(IsAnalog);
 
@@ -52,17 +50,17 @@ public abstract class InputWithPin : Input
         }
     }
 
-    public override void Dispose()
-    {
-        Microcontroller.UnAssignPins(PinConfig.Type);
-    }
-
-    public override IList<PinConfig> PinConfigs => new List<PinConfig>() {_pinConfig};
+    public override IList<PinConfig> PinConfigs => new List<PinConfig> {PinConfig};
 
     public string PinConfigText { get; private set; } = "Find Pin";
 
     protected abstract string DetectionText { get; }
     public ICommand DetectPinCommand { get; }
+
+    public override void Dispose()
+    {
+        Microcontroller.UnAssignPins(PinConfig.Type);
+    }
 
     private async Task DetectPin()
     {

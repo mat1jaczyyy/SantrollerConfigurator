@@ -18,53 +18,13 @@ public class MouseAxis : OutputAxis
 
     public override bool IsKeyboard => true;
     public override bool IsController => false;
-    public override bool IsMidi => false;
+
 
     public override bool Valid => true;
 
-    public override void UpdateBindings()
-    {
-    }
-
     public MouseAxisType Type { get; }
 
-    public override string GenerateOutput(ConfigField mode)
-    {
-        if (mode != ConfigField.Mouse) return "";
-        return GetReportField(Type);
-    }
-
     public override bool IsCombined => false;
-
-    protected override string MinCalibrationText()
-    {
-        switch (Type)
-        {
-            case MouseAxisType.X:
-            case MouseAxisType.ScrollX:
-                return "Move axis to the leftmost position";
-            case MouseAxisType.Y:
-            case MouseAxisType.ScrollY:
-                return "Move axis to the lowest position";
-            default:
-                return "";
-        }
-    }
-
-    protected override string MaxCalibrationText()
-    {
-        switch (Type)
-        {
-            case MouseAxisType.X:
-            case MouseAxisType.ScrollX:
-                return "Move axis to the rightmost position";
-            case MouseAxisType.Y:
-            case MouseAxisType.ScrollY:
-                return "Move axis to the highest position";
-            default:
-                return "";
-        }
-    }
 
     public override string LedOnLabel
     {
@@ -100,6 +60,56 @@ public class MouseAxis : OutputAxis
                     return "";
             }
         }
+    }
+
+    public override void UpdateBindings()
+    {
+    }
+
+    public override string GenerateOutput(ConfigField mode)
+    {
+        if (mode != ConfigField.Mouse) return "";
+        return GetReportField(Type);
+    }
+
+    protected override string MinCalibrationText()
+    {
+        switch (Type)
+        {
+            case MouseAxisType.X:
+            case MouseAxisType.ScrollX:
+                return "Move axis to the leftmost position";
+            case MouseAxisType.Y:
+            case MouseAxisType.ScrollY:
+                return "Move axis to the lowest position";
+            default:
+                return "";
+        }
+    }
+
+    protected override string MaxCalibrationText()
+    {
+        switch (Type)
+        {
+            case MouseAxisType.X:
+            case MouseAxisType.ScrollX:
+                return "Move axis to the rightmost position";
+            case MouseAxisType.Y:
+            case MouseAxisType.ScrollY:
+                return "Move axis to the highest position";
+            default:
+                return "";
+        }
+    }
+
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return "Mouse.png";
+    }
+
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    {
+        return mode is not ConfigField.Mouse ? "" : base.Generate(mode, debounceIndex, combined, extra);
     }
 
     protected override bool SupportsCalibration()

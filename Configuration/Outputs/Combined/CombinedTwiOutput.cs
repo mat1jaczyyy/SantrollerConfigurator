@@ -11,7 +11,9 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
 {
     private readonly Microcontroller _microcontroller;
 
-    public bool BindableTwi { get; }
+    private readonly TwiConfig _twiConfig;
+
+    private readonly string _twiType;
 
 
     protected CombinedTwiOutput(ConfigViewModel model, Microcontroller microcontroller, string twiType,
@@ -43,9 +45,7 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
         this.WhenAnyValue(x => x._twiConfig.Sda).Subscribe(_ => this.RaisePropertyChanged(nameof(Sda)));
     }
 
-    private readonly string _twiType;
-
-    private readonly TwiConfig _twiConfig;
+    public bool BindableTwi { get; }
 
     public int Sda
     {
@@ -62,6 +62,11 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
 
     public List<int> AvailableSdaPins => GetSdaPins();
     public List<int> AvailableSclPins => GetSclPins();
+
+    public List<int> TwiPins()
+    {
+        return new() {Sda, Scl};
+    }
 
     private List<int> GetSdaPins()
     {
@@ -82,6 +87,4 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
         _microcontroller.UnAssignPins(_twiType);
         base.Dispose();
     }
-
-    public List<int> TwiPins() => new() {Sda, Scl};
 }

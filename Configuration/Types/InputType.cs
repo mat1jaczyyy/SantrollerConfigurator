@@ -9,5 +9,6 @@ public enum InputType
     TurntableInput,
     WtNeckInput,
     Gh5NeckInput,
-    MacroInput
+    MacroInput,
+    RFInput
 }

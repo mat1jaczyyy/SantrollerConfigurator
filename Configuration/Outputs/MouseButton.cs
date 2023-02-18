@@ -6,23 +6,29 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
+
 public class MouseButton : OutputButton
 {
-    public MouseButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce, MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, EnumToStringConverter.Convert(type))
+    public MouseButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce,
+        MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce,
+        EnumToStringConverter.Convert(type))
     {
         Type = type;
     }
 
     public override bool IsKeyboard => true;
     public override bool IsController => false;
-    public override bool IsMidi => false;
-    public override void UpdateBindings()
-    {
-    }
 
     public MouseButtonType Type { get; }
 
     public override bool Valid => true;
+    public override bool IsStrum => false;
+
+    public override bool IsCombined => false;
+
+    public override void UpdateBindings()
+    {
+    }
 
     public override string GenerateOutput(ConfigField mode)
     {
@@ -30,9 +36,17 @@ public class MouseButton : OutputButton
         return GetReportField(Type);
     }
 
-    public override bool IsStrum => false;
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return "Mouse.png";
+    }
 
-    public override bool IsCombined => false;
+    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    {
+        return mode is not (ConfigField.Mouse or ConfigField.Shared)
+            ? ""
+            : base.Generate(mode, debounceIndex, combined, extra);
+    }
 
     public override SerializedOutput Serialize()
     {

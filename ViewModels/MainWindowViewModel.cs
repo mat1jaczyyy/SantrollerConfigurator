@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +20,6 @@ using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
 using ReactiveUI;
-using Timer = System.Timers.Timer;
 #if Windows
 using GuitarConfigurator.NetCore.Notify;
 using LibUsbDotNet.WinUsb;
@@ -31,230 +29,62 @@ namespace GuitarConfigurator.NetCore.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     {
-        // The Router associated with this Screen.
-        // Required by the IScreen interface.
-        public RoutingState Router { get; } = new();
-        public ReactiveCommand<Unit, IRoutableViewModel> Configure { get; }
-
-        // The command that navigates a user back.
-        public ReactiveCommand<Unit, IRoutableViewModel?> GoBack => Router.NavigateBack;
-
-        public AvaloniaList<IConfigurableDevice> Devices { get; } = new();
-
-        private IConfigurableDevice? _selectedDevice;
-        private IConfigurableDevice? _disconnectedDevice;
-
-        private readonly ObservableAsPropertyHelper<bool> _migrationSupported;
-        public bool MigrationSupported => _migrationSupported.Value;
-
-        private readonly ObservableAsPropertyHelper<bool> _isPico;
-        public bool IsPico => _isPico.Value;
-
-        private readonly ObservableAsPropertyHelper<bool> _is32U4;
-        public bool Is32U4 => _is32U4.Value;
-
-        private readonly ObservableAsPropertyHelper<bool> _isUno;
-        public bool IsUno => _isUno.Value;
-
-        private readonly ObservableAsPropertyHelper<bool> _isMega;
-        public bool IsMega => _isMega.Value;
-
-        private readonly ObservableAsPropertyHelper<bool> _isDfu;
-        public bool IsDfu => _isDfu.Value;
-
-        private readonly ObservableAsPropertyHelper<bool> _newDevice;
-        public bool NewDevice => _newDevice.Value;
-
         private static readonly string UdevFile = "99-ardwiino.rules";
         private static readonly string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
 
-        public IEnumerable<Arduino32U4Type> Arduino32U4Types => Enum.GetValues<Arduino32U4Type>();
-        public IEnumerable<MegaType> MegaTypes => Enum.GetValues<MegaType>();
-        public IEnumerable<UnoMegaType> UnoMegaTypes => Enum.GetValues<UnoMegaType>();
-        public IEnumerable<Board> PicoTypes => Board.Rp2040Boards;
-        public IEnumerable<DeviceInputType> DeviceInputTypes => Enum.GetValues<DeviceInputType>();
+        private readonly ObservableAsPropertyHelper<bool> _connected;
 
-        private UnoMegaType _unoMegaType;
+        private readonly List<string> _currentDrives = new();
+        private readonly HashSet<string> _currentDrivesTemp = new();
+        private readonly List<string> _currentPorts = new();
 
-        public UnoMegaType UnoMegaType
-        {
-            get => _unoMegaType;
-            set => this.RaiseAndSetIfChanged(ref _unoMegaType, value);
-        }
+        private readonly IDeviceNotifier _deviceListener;
 
-        private MegaType _megaType;
+        private readonly ObservableAsPropertyHelper<bool> _is32U4;
 
-        public MegaType MegaType
-        {
-            get => _megaType;
-            set => this.RaiseAndSetIfChanged(ref _megaType, value);
-        }
+        private readonly ObservableAsPropertyHelper<bool> _isDfu;
 
-        private DeviceInputType _deviceInputType;
+        private readonly ObservableAsPropertyHelper<bool> _isMega;
 
-        public DeviceInputType DeviceInputType
-        {
-            get => _deviceInputType;
-            set => this.RaiseAndSetIfChanged(ref _deviceInputType, value);
-        }
+        private readonly ObservableAsPropertyHelper<bool> _isPico;
+
+        private readonly ObservableAsPropertyHelper<bool> _isUno;
+
+        private readonly ObservableAsPropertyHelper<bool> _migrationSupported;
+
+        private readonly ObservableAsPropertyHelper<bool> _newDevice;
+
+        private readonly Timer _timer = new();
 
 
         private Arduino32U4Type _arduino32U4Type;
 
-        public Arduino32U4Type Arduino32U4Type
-        {
-            get => _arduino32U4Type;
-            set => this.RaiseAndSetIfChanged(ref _arduino32U4Type, value);
-        }
+        private DeviceInputType _deviceInputType;
+        private IConfigurableDevice? _disconnectedDevice;
+
+        private bool _installed;
+
+        private MegaType _megaType;
+
+        private string _message = "Connected";
 
         private Board _picoType = Board.Rp2040Boards[0];
-
-        public Board PicoType
-        {
-            get => _picoType;
-            set => this.RaiseAndSetIfChanged(ref _picoType, value);
-        }
-
-        public IConfigurableDevice? SelectedDevice
-        {
-            get => _selectedDevice;
-            set => this.RaiseAndSetIfChanged(ref _selectedDevice, value);
-        }
-
-
-        private bool _working = true;
-
-        public bool Working
-        {
-            get => _working;
-            set => this.RaiseAndSetIfChanged(ref _working, value);
-        }
 
 
         private bool _programming;
 
-        private bool _installed;
-
-        public bool Installed
-        {
-            get => _installed;
-            set => this.RaiseAndSetIfChanged(ref _installed, value);
-        }
+        private double _progress;
 
         private string _progressbarcolor = "#FF0078D7";
 
-        public string ProgressbarColor
-        {
-            get => _progressbarcolor;
-            set => this.RaiseAndSetIfChanged(ref _progressbarcolor, value);
-        }
-
-        private readonly ObservableAsPropertyHelper<bool> _connected;
-        public bool Connected => _connected.Value;
-
         private bool _readyToConfigure;
 
-        public bool ReadyToConfigure
-        {
-            get => _readyToConfigure;
-            set => this.RaiseAndSetIfChanged(ref _readyToConfigure, value);
-        }
+        private IConfigurableDevice? _selectedDevice;
 
-        private double _progress;
+        private UnoMegaType _unoMegaType;
 
-        public double Progress
-        {
-            get => _progress;
-            set => this.RaiseAndSetIfChanged(ref _progress, value);
-        }
 
-        private string _message = "Connected";
-
-        public string Message
-        {
-            get => _message;
-            set => this.RaiseAndSetIfChanged(ref _message, value);
-        }
-
-        internal IObservable<PlatformIo.PlatformIoState> Write(ConfigViewModel config)
-        {
-            StartWorking();
-            config.Generate(Pio);
-            var env = config.MicroController!.Board.Environment;
-            if (config.MicroController.Board.HasUsbmcu)
-            {
-                env += "_usb";
-            }
-
-            if (NewDevice)
-            {
-                env = env.Replace("_8", "");
-                env = env.Replace("_16", "");
-            }
-
-            var output = new StringBuilder();
-            _programming = true;
-            var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
-                "Writing",
-                0, 90, SelectedDevice);
-            command.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
-                {
-                    UpdateProgress(s);
-                    if (s.Log != null)
-                    {
-                        output.Append(s.Log + "\n");
-                    }
-                }, (_) =>
-                {
-                    ProgressbarColor = "red";
-                    config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => _programming = false);
-                },
-                () => { _programming = false; });
-            return command.OnErrorResumeNext(Observable.Return(command.Value));
-        }
-
-        private readonly IDeviceNotifier _deviceListener;
-        public PlatformIo Pio { get; } = new();
-
-        private readonly Timer _timer = new();
-
-        private class RegDeviceNotifyInfo : IUsbDeviceNotifyInfo
-        {
-            private readonly UsbRegistry _dev;
-
-            public RegDeviceNotifyInfo(UsbRegistry dev)
-            {
-                _dev = dev;
-            }
-
-            public UsbSymbolicName SymbolicName => UsbSymbolicName.Parse(_dev.SymbolicName);
-
-            public string Name => _dev.DevicePath;
-
-            public Guid ClassGuid => _dev.DeviceInterfaceGuids[0];
-
-            public int IdVendor => _dev.Vid;
-
-            public int IdProduct => _dev.Pid;
-
-            public string SerialNumber => _dev.Device.Info.SerialString;
-
-            public bool Open(out UsbDevice usbDevice)
-            {
-                usbDevice = _dev.Device;
-                return usbDevice != null && usbDevice.Open();
-            }
-        }
-
-        private class DeviceNotifyArgsRegistry : DeviceNotifyEventArgs
-        {
-            public DeviceNotifyArgsRegistry(UsbRegistry dev)
-            {
-                Device = new RegDeviceNotifyInfo(dev);
-                DeviceType = DeviceType.DeviceInterface;
-                EventType = EventType.DeviceArrival;
-            }
-        }
+        private bool _working = true;
 
         public MainWindowViewModel()
         {
@@ -297,13 +127,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     case NotifyCollectionChangedAction.Remove:
                     {
                         if (Devices.Any())
-                        {
                             if (e.OldItems!.Contains(SelectedDevice))
-                            {
                                 _ = Task.Delay(1)
                                     .ContinueWith(_ => SelectedDevice = Devices.FirstOrDefault(_ => true, null));
-                            }
-                        }
 
                         break;
                     }
@@ -318,7 +144,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             _timer.Elapsed += DevicePoller_Tick;
             _timer.AutoReset = false;
             StartWorking();
-            Pio.InitialisePlatformIo().Subscribe(UpdateProgress, (_) => ProgressbarColor = "red", () =>
+            Pio.InitialisePlatformIo().Subscribe(UpdateProgress, _ => ProgressbarColor = "red", () =>
             {
                 Complete(100);
                 Working = false;
@@ -335,15 +161,148 @@ namespace GuitarConfigurator.NetCore.ViewModels
 #else
                 List<UsbRegistry> deviceListAll = UsbDevice.AllDevices.AsList();
 #endif
-                foreach (var dev in deviceListAll)
-                {
-                    OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
-                }
+                foreach (var dev in deviceListAll) OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
 
                 _timer.Start();
             });
 
             Task.Run(InstallDependencies);
+        }
+
+        public ReactiveCommand<Unit, IRoutableViewModel> Configure { get; }
+
+        // The command that navigates a user back.
+        public ReactiveCommand<Unit, IRoutableViewModel?> GoBack => Router.NavigateBack;
+
+        public AvaloniaList<IConfigurableDevice> Devices { get; } = new();
+        public bool MigrationSupported => _migrationSupported.Value;
+        public bool IsPico => _isPico.Value;
+        public bool Is32U4 => _is32U4.Value;
+        public bool IsUno => _isUno.Value;
+        public bool IsMega => _isMega.Value;
+        public bool IsDfu => _isDfu.Value;
+        public bool NewDevice => _newDevice.Value;
+
+        public IEnumerable<Arduino32U4Type> Arduino32U4Types => Enum.GetValues<Arduino32U4Type>();
+        public IEnumerable<MegaType> MegaTypes => Enum.GetValues<MegaType>();
+        public IEnumerable<UnoMegaType> UnoMegaTypes => Enum.GetValues<UnoMegaType>();
+        public IEnumerable<Board> PicoTypes => Board.Rp2040Boards;
+        public IEnumerable<DeviceInputType> DeviceInputTypes => Enum.GetValues<DeviceInputType>();
+
+        public UnoMegaType UnoMegaType
+        {
+            get => _unoMegaType;
+            set => this.RaiseAndSetIfChanged(ref _unoMegaType, value);
+        }
+
+        public MegaType MegaType
+        {
+            get => _megaType;
+            set => this.RaiseAndSetIfChanged(ref _megaType, value);
+        }
+
+        public DeviceInputType DeviceInputType
+        {
+            get => _deviceInputType;
+            set => this.RaiseAndSetIfChanged(ref _deviceInputType, value);
+        }
+
+        public Arduino32U4Type Arduino32U4Type
+        {
+            get => _arduino32U4Type;
+            set => this.RaiseAndSetIfChanged(ref _arduino32U4Type, value);
+        }
+
+        public Board PicoType
+        {
+            get => _picoType;
+            set => this.RaiseAndSetIfChanged(ref _picoType, value);
+        }
+
+        public IConfigurableDevice? SelectedDevice
+        {
+            get => _selectedDevice;
+            set => this.RaiseAndSetIfChanged(ref _selectedDevice, value);
+        }
+
+        public bool Working
+        {
+            get => _working;
+            set => this.RaiseAndSetIfChanged(ref _working, value);
+        }
+
+        public bool Installed
+        {
+            get => _installed;
+            set => this.RaiseAndSetIfChanged(ref _installed, value);
+        }
+
+        public string ProgressbarColor
+        {
+            get => _progressbarcolor;
+            set => this.RaiseAndSetIfChanged(ref _progressbarcolor, value);
+        }
+
+        public bool Connected => _connected.Value;
+
+        public bool ReadyToConfigure
+        {
+            get => _readyToConfigure;
+            set => this.RaiseAndSetIfChanged(ref _readyToConfigure, value);
+        }
+
+        public double Progress
+        {
+            get => _progress;
+            set => this.RaiseAndSetIfChanged(ref _progress, value);
+        }
+
+        public string Message
+        {
+            get => _message;
+            set => this.RaiseAndSetIfChanged(ref _message, value);
+        }
+
+        public PlatformIo Pio { get; } = new();
+
+        public void Dispose()
+        {
+            _deviceListener.OnDeviceNotify -= OnDeviceNotify;
+        }
+
+        // The Router associated with this Screen.
+        // Required by the IScreen interface.
+        public RoutingState Router { get; } = new();
+
+        internal IObservable<PlatformIo.PlatformIoState> Write(ConfigViewModel config)
+        {
+            StartWorking();
+            config.Generate(Pio);
+            var env = config.MicroController!.Board.Environment;
+            if (config.MicroController.Board.HasUsbmcu) env += "_usb";
+
+            if (NewDevice)
+            {
+                env = env.Replace("_8", "");
+                env = env.Replace("_16", "");
+            }
+
+            var output = new StringBuilder();
+            _programming = true;
+            var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
+                "Writing",
+                0, 90, SelectedDevice);
+            command.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
+                {
+                    UpdateProgress(s);
+                    if (s.Log != null) output.Append(s.Log + "\n");
+                }, _ =>
+                {
+                    ProgressbarColor = "red";
+                    config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => _programming = false);
+                },
+                () => { _programming = false; });
+            return command.OnErrorResumeNext(Observable.Return(command.Value));
         }
 
         private void Complete(int total)
@@ -365,20 +324,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
             Message = state.Message;
         }
 
-        private readonly List<string> _currentDrives = new();
-        private readonly HashSet<string> _currentDrivesTemp = new();
-        private readonly List<string> _currentPorts = new();
-
         private void AddDevice(IConfigurableDevice device)
         {
             if (device is Arduino)
-            {
                 _ = Task.Delay(500).ContinueWith(_ => Devices.Add(device));
-            }
             else
-            {
                 Devices.Add(device);
-            }
 
             if (_disconnectedDevice == null) return;
             if (!_disconnectedDevice.DeviceAdded(device)) return;
@@ -394,19 +345,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
             _currentDrivesTemp.UnionWith(_currentDrives);
             foreach (var drive in drives)
             {
-                if (_currentDrivesTemp.Remove(drive.RootDirectory.FullName))
-                {
-                    continue;
-                }
+                if (_currentDrivesTemp.Remove(drive.RootDirectory.FullName)) continue;
 
                 var uf2 = Path.Combine(drive.RootDirectory.FullName, "INFO_UF2.txt");
                 if (drive.IsReady)
-                {
                     if (File.Exists(uf2) && File.ReadAllText(uf2).Contains("RPI-RP2"))
-                    {
                         AddDevice(new PicoDevice(Pio, drive.RootDirectory.FullName));
-                    }
-                }
 
                 _currentDrives.Add(drive.RootDirectory.FullName);
             }
@@ -421,10 +365,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 foreach (var port in ports)
                 {
-                    if (existingPorts.Contains(port.Port))
-                    {
-                        continue;
-                    }
+                    if (existingPorts.Contains(port.Port)) continue;
 
 
                     var arduino = new Arduino(Pio, port);
@@ -496,11 +437,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
             });
         }
 
-        public void Dispose()
-        {
-            _deviceListener.OnDeviceNotify -= OnDeviceNotify;
-        }
-
         private static bool CheckDependencies()
         {
             // Call check dependencies on startup, and pop up a dialog saying drivers are missing would you like to install if they are missing
@@ -518,10 +454,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                        output.Contains("10/02/2010 1.2.2.0");
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return File.Exists(UdevPath);
-            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return File.Exists(UdevPath);
 
             return true;
         }
@@ -559,6 +492,44 @@ namespace GuitarConfigurator.NetCore.ViewModels
             if (!CheckDependencies())
             {
                 // Pop open a dialog that it failed and to try again
+            }
+        }
+
+        private class RegDeviceNotifyInfo : IUsbDeviceNotifyInfo
+        {
+            private readonly UsbRegistry _dev;
+
+            public RegDeviceNotifyInfo(UsbRegistry dev)
+            {
+                _dev = dev;
+            }
+
+            public UsbSymbolicName SymbolicName => UsbSymbolicName.Parse(_dev.SymbolicName);
+
+            public string Name => _dev.DevicePath;
+
+            public Guid ClassGuid => _dev.DeviceInterfaceGuids[0];
+
+            public int IdVendor => _dev.Vid;
+
+            public int IdProduct => _dev.Pid;
+
+            public string SerialNumber => _dev.Device.Info.SerialString;
+
+            public bool Open(out UsbDevice usbDevice)
+            {
+                usbDevice = _dev.Device;
+                return usbDevice != null && usbDevice.Open();
+            }
+        }
+
+        private class DeviceNotifyArgsRegistry : DeviceNotifyEventArgs
+        {
+            public DeviceNotifyArgsRegistry(UsbRegistry dev)
+            {
+                Device = new RegDeviceNotifyInfo(dev);
+                DeviceType = DeviceType.DeviceInterface;
+                EventType = EventType.DeviceArrival;
             }
         }
     }

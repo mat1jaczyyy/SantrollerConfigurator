@@ -12,7 +12,7 @@ public enum BarButton
     Orange = 16
 }
 
-public enum Gh5NeckInputType 
+public enum Gh5NeckInputType
 {
     Green,
     Red,

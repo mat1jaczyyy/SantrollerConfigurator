@@ -6,17 +6,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public class Mega : AvrController
 {
-    protected override int SpiMiso => 50;
-
-    protected override int SpiMosi => 51;
-
-    protected override int SpiCSn => 53;
-    protected override int SpiSck => 52;
-
-    protected override int I2CSda => 20;
-
-    protected override int I2CScl => 21;
-
     private static readonly int[] PinIndex =
     {
         0, // PE 0 ** 0 ** USART0_RX	
@@ -88,10 +77,8 @@ public class Mega : AvrController
         4, // PK 4 ** 66 ** A12	
         5, // PK 5 ** 67 ** A13	
         6, // PK 6 ** 68 ** A14	
-        7, // PK 7 ** 69 ** A15	
+        7 // PK 7 ** 69 ** A15	
     };
-
-    public override int PinCount => PinIndex.Length;
 
     public static readonly Dictionary<int, string> Interrupts = new()
     {
@@ -100,7 +87,7 @@ public class Mega : AvrController
         {18, "INT5"},
         {19, "INT4"},
         {20, "INT3"},
-        {21, "INT2"},
+        {21, "INT2"}
     };
 
     private static readonly char[] Ports =
@@ -174,12 +161,38 @@ public class Mega : AvrController
         'K', // 'K' 4 ** 66 ** A12	
         'K', // 'K' 5 ** 67 ** A13	
         'K', // 'K' 6 ** 68 ** A14	
-        'K', // 'K' 7 ** 69 ** A15            
+        'K' // 'K' 7 ** 69 ** A15            
     };
+
+    public Mega(Board board)
+    {
+        Board = board;
+    }
+
+    protected override int SpiMiso => 50;
+
+    protected override int SpiMosi => 51;
+
+    protected override int SpiCSn => 53;
+    protected override int SpiSck => 52;
+
+    protected override int I2CSda => 20;
+
+    protected override int I2CScl => 21;
+
+    public override int PinCount => PinIndex.Length;
 
     protected override char[] PortNames => new[] {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'L'};
 
     protected override int PinA0 => 54;
+
+    public override Board Board { get; }
+
+    public override List<int> AnalogPins => Enumerable.Range(PinA0, 5).ToList();
+
+    protected override Dictionary<Tuple<char, int>, int> PinByMask { get; } = Ports.Zip(PinIndex)
+        .Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i))
+        .ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s => s.Item3);
 
 
     protected override string GetInterruptForPin(int ack)
@@ -192,14 +205,9 @@ public class Mega : AvrController
         return Interrupts.Keys.ToList();
     }
 
-    public override Board Board { get; }
-
-    public override List<int> GetAllPins(bool isAnalog) =>
-        isAnalog ? AnalogPins : Enumerable.Range(0, PinIndex.Length).ToList();
-
-    public Mega(Board board)
+    public override List<int> GetAllPins(bool isAnalog)
     {
-        Board = board;
+        return isAnalog ? AnalogPins : Enumerable.Range(0, PinIndex.Length).ToList();
     }
 
     public override int GetIndex(int pin)
@@ -218,12 +226,6 @@ public class Mega : AvrController
         if (reconfigurePin) chan |= 1 << 7;
         return chan;
     }
-
-    public override List<int> AnalogPins => Enumerable.Range(PinA0, 5).ToList();
-
-    protected override Dictionary<Tuple<char, int>, int> PinByMask { get; } = Ports.Zip(PinIndex)
-        .Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i))
-        .ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s => s.Item3);
 
     public override AvrPinMode? ForcedMode(int pin)
     {

@@ -18,32 +18,10 @@ namespace GuitarConfigurator.NetCore;
 
 public class Santroller : ConfigurableUsbDevice
 {
-    enum Commands
-    {
-        CommandReboot = 0x30,
-        CommandJumpBootloader,
-        CommandJumpBootloaderUno,
-        CommandReadConfig,
-        CommandReadFCpu,
-        CommandReadBoard,
-        CommandReadDigital,
-        CommandReadAnalog,
-        CommandReadPs2,
-        CommandReadWii,
-        CommandReadDjLeft,
-        CommandReadDjRight,
-        CommandReadGh5,
-        CommandReadGhWt,
-        CommandGetExtensionWii,
-        CommandGetExtensionPs2,
-        CommandSetLeds,
-    }
-
-    public override bool MigrationSupported => true;
     public static readonly Guid ControllerGuid = new("DF59037D-7C92-4155-AC12-7D700A313D78");
+    private readonly Dictionary<int, int> _analogRaw = new();
     private DeviceControllerType? _deviceControllerType;
-    private Dictionary<int, bool> _digitalRaw = new();
-    private Dictionary<int, int> _analogRaw = new();
+    private readonly Dictionary<int, bool> _digitalRaw = new();
     private bool _picking;
 
     // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
@@ -53,24 +31,26 @@ public class Santroller : ConfigurableUsbDevice
     public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort revision) :
         base(device, path, product, serial, revision)
     {
-        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, ((byte) Commands.CommandReadFCpu), 32)).Replace("\0", "")
+        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("\0", "")
             .Replace("L", "").Trim();
         var fCpu = uint.Parse(fCpuStr);
-        var board = Encoding.UTF8.GetString(ReadData(0, ((byte) Commands.CommandReadBoard), 32)).Replace("\0", "");
+        var board = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadBoard, 32)).Replace("\0", "");
         var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
         Board = m.Board;
     }
 
+    public override bool MigrationSupported => true;
+
     public override void Bootloader()
     {
-        WriteData(0, ((byte) Commands.CommandJumpBootloader), Array.Empty<byte>());
+        WriteData(0, (byte) Commands.CommandJumpBootloader, Array.Empty<byte>());
         Device.Close();
     }
 
     public override void BootloaderUsb()
     {
         if (!Board.HasUsbmcu) return;
-        WriteData(0, ((byte) Commands.CommandJumpBootloaderUno), Array.Empty<byte>());
+        WriteData(0, (byte) Commands.CommandJumpBootloaderUno, Array.Empty<byte>());
         Device.Close();
     }
 
@@ -95,10 +75,7 @@ public class Santroller : ConfigurableUsbDevice
                 {
                     var wValue = (ushort) (port | (mask << 8));
                     var data = ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte));
-                    if (data.Length == 0)
-                    {
-                        return;
-                    }
+                    if (data.Length == 0) return;
 
                     var pins = data[0];
                     model.MicroController!.PinsFromPortMask(port, mask, pins, _digitalRaw);
@@ -122,11 +99,9 @@ public class Santroller : ConfigurableUsbDevice
                 var ps2ControllerType = ReadData(0, (byte) Commands.CommandGetExtensionPs2, 1);
                 var wiiControllerType = ReadData(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
                 foreach (var output in model.Bindings)
-                {
                     output.Update(model.Bindings.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                         djRightRaw, gh5Raw,
                         ghWtRaw, ps2ControllerType, wiiControllerType);
-                }
             }
             catch (Exception ex)
             {
@@ -141,27 +116,27 @@ public class Santroller : ConfigurableUsbDevice
     {
         // try
         // {
-            var fCpuStr = Encoding.UTF8.GetString(ReadData(0, ((byte) Commands.CommandReadFCpu), 32)).Replace("\0", "")
-                .Replace("L", "").Trim();
-            var fCpu = uint.Parse(fCpuStr);
-            var board = Encoding.UTF8.GetString(ReadData(0, ((byte) Commands.CommandReadBoard), 32)).Replace("\0", "");
-            var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
-            Board = m.Board;
-            model.MicroController = m;
-            ushort start = 0;
-            var data = new List<byte>();
-            while (true)
-            {
-                var chunk = ReadData(start, ((byte) Commands.CommandReadConfig), 64);
-                if (!chunk.Any()) break;
-                data.AddRange(chunk);
-                start += 64;
-            }
+        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("\0", "")
+            .Replace("L", "").Trim();
+        var fCpu = uint.Parse(fCpuStr);
+        var board = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadBoard, 32)).Replace("\0", "");
+        var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
+        Board = m.Board;
+        model.MicroController = m;
+        ushort start = 0;
+        var data = new List<byte>();
+        while (true)
+        {
+            var chunk = ReadData(start, (byte) Commands.CommandReadConfig, 64);
+            if (!chunk.Any()) break;
+            data.AddRange(chunk);
+            start += 64;
+        }
 
-            using var inputStream = new MemoryStream(data.ToArray());
-            await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
-            Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
-            _deviceControllerType = model.DeviceType;
+        using var inputStream = new MemoryStream(data.ToArray());
+        await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
+        Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
+        _deviceControllerType = model.DeviceType;
         // }
         // catch (Exception ex) when (ex is JsonException or FormatException or InvalidOperationException)
         // {
@@ -189,7 +164,6 @@ public class Santroller : ConfigurableUsbDevice
         _picking = true;
         var importantPins = new List<int>();
         foreach (var config in microcontroller.PinConfigs)
-        {
             switch (config)
             {
                 case SpiConfig spi:
@@ -199,14 +173,10 @@ public class Santroller : ConfigurableUsbDevice
                     importantPins.AddRange(twi.Pins);
                     break;
                 case DirectPinConfig direct:
-                    if (!direct.Type.Contains("-"))
-                    {
-                        importantPins.AddRange(direct.Pins);
-                    }
+                    if (!direct.Type.Contains("-")) importantPins.AddRange(direct.Pins);
 
                     break;
             }
-        }
 
         if (analog)
         {
@@ -230,6 +200,7 @@ public class Santroller : ConfigurableUsbDevice
                             return pin;
                         }
                     }
+
                     analogVals[pin] = val;
                 }
 
@@ -251,7 +222,6 @@ public class Santroller : ConfigurableUsbDevice
                 var wValue = (ushort) (port | (mask << 8));
                 var pins = (byte) (ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte))[0] & mask);
                 if (tickedPorts.ContainsKey(port))
-                {
                     if (tickedPorts[port] != pins)
                     {
                         Dictionary<int, bool> outPins = new();
@@ -262,7 +232,6 @@ public class Santroller : ConfigurableUsbDevice
                         _picking = false;
                         return outPins.First(s => s.Value).Key;
                     }
-                }
 
                 tickedPorts[port] = pins;
             }
@@ -276,11 +245,29 @@ public class Santroller : ConfigurableUsbDevice
     public override string ToString()
     {
         var ret = $"Santroller - {Board.Name} - {Version}";
-        if (_deviceControllerType != null)
-        {
-            ret += $" - {_deviceControllerType}";
-        }
+        if (_deviceControllerType != null) ret += $" - {_deviceControllerType}";
 
         return ret;
+    }
+
+    private enum Commands
+    {
+        CommandReboot = 0x30,
+        CommandJumpBootloader,
+        CommandJumpBootloaderUno,
+        CommandReadConfig,
+        CommandReadFCpu,
+        CommandReadBoard,
+        CommandReadDigital,
+        CommandReadAnalog,
+        CommandReadPs2,
+        CommandReadWii,
+        CommandReadDjLeft,
+        CommandReadDjRight,
+        CommandReadGh5,
+        CommandReadGhWt,
+        CommandGetExtensionWii,
+        CommandGetExtensionPs2,
+        CommandSetLeds
     }
 }

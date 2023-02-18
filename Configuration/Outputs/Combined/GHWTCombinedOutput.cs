@@ -7,21 +7,19 @@ using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public class GhwtCombinedOutput : CombinedOutput
 {
-    public int Pin { get; set; }
-    private readonly Microcontroller _microcontroller;
-
     private static readonly Dictionary<GhWtInputType, StandardButtonType> Taps = new()
     {
         {GhWtInputType.TapGreen, StandardButtonType.A},
         {GhWtInputType.TapRed, StandardButtonType.B},
         {GhWtInputType.TapYellow, StandardButtonType.Y},
         {GhWtInputType.TapBlue, StandardButtonType.X},
-        {GhWtInputType.TapOrange, StandardButtonType.LeftShoulder},
+        {GhWtInputType.TapOrange, StandardButtonType.LeftShoulder}
     };
 
     private static readonly Dictionary<GhWtInputType, RBButtonType> TapRb = new()
@@ -30,32 +28,24 @@ public class GhwtCombinedOutput : CombinedOutput
         {GhWtInputType.TapRed, RBButtonType.UpperRed},
         {GhWtInputType.TapYellow, RBButtonType.UpperYellow},
         {GhWtInputType.TapBlue, RBButtonType.UpperBlue},
-        {GhWtInputType.TapOrange, RBButtonType.UpperOrange},
+        {GhWtInputType.TapOrange, RBButtonType.UpperOrange}
     };
-    
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
-    {
-        return "GHWT Slider Inputs";
-    }
+
+    private readonly Microcontroller _microcontroller;
+
+    private readonly DirectPinConfig _pin;
 
     public GhwtCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? pin = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, null, "GHWT")
     {
         _microcontroller = microcontroller;
-        if (pin.HasValue)
-        {
-            Pin = pin.Value;
-        }
-
+        _pin = microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtTapPinType, pin ?? 0, DevicePinMode.PullUp);
+        this.WhenAnyValue(x => x._pin.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
         Outputs.Clear();
         if (outputs != null)
-        {
             Outputs.AddRange(outputs);
-        }
         else
-        {
             CreateDefaults();
-        }
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Bind(out var analogOutputs)
             .Subscribe();
@@ -66,17 +56,26 @@ public class GhwtCombinedOutput : CombinedOutput
         DigitalOutputs = digitalOutputs;
     }
 
+    public int Pin
+    {
+        get => _pin.Pin;
+        set => _pin.Pin = value;
+    }
+
     public List<int> AvailablePins => _microcontroller.GetAllPins(false);
+
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return "GHWT Slider Inputs";
+    }
 
     public void CreateDefaults()
     {
         foreach (var pair in Taps)
-        {
             Outputs.Add(new ControllerButton(Model,
                 new GhWtTapInput(pair.Key, Model, _microcontroller,
                     combined: true), Colors.Black,
                 Colors.Black, Array.Empty<byte>(), 5, pair.Value));
-        }
 
         UpdateBindings();
     }

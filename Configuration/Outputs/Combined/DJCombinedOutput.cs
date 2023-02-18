@@ -14,8 +14,11 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public class DjCombinedOutput : CombinedTwiOutput
 {
-
     private readonly Microcontroller _microcontroller;
+
+    private bool _detectedLeft;
+
+    private bool _detectedRight;
 
     public DjCombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? sda = null, int? scl = null,
         IReadOnlyCollection<Output>? outputs = null) :
@@ -24,13 +27,9 @@ public class DjCombinedOutput : CombinedTwiOutput
         _microcontroller = microcontroller;
         Outputs.Clear();
         if (outputs != null)
-        {
             Outputs.AddRange(outputs);
-        }
         else
-        {
             CreateDefaults();
-        }
 
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Bind(out var analogOutputs)
@@ -41,7 +40,19 @@ public class DjCombinedOutput : CombinedTwiOutput
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
     }
-    
+
+    public bool DetectedLeft
+    {
+        get => _detectedLeft;
+        set => this.RaiseAndSetIfChanged(ref _detectedLeft, value);
+    }
+
+    public bool DetectedRight
+    {
+        get => _detectedRight;
+        set => this.RaiseAndSetIfChanged(ref _detectedRight, value);
+    }
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return "DJ Turntable Inputs";
@@ -50,10 +61,11 @@ public class DjCombinedOutput : CombinedTwiOutput
     public void CreateDefaults()
     {
         Outputs.Clear();
-        
-        Outputs.AddRange(DjInputTypes.Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable)).Select(button => new DjButton(Model,
-            new DjInput(button, Model, _microcontroller, combined: true),
-            Colors.Black, Colors.Black, Array.Empty<byte>(), 5, button)));
+
+        Outputs.AddRange(DjInputTypes.Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable))
+            .Select(button => new DjButton(Model,
+                new DjInput(button, Model, _microcontroller, combined: true),
+                Colors.Black, Colors.Black, Array.Empty<byte>(), 5, button)));
         Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, _microcontroller, combined: true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), 0, 16, 0, DjAxisType.LeftTableVelocity));
@@ -64,28 +76,11 @@ public class DjCombinedOutput : CombinedTwiOutput
 
     public override void UpdateBindings()
     {
-        
     }
 
     public override SerializedOutput Serialize()
     {
         return new SerializedDjCombinedOutput(Sda, Scl, Outputs.Items.ToList());
-    }
-
-    private bool _detectedLeft;
-
-    public bool DetectedLeft
-    {
-        get => _detectedLeft;
-        set => this.RaiseAndSetIfChanged(ref _detectedLeft, value);
-    }
-
-    private bool _detectedRight;
-
-    public bool DetectedRight
-    {
-        get => _detectedRight;
-        set => this.RaiseAndSetIfChanged(ref _detectedRight, value);
     }
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,

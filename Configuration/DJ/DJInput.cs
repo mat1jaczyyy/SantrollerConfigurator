@@ -14,10 +14,6 @@ public class DjInput : TwiInput
     public static readonly string DjTwiType = "dj";
     public static readonly int DjTwiFreq = 150000;
 
-    public bool Combined { get; }
-
-    public bool BindableTwi { get; }
-
     public DjInput(DjInputType input, ConfigViewModel model, Microcontroller microcontroller, int? sda = null,
         int? scl = null, bool combined = false) : base(
         microcontroller, DjTwiType, DjTwiFreq, sda, scl, model)
@@ -28,8 +24,15 @@ public class DjInput : TwiInput
         IsAnalog = Input <= DjInputType.RightTurntable;
     }
 
+    public bool Combined { get; }
+
+    public bool BindableTwi { get; }
+
     public DjInputType Input { get; set; }
     public override InputType? InputType => Types.InputType.TurntableInput;
+
+    public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
+    public override bool IsUint => false;
 
     public override string Generate(ConfigField mode)
     {
@@ -68,17 +71,17 @@ public class DjInput : TwiInput
             case DjInputType.LeftBlue when djLeftRaw.Any():
             case DjInputType.LeftGreen when djLeftRaw.Any():
             case DjInputType.LeftRed when djLeftRaw.Any():
-                RawValue = (djLeftRaw[0] & 1 << ((byte) Input - (byte) DjInputType.LeftGreen + 4)) != 0 ? 1 : 0;
+                RawValue = (djLeftRaw[0] & (1 << ((byte) Input - (byte) DjInputType.LeftGreen + 4))) != 0 ? 1 : 0;
                 break;
             case DjInputType.RightGreen when djRightRaw.Any():
             case DjInputType.RightRed when djRightRaw.Any():
             case DjInputType.RightBlue when djRightRaw.Any():
-                RawValue = (djRightRaw[0] & 1 << ((byte) Input - (byte) DjInputType.RightGreen + 4)) != 0 ? 1 : 0;
+                RawValue = (djRightRaw[0] & (1 << ((byte) Input - (byte) DjInputType.RightGreen + 4))) != 0 ? 1 : 0;
                 break;
         }
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
         var left = string.Join(";",
@@ -88,7 +91,9 @@ public class DjInput : TwiInput
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
                 .Select(binding => binding.Item2));
         var leftTrigger = mode == ConfigField.Shared ? "" : Output.GetReportField(StandardAxisType.LeftTrigger) + "=0;";
-        var rightTrigger = mode == ConfigField.Shared ? "" : Output.GetReportField(StandardAxisType.RightTrigger) + "=0;";
+        var rightTrigger = mode == ConfigField.Shared
+            ? ""
+            : Output.GetReportField(StandardAxisType.RightTrigger) + "=0;";
         return $@"if (djLeftValid) {{
                     {leftTrigger}
                     {left}
@@ -98,13 +103,11 @@ public class DjInput : TwiInput
                     {right}
                   }}";
     }
+
     public override string GetImagePath()
     {
         return $"DJ/{Input}.png";
     }
-
-    public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
-    public override bool IsUint => false;
 
     public override IReadOnlyList<string> RequiredDefines()
     {
@@ -113,10 +116,7 @@ public class DjInput : TwiInput
 
     public override SerializedInput Serialise()
     {
-        if (Combined)
-        {
-            return new SerializedDjInputCombined(Input);
-        }
+        if (Combined) return new SerializedDjInputCombined(Input);
 
         return new SerializedDjInput(Sda, Scl, Input);
     }

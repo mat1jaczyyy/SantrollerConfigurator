@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
-using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -48,7 +47,7 @@ public class Gh5NeckInput : TwiInput
         {0xB0, BarButton.Green | BarButton.Red},
         {0xCD, BarButton.Red},
         {0xE5, BarButton.Green | BarButton.Red | BarButton.Yellow},
-        {0xE6, BarButton.Red | BarButton.Yellow},
+        {0xE6, BarButton.Red | BarButton.Yellow}
     };
 
     private static readonly List<Gh5NeckInputType> Tap = new()
@@ -66,19 +65,16 @@ public class Gh5NeckInput : TwiInput
         {Gh5NeckInputType.TapRed, BarButton.Red},
         {Gh5NeckInputType.TapYellow, BarButton.Yellow},
         {Gh5NeckInputType.TapBlue, BarButton.Blue},
-        {Gh5NeckInputType.TapOrange, BarButton.Orange},
+        {Gh5NeckInputType.TapOrange, BarButton.Orange}
     };
 
     private static readonly Dictionary<Gh5NeckInputType, ReadOnlyCollection<int>> MappingByInput =
         Tap.ToDictionary(type => type,
-            type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
+            type => Mappings.Where(mapping => mapping.Value.HasFlag(InputToButton[type]))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public bool Combined { get; }
-    
-    public bool BindableTwi { get; }
-
-    public Gh5NeckInput(Gh5NeckInputType input, ConfigViewModel model, Microcontroller controller, int? sda = null, int? scl = null, bool combined = false) : base(
+    public Gh5NeckInput(Gh5NeckInputType input, ConfigViewModel model, Microcontroller controller, int? sda = null,
+        int? scl = null, bool combined = false) : base(
         controller,
         Gh5TwiType, Gh5TwiFreq, sda, scl, model)
     {
@@ -88,20 +84,22 @@ public class Gh5NeckInput : TwiInput
         IsAnalog = Input == Gh5NeckInputType.TapBar;
     }
 
+    public bool Combined { get; }
+
+    public bool BindableTwi { get; }
+
     public override InputType? InputType => Types.InputType.Gh5NeckInput;
     public Gh5NeckInputType Input { get; set; }
+
+    public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
+    public override bool IsUint => true;
 
     public override string Generate(ConfigField mode)
     {
         if (Input <= Gh5NeckInputType.Orange)
-        {
-            return $"(fivetar_buttons[0] & {1 << ((byte) Input) - ((byte) Gh5NeckInputType.Green)})";
-        }
+            return $"(fivetar_buttons[0] & {1 << ((byte) Input - (byte) Gh5NeckInputType.Green)})";
 
-        if (Input == Gh5NeckInputType.TapBar)
-        {
-            return "fivetar_buttons[1]";
-        }
+        if (Input == Gh5NeckInputType.TapBar) return "fivetar_buttons[1]";
 
         var mappings = MappingByInput[Input];
         return "if (gh5Valid) {" +
@@ -110,10 +108,7 @@ public class Gh5NeckInput : TwiInput
 
     public override SerializedInput Serialise()
     {
-        if (Combined)
-        {
-            return new SerializedGh5NeckInputCombined(Input);
-        }
+        if (Combined) return new SerializedGh5NeckInputCombined(Input);
         return new SerializedGh5NeckInput(Sda, Scl, Input);
     }
 
@@ -126,7 +121,7 @@ public class Gh5NeckInput : TwiInput
         switch (Input)
         {
             case <= Gh5NeckInputType.Orange:
-                RawValue = (gh5Raw[0] & (1 << ((byte) Input) - ((byte) Gh5NeckInputType.Green))) != 0 ? 1 : 0;
+                RawValue = (gh5Raw[0] & (1 << ((byte) Input - (byte) Gh5NeckInputType.Green))) != 0 ? 1 : 0;
                 break;
             case Gh5NeckInputType.TapBar:
                 RawValue = gh5Raw[1];
@@ -140,22 +135,16 @@ public class Gh5NeckInput : TwiInput
         }
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-        return string.Join(";\n", bindings.Select(binding => binding.Item2));
+        return string.Join("\n", bindings.Select(binding => binding.Item2));
     }
-
-    public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
-    public override bool IsUint => true;
 
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        if (Input <= Gh5NeckInputType.Orange)
-        {
-            return base.RequiredDefines().Concat(new[] {"INPUT_GH5_NECK"}).ToList();
-        }
+        if (Input <= Gh5NeckInputType.Orange) return base.RequiredDefines().Concat(new[] {"INPUT_GH5_NECK"}).ToList();
 
         return base.RequiredDefines().Concat(new[] {"INPUT_GH5_NECK", "INPUT_GH5_NECK_TAP_BAR"}).ToList();
     }

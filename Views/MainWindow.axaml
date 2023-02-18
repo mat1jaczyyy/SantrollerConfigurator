@@ -10,5 +10,5 @@
         Title="GuitarConfiguratorSharp"
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True">
-        <rxui:RoutedViewHost Router="{Binding Router}" />
+    <rxui:RoutedViewHost Router="{Binding Router}" />
 </Window>

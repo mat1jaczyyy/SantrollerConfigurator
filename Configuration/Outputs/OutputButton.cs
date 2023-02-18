@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -19,13 +18,15 @@ public abstract class OutputButton : Output
 
     public byte Debounce { get; set; }
 
-    public abstract string GenerateOutput(ConfigField mode);
-
 
     public override bool IsCombined => false;
+    public override string LedOnLabel => "Pressed LED Colour";
+    public override string LedOffLabel => "Released LED Colour";
+
+    public abstract string GenerateOutput(ConfigField mode);
 
     /// <summary>
-    /// Generate bindings
+    ///     Generate bindings
     /// </summary>
     /// <param name="mode"></param>
     /// <param name="debounceIndex"></param>
@@ -46,14 +47,12 @@ public abstract class OutputButton : Output
             if (!outputVar.Any()) return "";
             var leds = "";
             if (AreLedsEnabled && LedIndices.Any())
-            {
                 leds += $@"if (!{ifStatement}) {{
                         {LedIndices.Aggregate("", (s, index) => s + @$"if (ledState[{index - 1}].select == 1) {{
                             ledState[{index - 1}].select = 0; 
                             {Model.LedType.GetLedAssignment(LedOff, index)}
                         }}")}
                     }}";
-            }
 
             return
                 @$"if ({ifStatement}) {{ 
@@ -66,7 +65,6 @@ public abstract class OutputButton : Output
         var led = "";
         var led2 = "";
         if (AreLedsEnabled)
-        {
             foreach (var index in LedIndices)
             {
                 led += $@"
@@ -81,7 +79,6 @@ public abstract class OutputButton : Output
                 }}
             ";
             }
-        }
 
         if (combined && IsStrum)
         {
@@ -92,8 +89,6 @@ public abstract class OutputButton : Output
 
         return $"if (({Input.Generate(mode)})) {{ {led2}; {reset}; {extra}; }} {led}";
     }
-    public override string LedOnLabel => "Pressed LED Colour";
-    public override string LedOffLabel => "Released LED Colour";
 
     public override void UpdateBindings()
     {

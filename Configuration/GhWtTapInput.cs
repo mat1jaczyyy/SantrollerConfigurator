@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
-using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -14,20 +13,8 @@ namespace GuitarConfigurator.NetCore.Configuration;
 public class GhWtTapInput : InputWithPin
 {
     public static string GhWtTapPinType = "ghwt";
-    public GhWtInputType Input { get; set; }
 
-
-    public bool Combined { get; }
-
-    public GhWtTapInput(GhWtInputType input, ConfigViewModel model, Microcontroller microcontroller, int pin = 0, bool combined = false) : base(model, microcontroller,
-        microcontroller.GetOrSetPin(model, GhWtTapPinType, pin, DevicePinMode.Floating))
-    {
-        Combined = combined;
-        Input = input;
-        IsAnalog = Input == GhWtInputType.TapBar;
-    }
-
-    static readonly Dictionary<int, BarButton> Mappings = new()
+    private static readonly Dictionary<int, BarButton> Mappings = new()
     {
         {0x17, BarButton.Green},
         {0x16, BarButton.Green},
@@ -42,7 +29,7 @@ public class GhWtTapInput : InputWithPin
         {0x5, BarButton.Blue | BarButton.Orange},
         {0x4, BarButton.Blue | BarButton.Orange},
         {0x3, BarButton.Blue | BarButton.Orange},
-        {0x0, BarButton.Orange},
+        {0x0, BarButton.Orange}
     };
 
     private static readonly Dictionary<GhWtInputType, BarButton> InputToButton = new()
@@ -51,20 +38,40 @@ public class GhWtTapInput : InputWithPin
         {GhWtInputType.TapRed, BarButton.Red},
         {GhWtInputType.TapYellow, BarButton.Yellow},
         {GhWtInputType.TapBlue, BarButton.Blue},
-        {GhWtInputType.TapOrange, BarButton.Orange},
+        {GhWtInputType.TapOrange, BarButton.Orange}
     };
 
     private static readonly Dictionary<GhWtInputType, ReadOnlyCollection<int>> MappingByInput =
         InputToButton.Keys.ToDictionary(type => type,
-            type => Mappings.Where(mapping => mapping.Value.HasFlag((InputToButton[type])))
+            type => Mappings.Where(mapping => mapping.Value.HasFlag(InputToButton[type]))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
+
+    public GhWtTapInput(GhWtInputType input, ConfigViewModel model, Microcontroller microcontroller, int pin = 0,
+        bool combined = false) : base(model, microcontroller,
+        microcontroller.GetOrSetPin(model, GhWtTapPinType, pin, DevicePinMode.PullUp))
+    {
+        Combined = combined;
+        Input = input;
+        IsAnalog = Input == GhWtInputType.TapBar;
+    }
+
+    public GhWtInputType Input { get; set; }
+
+
+    public bool Combined { get; }
+
+    public override InputType? InputType => Types.InputType.WtNeckInput;
+    public override bool IsUint => true;
+    protected override string DetectionText => "Tap on the tap bar";
+
+    public override IList<DevicePin> Pins => new List<DevicePin>
+    {
+        new(PinConfig.Pin, DevicePinMode.Floating)
+    };
 
     public override string Generate(ConfigField mode)
     {
-        if (Input == GhWtInputType.TapBar)
-        {
-            return "lastTap";
-        }
+        if (Input == GhWtInputType.TapBar) return "lastTap";
 
         var mappings = MappingByInput[Input];
         return string.Join(" || ", mappings.Select(mapping => $"(lastTapShift == {mapping})"));
@@ -72,16 +79,9 @@ public class GhWtTapInput : InputWithPin
 
     public override SerializedInput Serialise()
     {
-        if (Combined)
-        {
-            return new SerializedGhWtInputCombined(Input);
-        }
+        if (Combined) return new SerializedGhWtInputCombined(Input);
         return new SerializedGhWtInput(PinConfig.Pin, Input);
     }
-
-    public override InputType? InputType => Types.InputType.WtNeckInput;
-    public override bool IsUint => true;
-    protected override string DetectionText => "Tap on the tap bar";
 
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
@@ -93,10 +93,10 @@ public class GhWtTapInput : InputWithPin
         RawValue = BitConverter.ToInt32(ghWtRaw);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-        return string.Join(";\n", bindings.Select(binding => binding.Item2));
+        return string.Join("\n", bindings.Select(binding => binding.Item2));
     }
 
     public override IReadOnlyList<string> RequiredDefines()
@@ -104,11 +104,6 @@ public class GhWtTapInput : InputWithPin
         return new[]
             {"INPUT_WT_NECK", $"WT_NECK_READ() {Microcontroller.GeneratePulseRead(PinConfig.Pin, PulseMode.LOW, 100)}"};
     }
-
-    public override IList<DevicePin> Pins => new List<DevicePin>()
-    {
-        new(PinConfig.Pin, DevicePinMode.Floating),
-    };
 
     public override string GetImagePath()
     {

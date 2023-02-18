@@ -1,8 +1,8 @@
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
-public enum Ps2ControllerType: byte
+public enum Ps2ControllerType : byte
 {
-    Digital=1,
+    Digital = 1,
     Dualshock,
     Dualshock2,
     Guitar,
@@ -10,5 +10,5 @@ public enum Ps2ControllerType: byte
     NegCon,
     GunCon,
     JogCon,
-    Mouse,
+    Mouse
 }

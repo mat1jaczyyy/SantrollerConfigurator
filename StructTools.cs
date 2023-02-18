@@ -6,22 +6,23 @@ namespace GuitarConfigurator.NetCore;
 public static class StructTools
 {
     /// <summary>
-    /// converts byte[] to struct
+    ///     converts byte[] to struct
     /// </summary>
     public static T RawDeserialize<T>(byte[] rawData, int position)
     {
         var rawsize = Marshal.SizeOf(typeof(T));
         if (rawsize > rawData.Length - position)
-            throw new ArgumentException("Not enough data to fill struct. Array length from position: " + (rawData.Length - position) + ", Struct length: " + rawsize);
+            throw new ArgumentException("Not enough data to fill struct. Array length from position: " +
+                                        (rawData.Length - position) + ", Struct length: " + rawsize);
         var buffer = Marshal.AllocHGlobal(rawsize);
         Marshal.Copy(rawData, position, buffer, rawsize);
-        var retobj = (T)Marshal.PtrToStructure(buffer, typeof(T))!;
+        var retobj = (T) Marshal.PtrToStructure(buffer, typeof(T))!;
         Marshal.FreeHGlobal(buffer);
         return retobj;
     }
 
     /// <summary>
-    /// converts a struct to byte[]
+    ///     converts a struct to byte[]
     /// </summary>
     public static byte[] RawSerialize(object anything)
     {

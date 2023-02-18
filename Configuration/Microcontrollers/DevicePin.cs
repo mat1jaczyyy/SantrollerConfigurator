@@ -4,14 +4,14 @@ namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public class DevicePin
 {
-    public int Pin { get; }
-    public DevicePinMode PinMode { get; }
-
     public DevicePin(int pin, DevicePinMode pinMode)
     {
         Pin = pin;
         PinMode = pinMode;
     }
+
+    public int Pin { get; }
+    public DevicePinMode PinMode { get; }
 
     private bool Equals(DevicePin other)
     {

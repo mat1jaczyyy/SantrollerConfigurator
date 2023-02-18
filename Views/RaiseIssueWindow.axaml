@@ -1,5 +1,4 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -39,10 +38,10 @@
                     <StackPanel>
                         <Label>Unfortunately an error has occurred while programming your microcontroller.</Label>
                         <Label>Feel free to use the below button to raise this issue and we will try to fix this problem.</Label>
-                        <Label></Label>
+                        <Label />
                         <Label>Included Information</Label>
-                        <Label Content="{Binding IncludedInfo}"></Label>
-                        <TextBox IsReadOnly="True" Text="{Binding Text}"></TextBox>
+                        <Label Content="{Binding IncludedInfo}" />
+                        <TextBox IsReadOnly="True" Text="{Binding Text}" />
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>

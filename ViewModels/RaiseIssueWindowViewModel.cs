@@ -12,11 +12,7 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 
 public class RaiseIssueWindowViewModel : ReactiveObject
 {
-    public string Text { get; }
-    public string IncludedInfo { get; }
     private readonly ConfigViewModel _model;
-    public ICommand RaiseIssueCommand { get; }
-    public ICommand CloseWindowCommand { get; }
     public Interaction<Unit, Unit> CloseWindowInteraction = new();
 
     public RaiseIssueWindowViewModel((string _platformIOText, ConfigViewModel) text)
@@ -38,6 +34,11 @@ Led Type: {_model.LedType}
 Microcontroller Type: {_model.MicroController!.Board.Name}
 Microcontroller Frequency: {_model.MicroController!.Board.CpuFreq / 1000}mhz";
     }
+
+    public string Text { get; }
+    public string IncludedInfo { get; }
+    public ICommand RaiseIssueCommand { get; }
+    public ICommand CloseWindowCommand { get; }
 
     private async Task RaiseIssue()
     {

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
@@ -12,6 +11,8 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class ControllerButton : OutputButton
 {
+    private readonly ObservableAsPropertyHelper<bool> _valid;
+
     public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
         byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce,
         type.ToString())
@@ -22,32 +23,53 @@ public class ControllerButton : OutputButton
             .ToProperty(this, s => s.Valid);
     }
 
+    public StandardButtonType Type { get; }
+
+    public override bool IsKeyboard => false;
+    public override bool IsController => true;
+
+    public override bool IsStrum => Type is StandardButtonType.DpadUp or StandardButtonType.DpadDown;
+
+    public override bool IsCombined => false;
+    public override bool Valid => _valid.Value;
+    public override string LedOnLabel => "Pressed LED Colour";
+    public override string LedOffLabel => "Released LED Colour";
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return ControllerEnumConverter.GetButtonText(deviceControllerType, rhythmType,
             Enum.Parse<StandardButtonType>(Name)) ?? Name;
     }
 
-    public StandardButtonType Type { get; }
-
     public override string GenerateOutput(ConfigField mode)
     {
-        if (mode is ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse)
+        if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360))
             return "";
         return GetReportField(Type);
     }
 
-    public override bool IsKeyboard => false;
-    public override bool IsController => true;
-    public override bool IsMidi => false;
-    public override bool IsStrum => Type is StandardButtonType.DpadUp or StandardButtonType.DpadDown;
-
-    public override bool IsCombined => false;
-
-    private readonly ObservableAsPropertyHelper<bool> _valid;
-    public override bool Valid => _valid.Value;
-    public override string LedOnLabel => "Pressed LED Colour";
-    public override string LedOffLabel => "Released LED Colour";
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        switch (type)
+        {
+            case DeviceControllerType.Gamepad:
+            case DeviceControllerType.Wheel:
+            case DeviceControllerType.ArcadeStick:
+            case DeviceControllerType.FlightStick:
+            case DeviceControllerType.DancePad:
+            case DeviceControllerType.ArcadePad:
+                return $"Others/Xbox360/360_{Name}.png";
+            case DeviceControllerType.Guitar:
+            case DeviceControllerType.Drum:
+                return $"{rhythmType}/{Name}.png";
+            case DeviceControllerType.LiveGuitar:
+                return $"GuitarHero/{Name}.png";
+            case DeviceControllerType.Turntable:
+                return $"DJ/{Name}.png";
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
 
     public override SerializedOutput Serialize()
     {

@@ -13,13 +13,9 @@ public class Dfu : IConfigurableDevice
     public static readonly uint DfuPid16U2 = 0x2FEF;
     public static readonly uint DfuVid = 0x03eb;
 
-    public Board Board { get; }
-
-    public bool MigrationSupported => true;
-
-    private DeviceNotifyEventArgs _args;
-
     private readonly string _port;
+
+    private readonly DeviceNotifyEventArgs _args;
 
     public Dfu(DeviceNotifyEventArgs args)
     {
@@ -27,17 +23,19 @@ public class Dfu : IConfigurableDevice
         var pid = args.Device.IdProduct;
         _port = args.Device.Name;
         foreach (var board in Board.Boards)
-        {
             if (board.ProductIDs.Contains((uint) pid) && board.HasUsbmcu)
             {
                 Board = board;
                 Console.WriteLine(Board.Environment);
                 return;
             }
-        }
 
         throw new InvalidOperationException("Not expected");
     }
+
+    public Board Board { get; }
+
+    public bool MigrationSupported => true;
 
     public bool IsSameDevice(PlatformIoPort port)
     {
@@ -52,23 +50,16 @@ public class Dfu : IConfigurableDevice
     public bool DeviceAdded(IConfigurableDevice device)
     {
         Console.WriteLine("DFU device added");
-        if (device is Dfu dfu)
-        {
-            dfu.Launch();
-        }
+        if (device is Dfu dfu) dfu.Launch();
 
-        if (device is Arduino arduino)
-        {
-            Console.WriteLine("Hello!");
-        }
+        if (device is Arduino arduino) Console.WriteLine("Hello!");
         return false;
     }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
-        Board board = Board;
+        var board = Board;
         if (Board.ArdwiinoName == "usb")
-        {
             switch (model.Main.UnoMegaType)
             {
                 case UnoMegaType.Uno:
@@ -83,18 +74,13 @@ public class Dfu : IConfigurableDevice
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
+
         model.SetDefaults(Board.FindMicrocontroller(board));
     }
 
     public Task<string?> GetUploadPort()
     {
         return Task.FromResult((string?) _port);
-    }
-
-    public override string ToString()
-    {
-        return $"{Board.Name} in DFU mode ({_port})";
     }
 
     public bool IsAvr()
@@ -110,6 +96,16 @@ public class Dfu : IConfigurableDevice
     {
     }
 
+    public bool IsPico()
+    {
+        return false;
+    }
+
+    public override string ToString()
+    {
+        return $"{Board.Name} in DFU mode ({_port})";
+    }
+
     public void Launch()
     {
         _args.Device.Open(out var device);
@@ -117,7 +113,7 @@ public class Dfu : IConfigurableDevice
                           UsbCtrlFlags.Recipient_Interface;
 
         var sp = new UsbSetupPacket(
-            ((byte) requestType),
+            (byte) requestType,
             3,
             0,
             0,
@@ -129,7 +125,7 @@ public class Dfu : IConfigurableDevice
         requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
 
         sp = new UsbSetupPacket(
-            ((byte) requestType),
+            (byte) requestType,
             1,
             0,
             0,
@@ -137,7 +133,7 @@ public class Dfu : IConfigurableDevice
         device.ControlTransfer(ref sp, buffer, buffer.Length, out length);
         Console.WriteLine(length);
         sp = new UsbSetupPacket(
-            ((byte) requestType),
+            (byte) requestType,
             1,
             0,
             0,

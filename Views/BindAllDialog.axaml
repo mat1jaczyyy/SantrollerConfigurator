@@ -1,5 +1,4 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -23,18 +22,16 @@
         WindowState="Maximized">
     <Panel>
         <Panel.Resources>
-            <netCore:EnumToStringConverter x:Key="EnumToStringConverter" />
             <netCore:PinToStringConverter x:Key="PinToStringConverter" />
-            <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
             <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
                 <TextBlock x:CompileBindings="False">
                     <TextBlock.Text>
                         <MultiBinding Converter="{StaticResource PinToStringConverter }">
-                            <Binding></Binding>
-                            <Binding Path="$parent[Panel].DataContext.Microcontroller"></Binding>
-                            <Binding Path="$parent[Panel].DataContext.Model"></Binding>
-                            <Binding Path="$parent[ComboBox].SelectedItem"></Binding>
-                            <Binding Path="$parent[Panel].DataContext.Output"></Binding>
+                            <Binding />
+                            <Binding Path="$parent[Panel].DataContext.Microcontroller" />
+                            <Binding Path="$parent[Panel].DataContext.Model" />
+                            <Binding Path="$parent[ComboBox].SelectedItem" />
+                            <Binding Path="$parent[Panel].DataContext.Output" />
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
@@ -52,25 +49,23 @@
         <Panel Margin="40">
             <DockPanel HorizontalAlignment="Stretch">
                 <StackPanel Height="50" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
-                    <Button Margin="0 0 5 0" Command="{Binding ContinueCommand}" Content="Continue" Classes="accent"></Button>
-                    <Button Command="{Binding AbortCommand}" Content="Abort"></Button>
+                    <Button Margin="0 0 5 0" Command="{Binding ContinueCommand}" Content="Continue" Classes="accent" />
+                    <Button Command="{Binding AbortCommand}" Content="Abort" />
                 </StackPanel>
                 <ScrollViewer>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="Binding:"></Label>
-                            <Label Content="{Binding LocalisedName}"></Label>
+                            <Label Content="Binding:" />
+                            <Label Content="{Binding LocalisedName}" />
                         </StackPanel>
                         <Image ToolTip.Tip="{Binding LocalisedName}"
                                HorizontalAlignment="Center" Width="75"
-                               Source="{Binding Image}">
-                        </Image>
+                               Source="{Binding Image}" />
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Input.Pin}"
                                   Items="{Binding Input.AvailablePins}"
-                                  ItemTemplate="{StaticResource PinToStringTemplate}">
-                        </ComboBox>
-                        <Label IsVisible="{Binding IsAnalog}" Content="Move the axis you want to use"></Label>
-                        <Label IsVisible="{Binding !IsAnalog}" Content="Press the button you want to use"></Label>
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                        <Label IsVisible="{Binding IsAnalog}" Content="Move the axis you want to use" />
+                        <Label IsVisible="{Binding !IsAnalog}" Content="Press the button you want to use" />
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>

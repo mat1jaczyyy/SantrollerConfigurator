@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reactive.Linq;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Media.Imaging;
@@ -17,22 +16,20 @@ namespace GuitarConfigurator.NetCore.Configuration;
 
 public abstract class Input : ReactiveObject, IDisposable
 {
-    protected ConfigViewModel Model { get; }
+    private bool _analog;
+
+    private Bitmap? _image;
+
+    private int _rawValue;
 
     protected Input(ConfigViewModel model)
     {
         Model = model;
     }
 
-    private Bitmap? _image;
+    protected ConfigViewModel Model { get; }
 
     public Bitmap Image => GetImage();
-
-    public abstract IReadOnlyList<string> RequiredDefines();
-    public abstract string Generate(ConfigField mode);
-
-    public abstract SerializedInput Serialise();
-    private bool _analog;
 
     public bool IsAnalog
     {
@@ -42,13 +39,22 @@ public abstract class Input : ReactiveObject, IDisposable
 
     public abstract bool IsUint { get; }
 
-    private int _rawValue;
-
     public int RawValue
     {
         get => _rawValue;
         set => this.RaiseAndSetIfChanged(ref _rawValue, value);
     }
+
+    public abstract IList<DevicePin> Pins { get; }
+    public abstract IList<PinConfig> PinConfigs { get; }
+    public abstract InputType? InputType { get; }
+
+    public abstract void Dispose();
+
+    public abstract IReadOnlyList<string> RequiredDefines();
+    public abstract string Generate(ConfigField mode);
+
+    public abstract SerializedInput Serialise();
 
     public virtual Input InnermostInput()
     {
@@ -60,10 +66,6 @@ public abstract class Input : ReactiveObject, IDisposable
         return new List<Input> {this};
     }
 
-    public abstract IList<DevicePin> Pins { get; }
-    public abstract IList<PinConfig> PinConfigs { get; }
-    public abstract InputType? InputType { get; }
-
     public abstract void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
@@ -72,16 +74,11 @@ public abstract class Input : ReactiveObject, IDisposable
     public abstract string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode);
 
-    public abstract void Dispose();
-
     public abstract string GetImagePath();
 
     private Bitmap GetImage()
     {
-        if (_image != null)
-        {
-            return _image;
-        }
+        if (_image != null) return _image;
 
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();

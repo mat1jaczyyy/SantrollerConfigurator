@@ -3,7 +3,6 @@ using System.Linq;
 
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
-
 public enum DrumAxisType
 {
     Green,
@@ -20,7 +19,6 @@ public enum DrumAxisType
 
 public static class DrumAxisTypeMethods
 {
-
     public static IEnumerable<DrumAxisType> RbTypes()
     {
         return new[]
@@ -58,6 +56,7 @@ public static class DrumAxisTypeMethods
     {
         return GetInvalidTypesFor(rhythmType).Except(GetTypeFor(rhythmType));
     }
+
     public static IEnumerable<DrumAxisType> GetDifferenceInverseFor(RhythmType rhythmType)
     {
         return GetTypeFor(rhythmType).Except(GetInvalidTypesFor(rhythmType));

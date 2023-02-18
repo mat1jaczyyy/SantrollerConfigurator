@@ -1,6 +1,4 @@
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
-using GuitarConfigurator.NetCore.Configuration.Outputs;
-using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
 
@@ -21,7 +19,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoInclude(112, typeof(SerializedGh5NeckInputCombined))]
 [ProtoInclude(113, typeof(SerializedDjInputCombined))]
 [ProtoInclude(114, typeof(SerializedMacroInput))]
-
 public abstract class SerializedInput
 {
     public abstract Input Generate(Microcontroller microcontroller1, ConfigViewModel model);

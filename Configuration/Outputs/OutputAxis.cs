@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Media;
@@ -23,6 +22,24 @@ public enum OutputAxisCalibrationState
 
 public abstract class OutputAxis : Output
 {
+    private const float ProgressWidth = 400;
+
+    private readonly ObservableAsPropertyHelper<Thickness> _computedDeadZoneMargin;
+    private readonly ObservableAsPropertyHelper<Thickness> _computedMinMaxMargin;
+    private readonly ObservableAsPropertyHelper<bool> _inputIsUInt;
+    private readonly ObservableAsPropertyHelper<bool> _isDigitalToAnalog;
+    private readonly ObservableAsPropertyHelper<int> _value;
+    private readonly ObservableAsPropertyHelper<int> _valueLower;
+
+    private readonly ObservableAsPropertyHelper<int> _valueRawLower;
+    private readonly ObservableAsPropertyHelper<int> _valueRawUpper;
+    private readonly ObservableAsPropertyHelper<int> _valueUpper;
+    private int _calibrationMax;
+    private int _calibrationMin;
+    private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.None;
+
+    private int _deadZone;
+
     protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
         int deadZone, string name, bool trigger) : base(model, input, ledOn, ledOff,
@@ -40,16 +57,16 @@ public abstract class OutputAxis : Output
             .ToProperty(this, x => x.InputIsUint);
         var calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue);
         calibrationWatcher.Subscribe(ApplyCalibration);
-        _valueRawLower = this.WhenAnyValue(x => x.ValueRaw).Select(s => (s < 0 ? -s : 0))
+        _valueRawLower = this.WhenAnyValue(x => x.ValueRaw).Select(s => s < 0 ? -s : 0)
             .ToProperty(this, x => x.ValueRawLower);
-        _valueRawUpper = this.WhenAnyValue(x => x.ValueRaw).Select(s => (s > 0 ? s : 0))
+        _valueRawUpper = this.WhenAnyValue(x => x.ValueRaw).Select(s => s > 0 ? s : 0)
             .ToProperty(this, x => x.ValueRawUpper);
 
         _value = this
             .WhenAnyValue(x => x.Enabled, x => x.ValueRaw, x => x.Min, x => x.Max, x => x.DeadZone, x => x.Trigger,
                 x => x.Model.DeviceType).Select(Calculate).ToProperty(this, x => x.Value);
-        _valueLower = this.WhenAnyValue(x => x.Value).Select(s => (s < 0 ? -s : 0)).ToProperty(this, x => x.ValueLower);
-        _valueUpper = this.WhenAnyValue(x => x.Value).Select(s => (s > 0 ? s : 0)).ToProperty(this, x => x.ValueUpper);
+        _valueLower = this.WhenAnyValue(x => x.Value).Select(s => s < 0 ? -s : 0).ToProperty(this, x => x.ValueLower);
+        _valueUpper = this.WhenAnyValue(x => x.Value).Select(s => s > 0 ? s : 0).ToProperty(this, x => x.ValueUpper);
         _computedDeadZoneMargin = this
             .WhenAnyValue(x => x.Min, x => x.Max, x => x.Trigger, x => x.InputIsUint, x => x.DeadZone)
             .Select(ComputeDeadZoneMargin).ToProperty(this, x => x.ComputedDeadZoneMargin);
@@ -59,9 +76,50 @@ public abstract class OutputAxis : Output
             .ToProperty(this, x => x.IsDigitalToAnalog);
     }
 
-    private const float ProgressWidth = 400;
     public float FullProgressWidth => ProgressWidth;
-    public float HalfProgressWidth => ProgressWidth/2;
+    public float HalfProgressWidth => ProgressWidth / 2;
+    public int ValueRawLower => _valueRawLower.Value;
+    public int ValueRawUpper => _valueRawUpper.Value;
+    public int Value => _value.Value;
+    public int ValueLower => _valueLower.Value;
+    public int ValueUpper => _valueUpper.Value;
+    public bool InputIsUint => _inputIsUInt.Value;
+    public bool InputIsDj { get; }
+
+    public int Min
+    {
+        get => _calibrationMin;
+        set => this.RaiseAndSetIfChanged(ref _calibrationMin, value);
+    }
+
+    public int Max
+    {
+        get => _calibrationMax;
+        set => this.RaiseAndSetIfChanged(ref _calibrationMax, value);
+    }
+
+    public Thickness ComputedDeadZoneMargin => _computedDeadZoneMargin.Value;
+    public Thickness CalibrationMinMaxMargin => _computedMinMaxMargin.Value;
+
+    public int DeadZone
+    {
+        get => _deadZone;
+        set => this.RaiseAndSetIfChanged(ref _deadZone, value);
+    }
+
+
+    public bool Trigger { get; }
+    public override bool IsCombined => false;
+    public override bool IsStrum => false;
+    public bool IsDigitalToAnalog => _isDigitalToAnalog.Value;
+
+    public string? CalibrationText => GetCalibrationText();
+
+    public int DjValue
+    {
+        get => Max;
+        set => _calibrationMax = InputIsDj ? value : _calibrationMax;
+    }
 
     private Thickness ComputeDeadZoneMargin((int, int, bool, bool, int) s)
     {
@@ -77,13 +135,9 @@ public abstract class OutputAxis : Output
         if (s.Item3)
         {
             if (s.Item1 < s.Item2)
-            {
                 max = min + s.Item5;
-            }
             else
-            {
                 min = max - s.Item5;
-            }
         }
         else
         {
@@ -92,9 +146,9 @@ public abstract class OutputAxis : Output
             max = mid + s.Item5;
         }
 
-        var left = Math.Min(min / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
+        var left = Math.Min(min / ushort.MaxValue * ProgressWidth, ProgressWidth);
 
-        var right = ProgressWidth - Math.Min(max / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
+        var right = ProgressWidth - Math.Min(max / ushort.MaxValue * ProgressWidth, ProgressWidth);
 
         return new Thickness(left, 0, right, 0);
     }
@@ -111,9 +165,9 @@ public abstract class OutputAxis : Output
         float min = Math.Min(s.Item1, s.Item2);
         float max = Math.Max(s.Item1, s.Item2);
 
-        var left = Math.Min(min / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
+        var left = Math.Min(min / ushort.MaxValue * ProgressWidth, ProgressWidth);
 
-        var right = ProgressWidth - Math.Min(max / (ushort.MaxValue) * ProgressWidth, ProgressWidth);
+        var right = ProgressWidth - Math.Min(max / ushort.MaxValue * ProgressWidth, ProgressWidth);
         left = Math.Max(0, left);
         right = Math.Max(0, right);
         return new Thickness(left, 0, right, 0);
@@ -135,33 +189,23 @@ public abstract class OutputAxis : Output
                 var valRaw = rawValue;
                 int deadZone;
                 if (valRaw < min)
-                {
                     deadZone = min;
-                }
                 else if (valRaw > max)
-                {
                     deadZone = max;
-                }
                 else
-                {
                     deadZone = valRaw;
-                }
 
                 if (Trigger)
                 {
                     if (Min < Max)
-                    {
                         DeadZone = valRaw - min;
-                    }
                     else
-                    {
                         DeadZone = max - valRaw;
-                    }
                 }
                 else
                 {
                     // For Int, deadzone starts in the middle and grows in both directions
-                    DeadZone = Math.Abs(((min + max) / 2) - deadZone);
+                    DeadZone = Math.Abs((min + max) / 2 - deadZone);
                 }
 
                 break;
@@ -170,16 +214,10 @@ public abstract class OutputAxis : Output
 
     public void Calibrate()
     {
-        if (!SupportsCalibration())
-        {
-            return;
-        }
+        if (!SupportsCalibration()) return;
 
         _calibrationState++;
-        if (_calibrationState == OutputAxisCalibrationState.Last)
-        {
-            _calibrationState = OutputAxisCalibrationState.None;
-        }
+        if (_calibrationState == OutputAxisCalibrationState.Last) _calibrationState = OutputAxisCalibrationState.None;
 
         ApplyCalibration(ValueRaw);
 
@@ -195,10 +233,7 @@ public abstract class OutputAxis : Output
         var max = (float) values.Item4;
         var deadZone = (float) values.Item5;
         var trigger = values.Item6;
-        if (InputIsDj)
-        {
-            return (int) (val * max);
-        }
+        if (InputIsDj) return (int) (val * max);
 
         if (trigger)
         {
@@ -211,19 +246,13 @@ public abstract class OutputAxis : Output
 
             if (max > min)
             {
-                if ((val - min) < deadZone)
-                {
-                    return 0;
-                }
+                if (val - min < deadZone) return 0;
             }
             else
             {
                 min -= deadZone;
 
-                if (val > min)
-                {
-                    return 0;
-                }
+                if (val > min) return 0;
             }
         }
         else
@@ -235,20 +264,17 @@ public abstract class OutputAxis : Output
                 max -= short.MaxValue;
             }
 
-            var deadZoneCalc = val - ((max + min) / 2);
-            if (deadZoneCalc < deadZone && deadZoneCalc > -deadZone)
-            {
-                return 0;
-            }
+            var deadZoneCalc = val - (max + min) / 2;
+            if (deadZoneCalc < deadZone && deadZoneCalc > -deadZone) return 0;
 
-            val = (val - (Math.Sign(val) * deadZone));
+            val = val - Math.Sign(val) * deadZone;
             min += deadZone;
             max -= deadZone;
         }
 
         if (trigger)
         {
-            val = (val - min) / (max - min) * (ushort.MaxValue);
+            val = (val - min) / (max - min) * ushort.MaxValue;
             if (val > ushort.MaxValue) val = ushort.MaxValue;
             if (val < 0) val = 0;
         }
@@ -262,63 +288,7 @@ public abstract class OutputAxis : Output
         return (int) val;
     }
 
-    private readonly ObservableAsPropertyHelper<int> _valueRawLower;
-    public int ValueRawLower => _valueRawLower.Value;
-    private readonly ObservableAsPropertyHelper<int> _valueRawUpper;
-    public int ValueRawUpper => _valueRawUpper.Value;
-    private readonly ObservableAsPropertyHelper<int> _value;
-    public int Value => _value.Value;
-    private readonly ObservableAsPropertyHelper<int> _valueLower;
-    public int ValueLower => _valueLower.Value;
-    private readonly ObservableAsPropertyHelper<int> _valueUpper;
-    public int ValueUpper => _valueUpper.Value;
-    private readonly ObservableAsPropertyHelper<bool> _inputIsUInt;
-    public bool InputIsUint => _inputIsUInt.Value;
-    public bool InputIsDj { get; }
-    private int _calibrationMin;
-    private int _calibrationMax;
-
-    public int Min
-    {
-        get => _calibrationMin;
-        set => this.RaiseAndSetIfChanged(ref _calibrationMin, value);
-    }
-
-    public int Max
-    {
-        get => _calibrationMax;
-        set => this.RaiseAndSetIfChanged(ref _calibrationMax, value);
-    }
-
-    private readonly ObservableAsPropertyHelper<Thickness> _computedDeadZoneMargin;
-    public Thickness ComputedDeadZoneMargin => _computedDeadZoneMargin.Value;
-    private readonly ObservableAsPropertyHelper<Thickness> _computedMinMaxMargin;
-    public Thickness CalibrationMinMaxMargin => _computedMinMaxMargin.Value;
-
-    private int _deadZone;
-
-    public int DeadZone
-    {
-        get => _deadZone;
-        set => this.RaiseAndSetIfChanged(ref _deadZone, value);
-    }
-
-
-    public bool Trigger { get; }
     public abstract string GenerateOutput(ConfigField mode);
-    public override bool IsCombined => false;
-    public override bool IsStrum => false;
-    private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.None;
-    private readonly ObservableAsPropertyHelper<bool> _isDigitalToAnalog;
-    public bool IsDigitalToAnalog => _isDigitalToAnalog.Value;
-
-    public string? CalibrationText => GetCalibrationText();
-
-    public int DjValue
-    {
-        get => Max;
-        set => _calibrationMax = InputIsDj ? value : _calibrationMax;
-    }
 
     protected abstract string MinCalibrationText();
     protected abstract string MaxCalibrationText();
@@ -334,6 +304,7 @@ public abstract class OutputAxis : Output
             _ => null
         };
     }
+
     protected string GenerateAssignment(ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
     {
         switch (Input)
@@ -350,7 +321,7 @@ public abstract class OutputAxis : Output
             or StandardAxisType.AccelerationZ
         };
         string function;
-        bool trigger = Trigger || forceTrigger;
+        var trigger = Trigger || forceTrigger;
         var normal = false;
 
         switch (mode)
@@ -403,12 +374,9 @@ public abstract class OutputAxis : Output
                 max += short.MaxValue;
             }
 
-            if (max <= min)
-            {
-                min -= DeadZone;
-            }
+            if (max <= min) min -= DeadZone;
 
-            multiplier = 1f / (max - min) * (ushort.MaxValue);
+            multiplier = 1f / (max - min) * ushort.MaxValue;
         }
         else
         {
@@ -446,7 +414,7 @@ public abstract class OutputAxis : Output
             var ledRead = mode == ConfigField.Xbox360
                 ? $"{GenerateOutput(mode)} << 8"
                 : GenerateOutput(mode);
-            led += $@"if (!ledState[{index-1}].select) {{
+            led += $@"if (!ledState[{index - 1}].select) {{
                         {Model.LedType.GetLedAssignment(LedOn, LedOff, ledRead, index)}
                     }}";
         }
@@ -457,7 +425,6 @@ public abstract class OutputAxis : Output
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
-        if (mode is ConfigField.Shared or ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse) return "";
         var led = Input is FixedInput ? "" : CalculateLeds(mode);
         return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)}; {led}";
     }

@@ -17,6 +17,17 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class EmptyOutput : Output
 {
+    private readonly ObservableAsPropertyHelper<IEnumerable<object>> _combinedTypes;
+
+    private readonly ObservableAsPropertyHelper<bool> _isController;
+    private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
+
+    private Key? _key;
+
+    private MouseAxisType? _mouseAxisType;
+
+    private MouseButtonType? _mouseButtonType;
+
     public EmptyOutput(ConfigViewModel model) : base(model, null, Colors.Black, Colors.Black,
         Array.Empty<byte>(), "Empty")
     {
@@ -26,25 +37,16 @@ public class EmptyOutput : Output
         _isKeyboard = this.WhenAnyValue(x => x.Model.EmulationType)
             .Select(x => x is EmulationType.KeyboardMouse)
             .ToProperty(this, x => x.IsKeyboard);
-        _isMidi = this.WhenAnyValue(x => x.Model.EmulationType)
-            .Select(x => x is EmulationType.Midi)
-            .ToProperty(this, x => x.IsMidi);
 
         _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType,
                 vm => vm.Model.RhythmType)
             .Select(ControllerEnumConverter.GetTypes).ToProperty(this, x => x.CombinedTypes);
     }
 
-    private readonly ObservableAsPropertyHelper<bool> _isController;
     public override bool IsController => _isController.Value;
-    private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
     public override bool IsKeyboard => _isKeyboard.Value;
-    private readonly ObservableAsPropertyHelper<bool> _isMidi;
-    public override bool IsMidi => _isMidi.Value;
 
     public override bool Valid => true;
-
-    private readonly ObservableAsPropertyHelper<IEnumerable<object>> _combinedTypes;
 
     public IEnumerable<object> CombinedTypes => _combinedTypes.Value;
 
@@ -53,8 +55,6 @@ public class EmptyOutput : Output
         get => null;
         set => Generate(value);
     }
-
-    private Key? _key;
 
     public Key? Key
     {
@@ -69,8 +69,6 @@ public class EmptyOutput : Output
 
     public IEnumerable<Key> Keys => Enum.GetValues<Key>();
 
-    private MouseAxisType? _mouseAxisType;
-
     public MouseAxisType? MouseAxisType
     {
         get => _mouseAxisType;
@@ -83,8 +81,6 @@ public class EmptyOutput : Output
     }
 
     public IEnumerable<MouseAxisType> MouseAxisTypes => Enum.GetValues<MouseAxisType>();
-
-    private MouseButtonType? _mouseButtonType;
 
     public MouseButtonType? MouseButtonType
     {
@@ -99,110 +95,88 @@ public class EmptyOutput : Output
 
     public IEnumerable<MouseButtonType> MouseButtonTypes => Enum.GetValues<MouseButtonType>();
 
+    public override string ErrorText => "Input is not bound!";
+
+    public override string LedOnLabel => "";
+    public override string LedOffLabel => "";
+
+    public override bool IsCombined => false;
+    public override bool IsStrum => false;
+
     private void Generate(object? value)
     {
         if (Model.MicroController == null) return;
-        switch (Model.EmulationType)
+        Output? output = Model.GetSimpleEmulationType() switch
         {
-            case EmulationType.Controller:
-                switch (value)
+            EmulationType.Controller => value switch
+            {
+                SimpleType simpleType => simpleType switch
                 {
-                    case SimpleType simpleType:
-                        switch (simpleType)
-                        {
-                            case SimpleType.WiiInputSimple:
-                                Model.Bindings.Add(new WiiCombinedOutput(Model, Model.MicroController!));
-                                break;
-                            case SimpleType.Gh5NeckSimple:
-                                Model.Bindings.Add(new Gh5CombinedOutput(Model, Model.MicroController!));
-                                break;
-                            case SimpleType.Ps2InputSimple:
-                                Model.Bindings.Add(new Ps2CombinedOutput(Model, Model.MicroController!));
-                                break;
-                            case SimpleType.WtNeckSimple:
-                                Model.Bindings.Add(new GhwtCombinedOutput(Model, Model.MicroController!));
-                                break;
-                            case SimpleType.DjTurntableSimple:
-                                Model.Bindings.Add(new DjCombinedOutput(Model, Model.MicroController!));
-                                break;
-                        }
+                    SimpleType.WiiInputSimple => new WiiCombinedOutput(Model, Model.MicroController!),
+                    SimpleType.Gh5NeckSimple => new Gh5CombinedOutput(Model, Model.MicroController!),
+                    SimpleType.Ps2InputSimple => new Ps2CombinedOutput(Model, Model.MicroController!),
+                    SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model, Model.MicroController!),
+                    SimpleType.DjTurntableSimple => new DjCombinedOutput(Model, Model.MicroController!),
+                    SimpleType.RFSimple => new RFRXOutput(Model),
+                    _ => null
+                },
+                StandardAxisType standardAxisType => new ControllerAxis(Model,
+                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
+                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    short.MinValue, short.MaxValue, 0,
+                    standardAxisType),
+                StandardButtonType standardButtonType => new ControllerButton(Model,
+                    new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 5,
+                    standardButtonType),
+                RBButtonType standardButtonType => new RbButton(Model,
+                    new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 5,
+                    standardButtonType),
+                DrumAxisType drumAxisType => new DrumAxis(Model,
+                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
+                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    short.MinValue, short.MaxValue, 0,
+                    1000, 10, drumAxisType),
+                Ps3AxisType ps3AxisType => new PS3Axis(Model,
+                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
+                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    short.MinValue, short.MaxValue, 0,
+                    ps3AxisType),
+                GuitarAxisType guitarAxisType => new GuitarAxis(Model,
+                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
+                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    short.MinValue, short.MaxValue, 0, guitarAxisType),
+                DjAxisType djAxisType => new DjAxis(Model,
+                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
+                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    short.MinValue, short.MaxValue, 0, djAxisType),
+                DjInputType djInputType => new DjButton(Model,
+                    new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
+                        Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
+                    djInputType),
+                _ => null
+            },
 
-                        break;
-                    case StandardAxisType standardAxisType:
-                        Model.Bindings.Add(new ControllerAxis(Model,
-                            new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
-                            short.MinValue, short.MaxValue, 0,
-                            standardAxisType));
-                        break;
-                    case StandardButtonType standardButtonType:
-                        Model.Bindings.Add(new ControllerButton(Model,
-                            new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Black,
-                            Colors.Black, Array.Empty<byte>(), 5,
-                            standardButtonType));
-                        break;
-                    case RBButtonType standardButtonType:
-                        Model.Bindings.Add(new RbButton(Model,
-                            new DirectInput(0, DevicePinMode.PullUp, Model, Model.MicroController), Colors.Black,
-                            Colors.Black, Array.Empty<byte>(), 5,
-                            standardButtonType));
-                        break;
-                    case DrumAxisType drumAxisType:
-                        Model.Bindings.Add(new DrumAxis(Model,
-                            new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
-                            short.MinValue, short.MaxValue, 0,
-                            1000, 10, drumAxisType));
-                        break;
-                    case Ps3AxisType ps3AxisType:
-                        Model.Bindings.Add(new PS3Axis(Model,
-                            new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
-                            short.MinValue, short.MaxValue, 0,
-                            ps3AxisType));
-                        break;
-                    case GuitarAxisType guitarAxisType:
-                        Model.Bindings.Add(new GuitarAxis(Model,
-                            new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
-                            short.MinValue, short.MaxValue, 0, guitarAxisType));
-                        break;
-                    case DjAxisType djAxisType:
-                        Model.Bindings.Add(new DjAxis(Model,
-                            new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(),
-                            short.MinValue, short.MaxValue, 0, djAxisType));
-                        break;
-                    case DjInputType djInputType:
-                        Model.Bindings.Add(new DjButton(Model,
-                            new DirectInput(Model.MicroController.GetFirstAnalogPin(), DevicePinMode.Analog, Model,
-                                Model.MicroController), Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
-                            djInputType));
-                        break;
-                }
-
-                break;
-            case EmulationType.KeyboardMouse:
-                if (MouseAxisType.HasValue)
-                {
-                    Model.Bindings.Add(new MouseAxis(Model, null, Colors.Black, Colors.Black,
-                        Array.Empty<byte>(), 1, 0, 0,
-                        MouseAxisType.Value));
-                }
-                else if (MouseButtonType.HasValue)
-                {
-                    Model.Bindings.Add(new MouseButton(Model, null, Colors.Black, Colors.Black,
-                        Array.Empty<byte>(), 5,
-                        MouseButtonType.Value));
-                }
-                else if (Key.HasValue)
-                {
-                    Model.Bindings.Add(new KeyboardButton(Model, null, Colors.Black, Colors.Black,
-                        Array.Empty<byte>(), 5,
-                        Key.Value));
-                }
-
-                break;
+            EmulationType.KeyboardMouse => this switch
+            {
+                {MouseAxisType: not null} => new MouseAxis(Model, null, Colors.Black, Colors.Black,
+                    Array.Empty<byte>(), 1, 0, 0,
+                    MouseAxisType.Value),
+                {MouseButtonType: not null} => new MouseButton(Model, null, Colors.Black, Colors.Black,
+                    Array.Empty<byte>(), 5,
+                    MouseButtonType.Value),
+                {Key: not null} => new KeyboardButton(Model, null, Colors.Black, Colors.Black,
+                    Array.Empty<byte>(), 5,
+                    Key.Value),
+                _ => null
+            },
+            _ => null
+        };
+        if (output != null)
+        {
+            output.Expanded = true;
+            Model.Bindings.Add(output);
         }
 
         Dispatcher.UIThread.InvokeAsync(() =>
@@ -212,21 +186,18 @@ public class EmptyOutput : Output
         });
     }
 
-    public override string ErrorText => "Input is not bound!";
-
-    public override string LedOnLabel => "";
-    public override string LedOffLabel => "";
-
     public override void UpdateBindings()
     {
     }
 
-    public override bool IsCombined => false;
-    public override bool IsStrum => false;
-
     public override SerializedOutput Serialize()
     {
         throw new IncompleteConfigurationException(ErrorText);
+    }
+
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return "Generic.png";
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)

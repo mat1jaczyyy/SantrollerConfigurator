@@ -1,5 +1,4 @@
 using Avalonia.Media;
-using GuitarConfigurator.NetCore.Configuration.DJ;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -11,14 +10,8 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoContract(SkipConstructor = true)]
 public class SerializedRBButton : SerializedOutput
 {
-    [ProtoMember(1)] public override SerializedInput? Input { get; }
-    [ProtoMember(2)] public override uint LedOn { get; }
-    [ProtoMember(3)] public override uint LedOff { get; }
-    [ProtoMember(6)] public override byte[] LedIndex { get; }
-    [ProtoMember(4)] public byte Debounce { get; }
-    [ProtoMember(5)] public RBButtonType Type { get; }
-
-    public SerializedRBButton(SerializedInput? input, Color ledOn, Color ledOff, byte[] ledIndex, byte debounce, RBButtonType type)
+    public SerializedRBButton(SerializedInput? input, Color ledOn, Color ledOff, byte[] ledIndex, byte debounce,
+        RBButtonType type)
     {
         Input = input;
         LedOn = ledOn.ToUint32();
@@ -28,8 +21,16 @@ public class SerializedRBButton : SerializedOutput
         Type = type;
     }
 
+    [ProtoMember(1)] public override SerializedInput? Input { get; }
+    [ProtoMember(2)] public override uint LedOn { get; }
+    [ProtoMember(3)] public override uint LedOff { get; }
+    [ProtoMember(6)] public override byte[] LedIndex { get; }
+    [ProtoMember(4)] public byte Debounce { get; }
+    [ProtoMember(5)] public RBButtonType Type { get; }
+
     public override Output Generate(ConfigViewModel model, Microcontroller microcontroller)
     {
-        return new RbButton(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
+        return new RbButton(model, Input?.Generate(microcontroller, model), Color.FromUInt32(LedOn),
+            Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
     }
 }

@@ -9,18 +9,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoContract(SkipConstructor = true)]
 public class SerializedConfiguration
 {
-    [ProtoMember(1)] public LedType LedType { get; }
-    [ProtoMember(2)] public bool XInputOnWindows { get; }
-    [ProtoMember(3)] public bool CombinedDebounce { get; }
-    [ProtoMember(4)] public DeviceControllerType DeviceType { get; }
-    [ProtoMember(5)] public EmulationType EmulationType { get; }
-    [ProtoMember(6)] public RhythmType RhythmType { get; }
-    [ProtoMember(7)] public List<SerializedOutput> Bindings { get; }
-    [ProtoMember(8)] public int Apa102Mosi { get; }
-    [ProtoMember(9)] public int Apa102Sck { get; }
-    [ProtoMember(10)] public byte LedCount { get; }
-    [ProtoMember(11)] public MouseMovementType MouseMovementType { get; }
-    
     public SerializedConfiguration(ConfigViewModel model)
     {
         Bindings = model.Bindings.Select(s => s.Serialize()).ToList();
@@ -35,6 +23,18 @@ public class SerializedConfiguration
         LedCount = model.LedCount;
         MouseMovementType = model.MouseMovementType;
     }
+
+    [ProtoMember(1)] public LedType LedType { get; }
+    [ProtoMember(2)] public bool XInputOnWindows { get; }
+    [ProtoMember(3)] public bool CombinedDebounce { get; }
+    [ProtoMember(4)] public DeviceControllerType DeviceType { get; }
+    [ProtoMember(5)] public EmulationType EmulationType { get; }
+    [ProtoMember(6)] public RhythmType RhythmType { get; }
+    [ProtoMember(7)] public List<SerializedOutput> Bindings { get; }
+    [ProtoMember(8)] public int Apa102Mosi { get; }
+    [ProtoMember(9)] public int Apa102Sck { get; }
+    [ProtoMember(10)] public byte LedCount { get; }
+    [ProtoMember(11)] public MouseMovementType MouseMovementType { get; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {

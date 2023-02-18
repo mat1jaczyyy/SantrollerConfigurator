@@ -3,11 +3,12 @@ using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
-public class AvrSpiConfig: SpiConfig
+public class AvrSpiConfig : SpiConfig
 {
     private readonly int _ss;
 
-    public AvrSpiConfig(ConfigViewModel model, string type, int mosi, int miso, int sck, int ss, bool cpol, bool cpha, bool msbfirst, uint clock) : base(model, type, mosi, miso, sck, cpol, cpha, msbfirst, clock)
+    public AvrSpiConfig(ConfigViewModel model, string type, int mosi, int miso, int sck, int ss, bool cpol, bool cpha,
+        bool msbfirst, uint clock) : base(model, type, mosi, miso, sck, cpol, cpha, msbfirst, clock)
     {
         _ss = ss;
     }

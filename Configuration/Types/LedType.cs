@@ -12,7 +12,7 @@ public enum LedType
     APA102_GRB,
     APA102_GBR,
     APA102_BRG,
-    APA102_BGR,
+    APA102_BGR
 }
 
 public static class LedTypeMethods
@@ -30,6 +30,7 @@ public static class LedTypeMethods
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
+
     public static string GetLedAssignment(this LedType type, Color color, byte index)
     {
         var data = GetLedBytes(type, color);

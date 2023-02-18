@@ -9,13 +9,13 @@ using Avalonia.Platform;
 namespace GuitarConfigurator.NetCore;
 
 /// <summary>
-/// <para>
-/// Converts a string path to a bitmap asset.
-/// </para>
-/// <para>
-/// The asset must be in the same assembly as the program. If it isn't,
-/// specify "avares://<assemblynamehere>/" in front of the path to the asset.
-/// </para>
+///     <para>
+///         Converts a string path to a bitmap asset.
+///     </para>
+///     <para>
+///         The asset must be in the same assembly as the program. If it isn't,
+///         specify "avares://<assemblynamehere>/" in front of the path to the asset.
+///     </para>
 /// </summary>
 public class BitmapAssetValueConverter : IValueConverter
 {
@@ -40,6 +40,7 @@ public class BitmapAssetValueConverter : IValueConverter
                 var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
                 uri = new Uri($"avares://{assemblyName}{rawUri}");
             }
+
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
             var asset = assets!.Open(uri);
 

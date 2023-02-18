@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -11,8 +10,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class DjAxis : OutputAxis
 {
-    public DjAxisType Type { get; }
-
     public DjAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
         int deadZone, DjAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone, "DJ" + type,
         false)
@@ -20,15 +17,51 @@ public class DjAxis : OutputAxis
         Type = type;
     }
 
+    public DjAxisType Type { get; }
+
+    public override bool IsKeyboard => false;
+    public override bool IsController => true;
+
+    public override bool Valid => true;
+
+    public override string LedOnLabel
+    {
+        get
+        {
+            return Type switch
+            {
+                DjAxisType.Crossfader => "Rightmost LED Colour",
+                DjAxisType.EffectsKnob => "Rightmost LED Colour",
+                DjAxisType.LeftTableVelocity => "Positive Spin Velocity Colour",
+                DjAxisType.RightTableVelocity => "Positive Spin Velocity Colour",
+                _ => ""
+            };
+        }
+    }
+
+    public override string LedOffLabel
+    {
+        get
+        {
+            return Type switch
+            {
+                DjAxisType.Crossfader => "Leftmost LED Colour",
+                DjAxisType.EffectsKnob => "Leftmost LED Colour",
+                DjAxisType.LeftTableVelocity => "Negative Spin Velocity Colour",
+                DjAxisType.RightTableVelocity => "Negative Spin Velocity Colour",
+                _ => ""
+            };
+        }
+    }
+
+    public bool IsVelocity => Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity;
+
+    public bool IsFader => Type is DjAxisType.Crossfader;
+
     public override SerializedOutput Serialize()
     {
         return new SerializedDjAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone);
     }
-
-    public override bool IsKeyboard => false;
-    public override bool IsController => true;
-    public override bool IsMidi => false;
-    public override bool Valid => true;
 
     public override string GenerateOutput(ConfigField mode)
     {
@@ -37,7 +70,7 @@ public class DjAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode is ConfigField.Shared or ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
@@ -77,39 +110,10 @@ public class DjAxis : OutputAxis
         };
     }
 
-    public override string LedOnLabel
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
-        get
-        {
-            return Type switch
-            {
-                DjAxisType.Crossfader => "Rightmost LED Colour",
-                DjAxisType.EffectsKnob => "Rightmost LED Colour",
-                DjAxisType.LeftTableVelocity => "Positive Spin Velocity Colour",
-                DjAxisType.RightTableVelocity => "Positive Spin Velocity Colour",
-                _ => ""
-            };
-        }
+        return $"DJ/{Name}.png";
     }
-
-    public override string LedOffLabel
-    {
-        get
-        {
-            return Type switch
-            {
-                DjAxisType.Crossfader => "Leftmost LED Colour",
-                DjAxisType.EffectsKnob => "Leftmost LED Colour",
-                DjAxisType.LeftTableVelocity => "Negative Spin Velocity Colour",
-                DjAxisType.RightTableVelocity => "Negative Spin Velocity Colour",
-                _ => ""
-            };
-        }
-    }
-
-    public bool IsVelocity => Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity;
-
-    public bool IsFader => Type is DjAxisType.Crossfader;
 
     protected override bool SupportsCalibration()
     {

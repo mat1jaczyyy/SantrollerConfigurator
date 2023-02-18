@@ -1,6 +1,6 @@
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
-public enum GhWtInputType 
+public enum GhWtInputType
 {
     TapGreen,
     TapRed,

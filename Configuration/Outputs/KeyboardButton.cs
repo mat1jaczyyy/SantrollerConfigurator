@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Input;
@@ -133,8 +132,10 @@ public class KeyboardButton : OutputButton
         {Key.MediaPlayPause, "Play / Pause Key"},
         {Key.VolumeMute, "Mute Key"},
         {Key.VolumeUp, "Volume Up Key"},
-        {Key.VolumeDown, "Volume Down Key"},
+        {Key.VolumeDown, "Volume Down Key"}
     };
+
+    public Key Key;
 
     public KeyboardButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
         byte debounce, Key type) : base(model, input, ledOn, ledOff, ledIndices,
@@ -143,16 +144,23 @@ public class KeyboardButton : OutputButton
         Key = type;
     }
 
-    public Key Key;
-
     public bool IsMediaKey => Key is Key.MediaStop or Key.MediaNextTrack or Key.MediaPlayPause or Key.VolumeDown
         or Key.VolumeMute or Key.VolumeUp;
 
     public override bool IsKeyboard => true;
     public override bool IsController => false;
-    public override bool IsMidi => false;
+
 
     public override bool Valid => true;
+
+    public override bool IsStrum => false;
+
+    public override bool IsCombined => false;
+
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return "Keyboard.png";
+    }
 
     public override void UpdateBindings()
     {
@@ -167,19 +175,12 @@ public class KeyboardButton : OutputButton
                 return "";
             default:
             {
-                if (Key == Key.Delete)
-                {
-                    return GetReportField("Del");
-                }
+                if (Key == Key.Delete) return GetReportField("Del");
 
                 return GetReportField(Key);
             }
         }
     }
-
-    public override bool IsStrum => false;
-
-    public override bool IsCombined => false;
 
     public override SerializedOutput Serialize()
     {

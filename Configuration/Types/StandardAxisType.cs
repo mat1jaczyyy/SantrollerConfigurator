@@ -1,6 +1,5 @@
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
-
 public enum StandardAxisType
 {
     LeftTrigger,
@@ -12,5 +11,5 @@ public enum StandardAxisType
     AccelerationX,
     AccelerationY,
     AccelerationZ,
-    Gyro,
+    Gyro
 }

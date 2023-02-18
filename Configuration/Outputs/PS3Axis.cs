@@ -9,7 +9,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class PS3Axis : OutputAxis
 {
-
     public PS3Axis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
         int deadZone, Ps3AxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
@@ -18,22 +17,32 @@ public class PS3Axis : OutputAxis
         Type = type;
     }
 
+    public Ps3AxisType Type { get; }
+
+    public override bool IsCombined => false;
+
+    public override bool Valid => true;
+
+    public override bool IsKeyboard => false;
+    public override bool IsController => true;
+    public override string LedOnLabel => "Pressed LED Colour";
+    public override string LedOffLabel => "Released LED Colour";
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return Name;
     }
 
-    public Ps3AxisType Type { get; }
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return $"PS3/{Name}.png";
+    }
 
 
     public override string GenerateOutput(ConfigField mode)
     {
-        return mode == ConfigField.Ps3 ? GetReportField(Type) : "" ;
+        return mode == ConfigField.Ps3 ? GetReportField(Type) : "";
     }
-
-    public override bool IsCombined => false;
-
-    public override bool Valid => true; 
 
     protected override string MinCalibrationText()
     {
@@ -45,9 +54,6 @@ public class PS3Axis : OutputAxis
         return "Press the button";
     }
 
-    public override bool IsKeyboard => false;
-    public override bool IsController => true;
-    public override bool IsMidi => false;
 
     protected override bool SupportsCalibration()
     {
@@ -64,8 +70,6 @@ public class PS3Axis : OutputAxis
         return new SerializedPS3Axis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
             DeadZone);
     }
-    public override string LedOnLabel => "Pressed LED Colour";
-    public override string LedOffLabel => "Released LED Colour";
 
     public override void UpdateBindings()
     {

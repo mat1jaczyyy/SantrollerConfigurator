@@ -43,7 +43,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {Ps2InputType.NegConR, StandardButtonType.RightShoulder},
         {Ps2InputType.NegConA, StandardButtonType.B},
         {Ps2InputType.NegConB, StandardButtonType.Y},
-        {Ps2InputType.NegConStart, StandardButtonType.Start},
+        {Ps2InputType.NegConStart, StandardButtonType.Start}
     };
 
 
@@ -62,7 +62,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {Ps2InputType.MouseY, StandardAxisType.LeftStickY},
         {Ps2InputType.GunconHSync, StandardAxisType.LeftStickX},
         {Ps2InputType.GunconVSync, StandardAxisType.LeftStickY},
-        {Ps2InputType.NegConL, StandardAxisType.LeftTrigger},
+        {Ps2InputType.NegConL, StandardAxisType.LeftTrigger}
     };
 
     public static readonly Dictionary<Ps2InputType, Ps3AxisType> Ps3Axis = new()
@@ -83,20 +83,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
 
-    public int Ack
-    {
-        get => _ackConfig.Pin;
-        set => _ackConfig.Pin = value;
-    }
-
-    public int Att
-    {
-        get => _attConfig.Pin;
-        set => _attConfig.Pin = value;
-    }
-
     private readonly Microcontroller _microcontroller;
-    public List<int> AvailablePins => Microcontroller.GetAllPins(false);
+
+
+    private Ps2ControllerType? _detectedType;
 
     public Ps2CombinedOutput(ConfigViewModel model, Microcontroller microcontroller, int? miso = null, int? mosi = null,
         int? sck = null, int? att = null, int? ack = null,
@@ -112,13 +102,9 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         Outputs.Clear();
         if (outputs != null)
-        {
             Outputs.AddRange(outputs);
-        }
         else
-        {
             CreateDefaults();
-        }
 
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Filter(this.WhenAnyValue(x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs)
@@ -129,14 +115,29 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
     }
-    
+
+    public int Ack
+    {
+        get => _ackConfig.Pin;
+        set => _ackConfig.Pin = value;
+    }
+
+    public int Att
+    {
+        get => _attConfig.Pin;
+        set => _attConfig.Pin = value;
+    }
+
+    public List<int> AvailablePins => Microcontroller.GetAllPins(false);
+    public string? DetectedType => _detectedType?.ToString() ?? "None";
+
     private static Func<Output, bool> CreateFilter(string? s)
     {
         return output => s is "None" or null ||
-                         output.Input?.InnermostInput() is Ps2Input ps2Input &&
-                         ps2Input.SupportsType(Enum.Parse<Ps2ControllerType>(s));
+                         (output.Input?.InnermostInput() is Ps2Input ps2Input &&
+                          ps2Input.SupportsType(Enum.Parse<Ps2ControllerType>(s)));
     }
-    
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return "PS2 Controller Inputs";
@@ -146,45 +147,41 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     {
         Outputs.Clear();
         foreach (var pair in Buttons)
-        {
             Outputs.Add(new ControllerButton(Model,
-                new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
+                new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(),
                 10,
                 pair.Value));
-        }
 
         Outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(
-                new Ps2Input(Ps2InputType.NegConI, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
+                new Ps2Input(Ps2InputType.NegConI, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, true),
                 AnalogToDigitalType.Trigger, 128, Model),
             Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.A));
         Outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(
-                new Ps2Input(Ps2InputType.NegConIi, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
+                new Ps2Input(Ps2InputType.NegConIi, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, true),
                 AnalogToDigitalType.Trigger, 128, Model),
             Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.X));
         Outputs.Add(new ControllerButton(Model,
             new AnalogToDigital(
-                new Ps2Input(Ps2InputType.NegConL, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
+                new Ps2Input(Ps2InputType.NegConL, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, true),
                 AnalogToDigitalType.Trigger, 240, Model),
             Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.LeftShoulder));
 
         Outputs.Add(new ControllerAxis(Model,
             new DigitalToAnalog(
                 new Ps2Input(Ps2InputType.GuitarTilt, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack,
-                    combined: true),
+                    true),
                 -32767, Model), Colors.Black,
             Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
             0, StandardAxisType.RightStickY));
         foreach (var pair in Axis)
-        {
             Outputs.Add(new ControllerAxis(Model,
-                new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
+                new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
-        }
 
         UpdateBindings();
     }
@@ -193,10 +190,6 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     {
         return new SerializedPs2CombinedOutput(Miso, Mosi, Sck, Att, Ack, Outputs.Items.ToList());
     }
-
-
-    private Ps2ControllerType? _detectedType;
-    public string? DetectedType => _detectedType?.ToString() ?? "None";
 
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
@@ -250,12 +243,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {
             if (Outputs.Items.Any(s => s is PS3Axis)) return;
             foreach (var pair in Ps3Axis)
-            {
                 Outputs.Add(new PS3Axis(Model,
-                    new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, combined: true),
+                    new Ps2Input(pair.Key, Model, _microcontroller, Miso, Mosi, Sck, Att, Ack, true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
-            }
 
             return;
         }

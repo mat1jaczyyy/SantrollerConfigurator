@@ -54,18 +54,15 @@
                     <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsDfu}"
                               SelectedItem="{Binding Main.UnoMegaType}"
                               Items="{Binding Main.UnoMegaTypes}"
-                              ItemTemplate="{StaticResource EnumToStringTemplate}">
-                    </ComboBox>
+                              ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsMega}"
                               SelectedItem="{Binding Main.MegaType}"
                               Items="{Binding Main.MegaTypes}"
-                              ItemTemplate="{StaticResource EnumToStringTemplate}">
-                    </ComboBox>
+                              ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.Is32U4}"
                               SelectedItem="{Binding Main.Arduino32U4Type}"
                               Items="{Binding Main.Arduino32U4Types}"
-                              ItemTemplate="{StaticResource EnumToStringTemplate}">
-                    </ComboBox>
+                              ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsPico}"
                               SelectedItem="{Binding Main.PicoType}"
                               Items="{Binding Main.PicoTypes}">
@@ -78,8 +75,7 @@
                     <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.NewDevice}"
                               SelectedItem="{Binding Main.DeviceInputType}"
                               Items="{Binding Main.DeviceInputTypes}"
-                              ItemTemplate="{StaticResource EnumToStringTemplate}">
-                    </ComboBox>
+                              ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     <TextBlock IsVisible="{Binding !Main.MigrationSupported}"
                                Text="The firmware on this device is too old, it's configuration will be erased when upgrading." />
                     <Button Content="Configure" Command="{Binding Main.Configure}"

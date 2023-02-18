@@ -12,14 +12,9 @@ namespace GuitarConfigurator.NetCore.Configuration.Conversions;
 
 public class DigitalToAnalog : Input
 {
-    public Input Child { get; }
-    public int On { get; set; }
+    private readonly ObservableAsPropertyHelper<int> _maximum;
 
     private readonly ObservableAsPropertyHelper<int> _minimum;
-    public int Minimum => _minimum.Value;
-
-    private readonly ObservableAsPropertyHelper<int> _maximum;
-    public int Maximum => _maximum.Value;
 
     public DigitalToAnalog(Input child, int on, ConfigViewModel model) : base(model)
     {
@@ -32,6 +27,16 @@ public class DigitalToAnalog : Input
             .ToProperty(this, x => x.Maximum);
         IsAnalog = Child.IsAnalog;
     }
+
+    public Input Child { get; }
+    public int On { get; set; }
+    public int Minimum => _minimum.Value;
+    public int Maximum => _maximum.Value;
+
+    public override IList<DevicePin> Pins => Child.Pins;
+    public override IList<PinConfig> PinConfigs => Child.PinConfigs;
+    public override InputType? InputType => Child.InputType;
+    public override bool IsUint => Child.IsUint;
 
     public override string Generate(ConfigField mode)
     {
@@ -51,11 +56,6 @@ public class DigitalToAnalog : Input
         return Child;
     }
 
-    public override IList<DevicePin> Pins => Child.Pins;
-    public override IList<PinConfig> PinConfigs => Child.PinConfigs;
-    public override InputType? InputType => Child.InputType;
-    public override bool IsUint => Child.IsUint;
-
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
@@ -65,7 +65,7 @@ public class DigitalToAnalog : Input
             ps2ControllerType, wiiControllerType);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings, 
+    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
         throw new InvalidOperationException("Never call GenerateAll on DigitalToAnalog, call it on its children");
