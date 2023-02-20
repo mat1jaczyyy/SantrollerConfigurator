@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Media;
@@ -424,9 +425,14 @@ public abstract class OutputAxis : Output
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
+        var output = GenerateOutput(mode);
+        if (!output.Any()) return "";
+        var mask = GetMaskField(output, mode);
+        if (mask.Any()) return mask;
+
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         var led = Input is FixedInput ? "" : CalculateLeds(mode);
-        return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)}; {led}";
+        return $"{output} = {GenerateAssignment(mode, false, false, false)}; {led}";
     }
 
     public override void UpdateBindings()

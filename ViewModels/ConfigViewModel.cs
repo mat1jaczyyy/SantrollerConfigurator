@@ -61,6 +61,8 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private byte _rfChannel;
 
+    private byte _rfId;
+
     private DirectPinConfig? _rfCsn;
 
     private SpiConfig? _rfSpiConfig;
@@ -68,8 +70,6 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private RhythmType _rhythmType;
 
     private bool _xinputOnWindows;
-
-    private SourceList<EmulationType> AllEmulationTypes = new();
 
     public ConfigViewModel(MainWindowViewModel screen)
     {
@@ -204,6 +204,12 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => this.RaiseAndSetIfChanged(ref _ledCount, value);
     }
 
+
+    public byte RfId
+    {
+        get => _rfId;
+        set => this.RaiseAndSetIfChanged(ref _rfId, value);
+    }
     public byte RfChannel
     {
         get => _rfChannel;
@@ -595,6 +601,18 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         lines.Add($"#define TICK_XBOX_ONE {GenerateTick(ConfigField.XboxOne)}");
 
+        lines.Add($"#define PS3_MASK {GenerateTick(ConfigField.Ps3Mask)}");
+
+        lines.Add($"#define XINPUT_MASK {GenerateTick(ConfigField.Xbox360Mask)}");
+
+        lines.Add($"#define XBOX_ONE_MASK {GenerateTick(ConfigField.XboxOneMask)}");
+
+        lines.Add($"#define CONSUMER_MASK {GenerateTick(ConfigField.ConsumerMask)}");
+
+        lines.Add($"#define MOUSE_MASK {GenerateTick(ConfigField.MouseMask)}");
+
+        lines.Add($"#define KEYBOARD_MASK {GenerateTick(ConfigField.KeyboardMask)}");
+
         var nkroTick = GenerateTick(ConfigField.Keyboard);
         if (nkroTick.Any()) lines.Add($"#define TICK_NKRO {nkroTick}");
 
@@ -612,11 +630,27 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         lines.Add($"#define LED_TYPE {GetLedType()}");
 
+        lines.Add(GenerateTick(ConfigField.RfRx));
         if (IsApa102)
         {
             lines.Add($"#define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}");
 
             lines.Add($"#define TICK_LED {GenerateLedTick()}");
+        }
+        if (IsRf)
+        {
+            if (BindableSpi)
+            {
+                lines.Add($"#define {RfSpiType.ToUpper()}_SPI_PORT {_rfSpiConfig!.Definition}");
+            }
+            lines.Add($"#define TRANSMIT_RADIO_ID {RfId}");
+            lines.Add($"#define DEST_RADIO_ID {RfChannel}");
+            lines.Add("#define RF_TX");
+            lines.Add($"#define RADIO_CE {_rfCe!.Pin}");
+            lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");
+            lines.Add($"#define RADIO_MOSI {_rfSpiConfig.Mosi}");
+            lines.Add($"#define RADIO_MISO {_rfSpiConfig.Miso}");
+            lines.Add($"#define RADIO_SCK {_rfSpiConfig.Sck}");
         }
 
         lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");

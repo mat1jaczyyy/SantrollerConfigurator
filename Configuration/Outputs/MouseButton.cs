@@ -43,7 +43,7 @@ public class MouseButton : OutputButton
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        return mode is not (ConfigField.Mouse or ConfigField.Shared)
+        return mode is not (ConfigField.Mouse or ConfigField.Shared or ConfigField.MouseMask)
             ? ""
             : base.Generate(mode, debounceIndex, combined, extra);
     }

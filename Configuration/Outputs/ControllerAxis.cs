@@ -89,7 +89,7 @@ public class ControllerAxis : OutputAxis
 
     public override string GenerateOutput(ConfigField mode)
     {
-        return GetReportField(Type);
+        return mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps3Mask or ConfigField.Xbox360Mask or ConfigField.XboxOneMask) ? "" : GetReportField(Type);
     }
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
@@ -156,13 +156,6 @@ public class ControllerAxis : OutputAxis
         return Type is not (StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
             or StandardAxisType.AccelerationZ);
     }
-
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
-    {
-        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
-        return base.Generate(mode, debounceIndex, combined, extra);
-    }
-
     public override SerializedOutput Serialize()
     {
         return new SerializedControllerAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,

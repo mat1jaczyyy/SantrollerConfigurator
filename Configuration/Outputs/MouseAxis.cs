@@ -109,7 +109,7 @@ public class MouseAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        return mode is not ConfigField.Mouse ? "" : base.Generate(mode, debounceIndex, combined, extra);
+        return mode is not (ConfigField.Mouse or ConfigField.MouseMask) ? "" : base.Generate(mode, debounceIndex, combined, extra);
     }
 
     protected override bool SupportsCalibration()

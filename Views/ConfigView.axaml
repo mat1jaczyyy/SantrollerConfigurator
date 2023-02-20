@@ -1040,6 +1040,14 @@
                                                Maximum="180" HorizontalAlignment="Stretch" />
 
                             </StackPanel>
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Transmitter ID"
+                                           TextAlignment="Center" />
+                                <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding RfChannel}"
+                                               Minimum="1"
+                                               Maximum="180" HorizontalAlignment="Stretch" />
+
+                            </StackPanel>
                             <StackPanel IsVisible="{Binding BindableSpi}">
                                 <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF MOSI Pin"
                                            TextAlignment="Center" />

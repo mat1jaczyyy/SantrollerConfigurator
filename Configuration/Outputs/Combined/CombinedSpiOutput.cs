@@ -9,7 +9,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 {
-    private readonly SpiConfig _spiConfig;
+    protected readonly SpiConfig _spiConfig;
 
     protected CombinedSpiOutput(ConfigViewModel model, string spiType, uint spiFreq,
         bool cpol,

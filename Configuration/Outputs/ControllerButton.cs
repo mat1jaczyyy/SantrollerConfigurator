@@ -43,9 +43,7 @@ public class ControllerButton : OutputButton
 
     public override string GenerateOutput(ConfigField mode)
     {
-        if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360))
-            return "";
-        return GetReportField(Type);
+        return mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps3Mask or ConfigField.Xbox360Mask or ConfigField.XboxOneMask) ? "" : GetReportField(Type);
     }
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)

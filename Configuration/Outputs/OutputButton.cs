@@ -37,6 +37,15 @@ public abstract class OutputButton : Output
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
+        switch (mode)
+        {
+            case ConfigField.Ps3Mask:
+                return $"maskbit(PS3_REPORT, {GenerateOutput(mode).Replace("report->", "")});";
+            case ConfigField.Xbox360Mask:
+                return $"maskbit(XINPUT_REPORT, {GenerateOutput(mode).Replace("report->", "")});";
+            case ConfigField.XboxOneMask:
+                return $"maskbit(XBOX_ONE_REPORT, {GenerateOutput(mode).Replace("report->", "")});";
+        }
 
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");

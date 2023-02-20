@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -116,7 +117,8 @@ public class DrumAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps3Mask
+            or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
 
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
@@ -128,48 +130,96 @@ public class DrumAxis : OutputAxis
         switch (mode)
         {
             case ConfigField.Xbox360:
-            {
                 padFlag = Xbox360PadFlag;
                 cymbalFlag = Xbox360CymbalFlag;
                 if (ButtonsXbox360.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = 1";
-
                 break;
-            }
             case ConfigField.XboxOne:
-            {
                 if (ButtonsXboxOne.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXboxOne[Type])} = 1";
-
                 break;
-            }
             case ConfigField.Ps3:
-            {
                 if (ButtonsPs3.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsPs3[Type])} = 1";
-
                 break;
-            }
+            case ConfigField.Xbox360Mask:
+                padFlag = Xbox360PadFlag;
+                cymbalFlag = Xbox360CymbalFlag;
+                if (ButtonsXbox360.ContainsKey(Type))
+                    outputButtons += GetMaskField(GetReportField(ButtonsXbox360[Type]), mode);
+                break;
+            case ConfigField.XboxOneMask:
+                if (ButtonsXboxOne.ContainsKey(Type))
+                    outputButtons += GetMaskField(GetReportField(ButtonsXboxOne[Type]), mode);
+                break;
+            case ConfigField.Ps3Mask:
+                if (ButtonsPs3.ContainsKey(Type)) outputButtons += GetMaskField(GetReportField(ButtonsPs3[Type]), mode);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
         }
 
         if (Model.RhythmType == RhythmType.RockBand && mode != ConfigField.XboxOne)
             switch (Type)
             {
                 case DrumAxisType.YellowCymbal:
-                    outputButtons += $"\n{GetReportField(YellowCymbalFlag)} = 1";
-                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+                    if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask)
+                    {
+                        outputButtons += GetMaskField(GetReportField(YellowCymbalFlag), mode);
+                        outputButtons += GetMaskField(GetReportField(cymbalFlag), mode);
+                    }
+                    else
+                    {
+                        outputButtons += $"\n{GetReportField(YellowCymbalFlag)} = 1";
+                        outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+                    }
+
                     break;
                 case DrumAxisType.BlueCymbal:
-                    outputButtons += $"\n{GetReportField(BlueCymbalFlag)} = 1";
-                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+
+                    if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask)
+                    {
+                        outputButtons += GetMaskField(GetReportField(BlueCymbalFlag), mode);
+                        outputButtons += GetMaskField(GetReportField(cymbalFlag), mode);
+                    }
+                    else
+                    {
+                        outputButtons += $"\n{GetReportField(BlueCymbalFlag)} = 1";
+                        outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+                    }
+
                     break;
                 case DrumAxisType.GreenCymbal:
-                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+
+                    if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask)
+                    {
+                        outputButtons += GetMaskField(GetReportField(cymbalFlag), mode);
+                    }
+                    else
+                    {
+                        outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+                    }
+
                     break;
                 case DrumAxisType.Green:
                 case DrumAxisType.Red:
                 case DrumAxisType.Yellow:
                 case DrumAxisType.Blue:
-                    outputButtons += $"\n{GetReportField(padFlag)} = 1";
+
+                    if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask)
+                    {
+                        outputButtons += GetMaskField(GetReportField(padFlag), mode);
+                    }
+                    else
+                    {
+                        outputButtons += $"\n{GetReportField(padFlag)} = 1";
+                    }
+
                     break;
             }
+
+        if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)
+        {
+            return outputButtons + GetMaskField(GenerateOutput(mode), mode);
+        }
 
         var assignedVal = "val_real";
         var valType = "uint16_t";

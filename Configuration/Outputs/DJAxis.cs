@@ -70,6 +70,8 @@ public class DjAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
+        if (mode is ConfigField.Xbox360Mask or ConfigField.XboxOneMask or ConfigField.Ps3Mask)
+            return base.Generate(mode, debounceIndex, combined, extra);
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (Input == null) throw new IncompleteConfigurationException("Missing input!");
 
