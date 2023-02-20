@@ -29,7 +29,6 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 {
     public static readonly string Apa102SpiType = "APA102";
-    public static readonly string RfSpiType = "RF";
 
     private readonly ObservableAsPropertyHelper<bool> _isApa102;
     private readonly ObservableAsPropertyHelper<bool> _isController;
@@ -310,15 +309,15 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         .Where(s => s.Value is SpiPinType.Sck)
         .Select(s => s.Key).ToList();
 
-    public List<int> AvailableRfMosiPins => Microcontroller.SpiPins(RfSpiType)
+    public List<int> AvailableRfMosiPins => Microcontroller.SpiPins(RFRXOutput.SpiType)
         .Where(s => s.Value is SpiPinType.Miso)
         .Select(s => s.Key).ToList();
 
-    public List<int> AvailableRfMisoPins => Microcontroller.SpiPins(RfSpiType)
+    public List<int> AvailableRfMisoPins => Microcontroller.SpiPins(RFRXOutput.SpiType)
         .Where(s => s.Value is SpiPinType.Mosi)
         .Select(s => s.Key).ToList();
 
-    public List<int> AvailableRfSckPins => Microcontroller.SpiPins(RfSpiType)
+    public List<int> AvailableRfSckPins => Microcontroller.SpiPins(RFRXOutput.SpiType)
         .Where(s => s.Value is SpiPinType.Sck)
         .Select(s => s.Key).ToList();
 
@@ -479,19 +478,19 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             if (_rfSpiConfig == null)
             {
-                var pins = Microcontroller.SpiPins(RfSpiType);
+                var pins = Microcontroller.SpiPins(RFRXOutput.SpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfSpiType, mosi, miso, sck, true, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RFRXOutput.SpiType, mosi, miso, sck, true, true,
                     true,
                     4000000);
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
                 this.RaisePropertyChanged(nameof(RfSck));
                 var first = Microcontroller.GetAllPins(false).First();
-                _rfCe = Microcontroller.GetOrSetPin(this, RfSpiType + "_ce", first, DevicePinMode.PullUp);
-                _rfCsn = Microcontroller.GetOrSetPin(this, RfSpiType + "_csn", first, DevicePinMode.Output);
+                _rfCe = Microcontroller.GetOrSetPin(this, RFRXOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
+                _rfCsn = Microcontroller.GetOrSetPin(this, RFRXOutput.SpiType + "_csn", first, DevicePinMode.Output);
             }
         }
         else
@@ -639,19 +638,18 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
         if (IsRf)
         {
-            if (BindableSpi)
-            {
-                lines.Add($"#define {RfSpiType.ToUpper()}_SPI_PORT {_rfSpiConfig!.Definition}");
-            }
             lines.Add($"#define TRANSMIT_RADIO_ID {RfId}");
             lines.Add($"#define DEST_RADIO_ID {RfChannel}");
             lines.Add("#define RF_TX");
             lines.Add($"#define RADIO_CE {_rfCe!.Pin}");
             lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");
-            lines.Add($"#define RADIO_MOSI {_rfSpiConfig.Mosi}");
-            lines.Add($"#define RADIO_MISO {_rfSpiConfig.Miso}");
-            lines.Add($"#define RADIO_SCK {_rfSpiConfig.Sck}");
-        }
+            if (BindableSpi)
+            {
+                lines.Add($"#define RADIO_MOSI {_rfSpiConfig.Mosi}");
+                lines.Add($"#define RADIO_MISO {_rfSpiConfig.Miso}");
+                lines.Add($"#define RADIO_SCK {_rfSpiConfig.Sck}");
+            }
+    }
 
         lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
 

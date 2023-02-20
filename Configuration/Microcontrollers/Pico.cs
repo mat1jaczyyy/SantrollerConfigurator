@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -197,6 +198,11 @@ public class Pico : Microcontroller
 
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
+        // On the pico, RF only supports Spi0
+        if (type == RFRXOutput.SpiType)
+        {
+            return SpiTypesByPin.Where(pin => SpiIndexByPin[pin.Key] == 0).ToList();
+        }
         return SpiTypesByPin.ToList();
     }
 
