@@ -279,7 +279,7 @@
                                Width="300">
                             Enable Digital Output
                         </Label>
-                        <ToggleSwitch x:CompileBindings="False" IsChecked="{Binding OutputEnabled}" OnContent="Enabled"
+                        <ToggleSwitch IsChecked="{Binding OutputEnabled}" OnContent="Enabled"
                                       OffContent="Disabled" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding OutputEnabled}">
@@ -951,7 +951,6 @@
                                     ContentTemplate="{StaticResource OutputTemplates}" />
 
                     <ToggleSwitch HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
-                                  x:CompileBindings="False"
                                   IsChecked="{Binding Enabled}" OnContent="Enabled" OffContent="Disabled" />
                 </Panel>
                 <ContentControl Content="{Binding}"
@@ -1110,6 +1109,7 @@
                                       ItemTemplate="{StaticResource EnumToStringTemplate}"
                                       Items="{Binding DeviceControllerTypes}" />
                         </StackPanel>
+                        
                         <StackPanel>
                             <StackPanel.IsVisible>
                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
@@ -1124,8 +1124,19 @@
                                       ItemTemplate="{StaticResource EnumToStringTemplate}"
                                       Items="{Binding RhythmTypes}" />
                         </StackPanel>
+                        
                         <StackPanel>
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="LED Type"
+                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Windows Controller Mode"
+                                       TextAlignment="Center" />
+                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                      SelectedIndex="{Binding XInputOnWindows}">
+                                <ComboBoxItem>HID Game Controller</ComboBoxItem>
+                                <ComboBoxItem>XInput</ComboBoxItem>
+                            </ComboBox>
+                            
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Stretch" Margin="20 20 20 0" Text="LED Type"
                                        TextAlignment="Center" />
                             <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
                                       SelectedItem="{Binding LedType}"

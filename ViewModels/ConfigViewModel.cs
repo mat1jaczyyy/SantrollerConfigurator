@@ -209,6 +209,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _rfId;
         set => this.RaiseAndSetIfChanged(ref _rfId, value);
     }
+
     public byte RfChannel
     {
         get => _rfChannel;
@@ -331,7 +332,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public void AddLedBinding()
     {
         var first = Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((DeviceType, EmulationType))).First();
-        Bindings.Add(new Led(this,  false, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
+        Bindings.Add(new Led(this, false, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
             first));
     }
 
@@ -439,7 +440,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.RaisePropertyChanged(nameof(DeviceType));
         this.RaisePropertyChanged(nameof(EmulationType));
         this.RaisePropertyChanged(nameof(RhythmType));
-        XInputOnWindows = false;
+        XInputOnWindows = true;
         MouseMovementType = MouseMovementType.Relative;
 
         switch (Main.DeviceInputType)
@@ -636,6 +637,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
             lines.Add($"#define TICK_LED {GenerateLedTick()}");
         }
+
         if (IsRf)
         {
             lines.Add($"#define TRANSMIT_RADIO_ID {RfId}");
@@ -645,11 +647,11 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");
             if (BindableSpi)
             {
-                lines.Add($"#define RADIO_MOSI {_rfSpiConfig.Mosi}");
-                lines.Add($"#define RADIO_MISO {_rfSpiConfig.Miso}");
-                lines.Add($"#define RADIO_SCK {_rfSpiConfig.Sck}");
+                lines.Add($"#define RADIO_MOSI {_rfSpiConfig!.Mosi}");
+                lines.Add($"#define RADIO_MISO {_rfSpiConfig!.Miso}");
+                lines.Add($"#define RADIO_SCK {_rfSpiConfig!.Sck}");
             }
-    }
+        }
 
         lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
 
