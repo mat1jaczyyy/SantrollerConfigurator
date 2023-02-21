@@ -106,6 +106,16 @@ public abstract class AvrController : Microcontroller
             new(I2CSda, TwiPinType.Sda)
         };
     }
+    
+    public override List<KeyValuePair<int, SpiPinType>> FreeSpiPins(string type)
+    {
+        return PinConfigs.Any(s => s is AvrSpiConfig) ? Array.Empty<KeyValuePair<int, SpiPinType>>().ToList() : SpiPins(type);
+    }
+
+    public override List<KeyValuePair<int, TwiPinType>> FreeTwiPins(string type)
+    {
+        return PinConfigs.Any(s => s is AvrTwiConfig) ? Array.Empty<KeyValuePair<int, TwiPinType>>().ToList() : TwiPins(type);
+    }
 
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)

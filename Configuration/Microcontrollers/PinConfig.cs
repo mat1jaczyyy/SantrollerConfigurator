@@ -34,7 +34,7 @@ public abstract class PinConfig : ReactiveObject
         var ret = configs.Select(pinConfig => new {pinConfig, conflicting = pinConfig.Value.Intersect(Pins).ToList()})
             .Where(t => t.conflicting.Any())
             .Select(t =>
-                $"{t.pinConfig.Key}: {string.Join(", ", t.conflicting.Select(s => Model.Microcontroller.GetPinForMicrocontroller(s, true, true)))}")
+                $"{t.pinConfig.Key}: {string.Join(", ", t.conflicting.Select(s => Model.Microcontroller.GetPinForMicrocontroller(s, this is TwiConfig, this is SpiConfig)))}")
             .ToList();
 
         return ret.Any() ? string.Join(", ", ret) : null;

@@ -23,7 +23,7 @@ public class PinToStringConverter : IMultiValueConverter
         var microcontroller = (Microcontroller) values[1]!;
         var model = (ConfigViewModel) values[2]!;
         var twi = values[4] is ITwi twiIo && twiIo.TwiPins().Contains(pin);
-        var spi = values[4] is ISpi spiIo && spiIo.SpiPins().Contains(pin);
+        var spi = values[4] is ISpi spiIo && spiIo.SpiPins().Contains(pin) || values[4] is ConfigViewModel;
 
         var configs = values[4] switch
         {

@@ -27,7 +27,7 @@ public abstract class SpiInput : Input, ISpi
         {
             if (miso == null || mosi == null || sck == null)
             {
-                var pins = Model.Microcontroller.SpiPins(_spiType);
+                var pins = Model.Microcontroller.FreeSpiPins(_spiType);
                 miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;

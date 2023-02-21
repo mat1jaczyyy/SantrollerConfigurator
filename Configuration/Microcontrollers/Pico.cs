@@ -180,7 +180,6 @@ public class Pico : Microcontroller
         var config = PinConfigs.OfType<PicoTwiConfig>().FirstOrDefault(c => c.Type == type);
         if (config != null) return config;
 
-        if (PinConfigs.Any(c => c is PicoTwiConfig s && s.Index == pin)) return null;
         config = new PicoTwiConfig(model, type, sda, scl, clock);
         PinConfigs.Add(config);
         return config;
@@ -209,6 +208,31 @@ public class Pico : Microcontroller
     public override List<KeyValuePair<int, TwiPinType>> TwiPins(string type)
     {
         return TwiTypeByPin.ToList();
+    }
+    public override List<KeyValuePair<int, SpiPinType>> FreeSpiPins(string type)
+    {
+        bool spi0Free = !PinConfigs.Any(s => s is PicoSpiConfig {Index: 0});
+        bool spi1Free = !PinConfigs.Any(s => s is PicoSpiConfig {Index: 1});
+        // If no pins are free, return all pins and let the user deal with the conflict
+        if (!spi0Free && !spi1Free)
+        {
+            return SpiPins(type);
+        }
+        return SpiPins(type)
+            .Where(s => (spi1Free && SpiIndexByPin[s.Key] == 1) || (spi0Free && SpiIndexByPin[s.Key] == 0)).ToList();
+    }
+
+    public override List<KeyValuePair<int, TwiPinType>> FreeTwiPins(string type)
+    {
+        bool twi0Free = !PinConfigs.Any(s => s is PicoTwiConfig {Index: 0});
+        bool twi1Free = !PinConfigs.Any(s => s is PicoTwiConfig {Index: 1});
+        // If no pins are free, return all pins and let the user deal with the conflict
+        if (!twi0Free && !twi1Free)
+        {
+            return TwiPins(type);
+        }
+        return TwiPins(type)
+            .Where(s => (twi1Free && TwiIndexByPin[s.Key] == 1) || (twi0Free && TwiIndexByPin[s.Key] == 0)).ToList();
     }
 
     public override void UnAssignPins(string type)

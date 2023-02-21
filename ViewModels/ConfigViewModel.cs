@@ -29,6 +29,10 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 {
     public static readonly string Apa102SpiType = "APA102";
+    public static readonly string UnoPinTypeTx = "Uno Serial Tx Pin";
+    public static readonly string UnoPinTypeRx = "Uno Serial Rx Pin";
+    public static readonly int UnoPinTypeRxPin = 0;
+    public static readonly int UnoPinTypeTxPin = 1;
 
     private readonly ObservableAsPropertyHelper<bool> _isApa102;
     private readonly ObservableAsPropertyHelper<bool> _isController;
@@ -111,6 +115,9 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .ToProperty(this, x => x.IsApa102);
 
         if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults();
+        if (Main is {IsUno: false, IsMega: false}) return;
+        Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output));
+        Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeTx, UnoPinTypeTxPin, DevicePinMode.Output));
     }
 
     public Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?> ShowIssueDialog { get; }
@@ -239,7 +246,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
             else if (_ledType == LedType.None)
             {
-                var pins = Microcontroller.SpiPins(Apa102SpiType);
+                var pins = Microcontroller.FreeSpiPins(Apa102SpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
                 _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, mosi, -1, sck, true, true,
@@ -247,6 +254,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     Math.Min(Microcontroller.Board.CpuFreq / 2, 12000000))!;
                 this.RaisePropertyChanged(nameof(Apa102Mosi));
                 this.RaisePropertyChanged(nameof(Apa102Sck));
+                UpdateErrors();
             }
 
             this.RaiseAndSetIfChanged(ref _ledType, value);
@@ -1003,6 +1011,11 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         if (IsApa102 && _apa102SpiConfig != null) pins["APA102"] = _apa102SpiConfig.Pins.ToList();
+        if (Main.IsUno || Main.IsMega)
+        {
+            pins[UnoPinTypeTx] = new List<int> {UnoPinTypeTxPin};
+            pins[UnoPinTypeRx] = new List<int> {UnoPinTypeRxPin};
+        }
 
         return pins;
     }

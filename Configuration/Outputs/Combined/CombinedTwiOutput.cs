@@ -30,7 +30,7 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
         {
             if (sda == null || scl == null)
             {
-                var pins = Model.Microcontroller.TwiPins(_twiType);
+                var pins = Model.Microcontroller.FreeTwiPins(_twiType);
                 scl = pins.First(pair => pair.Value is TwiPinType.Scl).Key;
                 sda = pins.First(pair => pair.Value is TwiPinType.Sda).Key;
             }
