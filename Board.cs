@@ -33,17 +33,18 @@ public struct Board
 
     public static readonly Board[] Atmega32U4Boards =
     {
-        new("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "a-micro", new List<uint> {0x0037, 0x0237},
+        new("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "arduino_micro_16", new List<uint> {0x0037, 0x0237},
             false),
-        new("a-micro", "Arduino Micro", 16000000, "a-micro", new List<uint> {0x8037, 0x8237}, false),
+        new("a-micro", "Arduino Micro", 16000000, "arduino_micro_16", new List<uint> {0x8037, 0x8237}, false),
         new("micro", "Sparkfun Pro Micro 3.3V", 8000000, "sparkfun_promicro_8", new List<uint> {0x9204}, false),
         new("micro", "Sparkfun Pro Micro 5V", 16000000, "sparkfun_promicro_16", new List<uint> {0x9206}, false),
-        new("leonardo", "Arduino Leonardo", 16000000, "leonardo", new List<uint> {0x8036, 0x800c}, false),
+        new("leonardo", "Arduino Leonardo", 16000000, "arduino_leonardo_16", new List<uint> {0x8036, 0x800c}, false),
+        new("leonardo", "Arduino Leonardo 3.3V", 8000000, "arduino_leonardo_8", new List<uint>(), false),
         new("leonardo", "Arduino Micro / Pro Micro / Leonardo in Bootloader Mode", 16000000, "leonardo",
             new List<uint> {0x0036}, false),
-        new("micro", "Arduino Pro Micro in Bootloader Mode", 8000000, "micro", new List<uint> {0x9203, 0x9207},
+        new("micro", "Arduino Pro Micro in Bootloader Mode", 8000000, "sparkfun_promicro_8", new List<uint> {0x9203, 0x9207},
             false),
-        new("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "micro", new List<uint> {0x9205}, false)
+        new("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "sparkfun_promicro_16", new List<uint> {0x9205}, false)
     };
 
     public static readonly Board[] Rp2040Boards =

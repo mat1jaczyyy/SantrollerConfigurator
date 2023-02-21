@@ -119,6 +119,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             Devices.CollectionChanged += (_, e) =>
             {
+                // We only want this logic to run when we are selecting devices
+                if (Router.NavigationStack.Last() is not MainViewModel) return;
                 switch (e.Action)
                 {
                     case NotifyCollectionChangedAction.Add:
@@ -429,10 +431,13 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 }
                 else
                 {
+                    if (_disconnectedDevice == null || _selectedDevice?.IsSameDevice(e.Device.Name) == true)
+                    {
+                        _disconnectedDevice = _selectedDevice;
+                        _selectedDevice = null;
+                    }
+
                     Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device.Name)));
-                    if (_disconnectedDevice != null || _selectedDevice?.IsSameDevice(e.Device.Name) != true) return;
-                    _disconnectedDevice = _selectedDevice;
-                    _selectedDevice = null;
                 }
             });
         }
