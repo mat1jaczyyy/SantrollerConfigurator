@@ -7,6 +7,7 @@ namespace GuitarConfigurator.NetCore;
 
 public struct Board
 {
+    public static readonly short RaspberryPiVendorID = 0x2e8a;
     public string ArdwiinoName { get; }
     public string Name { get; }
     public string Environment { get; }

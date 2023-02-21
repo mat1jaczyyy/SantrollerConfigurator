@@ -18,12 +18,21 @@ public class Arduino : IConfigurableDevice
         DfuDetected = new Subject<bool>();
         _port = port;
         foreach (var board in Board.Boards)
+        {
             if (board.ProductIDs.Contains(port.Pid))
             {
                 Board = board;
                 MigrationSupported = true;
                 return;
             }
+        }
+        // Handle any other RP2040 based boards we don't already have code for, using just the generic rp2040 board in this case
+        if (port.Vid == Board.RaspberryPiVendorID)
+        {
+            Board = Board.Rp2040Boards[0];
+            MigrationSupported = true;
+            return;
+        }
 
         // Really, really old ardwiinos had a serial protocol that response to a couple of commands for retrieving data.
         if (port.Vid == 0x1209 && port.Pid == 0x2882)
@@ -113,7 +122,7 @@ public class Arduino : IConfigurableDevice
 
     public bool IsPico()
     {
-        return false;
+        return Board.Rp2040Boards.Contains(Board);
     }
 
     public string GetSerialPort()

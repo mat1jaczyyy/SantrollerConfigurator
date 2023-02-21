@@ -99,7 +99,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 .Select(s => s != null)
                 .ToProperty(this, s => s.Connected);
             _isPico = this.WhenAnyValue(x => x.SelectedDevice)
-                .Select(s => s is PicoDevice)
+                .Select(s => s?.IsPico() == true)
                 .ToProperty(this, s => s.IsPico);
             _is32U4 = this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is Arduino arduino && arduino.Is32U4())
@@ -114,7 +114,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 .Select(s => s is Dfu)
                 .ToProperty(this, s => s.IsDfu);
             _newDevice = this.WhenAnyValue(x => x.SelectedDevice)
-                .Select(s => s != null && s is not Ardwiino && s is not Santroller)
+                .Select(s => s is not (Ardwiino or Santroller))
                 .ToProperty(this, s => s.NewDevice);
 
             Devices.CollectionChanged += (_, e) =>
