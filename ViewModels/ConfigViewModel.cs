@@ -21,6 +21,7 @@ using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.Devices;
 using ProtoBuf;
 using ReactiveUI;
 
@@ -76,6 +77,8 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public ConfigViewModel(MainWindowViewModel screen)
     {
+        Main = screen;
+        HostScreen = screen;
         Microcontroller = screen.SelectedDevice!.GetMicrocontroller(this);
         ShowIssueDialog = new Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>();
         ShowUnoShortDialog = new Interaction<Arduino, ShowUnoShortWindowViewModel?>();
@@ -85,8 +88,6 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             new Interaction<(ConfigViewModel model, Output output, DirectInput
                 input), BindAllWindowViewModel>();
         BindAllCommand = ReactiveCommand.CreateFromTask(BindAll);
-        Main = screen;
-        HostScreen = screen;
 
         WriteConfig = ReactiveCommand.CreateFromObservable(Write,
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
@@ -138,10 +139,14 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
 
+    // Mini only supports RF
+    // Only Pico supports bluetooth
     public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>()
         .Where(type =>
+            Main.SelectedDevice!.IsMini() && type is EmulationType.RfController or EmulationType.RfKeyboardMouse ||
             Main.SelectedDevice!.IsPico() ||
-            (type != EmulationType.Bluetooth && type != EmulationType.BluetoothKeyboardMouse));
+            !Main.SelectedDevice!.IsMini() && !Main.SelectedDevice!.IsPico() &&
+            type is not (EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse));
 
     public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
 
@@ -331,7 +336,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         .Select(s => s.Key).ToList();
 
     public List<int> AvailablePins => Microcontroller.GetAllPins(false);
-    public IEnumerable<PinConfig> PinConfigs => new[] {_apa102SpiConfig!};
+    public IEnumerable<PinConfig> PinConfigs => new[] {_apa102SpiConfig, _rfSpiConfig}.Where(s => s != null).Cast<PinConfig>();
     public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
 
     public IScreen HostScreen { get; }
@@ -443,7 +448,28 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ClearOutputs();
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
-        _emulationType = EmulationType.Controller;
+        if (Main.SelectedDevice!.IsMini())
+        {
+            Console.WriteLine("Mini!\n");
+            _emulationType = EmulationType.RfController;
+            if (_rfSpiConfig == null)
+            {
+                var pins = Microcontroller.SpiPins(RFRXOutput.SpiType);
+                var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
+                var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
+                var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RFRXOutput.SpiType, mosi, miso, sck, true, true,
+                    true,
+                    4000000);
+                this.RaisePropertyChanged(nameof(RfMiso));
+                this.RaisePropertyChanged(nameof(RfMosi));
+                this.RaisePropertyChanged(nameof(RfSck));
+                var first = Microcontroller.GetAllPins(false).First();
+                _rfCe = Microcontroller.GetOrSetPin(this, RFRXOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
+                _rfCsn = Microcontroller.GetOrSetPin(this, RFRXOutput.SpiType + "_csn", first, DevicePinMode.Output);
+            }
+        }
+
         _rhythmType = RhythmType.GuitarHero;
         this.RaisePropertyChanged(nameof(DeviceType));
         this.RaisePropertyChanged(nameof(EmulationType));

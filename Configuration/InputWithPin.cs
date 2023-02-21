@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 

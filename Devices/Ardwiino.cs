@@ -12,7 +12,7 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
 
-namespace GuitarConfigurator.NetCore;
+namespace GuitarConfigurator.NetCore.Devices;
 
 public class Ardwiino : ConfigurableUsbDevice
 {

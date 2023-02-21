@@ -14,6 +14,7 @@ using Avalonia.Collections;
 using Avalonia.Threading;
 using DynamicData;
 using DynamicData.Kernel;
+using GuitarConfigurator.NetCore.Devices;
 using LibUsbDotNet;
 using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Info;
@@ -49,6 +50,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private readonly ObservableAsPropertyHelper<bool> _isPico;
 
         private readonly ObservableAsPropertyHelper<bool> _isUno;
+        private readonly ObservableAsPropertyHelper<bool> _isGeneric;
 
         private readonly ObservableAsPropertyHelper<bool> _migrationSupported;
 
@@ -82,6 +84,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private IConfigurableDevice? _selectedDevice;
 
         private UnoMegaType _unoMegaType;
+        private AvrType _avrType;
 
 
         private bool _working = true;
@@ -113,10 +116,22 @@ namespace GuitarConfigurator.NetCore.ViewModels
             _isDfu = this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is Dfu)
                 .ToProperty(this, s => s.IsDfu);
+            _isGeneric = this.WhenAnyValue(x => x.SelectedDevice)
+                .Select(s => s?.IsGeneric() == true)
+                .ToProperty(this, s => s.IsGeneric);
             _newDevice = this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is not (Ardwiino or Santroller))
                 .ToProperty(this, s => s.NewDevice);
-
+            _deviceInputTypes = this.WhenAnyValue(s => s.SelectedDevice).Select(s =>
+                    Enum.GetValues<DeviceInputType>()
+                        .Where(type => type != DeviceInputType.Rf || s?.IsGeneric() != true).ToList())
+                .ToProperty(this, x => x.DeviceInputTypes);
+            // Make sure that the selected device input type is reset so that we don't end up doing something invalid like using RF on a generic serial device
+            this.WhenAnyValue(s => s.DeviceInputTypes).Subscribe(s =>
+            {
+                DeviceInputType = s.First();
+                this.RaisePropertyChanged(nameof(DeviceInputType));
+            });
             Devices.CollectionChanged += (_, e) =>
             {
                 // We only want this logic to run when we are selecting devices
@@ -183,14 +198,24 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public bool IsUno => _isUno.Value;
         public bool IsMega => _isMega.Value;
         public bool IsDfu => _isDfu.Value;
+        public bool IsGeneric => _isGeneric.Value;
         public bool NewDevice => _newDevice.Value;
 
         public IEnumerable<Arduino32U4Type> Arduino32U4Types => Enum.GetValues<Arduino32U4Type>();
         public IEnumerable<MegaType> MegaTypes => Enum.GetValues<MegaType>();
         public IEnumerable<UnoMegaType> UnoMegaTypes => Enum.GetValues<UnoMegaType>();
+        public IEnumerable<AvrType> AvrTypes => Enum.GetValues<AvrType>();
         public IEnumerable<Board> PicoTypes => Board.Rp2040Boards;
-        public IEnumerable<DeviceInputType> DeviceInputTypes => Enum.GetValues<DeviceInputType>();
 
+        private readonly ObservableAsPropertyHelper<IEnumerable<DeviceInputType>> _deviceInputTypes;
+        public IEnumerable<DeviceInputType> DeviceInputTypes => _deviceInputTypes.Value;
+
+        public AvrType AvrType
+        {
+            get => _avrType;
+            set => this.RaiseAndSetIfChanged(ref _avrType, value);
+        }
+        
         public UnoMegaType UnoMegaType
         {
             get => _unoMegaType;

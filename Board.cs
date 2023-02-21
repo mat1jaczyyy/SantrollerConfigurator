@@ -92,8 +92,8 @@ public struct Board
 
     public static readonly Board[] MiniBoards =
     {
-        new("mini", "Arduino Pro Mini 5V", 16000000, "mini", new List<uint>(), false),
-        new("mini", "Arduino Pro Mini 3.3V", 8000000, "mini", new List<uint>(), false)
+        new("mini", "Arduino Pro Mini 5V", 16000000, "arduino_mini_16", new List<uint>(), false),
+        new("mini", "Arduino Pro Mini 3.3V", 8000000, "arduino_mini_8", new List<uint>(), false)
     };
 
     public static readonly Board[] MegaBoards =
@@ -137,8 +137,9 @@ public struct Board
         if (MegaBoards.Contains(board)) return new Mega(board);
 
         if (Rp2040Boards.Contains(board)) return new Pico(board);
-
-        if (MiniBoards.Contains(board)) throw new NotSupportedException("TODO: support mini");
+        
+        // In terms of pin layout, the uno is close enough to a mini
+        if (MiniBoards.Contains(board)) return new Uno(board);
 
         throw new NotSupportedException("Not sure how we got here");
     }
@@ -152,5 +153,15 @@ public struct Board
     public bool IsPico()
     {
         return Rp2040Boards.Contains(this);
+    }
+
+    public bool IsGeneric()
+    {
+        return Generic.Name == Name;
+    }
+
+    public bool IsMini()
+    {
+        return MiniBoards.Contains(this);
     }
 }

@@ -14,7 +14,7 @@ using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
 using ProtoBuf;
 
-namespace GuitarConfigurator.NetCore;
+namespace GuitarConfigurator.NetCore.Devices;
 
 public class Santroller : ConfigurableUsbDevice
 {

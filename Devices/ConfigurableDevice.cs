@@ -3,7 +3,7 @@ using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfigurator.NetCore;
+namespace GuitarConfigurator.NetCore.Devices;
 
 public interface IConfigurableDevice
 {
@@ -23,5 +23,7 @@ public interface IConfigurableDevice
     public Task<string?> GetUploadPort();
 
     public bool IsAvr();
+    public bool IsGeneric();
     public bool IsPico();
+    public bool IsMini();
 }

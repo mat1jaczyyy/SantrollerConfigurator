@@ -6,7 +6,7 @@ using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
 using LibUsbDotNet.Main;
 
-namespace GuitarConfigurator.NetCore;
+namespace GuitarConfigurator.NetCore.Devices;
 
 public abstract class ConfigurableUsbDevice : IConfigurableDevice
 {
@@ -78,6 +78,15 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     public bool IsAvr()
     {
         return Board.IsAvr();
+    }
+
+    public bool IsGeneric()
+    {
+        return Board.IsGeneric();
+    }
+    public bool IsMini()
+    {
+        return Board.IsMini();
     }
 
     public bool IsPico()

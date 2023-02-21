@@ -7,6 +7,7 @@ using Avalonia.ReactiveUI;
 using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 

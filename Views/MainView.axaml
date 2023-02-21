@@ -40,6 +40,12 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock FontSize="30" HorizontalAlignment="Center"
                                Text="Welcome to the Santroller Configuration Tool!" Margin="0 0 0 20" />
+                    <TextBlock IsVisible="{Binding !Main.MigrationSupported}"
+                               Text="The firmware on this device is too old, it's configuration will be erased when upgrading." />
+                    <Label IsVisible="{Binding Main.IsGeneric}" VerticalAlignment="Center"
+                           VerticalContentAlignment="Center">
+                        Unknown board detected. Please pick the closest board to the type of Arduino you have plugged in.
+                    </Label>
                     <StackPanel HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
@@ -108,6 +114,17 @@
                                           Items="{Binding Main.Arduino32U4Types}"
                                           ItemTemplate="{StaticResource EnumToStringTemplate}" />
                             </StackPanel>
+                            <StackPanel IsVisible="{Binding Main.IsGeneric}" Orientation="Horizontal">
+                                <Label VerticalAlignment="Center"
+                                       VerticalContentAlignment="Center"
+                                       Width="300">
+                                    Arduino Type
+                                </Label>
+                                <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsGeneric}"
+                                          SelectedItem="{Binding Main.AvrType}"
+                                          Items="{Binding Main.AvrTypes}"
+                                          ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                            </StackPanel>
                             <StackPanel IsVisible="{Binding Main.IsPico}" Orientation="Horizontal">
                                 <Label VerticalAlignment="Center"
                                        VerticalContentAlignment="Center"
@@ -135,8 +152,6 @@
                                           Items="{Binding Main.DeviceInputTypes}"
                                           ItemTemplate="{StaticResource EnumToStringTemplate}" />
                             </StackPanel>
-                            <TextBlock IsVisible="{Binding !Main.MigrationSupported}"
-                                       Text="The firmware on this device is too old, it's configuration will be erased when upgrading." />
                         </StackPanel>
                         <Button Content="Configure" Command="{Binding Main.Configure}"
                                 IsEnabled="{Binding Main.ReadyToConfigure}" HorizontalAlignment="Center"

@@ -4,7 +4,7 @@ using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfigurator.NetCore;
+namespace GuitarConfigurator.NetCore.Devices;
 
 public class PicoDevice : IConfigurableDevice
 {
@@ -18,6 +18,11 @@ public class PicoDevice : IConfigurableDevice
     public bool MigrationSupported => true;
 
     public bool IsSameDevice(PlatformIoPort port)
+    {
+        return false;
+    }
+
+    public bool IsGeneric()
     {
         return false;
     }
@@ -66,6 +71,11 @@ public class PicoDevice : IConfigurableDevice
     public bool IsPico()
     {
         return true;
+    }
+
+    public bool IsMini()
+    {
+        return false;
     }
 
     public string GetPath()

@@ -6,7 +6,7 @@ using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.Main;
 
-namespace GuitarConfigurator.NetCore;
+namespace GuitarConfigurator.NetCore.Devices;
 
 public class Dfu : IConfigurableDevice
 {
@@ -103,6 +103,16 @@ public class Dfu : IConfigurableDevice
     }
 
     public bool IsPico()
+    {
+        return false;
+    }
+
+    public bool IsMini()
+    {
+        return false;
+    }
+
+    public bool IsGeneric()
     {
         return false;
     }

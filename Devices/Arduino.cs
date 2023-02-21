@@ -1,3 +1,4 @@
+using System;
 using System.IO.Ports;
 using System.Linq;
 using System.Reactive.Subjects;
@@ -6,12 +7,13 @@ using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfigurator.NetCore;
+namespace GuitarConfigurator.NetCore.Devices;
 
 public class Arduino : IConfigurableDevice
 {
     // public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
     private readonly PlatformIoPort _port;
+    private readonly bool _generic;
 
     public Arduino(PlatformIo pio, PlatformIoPort port)
     {
@@ -55,10 +57,11 @@ public class Arduino : IConfigurableDevice
         {
             Board = Board.Generic;
             MigrationSupported = true;
+            _generic = true;
         }
     }
 
-    public Board Board { get; }
+    public Board Board { get; set; }
 
     public Subject<bool> DfuDetected { get; }
 
@@ -86,7 +89,23 @@ public class Arduino : IConfigurableDevice
 
     public Microcontroller GetMicrocontroller(ConfigViewModel model)
     {
+        if (!_generic) return Board.FindMicrocontroller(Board);
+        Board = model.Main.AvrType switch
+        {
+            AvrType.Mini => Board.MiniBoards[0],
+            AvrType.ProMicro => Board.Atmega32U4Boards[2],
+            AvrType.Leonardo =>Board.Atmega32U4Boards[4],
+            AvrType.Micro => Board.Atmega32U4Boards[1],
+            AvrType.Uno => Board.Uno,
+            AvrType.Mega => Board.MegaBoards[0],
+            AvrType.MegaAdk => Board.MegaBoards[1],
+            _ => throw new ArgumentOutOfRangeException()
+        };
         return Board.FindMicrocontroller(Board);
+    }
+    public bool IsMini()
+    {
+        return Board.IsMini();
     }
 
     public bool LoadConfiguration(ConfigViewModel model)
@@ -122,7 +141,7 @@ public class Arduino : IConfigurableDevice
 
     public bool IsPico()
     {
-        return Board.Rp2040Boards.Contains(Board);
+        return Board.IsPico();
     }
 
     public string GetSerialPort()
@@ -143,6 +162,11 @@ public class Arduino : IConfigurableDevice
     public bool IsUno()
     {
         return Board.Uno.Name == Board.Name;
+    }
+
+    public bool IsGeneric()
+    {
+        return _generic;
     }
 
     public bool IsMega()
