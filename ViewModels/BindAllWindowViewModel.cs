@@ -63,7 +63,7 @@ public class BindAllWindowViewModel : ReactiveObject
     private IObservable<Unit> Close(bool response)
     {
         _picking = false;
-        _santroller?.cancelDetection();
+        _santroller?.CancelDetection();
         Response = response;
         return CloseWindowInteraction.Handle(new Unit());
     }

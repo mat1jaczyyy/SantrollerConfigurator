@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Collections;
@@ -21,6 +23,8 @@ using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
 using ReactiveUI;
+using SerialPort = System.IO.Ports.SerialPort;
+using Timer = System.Timers.Timer;
 #if Windows
 using GuitarConfigurator.NetCore.Notify;
 using LibUsbDotNet.WinUsb;
@@ -215,7 +219,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             get => _avrType;
             set => this.RaiseAndSetIfChanged(ref _avrType, value);
         }
-        
+
         public UnoMegaType UnoMegaType
         {
             get => _unoMegaType;
@@ -393,17 +397,27 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 foreach (var port in ports)
                 {
                     if (existingPorts.Contains(port.Port)) continue;
+                    var santroller = new Santroller(Pio, port);
+                    if (santroller.Valid)
+                    {
+                        AddDevice(santroller);
+                    }
+                    else
+                    {
+                        var arduino = new Arduino(Pio, port);
+                        AddDevice(arduino);
+                    }
 
-
-                    var arduino = new Arduino(Pio, port);
-                    AddDevice(arduino);
-                    _currentPorts.Add(arduino.GetSerialPort());
+                    _currentPorts.Add(port.Port);
                 }
 
                 var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
                 _currentPorts.RemoveMany(_currentPorts.Where(port => !currentSerialPorts.Contains(port)));
                 Devices.RemoveMany(Devices.Where(device =>
                     device is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())));
+                Devices.RemoveMany(Devices.Where(device =>
+                    device is Santroller santroller && santroller.GetSerialPort().Any() &&
+                    !currentSerialPorts.Contains(santroller.GetSerialPort())));
                 if (_selectedDevice is Arduino arduinoDevice &&
                     !currentSerialPorts.Contains(arduinoDevice.GetSerialPort()))
                 {

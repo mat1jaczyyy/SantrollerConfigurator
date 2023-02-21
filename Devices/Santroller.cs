@@ -2,34 +2,108 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
 using ProtoBuf;
 
 namespace GuitarConfigurator.NetCore.Devices;
 
-public class Santroller : ConfigurableUsbDevice
+public class Santroller : IConfigurableDevice
 {
     public static readonly Guid ControllerGuid = new("DF59037D-7C92-4155-AC12-7D700A313D78");
     private readonly Dictionary<int, int> _analogRaw = new();
     private readonly Dictionary<int, bool> _digitalRaw = new();
     private DeviceControllerType? _deviceControllerType;
     private bool _picking;
+    private SantrollerUsbDevice? _usbDevice;
+    private SerialPort? _serialPort;
+    private PlatformIoPort? _platformIoPort;
+    protected readonly Version Version;
+    protected Board Board { get; set; }
+    public bool Valid { get; }
+
 
     // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
     //     new(0x1209, 0x2882, label: "Santroller",
     //         classGuid: ControllerGUID);
 
-    public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort revision) :
-        base(device, path, product, serial, revision)
+    public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort version) :
+        base()
+    {
+        Version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, version & 0xf);
+        _usbDevice = new SantrollerUsbDevice(device, path, product, serial, version);
+        Load();
+    }
+
+    public Santroller(PlatformIo pio, PlatformIoPort port)
+    {
+        try
+        {
+            _serialPort = new SerialPort(port.Port, 38400, Parity.None, 8, StopBits.One);
+            _serialPort.Open();
+            Thread.Sleep(2000);
+            _platformIoPort = port;
+            var version = ReadData(0, (byte) Commands.CommandReadVersion, 3);
+            Version = new Version(version[0], version[1], version[2]);
+            Load();
+            Valid = true;
+        }
+        catch (TimeoutException)
+        {
+            Valid = false;
+        }
+    }
+
+    public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
+    {
+        if (_usbDevice != null)
+        {
+            return _usbDevice.ReadData(wValue, bRequest, size);
+        }
+
+        if (_serialPort != null)
+        {
+            _serialPort.Write(new[] {(byte)0x1f, bRequest, (byte) (wValue & 0xFF), (byte) ((wValue << 8) & 0xFF)}, 0, 4);
+            var buffer = new byte[_serialPort.ReadByte()];
+            var read = 0;
+            while (read < buffer.Length)
+            {
+                read += _serialPort.Read(buffer, read, buffer.Length - read);
+            }
+
+            return buffer;
+        }
+
+        return Array.Empty<byte>();
+    }
+
+
+    public void WriteData(ushort wValue, byte bRequest, byte[] buffer)
+    {
+        if (_usbDevice != null)
+        {
+            _usbDevice.WriteData(wValue, bRequest, buffer);
+        }
+        else if (_serialPort != null)
+        {
+            _serialPort.Write(new[] {(byte)0x1e,bRequest}, 0, 1);
+            _serialPort.Write(new[] {(byte) buffer.Length}, 0, 1);
+            _serialPort.Write(buffer, 0, buffer.Length);
+        }
+    }
+
+    private void Load()
     {
         var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("\0", "")
             .Replace("L", "").Trim();
@@ -39,24 +113,46 @@ public class Santroller : ConfigurableUsbDevice
         Board = m.Board;
     }
 
-    public override bool MigrationSupported => true;
-
-    public override void Bootloader()
+    public bool MigrationSupported => true;
+    public bool IsSameDevice(PlatformIoPort port)
     {
-        WriteData(0, (byte) Commands.CommandJumpBootloader, Array.Empty<byte>());
-        Device.Close();
+        return _platformIoPort == port;
     }
 
-    public override void BootloaderUsb()
+    public bool IsSameDevice(string serialOrPath)
+    {
+        return _usbDevice?.IsSameDevice(serialOrPath) == true;
+    }
+
+    public void Bootloader()
+    {
+        _usbDevice?.Bootloader();
+    }
+
+    public void BootloaderUsb()
     {
         if (!Board.HasUsbmcu) return;
-        WriteData(0, (byte) Commands.CommandJumpBootloaderUno, Array.Empty<byte>());
-        Device.Close();
+        _usbDevice?.BootloaderUsb();
+    }
+
+    public bool DeviceAdded(IConfigurableDevice device)
+    {
+        return _usbDevice != null && _usbDevice.DeviceAdded(device);
+    }
+
+    private bool IsOpen()
+    {
+        if (_usbDevice != null)
+        {
+            return _usbDevice.IsOpen();
+        }
+
+        return _serialPort != null && _serialPort.IsOpen;
     }
 
     private async Task Tick(ConfigViewModel model)
     {
-        while (Device.IsOpen)
+        while (IsOpen())
         {
             if (_picking)
             {
@@ -108,6 +204,11 @@ public class Santroller : ConfigurableUsbDevice
                 Console.WriteLine(ex);
             }
 
+            // Serial port is slow
+            if (_serialPort != null)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(1000));
+            }
             await Task.Delay(TimeSpan.FromMilliseconds(50));
         }
     }
@@ -148,13 +249,42 @@ public class Santroller : ConfigurableUsbDevice
         StartTicking(model);
     }
 
-    public override bool LoadConfiguration(ConfigViewModel model)
+    public bool LoadConfiguration(ConfigViewModel model)
     {
         _ = LoadConfigurationAsync(model);
         return true;
     }
 
-    public override Microcontroller GetMicrocontroller(ConfigViewModel model)
+    public Task<string?> GetUploadPort()
+    {
+        if (_platformIoPort != null)
+        {
+            return Task.FromResult((string?)_platformIoPort.Port);
+        }
+
+        return _usbDevice != null ? _usbDevice.GetUploadPort() : Task.FromResult<string?>(null);
+    }
+
+    public bool IsAvr()
+    {
+        return Board.IsAvr();
+    }
+
+    public bool IsGeneric()
+    {
+        return Board.IsGeneric();
+    }
+    public bool IsMini()
+    {
+        return Board.IsMini();
+    }
+
+    public bool IsPico()
+    {
+        return Board.IsPico();
+    }
+
+    public Microcontroller GetMicrocontroller(ConfigViewModel model)
     {
         // try
         // {
@@ -172,7 +302,7 @@ public class Santroller : ConfigurableUsbDevice
         _ = Dispatcher.UIThread.InvokeAsync(() => Tick(model));
     }
 
-    public void cancelDetection()
+    public void CancelDetection()
     {
         _picking = false;
     }
@@ -268,7 +398,7 @@ public class Santroller : ConfigurableUsbDevice
         return ret;
     }
 
-    private enum Commands
+    public enum Commands
     {
         CommandReboot = 0x30,
         CommandJumpBootloader,
@@ -286,6 +416,13 @@ public class Santroller : ConfigurableUsbDevice
         CommandReadGhWt,
         CommandGetExtensionWii,
         CommandGetExtensionPs2,
-        CommandSetLeds
+        CommandSetLeds,
+        CommandSetDetect,
+        CommandReadVersion
+    }
+
+    public string GetSerialPort()
+    {
+        return _platformIoPort?.Port ?? "";
     }
 }
