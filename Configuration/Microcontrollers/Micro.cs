@@ -159,6 +159,10 @@ public class Micro : AvrController
     {
         return Ports[pin];
     }
+    public override int GetFirstDigitalPin()
+    {
+        return 0;
+    }
 
     public override int GetChannel(int pin, bool reconfigurePin)
     {

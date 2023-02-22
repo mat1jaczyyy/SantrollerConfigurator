@@ -18,7 +18,7 @@ public abstract class InputWithPin : Input
         PinConfig = pinConfig;
         Model.Microcontroller.AssignPin(PinConfig);
         DetectPinCommand =
-            ReactiveCommand.CreateFromTask(DetectPin, this.WhenAnyValue(s => s.Model.Main.Working).Select(s => !s));
+            ReactiveCommand.CreateFromTask(DetectPinAsync, this.WhenAnyValue(s => s.Model.Main.Working).Select(s => !s));
         this.WhenAnyValue(x => x.PinConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
     }
 
@@ -61,13 +61,13 @@ public abstract class InputWithPin : Input
         Model.Microcontroller.UnAssignPins(PinConfig.Type);
     }
 
-    private async Task DetectPin()
+    private async Task DetectPinAsync()
     {
-        if (Model.Main.SelectedDevice is Santroller santroller)
+        if (Model.Device is Santroller santroller)
         {
             PinConfigText = DetectionText;
             this.RaisePropertyChanged(nameof(PinConfigText));
-            Pin = await santroller.DetectPin(IsAnalog, Pin, Model.Microcontroller);
+            Pin = await santroller.DetectPinAsync(IsAnalog, Pin, Model.Microcontroller);
             PinConfigText = "Find Pin";
             this.RaisePropertyChanged(nameof(PinConfigText));
         }

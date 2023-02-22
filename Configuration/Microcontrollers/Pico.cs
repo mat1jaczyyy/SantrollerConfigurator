@@ -198,7 +198,7 @@ public class Pico : Microcontroller
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
         // On the pico, RF only supports Spi0
-        if (type == RFRXOutput.SpiType)
+        if (type == RfRxOutput.SpiType)
         {
             return SpiTypesByPin.Where(pin => SpiIndexByPin[pin.Key] == 0).ToList();
         }
@@ -304,6 +304,10 @@ public class Pico : Microcontroller
     }
 
     public override int GetAnalogMask(DevicePin devicePin)
+    {
+        return 0;
+    }
+    public override int GetFirstDigitalPin()
     {
         return 0;
     }

@@ -31,7 +31,7 @@ public class BindAllWindowViewModel : ReactiveObject
         ContinueCommand = ReactiveCommand.CreateFromObservable(() => Close(true));
         AbortCommand = ReactiveCommand.CreateFromObservable(() => Close(false));
 
-        if (Model.Main.SelectedDevice is not Santroller santroller)
+        if (Model.Device is not Santroller santroller)
         {
             CloseWindowInteraction.Handle(new Unit());
             _santroller = null;
@@ -39,11 +39,11 @@ public class BindAllWindowViewModel : ReactiveObject
         }
 
         _santroller = santroller;
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             while (_picking)
             {
-                input.Pin = await santroller.DetectPin(IsAnalog, input.Pin, Model.Microcontroller);
+                input.Pin = await santroller.DetectPinAsync(IsAnalog, input.Pin, Model.Microcontroller);
                 await Task.Delay(100);
             }
         });

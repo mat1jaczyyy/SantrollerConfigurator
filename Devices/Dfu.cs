@@ -53,7 +53,6 @@ public class Dfu : IConfigurableDevice
         Console.WriteLine("DFU device added");
         if (device is Dfu dfu) dfu.Launch();
 
-        if (device is Arduino arduino) Console.WriteLine("Hello!");
         return false;
     }
 
@@ -84,7 +83,7 @@ public class Dfu : IConfigurableDevice
         return false;
     }
 
-    public Task<string?> GetUploadPort()
+    public Task<string?> GetUploadPortAsync()
     {
         return Task.FromResult((string?) _port);
     }

@@ -21,10 +21,10 @@ public class EnumToStringConverter : IValueConverter
         throw new NotSupportedException();
     }
 
-    public static string Convert(object? value)
+    public static string Convert(object value)
     {
         if (value is Key key) return KeyboardButton.Keys[key];
-        var valueType = value!.GetType();
+        var valueType = value.GetType();
         var fieldInfo = valueType.GetField(value.ToString()!, BindingFlags.Static | BindingFlags.Public)!;
         var attributes = (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
 

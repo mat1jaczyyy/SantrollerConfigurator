@@ -1,18 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Ports;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Avalonia.Collections;
 using Avalonia.Threading;
 using DynamicData;
 using DynamicData.Kernel;
@@ -23,7 +21,6 @@ using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
 using ReactiveUI;
-using SerialPort = System.IO.Ports.SerialPort;
 using Timer = System.Timers.Timer;
 #if Windows
 using GuitarConfigurator.NetCore.Notify;
@@ -62,11 +59,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         private readonly Timer _timer = new();
 
-
         private Arduino32U4Type _arduino32U4Type;
 
         private DeviceInputType _deviceInputType;
-        private IConfigurableDevice? _disconnectedDevice;
 
         private bool _installed;
 
@@ -77,7 +72,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private Board _picoType = Board.Rp2040Boards[0];
 
 
-        private bool _programming;
+        public bool Programming { get; private set; }
 
         private double _progress;
 
@@ -90,14 +85,40 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private UnoMegaType _unoMegaType;
         private AvrType _avrType;
 
+        private SourceList<DeviceInputType> _allDeviceInputTypes = new();
+        public ReadOnlyObservableCollection<DeviceInputType> DeviceInputTypes { get; }
+
 
         private bool _working = true;
-
+        private static Func<DeviceInputType, bool> CreateFilter(IConfigurableDevice? s)
+        {
+            return type => type != DeviceInputType.Rf || s?.IsGeneric() != true;
+        }
         public MainWindowViewModel()
         {
+            _allDeviceInputTypes.AddRange(Enum.GetValues<DeviceInputType>());
+            _allDeviceInputTypes
+                .Connect()
+                .Filter(this.WhenAnyValue(s => s.SelectedDevice).Select(CreateFilter))
+                .Bind(out var deviceInputTypes).Subscribe();
+            DeviceInputTypes = deviceInputTypes;
             Configure = ReactiveCommand.CreateFromObservable(
-                () => Router.Navigate.Execute(new ConfigViewModel(this))
+                () => Router.Navigate.Execute(new ConfigViewModel(this, SelectedDevice!))
             );
+            AvailableDevices.Connect().Bind(out var devices).Subscribe();
+            AvailableDevices.Connect().Subscribe(s =>
+            {
+                foreach (var change in s)
+                {
+                    SelectedDevice = change.Reason switch
+                    {
+                        ListChangeReason.Add when SelectedDevice == null => change.Item.Current,
+                        ListChangeReason.Remove when SelectedDevice == change.Item.Current => null,
+                        _ => SelectedDevice
+                    };
+                }
+            });
+            Devices = devices;
             Router.Navigate.Execute(new MainViewModel(this));
             _migrationSupported = this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s?.MigrationSupported != false)
@@ -124,38 +145,14 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 .Select(s => s?.IsGeneric() == true)
                 .ToProperty(this, s => s.IsGeneric);
             _newDevice = this.WhenAnyValue(x => x.SelectedDevice)
-                .Select(s => s is not (Ardwiino or Santroller))
+                .Select(s => s is not (null or Ardwiino or Santroller))
                 .ToProperty(this, s => s.NewDevice);
-            _deviceInputTypes = this.WhenAnyValue(s => s.SelectedDevice).Select(s =>
-                    Enum.GetValues<DeviceInputType>()
-                        .Where(type => type != DeviceInputType.Rf || s?.IsGeneric() != true).ToList())
-                .ToProperty(this, x => x.DeviceInputTypes);
             // Make sure that the selected device input type is reset so that we don't end up doing something invalid like using RF on a generic serial device
-            this.WhenAnyValue(s => s.DeviceInputTypes).Subscribe(s =>
+            this.WhenAnyValue(s => s.SelectedDevice).Subscribe(s =>
             {
-                DeviceInputType = s.First();
-                this.RaisePropertyChanged(nameof(DeviceInputType));
+                    DeviceInputType = DeviceInputType.Direct;
+                    this.RaisePropertyChanged(nameof(DeviceInputType));
             });
-            Devices.CollectionChanged += (_, e) =>
-            {
-                // We only want this logic to run when we are selecting devices
-                if (Router.NavigationStack.Last() is not MainViewModel) return;
-                switch (e.Action)
-                {
-                    case NotifyCollectionChangedAction.Add:
-                        SelectedDevice ??= Devices.First();
-                        break;
-                    case NotifyCollectionChangedAction.Remove:
-                    {
-                        if (Devices.Any())
-                            if (e.OldItems!.Contains(SelectedDevice))
-                                _ = Task.Delay(1)
-                                    .ContinueWith(_ => SelectedDevice = Devices.FirstOrDefault(_ => true, null));
-
-                        break;
-                    }
-                }
-            };
 #if Windows
             _deviceListener = new WindowsDeviceNotifierAvalonia();
 #else
@@ -187,7 +184,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 _timer.Start();
             });
 
-            Task.Run(InstallDependencies);
+            _ = Task.Run(InstallDependenciesAsync);
         }
 
         public ReactiveCommand<Unit, IRoutableViewModel> Configure { get; }
@@ -195,7 +192,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
         // The command that navigates a user back.
         public ReactiveCommand<Unit, IRoutableViewModel?> GoBack => Router.NavigateBack;
 
-        public AvaloniaList<IConfigurableDevice> Devices { get; } = new();
+        internal SourceList<IConfigurableDevice> AvailableDevices { get; } = new();
+
+        public ReadOnlyObservableCollection<IConfigurableDevice> Devices { get; }
         public bool MigrationSupported => _migrationSupported.Value;
         public bool IsPico => _isPico.Value;
         public bool Is32U4 => _is32U4.Value;
@@ -210,9 +209,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public IEnumerable<UnoMegaType> UnoMegaTypes => Enum.GetValues<UnoMegaType>();
         public IEnumerable<AvrType> AvrTypes => Enum.GetValues<AvrType>();
         public IEnumerable<Board> PicoTypes => Board.Rp2040Boards;
-
-        private readonly ObservableAsPropertyHelper<IEnumerable<DeviceInputType>> _deviceInputTypes;
-        public IEnumerable<DeviceInputType> DeviceInputTypes => _deviceInputTypes.Value;
 
         public AvrType AvrType
         {
@@ -255,6 +251,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             get => _selectedDevice;
             set => this.RaiseAndSetIfChanged(ref _selectedDevice, value);
         }
+
 
         public bool Working
         {
@@ -319,10 +316,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
             }
 
             var output = new StringBuilder();
-            _programming = true;
+            Programming = true;
             var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
                 "Writing",
-                0, 90, SelectedDevice);
+                0, 90, config.Device);
             command.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
                 {
                     UpdateProgress(s);
@@ -330,13 +327,13 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 }, _ =>
                 {
                     ProgressbarColor = "red";
-                    config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => _programming = false);
+                    config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => Programming = false);
                 },
-                () => { _programming = false; });
+                () => { Programming = false; });
             return command.OnErrorResumeNext(Observable.Return(command.Value));
         }
 
-        private void Complete(int total)
+        public void Complete(int total)
         {
             Working = false;
             Message = "Done";
@@ -354,23 +351,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
             Progress = state.Percentage;
             Message = state.Message;
         }
-
-        private void AddDevice(IConfigurableDevice device)
-        {
-            if (device is Arduino)
-                _ = Task.Delay(500).ContinueWith(_ => Devices.Add(device));
-            else
-                Devices.Add(device);
-
-            if (_disconnectedDevice == null) return;
-            if (!_disconnectedDevice.DeviceAdded(device)) return;
-            if (device is not ConfigurableUsbDevice) return;
-            SelectedDevice = device;
-            _disconnectedDevice = null;
-            Complete(100);
-        }
-
-        private void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
+        
+#pragma warning disable VSTHRD100
+        private async void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
+#pragma warning restore VSTHRD100
         {
             var drives = DriveInfo.GetDrives();
             _currentDrivesTemp.UnionWith(_currentDrives);
@@ -381,47 +365,57 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var uf2 = Path.Combine(drive.RootDirectory.FullName, "INFO_UF2.txt");
                 if (drive.IsReady)
                     if (File.Exists(uf2) && File.ReadAllText(uf2).Contains("RPI-RP2"))
-                        AddDevice(new PicoDevice(Pio, drive.RootDirectory.FullName));
+                        AvailableDevices.Add(new PicoDevice(Pio, drive.RootDirectory.FullName));
 
                 _currentDrives.Add(drive.RootDirectory.FullName);
             }
 
             // We removed all valid devices above, so anything left in currentDrivesSet is no longer valid
-            Devices.RemoveMany(Devices.Where(x => x is PicoDevice pico && _currentDrivesTemp.Contains(pico.GetPath())));
+            AvailableDevices.RemoveMany(AvailableDevices.Items.Where(x =>
+                x is PicoDevice pico && _currentDrivesTemp.Contains(pico.GetPath())));
             _currentDrives.RemoveMany(_currentDrivesTemp);
 
             var existingPorts = _currentPorts.ToHashSet();
-            var ports = Pio.GetPorts().Result;
+            var ports = await Pio.GetPortsAsync();
             if (ports != null)
             {
                 foreach (var port in ports)
                 {
                     if (existingPorts.Contains(port.Port)) continue;
-                    var santroller = new Santroller(Pio, port);
-                    if (santroller.Valid)
-                    {
-                        AddDevice(santroller);
-                    }
-                    else
-                    {
-                        var arduino = new Arduino(Pio, port);
-                        AddDevice(arduino);
-                    }
-
                     _currentPorts.Add(port.Port);
+                    var arduino = new Arduino(Pio, port);
+                    _ = Task.Delay(500).ContinueWith(_ =>
+                    {
+                        if (arduino.Board.IsGeneric())
+                        {
+                            // If a device is generic, then we have no real way of detecting it and must send a detection packet to work out what it is
+                            var santroller = new Santroller(Pio, port);
+                            if (santroller.Valid)
+                            {
+                                AvailableDevices.Add(santroller);
+                            }
+                            else
+                            {
+                                AvailableDevices.Add(arduino);
+                            }
+                        }
+                        else
+                        {
+                            AvailableDevices.Add(arduino);
+                        }
+                    }, TaskScheduler.Default);
                 }
 
                 var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
                 _currentPorts.RemoveMany(_currentPorts.Where(port => !currentSerialPorts.Contains(port)));
-                Devices.RemoveMany(Devices.Where(device =>
+                AvailableDevices.RemoveMany(AvailableDevices.Items.Where(device =>
                     device is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())));
-                Devices.RemoveMany(Devices.Where(device =>
+                AvailableDevices.RemoveMany(AvailableDevices.Items.Where(device =>
                     device is Santroller santroller && santroller.GetSerialPort().Any() &&
                     !currentSerialPorts.Contains(santroller.GetSerialPort())));
                 if (_selectedDevice is Arduino arduinoDevice &&
                     !currentSerialPorts.Contains(arduinoDevice.GetSerialPort()))
                 {
-                    _disconnectedDevice = _selectedDevice;
                     _selectedDevice = null;
                 }
             }
@@ -442,7 +436,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     var pid = e.Device.IdProduct;
                     if (vid == Dfu.DfuVid && (pid == Dfu.DfuPid16U2 || pid == Dfu.DfuPid8U2))
                     {
-                        AddDevice(new Dfu(e));
+                        AvailableDevices.Add(new Dfu(e));
                     }
                     else if (e.Device.Open(out var dev))
                     {
@@ -451,16 +445,17 @@ namespace GuitarConfigurator.NetCore.ViewModels
                         var serial = dev.Info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
                         switch (product)
                         {
-                            case "Santroller" when _programming && !IsPico:
+                            case "Santroller" when Programming && !IsPico:
                                 return;
                             case "Santroller":
-                                AddDevice(new Santroller(Pio, e.Device.Name, dev, product, serial, revision));
+                                AvailableDevices.Add(new Santroller(Pio, e.Device.Name, dev, product, serial,
+                                    revision));
                                 break;
-                            case "Ardwiino" when _programming:
+                            case "Ardwiino" when Programming:
                             case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
                                 return;
                             case "Ardwiino":
-                                AddDevice(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
+                                AvailableDevices.Add(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
                                 break;
                             default:
                                 dev.Close();
@@ -470,13 +465,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 }
                 else
                 {
-                    if (_disconnectedDevice == null || _selectedDevice?.IsSameDevice(e.Device.Name) == true)
-                    {
-                        _disconnectedDevice = _selectedDevice;
-                        _selectedDevice = null;
-                    }
-
-                    Devices.RemoveMany(Devices.Where(device => device.IsSameDevice(e.Device.Name)));
+                    AvailableDevices.RemoveMany(
+                        AvailableDevices.Items.Where(device => device.IsSameDevice(e.Device.Name)));
                 }
             });
         }
@@ -503,7 +493,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             return true;
         }
 
-        private static async void InstallDependencies()
+        private static async Task InstallDependenciesAsync()
         {
             if (CheckDependencies()) return;
             //TODO: pop open a dialog before doing this
@@ -513,7 +503,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var appdataFolder = AssetUtils.GetAppDataFolder();
                 var driverZip = Path.Combine(appdataFolder, "drivers.zip");
                 var driverFolder = Path.Combine(appdataFolder, "drivers");
-                await AssetUtils.ExtractZip("dfu.zip", driverZip, driverFolder);
+                await AssetUtils.ExtractZipAsync("dfu.zip", driverZip, driverFolder);
 
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.AddRange(new[] {"-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf")});
@@ -526,7 +516,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 // Just copy the file to install it, using pkexec for admin
                 var appdataFolder = AssetUtils.GetAppDataFolder();
                 var rules = Path.Combine(appdataFolder, UdevFile);
-                await AssetUtils.ExtractFile(UdevFile, rules);
+                await AssetUtils.ExtractFileAsync(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
                 info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});
                 info.UseShellExecute = true;

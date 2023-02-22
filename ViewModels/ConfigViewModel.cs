@@ -34,7 +34,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public static readonly string UnoPinTypeRx = "Uno Serial Rx Pin";
     public static readonly int UnoPinTypeRxPin = 0;
     public static readonly int UnoPinTypeTxPin = 1;
-
+    public IConfigurableDevice Device { get; private set; }
     private readonly ObservableAsPropertyHelper<bool> _isApa102;
     private readonly ObservableAsPropertyHelper<bool> _isController;
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
@@ -75,11 +75,27 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private bool _xinputOnWindows;
 
-    public ConfigViewModel(MainWindowViewModel screen)
+    public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
+        Device = device;
         Main = screen;
+        Main.AvailableDevices.Connect().Subscribe(s =>
+        {
+            foreach (var change in s)
+            {
+                switch (change.Reason)
+                {
+                    case ListChangeReason.Add:
+                        AddDevice(change.Item.Current);
+                        break;
+                    case ListChangeReason.Remove:
+                        RemoveDevice(change.Item.Current);
+                        break;
+                }
+            }
+        });
         HostScreen = screen;
-        Microcontroller = screen.SelectedDevice!.GetMicrocontroller(this);
+        Microcontroller = device.GetMicrocontroller(this);
         ShowIssueDialog = new Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>();
         ShowUnoShortDialog = new Interaction<Arduino, ShowUnoShortWindowViewModel?>();
         ShowYesNoDialog =
@@ -87,12 +103,13 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ShowBindAllDialog =
             new Interaction<(ConfigViewModel model, Output output, DirectInput
                 input), BindAllWindowViewModel>();
-        BindAllCommand = ReactiveCommand.CreateFromTask(BindAll);
+        BindAllCommand = ReactiveCommand.CreateFromTask(BindAllAsync);
 
         WriteConfig = ReactiveCommand.CreateFromObservable(Write,
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
-        GoBack = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute);
+        GoBack = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
+            this.WhenAnyValue(x => x.Main.Working).Select(s => !s));
         Bindings = new AvaloniaList<Output>();
 
         _writeToolTip = this.WhenAnyValue(x => x.HasError)
@@ -143,9 +160,9 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     // Only Pico supports bluetooth
     public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>()
         .Where(type =>
-            Main.SelectedDevice!.IsMini() && type is EmulationType.RfController or EmulationType.RfKeyboardMouse ||
-            Main.SelectedDevice!.IsPico() ||
-            !Main.SelectedDevice!.IsMini() && !Main.SelectedDevice!.IsPico() &&
+            Device.IsMini() && type is EmulationType.RfController or EmulationType.RfKeyboardMouse ||
+            Device.IsPico() ||
+            !Device.IsMini() && !Device.IsPico() &&
             type is not (EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse));
 
     public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
@@ -208,7 +225,8 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _rfCsn?.Pin ?? 0;
         set => _rfCsn!.Pin = value;
     }
-
+    
+    //TODO: have a rf connected and initialised bool here too, that show in the sidebar
     public byte LedCount
     {
         get => _ledCount;
@@ -291,7 +309,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public EmulationType EmulationType
     {
         get => _emulationType;
-        set => SetDefaultBindings(value);
+        set => _ = SetDefaultBindingsAsync(value);
     }
 
     public RhythmType RhythmType
@@ -323,20 +341,23 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         .Where(s => s.Value is SpiPinType.Sck)
         .Select(s => s.Key).ToList();
 
-    public List<int> AvailableRfMosiPins => Microcontroller.SpiPins(RFRXOutput.SpiType)
+    public List<int> AvailableRfMosiPins => Microcontroller.SpiPins(RfRxOutput.SpiType)
         .Where(s => s.Value is SpiPinType.Miso)
         .Select(s => s.Key).ToList();
 
-    public List<int> AvailableRfMisoPins => Microcontroller.SpiPins(RFRXOutput.SpiType)
+    public List<int> AvailableRfMisoPins => Microcontroller.SpiPins(RfRxOutput.SpiType)
         .Where(s => s.Value is SpiPinType.Mosi)
         .Select(s => s.Key).ToList();
 
-    public List<int> AvailableRfSckPins => Microcontroller.SpiPins(RFRXOutput.SpiType)
+    public List<int> AvailableRfSckPins => Microcontroller.SpiPins(RfRxOutput.SpiType)
         .Where(s => s.Value is SpiPinType.Sck)
         .Select(s => s.Key).ToList();
 
     public List<int> AvailablePins => Microcontroller.GetAllPins(false);
-    public IEnumerable<PinConfig> PinConfigs => new[] {_apa102SpiConfig, _rfSpiConfig}.Where(s => s != null).Cast<PinConfig>();
+
+    public IEnumerable<PinConfig> PinConfigs =>
+        new[] {_apa102SpiConfig, _rfSpiConfig}.Where(s => s != null).Cast<PinConfig>();
+
     public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
 
     public IScreen HostScreen { get; }
@@ -365,7 +386,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings);
         Bindings.RemoveAll(extra);
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
-        if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RFRXOutput)) return;
+        if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
 
 
         if (_deviceControllerType == DeviceControllerType.Drum)
@@ -448,25 +469,24 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ClearOutputs();
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
-        if (Main.SelectedDevice!.IsMini())
+        if (Device.IsMini())
         {
-            Console.WriteLine("Mini!\n");
             _emulationType = EmulationType.RfController;
             if (_rfSpiConfig == null)
             {
-                var pins = Microcontroller.SpiPins(RFRXOutput.SpiType);
+                var pins = Microcontroller.SpiPins(RfRxOutput.SpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RFRXOutput.SpiType, mosi, miso, sck, true, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, mosi, miso, sck, true, true,
                     true,
                     4000000);
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
                 this.RaisePropertyChanged(nameof(RfSck));
                 var first = Microcontroller.GetAllPins(false).First();
-                _rfCe = Microcontroller.GetOrSetPin(this, RFRXOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
-                _rfCsn = Microcontroller.GetOrSetPin(this, RFRXOutput.SpiType + "_csn", first, DevicePinMode.Output);
+                _rfCe = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
+                _rfCsn = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
             }
         }
 
@@ -480,7 +500,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         switch (Main.DeviceInputType)
         {
             case DeviceInputType.Direct:
-                SetDefaultBindings(EmulationType);
+                _ = SetDefaultBindingsAsync(EmulationType);
                 break;
             case DeviceInputType.Wii:
                 Bindings.Add(new WiiCombinedOutput(this));
@@ -489,7 +509,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Bindings.Add(new Ps2CombinedOutput(this));
                 break;
             case DeviceInputType.Rf:
-                Bindings.Add(new RFRXOutput(this));
+                Bindings.Add(new RfRxOutput(this, Array.Empty<ulong>()));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -498,7 +518,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (Main.IsUno || Main.IsMega)
         {
             Write();
-            _ = ShowUnoShortDialog.Handle((Arduino) Main.SelectedDevice!).ToTask();
+            _ = ShowUnoShortDialog.Handle((Arduino) Device).ToTask();
             return;
         }
 
@@ -507,25 +527,25 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Write();
     }
 
-    private async void SetDefaultBindings(EmulationType emulationType)
+    private async Task SetDefaultBindingsAsync(EmulationType emulationType)
     {
         if (IsRf)
         {
             if (_rfSpiConfig == null)
             {
-                var pins = Microcontroller.SpiPins(RFRXOutput.SpiType);
+                var pins = Microcontroller.SpiPins(RfRxOutput.SpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RFRXOutput.SpiType, mosi, miso, sck, true, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, mosi, miso, sck, true, true,
                     true,
                     4000000);
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
                 this.RaisePropertyChanged(nameof(RfSck));
                 var first = Microcontroller.GetAllPins(false).First();
-                _rfCe = Microcontroller.GetOrSetPin(this, RFRXOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
-                _rfCsn = Microcontroller.GetOrSetPin(this, RFRXOutput.SpiType + "_csn", first, DevicePinMode.Output);
+                _rfCe = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
+                _rfCsn = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
             }
         }
         else
@@ -588,7 +608,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
             if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
                 null) continue;
             Bindings.Add(new ControllerButton(this,
-                new DirectInput(0, DevicePinMode.PullUp, this),
+                new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type));
         }
 
@@ -766,7 +786,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
-    private async Task BindAll()
+    private async Task BindAllAsync()
     {
         foreach (var binding in Bindings)
         {
@@ -798,7 +818,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    public async void ClearOutputsWithConfirmation()
+    public async Task ClearOutputsWithConfirmationAsync()
     {
         var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
             "The following action will clear all your inputs, are you sure you want to do this?")).ToTask();
@@ -820,7 +840,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         foreach (var binding in Bindings) binding.Expanded = false;
     }
 
-    public async void ResetWithConfirmation()
+    public async Task ResetWithConfirmationAsync()
     {
         var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
             "The following action will clear all your inputs, are you sure you want to do this?")).ToTask();
@@ -833,7 +853,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    public async void Reset()
+    public async Task ResetAsync()
     {
         var yesNo = await ShowYesNoDialog.Handle(("Reset", "Cancel",
                 "The following action will revert your device back to an Arduino, are you sure you want to do this?"))
@@ -874,7 +894,9 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
         var groupedOutputs = outputs
-            .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
+            .SelectMany(s =>
+                s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0)) ??
+                new List<(Input First, Output Second)>())
             .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
         var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 
@@ -979,7 +1001,9 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
         var groupedOutputs = outputs
-            .SelectMany(s => s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0))!)
+            .SelectMany(s =>
+                s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0)) ??
+                new List<(Input First, Output Second)>())
             .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
         var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 
@@ -1056,5 +1080,26 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         HasError = foundError;
+    }
+
+    private void AddDevice(IConfigurableDevice device)
+    {
+        if (device is Santroller santroller)
+        {
+            if (Device is Santroller santrollerold)
+            {
+                if (santrollerold.Serial == santroller.Serial)
+                {
+                    Main.Complete(100);
+                }
+            } else if (!Main.Programming)
+            {
+                Main.Complete(100);
+            }
+        }
+    }
+
+    private void RemoveDevice(IConfigurableDevice device)
+    {
     }
 }

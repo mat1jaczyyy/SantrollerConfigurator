@@ -100,6 +100,10 @@ public class Uno : AvrController
                 return null;
         }
     }
+    public override int GetFirstDigitalPin()
+    {
+        return 2;
+    }
 
     public override List<int> GetAllPins(bool isAnalog)
     {

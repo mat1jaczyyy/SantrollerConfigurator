@@ -133,7 +133,7 @@ public abstract class Output : ReactiveObject, IDisposable
         _ledIndicesDisplay = this.WhenAnyValue(x => x.LedIndices)
             .Select(s => string.Join(", ", s))
             .ToProperty(this, s => s.LedIndicesDisplay);
-        AssignByKeyOrAxis = ReactiveCommand.CreateFromTask(FindAndAssign);
+        AssignByKeyOrAxis = ReactiveCommand.CreateFromTask(FindAndAssignAsync);
         Outputs = new SourceList<Output>();
         Outputs.Add(this);
         AnalogOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
@@ -390,7 +390,7 @@ public abstract class Output : ReactiveObject, IDisposable
         return $"report->{char.ToLower(typeName[0])}{typeName[1..]}";
     }
 
-    public async Task FindAndAssign()
+    public async Task FindAndAssignAsync()
     {
         ButtonText = "Move the mouse or click / press any key to use that input";
         await InputManager.Instance!.Process.FirstAsync();

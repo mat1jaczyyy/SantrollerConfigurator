@@ -64,7 +64,6 @@
                                     ContentTemplate="{StaticResource OutputHeaderTemplates}" />
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type leds:Led}" />
             <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox IsChecked="{Binding DetectedLeft}" IsEnabled="False">Left Turntable Found</CheckBox>
@@ -76,7 +75,7 @@
                     <CheckBox IsChecked="{Binding Detected}" IsEnabled="False">Detected</CheckBox>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type output:RFRXOutput}">
+            <DataTemplate DataType="{x:Type output:RfRxOutput}">
                 <CheckBox IsChecked="{Binding Connected}" IsEnabled="False">Connected to Transmitter</CheckBox>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}" />
@@ -155,6 +154,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputButton}" />
+            <DataTemplate  />
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="EmptySelector">
             <DataTemplate DataType="{x:Type output:EmptyOutput}">
@@ -785,30 +785,9 @@
                               Width="200" />
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type output:RFRXOutput}">
+            <DataTemplate DataType="{x:Type output:RfRxOutput}">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center"
-                               VerticalContentAlignment="Center"
-                               Width="300">
-                            Number of Simultaneous Transmitters
-                        </Label>
-                        <NumericUpDown VerticalAlignment="Center" FormatString="{}{0:#,0}"
-                                       Value="{Binding NumberOfTransmitters}"
-                                       Minimum="1"
-                                       Width="200" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center"
-                               VerticalContentAlignment="Center"
-                               Width="300">
-                            Channel
-                        </Label>
-                        <NumericUpDown VerticalAlignment="Center" FormatString="{}{0:#,0}"
-                                       Value="{Binding RadioID}"
-                                       Minimum="0"
-                                       Width="200" />
-                    </StackPanel>
+                    
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -848,7 +827,7 @@
                                   Width="200" />
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
@@ -861,7 +840,7 @@
                                   Width="200" />
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
@@ -943,6 +922,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate />
         </netCore:OutputTemplateSelector>
         <DataTemplate DataType="output:Output" x:Key="OutputTemplate">
             <StackPanel IsVisible="{Binding Valid}" Opacity="{Binding CombinedOpacity}">
@@ -1042,7 +1022,7 @@
                             <StackPanel>
                                 <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Transmitter ID"
                                            TextAlignment="Center" />
-                                <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding RfChannel}"
+                                <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding RfId}"
                                                Minimum="1"
                                                Maximum="180" HorizontalAlignment="Stretch" />
 
@@ -1182,7 +1162,7 @@
                                 HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Bind All
                         </Button>
-                        <Button Command="{Binding ResetWithConfirmation}"
+                        <Button Command="{Binding ResetWithConfirmationAsync}"
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
                             Load Defaults
                         </Button>

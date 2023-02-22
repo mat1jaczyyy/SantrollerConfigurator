@@ -55,24 +55,24 @@ public class PlatformIo
 
     public string FirmwareDir { get; }
 
-    private async Task RevertFirmware(BehaviorSubject<PlatformIoState> platformIoOutput)
+    private async Task RevertFirmwareAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
     {
         var appdataFolder = AssetUtils.GetAppDataFolder();
         if (Directory.Exists(FirmwareDir)) Directory.Delete(FirmwareDir, true);
 
         platformIoOutput.OnNext(new PlatformIoState(0, "Extracting Firmware", ""));
         var firmwareZipPath = Path.Combine(appdataFolder, "firmware.zip");
-        await AssetUtils.ExtractZip("firmware.zip", firmwareZipPath, FirmwareDir);
+        await AssetUtils.ExtractZipAsync("firmware.zip", firmwareZipPath, FirmwareDir);
     }
 
     public IObservable<PlatformIoState> InitialisePlatformIo()
     {
         var platformIoOutput =
             new BehaviorSubject<PlatformIoState>(new PlatformIoState(0, "Searching for python", null));
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             // On startup, reinstall the firmware, this will make sure that an update goes out, and also makes sure that the firmware is clean.
-            await RevertFirmware(platformIoOutput);
+            await RevertFirmwareAsync(platformIoOutput);
             await File.WriteAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"),
                 (await File.ReadAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"))).Replace(
                     "post:ardwiino_script_post.py",
@@ -80,7 +80,7 @@ public class PlatformIo
             if (File.Exists(_pioExecutable))
             {
                 // Make sure to update platform.io to whatever version we require. This is a noop and doesn't even require internet if the version is up to date.
-                var python = await FindPython(platformIoOutput);
+                var python = await FindPythonAsync(platformIoOutput);
                 var installerProcess = new Process();
                 installerProcess.StartInfo.FileName = python;
                 installerProcess.StartInfo.Arguments = $"-m pip install platformio=={PlatformIOVersion}";
@@ -99,7 +99,7 @@ public class PlatformIo
             else
             {
                 platformIoOutput.OnNext(new PlatformIoState(0, "Searching for python", null));
-                var python = await FindPython(platformIoOutput);
+                var python = await FindPythonAsync(platformIoOutput);
                 platformIoOutput.OnNext(new PlatformIoState(60, "Installing Platform.IO", null));
                 var installerProcess = new Process();
                 installerProcess.StartInfo.FileName = python;
@@ -132,7 +132,7 @@ public class PlatformIo
         return platformIoOutput;
     }
 
-    public async Task<PlatformIoPort[]?> GetPorts()
+    public async Task<PlatformIoPort[]?> GetPortsAsync()
     {
         _portProcess.Start();
         var output = await _portProcess.StandardOutput.ReadToEndAsync();
@@ -157,7 +157,7 @@ public class PlatformIo
             var uploading = environment != null && command.Length > 1;
             var appdataFolder = AssetUtils.GetAppDataFolder();
             var pioFolder = Path.Combine(appdataFolder, "platformio");
-            var python = await FindPython(platformIoOutput);
+            var python = await FindPythonAsync(platformIoOutput);
             var process = new Process();
             process.EnableRaisingEvents = true;
             process.StartInfo.FileName = python;
@@ -197,7 +197,7 @@ public class PlatformIo
 
                     if (device != null)
                     {
-                        var port = await device.GetUploadPort().ConfigureAwait(false);
+                        var port = await device.GetUploadPortAsync().ConfigureAwait(false);
                         if (port != null)
                         {
                             args.Add("--upload-port");
@@ -230,6 +230,7 @@ public class PlatformIo
                 if (state == 0)
                 {
                     var line = await process.StandardOutput.ReadLineAsync();
+                    Console.WriteLine(line);
                     if (string.IsNullOrEmpty(line))
                     {
                         await Task.Delay(1);
@@ -388,7 +389,7 @@ public class PlatformIo
         return platformIoOutput;
     }
 
-    private async Task<string?> SetupVenv(string pythonApp, string pythonFolder,
+    private async Task<string?> SetupVenvAsync(string pythonApp, string pythonFolder,
         BehaviorSubject<PlatformIoState> platformIoOutput)
     {
         var error = false;
@@ -426,7 +427,7 @@ public class PlatformIo
         return null;
     }
 
-    private async Task<string?> FindPython(BehaviorSubject<PlatformIoState> platformIoOutput)
+    private async Task<string?> FindPythonAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
     {
         var appdataFolder = AssetUtils.GetAppDataFolder();
         var pythonFolder = Path.Combine(appdataFolder, "python");
@@ -445,7 +446,7 @@ public class PlatformIo
         {
             foundExecutable = GetFullPath(executable);
             if (foundExecutable == null) continue;
-            var ret = await SetupVenv(executable, pythonFolder, platformIoOutput);
+            var ret = await SetupVenvAsync(executable, pythonFolder, platformIoOutput);
             if (ret != null) return ret;
         }
 
@@ -459,7 +460,7 @@ public class PlatformIo
                        "https://api.github.com/repos/indygreg/python-build-standalone/releases/62235403",
                        pythonJsonLoc))
             {
-                await download.StartDownload().ConfigureAwait(false);
+                await download.StartDownloadAsync().ConfigureAwait(false);
             }
 
             var jsonRelease = await File.ReadAllTextAsync(pythonJsonLoc);
@@ -475,7 +476,7 @@ public class PlatformIo
                         download.ProgressChanged += (_, _, percentage) =>
                             platformIoOutput.OnNext(new PlatformIoState(20 + percentage * 0.4 ?? 0,
                                 "Downloading python portable", null));
-                        await download.StartDownload().ConfigureAwait(false);
+                        await download.StartDownloadAsync().ConfigureAwait(false);
                     }
 
                     found = true;

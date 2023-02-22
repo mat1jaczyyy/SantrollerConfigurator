@@ -67,7 +67,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public abstract Microcontroller GetMicrocontroller(ConfigViewModel model);
 
-    public async Task<string?> GetUploadPort()
+    public async Task<string?> GetUploadPortAsync()
     {
         if (!Board.ArdwiinoName.Contains("pico") && !Board.HasUsbmcu) return null;
         _bootloaderPath = new TaskCompletionSource<string?>();

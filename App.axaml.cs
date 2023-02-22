@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using GuitarConfigurator.NetCore.ViewModels;
 using GuitarConfigurator.NetCore.Views;
 using ReactiveUI;
@@ -24,6 +25,7 @@ public class App : Application
         Locator.CurrentMutable.Register<IViewFor<ConfigViewModel>>(() => new ConfigView());
         Locator.CurrentMutable.Register<IViewFor<MainViewModel>>(() => new MainView());
         lifetime.MainWindow = new MainWindow {DataContext = Locator.Current.GetService<IScreen>()};
+        lifetime.MainWindow.RequestedThemeVariant = ThemeVariant.Dark;
         lifetime.Exit += (_, _) => { Environment.Exit(0); };
         base.OnFrameworkInitializationCompleted();
     }

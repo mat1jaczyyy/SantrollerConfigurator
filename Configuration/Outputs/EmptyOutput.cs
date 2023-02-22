@@ -116,7 +116,7 @@ public class EmptyOutput : Output
                     SimpleType.Ps2InputSimple => new Ps2CombinedOutput(Model),
                     SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model),
                     SimpleType.DjTurntableSimple => new DjCombinedOutput(Model),
-                    SimpleType.RFSimple => new RFRXOutput(Model),
+                    SimpleType.RFSimple => new RfRxOutput(Model, Array.Empty<ulong>()),
                     _ => null
                 },
                 StandardAxisType standardAxisType => new ControllerAxis(Model,
@@ -172,7 +172,7 @@ public class EmptyOutput : Output
             Model.Bindings.Add(output);
         }
 
-        Dispatcher.UIThread.InvokeAsync(() =>
+        _ = Dispatcher.UIThread.InvokeAsync(() =>
         {
             Model.Bindings.Remove(this);
             Model.UpdateErrors();

@@ -10,7 +10,7 @@ namespace GuitarConfigurator.NetCore;
 
 public class AssetUtils
 {
-    public static async Task ExtractFile(string file, string location)
+    public static async Task ExtractFileAsync(string file, string location)
     {
         await using var f = File.OpenWrite(location);
         var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
@@ -20,9 +20,9 @@ public class AssetUtils
         await target.CopyToAsync(f).ConfigureAwait(false);
     }
 
-    public static async Task ExtractZip(string zip, string zipLocation, string location)
+    public static async Task ExtractZipAsync(string zip, string zipLocation, string location)
     {
-        await ExtractFile(zip, zipLocation);
+        await ExtractFileAsync(zip, zipLocation);
         ZipFile.ExtractToDirectory(zipLocation, location);
         File.Delete(zipLocation);
     }

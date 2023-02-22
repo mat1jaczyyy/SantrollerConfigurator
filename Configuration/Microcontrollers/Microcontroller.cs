@@ -97,6 +97,8 @@ public abstract class Microcontroller
 
     public abstract int GetAnalogMask(DevicePin devicePin);
 
+    public abstract int GetFirstDigitalPin();
+
     public DirectPinConfig GetOrSetPin(ConfigViewModel model, string type, int pin, DevicePinMode devicePinMode)
     {
         var existing = PinConfigs.OfType<DirectPinConfig>().FirstOrDefault(s => s.Type == type);

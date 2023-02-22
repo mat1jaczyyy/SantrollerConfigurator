@@ -27,9 +27,9 @@ public class ConfigView : ReactiveUserControl<ConfigViewModel>
             disposables(ViewModel!.ShowIssueDialog.RegisterHandler(DoShowDialogAsync));
             disposables(ViewModel!.ShowUnoShortDialog.RegisterHandler(DoShowUnoDialogAsync));
             disposables(ViewModel!.ShowYesNoDialog.RegisterHandler(DoShowYesNoDialogAsync));
-            disposables(ViewModel!.ShowBindAllDialog.RegisterHandler(DoShowBindAllDialog));
+            disposables(ViewModel!.ShowBindAllDialog.RegisterHandler(DoShowBindAllDialogAsync));
             disposables(
-                ViewModel!.WhenAnyValue(x => x.Main.SelectedDevice!).OfType<Santroller>()
+                ViewModel!.WhenAnyValue(x => x.Device).OfType<Santroller>()
                     .ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => s.StartTicking(ViewModel)));
         });
         AvaloniaXamlLoader.Load(this);
@@ -72,7 +72,7 @@ public class ConfigView : ReactiveUserControl<ConfigViewModel>
         interaction.SetOutput(model);
     }
 
-    private async Task DoShowBindAllDialog(
+    private async Task DoShowBindAllDialogAsync(
         InteractionContext<(ConfigViewModel model, Output output, DirectInput input),
             BindAllWindowViewModel> interaction)
     {

@@ -19,7 +19,7 @@ public class RaiseIssueWindowViewModel : ReactiveObject
     {
         Text = text._platformIOText;
         _model = text.Item2;
-        RaiseIssueCommand = ReactiveCommand.CreateFromTask(RaiseIssue);
+        RaiseIssueCommand = ReactiveCommand.CreateFromTask(RaiseIssueAsync);
         CloseWindowCommand = ReactiveCommand.CreateFromObservable(() => CloseWindowInteraction.Handle(new Unit()));
         var os = Environment.OSVersion;
         IncludedInfo = @$"OS Version: {os.Version}
@@ -40,7 +40,7 @@ Microcontroller Frequency: {_model.Microcontroller.Board.CpuFreq / 1000}mhz";
     public ICommand RaiseIssueCommand { get; }
     public ICommand CloseWindowCommand { get; }
 
-    private async Task RaiseIssue()
+    private async Task RaiseIssueAsync()
     {
         const string uri = "https://hastebin.com/documents";
         using var wc = new HttpClient();

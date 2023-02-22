@@ -20,8 +20,7 @@ public interface IConfigurableDevice
 
     public bool LoadConfiguration(ConfigViewModel model);
 
-    public Task<string?> GetUploadPort();
-
+    public Task<string?> GetUploadPortAsync();
     public bool IsAvr();
     public bool IsGeneric();
     public bool IsPico();

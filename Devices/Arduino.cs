@@ -113,7 +113,7 @@ public class Arduino : IConfigurableDevice
         return false;
     }
 
-    public Task<string?> GetUploadPort()
+    public Task<string?> GetUploadPortAsync()
     {
         return Task.FromResult((string?) GetSerialPort());
     }
