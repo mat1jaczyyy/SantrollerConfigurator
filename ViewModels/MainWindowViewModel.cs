@@ -155,6 +155,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
             });
 #if Windows
             _deviceListener = new WindowsDeviceNotifierAvalonia();
+                
+            _ = Task.Delay(5000).ContinueWith(_ => (_deviceListener as WindowsDeviceNotifierAvalonia)!.StartEventLoop());
 #else
             _deviceListener = new LinuxDeviceNotifier();
 #endif
