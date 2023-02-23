@@ -154,7 +154,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputButton}" />
-            <DataTemplate  />
+            <DataTemplate />
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="EmptySelector">
             <DataTemplate DataType="{x:Type output:EmptyOutput}">
@@ -787,7 +787,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:RfRxOutput}">
                 <StackPanel>
-                    
+
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -1089,7 +1089,7 @@
                                       ItemTemplate="{StaticResource EnumToStringTemplate}"
                                       Items="{Binding DeviceControllerTypes}" />
                         </StackPanel>
-                        
+
                         <StackPanel>
                             <StackPanel.IsVisible>
                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
@@ -1104,7 +1104,7 @@
                                       ItemTemplate="{StaticResource EnumToStringTemplate}"
                                       Items="{Binding RhythmTypes}" />
                         </StackPanel>
-                        
+
                         <StackPanel>
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Windows Controller Mode"
                                        TextAlignment="Center" />
@@ -1113,7 +1113,7 @@
                                 <ComboBoxItem>HID Game Controller</ComboBoxItem>
                                 <ComboBoxItem>XInput</ComboBoxItem>
                             </ComboBox>
-                            
+
                         </StackPanel>
                         <StackPanel>
                             <TextBlock HorizontalAlignment="Stretch" Margin="20 20 20 0" Text="LED Type"
@@ -1181,180 +1181,173 @@
                     </StackPanel>
                 </ScrollViewer>
             </ExperimentalAcrylicBorder>
-            <ExperimentalAcrylicBorder DockPanel.Dock="Bottom">
-                <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
-                </ExperimentalAcrylicBorder.Material>
-                <StackPanel>
-                    <WrapPanel Margin="10" HorizontalAlignment="Center">
-                        <Button Content="Write Configuration" Command="{Binding WriteConfig}" />
-                        <Button x:CompileBindings="False" Content="Revert device to Arduino" Command="{Binding Reset}" />
-                        <Button Content="Configure another device" Command="{Binding GoBack}" />
-                    </WrapPanel>
-                    <TextBlock IsVisible="{Binding WriteToolTip, Converter={x:Static ObjectConverters.IsNotNull}}"
-                               Foreground="Red" HorizontalAlignment="Center" Text="{Binding WriteToolTip}" />
-                    <WrapPanel HorizontalAlignment="Center">
-                        <TextBlock Text="Status: " />
-                        <TextBlock Text="{Binding Main.Message}" />
-                    </WrapPanel>
-                    <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress"
-                                 Foreground="{Binding Main.ProgressbarColor}" Value="{Binding Main.Progress}"
-                                 IsIndeterminate="False" Minimum="0" Maximum="100" Height="30" />
-                </StackPanel>
-            </ExperimentalAcrylicBorder>
-            <ExperimentalAcrylicBorder>
-                <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
-                </ExperimentalAcrylicBorder.Material>
-                <ScrollViewer VerticalContentAlignment="Center">
-                    <ItemsControl Items="{Binding Bindings}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="output:Output">
-                                <StackPanel>
-                                    <Expander IsVisible="{Binding !IsEmpty}" HorizontalAlignment="Stretch"
-                                              Header="{Binding}" IsExpanded="{Binding Expanded}">
-                                        <Expander.HeaderTemplate>
-                                            <DataTemplate DataType="output:Output">
-                                                <Panel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Image Width="75"
-                                                               Source="{Binding Image}"
-                                                               Opacity="{Binding ImageOpacity}" />
-                                                        <Label VerticalAlignment="Center"
-                                                               VerticalContentAlignment="Center"
-                                                               Content="{Binding LocalisedName}" />
-                                                    </StackPanel>
-                                                    <ContentControl Content="{Binding}" HorizontalAlignment="Center"
-                                                                    ContentTemplate="{StaticResource OutputHeaderTemplates}" />
-                                                    <Button
-                                                        HorizontalAlignment="Right"
-                                                        x:CompileBindings="False"
-                                                        Command="{Binding Remove}">
-                                                        Remove
-                                                    </Button>
-                                                    <Label Foreground="Red" Margin="20 0 20 0"
-                                                           Content="{Binding ErrorText}"
-                                                           VerticalAlignment="Bottom"
-                                                           HorizontalAlignment="Center"
-                                                           HorizontalContentAlignment="Center"
+            <StackPanel DockPanel.Dock="Bottom">
+                <WrapPanel Margin="10" HorizontalAlignment="Center">
+                    <Button Content="Write Configuration" Command="{Binding WriteConfig}" />
+                    <Button x:CompileBindings="False" Content="Revert device to Arduino" Command="{Binding Reset}" />
+                    <Button Content="Configure another device" Command="{Binding GoBack}" />
+                </WrapPanel>
+                <TextBlock IsVisible="{Binding WriteToolTip, Converter={x:Static ObjectConverters.IsNotNull}}"
+                           Foreground="Red" HorizontalAlignment="Center" Text="{Binding WriteToolTip}" />
+                <WrapPanel HorizontalAlignment="Center">
+                    <TextBlock Text="Status: " />
+                    <TextBlock Text="{Binding Main.Message}" />
+                </WrapPanel>
+                <ProgressBar HorizontalAlignment="Stretch" ShowProgressText="True" Name="RunProgress"
+                             Foreground="{Binding Main.ProgressbarColor}" Value="{Binding Main.Progress}"
+                             IsIndeterminate="False" Minimum="0" Maximum="100" Height="30" />
+            </StackPanel>
+            <ScrollViewer VerticalContentAlignment="Center">
+                <ItemsControl Items="{Binding Bindings}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="output:Output">
+                            <StackPanel>
+                                <Expander IsVisible="{Binding !IsEmpty}" HorizontalAlignment="Stretch"
+                                          Header="{Binding}" IsExpanded="{Binding Expanded}">
+                                    <Expander.HeaderTemplate>
+                                        <DataTemplate DataType="output:Output">
+                                            <Panel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Width="75"
+                                                           Source="{Binding Image}"
+                                                           Opacity="{Binding ImageOpacity}" />
+                                                    <Label VerticalAlignment="Center"
                                                            VerticalContentAlignment="Center"
-                                                           IsVisible="{Binding ErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                                </Panel>
-                                            </DataTemplate>
-                                        </Expander.HeaderTemplate>
-                                        <StackPanel>
+                                                           Content="{Binding LocalisedName}" />
+                                                </StackPanel>
+                                                <ContentControl Content="{Binding}" HorizontalAlignment="Center"
+                                                                ContentTemplate="{StaticResource OutputHeaderTemplates}" />
+                                                <Button
+                                                    HorizontalAlignment="Right"
+                                                    x:CompileBindings="False"
+                                                    Command="{Binding Remove}">
+                                                    Remove
+                                                </Button>
+                                                <Label Foreground="Red" Margin="20 0 20 0"
+                                                       Content="{Binding ErrorText}"
+                                                       VerticalAlignment="Bottom"
+                                                       HorizontalAlignment="Center"
+                                                       HorizontalContentAlignment="Center"
+                                                       VerticalContentAlignment="Center"
+                                                       IsVisible="{Binding ErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                            </Panel>
+                                        </DataTemplate>
+                                    </Expander.HeaderTemplate>
+                                    <StackPanel>
 
-                                            <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
-                                                <Label VerticalAlignment="Center"
-                                                       VerticalContentAlignment="Center"
-                                                       Width="300">
-                                                    Output Type
-                                                </Label>
-                                                <ComboBox VerticalAlignment="Center"
-                                                          SelectedItem="{Binding KeyOrMouse}"
-                                                          Items="{Binding KeyOrMouseInputs}"
-                                                          ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                                                <Button Command="{Binding AssignByKeyOrAxis}"
-                                                        IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                                        Content="{Binding ButtonText}" />
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <StackPanel.IsVisible>
-                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                        <Binding Path="Input"
-                                                                 Converter="{x:Static  ObjectConverters.IsNotNull}" />
-                                                        <Binding Path="!IsCombined" />
-                                                    </MultiBinding>
-                                                </StackPanel.IsVisible>
-                                                <Label VerticalAlignment="Center"
-                                                       VerticalContentAlignment="Center"
-                                                       Width="300">
-                                                    Input Type
-                                                </Label>
-                                                <ComboBox VerticalAlignment="Center"
-                                                          SelectedItem="{Binding SelectedInputType}"
-                                                          Items="{Binding InputTypes}"
-                                                          ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <StackPanel.IsVisible>
-                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                        <Binding Path="Input"
-                                                                 Converter="{x:Static  ObjectConverters.IsNotNull}" />
-                                                        <Binding Path="!IsCombined" />
-                                                        <MultiBinding Converter="{x:Static BoolConverters.Or}">
-                                                            <Binding Path="IsWii" />
-                                                            <Binding Path="IsDj" />
-                                                            <Binding Path="IsPs2" />
-                                                            <Binding Path="IsGh5" />
-                                                            <Binding Path="IsWt" />
-                                                        </MultiBinding>
-                                                    </MultiBinding>
-                                                </StackPanel.IsVisible>
-                                                <Label VerticalAlignment="Center"
-                                                       VerticalContentAlignment="Center"
-                                                       Width="300">
-                                                    Input
-                                                </Label>
-                                                <ComboBox VerticalAlignment="Center"
-                                                          IsVisible="{Binding IsWii}"
-                                                          SelectedItem="{Binding WiiInputType}"
-                                                          Items="{Binding WiiInputTypes}"
-                                                          ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                                                <ComboBox VerticalAlignment="Center"
-                                                          IsVisible="{Binding IsDj}"
-                                                          SelectedItem="{Binding DjInputType}"
-                                                          Items="{Binding DjInputTypes}"
-                                                          ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                                                <ComboBox VerticalAlignment="Center"
-                                                          IsVisible="{Binding IsPs2}"
-                                                          SelectedItem="{Binding Ps2InputType}"
-                                                          Items="{Binding Ps2InputTypes}"
-                                                          ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                                                <ComboBox VerticalAlignment="Center"
-                                                          IsVisible="{Binding IsGh5}"
-                                                          SelectedItem="{Binding Gh5NeckInputType}"
-                                                          Items="{Binding Gh5NeckInputTypes}"
-                                                          ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                                                <ComboBox VerticalAlignment="Center"
-                                                          IsVisible="{Binding IsWt}"
-                                                          SelectedItem="{Binding GhWtInputType}"
-                                                          Items="{Binding GhWtInputTypes}"
-                                                          ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                                            </StackPanel>
-                                            <ContentControl ContentTemplate="{StaticResource OutputTemplate}"
-                                                            Content="{Binding}" />
-                                            <ItemsControl IsVisible="{Binding IsCombined}"
-                                                          HorizontalAlignment="Stretch"
-                                                          IsEnabled="{Binding IsCombined}"
-                                                          Items="{Binding DigitalOutputs}"
-                                                          ItemTemplate="{StaticResource CombinedOutputTemplate}">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <WrapPanel />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-                                            </ItemsControl>
-                                            <ItemsControl IsVisible="{Binding IsCombined}"
-                                                          HorizontalAlignment="Stretch"
-                                                          IsEnabled="{Binding IsCombined}"
-                                                          Items="{Binding AnalogOutputs}"
-                                                          ItemTemplate="{StaticResource CombinedOutputTemplate}">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <WrapPanel />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-                                            </ItemsControl>
+                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
+                                            <Label VerticalAlignment="Center"
+                                                   VerticalContentAlignment="Center"
+                                                   Width="300">
+                                                Output Type
+                                            </Label>
+                                            <ComboBox VerticalAlignment="Center"
+                                                      SelectedItem="{Binding KeyOrMouse}"
+                                                      Items="{Binding KeyOrMouseInputs}"
+                                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                            <Button Command="{Binding AssignByKeyOrAxis}"
+                                                    IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                                    Content="{Binding ButtonText}" />
                                         </StackPanel>
-                                    </Expander>
-                                    <ContentControl IsVisible="{Binding IsEmpty}" ContentTemplate="{StaticResource EmptySelector}" Content="{Binding}"></ContentControl>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </ExperimentalAcrylicBorder>
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel.IsVisible>
+                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                    <Binding Path="Input"
+                                                             Converter="{x:Static  ObjectConverters.IsNotNull}" />
+                                                    <Binding Path="!IsCombined" />
+                                                </MultiBinding>
+                                            </StackPanel.IsVisible>
+                                            <Label VerticalAlignment="Center"
+                                                   VerticalContentAlignment="Center"
+                                                   Width="300">
+                                                Input Type
+                                            </Label>
+                                            <ComboBox VerticalAlignment="Center"
+                                                      SelectedItem="{Binding SelectedInputType}"
+                                                      Items="{Binding InputTypes}"
+                                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel.IsVisible>
+                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                    <Binding Path="Input"
+                                                             Converter="{x:Static  ObjectConverters.IsNotNull}" />
+                                                    <Binding Path="!IsCombined" />
+                                                    <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                                                        <Binding Path="IsWii" />
+                                                        <Binding Path="IsDj" />
+                                                        <Binding Path="IsPs2" />
+                                                        <Binding Path="IsGh5" />
+                                                        <Binding Path="IsWt" />
+                                                    </MultiBinding>
+                                                </MultiBinding>
+                                            </StackPanel.IsVisible>
+                                            <Label VerticalAlignment="Center"
+                                                   VerticalContentAlignment="Center"
+                                                   Width="300">
+                                                Input
+                                            </Label>
+                                            <ComboBox VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsWii}"
+                                                      SelectedItem="{Binding WiiInputType}"
+                                                      Items="{Binding WiiInputTypes}"
+                                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                            <ComboBox VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsDj}"
+                                                      SelectedItem="{Binding DjInputType}"
+                                                      Items="{Binding DjInputTypes}"
+                                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                            <ComboBox VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsPs2}"
+                                                      SelectedItem="{Binding Ps2InputType}"
+                                                      Items="{Binding Ps2InputTypes}"
+                                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                            <ComboBox VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsGh5}"
+                                                      SelectedItem="{Binding Gh5NeckInputType}"
+                                                      Items="{Binding Gh5NeckInputTypes}"
+                                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                            <ComboBox VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsWt}"
+                                                      SelectedItem="{Binding GhWtInputType}"
+                                                      Items="{Binding GhWtInputTypes}"
+                                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                        </StackPanel>
+                                        <ContentControl ContentTemplate="{StaticResource OutputTemplate}"
+                                                        Content="{Binding}" />
+                                        <ItemsControl IsVisible="{Binding IsCombined}"
+                                                      HorizontalAlignment="Stretch"
+                                                      IsEnabled="{Binding IsCombined}"
+                                                      Items="{Binding DigitalOutputs}"
+                                                      ItemTemplate="{StaticResource CombinedOutputTemplate}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                        <ItemsControl IsVisible="{Binding IsCombined}"
+                                                      HorizontalAlignment="Stretch"
+                                                      IsEnabled="{Binding IsCombined}"
+                                                      Items="{Binding AnalogOutputs}"
+                                                      ItemTemplate="{StaticResource CombinedOutputTemplate}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Expander>
+                                <ContentControl IsVisible="{Binding IsEmpty}"
+                                                ContentTemplate="{StaticResource EmptySelector}"
+                                                Content="{Binding}">
+                                </ContentControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </DockPanel>
     </Panel>
 </UserControl>
