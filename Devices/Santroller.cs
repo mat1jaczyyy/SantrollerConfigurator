@@ -71,7 +71,7 @@ public class Santroller : IConfigurableDevice
             _serialPort.RtsEnable = true;
             _serialPort.DtrEnable = true;
             // Unfortunately, we do need a pretty hefty timeout, as the pro minis bootloader takes a bit
-            _serialPort.ReadTimeout = 3000;
+            _serialPort.ReadTimeout = 6000;
             _serialPort.WriteTimeout = 100;
             _serialPort.Open();
             // Santroller devices announce themselves over serial to make it easier to detect them.
