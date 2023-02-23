@@ -90,10 +90,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
 
         private bool _working = true;
+
         private static Func<DeviceInputType, bool> CreateFilter(IConfigurableDevice? s)
         {
             return type => type != DeviceInputType.Rf || s?.IsGeneric() != true;
         }
+
         public MainWindowViewModel()
         {
             _allDeviceInputTypes.AddRange(Enum.GetValues<DeviceInputType>());
@@ -150,12 +152,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
             // Make sure that the selected device input type is reset so that we don't end up doing something invalid like using RF on a generic serial device
             this.WhenAnyValue(s => s.SelectedDevice).Subscribe(s =>
             {
-                    DeviceInputType = DeviceInputType.Direct;
-                    this.RaisePropertyChanged(nameof(DeviceInputType));
+                DeviceInputType = DeviceInputType.Direct;
+                this.RaisePropertyChanged(nameof(DeviceInputType));
             });
 #if Windows
             _deviceListener = new WindowsDeviceNotifierAvalonia();
-                
+
 #else
             _deviceListener = new LinuxDeviceNotifier();
 #endif
@@ -319,7 +321,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             var output = new StringBuilder();
             Programming = true;
-            var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
+            var command = Pio.RunPlatformIo(env, new[] { "run", "--target", "upload" },
                 "Writing",
                 0, 90, config.Device);
             command.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
@@ -353,7 +355,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             Progress = state.Percentage;
             Message = state.Message;
         }
-        
+
 #pragma warning disable VSTHRD100
         private async void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
 #pragma warning restore VSTHRD100
@@ -442,9 +444,24 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     }
                     else if (e.Device.Open(out var dev))
                     {
+#if Windows
+                        UsbRegistry r = dev.UsbRegistryInfo;
+                        var product = "";
+                        if (e.Device.ClassGuid == WindowsDeviceNotifierAvalonia.ArdwiinoGUID)
+                        {
+                            product = "Ardwiino";
+                        } else if (e.Device.ClassGuid == WindowsDeviceNotifierAvalonia.SantrollerGUID)
+                        {
+                            product = "Santroller";
+                        }
+
+                        var revision = (ushort)r.Rev;
+                        var serial = "";
+#else
                         var revision = (ushort) dev.Info.Descriptor.BcdDevice;
                         var product = dev.Info.ProductString?.Split(new[] {'\0'}, 2)[0];
                         var serial = dev.Info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
+#endif
                         switch (product)
                         {
                             case "Santroller" when Programming && !IsPico:
@@ -509,7 +526,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 await AssetUtils.ExtractZipAsync("dfu.zip", driverZip, driverFolder);
 
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
-                info.ArgumentList.AddRange(new[] {"-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf")});
+                info.ArgumentList.AddRange(new[] { "-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf") });
                 info.UseShellExecute = true;
                 info.CreateNoWindow = true;
                 info.Verb = "runas";
@@ -522,7 +539,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var rules = Path.Combine(appdataFolder, UdevFile);
                 await AssetUtils.ExtractFileAsync(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
-                info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});
+                info.ArgumentList.AddRange(new[] { "cp", rules, UdevPath });
                 info.UseShellExecute = true;
                 Process.Start(info);
             }
