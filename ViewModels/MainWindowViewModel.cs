@@ -447,15 +447,15 @@ namespace GuitarConfigurator.NetCore.ViewModels
 #if Windows
                         UsbRegistry r = dev.UsbRegistryInfo;
                         var product = "";
-                        if (e.Device.ClassGuid == WindowsDeviceNotifierAvalonia.ArdwiinoGUID)
+                        if (e.Device.Name.Contains(WindowsDeviceNotifierAvalonia.ArdwiinoGUID.ToString().ToLower()))
                         {
                             product = "Ardwiino";
-                        } else if (e.Device.ClassGuid == WindowsDeviceNotifierAvalonia.SantrollerGUID)
+                        } else if (e.Device.Name.Contains(WindowsDeviceNotifierAvalonia.SantrollerGUID.ToString().ToLower()))
                         {
                             product = "Santroller";
                         }
 
-                        var revision = (ushort)r.Rev;
+                        var revision = (ushort)0;
                         var serial = "";
 #else
                         var revision = (ushort) dev.Info.Descriptor.BcdDevice;
