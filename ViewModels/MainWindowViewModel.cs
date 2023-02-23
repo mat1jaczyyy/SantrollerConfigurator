@@ -156,7 +156,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
 #if Windows
             _deviceListener = new WindowsDeviceNotifierAvalonia();
                 
-            _ = Task.Delay(5000).ContinueWith(_ => (_deviceListener as WindowsDeviceNotifierAvalonia)!.StartEventLoop());
 #else
             _deviceListener = new LinuxDeviceNotifier();
 #endif
@@ -178,6 +177,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 deviceListAll.AddRange(deviceList);
                 WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.SantrollerGUID, out deviceList);
                 deviceListAll.AddRange(deviceList);
+                (_deviceListener as WindowsDeviceNotifierAvalonia)!.StartEventLoop();
 #else
                 List<UsbRegistry> deviceListAll = UsbDevice.AllDevices.AsList();
 #endif
@@ -482,6 +482,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.Add("-e");
                 info.RedirectStandardOutput = true;
+                info.CreateNoWindow = true;
                 var process = Process.Start(info);
                 if (process == null) return false;
                 var output = process.StandardOutput.ReadToEnd();
@@ -510,6 +511,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.AddRange(new[] {"-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf")});
                 info.UseShellExecute = true;
+                info.CreateNoWindow = true;
                 info.Verb = "runas";
                 Process.Start(info);
             }

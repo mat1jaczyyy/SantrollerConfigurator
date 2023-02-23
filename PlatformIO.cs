@@ -51,6 +51,7 @@ public class PlatformIo
         _portProcess.StartInfo.UseShellExecute = false;
         _portProcess.StartInfo.RedirectStandardOutput = true;
         _portProcess.StartInfo.RedirectStandardError = true;
+        _portProcess.StartInfo.CreateNoWindow = true;
     }
 
     public string FirmwareDir { get; }
@@ -65,28 +66,26 @@ public class PlatformIo
         await AssetUtils.ExtractZipAsync("firmware.zip", firmwareZipPath, FirmwareDir);
     }
 
-    public IObservable<PlatformIoState> InitialisePlatformIo()
+    private async Task InitialisePlatformIoAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
     {
-        var platformIoOutput =
-            new BehaviorSubject<PlatformIoState>(new PlatformIoState(0, "Searching for python", null));
-        _ = Task.Run(async () =>
         {
             // On startup, reinstall the firmware, this will make sure that an update goes out, and also makes sure that the firmware is clean.
-            await RevertFirmwareAsync(platformIoOutput);
+            await RevertFirmwareAsync(platformIoOutput).ConfigureAwait(false);
             await File.WriteAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"),
                 (await File.ReadAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"))).Replace(
                     "post:ardwiino_script_post.py",
-                    "post:ardwiino_script_post_tool.py"));
+                    "post:ardwiino_script_post_tool.py")).ConfigureAwait(false);
             if (File.Exists(_pioExecutable))
             {
                 // Make sure to update platform.io to whatever version we require. This is a noop and doesn't even require internet if the version is up to date.
-                var python = await FindPythonAsync(platformIoOutput);
+                var python = await FindPythonAsync(platformIoOutput).ConfigureAwait(false);
                 var installerProcess = new Process();
                 installerProcess.StartInfo.FileName = python;
                 installerProcess.StartInfo.Arguments = $"-m pip install platformio=={PlatformIOVersion}";
                 installerProcess.StartInfo.UseShellExecute = false;
                 installerProcess.StartInfo.RedirectStandardOutput = true;
                 installerProcess.StartInfo.RedirectStandardError = true;
+                installerProcess.StartInfo.CreateNoWindow = true;
                 installerProcess.OutputDataReceived += (_, e) =>
                     platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
                 installerProcess.ErrorDataReceived += (_, e) =>
@@ -99,7 +98,7 @@ public class PlatformIo
             else
             {
                 platformIoOutput.OnNext(new PlatformIoState(0, "Searching for python", null));
-                var python = await FindPythonAsync(platformIoOutput);
+                var python = await FindPythonAsync(platformIoOutput).ConfigureAwait(false);
                 platformIoOutput.OnNext(new PlatformIoState(60, "Installing Platform.IO", null));
                 var installerProcess = new Process();
                 installerProcess.StartInfo.FileName = python;
@@ -107,6 +106,7 @@ public class PlatformIo
                 installerProcess.StartInfo.UseShellExecute = false;
                 installerProcess.StartInfo.RedirectStandardOutput = true;
                 installerProcess.StartInfo.RedirectStandardError = true;
+                installerProcess.StartInfo.CreateNoWindow = true;
                 installerProcess.OutputDataReceived += (_, e) =>
                     platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
                 installerProcess.ErrorDataReceived += (_, e) =>
@@ -115,12 +115,12 @@ public class PlatformIo
                 installerProcess.BeginOutputReadLine();
                 installerProcess.BeginErrorReadLine();
                 await installerProcess.WaitForExitAsync().ConfigureAwait(false);
-                var task = RunPlatformIo(null, new[] {"pkg", "install"},
+                var task = RunPlatformIo(null, new[] { "pkg", "install" },
                     "Installing packages (This may take a while)",
                     60, 90, null);
                 task.Subscribe(platformIoOutput.OnNext);
                 await task.ToTask();
-                task = RunPlatformIo(null, new[] {"system", "prune", "-f"},
+                task = RunPlatformIo(null, new[] { "system", "prune", "-f" },
                     "Cleaning up", 90,
                     90, null);
                 task.Subscribe(platformIoOutput.OnNext);
@@ -128,7 +128,14 @@ public class PlatformIo
             }
 
             platformIoOutput.OnCompleted();
-        });
+        }
+    }
+
+    public IObservable<PlatformIoState> InitialisePlatformIo()
+    {
+        var platformIoOutput =
+            new BehaviorSubject<PlatformIoState>(new PlatformIoState(0, "Searching for python", null));
+        _ = InitialisePlatformIoAsync(platformIoOutput).ConfigureAwait(false);
         return platformIoOutput;
     }
 
@@ -164,6 +171,7 @@ public class PlatformIo
             process.StartInfo.WorkingDirectory = FirmwareDir;
             process.StartInfo.EnvironmentVariables["PLATFORMIO_CORE_DIR"] = pioFolder;
             process.StartInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
+            process.StartInfo.CreateNoWindow = true;
             var args = new List<string>(command);
             args.Insert(0, _pioExecutable);
             var sections = 5;
@@ -399,6 +407,7 @@ public class PlatformIo
         penvProcess.StartInfo.UseShellExecute = false;
         penvProcess.StartInfo.RedirectStandardOutput = true;
         penvProcess.StartInfo.RedirectStandardError = true;
+        penvProcess.StartInfo.CreateNoWindow = true;
         penvProcess.OutputDataReceived += (_, e) =>
         {
             platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
@@ -503,12 +512,12 @@ public class PlatformIo
         foreach (var executable in executables)
         {
             var pythonAppdataExecutable = Path.Combine(pythonFolder, executable);
-            if (File.Exists(pythonAppdataExecutable))
-            {
-                var unixFileInfo = new UnixFileInfo(pythonAppdataExecutable);
-                unixFileInfo.FileAccessPermissions |= FileAccessPermissions.UserExecute;
-                return pythonAppdataExecutable;
-            }
+            if (!File.Exists(pythonAppdataExecutable)) continue;
+#if !Windows
+            var unixFileInfo = new UnixFileInfo(pythonAppdataExecutable);
+            unixFileInfo.FileAccessPermissions |= FileAccessPermissions.UserExecute;
+#endif
+            return pythonAppdataExecutable;
         }
 
         return null;
@@ -516,9 +525,9 @@ public class PlatformIo
 
     private string[] GetPythonExecutables()
     {
-        var executables = new[] {"python3", "python", Path.Combine("bin", "python3.10")};
+        var executables = new[] { "python3", "python", Path.Combine("bin", "python3.10") };
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            executables = new[] {"python.exe", Path.Combine("Scripts", "python.exe")};
+            executables = new[] { "python.exe", Path.Combine("Scripts", "python.exe") };
 
         return executables;
     }
@@ -576,7 +585,7 @@ public class PlatformIo
     {
         public PlatformIoState WithLog(string log)
         {
-            return this with {Log = log};
+            return this with { Log = log };
         }
     }
 }

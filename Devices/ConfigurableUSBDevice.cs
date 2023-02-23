@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
-using LibUsbDotNet;
+using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
+using Version = SemanticVersioning.Version;
 
 namespace GuitarConfigurator.NetCore.Devices;
 
