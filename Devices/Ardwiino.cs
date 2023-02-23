@@ -11,6 +11,8 @@ using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
+using SemanticVersioning;
+using Version = SemanticVersioning.Version;
 
 namespace GuitarConfigurator.NetCore.Devices;
 

@@ -17,7 +17,9 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
+using LibUsbDotNet.LibUsb;
 using ProtoBuf;
+using Version = SemanticVersioning.Version;
 
 namespace GuitarConfigurator.NetCore.Devices;
 
@@ -33,10 +35,12 @@ public class Santroller : IConfigurableDevice
     private PlatformIoPort? _platformIoPort;
     private Version Version { get; }
     private Board Board { get; set; }
+    private Microcontroller _microcontroller;
     public bool Valid { get; }
     public string RfId { get; private set; }
 
     public string Serial { get; private set; }
+    
 
     // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
     //     new(0x1209, 0x2882, label: "Santroller",
@@ -48,6 +52,7 @@ public class Santroller : IConfigurableDevice
         _usbDevice = new SantrollerUsbDevice(device, path, product, serial, version);
         RfId = "";
         Serial = "";
+        _microcontroller = new Pico(Board.Generic);
         Load();
         _usbDevice.SetBoard(Board);
     }
@@ -59,6 +64,7 @@ public class Santroller : IConfigurableDevice
         Serial = "";
         Version = new Version(1, 0, 0);
         Valid = false;
+        _microcontroller = new Pico(Board.Generic);
         try
         {
             _serialPort = new SerialPort(_platformIoPort.Port, 57600, Parity.None, 8, StopBits.One);
@@ -131,6 +137,7 @@ public class Santroller : IConfigurableDevice
         var board = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadBoard, 32)).Replace("\0", "");
         var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
         Board = m.Board;
+        _microcontroller = m;
         RfId = GenerateRfId();
     }
 
@@ -322,15 +329,7 @@ public class Santroller : IConfigurableDevice
 
     public Microcontroller GetMicrocontroller(ConfigViewModel model)
     {
-        // try
-        // {
-        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("\0", "")
-            .Replace("L", "").Trim();
-        var fCpu = uint.Parse(fCpuStr);
-        var board = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadBoard, 32)).Replace("\0", "");
-        var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
-        Board = m.Board;
-        return m;
+        return _microcontroller;
     }
 
     public void StartTicking(ConfigViewModel model)
