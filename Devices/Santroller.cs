@@ -76,16 +76,20 @@ public class Santroller : IConfigurableDevice
             _serialPort.Open();
             // Santroller devices announce themselves over serial to make it easier to detect them.
             // Sometimes, there will be an extra null byte at the start of transmission, so we need to strip that out
-            var line = _serialPort.ReadLine().Replace("\0","").Trim();
+            var line = _serialPort.ReadLine().Replace("\0", "").Trim();
             if (line != "Santroller")
             {
                 return;
             }
+
             Version = Version.Parse(_serialPort.ReadLine().Trim());
             Load();
             Valid = true;
         }
         catch (TimeoutException)
+        {
+        }
+        catch (UnauthorizedAccessException)
         {
         }
     }

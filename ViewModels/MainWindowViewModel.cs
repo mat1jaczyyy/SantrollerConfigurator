@@ -388,7 +388,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     if (existingPorts.Contains(port.Port)) continue;
                     _currentPorts.Add(port.Port);
                     var arduino = new Arduino(Pio, port);
-                    _ = Task.Delay(500).ContinueWith(_ =>
+                    _ = Task.Delay(1000).ContinueWith(_ =>
                     {
                         if (arduino.Board.IsGeneric())
                         {
