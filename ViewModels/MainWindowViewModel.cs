@@ -56,6 +56,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private readonly ObservableAsPropertyHelper<bool> _migrationSupported;
 
         private readonly ObservableAsPropertyHelper<bool> _newDevice;
+        private readonly ObservableAsPropertyHelper<bool> _hasSidebar;
 
         private readonly Timer _timer = new();
 
@@ -122,6 +123,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
             });
             Devices = devices;
             Router.Navigate.Execute(new MainViewModel(this));
+            _hasSidebar = Router.CurrentViewModel
+                .Select(s => s is ConfigViewModel)
+                .ToProperty(this, s => s.HasSidebar);
             _migrationSupported = this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s?.MigrationSupported != false)
                 .ToProperty(this, s => s.MigrationSupported);
@@ -276,6 +280,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         }
 
         public bool Connected => _connected.Value;
+        public bool HasSidebar => _hasSidebar.Value;
 
         public bool ReadyToConfigure
         {

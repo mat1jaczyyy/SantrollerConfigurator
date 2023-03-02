@@ -3,28 +3,53 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
+        xmlns:viewModels="clr-namespace:GuitarConfigurator.NetCore.ViewModels"
+        xmlns:netCore="clr-namespace:GuitarConfigurator.NetCore"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GuitarConfigurator.NetCore.Views.MainWindow"
         TransparencyLevelHint="AcrylicBlur"
         Icon="/Assets/avalonia-logo.ico"
         Title="GuitarConfiguratorSharp"
         Background="Transparent"
-        ExtendClientAreaToDecorationsHint="True">
-
+        ExtendClientAreaToDecorationsHint="True"
+        x:DataType="viewModels:MainWindowViewModel"
+        x:CompileBindings="True">
+    <Window.Resources>
+        <netCore:OutputTemplateSelector x:Key="SidebarTemplate">
+            <DataTemplate DataType="viewModels:ConfigViewModel">
+                <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="240">
+                    <ExperimentalAcrylicBorder.Material>
+                        <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
+                    </ExperimentalAcrylicBorder.Material>
+                    <views:SidebarView></views:SidebarView>
+                </ExperimentalAcrylicBorder>
+            </DataTemplate>
+            <DataTemplate></DataTemplate>
+        </netCore:OutputTemplateSelector>
+    </Window.Resources>
     <DockPanel>
-        <ExperimentalAcrylicBorder Height="30" DockPanel.Dock="Top" IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.2" TintOpacity="1" />
-            </ExperimentalAcrylicBorder.Material>
-            <Panel>
-            </Panel>
-        </ExperimentalAcrylicBorder>
+        <DockPanel Height="30" DockPanel.Dock="Top" IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="240" IsVisible="{Binding HasSidebar}">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+                <views:SidebarView></views:SidebarView>
+            </ExperimentalAcrylicBorder>
+            <ExperimentalAcrylicBorder>
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+            </ExperimentalAcrylicBorder>
+        </DockPanel>
+        <ContentControl Content="{Binding Router.CurrentViewModel^}" ContentTemplate="{StaticResource SidebarTemplate}">
+        </ContentControl>
         <ExperimentalAcrylicBorder>
             <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.2" TintOpacity="1" />
+                <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" />
             </ExperimentalAcrylicBorder.Material>
-            <rxui:RoutedViewHost VerticalAlignment="Stretch" Router="{Binding Router}"/>
+            <rxui:RoutedViewHost VerticalAlignment="Stretch" Router="{Binding Router}" />
         </ExperimentalAcrylicBorder>
-        
+
     </DockPanel>
 </Window>

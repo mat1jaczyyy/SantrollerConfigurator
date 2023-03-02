@@ -1,0 +1,234 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:viewModels="clr-namespace:GuitarConfigurator.NetCore.ViewModels"
+             xmlns:netCore="clr-namespace:GuitarConfigurator.NetCore"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
+             x:Class="GuitarConfigurator.NetCore.Views.SidebarView"
+             x:CompileBindings="True"
+             Background="Transparent">
+    <UserControl.Styles>
+        <Style Selector="ComboBoxItem">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ComboBoxItem TextBlock">
+            <Setter Property="Padding" Value="{DynamicResource ComboBoxItemThemePadding}" />
+        </Style>
+    </UserControl.Styles>
+    <UserControl.Resources>
+        <netCore:EnumToStringConverter x:Key="EnumToStringConverter" />
+        <netCore:PinToStringConverter x:Key="PinToStringConverter" />
+        <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
+        <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
+            <TextBlock x:CompileBindings="False">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource PinToStringConverter }">
+                        <Binding />
+                        <Binding Path="$parent[UserControl].DataContext.Microcontroller" />
+                        <Binding Path="$parent[UserControl].DataContext" />
+                        <Binding Path="$parent[ComboBox].SelectedItem" />
+                        <Binding Path="$parent[ComboBox].DataContext" />
+                        <Binding Path="$parent" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DataTemplate>
+        <DataTemplate x:Key="ControllerEnumTemplate" DataType="system:Object">
+            <TextBlock x:CompileBindings="False">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
+                        <Binding />
+                        <Binding Path="$parent[UserControl].DataContext.DeviceType" />
+                        <Binding Path="$parent[UserControl].DataContext.RhythmType" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DataTemplate>
+        <DataTemplate x:Key="EnumToStringTemplate" DataType="system:Object">
+            <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
+        </DataTemplate>
+    </UserControl.Resources>
+    <Panel>
+        <ScrollViewer VerticalAlignment="Center">
+            <StackPanel Margin="0 0 0 40">
+                <StackPanel>
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Emulation Type"
+                               TextAlignment="Center" />
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedItem="{Binding EmulationType}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}"
+                              Items="{Binding EmulationTypes}" />
+                </StackPanel>
+                <StackPanel IsVisible="{Binding IsRf}" Orientation="Vertical">
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Channel"
+                                   TextAlignment="Center" />
+                        <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding RfChannel}"
+                                       Minimum="1"
+                                       Maximum="180" HorizontalAlignment="Stretch" />
+
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Transmitter ID"
+                                   TextAlignment="Center" />
+                        <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding RfId}"
+                                       Minimum="1"
+                                       Maximum="180" HorizontalAlignment="Stretch" />
+
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableSpi}">
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF MOSI Pin"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding RfMosi}"
+                                  Items="{Binding AvailableRfMosiPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableSpi}">
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF MISO Pin"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding RfMiso}"
+                                  Items="{Binding AvailableRfMisoPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableSpi}">
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF SCK Pin"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding RfSck}"
+                                  Items="{Binding AvailableRfSckPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0"
+                                   Text="RF Chip Select Not (CSN) Pin"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding RfCsn}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0"
+                                   Text="RF Chip Enable (CE) Pin"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding RfCe}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel IsVisible="{Binding IsKeyboard}">
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Mouse Movement Type"
+                               TextAlignment="Center" />
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedItem="{Binding MouseMovementType}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}"
+                              Items="{Binding MouseMovementTypes}" />
+                </StackPanel>
+                <StackPanel IsVisible="{Binding IsController}">
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type"
+                               TextAlignment="Center" />
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedItem="{Binding DeviceType}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}"
+                              Items="{Binding DeviceControllerTypes}" />
+                </StackPanel>
+
+                <StackPanel>
+                    <StackPanel.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="IsRhythm" />
+                            <Binding Path="IsController" />
+                        </MultiBinding>
+                    </StackPanel.IsVisible>
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Rhythm Game Type"
+                               TextAlignment="Center" />
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedItem="{Binding RhythmType}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}"
+                              Items="{Binding RhythmTypes}" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Windows Controller Mode"
+                               TextAlignment="Center" />
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedIndex="{Binding XInputOnWindows}">
+                        <ComboBoxItem>HID Game Controller</ComboBoxItem>
+                        <ComboBoxItem>XInput</ComboBoxItem>
+                    </ComboBox>
+
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock HorizontalAlignment="Stretch" Margin="20 20 20 0" Text="LED Type"
+                               TextAlignment="Center" />
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                              SelectedItem="{Binding LedType}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}" Items="{Binding LedTypes}" />
+                </StackPanel>
+                <StackPanel IsVisible="{Binding IsApa102}">
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Led Count"
+                               TextAlignment="Center" />
+                    <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding LedCount}"
+                                   Minimum="1"
+                                   Maximum="180" HorizontalAlignment="Stretch" />
+
+                </StackPanel>
+                <StackPanel Orientation="Vertical" IsVisible="{Binding IsApa102}">
+                    <StackPanel IsVisible="{Binding BindableSpi}">
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 CI / SCK Pin"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding Apa102Mosi}"
+                                  Items="{Binding AvailableApaMosiPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableSpi}">
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0"
+                                   Text="APA102 DI / MOSI Pin"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding Apa102Sck}"
+                                  Items="{Binding AvailableApaSckPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+
+                    </StackPanel>
+                </StackPanel>
+                <Button Command="{Binding AddOutput}" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                    Add Binding
+                </Button>
+                <Button Command="{Binding AddLedBinding}" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                    Add LED
+                </Button>
+                <Button Command="{Binding BindAllCommand}" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                    Bind All
+                </Button>
+                <Button Command="{Binding ResetWithConfirmationAsync}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                    Load Defaults
+                </Button>
+                <Button Command="{Binding ExpandAll}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                    Expand All
+                </Button>
+                <Button Command="{Binding CollapseAll}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                    Collapse All
+                </Button>
+                <Button Command="{Binding ClearOutputs}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                    Clear All
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
+    </Panel>
+</UserControl>
