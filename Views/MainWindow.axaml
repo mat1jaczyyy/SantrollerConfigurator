@@ -34,7 +34,6 @@
                 <ExperimentalAcrylicBorder.Material>
                     <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
                 </ExperimentalAcrylicBorder.Material>
-                <views:SidebarView></views:SidebarView>
             </ExperimentalAcrylicBorder>
             <ExperimentalAcrylicBorder>
                 <ExperimentalAcrylicBorder.Material>

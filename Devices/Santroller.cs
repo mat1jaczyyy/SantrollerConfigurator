@@ -40,7 +40,7 @@ public class Santroller : IConfigurableDevice
     public string RfId { get; private set; }
 
     public string Serial { get; private set; }
-    
+
 
     // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
     //     new(0x1209, 0x2882, label: "Santroller",
@@ -55,6 +55,10 @@ public class Santroller : IConfigurableDevice
         _microcontroller = new Pico(Board.Generic);
         Load();
         _usbDevice.SetBoard(Board);
+#if Windows
+        var versionBytes = ReadData(0, (byte)Commands.CommandReadVersion, 3);
+        Version = new Version(versionBytes[0], versionBytes[1], versionBytes[2]);
+#endif
     }
 
     public Santroller(PlatformIo pio, PlatformIoPort port)
@@ -103,7 +107,7 @@ public class Santroller : IConfigurableDevice
         }
 
         if (_serialPort == null) return Array.Empty<byte>();
-        _serialPort.Write(new[] {(byte) 0x1f, bRequest, (byte) (wValue & 0xFF), (byte) ((wValue << 8) & 0xFF)}, 0,
+        _serialPort.Write(new[] { (byte)0x1f, bRequest, (byte)(wValue & 0xFF), (byte)((wValue << 8) & 0xFF) }, 0,
             4);
         var size2 = _serialPort.ReadByte();
         if (size2 > size) return Array.Empty<byte>();
@@ -115,7 +119,6 @@ public class Santroller : IConfigurableDevice
         }
 
         return buffer;
-
     }
 
 
@@ -127,18 +130,18 @@ public class Santroller : IConfigurableDevice
         }
         else if (_serialPort != null)
         {
-            _serialPort.Write(new[] {(byte) 0x1e, bRequest}, 0, 1);
-            _serialPort.Write(new[] {(byte) buffer.Length}, 0, 1);
+            _serialPort.Write(new[] { (byte)0x1e, bRequest }, 0, 1);
+            _serialPort.Write(new[] { (byte)buffer.Length }, 0, 1);
             _serialPort.Write(buffer, 0, buffer.Length);
         }
     }
 
     private void Load()
     {
-        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("\0", "")
+        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte)Commands.CommandReadFCpu, 32)).Replace("\0", "")
             .Replace("L", "").Trim();
         var fCpu = uint.Parse(fCpuStr);
-        var board = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadBoard, 32)).Replace("\0", "");
+        var board = Encoding.UTF8.GetString(ReadData(0, (byte)Commands.CommandReadBoard, 32)).Replace("\0", "");
         var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
         Board = m.Board;
         _microcontroller = m;
@@ -182,7 +185,7 @@ public class Santroller : IConfigurableDevice
             return _usbDevice.IsOpen();
         }
 
-        return _serialPort is {IsOpen: true};
+        return _serialPort is { IsOpen: true };
     }
 
     private async Task TickAsync(ConfigViewModel model)
@@ -204,8 +207,8 @@ public class Santroller : IConfigurableDevice
                 var ports = model.Microcontroller.GetPortsForTicking(digital);
                 foreach (var (port, mask) in ports)
                 {
-                    var wValue = (ushort) (port | (mask << 8));
-                    var data = ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte));
+                    var wValue = (ushort)(port | (mask << 8));
+                    var data = ReadData(wValue, (byte)Commands.CommandReadDigital, sizeof(byte));
                     if (data.Length == 0) return;
 
                     var pins = data[0];
@@ -215,20 +218,20 @@ public class Santroller : IConfigurableDevice
                 foreach (var devicePin in analog)
                 {
                     var mask = model.Microcontroller.GetAnalogMask(devicePin);
-                    var wValue = (ushort) (model.Microcontroller.GetChannel(devicePin.Pin, false) | (mask << 8));
-                    var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
+                    var wValue = (ushort)(model.Microcontroller.GetChannel(devicePin.Pin, false) | (mask << 8));
+                    var val = BitConverter.ToUInt16(ReadData(wValue, (byte)Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     _analogRaw[devicePin.Pin] = val;
                 }
 
-                var ps2Raw = ReadData(0, (byte) Commands.CommandReadPs2, 9);
-                var wiiRaw = ReadData(0, (byte) Commands.CommandReadWii, 8);
-                var djLeftRaw = ReadData(0, (byte) Commands.CommandReadDjLeft, 3);
-                var djRightRaw = ReadData(0, (byte) Commands.CommandReadDjRight, 3);
-                var gh5Raw = ReadData(0, (byte) Commands.CommandReadGh5, 2);
-                var ghWtRaw = ReadData(0, (byte) Commands.CommandReadGhWt, sizeof(int));
-                var ps2ControllerType = ReadData(0, (byte) Commands.CommandGetExtensionPs2, 1);
-                var wiiControllerType = ReadData(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
+                var ps2Raw = ReadData(0, (byte)Commands.CommandReadPs2, 9);
+                var wiiRaw = ReadData(0, (byte)Commands.CommandReadWii, 8);
+                var djLeftRaw = ReadData(0, (byte)Commands.CommandReadDjLeft, 3);
+                var djRightRaw = ReadData(0, (byte)Commands.CommandReadDjRight, 3);
+                var gh5Raw = ReadData(0, (byte)Commands.CommandReadGh5, 2);
+                var ghWtRaw = ReadData(0, (byte)Commands.CommandReadGhWt, sizeof(int));
+                var ps2ControllerType = ReadData(0, (byte)Commands.CommandGetExtensionPs2, 1);
+                var wiiControllerType = ReadData(0, (byte)Commands.CommandGetExtensionWii, sizeof(short));
                 foreach (var output in model.Bindings)
                     output.Update(model.Bindings.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                         djRightRaw, gh5Raw,
@@ -255,7 +258,7 @@ public class Santroller : IConfigurableDevice
         var data = new List<byte>();
         while (true)
         {
-            var chunk = ReadData(start, (byte) Commands.CommandReadConfig, 64);
+            var chunk = ReadData(start, (byte)Commands.CommandReadConfig, 64);
             if (!chunk.Any()) break;
             data.AddRange(chunk);
             start += 64;
@@ -296,7 +299,7 @@ public class Santroller : IConfigurableDevice
         if (_platformIoPort != null)
         {
             _serialPort?.Close();
-            return Task.FromResult((string?) _platformIoPort.Port);
+            return Task.FromResult((string?)_platformIoPort.Port);
         }
 
         return _usbDevice != null ? _usbDevice.GetUploadPortAsync() : Task.FromResult<string?>(null);
@@ -324,7 +327,7 @@ public class Santroller : IConfigurableDevice
 
     public string GenerateRfId()
     {
-        var data = ReadData(0, (byte) Commands.CommandReadSerial, 20);
+        var data = ReadData(0, (byte)Commands.CommandReadSerial, 20);
         Serial = Encoding.UTF8.GetString(data);
         using SHA256 sha256Hash = SHA256.Create();
         var bytes = sha256Hash.ComputeHash(data);
@@ -375,8 +378,8 @@ public class Santroller : IConfigurableDevice
                 {
                     var devicePin = new DevicePin(pin, DevicePinMode.PullUp);
                     var mask = microcontroller.GetAnalogMask(devicePin);
-                    var wValue = (ushort) (microcontroller.GetChannel(pin, true) | (mask << 8));
-                    var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
+                    var wValue = (ushort)(microcontroller.GetChannel(pin, true) | (mask << 8));
+                    var val = BitConverter.ToUInt16(ReadData(wValue, (byte)Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     if (analogVals.ContainsKey(pin))
                     {
@@ -406,8 +409,8 @@ public class Santroller : IConfigurableDevice
         {
             foreach (var (port, mask) in ports)
             {
-                var wValue = (ushort) (port | (mask << 8));
-                var pins = (byte) (ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte))[0] & mask);
+                var wValue = (ushort)(port | (mask << 8));
+                var pins = (byte)(ReadData(wValue, (byte)Commands.CommandReadDigital, sizeof(byte))[0] & mask);
                 if (tickedPorts.ContainsKey(port))
                     if (tickedPorts[port] != pins)
                     {
@@ -415,7 +418,7 @@ public class Santroller : IConfigurableDevice
                         // Xor the old and new values to work out what changed, and then return the first changed bit
                         // Note that we also need to invert this, as pinsFromPortMask is configured assuming a pull up is in place,
                         // Which would then be expecting a zero for a active pin and a 1 for a inactive pin.
-                        microcontroller.PinsFromPortMask(port, mask, (byte) ~(pins ^ tickedPorts[port]), outPins);
+                        microcontroller.PinsFromPortMask(port, mask, (byte)~(pins ^ tickedPorts[port]), outPins);
                         _picking = false;
                         return outPins.First(s => s.Value).Key;
                     }
