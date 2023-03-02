@@ -11,20 +11,5 @@
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True">
 
-    <DockPanel>
-        <ExperimentalAcrylicBorder Height="30" DockPanel.Dock="Top" IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.2" TintOpacity="1" />
-            </ExperimentalAcrylicBorder.Material>
-            <Panel>
-            </Panel>
-        </ExperimentalAcrylicBorder>
-        <ExperimentalAcrylicBorder>
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.2" TintOpacity="1" />
-            </ExperimentalAcrylicBorder.Material>
-            <rxui:RoutedViewHost VerticalAlignment="Stretch" Router="{Binding Router}"/>
-        </ExperimentalAcrylicBorder>
-        
-    </DockPanel>
+    <rxui:RoutedViewHost VerticalAlignment="Stretch" Router="{Binding Router}" />
 </Window>
