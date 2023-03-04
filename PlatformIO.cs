@@ -115,12 +115,12 @@ public class PlatformIo
                 installerProcess.BeginOutputReadLine();
                 installerProcess.BeginErrorReadLine();
                 await installerProcess.WaitForExitAsync().ConfigureAwait(false);
-                var task = RunPlatformIo(null, new[] { "pkg", "install" },
+                var task = RunPlatformIo(null, new[] {"pkg", "install"},
                     "Installing packages (This may take a while)",
                     60, 90, null);
                 task.Subscribe(platformIoOutput.OnNext);
                 await task.ToTask();
-                task = RunPlatformIo(null, new[] { "system", "prune", "-f" },
+                task = RunPlatformIo(null, new[] {"system", "prune", "-f"},
                     "Cleaning up", 90,
                     90, null);
                 task.Subscribe(platformIoOutput.OnNext);
@@ -178,6 +178,7 @@ public class PlatformIo
             var isUsb = false;
             if (environment != null)
             {
+                percentageStep = progressEndingPercentage - progressStartingPercentage;
                 if (device is Arduino) sections = 10;
 
                 if (environment.EndsWith("_usb"))
@@ -190,7 +191,6 @@ public class PlatformIo
                     sections = 10;
                 }
 
-                percentageStep = progressEndingPercentage - progressStartingPercentage;
                 args.Add("--environment");
                 args.Add(environment);
                 if (uploading && !isUsb)
@@ -200,7 +200,7 @@ public class PlatformIo
                         platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                             $"{progressMessage} - Looking for device", null));
                         currentProgress += percentageStep / sections;
-                        sections = 2;
+                        sections = 4;
                     }
 
                     if (device != null)
@@ -300,6 +300,21 @@ public class PlatformIo
                         platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                             $"{progressMessage} - Uploading", null));
                         state = 2;
+                    }
+
+                    if (line.Contains("rp2040load"))
+                    {
+                        platformIoOutput.OnNext(new PlatformIoState(currentProgress,
+                            $"{progressMessage} - Uploading", null));
+                        ;
+                    }
+
+                    if (line.Contains("Loading into Flash:"))
+                    {
+                        var done = line.Count(s => s == '=') / 30.0;
+                        platformIoOutput.OnNext(new PlatformIoState(
+                            currentProgress + percentageStep / sections * done,
+                            $"{progressMessage} - Uploading", null));
                     }
 
                     if (line.Contains("reading on-chip flash data"))
@@ -525,9 +540,9 @@ public class PlatformIo
 
     private string[] GetPythonExecutables()
     {
-        var executables = new[] { "python3", "python", Path.Combine("bin", "python3.10") };
+        var executables = new[] {"python3", "python", Path.Combine("bin", "python3.10")};
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            executables = new[] { "python.exe", Path.Combine("Scripts", "python.exe") };
+            executables = new[] {"python.exe", Path.Combine("Scripts", "python.exe")};
 
         return executables;
     }
@@ -585,7 +600,7 @@ public class PlatformIo
     {
         public PlatformIoState WithLog(string log)
         {
-            return this with { Log = log };
+            return this with {Log = log};
         }
     }
 }

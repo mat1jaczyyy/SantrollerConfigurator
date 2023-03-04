@@ -463,6 +463,7 @@ public class Santroller : IConfigurableDevice
         CommandReadVersion,
         CommandReadSerial
     }
+    
 
     public string GetSerialPort()
     {

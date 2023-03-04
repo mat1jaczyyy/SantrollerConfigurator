@@ -1091,12 +1091,19 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 if (santrollerold.Serial == santroller.Serial)
                 {
                     Main.Complete(100);
+                    Device = device;
+                    santroller.StartTicking(this);
                 }
             } else if (!Main.Programming)
             {
                 Main.Complete(100);
+                Device = device;
+                santroller.StartTicking(this);
             }
         }
+
+        Device.DeviceAdded(device);
+
     }
 
     private void RemoveDevice(IConfigurableDevice device)

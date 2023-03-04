@@ -111,12 +111,18 @@ namespace GuitarConfigurator.NetCore.ViewModels
             AvailableDevices.Connect().Bind(out var devices).Subscribe();
             AvailableDevices.Connect().Subscribe(s =>
             {
+                IConfigurableDevice? item = null;
+                if (AvailableDevices.Items.Any())
+                {
+                    item = AvailableDevices.Items.First();
+                }
                 foreach (var change in s)
                 {
                     SelectedDevice = change.Reason switch
                     {
                         ListChangeReason.Add when SelectedDevice == null => change.Item.Current,
-                        ListChangeReason.Remove when SelectedDevice == change.Item.Current => null,
+                        ListChangeReason.Remove when SelectedDevice == change.Item.Current => item,
+                        ListChangeReason.Remove when SelectedDevice == null => item,
                         _ => SelectedDevice
                     };
                 }
@@ -422,11 +428,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 AvailableDevices.RemoveMany(AvailableDevices.Items.Where(device =>
                     device is Santroller santroller && santroller.GetSerialPort().Any() &&
                     !currentSerialPorts.Contains(santroller.GetSerialPort())));
-                if (_selectedDevice is Arduino arduinoDevice &&
-                    !currentSerialPorts.Contains(arduinoDevice.GetSerialPort()))
-                {
-                    _selectedDevice = null;
-                }
             }
 
             ReadyToConfigure = null != SelectedDevice && Installed;

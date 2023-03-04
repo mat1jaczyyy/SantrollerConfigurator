@@ -42,8 +42,6 @@ public class PicoDevice : IConfigurableDevice
 
     bool IConfigurableDevice.DeviceAdded(IConfigurableDevice device)
     {
-        Console.WriteLine("PICO!");
-        Console.WriteLine(device);
         if (device is Santroller controller) return true;
         return false;
     }

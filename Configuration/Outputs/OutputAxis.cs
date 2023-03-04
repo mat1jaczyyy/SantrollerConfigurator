@@ -121,30 +121,24 @@ public abstract class OutputAxis : Output
         get => Max;
         set => _calibrationMax = InputIsDj ? value : _calibrationMax;
     }
-
-    private Thickness ComputeDeadZoneMargin((int, int, bool, bool, int) s)
+    private Thickness ComputeDeadZoneMargin((int min, int max, bool trigger, bool inputIsUint, int deadZone) s)
     {
-        if (!s.Item4)
-        {
-            s.Item1 += short.MaxValue;
-            s.Item2 += short.MaxValue;
-        }
 
-        float min = Math.Min(s.Item1, s.Item2);
-        float max = Math.Max(s.Item1, s.Item2);
-
-        if (s.Item3)
+        float min = Math.Min(s.min, s.max);
+        float max = Math.Max(s.min, s.max);
+        var inverted = s.min > s.max;
+        if (s.trigger)
         {
-            if (s.Item1 < s.Item2)
-                max = min + s.Item5;
+            if (inverted)
+                min = max - s.deadZone;
             else
-                min = max - s.Item5;
+                max = min + s.deadZone;
         }
         else
         {
             var mid = (max + min) / 2;
-            min = mid - s.Item5;
-            max = mid + s.Item5;
+            min = mid - s.deadZone;
+            max = mid + s.deadZone;
         }
 
         var left = Math.Min(min / ushort.MaxValue * ProgressWidth, ProgressWidth);
@@ -187,26 +181,19 @@ public abstract class OutputAxis : Output
             case OutputAxisCalibrationState.DeadZone:
                 var min = Math.Min(Min, Max);
                 var max = Math.Max(Min, Max);
-                var valRaw = rawValue;
-                int deadZone;
-                if (valRaw < min)
-                    deadZone = min;
-                else if (valRaw > max)
-                    deadZone = max;
-                else
-                    deadZone = valRaw;
+                rawValue = Math.Min(Math.Max(min, rawValue), max);
 
                 if (Trigger)
                 {
                     if (Min < Max)
-                        DeadZone = valRaw - min;
+                        DeadZone = rawValue - min;
                     else
-                        DeadZone = max - valRaw;
+                        DeadZone = max - rawValue;
                 }
                 else
                 {
-                    // For Int, deadzone starts in the middle and grows in both directions
-                    DeadZone = Math.Abs((min + max) / 2 - deadZone);
+                    // For non triggers, deadzone starts in the middle and grows in both directions
+                    DeadZone = Math.Abs((min + max) / 2 - rawValue);
                 }
 
                 break;
@@ -224,51 +211,48 @@ public abstract class OutputAxis : Output
 
         this.RaisePropertyChanged(nameof(CalibrationText));
     }
-
-    private int Calculate((bool, int, int, int, int, bool, DeviceControllerType) values)
+    private int Calculate((bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType deviceControllerType) values)
     {
-        if (!values.Item1) return 0;
-        double val = values.Item2;
+        if (!values.enabled) return 0;
+        double val = values.value;
 
-        var min = (float) values.Item3;
-        var max = (float) values.Item4;
-        var deadZone = (float) values.Item5;
-        var trigger = values.Item6;
+        var min = (float) values.min;
+        var max = (float) values.max;
+        var deadZone = (float) values.deadZone;
+        var trigger = values.trigger;
+        var inverted = min > max;
         if (InputIsDj) return (int) (val * max);
-
         if (trigger)
         {
+            // Trigger is uint, so if the input is not, shove it forward to put it into the right range
             if (!InputIsUint)
             {
                 val += short.MaxValue;
-                min += short.MaxValue;
-                max += short.MaxValue;
             }
 
-            if (max > min)
+            if (inverted)
             {
-                if (val - min < deadZone) return 0;
+                min -= deadZone;
+                if (val > min) return 0;
             }
             else
             {
-                min -= deadZone;
-
-                if (val > min) return 0;
+                min += deadZone;
+                if (val < min) return 0;
             }
         }
         else
         {
+            // Standard axis is int, so if the input is not, then subtract to get it within the right range
             if (InputIsUint)
             {
                 val -= short.MaxValue;
-                min -= short.MaxValue;
-                max -= short.MaxValue;
             }
 
             var deadZoneCalc = val - (max + min) / 2;
             if (deadZoneCalc < deadZone && deadZoneCalc > -deadZone) return 0;
 
-            val = val - Math.Sign(val) * deadZone;
+            val -= Math.Sign(val) * deadZone;
             min += deadZone;
             max -= deadZone;
         }
@@ -366,27 +350,23 @@ public abstract class OutputAxis : Output
 
         var min = Min;
         var max = Max;
+        bool inverted = Min > Max;
         float multiplier;
         if (Trigger)
         {
-            if (!InputIsUint)
+            if (inverted)
             {
-                min += short.MaxValue;
-                max += short.MaxValue;
+                min -= DeadZone;
             }
-
-            if (max <= min) min -= DeadZone;
-
+            else
+            {
+                min += DeadZone;
+            }
+            
             multiplier = 1f / (max - min) * ushort.MaxValue;
         }
         else
         {
-            if (InputIsUint)
-            {
-                min -= short.MaxValue;
-                max -= short.MaxValue;
-            }
-
             min += DeadZone;
             max -= DeadZone;
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
