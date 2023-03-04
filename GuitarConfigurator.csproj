@@ -6,11 +6,9 @@
         <RootNamespace>GuitarConfigurator.NetCore</RootNamespace>
         <AvaloniaVersion>11.0.0-preview4</AvaloniaVersion>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-        <TrimMode>link</TrimMode>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
         <PublishReadyToRun>true</PublishReadyToRun>
-        <PublishTrimmed>true</PublishTrimmed>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">Windows</DefineConstants>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">POSIX</DefineConstants>
         <LangVersion>latestmajor</LangVersion>
