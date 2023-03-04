@@ -46,7 +46,9 @@
         <PackageReference Include="System.Text.Json" Version="8.0.0-preview.1.23110.8" />
     </ItemGroup>
     <ItemGroup>
-        <Content Include="Assets\Icons\Readme.txt" />
+        <Content Include="Assets\firmware.zip" />
+        <Content Include="Assets\dfu.zip" />
+        <Content Include="Assets\99-ardwiino.rules" />
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Views\UnoShortWindow.axaml.cs">
