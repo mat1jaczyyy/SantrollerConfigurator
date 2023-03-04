@@ -60,17 +60,9 @@ public class PlatformIo
     {
         var appdataFolder = AssetUtils.GetAppDataFolder();
         if (Directory.Exists(FirmwareDir)) Directory.Delete(FirmwareDir, true);
-        try
-        {
-            platformIoOutput.OnNext(new PlatformIoState(0, "Extracting Firmware", ""));
-            var firmwareZipPath = Path.Combine(appdataFolder, "firmware.zip");
-            await AssetUtils.ExtractZipAsync("firmware.zip", firmwareZipPath, FirmwareDir);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            throw ex;
-        }
+        platformIoOutput.OnNext(new PlatformIoState(0, "Extracting Firmware", ""));
+        var firmwareZipPath = Path.Combine(appdataFolder, "firmware.zip");
+        await AssetUtils.ExtractZipAsync("firmware.zip", firmwareZipPath, FirmwareDir);
     }
 
     private async Task InitialisePlatformIoAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
