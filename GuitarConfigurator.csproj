@@ -9,8 +9,8 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
         <PublishReadyToRun>true</PublishReadyToRun>
-        <TrimMode>partial</TrimMode>
-        <PublishTrimmed>true</PublishTrimmed>
+<!--        <TrimMode>partial</TrimMode>-->
+<!--        <PublishTrimmed>true</PublishTrimmed>-->
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">Windows</DefineConstants>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">POSIX</DefineConstants>
         <LangVersion>latestmajor</LangVersion>
