@@ -33,7 +33,8 @@ public struct Board
 
     public static readonly Board[] Atmega32U4Boards =
     {
-        new("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "arduino_micro_16", new List<uint> {0x0037, 0x0237},
+        new("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "arduino_micro_16",
+            new List<uint> {0x0037, 0x0237},
             false),
         new("a-micro", "Arduino Micro", 16000000, "arduino_micro_16", new List<uint> {0x8037, 0x8237}, false),
         new("micro", "Sparkfun Pro Micro 3.3V", 8000000, "sparkfun_promicro_8", new List<uint> {0x9204}, false),
@@ -42,52 +43,142 @@ public struct Board
         new("leonardo", "Arduino Leonardo 3.3V", 8000000, "arduino_leonardo_8", new List<uint>(), false),
         new("leonardo", "Arduino Micro / Pro Micro / Leonardo in Bootloader Mode", 16000000, "leonardo",
             new List<uint> {0x0036}, false),
-        new("micro", "Arduino Pro Micro in Bootloader Mode", 8000000, "sparkfun_promicro_8", new List<uint> {0x9203, 0x9207},
+        new("micro", "Arduino Pro Micro in Bootloader Mode", 8000000, "sparkfun_promicro_8",
+            new List<uint> {0x9203, 0x9207},
             false),
-        new("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "sparkfun_promicro_16", new List<uint> {0x9205}, false)
+        new("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "sparkfun_promicro_16", new List<uint> {0x9205},
+            false)
     };
 
     public static readonly Board[] Rp2040Boards =
     {
-        new("pico", "Raspberry PI Pico", 0, "pico", new List<uint>(), false),
-        new("adafruit_feather_rp2040", "Adafruit Feather RP2040", 0, "adafruit_feather_rp2040", new List<uint>(),
+        new("pico", "Raspberry PI Pico", 0, "pico", new List<uint> {0x000a}, false),
+        new("rpipicow", "Raspberry PI Pico W", 0, "picow", new List<uint>(0xf00a), false),
+        //Raspberry Pi
+        new("rpipico", "Raspberry Pi Pico", 0, "rpipico", new List<uint> {0x000a}, false),
+        new("rpipicow", "Raspberry Pi Pico W", 0, "rpipicow", new List<uint> {0xf00a}, false),
+
+        //0xCB
+        new("0xcb_helios", "0xCB Helios", 0, "0xcb_helios", new List<uint> {0xCB74}, false),
+
+        //Adafruit
+        new("adafruit_feather", "Adafruit Feather RP2040", 0, "adafruit_feather", new List<uint> {0x80f1}, false),
+        new("adafruit_feather_scorpio", "Adafruit Feather RP2040 SCORPIO", 0, "adafruit_feather_scorpio",
+            new List<uint> {0x8121}, false),
+        new("adafruit_feather_dvi", "Adafruit Feather RP2040 DVI", 0, "adafruit_feather_dvi", new List<uint> {0x8127},
             false),
-        new("adafruit_itsybitsy_rp2040", "Adafruit ItsyBitsy RP2040", 0, "adafruit_itsybitsy_rp2040",
-            new List<uint>(), false),
-        new("adafruit_feather_rp2040", "Adafruit KB2040", 0, "adafruit_feather_rp2040", new List<uint>(), false),
-        new("adafruit_qtpy_rp2040", "Adafruit QT Py RP2040", 0, "adafruit_qtpy_rp2040", new List<uint>(), false),
-        new("adafruit_trinkey_qt2040", "Adafruit Trinkey QT2040", 0, "adafruit_trinkey_qt2040", new List<uint>(),
+        new("adafruit_itsybitsy", "Adafruit ItsyBitsy RP2040", 0, "adafruit_itsybitsy", new List<uint> {0x80fd}, false),
+        new("adafruit_qtpy", "Adafruit QT Py RP2040", 0, "adafruit_qtpy", new List<uint> {0x80f7}, false),
+        new("adafruit_stemmafriend", "Adafruit STEMMA Friend RP2040", 0, "adafruit_stemmafriend",
+            new List<uint> {0x80e3}, false),
+        new("adafruit_trinkeyrp2040qt", "Adafruit Trinkey RP2040 QT", 0, "adafruit_trinkeyrp2040qt",
+            new List<uint> {0x8109}, false),
+        new("adafruit_macropad2040", "Adafruit MacroPad RP2040", 0, "adafruit_macropad2040", new List<uint> {0x8107},
             false),
-        new("arduino_nano_rp2040_connect", "Arduino Nano RP2040 Connect", 0, "arduino_nano_rp2040_connect",
-            new List<uint>(), false),
-        new("melopero_shake_rp2040", "Melopero Shake RP2040", 0, "melopero_shake_rp2040", new List<uint>(), false),
-        new("pimoroni_interstate75_rp2040", "Pimoroni Interstate 75", 0, "pimoroni_interstate75_rp2040",
-            new List<uint>(), false),
-        new("pimoroni_keybow2040", "Pimoroni Keybow 2040", 0, "pimoroni_keybow2040", new List<uint>(), false),
-        new("pimoroni_pga2040", "Pimoroni PGA2040", 0, "pimoroni_pga2040", new List<uint>(), false),
-        new("pimoroni_picolipo_4mb", "Pimoroni Pico LiPo (4MB)", 0, "pimoroni_picolipo_4mb", new List<uint>(),
+        new("adafruit_kb2040", "Adafruit KB2040", 0, "adafruit_kb2040", new List<uint> {0x8105}, false),
+
+        //Arduino
+        new("arduino_nano_connect", "Arduino Nano RP2040 Connect", 0, "arduino_nano_connect",
+            new List<uint> {0x005e, 0x805e, 0x015e, 0x025e}, false),
+
+        //BridgeTek
+        new("bridgetek_idm2040-7a", "BridgeTek IDM2040-7A", 0, "bridgetek_idm2040-7a", new List<uint> {0x1041}, false),
+
+        //Cytron
+        new("cytron_maker_nano_rp2040", "Cytron Maker Nano RP2040", 0, "cytron_maker_nano_rp2040",
+            new List<uint> {0x100f}, false),
+        new("cytron_maker_pi_rp2040", "Cytron Maker Pi RP2040", 0, "cytron_maker_pi_rp2040", new List<uint> {0x1000},
             false),
-        new("pimoroni_picolipo_16mb", "Pimoroni Pico LiPo (16MB)", 0, "pimoroni_picolipo_16mb", new List<uint>(),
+
+        //DatanoiseTV
+        new("datanoisetv_picoadk", "DatanoiseTV PicoADK", 0, "datanoisetv_picoadk", new List<uint> {0x000a}, false),
+
+        //DeRuiLab
+        new("flyboard2040_core", "DeRuiLab FlyBoard2040Core", 0, "flyboard2040_core", new List<uint> {0x008a}, false),
+
+        //DFRobot
+        new("dfrobot_beetle_rp2040", "DFRobot Beetle RP2040", 0, "dfrobot_beetle_rp2040", new List<uint> {0x4253},
             false),
-        new("pimoroni_picosystem_rp2040", "Pimoroni PicoSystem", 0, "pimoroni_picosystem_rp2040", new List<uint>(),
+
+        //ElectronicCat
+        new("electroniccats_huntercat_nfc", "ElectronicCats HunterCat NFC RP2040", 0, "electroniccats_huntercat_nfc",
+            new List<uint> {0x1037}, false),
+
+        //ExtremeElectronics
+        new("extelec_rc2040", "ExtremeElectronics RC2040", 0, "extelec_rc2040", new List<uint> {0xee20}, false),
+
+        //iLabs
+        new("challenger_2040_lte", "iLabs Challenger 2040 LTE", 0, "challenger_2040_lte", new List<uint> {0x100b},
             false),
-        new("pimoroni_plasma2040", "Pimoroni Plasma 2040", 0, "pimoroni_plasma2040", new List<uint>(), false),
-        new("pimoroni_tiny2040", "Pimoroni Tiny 2040", 0, "pimoroni_tiny2040", new List<uint>(), false),
-        new("pybstick26_rp2040", "RP2040 PYBStick", 0, "pybstick26_rp2040", new List<uint>(), false),
-        new("sparkfun_micromod_rp2040", "SparkFun MicroMod - RP2040", 0, "sparkfun_micromod_rp2040",
-            new List<uint>(), false),
-        new("sparkfun_promicro_rp2040", "SparkFun Pro Micro - RP2040", 0, "sparkfun_promicro_rp2040",
-            new List<uint>(), false),
-        new("sparkfun_thingplus_rp2040", "SparkFun Thing Plus - RP2040", 0, "sparkfun_thingplus_rp2040",
-            new List<uint>(), false),
-        new("vgaboard_rp2040", "Pimoroni Pico VGA Demo Base", 0, "vgaboard_rp2040", new List<uint>(), false),
-        new("waveshare_rp2040_lcd_0.96", "Waveshare RP2040-LCD-0.96", 0, "waveshare_rp2040_lcd_0.96",
-            new List<uint>(), false),
-        new("waveshare_rp2040_plus_4mb", "Waveshare RP2040-Plus (4MB)", 0, "waveshare_rp2040_plus_4mb",
-            new List<uint>(), false),
-        new("waveshare_rp2040_plus_16mb", "Waveshare RP2040-Plus (16MB)", 0, "waveshare_rp2040_plus_16mb",
-            new List<uint>(), false),
-        new("waveshare_rp2040_zero", "Waveshare RP2040-Zero", 0, "waveshare_rp2040_zero", new List<uint>(), false)
+        new("challenger_2040_lora", "iLabs Challenger 2040 LoRa", 0, "challenger_2040_lora", new List<uint> {0x1023},
+            false),
+        new("challenger_2040_subghz", "iLabs Challenger 2040 SubGHz", 0, "challenger_2040_subghz",
+            new List<uint> {0x1032}, false),
+        new("challenger_2040_wifi", "iLabs Challenger 2040 WiFi", 0, "challenger_2040_wifi", new List<uint> {0x1006},
+            false),
+        new("challenger_2040_wifi_ble", "iLabs Challenger 2040 WiFi/BLE", 0, "challenger_2040_wifi_ble",
+            new List<uint> {0x102C}, false),
+        new("challenger_nb_2040_wifi", "iLabs Challenger NB 2040 WiFi", 0, "challenger_nb_2040_wifi",
+            new List<uint> {0x100d}, false),
+        new("challenger_2040_sdrtc", "iLabs Challenger 2040 SD/RTC", 0, "challenger_2040_sdrtc",
+            new List<uint> {0x102d}, false),
+        new("challenger_2040_nfc", "iLabs Challenger 2040 NFC", 0, "challenger_2040_nfc", new List<uint> {0x1036},
+            false),
+        new("ilabs_rpico32", "iLabs RPICO32", 0, "ilabs_rpico32", new List<uint> {0x1010}, false),
+
+        //Melopero
+        new("melopero_cookie_rp2040", "Melopero Cookie RP2040", 0, "melopero_cookie_rp2040", new List<uint> {0x1011},
+            false),
+        new("melopero_shake_rp2040", "Melopero Shake RP2040", 0, "melopero_shake_rp2040", new List<uint> {0x1005},
+            false),
+
+        //nullbits
+        new("nullbits_bit_c_pro", "nullbits Bit-C PRO", 0, "nullbits_bit_c_pro", new List<uint> {0x6e61}, false),
+
+        //Pimoroni
+        new("pimoroni_pga2040", "Pimoroni PGA2040", 0, "pimoroni_pga2040", new List<uint> {0x1008}, false),
+
+        //Solder Party
+        new("solderparty_rp2040_stamp", "Solder Party RP2040 Stamp", 0, "solderparty_rp2040_stamp",
+            new List<uint> {0xa182}, false),
+
+        //SparkFun
+        new("sparkfun_promicrorp2040", "SparkFun ProMicro RP2040", 0, "sparkfun_promicrorp2040",
+            new List<uint> {0x0026}, false),
+        new("sparkfun_thingplusrp2040", "SparkFun Thing Plus RP2040", 0, "sparkfun_thingplusrp2040",
+            new List<uint> {0x0026}, false),
+
+        //Upesy
+        new("upesy_rp2040_devkit", "uPesy RP2040 DevKit", 0, "upesy_rp2040_devkit", new List<uint> {0x1007}, false),
+
+        //Seeed
+        new("seeed_xiao_rp2040", "Seeed XIAO RP2040", 0, "seeed_xiao_rp2040", new List<uint> {0x000a}, false),
+
+        //VCC-GND YD-2040 - Use generic SPI/4 because boards seem to come with varied flash modules but same name
+        new("vccgnd_yd_rp2040", "VCC-GND YD RP2040 0x2e8a", 0, "vccgnd_yd_rp2040", new List<uint> {0x800a}, false),
+
+        //Viyalab
+        new("viyalab_mizu", "Viyalab Mizu RP2040", 0, "viyalab_mizu", new List<uint> {0x000a}, false),
+
+        //Waveshare
+        new("waveshare_rp2040_zero", "Waveshare RP2040 Zero", 0, "waveshare_rp2040_zero", new List<uint> {0x0003},
+            false),
+        new("waveshare_rp2040_one", "Waveshare RP2040 One", 0, "waveshare_rp2040_one", new List<uint> {0x103a}, false),
+        new("waveshare_rp2040_plus_4mb", "Waveshare RP2040 Plus 4MB", 0, "waveshare_rp2040_plus_4mb",
+            new List<uint> {0x1020}, false),
+        new("waveshare_rp2040_plus_16mb", "Waveshare RP2040 Plus 16MB", 0, "waveshare_rp2040_plus_16mb",
+            new List<uint> {0x1020}, false),
+        new("waveshare_rp2040_lcd_0_96", "Waveshare RP2040 LCD 0.96", 0, "waveshare_rp2040_lcd_0_96",
+            new List<uint> {0x1021}, false),
+        new("waveshare_rp2040_lcd_1_28", "Waveshare RP2040 LCD 1.28", 0, "waveshare_rp2040_lcd_1_28",
+            new List<uint> {0x1039}, false),
+
+        //WIZnet
+        new("wiznet_5100s_evb_pico", "WIZnet W5100S-EVB-Pico", 0, "wiznet_5100s_evb_pico", new List<uint> {0x1027},
+            false),
+        new("wiznet_wizfi360_evb_pico", "WIZnet WizFi360-EVB-Pico", 0, "wiznet_wizfi360_evb_pico",
+            new List<uint> {0x1028}, false),
+        new("wiznet_5500_evb_pico", "WIZnet W5500-EVB-Pico", 0, "wiznet_5500_evb_pico", new List<uint> {0x1029}, false),
     };
 
     public static readonly Board[] MiniBoards =
@@ -137,7 +228,7 @@ public struct Board
         if (MegaBoards.Contains(board)) return new Mega(board);
 
         if (Rp2040Boards.Contains(board)) return new Pico(board);
-        
+
         // In terms of pin layout, the uno is close enough to a mini
         if (MiniBoards.Contains(board)) return new Uno(board);
 
