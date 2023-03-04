@@ -453,10 +453,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
 #if Windows
                         UsbRegistry r = dev.UsbRegistryInfo;
                         var product = "";
-                        if (e.Device.Name.Contains(WindowsDeviceNotifierAvalonia.ArdwiinoGUID.ToString().ToLower()))
+                        if (e.Device.Name.Contains(WindowsDeviceNotifierAvalonia.ArdwiinoGuid.ToString().ToLower()))
                         {
                             product = "Ardwiino";
-                        } else if (e.Device.Name.Contains(WindowsDeviceNotifierAvalonia.SantrollerGUID.ToString().ToLower()))
+                        } else if (e.Device.Name.Contains(WindowsDeviceNotifierAvalonia.SantrollerGuid.ToString().ToLower()))
                         {
                             product = "Santroller";
                         }
