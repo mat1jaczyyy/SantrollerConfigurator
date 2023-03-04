@@ -239,9 +239,9 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
         if (Model.DeviceType == DeviceControllerType.Gamepad)
         {
-            if (Outputs.Items.Any(s => s is PS3Axis)) return;
+            if (Outputs.Items.Any(s => s is Ps3Axis)) return;
             foreach (var pair in Ps3Axis)
-                Outputs.Add(new PS3Axis(Model,
+                Outputs.Add(new Ps3Axis(Model,
                     new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
@@ -249,6 +249,6 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             return;
         }
 
-        Outputs.RemoveMany(Outputs.Items.Where(s => s is PS3Axis));
+        Outputs.RemoveMany(Outputs.Items.Where(s => s is Ps3Axis));
     }
 }

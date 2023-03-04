@@ -52,6 +52,7 @@ public class LedIndex : ReactiveObject
     }
 }
 
+
 public abstract class Output : ReactiveObject, IDisposable
 {
     private readonly ObservableAsPropertyHelper<bool> _areLedsEnabled;
@@ -86,14 +87,16 @@ public abstract class Output : ReactiveObject, IDisposable
 
     private bool _expanded;
 
-    private Input? _input;
+    private Input _input;
     private Color _ledOff;
 
     private Color _ledOn;
 
-    protected Output(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, string name)
+    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, string name)
     {
-        Input = input;
+        _input = input;
+        Input.Output = this;
+
         LedOn = ledOn;
         LedOff = ledOff;
         LedIndices = new ObservableCollection<byte>(ledIndices);
@@ -140,7 +143,7 @@ public abstract class Output : ReactiveObject, IDisposable
         DigitalOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
     }
 
-    public Input? Input
+    public Input Input
     {
         get => _input;
         set => this.RaiseAndSetIfChanged(ref _input, value);

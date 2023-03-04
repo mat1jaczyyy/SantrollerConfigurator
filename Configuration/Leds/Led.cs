@@ -197,7 +197,7 @@ public class Led : Output
 
     public Led(ConfigViewModel model, bool outputEnabled, int pin, Color ledOn,
         Color ledOff, byte[] ledIndices, RumbleCommand command) : base(
-        model, null, ledOn, ledOff, ledIndices, EnumToStringConverter.Convert(command))
+        model, new FixedInput(model, 0), ledOn, ledOff, ledIndices, EnumToStringConverter.Convert(command))
     {
         Pin = pin;
         OutputEnabled = outputEnabled;

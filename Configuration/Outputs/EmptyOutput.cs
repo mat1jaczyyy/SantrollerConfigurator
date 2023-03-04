@@ -28,7 +28,7 @@ public class EmptyOutput : Output
 
     private MouseButtonType? _mouseButtonType;
 
-    public EmptyOutput(ConfigViewModel model) : base(model, null, Colors.Black, Colors.Black,
+    public EmptyOutput(ConfigViewModel model) : base(model, new FixedInput(model, 0), Colors.Black, Colors.Black,
         Array.Empty<byte>(), "Empty")
     {
         _isController = this.WhenAnyValue(x => x.Model.EmulationType)
@@ -135,7 +135,7 @@ public class EmptyOutput : Output
                     new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0,
                     1000, 10, drumAxisType),
-                Ps3AxisType ps3AxisType => new PS3Axis(Model,
+                Ps3AxisType ps3AxisType => new Ps3Axis(Model,
                     new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0,
                     ps3AxisType),
@@ -153,13 +153,13 @@ public class EmptyOutput : Output
 
             EmulationType.KeyboardMouse => this switch
             {
-                {MouseAxisType: not null} => new MouseAxis(Model, null, Colors.Black, Colors.Black,
+                {MouseAxisType: not null} => new MouseAxis(Model, new FixedInput(Model, 0), Colors.Black, Colors.Black,
                     Array.Empty<byte>(), 1, 0, 0,
                     MouseAxisType.Value),
-                {MouseButtonType: not null} => new MouseButton(Model, null, Colors.Black, Colors.Black,
+                {MouseButtonType: not null} => new MouseButton(Model, new FixedInput(Model, 0), Colors.Black, Colors.Black,
                     Array.Empty<byte>(), 5,
                     MouseButtonType.Value),
-                {Key: not null} => new KeyboardButton(Model, null, Colors.Black, Colors.Black,
+                {Key: not null} => new KeyboardButton(Model, new FixedInput(Model, 0), Colors.Black, Colors.Black,
                     Array.Empty<byte>(), 5,
                     Key.Value),
                 _ => null

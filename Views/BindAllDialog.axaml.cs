@@ -1,5 +1,7 @@
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using Avalonia.Styling;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
@@ -17,6 +19,10 @@ public class BindAllWindow : ReactiveWindow<BindAllWindowViewModel>
                 Close();
             }));
         });
+        RequestedThemeVariant = ThemeVariant.Dark;
         AvaloniaXamlLoader.Load(this);
     }
+
+    public Output Output => ViewModel!.Output;
+    public ConfigViewModel Model => ViewModel!.Model;
 }

@@ -10,7 +10,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoContract(SkipConstructor = true)]
 public class SerializedControllerAxis : SerializedOutput
 {
-    public SerializedControllerAxis(SerializedInput? input, StandardAxisType type, Color ledOn, Color ledOff,
+    public SerializedControllerAxis(SerializedInput input, StandardAxisType type, Color ledOn, Color ledOff,
         byte[] ledIndex, int min, int max, int deadzone)
     {
         Input = input;
@@ -23,7 +23,7 @@ public class SerializedControllerAxis : SerializedOutput
         LedIndex = ledIndex;
     }
 
-    [ProtoMember(1)] public override SerializedInput? Input { get; }
+    [ProtoMember(1)] public override SerializedInput Input { get; }
     [ProtoMember(2)] public override uint LedOn { get; }
     [ProtoMember(3)] public override uint LedOff { get; }
     [ProtoMember(8)] public override byte[] LedIndex { get; }
@@ -35,7 +35,7 @@ public class SerializedControllerAxis : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        var input = Input?.Generate(model);
+        var input = Input.Generate(model);
         return new ControllerAxis(model, input, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Min, Max,
             Deadzone,
             Type);

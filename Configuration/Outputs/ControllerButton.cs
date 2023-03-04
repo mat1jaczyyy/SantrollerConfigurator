@@ -13,7 +13,7 @@ public class ControllerButton : OutputButton
 {
     private readonly ObservableAsPropertyHelper<bool> _valid;
 
-    public ControllerButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
+    public ControllerButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce,
         type.ToString())
     {
@@ -71,6 +71,6 @@ public class ControllerButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedControllerButton(Input?.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);
+        return new SerializedControllerButton(Input.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);
     }
 }

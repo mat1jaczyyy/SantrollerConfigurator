@@ -1,6 +1,7 @@
 using System.Reactive;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using Avalonia.Styling;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
@@ -18,6 +19,8 @@ public class RaiseIssueWindow : ReactiveWindow<RaiseIssueWindowViewModel>
                 Close();
             }));
         });
+        
+        RequestedThemeVariant = ThemeVariant.Dark;
         AvaloniaXamlLoader.Load(this);
     }
 }

@@ -5,6 +5,7 @@
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:viewModels="clr-namespace:GuitarConfigurator.NetCore.ViewModels"
         xmlns:netCore="clr-namespace:GuitarConfigurator.NetCore"
+        xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GuitarConfigurator.NetCore.Views.BindAllWindow"
         TransparencyLevelHint="AcrylicBlur"
@@ -24,14 +25,14 @@
         <Panel.Resources>
             <netCore:PinToStringConverter x:Key="PinToStringConverter" />
             <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
-                <TextBlock x:CompileBindings="False">
+                <TextBlock>
                     <TextBlock.Text>
                         <MultiBinding Converter="{StaticResource PinToStringConverter }">
                             <Binding />
-                            <Binding Path="$parent[Panel].DataContext.Microcontroller" />
-                            <Binding Path="$parent[Panel].DataContext.Model" />
+                            <Binding Path="$parent[views:BindAllWindow].Model" />
                             <Binding Path="$parent[ComboBox].SelectedItem" />
-                            <Binding Path="$parent[Panel].DataContext.Output" />
+                            <Binding Path="$parent[views:BindAllWindow].Output" />
+                            <Binding Path="$parent[ComboBoxItem]" />
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>

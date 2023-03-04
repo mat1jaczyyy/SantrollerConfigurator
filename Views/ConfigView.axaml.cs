@@ -7,6 +7,7 @@ using Avalonia.ReactiveUI;
 using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
@@ -85,4 +86,7 @@ public class ConfigView : ReactiveUserControl<ConfigViewModel>
         await dialog.ShowDialog<BindAllWindowViewModel?>((Window) VisualRoot!);
         interaction.SetOutput(model);
     }
+
+    public RhythmType RhythmType => ViewModel!.RhythmType;
+    public DeviceControllerType DeviceType => ViewModel!.DeviceType;
 }

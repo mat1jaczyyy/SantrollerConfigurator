@@ -14,18 +14,18 @@ public class PinToStringConverter : IMultiValueConverter
 {
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (values[0] == null || values[1] == null || values[2] == null || values[3] == null || values[4] == null)
+        if (values[0] == null || values[1] == null || values[2] == null || values[3] == null)
             return null;
-        if (values[0] is not int || values[1] is not Microcontroller || values[2] is not ConfigViewModel ||
-            values[3] is not int || values[4] is not (Output or Input or ConfigViewModel)) return null;
+        if (values[0] is not int || values[1] is not ConfigViewModel ||
+            values[2] is not int || values[3] is not (Output or Input or ConfigViewModel)) return null;
         var pin = (int) values[0]!;
-        var selectedPin = (int) values[3]!;
-        var microcontroller = (Microcontroller) values[1]!;
-        var model = (ConfigViewModel) values[2]!;
-        var twi = values[4] is ITwi twiIo && twiIo.TwiPins().Contains(pin);
-        var spi = values[4] is ISpi spiIo && spiIo.SpiPins().Contains(pin) || values[4] is ConfigViewModel;
+        var selectedPin = (int) values[2]!;
+        var model = (ConfigViewModel) values[1]!;
+        var microcontroller = model.Microcontroller;
+        var twi = values[3] is ITwi twiIo && twiIo.TwiPins().Contains(pin);
+        var spi = values[3] is ISpi spiIo && spiIo.SpiPins().Contains(pin) || values[3] is ConfigViewModel;
 
-        var configs = values[4] switch
+        var configs = values[3] switch
         {
             Input input => input.PinConfigs,
             Output output => output.GetPinConfigs(),
@@ -33,6 +33,6 @@ public class PinToStringConverter : IMultiValueConverter
             _ => new List<PinConfig>()
         };
         return microcontroller.GetPin(pin, selectedPin, model.Bindings, twi, spi, configs, model,
-            values[5] is ComboBoxItem);
+            values[4] is ComboBoxItem);
     }
 }

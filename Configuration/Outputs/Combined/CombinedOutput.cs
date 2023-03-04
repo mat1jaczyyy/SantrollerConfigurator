@@ -8,7 +8,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public abstract class CombinedOutput : Output
 {
-    protected CombinedOutput(ConfigViewModel model, Input? input, string name) : base(model, input, Colors.Black,
+    protected CombinedOutput(ConfigViewModel model, Input input, string name) : base(model, input, Colors.Black,
         Colors.Black, Array.Empty<byte>(), name)
     {
     }

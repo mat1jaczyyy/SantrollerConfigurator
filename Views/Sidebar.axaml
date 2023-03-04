@@ -4,6 +4,7 @@
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:viewModels="clr-namespace:GuitarConfigurator.NetCore.ViewModels"
              xmlns:netCore="clr-namespace:GuitarConfigurator.NetCore"
+             xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.SidebarView"
              x:CompileBindings="True"
@@ -21,26 +22,25 @@
         <netCore:PinToStringConverter x:Key="PinToStringConverter" />
         <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
         <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
-            <TextBlock x:CompileBindings="False">
+            <TextBlock>
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource PinToStringConverter }">
                         <Binding />
-                        <Binding Path="$parent[UserControl].DataContext.Microcontroller" />
                         <Binding Path="$parent[UserControl].DataContext" />
                         <Binding Path="$parent[ComboBox].SelectedItem" />
                         <Binding Path="$parent[ComboBox].DataContext" />
-                        <Binding Path="$parent" />
+                        <Binding Path="$parent[ComboBoxItem]" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
         </DataTemplate>
         <DataTemplate x:Key="ControllerEnumTemplate" DataType="system:Object">
-            <TextBlock x:CompileBindings="False">
+            <TextBlock>
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                         <Binding />
-                        <Binding Path="$parent[UserControl].DataContext.DeviceType" />
-                        <Binding Path="$parent[UserControl].DataContext.RhythmType" />
+                        <Binding Path="$parent[views:SidebarView].DeviceType" />
+                        <Binding Path="$parent[views:SidebarView].RhythmType" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>

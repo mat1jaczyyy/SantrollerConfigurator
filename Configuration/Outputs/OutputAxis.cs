@@ -41,9 +41,9 @@ public abstract class OutputAxis : Output
 
     private int _deadZone;
 
-    protected OutputAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
+    protected OutputAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
-        int deadZone, string name, bool trigger) : base(model, input, ledOn, ledOff,
+        int deadZone, string name, bool trigger) : base(model, new FixedInput(model, 0), ledOn, ledOff,
         ledIndices,
         name)
     {

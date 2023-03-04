@@ -1,5 +1,6 @@
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using Avalonia.Styling;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
@@ -17,6 +18,7 @@ public class AreYouSureWindow : ReactiveWindow<AreYouSureWindowViewModel>
                 Close();
             }));
         });
+        RequestedThemeVariant = ThemeVariant.Dark;
         AvaloniaXamlLoader.Load(this);
     }
 }

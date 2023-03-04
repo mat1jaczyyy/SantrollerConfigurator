@@ -9,7 +9,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public abstract class OutputButton : Output
 {
-    protected OutputButton(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices,
+    protected OutputButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         byte debounce,
         string name) : base(model, input, ledOn, ledOff, ledIndices, name)
     {

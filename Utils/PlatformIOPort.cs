@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace GuitarConfigurator.NetCore.Utils;
@@ -39,8 +40,11 @@ public partial class PlatformIoPort
         var serializeOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
-            WriteIndented = true
+            WriteIndented = true,
+            TypeInfoResolver = SourceGenerationContext.Default
         };
+#pragma warning disable IL2026
         return JsonSerializer.Deserialize<PlatformIoPort[]>(json, serializeOptions)!;
+#pragma warning restore IL2026
     }
 }

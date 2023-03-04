@@ -37,6 +37,14 @@ public abstract class Input : ReactiveObject, IDisposable
         set => this.RaiseAndSetIfChanged(ref _analog, value);
     }
 
+    private Output? _output;
+
+    public Output? Output
+    {
+        get => _output;
+        set => this.RaiseAndSetIfChanged(ref _output, value);
+    }
+
     public abstract bool IsUint { get; }
 
     public int RawValue

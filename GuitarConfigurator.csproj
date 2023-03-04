@@ -9,6 +9,8 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
         <PublishReadyToRun>true</PublishReadyToRun>
+        <TrimMode>link</TrimMode>
+        <PublishTrimmed>true</PublishTrimmed>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">Windows</DefineConstants>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">POSIX</DefineConstants>
         <LangVersion>latestmajor</LangVersion>
@@ -44,11 +46,6 @@
         <PackageReference Include="System.IO.Ports" Version="8.0.0-preview.1.23110.8" />
         <PackageReference Include="SemanticVersioning" Version="2.0.2" />
         <PackageReference Include="System.Text.Json" Version="8.0.0-preview.1.23110.8" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Assets\firmware.zip" />
-        <Content Include="Assets\dfu.zip" />
-        <Content Include="Assets\99-ardwiino.rules" />
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Views\UnoShortWindow.axaml.cs">

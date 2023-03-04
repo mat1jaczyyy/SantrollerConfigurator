@@ -10,7 +10,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class DjAxis : OutputAxis
 {
-    public DjAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
+    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
         int deadZone, DjAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone, "DJ" + type,
         false)
     {

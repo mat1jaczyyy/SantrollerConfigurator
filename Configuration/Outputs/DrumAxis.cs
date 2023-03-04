@@ -69,7 +69,7 @@ public class DrumAxis : OutputAxis
 
     private int _threshold;
 
-    public DrumAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
+    public DrumAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
         int deadZone, int threshold, int debounce, DrumAxisType type) : base(model, input, ledOn, ledOff, ledIndices,
         min, max, deadZone,
         "Drum" + type, true)
@@ -303,7 +303,7 @@ public class DrumAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDrumAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
+        return new SerializedDrumAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
             DeadZone, Threshold, Debounce);
     }
 }

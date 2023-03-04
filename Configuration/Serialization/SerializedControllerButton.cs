@@ -10,7 +10,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoContract(SkipConstructor = true)]
 public class SerializedControllerButton : SerializedOutput
 {
-    public SerializedControllerButton(SerializedInput? input, Color ledOn, Color ledOff, byte[] ledIndex, byte debounce,
+    public SerializedControllerButton(SerializedInput input, Color ledOn, Color ledOff, byte[] ledIndex, byte debounce,
         StandardButtonType type)
     {
         Input = input;
@@ -21,7 +21,7 @@ public class SerializedControllerButton : SerializedOutput
         Type = type;
     }
 
-    [ProtoMember(1)] public override SerializedInput? Input { get; }
+    [ProtoMember(1)] public override SerializedInput Input { get; }
     [ProtoMember(2)] public override uint LedOn { get; }
     [ProtoMember(3)] public override uint LedOff { get; }
     [ProtoMember(6)] public override byte[] LedIndex { get; }
@@ -30,7 +30,7 @@ public class SerializedControllerButton : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        return new ControllerButton(model, Input?.Generate(model), Color.FromUInt32(LedOn),
+        return new ControllerButton(model, Input.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
     }
 }

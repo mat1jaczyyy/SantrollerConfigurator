@@ -14,7 +14,7 @@ public class ControllerAxis : OutputAxis
 {
     private readonly ObservableAsPropertyHelper<bool> _valid;
 
-    public ControllerAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
+    public ControllerAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
         int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
         deadZone,
@@ -158,7 +158,7 @@ public class ControllerAxis : OutputAxis
     }
     public override SerializedOutput Serialize()
     {
-        return new SerializedControllerAxis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
+        return new SerializedControllerAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
             DeadZone);
     }
 

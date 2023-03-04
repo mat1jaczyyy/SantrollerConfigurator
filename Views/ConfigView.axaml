@@ -8,8 +8,9 @@
              xmlns:combined="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs.Combined"
              xmlns:output="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs"
              xmlns:dj="clr-namespace:GuitarConfigurator.NetCore.Configuration.DJ"
-             xmlns:confnig="clr-namespace:GuitarConfigurator.NetCore.Configuration"
+             xmlns:config="clr-namespace:GuitarConfigurator.NetCore.Configuration"
              xmlns:leds="clr-namespace:GuitarConfigurator.NetCore.Configuration.Leds"
+             xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
@@ -27,26 +28,25 @@
         <netCore:PinToStringConverter x:Key="PinToStringConverter" />
         <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
         <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
-            <TextBlock x:CompileBindings="False">
+            <TextBlock>
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource PinToStringConverter }">
                         <Binding />
-                        <Binding Path="$parent[UserControl].DataContext.Microcontroller" />
                         <Binding Path="$parent[UserControl].DataContext" />
                         <Binding Path="$parent[ComboBox].SelectedItem" />
                         <Binding Path="$parent[ComboBox].DataContext" />
-                        <Binding Path="$parent" />
+                        <Binding Path="$parent[ComboBoxItem]" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
         </DataTemplate>
         <DataTemplate x:Key="ControllerEnumTemplate" DataType="system:Object">
-            <TextBlock x:CompileBindings="False">
+            <TextBlock>
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                         <Binding />
-                        <Binding Path="$parent[UserControl].DataContext.DeviceType" />
-                        <Binding Path="$parent[UserControl].DataContext.RhythmType" />
+                        <Binding Path="$parent[views:ConfigView].DeviceType" />
+                        <Binding Path="$parent[views:ConfigView].RhythmType" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
@@ -190,7 +190,6 @@
                             </StackPanel>
                         </StackPanel>
                         <Button
-                            x:CompileBindings="False"
                             Command="{Binding Remove}">
                             Remove
                         </Button>
@@ -203,15 +202,15 @@
             </DataTemplate>
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
-            <DataTemplate DataType="{x:Type confnig:GhWtTapInput}">
+            <DataTemplate DataType="{x:Type config:GhWtTapInput}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
                     <StackPanel Orientation="Horizontal">
-                        <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                        <Image  IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                                HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                                Source="{Binding Image}"
-                               Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}" />
+                               Opacity="{Binding Output.ImageOpacity}" />
                         <StackPanel Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
@@ -226,14 +225,14 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type confnig:Gh5NeckInput}">
+            <DataTemplate DataType="{x:Type config:Gh5NeckInput}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
-                    <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                    <Image  IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
-                           Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}" />
+                           Opacity="{Binding Output.ImageOpacity}" />
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -299,10 +298,10 @@
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
-                    <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                    <Image  IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
-                           Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}" />
+                           Opacity="{Binding Output.ImageOpacity}" />
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -329,14 +328,14 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type confnig:Ps2Input}">
+            <DataTemplate DataType="{x:Type config:Ps2Input}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
-                    <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                    <Image  IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
-                           Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}" />
+                           Opacity="{Binding Output.ImageOpacity}" />
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -403,14 +402,14 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type confnig:WiiInput}">
+            <DataTemplate DataType="{x:Type config:WiiInput}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
-                    <Image x:CompileBindings="False" IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                    <Image IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
-                           Opacity="{Binding $parent[StackPanel;1].DataContext.ImageOpacity}" />
+                           Opacity="{Binding Output.ImageOpacity}" />
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -437,7 +436,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type confnig:DirectInput}">
+            <DataTemplate DataType="{x:Type config:DirectInput}">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
                         <Label VerticalAlignment="Center" Width="300">Pin Mode</Label>
@@ -583,7 +582,7 @@
                             </StackPanel>
 
                         </StackPanel>
-                        <Button x:CompileBindings="False" IsVisible="{Binding !IsDigitalToAnalog}"
+                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
                                 Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
                                 Margin="10 0 0 0">
@@ -678,7 +677,7 @@
                         </StackPanel>
 
                     </StackPanel>
-                    <Button x:CompileBindings="False" IsVisible="{Binding !IsDigitalToAnalog}"
+                    <Button IsVisible="{Binding !IsDigitalToAnalog}"
                             Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
                             Margin="10 0 0 0">
@@ -735,7 +734,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type confnig:MacroInput}">
+            <DataTemplate DataType="{x:Type config:MacroInput}">
                 <StackPanel Orientation="Horizontal">
                     <ContentControl Content="{Binding Child1}"
                                     ContentTemplate="{StaticResource OutputTemplates}" />
@@ -954,7 +953,7 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="output:LedIndex">
-                                <ToggleButton x:CompileBindings="False" IsChecked="{Binding Selected }"
+                                <ToggleButton IsChecked="{Binding Selected }"
                                               Content="{Binding Index}" Width="50" HorizontalContentAlignment="Center" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -999,7 +998,7 @@
             <StackPanel DockPanel.Dock="Bottom">
                 <WrapPanel Margin="10" HorizontalAlignment="Center">
                     <Button Content="Write Configuration" Command="{Binding WriteConfig}" />
-                    <Button x:CompileBindings="False" Content="Revert device to Arduino" Command="{Binding Reset}" />
+                    <Button Content="Revert device to Arduino" Command="{Binding ResetAsync}" />
                     <Button Content="Configure another device" Command="{Binding GoBack}" />
                 </WrapPanel>
                 <TextBlock IsVisible="{Binding WriteToolTip, Converter={x:Static ObjectConverters.IsNotNull}}"
@@ -1034,7 +1033,6 @@
                                                                 ContentTemplate="{StaticResource OutputHeaderTemplates}" />
                                                 <Button
                                                     HorizontalAlignment="Right"
-                                                    x:CompileBindings="False"
                                                     Command="{Binding Remove}">
                                                     Remove
                                                 </Button>

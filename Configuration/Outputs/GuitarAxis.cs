@@ -10,7 +10,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class GuitarAxis : OutputAxis
 {
-    public GuitarAxis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff,
+    public GuitarAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff,
         byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type) : base(model, input, ledOn,
         ledOff, ledIndices, min, max, deadZone, "Guitar" + type, false)
     {

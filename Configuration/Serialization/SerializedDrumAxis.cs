@@ -10,7 +10,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoContract(SkipConstructor = true)]
 public class SerializedDrumAxis : SerializedOutput
 {
-    public SerializedDrumAxis(SerializedInput? input, DrumAxisType type, Color ledOn, Color ledOff, byte[] ledIndex,
+    public SerializedDrumAxis(SerializedInput input, DrumAxisType type, Color ledOn, Color ledOff, byte[] ledIndex,
         int min, int max, int deadzone, int threshold, int debounce)
     {
         Input = input;
@@ -25,7 +25,7 @@ public class SerializedDrumAxis : SerializedOutput
         Debounce = debounce;
     }
 
-    [ProtoMember(1)] public override SerializedInput? Input { get; }
+    [ProtoMember(1)] public override SerializedInput Input { get; }
     [ProtoMember(2)] public override uint LedOn { get; }
     [ProtoMember(3)] public override uint LedOff { get; }
     [ProtoMember(4)] public override byte[] LedIndex { get; }
@@ -38,7 +38,7 @@ public class SerializedDrumAxis : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        return new DrumAxis(model, Input?.Generate(model), Color.FromUInt32(LedOn),
+        return new DrumAxis(model, Input.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
             Threshold, Debounce, Type);
     }

@@ -7,9 +7,9 @@ using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
-public class PS3Axis : OutputAxis
+public class Ps3Axis : OutputAxis
 {
-    public PS3Axis(ConfigViewModel model, Input? input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
+    public Ps3Axis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
         int deadZone, Ps3AxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
         EnumToStringConverter.Convert(type), true)
@@ -67,7 +67,7 @@ public class PS3Axis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedPS3Axis(Input?.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
+        return new SerializedPS3Axis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
             DeadZone);
     }
 

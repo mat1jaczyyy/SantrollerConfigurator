@@ -16,7 +16,7 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
 
 
     protected CombinedTwiOutput(ConfigViewModel model, string twiType,
-        int twiFreq, string name, int? sda = null, int? scl = null) : base(model, null, name)
+        int twiFreq, string name, int? sda = null, int? scl = null) : base(model, new FixedInput(model, 0), name)
 
     {
         BindableTwi = Model.Microcontroller.TwiAssignable;

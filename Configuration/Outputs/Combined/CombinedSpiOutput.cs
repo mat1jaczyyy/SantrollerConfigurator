@@ -13,7 +13,7 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 
     protected CombinedSpiOutput(ConfigViewModel model, string spiType, uint spiFreq,
         bool cpol,
-        bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null) : base(model, null,
+        bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null) : base(model, new FixedInput(model, 0),
         name)
     {
         SpiType = spiType;
