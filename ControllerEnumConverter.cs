@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -447,7 +448,6 @@ public class ControllerEnumConverter : IMultiValueConverter
             case StandardButtonType button:
                 return GetButtonText(deviceControllerType, rhythmType, button);
         }
-
         var valueType = values[0]!.GetType();
         var fieldInfo = valueType.GetField(values[0]!.ToString()!, BindingFlags.Static | BindingFlags.Public)!;
         var attributes = (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
