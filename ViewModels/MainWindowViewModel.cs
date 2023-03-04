@@ -183,11 +183,11 @@ namespace GuitarConfigurator.NetCore.ViewModels
 #if Windows
                 List<UsbRegistry> deviceListAll = new List<UsbRegistry>();
                 List<WinUsbRegistry> deviceList = new List<WinUsbRegistry>();
-                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.UsbGUID, out deviceList);
+                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.UsbGuid, out deviceList);
                 deviceListAll.AddRange(deviceList);
-                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.ArdwiinoGUID, out deviceList);
+                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.ArdwiinoGuid, out deviceList);
                 deviceListAll.AddRange(deviceList);
-                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.SantrollerGUID, out deviceList);
+                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.SantrollerGuid, out deviceList);
                 deviceListAll.AddRange(deviceList);
                 (_deviceListener as WindowsDeviceNotifierAvalonia)!.StartEventLoop();
 #else
