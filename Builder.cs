@@ -153,10 +153,11 @@ public class Builder : Microsoft.Build.Utilities.Task
             pioProcess.Start();
             pioProcess.WaitForExit();
             // Drop some unused esp32 sdks
+            //platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3
             foreach (var dir in new[] {"esp32s3", "esp32s2", "esp32c3"})
             {
                 var path = Path.Combine(pioFolder, "packages", "framework-arduinoespressif32", "tools", "sdk", dir);
-                if (File.Exists(path))
+                if (Directory.Exists(path))
                 {
                     Directory.Delete(path, true);
                 }
