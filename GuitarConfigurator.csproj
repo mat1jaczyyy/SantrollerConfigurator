@@ -101,7 +101,7 @@
         <Copy SourceFiles="$(TargetDir)\runtimes\unix\lib\net7.0\System.IO.Ports.dll" DestinationFolder="$(TargetDir)" Condition="'$(OS)' != 'Windows_NT' " />
         <Copy SourceFiles="$(TargetDir)\runtimes\win\lib\net7.0\System.IO.Ports.dll" DestinationFolder="$(TargetDir)" Condition="'$(OS)' == 'Windows_NT' " />
     </Target>
-    <Target Name="ZipOutputPath" AfterTargets="BeforeBuild" BeforeTargets="GenerateAvaloniaResourcesTask">
+    <Target Name="ZipOutputPath" BeforeTargets="ResolveReferences">
         <Builder Parameter1="$(TargetDir)" Parameter2="$(MSBuildProjectDirectory)" />
     </Target>
 </Project>
