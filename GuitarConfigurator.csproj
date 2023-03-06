@@ -36,9 +36,6 @@
     </ItemGroup>
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
-        <AvaloniaResource Include="Assets\firmware.tar.xz" />
-        <AvaloniaResource Include="Assets\platformio.tar.xz" />
-        <AvaloniaResource Include="Assets\python.tar.xz" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.0.999-cibuild0030381-beta" />

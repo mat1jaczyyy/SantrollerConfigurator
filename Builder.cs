@@ -184,6 +184,7 @@ public class Builder : Microsoft.Build.Utilities.Task
         s7ZProcess.StartInfo.FileName = "tar";
         s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
         s7ZProcess.StartInfo.Arguments = $"cfvJ {Path.Combine(Parameter2,"Assets",archive)} {Path.GetFileName(path)}";
+        s7ZProcess.StartInfo.EnvironmentVariables["XZ_OPT"] = "-T0 -9";
         s7ZProcess.StartInfo.UseShellExecute = false;
         s7ZProcess.StartInfo.RedirectStandardOutput = true;
         s7ZProcess.StartInfo.RedirectStandardError = true;
