@@ -63,24 +63,10 @@ public class Builder : Microsoft.Build.Utilities.Task
             tarProcess.StartInfo.RedirectStandardError = true;
             tarProcess.StartInfo.CreateNoWindow = true;
             Log.LogMessage("Extracting python");
-            tarProcess.OutputDataReceived += (_, e) =>
-            {
-                if (e.Data != null)
-                {
-                    Log.LogMessage(e.Data);
-                }
-            };
-            tarProcess.ErrorDataReceived += (_, e) =>
-            {
-                if (e.Data != null)
-                {
-                    Log.LogMessage(e.Data);
-                }
-            };
             tarProcess.Start();
-            tarProcess.BeginOutputReadLine();
-            tarProcess.BeginErrorReadLine();
-            tarProcess.WaitForExit(60 * 60 * 1000);
+            var _ = ConsumeReaderAsync(tarProcess.StandardOutput);
+            _ = ConsumeReaderAsync(tarProcess.StandardError);
+            tarProcess.WaitForExit(-1);
 
             File.Delete(pythonLoc);
         }
@@ -94,24 +80,10 @@ public class Builder : Microsoft.Build.Utilities.Task
             installerProcess.StartInfo.RedirectStandardOutput = true;
             installerProcess.StartInfo.RedirectStandardError = true;
             installerProcess.StartInfo.CreateNoWindow = true;
-            installerProcess.OutputDataReceived += (_, e) =>
-            {
-                if (e.Data != null)
-                {
-                    Log.LogMessage(e.Data);
-                }
-            };
-            installerProcess.ErrorDataReceived += (_, e) =>
-            {
-                if (e.Data != null)
-                {
-                    Log.LogMessage(e.Data);
-                }
-            };
             installerProcess.Start();
-            installerProcess.BeginOutputReadLine();
-            installerProcess.BeginErrorReadLine();
-            installerProcess.WaitForExit(60 * 60 * 1000);
+            var _ = ConsumeReaderAsync(installerProcess.StandardOutput);
+            _ = ConsumeReaderAsync(installerProcess.StandardError);
+            installerProcess.WaitForExit(-1);
         }
 
         if (!File.Exists(Path.Combine(Parameter2, "Assets", "platformio.tar.xz")) || ForceBuild)
@@ -127,39 +99,20 @@ public class Builder : Microsoft.Build.Utilities.Task
             pioProcess.StartInfo.RedirectStandardOutput = true;
             pioProcess.StartInfo.RedirectStandardError = true;
             pioProcess.StartInfo.CreateNoWindow = true;
-            pioProcess.OutputDataReceived += (_, e) =>
-            {
-                if (e.Data != null)
-                {
-                    Log.LogMessage(e.Data);
-                }
-                else
-                {
-                    pioProcess.Kill();
-                }
-            };
-            pioProcess.ErrorDataReceived += (_, e) =>
-            {
-                if (e.Data != null)
-                {
-                    Log.LogMessage(e.Data);
-                }
-                else
-                {
-                    pioProcess.Kill();
-                }
-            };
+            
             pioProcess.Start();
-            pioProcess.BeginOutputReadLine();
-            pioProcess.BeginErrorReadLine();
-            pioProcess.WaitForExit(60 * 60 * 1000);
+            var _ = ConsumeReaderAsync(pioProcess.StandardOutput);
+            _ = ConsumeReaderAsync(pioProcess.StandardError);
+            pioProcess.WaitForExit(-1);
 
             // Now that we have packages downloaded, remove the cache, remove piolibs and download again. This will get us a .cache directory with only packages
 
             Directory.Delete(Path.Combine(pioFolder, ".cache"), true);
             Directory.Delete(Path.Combine(firmwareDir, ".pio"), true);
             pioProcess.Start();
-            pioProcess.WaitForExit(60 * 60 * 1000);
+            var _ = ConsumeReaderAsync(pioProcess.StandardOutput);
+            _ = ConsumeReaderAsync(pioProcess.StandardError);
+            pioProcess.WaitForExit(-1);
             // Drop some unused esp32 sdks
             foreach (var dir in new[] {"esp32s3", "esp32s2", "esp32c3"})
             {
@@ -186,6 +139,16 @@ public class Builder : Microsoft.Build.Utilities.Task
 
         return true;
     }
+    
+    async Task ConsumeReaderAsync(TextReader reader)
+    {
+        string? text;
+
+        while ((text = await reader.ReadLineAsync()) != null)
+        {
+            Log.LogMessage(text);
+        }
+    }
 
     private void Compress(string archive, string path)
     {
@@ -200,24 +163,10 @@ public class Builder : Microsoft.Build.Utilities.Task
         s7ZProcess.StartInfo.RedirectStandardOutput = true;
         s7ZProcess.StartInfo.RedirectStandardError = true;
         s7ZProcess.StartInfo.CreateNoWindow = true;
-        s7ZProcess.OutputDataReceived += (_, e) =>
-        {
-            if (e.Data != null)
-            {
-                Log.LogMessage(e.Data);
-            }
-        };
-        s7ZProcess.ErrorDataReceived += (_, e) =>
-        {
-            if (e.Data != null)
-            {
-                Log.LogMessage(e.Data);
-            }
-        };
         s7ZProcess.Start();
-        s7ZProcess.BeginOutputReadLine();
-        s7ZProcess.BeginErrorReadLine();
-        s7ZProcess.WaitForExit(60 * 60 * 1000);
+        var _ = ConsumeReaderAsync(s7ZProcess.StandardOutput);
+        _ = ConsumeReaderAsync(s7ZProcess.StandardError);
+        s7ZProcess.WaitForExit(-1);
     }
 
     public override bool Execute()
