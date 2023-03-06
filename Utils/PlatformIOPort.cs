@@ -48,3 +48,5 @@ public partial class PlatformIoPort
 #pragma warning restore IL2026
     }
 }
+[JsonSerializable(typeof(PlatformIoPort[]))]
+internal partial class SourceGenerationContext : JsonSerializerContext { }

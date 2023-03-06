@@ -448,4 +448,6 @@ $RECYCLE.BIN/
 ## Visual Studio Code
 ##
 .vscode/*
-Assets/firmware.zip
+Assets/firmware.tar.xz
+Assets/python.tar.xz
+Assets/platformio.tar.xz

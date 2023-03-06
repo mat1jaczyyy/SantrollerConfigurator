@@ -99,6 +99,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         public MainWindowViewModel()
         {
+            AssetUtils.InitNativeLibrary();
             _allDeviceInputTypes.AddRange(Enum.GetValues<DeviceInputType>());
             _allDeviceInputTypes
                 .Connect()
@@ -527,9 +528,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
                 var appdataFolder = AssetUtils.GetAppDataFolder();
-                var driverZip = Path.Combine(appdataFolder, "drivers.zip");
                 var driverFolder = Path.Combine(appdataFolder, "drivers");
-                await AssetUtils.ExtractZipAsync("dfu.zip", driverZip, driverFolder);
+                await AssetUtils.ExtractXzAsync("dfu.7z", driverFolder);
 
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.AddRange(new[] { "-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf") });

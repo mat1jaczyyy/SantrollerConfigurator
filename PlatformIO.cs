@@ -6,14 +6,10 @@ using System.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.Utils;
-using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Tar;
-using Mono.Unix;
 
 namespace GuitarConfigurator.NetCore;
 
@@ -22,10 +18,9 @@ public class PlatformIo
     //TODO: probably have a nice script to update this, but for now: ` pio pkg list | grep "@"|cut -f1 -d"(" |cut -c 11- | sort -u | wc -l`
     private const int PackageCount = 17;
 
-    private readonly string _pioExecutable;
+    private readonly string _pythonExecutable;
 
     private readonly Process _portProcess;
-    private readonly string PlatformIOVersion = "6.1.5";
 
     public PlatformIo()
     {
@@ -33,20 +28,19 @@ public class PlatformIo
         if (!File.Exists(appdataFolder)) Directory.CreateDirectory(appdataFolder);
 
         var pioFolder = Path.Combine(appdataFolder, "platformio");
-        var pioExecutablePath = Path.Combine(appdataFolder, "python", "bin", "platformio");
+        _pythonExecutable = Path.Combine(appdataFolder, "python", "bin", "python3");
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            pioExecutablePath = Path.Combine(appdataFolder, "python", "Scripts", "platformio.exe");
+            _pythonExecutable = Path.Combine(appdataFolder, "python", "python.exe");
 
-        _pioExecutable = pioExecutablePath;
         FirmwareDir = Path.Combine(appdataFolder, "firmware");
 
         _portProcess = new Process();
         _portProcess.EnableRaisingEvents = true;
-        _portProcess.StartInfo.FileName = _pioExecutable;
+        _portProcess.StartInfo.FileName = _pythonExecutable;
         _portProcess.StartInfo.WorkingDirectory = FirmwareDir;
         _portProcess.StartInfo.EnvironmentVariables["PLATFORMIO_CORE_DIR"] = pioFolder;
 
-        _portProcess.StartInfo.Arguments = "device list --json-output";
+        _portProcess.StartInfo.Arguments = "-m platformio device list --json-output";
 
         _portProcess.StartInfo.UseShellExecute = false;
         _portProcess.StartInfo.RedirectStandardOutput = true;
@@ -56,84 +50,46 @@ public class PlatformIo
 
     public string FirmwareDir { get; }
 
-    private async Task RevertFirmwareAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
+    private async Task InitialisePlatformIoAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
     {
+        // On startup, reinstall the firmware, this will make sure that an update goes out, and also makes sure that the firmware is clean.
+
         var appdataFolder = AssetUtils.GetAppDataFolder();
         if (Directory.Exists(FirmwareDir)) Directory.Delete(FirmwareDir, true);
         platformIoOutput.OnNext(new PlatformIoState(0, "Extracting Firmware", ""));
-        var firmwareZipPath = Path.Combine(appdataFolder, "firmware.zip");
-        await AssetUtils.ExtractZipAsync("firmware.zip", firmwareZipPath, FirmwareDir);
-    }
+        await AssetUtils.ExtractXzAsync("firmware.tar.xz", appdataFolder);
 
-    private async Task InitialisePlatformIoAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
-    {
-        {
-            // On startup, reinstall the firmware, this will make sure that an update goes out, and also makes sure that the firmware is clean.
-            await RevertFirmwareAsync(platformIoOutput).ConfigureAwait(false);
-            await File.WriteAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"),
-                (await File.ReadAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"))).Replace(
-                    "post:ardwiino_script_post.py",
-                    "post:ardwiino_script_post_tool.py")).ConfigureAwait(false);
-            if (File.Exists(_pioExecutable))
-            {
-                // Make sure to update platform.io to whatever version we require. This is a noop and doesn't even require internet if the version is up to date.
-                var python = await FindPythonAsync(platformIoOutput).ConfigureAwait(false);
-                var installerProcess = new Process();
-                installerProcess.StartInfo.FileName = python;
-                installerProcess.StartInfo.Arguments = $"-m pip install platformio=={PlatformIOVersion}";
-                installerProcess.StartInfo.UseShellExecute = false;
-                installerProcess.StartInfo.RedirectStandardOutput = true;
-                installerProcess.StartInfo.RedirectStandardError = true;
-                installerProcess.StartInfo.CreateNoWindow = true;
-                installerProcess.OutputDataReceived += (_, e) =>
-                    platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
-                installerProcess.ErrorDataReceived += (_, e) =>
-                    platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
-                installerProcess.Start();
-                installerProcess.BeginOutputReadLine();
-                installerProcess.BeginErrorReadLine();
-                await installerProcess.WaitForExitAsync().ConfigureAwait(false);
-            }
-            else
-            {
-                platformIoOutput.OnNext(new PlatformIoState(0, "Searching for python", null));
-                var python = await FindPythonAsync(platformIoOutput).ConfigureAwait(false);
-                platformIoOutput.OnNext(new PlatformIoState(60, "Installing Platform.IO", null));
-                var installerProcess = new Process();
-                installerProcess.StartInfo.FileName = python;
-                installerProcess.StartInfo.Arguments = $"-m pip install platformio=={PlatformIOVersion}";
-                installerProcess.StartInfo.UseShellExecute = false;
-                installerProcess.StartInfo.RedirectStandardOutput = true;
-                installerProcess.StartInfo.RedirectStandardError = true;
-                installerProcess.StartInfo.CreateNoWindow = true;
-                installerProcess.OutputDataReceived += (_, e) =>
-                    platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
-                installerProcess.ErrorDataReceived += (_, e) =>
-                    platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
-                installerProcess.Start();
-                installerProcess.BeginOutputReadLine();
-                installerProcess.BeginErrorReadLine();
-                await installerProcess.WaitForExitAsync().ConfigureAwait(false);
-                var task = RunPlatformIo(null, new[] {"pkg", "install"},
-                    "Installing packages (This may take a while)",
-                    60, 90, null);
-                task.Subscribe(platformIoOutput.OnNext);
-                await task.ToTask();
-                task = RunPlatformIo(null, new[] {"system", "prune", "-f"},
-                    "Cleaning up", 90,
-                    90, null);
-                task.Subscribe(platformIoOutput.OnNext);
-                await task.ToTask();
-            }
+        var pythonDir = Path.Combine(appdataFolder, "python");
+        if (Directory.Exists(pythonDir)) Directory.Delete(pythonDir, true);
+        platformIoOutput.OnNext(new PlatformIoState(30, "Extracting Python", ""));
+        await AssetUtils.ExtractXzAsync("python.tar.xz", appdataFolder);
 
-            platformIoOutput.OnCompleted();
-        }
+        var platformIoDir = Path.Combine(appdataFolder, "platformio");
+        if (Directory.Exists(platformIoDir)) Directory.Delete(platformIoDir, true);
+        platformIoOutput.OnNext(new PlatformIoState(60, "Extracting Platform.IO", ""));
+        await AssetUtils.ExtractXzAsync("platformio.tar.xz", appdataFolder);
+        
+        await File.WriteAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"),
+            (await File.ReadAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"))).Replace(
+                "post:ardwiino_script_post.py",
+                "post:ardwiino_script_post_tool.py")).ConfigureAwait(false);
+        var task = RunPlatformIo(null, new[] {"pkg", "install"},
+            "Installing packages (This may take a while)",
+            60, 90, null);
+        task.Subscribe(platformIoOutput.OnNext);
+        await task.ToTask();
+        task = RunPlatformIo(null, new[] {"system", "prune", "-f"},
+            "Cleaning up", 90,
+            90, null);
+        task.Subscribe(platformIoOutput.OnNext);
+        await task.ToTask();
+        platformIoOutput.OnCompleted();
     }
 
     public IObservable<PlatformIoState> InitialisePlatformIo()
     {
         var platformIoOutput =
-            new BehaviorSubject<PlatformIoState>(new PlatformIoState(0, "Searching for python", null));
+            new BehaviorSubject<PlatformIoState>(new PlatformIoState(0, "Setting up", null));
         _ = InitialisePlatformIoAsync(platformIoOutput).ConfigureAwait(false);
         return platformIoOutput;
     }
@@ -163,16 +119,16 @@ public class PlatformIo
             var uploading = environment != null && command.Length > 1;
             var appdataFolder = AssetUtils.GetAppDataFolder();
             var pioFolder = Path.Combine(appdataFolder, "platformio");
-            var python = await FindPythonAsync(platformIoOutput);
             var process = new Process();
             process.EnableRaisingEvents = true;
-            process.StartInfo.FileName = python;
+            process.StartInfo.FileName = _pythonExecutable;
             process.StartInfo.WorkingDirectory = FirmwareDir;
             process.StartInfo.EnvironmentVariables["PLATFORMIO_CORE_DIR"] = pioFolder;
             process.StartInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
             process.StartInfo.CreateNoWindow = true;
             var args = new List<string>(command);
-            args.Insert(0, _pioExecutable);
+            args.Insert(0, "-m");
+            args.Insert(1, "platformio");
             var sections = 5;
             var isUsb = false;
             if (environment != null)
@@ -411,132 +367,6 @@ public class PlatformIo
         return platformIoOutput;
     }
 
-    private async Task<string?> SetupVenvAsync(string pythonApp, string pythonFolder,
-        BehaviorSubject<PlatformIoState> platformIoOutput)
-    {
-        var error = false;
-        var penvProcess = new Process();
-        penvProcess.StartInfo.FileName = pythonApp;
-        penvProcess.StartInfo.Arguments = $"-m venv {pythonFolder}";
-        penvProcess.StartInfo.UseShellExecute = false;
-        penvProcess.StartInfo.RedirectStandardOutput = true;
-        penvProcess.StartInfo.RedirectStandardError = true;
-        penvProcess.StartInfo.CreateNoWindow = true;
-        penvProcess.OutputDataReceived += (_, e) =>
-        {
-            platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
-            // No support for venv here, so just fall back to downloading python in that case.
-            if (e.Data != null && e.Data!.Contains("ensurepip is not"))
-            {
-                error = true;
-                Directory.Delete(pythonFolder, true);
-                Console.WriteLine("Stdout");
-            }
-        };
-        penvProcess.ErrorDataReceived += (_, e) => platformIoOutput.OnNext(platformIoOutput.Value.WithLog(e.Data!));
-        penvProcess.Start();
-        penvProcess.BeginOutputReadLine();
-        penvProcess.BeginErrorReadLine();
-        await penvProcess.WaitForExitAsync();
-        if (error) return null;
-
-        var executables = GetPythonExecutables();
-        foreach (var executable in executables)
-        {
-            var pythonAppdataExecutable = Path.Combine(pythonFolder, executable);
-            if (File.Exists(pythonAppdataExecutable)) return pythonAppdataExecutable;
-        }
-
-        return null;
-    }
-
-    private async Task<string?> FindPythonAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
-    {
-        var appdataFolder = AssetUtils.GetAppDataFolder();
-        var pythonFolder = Path.Combine(appdataFolder, "python");
-        var pythonLoc = Path.Combine(pythonFolder, "python.tar.gz");
-        var executables = GetPythonExecutables();
-        Directory.CreateDirectory(appdataFolder);
-
-        foreach (var executable in executables)
-        {
-            var pythonAppdataExecutable = Path.Combine(pythonFolder, executable);
-            if (File.Exists(pythonAppdataExecutable)) return pythonAppdataExecutable;
-        }
-
-        string? foundExecutable = null;
-        foreach (var executable in executables)
-        {
-            foundExecutable = GetFullPath(executable);
-            if (foundExecutable == null) continue;
-            var ret = await SetupVenvAsync(executable, pythonFolder, platformIoOutput);
-            if (ret != null) return ret;
-        }
-
-        Directory.CreateDirectory(pythonFolder);
-        if (foundExecutable == null)
-        {
-            platformIoOutput.OnNext(new PlatformIoState(10, "Downloading python portable", null));
-            var pythonJsonLoc = Path.Combine(pythonFolder, "python.json");
-            var arch = GetSysType();
-            using (var download = new HttpClientDownloadWithProgress(
-                       "https://api.github.com/repos/indygreg/python-build-standalone/releases/62235403",
-                       pythonJsonLoc))
-            {
-                await download.StartDownloadAsync().ConfigureAwait(false);
-            }
-
-            var jsonRelease = await File.ReadAllTextAsync(pythonJsonLoc);
-            var release = GithubRelease.FromJson(jsonRelease);
-            var found = false;
-            foreach (var asset in release.Assets)
-                if (asset.Name.EndsWith($"{arch}-install_only.tar.gz"))
-                {
-                    using (var download =
-                           new HttpClientDownloadWithProgress(asset.BrowserDownloadUrl.ToString(), pythonLoc))
-                    {
-                        // This isnt right, the percentage bar goes too far
-                        download.ProgressChanged += (_, _, percentage) =>
-                            platformIoOutput.OnNext(new PlatformIoState(20 + percentage * 0.4 ?? 0,
-                                "Downloading python portable", null));
-                        await download.StartDownloadAsync().ConfigureAwait(false);
-                    }
-
-                    found = true;
-                    break;
-                }
-
-            if (!found) return null;
-
-            platformIoOutput.OnNext(new PlatformIoState(60, "Extracting python portable", null));
-            await using (var inStream = File.OpenRead(pythonLoc))
-            {
-                Stream gzipStream = new GZipInputStream(inStream);
-
-                var tarArchive = TarArchive.CreateInputTarArchive(gzipStream, Encoding.UTF8);
-                tarArchive.ExtractContents(appdataFolder);
-                tarArchive.Close();
-
-                gzipStream.Close();
-                File.Delete(pythonLoc);
-                File.Delete(pythonJsonLoc);
-            }
-        }
-
-        foreach (var executable in executables)
-        {
-            var pythonAppdataExecutable = Path.Combine(pythonFolder, executable);
-            if (!File.Exists(pythonAppdataExecutable)) continue;
-#if !Windows
-            var unixFileInfo = new UnixFileInfo(pythonAppdataExecutable);
-            unixFileInfo.FileAccessPermissions |= FileAccessPermissions.UserExecute;
-#endif
-            return pythonAppdataExecutable;
-        }
-
-        return null;
-    }
-
     private string[] GetPythonExecutables()
     {
         var executables = new[] {"python3", "python", Path.Combine("bin", "python3.10")};
@@ -546,38 +376,6 @@ public class PlatformIo
         return executables;
     }
 
-    private string GetSysType()
-    {
-        var arch = "unknown";
-        switch (RuntimeInformation.OSArchitecture)
-        {
-            case Architecture.X86:
-                arch = "i686";
-                break;
-            case Architecture.X64:
-                arch = "x86_64";
-                break;
-            case Architecture.Arm:
-                arch = "armv6l";
-                break;
-            case Architecture.Arm64:
-                arch = "aarch64";
-                break;
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return $"{arch}-pc-windows-msvc-shared";
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return $"{arch}-apple-darwin";
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return $"{arch}-unknown-linux-gnu";
-
-        return "unsupported";
-    }
-
-    public bool ExistsOnPath(string fileName)
-    {
-        return GetFullPath(fileName) != null;
-    }
 
     private string? GetFullPath(string fileName)
     {

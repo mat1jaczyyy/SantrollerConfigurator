@@ -1,10 +1,12 @@
 using System;
 using System.IO;
-using System.IO.Compression;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Platform;
+using Joveler.Compression.XZ;
+using System.Formats.Tar;
 
 namespace GuitarConfigurator.NetCore;
 
@@ -20,11 +22,22 @@ public class AssetUtils
         await target.CopyToAsync(f).ConfigureAwait(false);
     }
 
-    public static async Task ExtractZipAsync(string zip, string zipLocation, string location)
+    public static void InitNativeLibrary()
     {
-        await ExtractFileAsync(zip, zipLocation);
-        ZipFile.ExtractToDirectory(zipLocation, location);
-        File.Delete(zipLocation);
+        XZInit.GlobalInit();
+    }
+
+    public static async Task ExtractXzAsync(string archiveFile, string location)
+    {
+        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
+        var uri = new Uri($"avares://{assemblyName}/Assets/{archiveFile}");
+        await using var target = assets!.Open(uri);
+        var decompOpts = new XZDecompressOptions();
+        var opts = new XZThreadedDecompressOptions();
+        opts.Threads = Environment.ProcessorCount;
+        await using XZStream zs = new XZStream(target, decompOpts, opts);
+        await TarFile.ExtractToDirectoryAsync(zs, location, true);
     }
 
     public static string GetAppDataFolder()
