@@ -133,12 +133,20 @@ public class Builder : Microsoft.Build.Utilities.Task
                 {
                     Log.LogMessage(e.Data);
                 }
+                else
+                {
+                    Log.LogMessage("Done?");
+                }
             };
             pioProcess.ErrorDataReceived += (_, e) =>
             {
                 if (e.Data != null)
                 {
                     Log.LogMessage(e.Data);
+                }
+                else
+                {
+                    Log.LogMessage("Done?");
                 }
             };
             pioProcess.Start();

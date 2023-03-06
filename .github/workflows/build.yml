@@ -5,12 +5,12 @@ jobs:
     name: Build (macOS)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
       - name: codesign
         id: codesign
-        uses: apple-actions/import-codesign-certs@v1
+        uses: apple-actions/import-codesign-certs@master
         with: 
           p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
           p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
@@ -44,7 +44,7 @@ jobs:
     name: Build (Linux)
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
       - name: Setup .NET Core SDK
@@ -108,7 +108,7 @@ jobs:
     needs: [build-linux, build-mac, build-windows]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           persist-credentials: false
       - name: Download Windows Artifacts
