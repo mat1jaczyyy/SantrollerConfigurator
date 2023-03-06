@@ -135,7 +135,7 @@ public class Builder : Microsoft.Build.Utilities.Task
                 }
                 else
                 {
-                    Log.LogMessage("Done?");
+                    pioProcess.Kill();
                 }
             };
             pioProcess.ErrorDataReceived += (_, e) =>
@@ -146,7 +146,7 @@ public class Builder : Microsoft.Build.Utilities.Task
                 }
                 else
                 {
-                    Log.LogMessage("Done?");
+                    pioProcess.Kill();
                 }
             };
             pioProcess.Start();
