@@ -22,7 +22,7 @@ public class Builder : Microsoft.Build.Utilities.Task
     {
         var appdataFolder = Path.Combine(Parameter1, "SantrollerConfigurator");
         if (!File.Exists(appdataFolder)) Directory.CreateDirectory(appdataFolder);
-        
+
         var pioFolder = Path.Combine(appdataFolder, "platformio");
         if (!File.Exists(appdataFolder)) Directory.CreateDirectory(pioFolder);
 
@@ -33,7 +33,7 @@ public class Builder : Microsoft.Build.Utilities.Task
 
         // Download python
         var pythonFolder = Path.Combine(appdataFolder, "python");
-        
+
         var pythonExecutable = Path.Combine(pythonFolder, "bin", "python3");
         var pioExecutable = Path.Combine(pythonFolder, "bin", "platformio");
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -80,7 +80,7 @@ public class Builder : Microsoft.Build.Utilities.Task
             tarProcess.Start();
             tarProcess.BeginOutputReadLine();
             tarProcess.BeginErrorReadLine();
-            tarProcess.WaitForExit();
+            tarProcess.WaitForExit(60 * 60 * 1000);
 
             File.Delete(pythonLoc);
         }
@@ -111,10 +111,10 @@ public class Builder : Microsoft.Build.Utilities.Task
             installerProcess.Start();
             installerProcess.BeginOutputReadLine();
             installerProcess.BeginErrorReadLine();
-            installerProcess.WaitForExit();
+            installerProcess.WaitForExit(60 * 60 * 1000);
         }
 
-        if (!File.Exists(Path.Combine(Parameter2,"Assets","platformio.tar.xz")) || ForceBuild)
+        if (!File.Exists(Path.Combine(Parameter2, "Assets", "platformio.tar.xz")) || ForceBuild)
         {
             // Install pio packages
             var pioProcess = new Process();
@@ -144,16 +144,15 @@ public class Builder : Microsoft.Build.Utilities.Task
             pioProcess.Start();
             pioProcess.BeginOutputReadLine();
             pioProcess.BeginErrorReadLine();
-            pioProcess.WaitForExit();
+            pioProcess.WaitForExit(60 * 60 * 1000);
 
             // Now that we have packages downloaded, remove the cache, remove piolibs and download again. This will get us a .cache directory with only packages
 
             Directory.Delete(Path.Combine(pioFolder, ".cache"), true);
             Directory.Delete(Path.Combine(firmwareDir, ".pio"), true);
             pioProcess.Start();
-            pioProcess.WaitForExit();
+            pioProcess.WaitForExit(60 * 60 * 1000);
             // Drop some unused esp32 sdks
-            //platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3
             foreach (var dir in new[] {"esp32s3", "esp32s2", "esp32c3"})
             {
                 var path = Path.Combine(pioFolder, "packages", "framework-arduinoespressif32", "tools", "sdk", dir);
@@ -169,6 +168,7 @@ public class Builder : Microsoft.Build.Utilities.Task
             {
                 Directory.Delete(path2, true);
             }
+
             Directory.Delete(Path.Combine(firmwareDir, ".pio"), true);
 
             Compress("firmware.tar.xz", firmwareDir);
@@ -184,7 +184,9 @@ public class Builder : Microsoft.Build.Utilities.Task
         var s7ZProcess = new Process();
         s7ZProcess.StartInfo.FileName = "tar";
         s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
-        s7ZProcess.StartInfo.Arguments = $"cfvJ {Path.Combine(Parameter2,"Assets",archive)} {Path.GetFileName(path)}";
+        s7ZProcess.StartInfo.Arguments = $"cfvJ {Path.Combine(Parameter2, "Assets", archive)} {Path.GetFileName(path)}";
+        // Can we just download a copy of xz on windows, and then run through that
+        // Or even find some way to run a different version of tar just for this
         s7ZProcess.StartInfo.EnvironmentVariables["XZ_OPT"] = "-T0 -9";
         s7ZProcess.StartInfo.UseShellExecute = false;
         s7ZProcess.StartInfo.RedirectStandardOutput = true;
@@ -207,7 +209,7 @@ public class Builder : Microsoft.Build.Utilities.Task
         s7ZProcess.Start();
         s7ZProcess.BeginOutputReadLine();
         s7ZProcess.BeginErrorReadLine();
-        s7ZProcess.WaitForExit();
+        s7ZProcess.WaitForExit(60 * 60 * 1000);
     }
 
     public override bool Execute()
