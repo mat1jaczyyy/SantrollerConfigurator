@@ -110,7 +110,7 @@ public class Builder : Microsoft.Build.Utilities.Task
             Directory.Delete(Path.Combine(pioFolder, ".cache"), true);
             Directory.Delete(Path.Combine(firmwareDir, ".pio"), true);
             pioProcess.Start();
-            var _ = ConsumeReaderAsync(pioProcess.StandardOutput);
+            _ = ConsumeReaderAsync(pioProcess.StandardOutput);
             _ = ConsumeReaderAsync(pioProcess.StandardError);
             pioProcess.WaitForExit(-1);
             // Drop some unused esp32 sdks
