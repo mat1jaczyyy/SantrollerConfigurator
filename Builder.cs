@@ -155,7 +155,7 @@ public class Builder : Microsoft.Build.Utilities.Task
     {
         var archiveWithPath = Path.Combine(Parameter2, "Assets", archive);
         var s7ZProcess = new Process();
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             s7ZProcess.StartInfo.FileName = "cmd";
             s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
