@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Net.Http;
@@ -159,6 +160,8 @@ public class Builder : Microsoft.Build.Utilities.Task
         {
             s7ZProcess.StartInfo.FileName = "cmd";
             s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
+            Log.LogMessage(s7ZProcess.StartInfo.EnvironmentVariables["PATH"]);
+            Log.LogMessage(string.Join(",", Directory.GetFiles("C:\\Program Files\\7-Zip")));
             s7ZProcess.StartInfo.EnvironmentVariables["PATH"] += ";C:\\Program Files\\7-Zip";
             s7ZProcess.StartInfo.Arguments =
                 $"/c '7z a -ttar -so {archiveWithPath} {Path.GetFileName(path)} | 7z a -txz -si {archiveWithPath} -mx9'";
