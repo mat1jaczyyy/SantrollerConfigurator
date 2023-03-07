@@ -159,8 +159,9 @@ public class Builder : Microsoft.Build.Utilities.Task
         {
             s7ZProcess.StartInfo.FileName = "cmd";
             s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
+            s7ZProcess.StartInfo.EnvironmentVariables["PATH"] += ";C:\\Program Files\\7-Zip";
             s7ZProcess.StartInfo.Arguments =
-                $"/c '\"C:\\Program Files\\7-Zip\\7z\" a -ttar -so {archiveWithPath} {Path.GetFileName(path)} | \"C:\\Program Files\\7-Zip\\7z\" a -txz -si {archiveWithPath} -mx9'";
+                $"/c '7z a -ttar -so {archiveWithPath} {Path.GetFileName(path)} | 7z a -txz -si {archiveWithPath} -mx9'";
         }
         else
         {
