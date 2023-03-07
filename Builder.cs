@@ -160,7 +160,7 @@ public class Builder : Microsoft.Build.Utilities.Task
             s7ZProcess.StartInfo.FileName = "cmd";
             s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
             s7ZProcess.StartInfo.Arguments =
-                $"-c '7z a -ttar -so {archiveWithPath} {Path.GetFileName(path)} | 7z a -txz -si {archiveWithPath} -mx9'";
+                $"/c '7z a -ttar -so {archiveWithPath} {Path.GetFileName(path)} | 7z a -txz -si {archiveWithPath} -mx9'";
         }
         else
         {
