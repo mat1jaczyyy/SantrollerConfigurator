@@ -130,13 +130,16 @@ public class Builder : Microsoft.Build.Utilities.Task
             {
                 Directory.Delete(path2, true);
             }
-
-            Directory.Delete(Path.Combine(firmwareDir, ".pio"), true);
-
-            Compress("firmware.tar.xz", firmwareDir);
             Compress("python.tar.xz", pythonFolder);
             Compress("platformio.tar.xz", pioFolder);
         }
+
+        if (Directory.Exists(Path.Combine(firmwareDir, ".pio")))
+        {
+            Directory.Delete(Path.Combine(firmwareDir, ".pio"), true);
+        }
+
+        Compress("firmware.tar.xz", firmwareDir);
 
         return true;
     }
