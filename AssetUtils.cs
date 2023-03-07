@@ -24,7 +24,15 @@ public class AssetUtils
 
     public static void InitNativeLibrary()
     {
-        XZInit.GlobalInit();
+        string lib;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            lib = "liblzma.so.5";
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            lib = "liblzma.dylib";
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            lib = "liblzma.dll";
+        else lib = "";
+        XZInit.GlobalInit(lib);
     }
 
     public static async Task ExtractXzAsync(string archiveFile, string location)
