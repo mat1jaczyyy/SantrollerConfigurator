@@ -142,8 +142,9 @@ public class Builder : Microsoft.Build.Utilities.Task
     
     async Task ConsumeReaderAsync(TextReader reader)
     {
+        #nullable enable
         string? text;
-
+        #nullable restore
         while ((text = await reader.ReadLineAsync()) != null)
         {
             Log.LogMessage(text);
@@ -152,13 +153,18 @@ public class Builder : Microsoft.Build.Utilities.Task
 
     private void Compress(string archive, string path)
     {
+        var archiveWithPath = Path.Combine(Parameter2, "Assets", archive);
         var s7ZProcess = new Process();
+        #if Windows
+        s7ZProcess.StartInfo.FileName = "cmd";
+        s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
+        s7ZProcess.StartInfo.Arguments = $"-c '7z a -ttar -so {archiveWithPath} {Path.GetFileName(path)} | 7z a -txz -si {archiveWithPath} -mx9'";
+        #else
         s7ZProcess.StartInfo.FileName = "tar";
         s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
-        s7ZProcess.StartInfo.Arguments = $"cfvJ {Path.Combine(Parameter2, "Assets", archive)} {Path.GetFileName(path)}";
-        // Can we just download a copy of xz on windows, and then run through that
-        // Or even find some way to run a different version of tar just for this
+        s7ZProcess.StartInfo.Arguments = $"cfvJ {archiveWithPath} {Path.GetFileName(path)}";
         s7ZProcess.StartInfo.EnvironmentVariables["XZ_OPT"] = "-T0 -9";
+        #endif
         s7ZProcess.StartInfo.UseShellExecute = false;
         s7ZProcess.StartInfo.RedirectStandardOutput = true;
         s7ZProcess.StartInfo.RedirectStandardError = true;
