@@ -99,7 +99,7 @@ public class Builder : Microsoft.Build.Utilities.Task
             pioProcess.StartInfo.RedirectStandardOutput = true;
             pioProcess.StartInfo.RedirectStandardError = true;
             pioProcess.StartInfo.CreateNoWindow = true;
-            
+
             pioProcess.Start();
             var _ = ConsumeReaderAsync(pioProcess.StandardOutput);
             _ = ConsumeReaderAsync(pioProcess.StandardError);
@@ -139,12 +139,12 @@ public class Builder : Microsoft.Build.Utilities.Task
 
         return true;
     }
-    
+
     async Task ConsumeReaderAsync(TextReader reader)
     {
-        #nullable enable
+#nullable enable
         string? text;
-        #nullable restore
+#nullable restore
         while ((text = await reader.ReadLineAsync()) != null)
         {
             Log.LogMessage(text);
@@ -155,16 +155,21 @@ public class Builder : Microsoft.Build.Utilities.Task
     {
         var archiveWithPath = Path.Combine(Parameter2, "Assets", archive);
         var s7ZProcess = new Process();
-        #if Windows
-        s7ZProcess.StartInfo.FileName = "cmd";
-        s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
-        s7ZProcess.StartInfo.Arguments = $"-c '7z a -ttar -so {archiveWithPath} {Path.GetFileName(path)} | 7z a -txz -si {archiveWithPath} -mx9'";
-        #else
-        s7ZProcess.StartInfo.FileName = "tar";
-        s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
-        s7ZProcess.StartInfo.Arguments = $"cfvJ {archiveWithPath} {Path.GetFileName(path)}";
-        s7ZProcess.StartInfo.EnvironmentVariables["XZ_OPT"] = "-T0 -9";
-        #endif
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            s7ZProcess.StartInfo.FileName = "cmd";
+            s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
+            s7ZProcess.StartInfo.Arguments =
+                $"-c '7z a -ttar -so {archiveWithPath} {Path.GetFileName(path)} | 7z a -txz -si {archiveWithPath} -mx9'";
+        }
+        else
+        {
+            s7ZProcess.StartInfo.FileName = "tar";
+            s7ZProcess.StartInfo.WorkingDirectory = Directory.GetParent(path)!.ToString();
+            s7ZProcess.StartInfo.Arguments = $"cfvJ {archiveWithPath} {Path.GetFileName(path)}";
+            s7ZProcess.StartInfo.EnvironmentVariables["XZ_OPT"] = "-T0 -9";
+        }
+
         s7ZProcess.StartInfo.UseShellExecute = false;
         s7ZProcess.StartInfo.RedirectStandardOutput = true;
         s7ZProcess.StartInfo.RedirectStandardError = true;
