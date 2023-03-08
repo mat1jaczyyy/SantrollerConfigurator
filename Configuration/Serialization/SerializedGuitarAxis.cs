@@ -23,10 +23,10 @@ public class SerializedGuitarAxis : SerializedOutput
         LedIndex = ledIndex;
     }
 
-    [ProtoMember(1)] public override SerializedInput Input { get; }
-    [ProtoMember(2)] public override uint LedOn { get; }
-    [ProtoMember(3)] public override uint LedOff { get; }
-    [ProtoMember(4)] public override byte[] LedIndex { get; }
+    [ProtoMember(1)] public virtual SerializedInput Input { get; }
+    [ProtoMember(2)] public virtual uint LedOn { get; }
+    [ProtoMember(3)] public virtual uint LedOff { get; }
+    [ProtoMember(4)] public virtual byte[] LedIndex { get; }
     [ProtoMember(5)] public int Min { get; }
     [ProtoMember(6)] public int Max { get; }
     [ProtoMember(7)] public int Deadzone { get; }

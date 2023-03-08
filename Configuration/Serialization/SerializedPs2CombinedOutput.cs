@@ -25,7 +25,7 @@ public class SerializedPs2CombinedOutput : SerializedOutput
         Enabled = GetBytes(new BitArray(outputs.Select(s => s.Enabled).ToArray()));
     }
 
-    [ProtoMember(1)] public override SerializedInput? Input => null;
+    [ProtoMember(1)] public SerializedInput? Input => null;
     [ProtoMember(4)] public int Miso { get; }
     [ProtoMember(5)] public int Mosi { get; }
     [ProtoMember(6)] public int Sck { get; }
@@ -35,9 +35,6 @@ public class SerializedPs2CombinedOutput : SerializedOutput
     [ProtoMember(9)] public List<SerializedOutput> Outputs { get; }
 
     [ProtoMember(10)] public byte[] Enabled { get; }
-    public override uint LedOn => Colors.Black.ToUint32();
-    public override uint LedOff => Colors.Black.ToUint32();
-    public override byte[] LedIndex => Array.Empty<byte>();
 
     public override Output Generate(ConfigViewModel model)
     {

@@ -23,15 +23,12 @@ public class SerializedDjCombinedOutput : SerializedOutput
         Enabled = GetBytes(new BitArray(outputs.Select(s => s.Enabled).ToArray()));
     }
 
-    [ProtoMember(1)] public override SerializedInput? Input => null;
+    [ProtoMember(1)] public SerializedInput? Input => null;
     [ProtoMember(4)] public int Sda { get; }
     [ProtoMember(5)] public int Scl { get; }
     [ProtoMember(6)] public List<SerializedOutput> Outputs { get; }
 
     [ProtoMember(7)] public byte[] Enabled { get; }
-    public override uint LedOn => Colors.Black.ToUint32();
-    public override uint LedOff => Colors.Black.ToUint32();
-    public override byte[] LedIndex => Array.Empty<byte>();
 
     public override Output Generate(ConfigViewModel model)
     {

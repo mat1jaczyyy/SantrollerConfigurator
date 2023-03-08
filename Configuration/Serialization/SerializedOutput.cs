@@ -26,13 +26,9 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoContract]
 public abstract class SerializedOutput
 {
-    public abstract SerializedInput? Input { get; }
-    public abstract uint LedOn { get; }
-    public abstract uint LedOff { get; }
-    public abstract byte[] LedIndex { get; }
     public abstract Output Generate(ConfigViewModel model);
 
-    protected byte[] GetBytes(BitArray bits)
+    protected static byte[] GetBytes(BitArray bits)
     {
         var ret = new byte[(bits.Length - 1) / 8 + 1];
         bits.CopyTo(ret, 0);

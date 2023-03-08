@@ -19,11 +19,9 @@ public class SerializedLed : SerializedOutput
         OutputEnabled = outputEnabled;
         Pin = pin;
     }
-
-    public override SerializedInput? Input => null;
-    [ProtoMember(1)] public override uint LedOn { get; }
-    [ProtoMember(2)] public override uint LedOff { get; }
-    [ProtoMember(3)] public override byte[] LedIndex { get; }
+    [ProtoMember(1)] public uint LedOn { get; }
+    [ProtoMember(2)] public uint LedOff { get; }
+    [ProtoMember(3)] public byte[] LedIndex { get; }
     [ProtoMember(4)] public RumbleCommand Type { get; }
     [ProtoMember(5)] public bool OutputEnabled { get; }
     [ProtoMember(6)] public int Pin { get; }
