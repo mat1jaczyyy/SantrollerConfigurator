@@ -106,7 +106,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 .Filter(this.WhenAnyValue(s => s.SelectedDevice).Select(CreateFilter))
                 .Bind(out var deviceInputTypes).Subscribe();
             DeviceInputTypes = deviceInputTypes;
-            Configure = ReactiveCommand.CreateFromObservable(
+            ConfigureCommand = ReactiveCommand.CreateFromObservable(
                 () => Router.Navigate.Execute(new ConfigViewModel(this, SelectedDevice!))
             );
             AvailableDevices.Connect().Bind(out var devices).Subscribe();
@@ -202,7 +202,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             _ = Task.Run(InstallDependenciesAsync);
         }
 
-        public ReactiveCommand<Unit, IRoutableViewModel> Configure { get; }
+        public ReactiveCommand<Unit, IRoutableViewModel> ConfigureCommand { get; }
 
         // The command that navigates a user back.
         public ReactiveCommand<Unit, IRoutableViewModel?> GoBack => Router.NavigateBack;

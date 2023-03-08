@@ -200,11 +200,11 @@
 
                     </StackPanel>
                 </StackPanel>
-                <Button Command="{Binding AddOutput}" HorizontalAlignment="Stretch"
+                <Button Command="{Binding AddOutputCommand}" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Add Binding
                 </Button>
-                <Button Command="{Binding AddLedBinding}" HorizontalAlignment="Stretch"
+                <Button Command="{Binding AddLedBindingCommand}" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Add LED
                 </Button>
@@ -212,19 +212,19 @@
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Bind All
                 </Button>
-                <Button Command="{Binding ResetWithConfirmationAsync}"
+                <Button Command="{Binding ResetWithConfirmationCommand}"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Load Defaults
                 </Button>
-                <Button Command="{Binding ExpandAll}"
+                <Button Command="{Binding ExpandAllCommand}"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Expand All
                 </Button>
-                <Button Command="{Binding CollapseAll}"
+                <Button Command="{Binding CollapseAllCommand}"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Collapse All
                 </Button>
-                <Button Command="{Binding ClearOutputs}"
+                <Button Command="{Binding ClearOutputsCommand}"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Clear All
                 </Button>

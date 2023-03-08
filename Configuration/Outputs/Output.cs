@@ -14,6 +14,7 @@ using Avalonia.Input.Raw;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using CommunityToolkit.Mvvm.Input;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.DJ;
@@ -53,7 +54,7 @@ public class LedIndex : ReactiveObject
 }
 
 
-public abstract class Output : ReactiveObject, IDisposable
+public abstract partial class Output : ReactiveObject, IDisposable
 {
     private readonly ObservableAsPropertyHelper<bool> _areLedsEnabled;
 
@@ -136,7 +137,6 @@ public abstract class Output : ReactiveObject, IDisposable
         _ledIndicesDisplay = this.WhenAnyValue(x => x.LedIndices)
             .Select(s => string.Join(", ", s))
             .ToProperty(this, s => s.LedIndicesDisplay);
-        AssignByKeyOrAxis = ReactiveCommand.CreateFromTask(FindAndAssignAsync);
         Outputs = new SourceList<Output>();
         Outputs.Add(this);
         AnalogOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
@@ -253,7 +253,6 @@ public abstract class Output : ReactiveObject, IDisposable
     public double ImageOpacity => _imageOpacity.Value;
     public int ValueRaw => _valueRaw.Value;
 
-    public ICommand AssignByKeyOrAxis { get; }
 
 
     public abstract bool IsStrum { get; }
@@ -392,8 +391,9 @@ public abstract class Output : ReactiveObject, IDisposable
         var typeName = type.ToString()!;
         return $"report->{char.ToLower(typeName[0])}{typeName[1..]}";
     }
-
-    public async Task FindAndAssignAsync()
+    
+    [RelayCommand]
+    private async Task FindAndAssignAsync()
     {
         ButtonText = "Move the mouse or click / press any key to use that input";
         await InputManager.Instance!.Process.FirstAsync();
@@ -567,7 +567,8 @@ public abstract class Output : ReactiveObject, IDisposable
         return Outputs.Items.Except(extra).Where(output => output.Enabled);
     }
 
-    public void Remove()
+    [RelayCommand]
+    private void Remove()
     {
         Model.RemoveOutput(this);
     }

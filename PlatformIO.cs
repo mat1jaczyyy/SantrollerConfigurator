@@ -52,8 +52,6 @@ public class PlatformIo
 
     private async Task InitialisePlatformIoAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
     {
-        // On startup, reinstall the firmware, this will make sure that an update goes out, and also makes sure that the firmware is clean.
-
         var appdataFolder = AssetUtils.GetAppDataFolder();
         if (Directory.Exists(FirmwareDir)) Directory.Delete(FirmwareDir, true);
         platformIoOutput.OnNext(new PlatformIoState(0, "Extracting Firmware", ""));

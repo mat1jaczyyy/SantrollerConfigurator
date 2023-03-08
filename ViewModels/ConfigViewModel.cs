@@ -24,10 +24,12 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Devices;
 using ProtoBuf;
 using ReactiveUI;
+using CommunityToolkit.Mvvm;
+using CommunityToolkit.Mvvm.Input;
 
 namespace GuitarConfigurator.NetCore.ViewModels;
 
-public class ConfigViewModel : ReactiveObject, IRoutableViewModel
+public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 {
     public static readonly string Apa102SpiType = "APA102";
     public static readonly string UnoPinTypeTx = "Uno Serial Tx Pin";
@@ -105,10 +107,10 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 input), BindAllWindowViewModel>();
         BindAllCommand = ReactiveCommand.CreateFromTask(BindAllAsync);
 
-        WriteConfig = ReactiveCommand.CreateFromObservable(Write,
+        WriteConfigCommand = ReactiveCommand.CreateFromObservable(Write,
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
-        GoBack = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
+        GoBackCommand = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
             this.WhenAnyValue(x => x.Main.Working).Select(s => !s));
         Bindings = new AvaloniaList<Output>();
 
@@ -174,9 +176,9 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public int[] KvKey1 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
     public int[] KvKey2 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
 
-    public ICommand WriteConfig { get; }
+    public ICommand WriteConfigCommand { get; }
 
-    public ICommand GoBack { get; }
+    public ICommand GoBackCommand { get; }
 
     public MouseMovementType MouseMovementType
     {
@@ -233,7 +235,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => this.RaiseAndSetIfChanged(ref _ledCount, value);
     }
 
-
+    
     public byte RfId
     {
         get => _rfId;
@@ -362,7 +364,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public IScreen HostScreen { get; }
 
-
+    [RelayCommand]
     public void AddLedBinding()
     {
         var first = Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((DeviceType, EmulationType))).First();
@@ -809,7 +811,7 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         UpdateErrors();
     }
-
+    [RelayCommand]
     public void ClearOutputs()
     {
         foreach (var binding in Bindings) binding.Dispose();
@@ -829,17 +831,17 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Bindings.Clear();
         UpdateErrors();
     }
-
+    [RelayCommand]
     public void ExpandAll()
     {
         foreach (var binding in Bindings) binding.Expanded = true;
     }
-
+    [RelayCommand]
     public void CollapseAll()
     {
         foreach (var binding in Bindings) binding.Expanded = false;
     }
-
+    [RelayCommand]
     public async Task ResetWithConfirmationAsync()
     {
         var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
@@ -853,7 +855,8 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    public async Task ResetAsync()
+    [RelayCommand]
+    private async Task ResetAsync()
     {
         var yesNo = await ShowYesNoDialog.Handle(("Reset", "Cancel",
                 "The following action will revert your device back to an Arduino, are you sure you want to do this?"))
@@ -861,7 +864,8 @@ public class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (!yesNo.Response) return;
         //TODO: actually revert the device to an arduino
     }
-
+    
+    [RelayCommand]
     public void AddOutput()
     {
         if (IsController)

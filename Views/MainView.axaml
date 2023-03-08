@@ -150,7 +150,7 @@
                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                         </StackPanel>
                     </StackPanel>
-                    <Button Content="Configure" Command="{Binding Main.Configure}"
+                    <Button Content="Configure" Command="{Binding Main.ConfigureCommand}"
                             IsEnabled="{Binding Main.ReadyToConfigure}" HorizontalAlignment="Center"
                             Margin="0 20 0 0" />
                 </StackPanel>

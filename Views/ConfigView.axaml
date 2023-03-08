@@ -189,8 +189,7 @@
                                           ItemTemplate="{StaticResource ControllerEnumTemplate}" />
                             </StackPanel>
                         </StackPanel>
-                        <Button
-                            Command="{Binding Remove}">
+                        <Button Command="{Binding RemoveCommand}">
                             Remove
                         </Button>
                     </WrapPanel>
@@ -207,7 +206,7 @@
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
                     <StackPanel Orientation="Horizontal">
-                        <Image  IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                        <Image IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                                HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                                Source="{Binding Image}"
                                Opacity="{Binding Output.ImageOpacity}" />
@@ -229,7 +228,7 @@
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
-                    <Image  IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                    <Image IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
                            Opacity="{Binding Output.ImageOpacity}" />
@@ -298,7 +297,7 @@
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
-                    <Image  IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                    <Image IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
                            Opacity="{Binding Output.ImageOpacity}" />
@@ -332,7 +331,7 @@
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
-                    <Image  IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
+                    <Image IsVisible="{Binding Combined}" ToolTip.Tip="{Binding Input}"
                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                            Source="{Binding Image}"
                            Opacity="{Binding Output.ImageOpacity}" />
@@ -448,8 +447,7 @@
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Pin}"
                                   Items="{Binding AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
-                        <Button
-                            Command="{Binding DetectPinCommand}" Content="{Binding PinConfigText}" />
+                        <Button Command="{Binding DetectPinCommand}" Content="{Binding PinConfigText}" />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -583,7 +581,7 @@
 
                         </StackPanel>
                         <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                                Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
+                                Command="{Binding CalibrateCommand}" HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
                                 Margin="10 0 0 0">
                             Calibrate
@@ -678,7 +676,7 @@
 
                     </StackPanel>
                     <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                            Command="{Binding Calibrate}" HorizontalAlignment="Stretch"
+                            Command="{Binding CalibrateCommand}" HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
                             Margin="10 0 0 0">
                         Calibrate
@@ -997,9 +995,9 @@
         <DockPanel HorizontalAlignment="Stretch">
             <StackPanel DockPanel.Dock="Bottom">
                 <WrapPanel Margin="10" HorizontalAlignment="Center">
-                    <Button Content="Write Configuration" Command="{Binding WriteConfig}" />
-                    <Button Content="Revert device to Arduino" Command="{Binding ResetAsync}" />
-                    <Button Content="Configure another device" Command="{Binding GoBack}" />
+                    <Button Content="Write Configuration" Command="{Binding WriteConfigCommand}" />
+                    <Button Content="Revert device to Arduino" Command="{Binding ResetCommand}" />
+                    <Button Content="Configure another device" Command="{Binding GoBackCommand}" />
                 </WrapPanel>
                 <TextBlock IsVisible="{Binding WriteToolTip, Converter={x:Static ObjectConverters.IsNotNull}}"
                            Foreground="Red" HorizontalAlignment="Center" Text="{Binding WriteToolTip}" />
@@ -1033,7 +1031,7 @@
                                                                 ContentTemplate="{StaticResource OutputHeaderTemplates}" />
                                                 <Button
                                                     HorizontalAlignment="Right"
-                                                    Command="{Binding Remove}">
+                                                    Command="{Binding RemoveCommand}">
                                                     Remove
                                                 </Button>
                                                 <Label Foreground="Red" Margin="20 0 20 0"
@@ -1058,7 +1056,7 @@
                                                       SelectedItem="{Binding KeyOrMouse}"
                                                       Items="{Binding KeyOrMouseInputs}"
                                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                                            <Button Command="{Binding AssignByKeyOrAxis}"
+                                            <Button Command="{Binding FindAndAssignCommand}"
                                                     IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
                                                     Content="{Binding ButtonText}" />
                                         </StackPanel>

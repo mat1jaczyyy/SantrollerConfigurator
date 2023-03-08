@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Media;
+using CommunityToolkit.Mvvm.Input;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -21,7 +22,7 @@ public enum OutputAxisCalibrationState
     Last
 }
 
-public abstract class OutputAxis : Output
+public abstract partial class OutputAxis : Output
 {
     private const float ProgressWidth = 400;
 
@@ -199,8 +200,9 @@ public abstract class OutputAxis : Output
                 break;
         }
     }
-
-    public void Calibrate()
+    
+    [RelayCommand]
+    private void Calibrate()
     {
         if (!SupportsCalibration()) return;
 
