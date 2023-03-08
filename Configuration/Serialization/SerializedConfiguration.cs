@@ -30,7 +30,8 @@ public class SerializedConfiguration
     [ProtoMember(4)] public DeviceControllerType DeviceType { get; }
     [ProtoMember(5)] public EmulationType EmulationType { get; }
     [ProtoMember(6)] public RhythmType RhythmType { get; }
-    [ProtoMember(7)] public List<SerializedOutput> Bindings { get; }
+    // ReSharper disable once MemberInitializerValueIgnored
+    [ProtoMember(7)] public List<SerializedOutput> Bindings { get; } = new();
     [ProtoMember(8)] public int Apa102Mosi { get; }
     [ProtoMember(9)] public int Apa102Sck { get; }
     [ProtoMember(10)] public byte LedCount { get; }
