@@ -24,6 +24,7 @@ using ReactiveUI;
 using Timer = System.Timers.Timer;
 #if Windows
 using GuitarConfigurator.NetCore.Notify;
+using LibUsbDotNet.Info;
 using LibUsbDotNet.WinUsb;
 #endif
 
@@ -451,24 +452,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     }
                     else if (e.Device.Open(out var dev))
                     {
-#if Windows
-                        UsbRegistry r = dev.UsbRegistryInfo;
-                        var product = "";
-                        if (e.Device.Name.Contains(WindowsDeviceNotifierAvalonia.ArdwiinoGuid.ToString().ToLower()))
-                        {
-                            product = "Ardwiino";
-                        } else if (e.Device.Name.Contains(WindowsDeviceNotifierAvalonia.SantrollerGuid.ToString().ToLower()))
-                        {
-                            product = "Santroller";
-                        }
-
-                        var revision = (ushort)0;
-                        var serial = "";
-#else
-                        var revision = (ushort) dev.Info.Descriptor.BcdDevice;
-                        var product = dev.Info.ProductString?.Split(new[] {'\0'}, 2)[0];
-                        var serial = dev.Info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
-#endif
+                        var info = dev.Info;
+                        var revision = (ushort) info.Descriptor.BcdDevice;
+                        var product = info.ProductString?.Split(new[] {'\0'}, 2)[0];
+                        var serial = info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
                         switch (product)
                         {
                             case "Santroller" when Programming && !IsPico:
