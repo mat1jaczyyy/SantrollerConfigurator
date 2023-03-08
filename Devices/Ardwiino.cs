@@ -11,6 +11,7 @@ using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
+using LibUsbDotNet.Descriptors;
 using SemanticVersioning;
 using Version = SemanticVersioning.Version;
 
@@ -554,12 +555,18 @@ public class Ardwiino : ConfigurableUsbDevice
             foreach (var binding in bindings)
                 if (binding is ControllerAxis axis)
                 {
-                    if (axis.Type == StandardAxisType.LeftStickX)
-                        lx = axis;
-                    else if (axis.Type == StandardAxisType.LeftStickY) ly = axis;
+                    switch (axis.Type)
+                    {
+                        case StandardAxisType.LeftStickX:
+                            lx = axis;
+                            break;
+                        case StandardAxisType.LeftStickY:
+                            ly = axis;
+                            break;
+                    }
                 }
 
-            if (lx != null && lx.Input != null)
+            if (lx != null)
             {
                 var ledOn = lx.LedOn;
                 var ledOff = lx.LedOff;
@@ -571,7 +578,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadRight));
             }
 
-            if (ly != null && ly.Input != null)
+            if (ly != null)
             {
                 var ledOn = ly.LedOn;
                 var ledOff = ly.LedOff;

@@ -55,10 +55,6 @@ public class Santroller : IConfigurableDevice
         _microcontroller = new Pico(Board.Generic);
         Load();
         _usbDevice.SetBoard(Board);
-#if Windows
-        var versionBytes = ReadData(0, (byte)Commands.CommandReadVersion, 3);
-        Version = new Version(versionBytes[0], versionBytes[1], versionBytes[2]);
-#endif
     }
 
     public Santroller(PlatformIo pio, PlatformIoPort port)

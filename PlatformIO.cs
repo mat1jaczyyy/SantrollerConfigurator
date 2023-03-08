@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,9 +14,6 @@ namespace GuitarConfigurator.NetCore;
 
 public class PlatformIo
 {
-    //TODO: probably have a nice script to update this, but for now: ` pio pkg list | grep "@"|cut -f1 -d"(" |cut -c 11- | sort -u | wc -l`
-    private const int PackageCount = 17;
-
     private readonly string _pythonExecutable;
 
     private readonly Process _portProcess;
@@ -50,7 +46,7 @@ public class PlatformIo
 
     public string FirmwareDir { get; }
 
-    private async Task InitialisePlatformIoAsync(BehaviorSubject<PlatformIoState> platformIoOutput)
+    private async Task InitialisePlatformIoAsync(IObserver<PlatformIoState> platformIoOutput)
     {
         var appdataFolder = AssetUtils.GetAppDataFolder();
         if (Directory.Exists(FirmwareDir)) Directory.Delete(FirmwareDir, true);
@@ -58,29 +54,39 @@ public class PlatformIo
         await AssetUtils.ExtractXzAsync("firmware.tar.xz", appdataFolder);
 
         var pythonDir = Path.Combine(appdataFolder, "python");
-        if (Directory.Exists(pythonDir)) Directory.Delete(pythonDir, true);
-        platformIoOutput.OnNext(new PlatformIoState(30, "Extracting Python", ""));
-        await AssetUtils.ExtractXzAsync("python.tar.xz", appdataFolder);
+        
+        // TODO: make some sort of check to check if an update is needed here
+        // TODO: could easily just package the version name in a "version.txt" file inside of the folder?
+        // if (Directory.Exists(pythonDir) && needsUpdate)
+        // {
+            // Directory.Delete(pythonDir, true);
+        // }
+
+        if (!Directory.Exists(pythonDir))
+        {
+            platformIoOutput.OnNext(new PlatformIoState(30, "Extracting Python", ""));
+            await AssetUtils.ExtractXzAsync("python.tar.xz", appdataFolder);
+        }
+        
 
         var platformIoDir = Path.Combine(appdataFolder, "platformio");
-        if (Directory.Exists(platformIoDir)) Directory.Delete(platformIoDir, true);
-        platformIoOutput.OnNext(new PlatformIoState(60, "Extracting Platform.IO", ""));
-        await AssetUtils.ExtractXzAsync("platformio.tar.xz", appdataFolder);
-        
-        await File.WriteAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"),
-            (await File.ReadAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"))).Replace(
-                "post:ardwiino_script_post.py",
-                "post:ardwiino_script_post_tool.py")).ConfigureAwait(false);
-        var task = RunPlatformIo(null, new[] {"pkg", "install"},
-            "Installing packages (This may take a while)",
-            60, 90, null);
-        task.Subscribe(platformIoOutput.OnNext);
-        await task.ToTask();
-        task = RunPlatformIo(null, new[] {"system", "prune", "-f"},
-            "Cleaning up", 90,
-            90, null);
-        task.Subscribe(platformIoOutput.OnNext);
-        await task.ToTask();
+        // TODO: make some sort of check to check if an update is needed here
+        // TODO: could easily just package the version name in a "version.txt" file inside of the folder?
+        // if (Directory.Exists(platformIoDir) && needsUpdate)
+        // {
+        //     Directory.Delete(platformIoDir, true);
+        // }
+        if (!Directory.Exists(platformIoDir))
+        {
+            platformIoOutput.OnNext(new PlatformIoState(60, "Extracting Platform.IO", ""));
+            await AssetUtils.ExtractXzAsync("platformio.tar.xz", appdataFolder);
+
+            await File.WriteAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"),
+                (await File.ReadAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"))).Replace(
+                    "post:ardwiino_script_post.py",
+                    "post:ardwiino_script_post_tool.py")).ConfigureAwait(false);
+        }
+
         platformIoOutput.OnCompleted();
     }
 
@@ -100,7 +106,7 @@ public class PlatformIo
         return output != "" ? PlatformIoPort.FromJson(output) : null;
     }
 
-    public BehaviorSubject<PlatformIoState> RunPlatformIo(string? environment, string[] command,
+    public BehaviorSubject<PlatformIoState> RunPlatformIo(string environment, string[] command,
         string progressMessage,
         double progressStartingPercentage, double progressEndingPercentage,
         IConfigurableDevice? device)
@@ -111,10 +117,9 @@ public class PlatformIo
 
         async Task Process()
         {
-            var percentageStep = (progressEndingPercentage - progressStartingPercentage) / PackageCount;
+            var percentageStep = (progressEndingPercentage - progressStartingPercentage);
             var currentProgress = progressStartingPercentage;
-            var updating = environment == null && command is [_, "install"];
-            var uploading = environment != null && command.Length > 1;
+            var uploading = command.Length > 1;
             var appdataFolder = AssetUtils.GetAppDataFolder();
             var pioFolder = Path.Combine(appdataFolder, "platformio");
             var process = new Process();
@@ -125,45 +130,44 @@ public class PlatformIo
             process.StartInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
             process.StartInfo.CreateNoWindow = true;
             var args = new List<string>(command);
-            args.Insert(0, "-m");
-            args.Insert(1, "platformio");
+            args.Insert(0, _pythonExecutable);
+            args.Insert(1, "-m");
+            args.Insert(2, "platformio");
+            Console.WriteLine(string.Join(", ", args));
             var sections = 5;
             var isUsb = false;
-            if (environment != null)
-            {
-                percentageStep = progressEndingPercentage - progressStartingPercentage;
-                if (device is Arduino) sections = 10;
 
-                if (environment.EndsWith("_usb"))
+            if (device is Arduino) sections = 10;
+
+            if (environment.EndsWith("_usb"))
+            {
+                platformIoOutput.OnNext(new PlatformIoState(currentProgress,
+                    $"{progressMessage} - Looking for device", null));
+                currentProgress += percentageStep / sections;
+                if (device != null) isUsb = true;
+
+                sections = 10;
+            }
+
+            args.Add("--environment");
+            args.Add(environment);
+            if (uploading && !isUsb)
+            {
+                if (environment.Contains("pico"))
                 {
                     platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                         $"{progressMessage} - Looking for device", null));
                     currentProgress += percentageStep / sections;
-                    if (device != null) isUsb = true;
-
-                    sections = 10;
+                    sections = 4;
                 }
 
-                args.Add("--environment");
-                args.Add(environment);
-                if (uploading && !isUsb)
+                if (device != null)
                 {
-                    if (environment.Contains("pico"))
+                    var port = await device.GetUploadPortAsync().ConfigureAwait(false);
+                    if (port != null)
                     {
-                        platformIoOutput.OnNext(new PlatformIoState(currentProgress,
-                            $"{progressMessage} - Looking for device", null));
-                        currentProgress += percentageStep / sections;
-                        sections = 4;
-                    }
-
-                    if (device != null)
-                    {
-                        var port = await device.GetUploadPortAsync().ConfigureAwait(false);
-                        if (port != null)
-                        {
-                            args.Add("--upload-port");
-                            args.Add(port);
-                        }
+                        args.Add("--upload-port");
+                        args.Add(port);
                     }
                 }
             }
@@ -184,9 +188,6 @@ public class PlatformIo
             var buffer = new char[1];
             var hasError = false;
             var main = sections == 5;
-            var uploadPackage = "";
-            var uploadCount = 11;
-            var seen = new List<string>();
             while (!process.HasExited)
                 if (state == 0)
                 {
@@ -199,18 +200,6 @@ public class PlatformIo
                     }
 
                     platformIoOutput.OnNext(platformIoOutput.Value.WithLog(line));
-                    if (updating)
-                    {
-                        var matches = Regex.Matches(line, @".+: Installing (.+)");
-                        if (matches.Count > 0)
-                        {
-                            uploadPackage = matches[0].Groups[1].Value;
-                            if (seen.Contains(uploadPackage)) continue;
-                            seen.Add(uploadPackage);
-                            uploadCount = 10;
-                            state = 5;
-                        }
-                    }
 
                     if (uploading)
                     {
@@ -288,12 +277,10 @@ public class PlatformIo
                         break;
                     }
 
-                    if (line.Contains("FAILED"))
-                    {
-                        platformIoOutput.OnError(new Exception("{progressMessage} - Error"));
-                        hasError = true;
-                        break;
-                    }
+                    if (!line.Contains("FAILED")) continue;
+                    platformIoOutput.OnError(new Exception("{progressMessage} - Error"));
+                    hasError = true;
+                    break;
                 }
                 else
                 {
@@ -322,27 +309,7 @@ public class PlatformIo
                                 platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                                     $"{progressMessage} - Verifying", null));
                                 break;
-                            case 5:
-                                if (buffer[0] == '%')
-                                {
-                                    uploadCount--;
-                                    currentProgress += percentageStep / 11;
-                                }
-
-                                if (buffer[0] == '\n')
-                                {
-                                    // If a file is downloaded fast, it doesn't hit 100
-                                    if (uploadCount > 0) currentProgress += percentageStep / 11 * uploadCount;
-
-                                    state = 0;
-                                }
-
-                                platformIoOutput.OnNext(new PlatformIoState(currentProgress,
-                                    $"{progressMessage} - {uploadPackage}", null));
-                                break;
                         }
-
-                        if (state == 0) break;
                     }
                 }
 
@@ -363,32 +330,6 @@ public class PlatformIo
 
         _ = Process();
         return platformIoOutput;
-    }
-
-    private string[] GetPythonExecutables()
-    {
-        var executables = new[] {"python3", "python", Path.Combine("bin", "python3.10")};
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            executables = new[] {"python.exe", Path.Combine("Scripts", "python.exe")};
-
-        return executables;
-    }
-
-
-    private string? GetFullPath(string fileName)
-    {
-        if (File.Exists(fileName))
-            return Path.GetFullPath(fileName);
-
-        var values = Environment.GetEnvironmentVariable("PATH")!;
-        foreach (var path in values.Split(Path.PathSeparator))
-        {
-            var fullPath = Path.Combine(path, fileName);
-            if (File.Exists(fullPath))
-                return fullPath;
-        }
-
-        return null;
     }
 
     public record PlatformIoState(double Percentage, string Message, string? Log)

@@ -101,16 +101,16 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
     {
         if (!Device.IsOpen) return Array.Empty<byte>();
-        var requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
+        const UsbCtrlFlags requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
         var buffer = new byte[size];
 
         var sp = new UsbSetupPacket(
             (byte) requestType,
             bRequest,
             wValue,
-            1,
+            2,
             buffer.Length);
-        bool test = Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
+        Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
         Array.Resize(ref buffer, length);
         return buffer;
     }
