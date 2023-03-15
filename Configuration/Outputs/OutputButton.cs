@@ -10,8 +10,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public abstract class OutputButton : Output
 {
     protected OutputButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
-        byte debounce,
-        string name) : base(model, input, ledOn, ledOff, ledIndices, name)
+        byte debounce) : base(model, input, ledOn, ledOff, ledIndices)
     {
         Debounce = debounce;
     }
@@ -36,7 +35,6 @@ public abstract class OutputButton : Output
     /// <exception cref="IncompleteConfigurationException"></exception>
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         switch (mode)
         {
             case ConfigField.Ps3Mask:

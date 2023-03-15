@@ -11,9 +11,10 @@ public class MouseAxis : OutputAxis
 {
     public MouseAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
-        deadZone, EnumToStringConverter.Convert(type), false)
+        deadZone, false)
     {
         Type = type;
+        UpdateDetails();
     }
 
     public override bool IsKeyboard => true;
@@ -102,6 +103,11 @@ public class MouseAxis : OutputAxis
         }
     }
 
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return EnumToStringConverter.Convert(Type);
+    }
+
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
         return "Mouse.png";
@@ -109,7 +115,9 @@ public class MouseAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        return mode is not (ConfigField.Mouse or ConfigField.MouseMask) ? "" : base.Generate(mode, debounceIndex, combined, extra);
+        return mode is not (ConfigField.Mouse or ConfigField.MouseMask)
+            ? ""
+            : base.Generate(mode, debounceIndex, combined, extra);
     }
 
     protected override bool SupportsCalibration()

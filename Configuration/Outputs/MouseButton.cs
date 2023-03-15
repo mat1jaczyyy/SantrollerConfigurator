@@ -10,10 +10,10 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public class MouseButton : OutputButton
 {
     public MouseButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce,
-        MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce,
-        EnumToStringConverter.Convert(type))
+        MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce)
     {
         Type = type;
+        UpdateDetails();
     }
 
     public override bool IsKeyboard => true;
@@ -34,6 +34,11 @@ public class MouseButton : OutputButton
     {
         if (mode != ConfigField.Mouse) return "";
         return GetReportField(Type);
+    }
+
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return EnumToStringConverter.Convert(Type);
     }
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)

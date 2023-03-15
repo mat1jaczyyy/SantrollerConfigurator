@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Views;
 
-public class MainView : ReactiveUserControl<MainViewModel>
+public partial class MainView : ReactiveUserControl<MainViewModel>
 {
     public MainView()
     {

@@ -11,6 +11,7 @@
              xmlns:config="clr-namespace:GuitarConfigurator.NetCore.Configuration"
              xmlns:leds="clr-namespace:GuitarConfigurator.NetCore.Configuration.Leds"
              xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
+             xmlns:emulationMode="clr-namespace:GuitarConfigurator.NetCore.Configuration.EmulationMode"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
@@ -167,7 +168,7 @@
                                Source="{Binding Image}"
                                Opacity="{Binding ImageOpacity}" />
                         <Label IsVisible="{Binding IsKeyboard}"
-                               Content="{Binding Name}" />
+                               Content="{Binding LocalisedName}" />
                         <StackPanel Orientation="Horizontal">
                             <StackPanel Orientation="Horizontal" IsVisible="{Binding IsController}">
                                 <ComboBox VerticalAlignment="Center"
@@ -201,6 +202,21 @@
             </DataTemplate>
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
+            <DataTemplate DataType="{x:Type emulationMode:EmulationMode}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Emulation Mode
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Type}"
+                                  Items="{Binding EmulationModes}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type config:GhWtTapInput}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
@@ -267,7 +283,7 @@
                             Led
                         </Label>
                         <ComboBox VerticalAlignment="Center"
-                                  SelectedItem="{Binding RumbleCommand}"
+                                  SelectedItem="{Binding Command}"
                                   Items="{Binding RumbleCommands}"
                                   ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     </StackPanel>
@@ -923,7 +939,7 @@
         </netCore:OutputTemplateSelector>
         <DataTemplate DataType="output:Output" x:Key="OutputTemplate">
             <StackPanel IsVisible="{Binding Valid}" Opacity="{Binding CombinedOpacity}">
-                <Panel>
+                <Panel IsVisible="{Binding DisplayInputFirst}">
                     <ContentControl Content="{Binding Input}"
                                     ContentTemplate="{StaticResource OutputTemplates}" />
 
@@ -932,6 +948,13 @@
                 </Panel>
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource OutputTemplates}" />
+                <Panel IsVisible="{Binding !DisplayInputFirst}">
+                    <ContentControl Content="{Binding Input}"
+                                    ContentTemplate="{StaticResource OutputTemplates}" />
+
+                    <ToggleSwitch HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
+                                  IsChecked="{Binding Enabled}" OnContent="Enabled" OffContent="Disabled" />
+                </Panel>
                 <WrapPanel Orientation="Horizontal">
                     <WrapPanel.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
@@ -1057,15 +1080,16 @@
                                                       Items="{Binding KeyOrMouseInputs}"
                                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                                             <Button Command="{Binding FindAndAssignCommand}"
-                                                    IsEnabled="{Binding Input, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                                    IsEnabled="{Binding ConfigurableInput}"
                                                     Content="{Binding ButtonText}" />
                                         </StackPanel>
+                                        <ContentControl IsVisible="{Binding !DisplayInputFirst}" ContentTemplate="{StaticResource OutputTemplate}"
+                                                        Content="{Binding}" />
                                         <StackPanel Orientation="Horizontal">
                                             <StackPanel.IsVisible>
                                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="Input"
-                                                             Converter="{x:Static  ObjectConverters.IsNotNull}" />
                                                     <Binding Path="!IsCombined" />
+                                                    <Binding Path="ConfigurableInput" />
                                                 </MultiBinding>
                                             </StackPanel.IsVisible>
                                             <Label VerticalAlignment="Center"
@@ -1081,8 +1105,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <StackPanel.IsVisible>
                                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="Input"
-                                                             Converter="{x:Static  ObjectConverters.IsNotNull}" />
+                                                    <Binding Path="ConfigurableInput"/>
                                                     <Binding Path="!IsCombined" />
                                                     <MultiBinding Converter="{x:Static BoolConverters.Or}">
                                                         <Binding Path="IsWii" />
@@ -1124,7 +1147,7 @@
                                                       Items="{Binding GhWtInputTypes}"
                                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                                         </StackPanel>
-                                        <ContentControl ContentTemplate="{StaticResource OutputTemplate}"
+                                        <ContentControl IsVisible="{Binding DisplayInputFirst}" ContentTemplate="{StaticResource OutputTemplate}"
                                                         Content="{Binding}" />
                                         <ItemsControl IsVisible="{Binding IsCombined}"
                                                       HorizontalAlignment="Stretch"

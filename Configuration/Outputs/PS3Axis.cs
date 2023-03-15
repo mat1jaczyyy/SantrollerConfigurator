@@ -11,10 +11,10 @@ public class Ps3Axis : OutputAxis
 {
     public Ps3Axis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
-        int deadZone, Ps3AxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
-        EnumToStringConverter.Convert(type), true)
+        int deadZone, Ps3AxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone, true)
     {
         Type = type;
+        UpdateDetails();
     }
 
     public Ps3AxisType Type { get; }
@@ -30,12 +30,12 @@ public class Ps3Axis : OutputAxis
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return Name;
+        return EnumToStringConverter.Convert(Type);
     }
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
-        return $"PS3/{Name}.png";
+        return $"PS3/{Type}.png";
     }
 
 

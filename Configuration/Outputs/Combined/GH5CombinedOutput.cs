@@ -101,4 +101,8 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     public override void UpdateBindings()
     {
     }
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return "Combined/GH5.png";
+    }
 }

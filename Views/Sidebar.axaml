@@ -208,6 +208,10 @@
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Add LED
                 </Button>
+                <Button Command="{Binding AddConsoleShortcutCommand}" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                    Add Console Shortcut
+                </Button>
                 <Button Command="{Binding BindAllCommand}" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Bind All

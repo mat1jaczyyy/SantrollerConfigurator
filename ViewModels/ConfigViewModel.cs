@@ -26,6 +26,7 @@ using ProtoBuf;
 using ReactiveUI;
 using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.Input;
+using GuitarConfigurator.NetCore.Configuration.EmulationMode;
 
 namespace GuitarConfigurator.NetCore.ViewModels;
 
@@ -372,6 +373,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             first));
     }
 
+    [RelayCommand]
+    public void AddConsoleShortcut()
+    {
+        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.XboxOne));
+    }
+
     public void SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceControllerType type, RhythmType rhythmType,
         EmulationType emulationType)
     {
@@ -383,6 +390,28 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private void UpdateBindings()
     {
         foreach (var binding in Bindings) binding.UpdateBindings();
+
+        if (EmulationType == EmulationType.Controller)
+        {
+            if (!Bindings.Any(s => s is EmulationMode))
+            {
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.XboxOne));
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.Ps3));
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.Ps4Or5));
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.Wii));
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.Switch));
+            }
+        }
 
         var (extra, types) =
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings);
@@ -498,7 +527,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.RaisePropertyChanged(nameof(RhythmType));
         XInputOnWindows = true;
         MouseMovementType = MouseMovementType.Relative;
-
+        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.XboxOne));
+        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Ps3));
+        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Ps4Or5));
+        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Wii));
+        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Switch));
         switch (Main.DeviceInputType)
         {
             case DeviceInputType.Direct:
@@ -650,6 +683,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             $"#define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}");
 
         lines.Add($"#define TICK_SHARED {GenerateTick(ConfigField.Shared)}");
+        lines.Add($"#define TICK_DETECTION {GenerateTick(ConfigField.Detection)}");
 
         lines.Add($"#define TICK_PS3 {GenerateTick(ConfigField.Ps3)}");
 
@@ -800,14 +834,15 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void RemoveOutput(Output output)
     {
-        output.Dispose();
         if (Bindings.Remove(output))
         {
+            output.Dispose();
             UpdateErrors();
             return;
         }
 
         foreach (var binding in Bindings) binding.Outputs.Remove(output);
+        output.Dispose();
 
         UpdateErrors();
     }
@@ -907,7 +942,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Dictionary<string, int> debounces = new();
         if (combined)
             foreach (var output in outputs.Where(output => output.IsStrum))
-                debounces[output.Name] = debounces.Count;
+                debounces[output.LocalisedName] = debounces.Count;
 
         // Pass 1: work out debounces and map inputs to debounces
         var inputs = new Dictionary<string, List<int>>();
@@ -916,24 +951,23 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         foreach (var (input, output) in groupedOutput)
         {
             var generatedInput = input.Generate(mode);
-            if (input == null) throw new IncompleteConfigurationException("Missing input!");
             if (output is not OutputButton and not DrumAxis) continue;
 
             if (output.Input is MacroInput)
             {
-                if (!debounces.ContainsKey(output.Name + generatedInput))
-                    debounces[output.Name + generatedInput] = debounces.Count;
+                if (!debounces.ContainsKey(output.LocalisedName + generatedInput))
+                    debounces[output.LocalisedName + generatedInput] = debounces.Count;
 
                 macros.Add(output);
             }
             else
             {
-                if (!debounces.ContainsKey(output.Name)) debounces[output.Name] = debounces.Count;
+                if (!debounces.ContainsKey(output.LocalisedName)) debounces[output.LocalisedName] = debounces.Count;
             }
 
             if (!inputs.ContainsKey(generatedInput)) inputs[generatedInput] = new List<int>();
 
-            inputs[generatedInput].Add(debounces[output.Name]);
+            inputs[generatedInput].Add(debounces[output.LocalisedName]);
         }
 
         var seen = new HashSet<Output>();
@@ -955,21 +989,21 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                             var extra = "";
                             if (output is OutputButton or DrumAxis)
                             {
-                                index = new List<int> {debounces[output.Name]};
+                                index = new List<int> {debounces[output.LocalisedName]};
                                 if (output.Input is MacroInput)
                                 {
                                     if (mode == ConfigField.Shared)
                                     {
                                         output = output.Serialize().Generate(this);
                                         output.Input = input;
-                                        index = new List<int> {debounces[output.Name + generatedInput]};
+                                        index = new List<int> {debounces[output.LocalisedName + generatedInput]};
                                     }
                                     else
                                     {
                                         if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
                                         seen.Add(output);
                                         index = output.Input!.Inputs()
-                                            .Select(input1 => debounces[output.Name + input1.Generate(mode)])
+                                            .Select(input1 => debounces[output.LocalisedName + input1.Generate(mode)])
                                             .ToList();
                                     }
                                 }
@@ -991,7 +1025,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 var ifStatement = string.Join(" && ",
                     output.Input!.Inputs().Select(input =>
-                        $"debounce[{debounces[output.Name + input.Generate(mode)]}]"));
+                        $"debounce[{debounces[output.LocalisedName + input.Generate(mode)]}]"));
                 var sharedReset = output.Input!.Inputs().Aggregate("",
                     (current, input) => current + string.Join("",
                         inputs[input.Generate(mode)].Select(s => $"debounce[{s}]=0;").Distinct()));
@@ -1013,7 +1047,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Dictionary<string, int> debounces = new();
         if (combined)
             foreach (var output in outputs.Where(output => output.IsStrum))
-                debounces[output.Name] = debounces.Count;
+                debounces[output.LocalisedName] = debounces.Count;
 
         // Pass 1: work out debounces and map inputs to debounces
         var inputs = new Dictionary<string, List<int>>();
@@ -1022,24 +1056,23 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         foreach (var (input, output) in groupedOutput)
         {
             var generatedInput = input.Generate(ConfigField.Xbox360);
-            if (input == null) throw new IncompleteConfigurationException("Missing input!");
             if (output is not OutputButton and not DrumAxis) continue;
 
             if (output.Input is MacroInput)
             {
-                if (!debounces.ContainsKey(output.Name + generatedInput))
-                    debounces[output.Name + generatedInput] = debounces.Count;
+                if (!debounces.ContainsKey(output.LocalisedName + generatedInput))
+                    debounces[output.LocalisedName + generatedInput] = debounces.Count;
 
                 macros.Add(output);
             }
             else
             {
-                if (!debounces.ContainsKey(output.Name)) debounces[output.Name] = debounces.Count;
+                if (!debounces.ContainsKey(output.LocalisedName)) debounces[output.LocalisedName] = debounces.Count;
             }
 
             if (!inputs.ContainsKey(generatedInput)) inputs[generatedInput] = new List<int>();
 
-            inputs[generatedInput].Add(debounces[output.Name]);
+            inputs[generatedInput].Add(debounces[output.LocalisedName]);
         }
 
         return debounces.Count;
@@ -1058,9 +1091,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             var configs = binding.GetPinConfigs();
             //Exclude digital or analog pins (which use a guid containing a -
             if (configs.Any(s => s.Type == type || (type.Contains("-") && s.Type.Contains("-")))) continue;
-            if (!pins.ContainsKey(binding.Name)) pins[binding.Name] = new List<int>();
+            if (!pins.ContainsKey(binding.LocalisedName)) pins[binding.LocalisedName] = new List<int>();
 
-            foreach (var pinConfig in configs) pins[binding.Name].AddRange(pinConfig.Pins);
+            foreach (var pinConfig in configs) pins[binding.LocalisedName].AddRange(pinConfig.Pins);
         }
 
         if (IsApa102 && _apa102SpiConfig != null) pins["APA102"] = _apa102SpiConfig.Pins.ToList();

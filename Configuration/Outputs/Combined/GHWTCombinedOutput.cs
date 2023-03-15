@@ -35,7 +35,7 @@ public class GhwtCombinedOutput : CombinedOutput
     private readonly DirectPinConfig _pin;
 
     public GhwtCombinedOutput(ConfigViewModel model, int? pin = null,
-        IReadOnlyCollection<Output>? outputs = null) : base(model, new FixedInput(model, 0), "GHWT")
+        IReadOnlyCollection<Output>? outputs = null) : base(model, new FixedInput(model, 0))
     {
         _pin = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtTapPinType, pin ?? 0, DevicePinMode.PullUp);
         this.WhenAnyValue(x => x._pin.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
@@ -137,5 +137,9 @@ public class GhwtCombinedOutput : CombinedOutput
                 item.LedOff, item.LedIndices.ToArray(), item.Debounce,
                 Taps[item.GhWtInputType])));
         }
+    }
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return "Combined/GHWT.png";
     }
 }

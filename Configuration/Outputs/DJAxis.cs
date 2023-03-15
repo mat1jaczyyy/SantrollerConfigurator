@@ -11,10 +11,11 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public class DjAxis : OutputAxis
 {
     public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
-        int deadZone, DjAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone, "DJ" + type,
+        int deadZone, DjAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
         false)
     {
         Type = type;
+        UpdateDetails();
     }
 
     public DjAxisType Type { get; }
@@ -58,6 +59,11 @@ public class DjAxis : OutputAxis
 
     public bool IsFader => Type is DjAxisType.Crossfader;
 
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return EnumToStringConverter.Convert(Type);
+    }
+
     public override SerializedOutput Serialize()
     {
         return new SerializedDjAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone);
@@ -73,7 +79,6 @@ public class DjAxis : OutputAxis
         if (mode is ConfigField.Xbox360Mask or ConfigField.XboxOneMask or ConfigField.Ps3Mask)
             return base.Generate(mode, debounceIndex, combined, extra);
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
-        if (Input == null) throw new IncompleteConfigurationException("Missing input!");
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
@@ -114,7 +119,7 @@ public class DjAxis : OutputAxis
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
-        return $"DJ/{Name}.png";
+        return $"DJ/{Type}.png";
     }
 
     protected override bool SupportsCalibration()

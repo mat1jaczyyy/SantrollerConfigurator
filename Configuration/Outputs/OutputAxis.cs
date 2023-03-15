@@ -44,9 +44,8 @@ public abstract partial class OutputAxis : Output
 
     protected OutputAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
-        int deadZone, string name, bool trigger) : base(model, new FixedInput(model, 0), ledOn, ledOff,
-        ledIndices,
-        name)
+        int deadZone, bool trigger) : base(model, new FixedInput(model, 0), ledOn, ledOff,
+        ledIndices)
     {
         Input = input;
         Trigger = trigger;
@@ -294,13 +293,7 @@ public abstract partial class OutputAxis : Output
 
     protected string GenerateAssignment(ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
     {
-        switch (Input)
-        {
-            case null:
-                throw new IncompleteConfigurationException("Missing input!");
-            case FixedInput or DigitalToAnalog:
-                return Input.Generate(mode);
-        }
+        if (Input is FixedInput or DigitalToAnalog) return Input.Generate(mode);
 
         var accel = forceAccel || this is ControllerAxis
         {
@@ -412,7 +405,6 @@ public abstract partial class OutputAxis : Output
         var mask = GetMaskField(output, mode);
         if (mask.Any()) return mask;
 
-        if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         var led = Input is FixedInput ? "" : CalculateLeds(mode);
         return $"{output} = {GenerateAssignment(mode, false, false, false)}; {led}";
     }

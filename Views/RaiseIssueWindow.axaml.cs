@@ -7,7 +7,7 @@ using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Views;
 
-public class RaiseIssueWindow : ReactiveWindow<RaiseIssueWindowViewModel>
+public partial class RaiseIssueWindow : ReactiveWindow<RaiseIssueWindowViewModel>
 {
     public RaiseIssueWindow()
     {

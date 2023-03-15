@@ -92,4 +92,8 @@ public class DjCombinedOutput : CombinedTwiOutput
         DetectedLeft = djLeftRaw.Any();
         DetectedRight = djRightRaw.Any();
     }
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return "Combined/DJ.png";
+    }
 }

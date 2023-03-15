@@ -251,4 +251,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
         Outputs.RemoveMany(Outputs.Items.Where(s => s is Ps3Axis));
     }
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return "Combined/PS2.png";
+    }
 }

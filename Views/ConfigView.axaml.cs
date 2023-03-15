@@ -14,7 +14,7 @@ using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Views;
 
-public class ConfigView : ReactiveUserControl<ConfigViewModel>
+public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
 {
     public ConfigView()
     {

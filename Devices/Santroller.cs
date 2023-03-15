@@ -41,6 +41,8 @@ public class Santroller : IConfigurableDevice
 
     public string Serial { get; private set; }
 
+    private bool InvalidDevice { get; }
+
 
     // public static readonly FilterDeviceDefinition SantrollerDeviceFilter =
     //     new(0x1209, 0x2882, label: "Santroller",
@@ -54,6 +56,11 @@ public class Santroller : IConfigurableDevice
         Serial = "";
         _microcontroller = new Pico(Board.Generic);
         Load();
+        if (Board.Name == Board.Generic.Name)
+        {
+            InvalidDevice = true;
+            return;
+        }
         _usbDevice.SetBoard(Board);
     }
 
@@ -136,12 +143,17 @@ public class Santroller : IConfigurableDevice
     {
         var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte)Commands.CommandReadFCpu, 32)).Replace("\0", "")
             .Replace("L", "").Trim();
+        if (!fCpuStr.Any())
+        {
+            return;
+        }
         var fCpu = uint.Parse(fCpuStr);
         var board = Encoding.UTF8.GetString(ReadData(0, (byte)Commands.CommandReadBoard, 32)).Replace("\0", "");
         var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
         Board = m.Board;
         _microcontroller = m;
         RfId = GenerateRfId();
+        
     }
 
     public bool MigrationSupported => true;
@@ -196,7 +208,7 @@ public class Santroller : IConfigurableDevice
 
             try
             {
-                var direct = model.Bindings.Where(s => s.Input != null).Select(s => s.Input!.InnermostInput())
+                var direct = model.Bindings.Select(s => s.Input!.InnermostInput())
                     .OfType<DirectInput>().ToList();
                 var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins);
                 var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins);
@@ -430,6 +442,10 @@ public class Santroller : IConfigurableDevice
 
     public override string ToString()
     {
+        if (InvalidDevice)
+        {
+            return "Santroller - please disconnect and reconnect in PC mode";
+        }
         var ret = $"Santroller - {Board.Name} - {Version}";
         if (_deviceControllerType != null) ret += $" - {_deviceControllerType}";
 

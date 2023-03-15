@@ -29,7 +29,7 @@ public class EmptyOutput : Output
     private MouseButtonType? _mouseButtonType;
 
     public EmptyOutput(ConfigViewModel model) : base(model, new FixedInput(model, 0), Colors.Black, Colors.Black,
-        Array.Empty<byte>(), "Empty")
+        Array.Empty<byte>())
     {
         _isController = this.WhenAnyValue(x => x.Model.EmulationType)
             .Select(x => x is EmulationType.Controller)
@@ -120,7 +120,8 @@ public class EmptyOutput : Output
                     _ => null
                 },
                 StandardAxisType standardAxisType => new ControllerAxis(Model,
-                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0,
                     standardAxisType),
                 StandardButtonType standardButtonType => new ControllerButton(Model,
@@ -132,21 +133,26 @@ public class EmptyOutput : Output
                     Colors.Black, Array.Empty<byte>(), 5,
                     standardButtonType),
                 DrumAxisType drumAxisType => new DrumAxis(Model,
-                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0,
                     1000, 10, drumAxisType),
                 Ps3AxisType ps3AxisType => new Ps3Axis(Model,
-                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0,
                     ps3AxisType),
                 GuitarAxisType guitarAxisType => new GuitarAxis(Model,
-                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0, guitarAxisType),
                 DjAxisType djAxisType => new DjAxis(Model,
-                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0, djAxisType),
                 DjInputType djInputType => new DjButton(Model,
-                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
+                    new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
                     djInputType),
                 _ => null
             },
@@ -156,7 +162,8 @@ public class EmptyOutput : Output
                 {MouseAxisType: not null} => new MouseAxis(Model, new FixedInput(Model, 0), Colors.Black, Colors.Black,
                     Array.Empty<byte>(), 1, 0, 0,
                     MouseAxisType.Value),
-                {MouseButtonType: not null} => new MouseButton(Model, new FixedInput(Model, 0), Colors.Black, Colors.Black,
+                {MouseButtonType: not null} => new MouseButton(Model, new FixedInput(Model, 0), Colors.Black,
+                    Colors.Black,
                     Array.Empty<byte>(), 5,
                     MouseButtonType.Value),
                 {Key: not null} => new KeyboardButton(Model, new FixedInput(Model, 0), Colors.Black, Colors.Black,
@@ -186,6 +193,11 @@ public class EmptyOutput : Output
     public override SerializedOutput Serialize()
     {
         throw new IncompleteConfigurationException(ErrorText);
+    }
+
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return "";
     }
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)

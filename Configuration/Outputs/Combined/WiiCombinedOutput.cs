@@ -464,4 +464,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
             }
         }
     }
+    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    {
+        return "Combined/Wii.png";
+    }
 }

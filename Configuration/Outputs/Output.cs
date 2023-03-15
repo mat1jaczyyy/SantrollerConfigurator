@@ -93,20 +93,24 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     private Color _ledOn;
 
-    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, string name)
+    public bool DisplayInputFirst { get; }
+
+    private bool ShouldUpdateDetails { get; set; }
+
+    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, bool displayInputFirst = true)
     {
+        DisplayInputFirst = displayInputFirst;
         _input = input;
         Input.Output = this;
 
         LedOn = ledOn;
         LedOff = ledOff;
         LedIndices = new ObservableCollection<byte>(ledIndices);
-        Name = name;
         Model = model;
         _availableIndices = this.WhenAnyValue(x => x.Model.LedCount)
             .Select(x => Enumerable.Range(1, x).Select(s => new LedIndex(this, (byte) s)).ToArray())
             .ToProperty(this, x => x.AvailableIndices);
-        _image = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType)
+        _image = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
             .Select(x => GetImage(x.Item1, x.Item2)).ToProperty(this, x => x.Image);
         _isDj = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is DjInput)
             .ToProperty(this, x => x.IsDj);
@@ -120,7 +124,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
             .ToProperty(this, x => x.IsWt);
         _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToProperty(this, x => x.AreLedsEnabled);
-        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType)
+        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
             .Select(x => GetName(x.Item1, x.Item2))
             .ToProperty(this, x => x.LocalisedName);
         _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
@@ -143,6 +147,14 @@ public abstract partial class Output : ReactiveObject, IDisposable
         DigitalOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
     }
 
+    protected void UpdateDetails()
+    {
+        ShouldUpdateDetails = true;
+        this.RaisePropertyChanged(nameof(ShouldUpdateDetails));
+        ShouldUpdateDetails = false;
+        this.RaisePropertyChanged(nameof(ShouldUpdateDetails));
+    }
+
     public Input Input
     {
         get => _input;
@@ -150,8 +162,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
     }
 
     public Bitmap? Image => _image.Value;
-
-    public string Name { get; }
 
     public bool Enabled
     {
@@ -297,6 +307,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public double CombinedOpacity => _combinedOpacity.Value;
 
     public IBrush CombinedBackground => _combinedBackground.Value;
+    public bool ConfigurableInput => Input is not FixedInput;
 
     public virtual void Dispose()
     {
@@ -360,10 +371,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     {
     }
 
-    public virtual string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
-    {
-        return Name;
-    }
+    public abstract string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType);
 
     public static string GetMaskField(string type, ConfigField mode)
     {
@@ -547,6 +555,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     {
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var bitmap = GetImagePath(type, rhythmType);
+        
 
         var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
         try

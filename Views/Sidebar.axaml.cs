@@ -14,7 +14,7 @@ using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Views;
 
-public class SidebarView : ReactiveUserControl<ConfigViewModel>
+public partial class SidebarView : ReactiveUserControl<ConfigViewModel>
 {
     public SidebarView()
     {

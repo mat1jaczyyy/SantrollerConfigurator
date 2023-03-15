@@ -7,7 +7,7 @@ using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Views;
 
-public class BindAllWindow : ReactiveWindow<BindAllWindowViewModel>
+public partial class BindAllWindow : ReactiveWindow<BindAllWindowViewModel>
 {
     public BindAllWindow()
     {

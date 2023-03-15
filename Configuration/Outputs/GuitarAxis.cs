@@ -12,9 +12,10 @@ public class GuitarAxis : OutputAxis
 {
     public GuitarAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff,
         byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type) : base(model, input, ledOn,
-        ledOff, ledIndices, min, max, deadZone, "Guitar" + type, false)
+        ledOff, ledIndices, min, max, deadZone, false)
     {
         Type = type;
+        UpdateDetails();
     }
 
     public GuitarAxisType Type { get; }
@@ -63,14 +64,13 @@ public class GuitarAxis : OutputAxis
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
-        return $"{rhythmType}/{Name}.png";
+        return $"{rhythmType}/{Type}.png";
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps3Mask
             or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)) return "";
-        if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         var led = Input is FixedInput ? "" : CalculateLeds(mode);
         switch (mode)
         {
@@ -110,6 +110,11 @@ public class GuitarAxis : OutputAxis
             default:
                 return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)}; {led}";
         }
+    }
+
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return EnumToStringConverter.Convert(Type);
     }
 
     protected override string MinCalibrationText()

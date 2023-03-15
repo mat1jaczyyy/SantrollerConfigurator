@@ -6,7 +6,7 @@ using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Views;
 
-public class AreYouSureWindow : ReactiveWindow<AreYouSureWindowViewModel>
+public partial class AreYouSureWindow : ReactiveWindow<AreYouSureWindowViewModel>
 {
     public AreYouSureWindow()
     {

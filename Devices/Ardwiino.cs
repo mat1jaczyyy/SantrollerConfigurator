@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Avalonia.Media;
+using DynamicData.Kernel;
 using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
+using GuitarConfigurator.NetCore.Configuration.EmulationMode;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
@@ -589,6 +591,36 @@ public class Ardwiino : ConfigurableUsbDevice
                     new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
                     Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadDown));
             }
+        }
+
+        var a = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.A});
+        if (a.HasValue)
+        {
+            bindings.Add(new EmulationMode(model, a.Value.Input, EmulationModeType.XboxOne));
+        }
+        
+        var b = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.B});
+        if (b.HasValue)
+        {
+            bindings.Add(new EmulationMode(model, b.Value.Input, EmulationModeType.Ps3));
+        }
+        
+        var x = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.X});
+        if (x.HasValue)
+        {
+            bindings.Add(new EmulationMode(model, x.Value.Input, EmulationModeType.Ps4Or5));
+        }
+        
+        var y = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.Y});
+        if (y.HasValue)
+        {
+            bindings.Add(new EmulationMode(model, y.Value.Input, EmulationModeType.Wii));
+        }
+        
+        var lb = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.LeftShoulder});
+        if (lb.HasValue)
+        {
+            bindings.Add(new EmulationMode(model, lb.Value.Input, EmulationModeType.Switch));
         }
 
         model.LedType = ledType;

@@ -139,9 +139,10 @@ public class KeyboardButton : OutputButton
 
     public KeyboardButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         byte debounce, Key type) : base(model, input, ledOn, ledOff, ledIndices,
-        debounce, Keys[type])
+        debounce)
     {
         Key = type;
+        UpdateDetails();
     }
 
     public bool IsMediaKey => Key is Key.MediaStop or Key.MediaNextTrack or Key.MediaPlayPause or Key.VolumeDown
@@ -164,6 +165,11 @@ public class KeyboardButton : OutputButton
 
     public override void UpdateBindings()
     {
+    }
+
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return EnumToStringConverter.Convert(Key);
     }
 
     public override string GenerateOutput(ConfigField mode)

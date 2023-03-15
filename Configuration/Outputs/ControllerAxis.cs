@@ -17,13 +17,13 @@ public class ControllerAxis : OutputAxis
     public ControllerAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
         int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
-        deadZone,
-        type.ToString(), IsTrigger(type))
+        deadZone, IsTrigger(type))
     {
         Type = type;
         _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
             .Select(s => ControllerEnumConverter.GetAxisText(s.Item1, s.Item2, s.Item3) != null)
             .ToProperty(this, s => s.Valid);
+        UpdateDetails();
     }
 
     public StandardAxisType Type { get; }
@@ -79,7 +79,7 @@ public class ControllerAxis : OutputAxis
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return ControllerEnumConverter.GetAxisText(deviceControllerType, rhythmType,
-            Enum.Parse<StandardAxisType>(Name)) ?? Name;
+            Type) ?? Type.ToString();
     }
 
     private static bool IsTrigger(StandardAxisType type)
@@ -102,14 +102,14 @@ public class ControllerAxis : OutputAxis
             case DeviceControllerType.FlightStick:
             case DeviceControllerType.DancePad:
             case DeviceControllerType.ArcadePad:
-                return $"Others/Xbox360/360_{Name}.png";
+                return $"Others/Xbox360/360_{Type}.png";
             case DeviceControllerType.Guitar:
             case DeviceControllerType.Drum:
-                return $"{rhythmType}/{Name}.png";
+                return $"{rhythmType}/{Type}.png";
             case DeviceControllerType.LiveGuitar:
-                return $"GuitarHero/{Name}.png";
+                return $"GuitarHero/{Type}.png";
             case DeviceControllerType.Turntable:
-                return $"DJ/{Name}.png";
+                return $"DJ/{Type}.png";
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }

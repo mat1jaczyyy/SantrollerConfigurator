@@ -20,5 +20,6 @@ public enum ConfigField
     PlayerLed,
     RumbleLed,
     KeyboardLed,
-    StrobeLed
+    StrobeLed,
+    Detection
 }

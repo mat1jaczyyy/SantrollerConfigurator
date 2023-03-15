@@ -196,8 +196,7 @@ public class Led : Output
     private int _pin;
 
     public Led(ConfigViewModel model, bool outputEnabled, int pin, Color ledOn,
-        Color ledOff, byte[] ledIndices, RumbleCommand command) : base(
-        model, new FixedInput(model, 0), ledOn, ledOff, ledIndices, EnumToStringConverter.Convert(command))
+        Color ledOff, byte[] ledIndices, RumbleCommand command) : base(model, new FixedInput(model, 0), ledOn, ledOff, ledIndices)
     {
         Pin = pin;
         OutputEnabled = outputEnabled;
@@ -246,27 +245,22 @@ public class Led : Output
         }
     }
 
-    public RumbleCommand Command { get; }
+    private RumbleCommand _command;
+    public RumbleCommand Command
+    {
+        get=>_command;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _command, value);
+            UpdateDetails();
+        }
+    }
 
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 
     public ReadOnlyObservableCollection<RumbleCommand> RumbleCommands { get; }
 
-    public RumbleCommand RumbleCommand
-    {
-        get => Command;
-        set
-        {
-            if (value == Command) return;
-            var output = new Led(Model, OutputEnabled, Pin, LedOn, LedOff, LedIndices.ToArray(),
-                value);
-            output.Expanded = Expanded;
-            Model.Bindings.Insert(Model.Bindings.IndexOf(this), output);
-            Model.RemoveOutput(this);
-            Dispose();
-        }
-    }
 
     public override string LedOnLabel
     {
@@ -304,6 +298,11 @@ public class Led : Output
         if (PinConfig == null) return;
         Model.Microcontroller.UnAssignPins(PinConfig.Type);
         PinConfig = null;
+    }
+
+    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    {
+        return EnumToStringConverter.Convert(Command);
     }
 
     protected override IEnumerable<PinConfig> GetOwnPinConfigs()
@@ -357,12 +356,11 @@ public class Led : Output
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
-        return $"Led/{Name}.png";
+        return $"Led/{Command}.png";
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (Input == null) throw new IncompleteConfigurationException("Missing input!");
         if (mode is ConfigField.StrobeLed && Command != RumbleCommand.StageKitStrobe) return "";
         if (mode is not (ConfigField.StrobeLed or ConfigField.AuthLed or ConfigField.PlayerLed or ConfigField.RumbleLed
                 or ConfigField.KeyboardLed) ||

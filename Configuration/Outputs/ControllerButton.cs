@@ -14,13 +14,13 @@ public class ControllerButton : OutputButton
     private readonly ObservableAsPropertyHelper<bool> _valid;
 
     public ControllerButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
-        byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce,
-        type.ToString())
+        byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce)
     {
         Type = type;
         _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
             .Select(s => ControllerEnumConverter.GetButtonText(s.Item1, s.Item2, s.Item3) != null)
             .ToProperty(this, s => s.Valid);
+        UpdateDetails();
     }
 
     public StandardButtonType Type { get; }
@@ -37,13 +37,15 @@ public class ControllerButton : OutputButton
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return ControllerEnumConverter.GetButtonText(deviceControllerType, rhythmType,
-            Enum.Parse<StandardButtonType>(Name)) ?? Name;
+        return ControllerEnumConverter.GetButtonText(deviceControllerType, rhythmType, Type) ?? Type.ToString();
     }
 
     public override string GenerateOutput(ConfigField mode)
     {
-        return mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps3Mask or ConfigField.Xbox360Mask or ConfigField.XboxOneMask) ? "" : GetReportField(Type);
+        return mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360
+            or ConfigField.Ps3Mask or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)
+            ? ""
+            : GetReportField(Type);
     }
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
@@ -56,14 +58,14 @@ public class ControllerButton : OutputButton
             case DeviceControllerType.FlightStick:
             case DeviceControllerType.DancePad:
             case DeviceControllerType.ArcadePad:
-                return $"Others/Xbox360/360_{Name}.png";
+                return $"Others/Xbox360/360_{Type}.png";
             case DeviceControllerType.Guitar:
             case DeviceControllerType.Drum:
-                return $"{rhythmType}/{Name}.png";
+                return $"{rhythmType}/{Type}.png";
             case DeviceControllerType.LiveGuitar:
-                return $"GuitarHero/{Name}.png";
+                return $"GuitarHero/{Type}.png";
             case DeviceControllerType.Turntable:
-                return $"DJ/{Name}.png";
+                return $"DJ/{Type}.png";
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }

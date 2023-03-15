@@ -57,26 +57,26 @@ public class DrumAxis : OutputAxis
         {DrumAxisType.Kick, "report->kickVelocity"}
     };
 
-    private readonly StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
+    private const StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
 
-    private readonly StandardButtonType Ps3CymbalFlag = StandardButtonType.RightThumbClick;
-    private readonly StandardButtonType Ps3PadFlag = StandardButtonType.LeftThumbClick;
-    private readonly StandardButtonType Xbox360CymbalFlag = StandardButtonType.LeftShoulder;
-    private readonly StandardButtonType Xbox360PadFlag = StandardButtonType.RightThumbClick;
+    private const StandardButtonType Ps3CymbalFlag = StandardButtonType.RightThumbClick;
+    private const StandardButtonType Ps3PadFlag = StandardButtonType.LeftThumbClick;
+    private const StandardButtonType Xbox360CymbalFlag = StandardButtonType.LeftShoulder;
+    private const StandardButtonType Xbox360PadFlag = StandardButtonType.RightThumbClick;
 
-    private readonly StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
+    private const StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
     private int _debounce;
 
     private int _threshold;
 
     public DrumAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
         int deadZone, int threshold, int debounce, DrumAxisType type) : base(model, input, ledOn, ledOff, ledIndices,
-        min, max, deadZone,
-        "Drum" + type, true)
+        min, max, deadZone, true)
     {
         Type = type;
         Threshold = threshold;
         Debounce = debounce;
+        UpdateDetails();
     }
 
     public DrumAxisType Type { get; }
@@ -105,7 +105,7 @@ public class DrumAxis : OutputAxis
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return Name;
+        return EnumToStringConverter.Convert(Type);
     }
 
 
@@ -298,7 +298,7 @@ public class DrumAxis : OutputAxis
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
-        return $"{rhythmType}/{Name}.png";
+        return $"{rhythmType}/{Type}.png";
     }
 
     public override SerializedOutput Serialize()
