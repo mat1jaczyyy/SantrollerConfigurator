@@ -391,6 +391,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         foreach (var binding in Bindings) binding.UpdateBindings();
 
+        var (extra, types) =
+            ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings);
+        Bindings.RemoveAll(extra);
+        // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
+        if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
+        
         if (EmulationType == EmulationType.Controller)
         {
             if (!Bindings.Any(s => s is EmulationMode))
@@ -412,13 +418,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     EmulationModeType.Switch));
             }
         }
-
-        var (extra, types) =
-            ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings);
-        Bindings.RemoveAll(extra);
-        // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
-        if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
-
 
         if (_deviceControllerType == DeviceControllerType.Drum)
         {
@@ -527,21 +526,33 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.RaisePropertyChanged(nameof(RhythmType));
         XInputOnWindows = true;
         MouseMovementType = MouseMovementType.Relative;
-        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.XboxOne));
-        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Ps3));
-        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Ps4Or5));
-        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Wii));
-        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Switch));
         switch (Main.DeviceInputType)
         {
             case DeviceInputType.Direct:
                 _ = SetDefaultBindingsAsync(EmulationType);
+                
+                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.XboxOne));
+                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Ps3));
+                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Ps4Or5));
+                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Wii));
+                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Switch));
                 break;
             case DeviceInputType.Wii:
                 Bindings.Add(new WiiCombinedOutput(this));
+                
+                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicA, this), EmulationModeType.XboxOne));
+                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicB, this), EmulationModeType.Ps3));
+                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicX, this), EmulationModeType.Ps4Or5));
+                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicY, this), EmulationModeType.Wii));
+                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicLt, this), EmulationModeType.Switch));
                 break;
             case DeviceInputType.Ps2:
                 Bindings.Add(new Ps2CombinedOutput(this));
+                Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Cross, this), EmulationModeType.XboxOne));
+                Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Circle, this), EmulationModeType.Ps3));
+                Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Square, this), EmulationModeType.Ps4Or5));
+                Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Triangle, this), EmulationModeType.Wii));
+                Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.L1, this), EmulationModeType.Switch));
                 break;
             case DeviceInputType.Rf:
                 Bindings.Add(new RfRxOutput(this, Array.Empty<ulong>()));
