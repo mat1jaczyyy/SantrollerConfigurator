@@ -53,7 +53,6 @@ public class LedIndex : ReactiveObject
     }
 }
 
-
 public abstract partial class Output : ReactiveObject, IDisposable
 {
     private readonly ObservableAsPropertyHelper<bool> _areLedsEnabled;
@@ -97,7 +96,8 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     private bool ShouldUpdateDetails { get; set; }
 
-    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, bool displayInputFirst = true)
+    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
+        bool displayInputFirst = true)
     {
         DisplayInputFirst = displayInputFirst;
         _input = input;
@@ -232,7 +232,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
 
     public IEnumerable<InputType> InputTypes =>
-        Enum.GetValues<InputType>().Where(s => s is not InputType.MacroInput || this is OutputButton);
+        Enum.GetValues<InputType>().Where(s => (s is not InputType.MultiplexerInput || Model.IsPico) && (s is not InputType.MacroInput || this is OutputButton));
 
     public string LocalisedName => _localisedName.Value;
     public bool IsDj => _isDj.Value;
@@ -262,7 +262,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public double ImageOpacity => _imageOpacity.Value;
     public int ValueRaw => _valueRaw.Value;
-
 
 
     public abstract bool IsStrum { get; }
@@ -378,17 +377,17 @@ public abstract partial class Output : ReactiveObject, IDisposable
         switch (mode)
         {
             case ConfigField.MouseMask:
-                return $"maskfield(USB_Mouse_Data_t, {type.Replace("report->","")});";
+                return $"maskfield(USB_Mouse_Data_t, {type.Replace("report->", "")});";
             case ConfigField.ConsumerMask:
-                return $"maskfield(USB_ConsumerControl_Data_t, {type.Replace("report->","")});";
+                return $"maskfield(USB_ConsumerControl_Data_t, {type.Replace("report->", "")});";
             case ConfigField.KeyboardMask:
-                return $"maskfield(USB_NKRO_Data_t, {type.Replace("report->","")});";
+                return $"maskfield(USB_NKRO_Data_t, {type.Replace("report->", "")});";
             case ConfigField.Ps3Mask:
-                return $"maskfield(PS3_REPORT, {type.Replace("report->","")});";
+                return $"maskfield(PS3_REPORT, {type.Replace("report->", "")});";
             case ConfigField.Xbox360Mask:
-                return $"maskfield(XINPUT_REPORT, {type.Replace("report->","")});";
+                return $"maskfield(XINPUT_REPORT, {type.Replace("report->", "")});";
             case ConfigField.XboxOneMask:
-                return $"maskfield(XBOX_ONE_REPORT, {type.Replace("report->","")});";
+                return $"maskfield(XBOX_ONE_REPORT, {type.Replace("report->", "")});";
         }
 
         return "";
@@ -399,7 +398,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
         var typeName = type.ToString()!;
         return $"report->{char.ToLower(typeName[0])}{typeName[1..]}";
     }
-    
+
     [RelayCommand]
     private async Task FindAndAssignAsync()
     {
@@ -452,19 +451,25 @@ public abstract partial class Output : ReactiveObject, IDisposable
         GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
     {
         Input input;
-        var lastPin = inputType == InputType.AnalogPinInput ? Model.Microcontroller.GetFirstAnalogPin() : 0;
+        var lastPin = inputType is InputType.AnalogPinInput or InputType.MultiplexerInput ? Model.Microcontroller.GetFirstAnalogPin() : 0;
         var pinMode = DevicePinMode.PullUp;
-        if (Input?.InnermostInput() is DirectInput direct)
+        if (Input.InnermostInput() is DirectInput direct)
+        {
             if (direct.IsAnalog || inputType != InputType.AnalogPinInput)
             {
                 lastPin = direct.Pin;
                 if (!direct.IsAnalog) pinMode = direct.PinMode;
             }
+        }
+
 
         switch (inputType)
         {
             case InputType.AnalogPinInput:
                 input = new DirectInput(lastPin, DevicePinMode.Analog, Model);
+                break;
+            case InputType.MultiplexerInput:
+                input = new MultiplexerInput(lastPin, 0,0,0,0,0,MultiplexerType.EightChannel, Model);
                 break;
             case InputType.MacroInput:
                 input = new MacroInput(new DirectInput(lastPin, pinMode, Model),
@@ -491,7 +496,9 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 break;
             case InputType.WtNeckInput when Input?.InnermostInput() is not GhWtTapInput:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                input = new GhWtTapInput(ghWtInputType.Value, Model, Model.Microcontroller.GetFirstAnalogPin(), Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin());
+                input = new GhWtTapInput(ghWtInputType.Value, Model, Model.Microcontroller.GetFirstAnalogPin(),
+                    Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(),
+                    Model.Microcontroller.GetFirstDigitalPin());
                 break;
             case InputType.WtNeckInput when Input?.InnermostInput() is GhWtTapInput wt:
                 ghWtInputType ??= GhWtInputType.TapGreen;
@@ -555,7 +562,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     {
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var bitmap = GetImagePath(type, rhythmType);
-        
+
 
         var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
         try

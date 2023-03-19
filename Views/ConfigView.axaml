@@ -242,7 +242,7 @@
                                    Width="300">
                                 Slider Bar Sensitivity
                             </Label>
-                            <NumericUpDown Value="{Binding Sensitivity}" Maximum="60" VerticalAlignment="Center"
+                            <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Sensitivity}" Maximum="60" VerticalAlignment="Center"
                                            Width="200" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
@@ -507,6 +507,56 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type config:MultiplexerInput}">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Width="300">Analog Pin</Label>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Pin}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsSixteenChannel}">
+                        <Label VerticalAlignment="Center" Width="300">Channel</Label>
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Channel}" Minimum="0"
+                                       Maximum="15" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsSixteenChannel}">
+                        <Label VerticalAlignment="Center" Width="300">Channel</Label>
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Channel}" Minimum="0"
+                                       Maximum="8" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Width="300">Multiplexer Type</Label>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding MultiplexerType}"
+                                  Items="{Binding MultiplexerTypes}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Width="300">S0 Pin</Label>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding PinS0}"
+                                  Items="{Binding AvailableDigitalPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Width="300">S1 Pin</Label>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding PinS1}"
+                                  Items="{Binding AvailableDigitalPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Width="300">S2 Pin</Label>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding PinS2}"
+                                  Items="{Binding AvailableDigitalPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsSixteenChannel}">
+                        <Label VerticalAlignment="Center" Width="300">S3 Pin</Label>
+                        <ComboBox VerticalAlignment="Center" SelectedItem="{Binding PinS3}"
+                                  Items="{Binding AvailableDigitalPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type config:DirectInput}">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
@@ -762,7 +812,7 @@
                            Width="300">
                         Debounce
                     </Label>
-                    <NumericUpDown Value="{Binding Debounce}" VerticalAlignment="Center" Width="200" />
+                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Debounce}" VerticalAlignment="Center" Width="200" />
                 </StackPanel>
             </DataTemplate>
 

@@ -3,6 +3,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 public enum InputType
 {
     AnalogPinInput,
+    MultiplexerInput,
     DigitalPinInput,
     WiiInput,
     Ps2Input,
@@ -10,5 +11,5 @@ public enum InputType
     WtNeckInput,
     Gh5NeckInput,
     MacroInput,
-    RFInput
+    RfInput
 }
