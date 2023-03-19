@@ -53,7 +53,6 @@ public class ControllerButton : OutputButton
         switch (type)
         {
             case DeviceControllerType.Gamepad:
-            case DeviceControllerType.Wheel:
             case DeviceControllerType.ArcadeStick:
             case DeviceControllerType.FlightStick:
             case DeviceControllerType.DancePad:

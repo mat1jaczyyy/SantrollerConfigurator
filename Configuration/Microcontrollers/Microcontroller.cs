@@ -84,7 +84,6 @@ public abstract class Microcontroller
 
     public abstract string GenerateAnalogRead(int pin);
 
-    public abstract string GeneratePulseRead(int pin, PulseMode mode, int timeout);
     public abstract int GetFirstAnalogPin();
     public abstract void AssignPin(PinConfig pinConfig);
 

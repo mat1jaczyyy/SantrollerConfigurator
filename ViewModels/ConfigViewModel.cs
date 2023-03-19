@@ -33,6 +33,8 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 {
     public static readonly string Apa102SpiType = "APA102";
+    public static readonly string UsbHostPinTypeDm = "DM";
+    public static readonly string UsbHostPinTypeDp = "DP";
     public static readonly string UnoPinTypeTx = "Uno Serial Tx Pin";
     public static readonly string UnoPinTypeRx = "Uno Serial Rx Pin";
     public static readonly int UnoPinTypeRxPin = 0;
@@ -60,6 +62,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private byte _ledCount;
 
+    private byte _wtSensitivity;
+
     private LedType _ledType;
 
     private MouseMovementType _mouseMovementType;
@@ -72,11 +76,16 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private DirectPinConfig? _rfCsn;
 
+    private DirectPinConfig? _usbHostDm;
+    private DirectPinConfig? _usbHostDp;
+
     private SpiConfig? _rfSpiConfig;
 
     private RhythmType _rhythmType;
 
     private bool _xinputOnWindows;
+
+    private bool _usbHostEnabled;
 
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
@@ -134,7 +143,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Select(x => x is LedType.APA102_BGR or LedType.APA102_BRG or LedType.APA102_GBR or LedType.APA102_GRB
                 or LedType.APA102_RBG or LedType.APA102_RGB)
             .ToProperty(this, x => x.IsApa102);
-
+        
         if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults();
         if (Main is {IsUno: false, IsMega: false}) return;
         Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output));
@@ -228,7 +237,31 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _rfCsn?.Pin ?? 0;
         set => _rfCsn!.Pin = value;
     }
-    
+
+    public int UsbHostDm
+    {
+        get => _usbHostDm?.Pin ?? 0;
+        set
+        {
+            _usbHostDm!.Pin = value;
+            _usbHostDp!.Pin = value - 1;
+            this.RaisePropertyChanged();
+            this.RaisePropertyChanged(nameof(UsbHostDp));
+        }
+    }
+
+    public int UsbHostDp
+    {
+        get => _usbHostDp?.Pin ?? 0;
+        set
+        {
+            _usbHostDp!.Pin = value;
+            _usbHostDm!.Pin = value + 1;
+            this.RaisePropertyChanged();
+            this.RaisePropertyChanged(nameof(UsbHostDm));
+        }
+    }
+
     //TODO: have a rf connected and initialised bool here too, that show in the sidebar
     public byte LedCount
     {
@@ -236,7 +269,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => this.RaiseAndSetIfChanged(ref _ledCount, value);
     }
 
-    
+    public byte WtSensitivity
+    {
+        get => _wtSensitivity;
+        set => this.RaiseAndSetIfChanged(ref _wtSensitivity, value);
+    }
+
+
     public byte RfId
     {
         get => _rfId;
@@ -293,6 +332,38 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => this.RaiseAndSetIfChanged(ref _xinputOnWindows, value);
     }
 
+    public bool UsbHostEnabled
+    {
+        get => _usbHostEnabled;
+        set
+        {
+            if (!IsPico) return;
+            this.RaiseAndSetIfChanged(ref _usbHostEnabled, value);
+            if (value)
+            {
+                // These pins get handled by the usb host lib, but we need them defined regardless
+                _usbHostDp = Microcontroller.GetOrSetPin(this, UsbHostPinTypeDp, AvailablePinsDp.First(), DevicePinMode.Skip);
+                _usbHostDm = Microcontroller.GetOrSetPin(this, UsbHostPinTypeDm, AvailablePinsDm.First(), DevicePinMode.Skip);
+                this.RaisePropertyChanged(nameof(UsbHostDp));
+                this.RaisePropertyChanged(nameof(UsbHostDm));
+            }
+            else
+            {
+                if (_usbHostDp != null)
+                {
+                    Microcontroller.UnAssignPins(_usbHostDp.Type);
+                    _usbHostDp = null;
+                }
+
+                if (_usbHostDm == null) return;
+                Microcontroller.UnAssignPins(_usbHostDm.Type);
+                _usbHostDm = null;
+            }
+
+            UpdateErrors();
+        }
+    }
+
     public bool CombinedDebounce
     {
         get => _combinedDebounce;
@@ -345,11 +416,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         .Select(s => s.Key).ToList();
 
     public List<int> AvailableRfMosiPins => Microcontroller.SpiPins(RfRxOutput.SpiType)
-        .Where(s => s.Value is SpiPinType.Miso)
+        .Where(s => s.Value is SpiPinType.Mosi)
         .Select(s => s.Key).ToList();
 
     public List<int> AvailableRfMisoPins => Microcontroller.SpiPins(RfRxOutput.SpiType)
-        .Where(s => s.Value is SpiPinType.Mosi)
+        .Where(s => s.Value is SpiPinType.Miso)
         .Select(s => s.Key).ToList();
 
     public List<int> AvailableRfSckPins => Microcontroller.SpiPins(RfRxOutput.SpiType)
@@ -357,13 +428,18 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         .Select(s => s.Key).ToList();
 
     public List<int> AvailablePins => Microcontroller.GetAllPins(false);
+    // Since DM and DP need to be next to eachother, you cannot use pins at the far ends
+    public List<int> AvailablePinsDm => AvailablePins.Skip(1).ToList();
+    public List<int> AvailablePinsDp => AvailablePins.SkipLast(1).ToList();
 
     public IEnumerable<PinConfig> PinConfigs =>
-        new[] {_apa102SpiConfig, _rfSpiConfig}.Where(s => s != null).Cast<PinConfig>();
+        new PinConfig?[] {_apa102SpiConfig, _rfSpiConfig, _usbHostDm, _usbHostDp}.Where(s => s != null)
+            .Cast<PinConfig>();
 
     public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
 
     public IScreen HostScreen { get; }
+    public bool IsPico => Device.IsPico();
 
     [RelayCommand]
     public void AddLedBinding()
@@ -376,7 +452,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [RelayCommand]
     public void AddConsoleShortcut()
     {
-        Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.XboxOne));
+        Bindings.Add(new EmulationMode(this,
+            new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+            EmulationModeType.XboxOne));
     }
 
     public void SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceControllerType type, RhythmType rhythmType,
@@ -396,7 +474,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Bindings.RemoveAll(extra);
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
         if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
-        
+
         if (EmulationType == EmulationType.Controller)
         {
             if (!Bindings.Any(s => s is EmulationMode))
@@ -499,6 +577,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ClearOutputs();
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
+        _wtSensitivity = 30;
+        _usbHostEnabled = false;
         if (Device.IsMini())
         {
             _emulationType = EmulationType.RfController;
@@ -530,27 +610,42 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             case DeviceInputType.Direct:
                 _ = SetDefaultBindingsAsync(EmulationType);
-                
-                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.XboxOne));
-                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Ps3));
-                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Ps4Or5));
-                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Wii));
-                Bindings.Add(new EmulationMode(this, new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this), EmulationModeType.Switch));
+
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.XboxOne));
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.Ps3));
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.Ps4Or5));
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.Wii));
+                Bindings.Add(new EmulationMode(this,
+                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                    EmulationModeType.Switch));
                 break;
             case DeviceInputType.Wii:
                 Bindings.Add(new WiiCombinedOutput(this));
-                
-                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicA, this), EmulationModeType.XboxOne));
+
+                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicA, this),
+                    EmulationModeType.XboxOne));
                 Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicB, this), EmulationModeType.Ps3));
-                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicX, this), EmulationModeType.Ps4Or5));
+                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicX, this),
+                    EmulationModeType.Ps4Or5));
                 Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicY, this), EmulationModeType.Wii));
-                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicLt, this), EmulationModeType.Switch));
+                Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.ClassicLt, this),
+                    EmulationModeType.Switch));
                 break;
             case DeviceInputType.Ps2:
                 Bindings.Add(new Ps2CombinedOutput(this));
-                Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Cross, this), EmulationModeType.XboxOne));
+                Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Cross, this),
+                    EmulationModeType.XboxOne));
                 Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Circle, this), EmulationModeType.Ps3));
-                Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Square, this), EmulationModeType.Ps4Or5));
+                Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Square, this),
+                    EmulationModeType.Ps4Or5));
                 Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.Triangle, this), EmulationModeType.Wii));
                 Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.L1, this), EmulationModeType.Switch));
                 break;
@@ -575,7 +670,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
     {
-        if (IsRf)
+        if (emulationType is EmulationType.RfController or EmulationType.RfKeyboardMouse)
         {
             if (_rfSpiConfig == null)
             {
@@ -586,12 +681,15 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, mosi, miso, sck, true, true,
                     true,
                     4000000);
-                this.RaisePropertyChanged(nameof(RfMiso));
-                this.RaisePropertyChanged(nameof(RfMosi));
-                this.RaisePropertyChanged(nameof(RfSck));
                 var first = Microcontroller.GetAllPins(false).First();
                 _rfCe = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
                 _rfCsn = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
+                
+                this.RaisePropertyChanged(nameof(RfMiso));
+                this.RaisePropertyChanged(nameof(RfMosi));
+                this.RaisePropertyChanged(nameof(RfSck));
+                this.RaisePropertyChanged(nameof(RfCe));
+                this.RaisePropertyChanged(nameof(RfCsn));
             }
         }
         else
@@ -613,6 +711,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Microcontroller.UnAssignPins(_rfCsn.Type);
                 _rfCsn = null;
             }
+        }
+        // If going from say bluetooth controller to standard controller, the pin bindings can stay
+        if (GetSimpleEmulationTypeFor(EmulationType) == GetSimpleEmulationTypeFor(emulationType))
+        {
+            _emulationType = emulationType;
+            this.RaisePropertyChanged(nameof(EmulationType));
+            UpdateErrors();
+            return;
         }
 
         if (Bindings.Any())
@@ -673,7 +779,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var directInputs = inputs.OfType<DirectInput>().ToList();
         var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
         var lines = new List<string>();
-        var leds = outputs.SelectMany(s => s.Outputs.Items).SelectMany(s => s.LedIndices).ToList();
 
         using (var outputStream = new MemoryStream())
         {
@@ -689,6 +794,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
 
         lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
+        lines.Add($"#define USB_HOST_STACK {UsbHostEnabled.ToString().ToLower()}");
+        lines.Add($"#define USB_HOST_DP_PIN {UsbHostDp}");
 
         lines.Add(
             $"#define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}");
@@ -728,6 +835,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
         lines.Add($"#define LED_COUNT {LedCount}");
+        lines.Add($"#define WT_SENSITIVITY {WtSensitivity}");
 
         lines.Add($"#define LED_TYPE {GetLedType()}");
 
@@ -799,9 +907,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         return (byte) GetSimpleEmulationType();
     }
 
-    public EmulationType GetSimpleEmulationType()
+    private EmulationType GetSimpleEmulationTypeFor(EmulationType type)
     {
-        switch (EmulationType)
+        switch (type)
         {
             case EmulationType.Bluetooth:
             case EmulationType.Controller:
@@ -814,6 +922,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             default:
                 return EmulationType;
         }
+    }
+    public EmulationType GetSimpleEmulationType()
+    {
+        return GetSimpleEmulationTypeFor(EmulationType);
     }
 
     private int GetLedType()
@@ -857,6 +969,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         UpdateErrors();
     }
+
     [RelayCommand]
     public void ClearOutputs()
     {
@@ -877,16 +990,19 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Bindings.Clear();
         UpdateErrors();
     }
+
     [RelayCommand]
     public void ExpandAll()
     {
         foreach (var binding in Bindings) binding.Expanded = true;
     }
+
     [RelayCommand]
     public void CollapseAll()
     {
         foreach (var binding in Bindings) binding.Expanded = false;
     }
+
     [RelayCommand]
     public async Task ResetWithConfirmationAsync()
     {
@@ -910,7 +1026,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (!yesNo.Response) return;
         //TODO: actually revert the device to an arduino
     }
-    
+
     [RelayCommand]
     public void AddOutput()
     {
@@ -945,7 +1061,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
         var groupedOutputs = outputs
             .SelectMany(s =>
-                s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input?.Inputs().Count ?? 0)) ??
+                s.Input?.Inputs().Zip(Enumerable.Repeat(s, s.Input.Inputs().Count)) ??
                 new List<(Input First, Output Second)>())
             .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
         var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
@@ -1114,6 +1230,16 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             pins[UnoPinTypeRx] = new List<int> {UnoPinTypeRxPin};
         }
 
+        if (UsbHostEnabled)
+        {
+            pins["USB Host"] = new List<int>{UsbHostDm, UsbHostDp};
+        }
+
+        if (IsRf)
+        {
+            pins["RF"] = new List<int>{RfMiso, RfMosi, RfCe, RfSck, RfCsn};
+        }
+
         return pins;
     }
 
@@ -1141,7 +1267,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     Device = device;
                     santroller.StartTicking(this);
                 }
-            } else if (!Main.Programming)
+            }
+            else if (!Main.Programming)
             {
                 Main.Complete(100);
                 Device = device;
@@ -1150,7 +1277,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         Device.DeviceAdded(device);
-
     }
 
     private void RemoveDevice(IConfigurableDevice device)

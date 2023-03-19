@@ -330,7 +330,6 @@ public class Led : Output
                 switch (type.Item1)
                 {
                     case DeviceControllerType.Gamepad:
-                    case DeviceControllerType.Wheel:
                     case DeviceControllerType.ArcadeStick:
                     case DeviceControllerType.FlightStick:
                     case DeviceControllerType.DancePad:

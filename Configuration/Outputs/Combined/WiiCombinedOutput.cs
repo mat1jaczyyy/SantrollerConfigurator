@@ -46,6 +46,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.GuitarYellow, StandardButtonType.Y},
         {WiiInputType.GuitarBlue, StandardButtonType.X},
         {WiiInputType.GuitarOrange, StandardButtonType.LeftShoulder},
+        {WiiInputType.GuitarTapAll, StandardButtonType.A},
         {WiiInputType.GuitarStrumDown, StandardButtonType.DpadDown},
         {WiiInputType.GuitarStrumUp, StandardButtonType.DpadUp},
         {WiiInputType.GuitarMinus, StandardButtonType.Back},
@@ -215,28 +216,9 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 pair.Value));
 
         foreach (var pair in Axis)
-            Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model,  Sda, Scl, true),
+            Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), -30000, 30000, 10, pair.Value));
-
-        // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, Model, Sda, Scl),
-        //         AnalogToDigitalType.JoyLow, 32),
-        //     Colors.Black, Colors.Black, null, 10, StandardButtonType.Left));
-        //
-        // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickX, Model, Sda, Scl),
-        //         AnalogToDigitalType.JoyHigh, 32),
-        //     Colors.Black, Colors.Black, null, 10, StandardButtonType.Right));
-        // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, Model, Sda, Scl),
-        //         AnalogToDigitalType.JoyLow, 32),
-        //     Colors.Black, Colors.Black, null, 10, StandardButtonType.Up));
-        //
-        // _outputs.Add(new ControllerButton(Model,
-        //     new AnalogToDigital(new WiiInput(WiiInputType.DjStickY, Model, Sda, Scl),
-        //         AnalogToDigitalType.JoyLow, 32),
-        //     Colors.Black, Colors.Black, null, 10, StandardButtonType.Down));
 
         Outputs.Add(new ControllerAxis(Model,
             new WiiInput(WiiInputType.GuitarTapBar, Model, Sda, Scl, true),
@@ -247,11 +229,36 @@ public class WiiCombinedOutput : CombinedTwiOutput
             Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
+
+        UpdateBindings();
+    }
+
+    public override IEnumerable<Output> ValidOutputs()
+    {
+        var tapAnalog =
+            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapBar}});
+        var tapFrets =
+            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
+        if (tapAnalog == null && tapFrets == null) return Outputs.Items;
+        var outputs = new List<Output>(Outputs.Items);
+        // Map Tap bar to Upper frets on RB guitars
+        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
+        {
+            outputs.AddRange(TapRb.Select(pair => new RbButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
+
+            outputs.Remove(tapAnalog);
+        }
+
+        if (tapFrets == null) return outputs;
         foreach (var pair in Tap)
-            Outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
+        {
+            outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), 5, pair.Value));
-        UpdateBindings();
+            outputs.Remove(tapFrets);
+        }
+
+        return outputs;
     }
 
     public override SerializedOutput Serialize()
@@ -286,7 +293,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     private bool OutputValid(Output output)
     {
-        Console.WriteLine(DetectedType);
         if (_detectedType != null)
             return output.Input is WiiInput wiiInput &&
                    wiiInput.WiiControllerType == _detectedType;
@@ -361,42 +367,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
             }
         }
 
-        // Map Tap bar to Upper frets on RB guitars, and standard frets on anything else
-        if (Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
-        {
-            if (!Outputs.Items.Any(s => s is RbButton))
-            {
-                var items = Outputs.Items.Where(s => s is ControllerButton
-                {
-                    Input: WiiInput
-                    {
-                        Input: WiiInputType.GuitarTapGreen or WiiInputType.GuitarTapRed
-                        or WiiInputType.GuitarTapYellow or WiiInputType.GuitarTapBlue
-                        or WiiInputType.GuitarTapOrange
-                    }
-                }).ToList();
-                Outputs.RemoveMany(items);
-                Outputs.AddRange(items.Cast<RbButton>().Select(item => new RbButton(Model, item.Input,
-                    item.LedOn,
-                    item.LedOff, item.LedIndices.ToArray(), item.Debounce,
-                    TapRb[item.WiiInputType])));
-            }
-        }
-        else
-        {
-            var items2 = Outputs.Items.Where(s => s is RbButton).ToList();
-            if (items2.Any())
-            {
-                Outputs.RemoveMany(items2);
-                Outputs.AddRange(items2.Cast<RbButton>().Select(item => new ControllerButton(Model, item.Input,
-                    item.LedOn,
-                    item.LedOff, item.LedIndices.ToArray(), item.Debounce,
-                    Tap[item.WiiInputType])));
-            }
-        }
-
-        // Map Slider on GH guitars to Slider, and to RightStickY on anything else
-        if (Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.GuitarHero)
+        // Map Slider on guitars to Slider, and to RightStickY on anything else
+        if (Model.DeviceType is DeviceControllerType.Guitar)
         {
             if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Slider}))
             {
@@ -464,6 +436,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             }
         }
     }
+
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
         return "Combined/Wii.png";

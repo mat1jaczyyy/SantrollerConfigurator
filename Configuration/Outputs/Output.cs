@@ -491,11 +491,11 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 break;
             case InputType.WtNeckInput when Input?.InnermostInput() is not GhWtTapInput:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                input = new GhWtTapInput(ghWtInputType.Value, Model);
+                input = new GhWtTapInput(ghWtInputType.Value, Model, Model.Microcontroller.GetFirstAnalogPin(), Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin());
                 break;
             case InputType.WtNeckInput when Input?.InnermostInput() is GhWtTapInput wt:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                input = new GhWtTapInput(ghWtInputType.Value, Model, wt.Pin);
+                input = new GhWtTapInput(ghWtInputType.Value, Model, wt.Pin, wt.PinS0, wt.PinS1, wt.PinS2);
                 break;
             case InputType.WiiInput when Input?.InnermostInput() is not WiiInput:
                 wiiInput ??= WiiInputType.ClassicA;
@@ -570,7 +570,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public abstract string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra);
 
-    public IEnumerable<Output> ValidOutputs()
+    public virtual IEnumerable<Output> ValidOutputs()
     {
         var (extra, _) = ControllerEnumConverter.FilterValidOutputs(Model.DeviceType, Model.RhythmType, Outputs.Items);
         return Outputs.Items.Except(extra).Where(output => output.Enabled);

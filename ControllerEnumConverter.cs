@@ -461,8 +461,7 @@ public class ControllerEnumConverter : IMultiValueConverter
         if (deviceControllerType is not DeviceControllerType.Guitar or DeviceControllerType.Drum)
             rhythmType = null;
         if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick
-            or DeviceControllerType.DancePad
-            or DeviceControllerType.Wheel or DeviceControllerType.FlightStick or DeviceControllerType.Drum)
+            or DeviceControllerType.DancePad or DeviceControllerType.FlightStick or DeviceControllerType.Drum)
             deviceControllerType = DeviceControllerType.Gamepad;
         return AxisLabels.GetValueOrDefault(
             new Tuple<DeviceControllerType, RhythmType?, StandardAxisType>(deviceControllerType, rhythmType, axis));
@@ -474,8 +473,7 @@ public class ControllerEnumConverter : IMultiValueConverter
         if (deviceControllerType is not DeviceControllerType.Guitar or DeviceControllerType.Drum)
             rhythmType = null;
         if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick
-            or DeviceControllerType.DancePad
-            or DeviceControllerType.Wheel or DeviceControllerType.FlightStick or DeviceControllerType.Drum)
+            or DeviceControllerType.DancePad or DeviceControllerType.FlightStick or DeviceControllerType.Drum)
             deviceControllerType = DeviceControllerType.Gamepad;
         return ButtonLabels.GetValueOrDefault(
             new Tuple<DeviceControllerType, RhythmType?, StandardButtonType>(deviceControllerType, rhythmType, button));
@@ -539,8 +537,7 @@ public class ControllerEnumConverter : IMultiValueConverter
         if (deviceControllerType is not DeviceControllerType.Guitar)
             rhythmType = null;
         if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick
-            or DeviceControllerType.DancePad
-            or DeviceControllerType.Wheel or DeviceControllerType.FlightStick)
+            or DeviceControllerType.DancePad or DeviceControllerType.FlightStick)
             deviceControllerType = DeviceControllerType.Gamepad;
         return Enum.GetValues<SimpleType>().Cast<object>()
             .Concat(otherBindings)

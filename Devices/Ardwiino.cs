@@ -335,7 +335,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 deviceType = DeviceControllerType.ArcadePad;
                 break;
             case SubType.XinputWheel:
-                deviceType = DeviceControllerType.Wheel;
+                deviceType = DeviceControllerType.Gamepad;
                 break;
             case SubType.XinputArcadeStick:
                 deviceType = DeviceControllerType.ArcadeStick;

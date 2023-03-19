@@ -126,11 +126,6 @@ public class Pico : Microcontroller
 
     public override List<int> AnalogPins => new() {26, 27, 28, 29};
 
-    public override string GeneratePulseRead(int pin, PulseMode mode, int timeout)
-    {
-        return $"pulseIn({pin},{mode},{timeout})";
-    }
-
     public override int GetFirstAnalogPin()
     {
         return PinA0;
@@ -252,19 +247,26 @@ public class Pico : Microcontroller
         var ret = "";
         var pins = PinConfigs.OfType<DirectPinConfig>();
         foreach (var devicePin in pins)
-            if (devicePin.PinMode == DevicePinMode.Analog)
+        {
+            switch (devicePin.PinMode)
             {
-                ret += $"adc_gpio_init({devicePin.Pin});";
+                case DevicePinMode.Skip:
+                    continue;
+                case DevicePinMode.Analog:
+                    ret += $"adc_gpio_init({devicePin.Pin});";
+                    break;
+                default:
+                {
+                    var up = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
+                    var down = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
+                    ret += $"gpio_init({devicePin.Pin});";
+                    ret +=
+                        $"gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});";
+                    ret += $"gpio_set_pulls({devicePin.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
+                    break;
+                }
             }
-            else
-            {
-                var up = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
-                var down = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
-                ret += $"gpio_init({devicePin.Pin});";
-                ret +=
-                    $"gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});";
-                ret += $"gpio_set_pulls({devicePin.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
-            }
+        }
 
         return ret;
     }

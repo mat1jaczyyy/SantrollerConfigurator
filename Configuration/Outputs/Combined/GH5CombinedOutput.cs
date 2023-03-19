@@ -15,6 +15,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
 {
     private static readonly Dictionary<Gh5NeckInputType, StandardButtonType> Buttons = new()
     {
+        {Gh5NeckInputType.TapAll, StandardButtonType.A},
         {Gh5NeckInputType.Green, StandardButtonType.A},
         {Gh5NeckInputType.Red, StandardButtonType.B},
         {Gh5NeckInputType.Yellow, StandardButtonType.Y},
@@ -29,6 +30,15 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         {Gh5NeckInputType.TapYellow, StandardButtonType.Y},
         {Gh5NeckInputType.TapBlue, StandardButtonType.X},
         {Gh5NeckInputType.TapOrange, StandardButtonType.LeftShoulder}
+    };
+    
+    private static readonly Dictionary<Gh5NeckInputType, RBButtonType> TapsRb = new()
+    {
+        {Gh5NeckInputType.TapGreen, RBButtonType.UpperGreen},
+        {Gh5NeckInputType.TapRed, RBButtonType.UpperRed},
+        {Gh5NeckInputType.TapYellow, RBButtonType.UpperYellow},
+        {Gh5NeckInputType.TapBlue, RBButtonType.UpperBlue},
+        {Gh5NeckInputType.TapOrange, RBButtonType.UpperOrange}
     };
 
 
@@ -81,6 +91,34 @@ public class Gh5CombinedOutput : CombinedTwiOutput
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY));
     }
+    
+    public override IEnumerable<Output> ValidOutputs()
+    {
+        var tapAnalog =
+            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: Gh5NeckInput {Input: Gh5NeckInputType.TapBar}});
+        var tapFrets =
+            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: Gh5NeckInput {Input: Gh5NeckInputType.TapAll}});
+        if (tapAnalog == null && tapFrets == null) return Outputs.Items;
+        var outputs = new List<Output>(Outputs.Items);
+        // Map Tap bar to Upper frets on RB guitars
+        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
+        {
+            outputs.AddRange(TapsRb.Select(pair => new RbButton(Model, new Gh5NeckInput(pair.Key, Model, Sda, Scl, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
+
+            outputs.Remove(tapAnalog);
+        }
+
+        if (tapFrets == null) return outputs;
+        foreach (var pair in Taps)
+        {
+            outputs.Add(new ControllerButton(Model, new Gh5NeckInput(pair.Key, Model, Sda, Scl, true),
+                Colors.Black,
+                Colors.Black, Array.Empty<byte>(), 5, pair.Value));
+            outputs.Remove(tapFrets);
+        }
+
+        return outputs;
+    }
 
     public override SerializedOutput Serialize()
     {
@@ -100,6 +138,29 @@ public class Gh5CombinedOutput : CombinedTwiOutput
 
     public override void UpdateBindings()
     {
+        var axisController = Outputs.Items.FirstOrDefault(s => s is ControllerAxis);
+        var axisGuitar = Outputs.Items.FirstOrDefault(s => s is GuitarAxis);
+        if (Model.DeviceType is DeviceControllerType.Guitar)
+        {
+            if (axisController == null) return;
+            Outputs.Remove(axisController);
+            Outputs.Add(new GuitarAxis(Model,
+                new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, Sda, Scl,
+                    combined: true),
+                Colors.Black,
+                Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                GuitarAxisType.Slider));
+        }
+        else if (axisGuitar != null)
+        {
+            Outputs.Remove(axisGuitar);
+            Outputs.Add(new ControllerAxis(Model,
+                new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, Sda, Scl,
+                    combined: true),
+                Colors.Black,
+                Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                StandardAxisType.LeftStickX));
+        }
     }
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {

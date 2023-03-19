@@ -17,6 +17,6 @@ public class SerializedGhWtInputCombined : SerializedInput
 
     public override Input Generate(ConfigViewModel model)
     {
-        return new GhWtTapInput(Type, model, combined: true);
+        return new GhWtTapInput(Type, model, 0,0,0,0,combined: true);
     }
 }

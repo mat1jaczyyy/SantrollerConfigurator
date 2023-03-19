@@ -46,7 +46,7 @@ public enum WiiInputType
     [Description("Guitar - Joystick Y Axis")]
     GuitarJoystickY,
     [Description("Guitar - Whammy")] GuitarWhammy,
-    [Description("Guitar - Slider")] GuitarTapBar,
+    [Description("Guitar - Slider Axis")] GuitarTapBar,
 
     [Description("Nunchuk - Joystick X Axis")]
     NunchukStickX,
@@ -101,6 +101,9 @@ public enum WiiInputType
     [Description("Guitar - Yellow Fret")] GuitarYellow,
     [Description("Guitar - Blue Fret")] GuitarBlue,
     [Description("Guitar - Orange Fret")] GuitarOrange,
+
+    [Description("Guitar - Slider To Frets")]
+    GuitarTapAll,
 
     [Description("Guitar - Slider Green Fret")]
     GuitarTapGreen,

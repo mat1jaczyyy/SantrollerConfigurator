@@ -33,12 +33,27 @@ public class GhwtCombinedOutput : CombinedOutput
 
 
     private readonly DirectPinConfig _pin;
+    private readonly DirectPinConfig _pinConfigS0;
+    private readonly DirectPinConfig _pinConfigS1;
+    private readonly DirectPinConfig _pinConfigS2;
 
-    public GhwtCombinedOutput(ConfigViewModel model, int? pin = null,
+    public GhwtCombinedOutput(ConfigViewModel model, int? pin = null, int? pinS0 = null, int? pinS1 = null,
+        int? pinS2 = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, new FixedInput(model, 0))
     {
-        _pin = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtTapPinType, pin ?? 0, DevicePinMode.PullUp);
+        _pin = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtAnalogPinType,
+            pin ?? model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.PullUp);
+        _pinConfigS0 = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtS0PinType,
+            pinS0 ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
+        _pinConfigS1 = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtS1PinType,
+            pinS1 ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
+        _pinConfigS2 = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtS2PinType,
+            pinS2 ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
         this.WhenAnyValue(x => x._pin.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
+        this.WhenAnyValue(x => x._pinConfigS0.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS0)));
+        this.WhenAnyValue(x => x._pinConfigS1.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS1)));
+        this.WhenAnyValue(x => x._pinConfigS2.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS2)));
+        this.WhenAnyValue(x => x.Model.WtSensitivity).Subscribe(_ => this.RaisePropertyChanged(nameof(Sensitivity)));
         Outputs.Clear();
         if (outputs != null)
             Outputs.AddRange(outputs);
@@ -60,7 +75,34 @@ public class GhwtCombinedOutput : CombinedOutput
         set => _pin.Pin = value;
     }
 
-    public List<int> AvailablePins => Model.Microcontroller.GetAllPins(false);
+    public int PinS0
+    {
+        get => _pinConfigS0.Pin;
+        set => _pinConfigS0.Pin = value;
+    }
+    
+    public byte Sensitivity
+    {
+        get => Model.WtSensitivity;
+        set => Model.WtSensitivity = value;
+    }
+
+    public int PinS1
+    {
+        get => _pinConfigS1.Pin;
+        set => _pinConfigS1.Pin = value;
+    }
+
+    public int PinS2
+    {
+        get => _pinConfigS2.Pin;
+        set => _pinConfigS2.Pin = value;
+    }
+
+
+    public List<int> AvailablePins => Model.Microcontroller.GetAllPins(true);
+    
+    public List<int> AvailablePinsDigital => Model.Microcontroller.GetAllPins(false);
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
@@ -69,75 +111,79 @@ public class GhwtCombinedOutput : CombinedOutput
 
     public void CreateDefaults()
     {
-        foreach (var pair in Taps)
-            Outputs.Add(new ControllerButton(Model,
-                new GhWtTapInput(pair.Key, Model,
-                    combined: true), Colors.Black,
-                Colors.Black, Array.Empty<byte>(), 5, pair.Value));
-
+        Outputs.Add(new ControllerButton(Model,
+            new GhWtTapInput(GhWtInputType.TapAll, Model, Pin, PinS0, PinS1, PinS2,
+                combined: true), Colors.Black,
+            Colors.Black, Array.Empty<byte>(), 5, StandardButtonType.A));
+        Outputs.Add(new GuitarAxis(Model,
+            new GhWtTapInput(GhWtInputType.TapBar, Model, Pin, PinS0, PinS1, PinS2,
+                combined: true),
+            Colors.Black,
+            Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+            GuitarAxisType.Slider));
         UpdateBindings();
     }
-
-    public void AddTapBarFrets()
+    
+    public override IEnumerable<Output> ValidOutputs()
     {
+        var tapAnalog =
+            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: GhWtTapInput {Input: GhWtInputType.TapBar}});
+        var tapFrets =
+            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: GhWtTapInput {Input: GhWtInputType.TapAll}});
+        if (tapAnalog == null && tapFrets == null) return Outputs.Items;
+        var outputs = new List<Output>(Outputs.Items);
+        // Map Tap bar to Upper frets on RB guitars
+        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
+        {
+            outputs.AddRange(TapRb.Select(pair => new RbButton(Model, new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
+
+            outputs.Remove(tapAnalog);
+        }
+
+        if (tapFrets == null) return outputs;
+        foreach (var pair in Taps)
+        {
+            outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true),
+                Colors.Black,
+                Colors.Black, Array.Empty<byte>(), 5, pair.Value));
+            outputs.Remove(tapFrets);
+        }
+
+        return outputs;
     }
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedGhwtCombinedOutput(Pin, Outputs.Items.ToList());
+        return new SerializedGhwtCombinedOutput(Pin, PinS0, PinS1, PinS2, Outputs.Items.ToList());
     }
 
     public override void UpdateBindings()
     {
-        if (Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType == RhythmType.GuitarHero)
+        var axisController = Outputs.Items.FirstOrDefault(s => s is ControllerAxis);
+        var axisGuitar = Outputs.Items.FirstOrDefault(s => s is GuitarAxis);
+        if (Model.DeviceType is DeviceControllerType.Guitar)
         {
-            if (!Outputs.Items.Any(s => s is GuitarAxis))
-            {
-                Outputs.Clear();
-                Outputs.Add(new GuitarAxis(Model,
-                    new GhWtTapInput(GhWtInputType.TapBar, Model, 
-                        combined: true),
-                    Colors.Black,
-                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                    GuitarAxisType.Slider));
-            }
+            if (axisController == null) return;
+            Outputs.Remove(axisController);
+            Outputs.Add(new GuitarAxis(Model,
+                new GhWtTapInput(GhWtInputType.TapBar, Model, Pin, PinS0, PinS1, PinS2,
+                    combined: true),
+                Colors.Black,
+                Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                GuitarAxisType.Slider));
         }
-        else
+        else if (axisGuitar != null)
         {
-            if (!Outputs.Items.Any(s => s is ControllerAxis))
-            {
-                Outputs.Clear();
-                Outputs.Add(new ControllerAxis(Model,
-                    new GhWtTapInput(GhWtInputType.TapBar, Model, 
-                        combined: true),
-                    Colors.Black,
-                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                    StandardAxisType.LeftStickX));
-            }
-        }
-
-        // Map Tap bar to Upper frets on RB guitars, and standard frets on anything else
-        if (Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
-        {
-            var items = Outputs.Items.Where(s => s is ControllerButton).ToList();
-            if (!items.Any()) return;
-            Outputs.RemoveMany(items);
-            Outputs.AddRange(items.Cast<RbButton>().Select(item => new RbButton(Model, item.Input,
-                item.LedOn,
-                item.LedOff, item.LedIndices.ToArray(), item.Debounce,
-                TapRb[item.GhWtInputType])));
-        }
-        else
-        {
-            var items2 = Outputs.Items.Where(s => s is RbButton).ToList();
-            if (!items2.Any()) return;
-            Outputs.RemoveMany(items2);
-            Outputs.AddRange(items2.Cast<RbButton>().Select(item => new ControllerButton(Model, item.Input,
-                item.LedOn,
-                item.LedOff, item.LedIndices.ToArray(), item.Debounce,
-                Taps[item.GhWtInputType])));
+            Outputs.Remove(axisGuitar);
+            Outputs.Add(new ControllerAxis(Model,
+                new GhWtTapInput(GhWtInputType.TapBar, Model, Pin, PinS0, PinS1, PinS2,
+                    combined: true),
+                Colors.Black,
+                Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                StandardAxisType.LeftStickX));
         }
     }
+
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
         return "Combined/GHWT.png";

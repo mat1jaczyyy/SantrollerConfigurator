@@ -40,8 +40,6 @@ public class DigitalToAnalog : Input
 
     public override string Generate(ConfigField mode)
     {
-        // We want to be able to handle multiple things at once. Therefore, we should not use off, and instead just return the original value here
-        // Then, we can do some logic to work out what the first generated digitaltoanalog is and set its value if necessary.
         var gen = Child.Generate(mode);
         return mode == ConfigField.Xbox360 ? $"({gen})?{On}:{{output}}" : $"({gen})?{(On >> 8) + 128}:{{output}}";
     }

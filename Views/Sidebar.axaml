@@ -60,6 +60,34 @@
                               ItemTemplate="{StaticResource EnumToStringTemplate}"
                               Items="{Binding EmulationTypes}" />
                 </StackPanel>
+                <StackPanel IsVisible="{Binding IsPico}" Orientation="Vertical">
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="USB Host"
+                                   TextAlignment="Center" />
+                        <ToggleSwitch HorizontalAlignment="Center" Margin="20 20 20 0" HorizontalContentAlignment="Center" IsChecked="{Binding UsbHostEnabled}" OnContent="Enabled"
+                                      OffContent="Disabled" />
+
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding UsbHostEnabled}">
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="D- (White) Pin"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding UsbHostDm}"
+                                  Items="{Binding AvailablePinsDm}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding UsbHostEnabled}">
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="D+ (Green) Pin"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding UsbHostDp}"
+                                  Items="{Binding AvailablePinsDp}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+
+                    </StackPanel>
+                </StackPanel>
+
                 <StackPanel IsVisible="{Binding IsRf}" Orientation="Vertical">
                     <StackPanel>
                         <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Channel"

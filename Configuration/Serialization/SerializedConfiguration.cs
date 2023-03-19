@@ -22,6 +22,9 @@ public class SerializedConfiguration
         Apa102Sck = model.Apa102Sck;
         LedCount = model.LedCount;
         MouseMovementType = model.MouseMovementType;
+        WtSensitivity = model.WtSensitivity;
+        UsbHostDp = model.UsbHostDp;
+        UsbHostEnabled = model.UsbHostEnabled;
     }
 
     [ProtoMember(1)] public LedType LedType { get; }
@@ -36,6 +39,9 @@ public class SerializedConfiguration
     [ProtoMember(9)] public int Apa102Sck { get; }
     [ProtoMember(10)] public byte LedCount { get; }
     [ProtoMember(11)] public MouseMovementType MouseMovementType { get; }
+    [ProtoMember(12)] public byte WtSensitivity { get; }
+    [ProtoMember(13)] public bool UsbHostEnabled { get; }
+    [ProtoMember(14)] public int UsbHostDp { get; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
@@ -47,7 +53,14 @@ public class SerializedConfiguration
         model.Bindings.AddRange(Bindings.Select(s => s.Generate(model)));
         model.LedType = LedType;
         model.LedCount = LedCount < 1 ? (byte) 1 : LedCount;
+        model.WtSensitivity = WtSensitivity;
         model.MouseMovementType = MouseMovementType;
+        model.UsbHostEnabled = UsbHostEnabled;
+        if (UsbHostEnabled)
+        {
+            model.UsbHostDp = UsbHostDp;
+        }
+
         if (!model.IsApa102) return;
         model.Apa102Mosi = Apa102Mosi;
         model.Apa102Sck = Apa102Sck;

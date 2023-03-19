@@ -15,7 +15,7 @@ public class Gh5NeckInput : TwiInput
     public static readonly string Gh5TwiType = "gh5";
     public static readonly int Gh5TwiFreq = 100000;
 
-    private static readonly Dictionary<int, BarButton> Mappings = new()
+    public static readonly Dictionary<int, BarButton> Gh5Mappings = new()
     {
         {0x19, BarButton.Green | BarButton.Yellow},
         {0x1A, BarButton.Yellow},
@@ -70,7 +70,7 @@ public class Gh5NeckInput : TwiInput
 
     private static readonly Dictionary<Gh5NeckInputType, ReadOnlyCollection<int>> MappingByInput =
         Tap.ToDictionary(type => type,
-            type => Mappings.Where(mapping => mapping.Value.HasFlag(InputToButton[type]))
+            type => Gh5Mappings.Where(mapping => mapping.Value.HasFlag(InputToButton[type]))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
     public Gh5NeckInput(Gh5NeckInputType input, ConfigViewModel model, int? sda = null,

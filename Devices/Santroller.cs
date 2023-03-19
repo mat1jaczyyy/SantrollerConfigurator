@@ -256,7 +256,7 @@ public class Santroller : IConfigurableDevice
                 await Task.Delay(TimeSpan.FromMilliseconds(1000));
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(50));
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
         }
     }
 

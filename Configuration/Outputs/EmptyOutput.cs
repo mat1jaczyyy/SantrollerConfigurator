@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -40,7 +41,7 @@ public class EmptyOutput : Output
 
         _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType,
                 vm => vm.Model.RhythmType)
-            .Select(ControllerEnumConverter.GetTypes).ToProperty(this, x => x.CombinedTypes);
+            .Select(ControllerEnumConverter.GetTypes).Select(s => s.Where(s2 => model.IsPico || s2 is not SimpleType.WtNeckSimple)).ToProperty(this, x => x.CombinedTypes);
     }
 
     public override bool IsController => _isController.Value;

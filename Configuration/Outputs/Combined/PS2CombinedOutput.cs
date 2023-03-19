@@ -95,7 +95,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         _ackConfig = Model.Microcontroller
             .GetOrSetPin(model, Ps2Input.Ps2AckType, ack ?? Model.Microcontroller.SupportedAckPins()[0],
                 DevicePinMode.Floating);
-        _attConfig = Model.Microcontroller.GetOrSetPin(model, Ps2Input.Ps2AttType, att ?? 0, DevicePinMode.Output);
+        _attConfig = Model.Microcontroller.GetOrSetPin(model, Ps2Input.Ps2AttType, att ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         Outputs.Clear();

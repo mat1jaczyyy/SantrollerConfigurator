@@ -213,7 +213,7 @@ public class Ps2Input : SpiInput
         Input = input;
         _ackConfig = Model.Microcontroller
             .GetOrSetPin(model, Ps2AckType, ack ?? Model.Microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);
-        _attConfig = Model.Microcontroller.GetOrSetPin(model, Ps2AttType, att ?? 0, DevicePinMode.Output);
+        _attConfig = Model.Microcontroller.GetOrSetPin(model, Ps2AttType, att ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         IsAnalog = Input <= Ps2InputType.Dualshock2R2;

@@ -226,16 +226,64 @@
                                HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
                                Source="{Binding Image}"
                                Opacity="{Binding Output.ImageOpacity}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" IsVisible="{Binding !Combined}">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !Combined}">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                Slider Bar Sensitivity
+                            </Label>
+                            <NumericUpDown Value="{Binding Sensitivity}" Maximum="50" VerticalAlignment="Center"
+                                           Width="200" />
+                        </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300">
-                                Slider Input Pin
+                                Slider Analog Input Pin
                             </Label>
-                            <ComboBox IsVisible="{Binding !Combined}" VerticalAlignment="Center"
+                            <ComboBox VerticalAlignment="Center"
                                       SelectedItem="{Binding Pin}"
+                                      Items="{Binding AvailablePins}"
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
-                                      Items="{Binding AvailablePins}" />
+                                      Width="200" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                Slider S0 Pin
+                            </Label>
+                            <ComboBox VerticalAlignment="Center"
+                                      SelectedItem="{Binding PinS0}"
+                                      Items="{Binding AvailablePinsDigital}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}"
+                                      Width="200" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                Slider S1 Pin
+                            </Label>
+                            <ComboBox VerticalAlignment="Center"
+                                      SelectedItem="{Binding PinS1}"
+                                      Items="{Binding AvailablePinsDigital}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}"
+                                      Width="200" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                Slider S2 Pin
+                            </Label>
+                            <ComboBox VerticalAlignment="Center"
+                                      SelectedItem="{Binding PinS2}"
+                                      Items="{Binding AvailablePinsDigital}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}"
+                                      Width="200" />
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
@@ -785,17 +833,64 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}">
-                <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center"
-                           VerticalContentAlignment="Center"
-                           Width="300">
-                        Slider Input Pin
-                    </Label>
-                    <ComboBox VerticalAlignment="Center"
-                              SelectedItem="{Binding Pin}"
-                              Items="{Binding AvailablePins}"
-                              ItemTemplate="{StaticResource PinToStringTemplate}"
-                              Width="200" />
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Slider Bar Sensitivity
+                        </Label>
+                        <NumericUpDown Value="{Binding Sensitivity}" Maximum="50" VerticalAlignment="Center"
+                                       Width="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Slider Analog Input Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Pin}"
+                                  Items="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Slider S0 Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding PinS0}"
+                                  Items="{Binding AvailablePinsDigital}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Slider S1 Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding PinS1}"
+                                  Items="{Binding AvailablePinsDigital}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Slider S2 Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding PinS2}"
+                                  Items="{Binding AvailablePinsDigital}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:RfRxOutput}">
@@ -1083,7 +1178,8 @@
                                                     IsEnabled="{Binding ConfigurableInput}"
                                                     Content="{Binding ButtonText}" />
                                         </StackPanel>
-                                        <ContentControl IsVisible="{Binding !DisplayInputFirst}" ContentTemplate="{StaticResource OutputTemplate}"
+                                        <ContentControl IsVisible="{Binding !DisplayInputFirst}"
+                                                        ContentTemplate="{StaticResource OutputTemplate}"
                                                         Content="{Binding}" />
                                         <StackPanel Orientation="Horizontal">
                                             <StackPanel.IsVisible>
@@ -1105,7 +1201,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <StackPanel.IsVisible>
                                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="ConfigurableInput"/>
+                                                    <Binding Path="ConfigurableInput" />
                                                     <Binding Path="!IsCombined" />
                                                     <MultiBinding Converter="{x:Static BoolConverters.Or}">
                                                         <Binding Path="IsWii" />
@@ -1147,7 +1243,8 @@
                                                       Items="{Binding GhWtInputTypes}"
                                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                                         </StackPanel>
-                                        <ContentControl IsVisible="{Binding DisplayInputFirst}" ContentTemplate="{StaticResource OutputTemplate}"
+                                        <ContentControl IsVisible="{Binding DisplayInputFirst}"
+                                                        ContentTemplate="{StaticResource OutputTemplate}"
                                                         Content="{Binding}" />
                                         <ItemsControl IsVisible="{Binding IsCombined}"
                                                       HorizontalAlignment="Stretch"

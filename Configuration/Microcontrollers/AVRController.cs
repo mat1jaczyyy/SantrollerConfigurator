@@ -47,11 +47,6 @@ public abstract class AvrController : Microcontroller
         return $"PORT{GetPort(pin)} &= {~(1 << GetIndex(pin))}";
     }
 
-    public override string GeneratePulseRead(int pin, PulseMode mode, int timeout)
-    {
-        return $"pulseIn(PIN{GetPort(pin)},{1 << GetIndex(pin)},{mode},{timeout})";
-    }
-
     public abstract int GetIndex(int pin);
     public abstract char GetPort(int pin);
 

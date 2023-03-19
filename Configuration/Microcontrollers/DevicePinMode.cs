@@ -7,5 +7,6 @@ public enum DevicePinMode
     PullDown = 2,
     BusKeep = 3,
     Analog = 4,
-    Output = 5
+    Output = 5,
+    Skip = 6
 }
