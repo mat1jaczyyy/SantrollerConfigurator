@@ -170,6 +170,11 @@ public class Micro : AvrController
         if (reconfigurePin) chan |= 1 << 7;
         return chan;
     }
+    
+    public override List<int> GetPwmPins()
+    {
+        return new List<int> {3,5,6,9,10,11,13};
+    }
 
     public override AvrPinMode? ForcedMode(int pin)
     {

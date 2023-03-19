@@ -100,6 +100,10 @@ public class Uno : AvrController
                 return null;
         }
     }
+    public override List<int> GetPwmPins()
+    {
+        return new List<int> {3,5,6,9,10,11};
+    }
     public override int GetFirstDigitalPin()
     {
         return 2;

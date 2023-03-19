@@ -12,6 +12,7 @@
              xmlns:leds="clr-namespace:GuitarConfigurator.NetCore.Configuration.Leds"
              xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
              xmlns:emulationMode="clr-namespace:GuitarConfigurator.NetCore.Configuration.EmulationMode"
+             xmlns:rumble="clr-namespace:GuitarConfigurator.NetCore.Configuration.Rumble"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
@@ -357,6 +358,32 @@
                                VerticalContentAlignment="Center"
                                Width="300">
                             Digital Output Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Pin}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Items="{Binding AvailablePins}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type rumble:Rumble}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Motor
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding RumbleMotorType}"
+                                  Items="{Binding RumbleMotorTypes}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Motor Driver Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
                                   SelectedItem="{Binding Pin}"

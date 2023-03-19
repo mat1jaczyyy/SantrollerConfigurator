@@ -62,6 +62,11 @@ public abstract class AvrController : Microcontroller
         PinConfigs.Add(conf);
         return conf;
     }
+    
+    public override string GenerateAnalogWrite(int pin, string val)
+    {
+        return $"analogWrite({pin}, {val})";
+    }
 
     public override TwiConfig? AssignTwiPins(ConfigViewModel model, string type, int sda, int scl, int clock)
     {
@@ -101,15 +106,19 @@ public abstract class AvrController : Microcontroller
             new(I2CSda, TwiPinType.Sda)
         };
     }
-    
+
     public override List<KeyValuePair<int, SpiPinType>> FreeSpiPins(string type)
     {
-        return PinConfigs.Any(s => s is AvrSpiConfig) ? Array.Empty<KeyValuePair<int, SpiPinType>>().ToList() : SpiPins(type);
+        return PinConfigs.Any(s => s is AvrSpiConfig)
+            ? Array.Empty<KeyValuePair<int, SpiPinType>>().ToList()
+            : SpiPins(type);
     }
 
     public override List<KeyValuePair<int, TwiPinType>> FreeTwiPins(string type)
     {
-        return PinConfigs.Any(s => s is AvrTwiConfig) ? Array.Empty<KeyValuePair<int, TwiPinType>>().ToList() : TwiPins(type);
+        return PinConfigs.Any(s => s is AvrTwiConfig)
+            ? Array.Empty<KeyValuePair<int, TwiPinType>>().ToList()
+            : TwiPins(type);
     }
 
     public override void PinsFromPortMask(int port, int mask, byte pins,

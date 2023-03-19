@@ -209,6 +209,12 @@ public class Mega : AvrController
     {
         return isAnalog ? AnalogPins : Enumerable.Range(0, PinIndex.Length).ToList();
     }
+
+    public override List<int> GetPwmPins()
+    {
+        return Enumerable.Range(2, 12).Concat(Enumerable.Range(44, 3)).ToList();
+    }
+
     public override int GetFirstDigitalPin()
     {
         return 2;

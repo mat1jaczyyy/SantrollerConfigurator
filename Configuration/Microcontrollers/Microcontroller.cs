@@ -18,6 +18,7 @@ public abstract class Microcontroller
     public abstract bool SpiAssignable { get; }
     public abstract string GenerateDigitalRead(int pin, bool pullUp);
     public abstract string GenerateDigitalWrite(int pin, bool val);
+    public abstract string GenerateAnalogWrite(int pin, string val);
 
     public string GenerateDefinitions()
     {
@@ -88,6 +89,7 @@ public abstract class Microcontroller
     public abstract void AssignPin(PinConfig pinConfig);
 
     public abstract List<int> GetAllPins(bool isAnalog);
+    public abstract List<int> GetPwmPins();
 
     public abstract Dictionary<int, int> GetPortsForTicking(IEnumerable<DevicePin> digital);
 

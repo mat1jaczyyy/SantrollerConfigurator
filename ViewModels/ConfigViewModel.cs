@@ -27,6 +27,7 @@ using ReactiveUI;
 using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.Input;
 using GuitarConfigurator.NetCore.Configuration.EmulationMode;
+using GuitarConfigurator.NetCore.Configuration.Rumble;
 
 namespace GuitarConfigurator.NetCore.ViewModels;
 
@@ -447,6 +448,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var first = Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((DeviceType, EmulationType))).First();
         Bindings.Add(new Led(this, false, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
             first));
+    }
+    [RelayCommand]
+    public void AddRumbleBinding()
+    {
+        Bindings.Add(new Rumble(this, 0, RumbleMotorType.Left));
     }
 
     [RelayCommand]

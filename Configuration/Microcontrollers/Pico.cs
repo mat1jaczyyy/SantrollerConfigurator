@@ -147,6 +147,11 @@ public class Pico : Microcontroller
         return val ? $"sio_hw->gpio_set = {1 << pin}" : $"sio_hw->gpio_clr = {1 << pin}";
     }
 
+    public override string GenerateAnalogWrite(int pin, string val)
+    {
+        return $"analogWrite({pin}, {val})";
+    }
+
 
     public override SpiConfig? AssignSpiPins(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol,
         bool cpha,
@@ -295,6 +300,11 @@ public class Pico : Microcontroller
     public override List<int> GetAllPins(bool isAnalog)
     {
         return isAnalog ? AnalogPins : Enumerable.Range(0, GpioCount).ToList();
+    }
+
+    public override List<int> GetPwmPins()
+    {
+        return GetAllPins(false);
     }
 
     public override void PinsFromPortMask(int port, int mask, byte pins,

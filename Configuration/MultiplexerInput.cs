@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
@@ -156,7 +157,10 @@ public class MultiplexerInput : DirectInput
 
         return $"multiplexer_read({Model.Microcontroller.GetChannel(Pin, false)}, {mask}, {bits});";
     }
-
+    public override SerializedInput Serialise()
+    {
+        return new SerializedMultiplexerInput(Pin, PinS0, PinS1, PinS2, PinS3, MultiplexerType, Channel);
+    }
     public override InputType? InputType => Types.InputType.MultiplexerInput;
 
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
