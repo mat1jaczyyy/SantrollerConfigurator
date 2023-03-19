@@ -83,10 +83,9 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
 
-
-
-    private Ps2ControllerType? _detectedType;
-
+    private Ps2ControllerType _detectedType;
+    private bool _controllerFound;
+    
     public Ps2CombinedOutput(ConfigViewModel model, int? miso = null, int? mosi = null,
         int? sck = null, int? att = null, int? ack = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, Ps2Input.Ps2SpiType,
@@ -105,10 +104,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             CreateDefaults();
 
         Outputs.Connect().Filter(x => x is OutputAxis)
-            .Filter(this.WhenAnyValue(x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs)
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton)
-            .Filter(this.WhenAnyValue(x => x.DetectedType).Select(CreateFilter)).Bind(out var digitalOutputs)
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter)).Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
@@ -127,13 +126,22 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     }
 
     public List<int> AvailablePins => Model.Microcontroller.GetAllPins(false);
-    public string? DetectedType => _detectedType?.ToString() ?? "None";
 
-    private static Func<Output, bool> CreateFilter(string? s)
+    public Ps2ControllerType DetectedType
     {
-        return output => s is "None" or null ||
+        get => _detectedType;
+        set => this.RaiseAndSetIfChanged(ref _detectedType, value);
+    }
+    public bool ControllerFound
+    {
+        get => _controllerFound;
+        set => this.RaiseAndSetIfChanged(ref _controllerFound, value);
+    }
+    private static Func<Output, bool> CreateFilter((bool controllerFound, Ps2ControllerType controllerType) tuple)
+    {
+        return output => tuple.controllerFound ||
                          (output.Input?.InnermostInput() is Ps2Input ps2Input &&
-                          ps2Input.SupportsType(Enum.Parse<Ps2ControllerType>(s)));
+                          ps2Input.SupportsType(tuple.controllerType));
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
@@ -200,19 +208,15 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             wiiControllerType);
         if (!ps2ControllerType.Any())
         {
-            this.RaisePropertyChanging(nameof(DetectedType));
-            _detectedType = null;
-            this.RaisePropertyChanged(nameof(DetectedType));
+            ControllerFound = false;
             return;
         }
 
+        ControllerFound = true;
         var type = ps2ControllerType[0];
         if (!Enum.IsDefined(typeof(Ps2ControllerType), type)) return;
         var newType = (Ps2ControllerType) type;
-        if (newType == _detectedType) return;
-        this.RaisePropertyChanging(nameof(DetectedType));
-        _detectedType = newType;
-        this.RaisePropertyChanged(nameof(DetectedType));
+        DetectedType = newType;
     }
 
     public override void UpdateBindings()

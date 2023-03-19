@@ -8,8 +8,6 @@ public enum StandardButtonType
     Y,
     LeftShoulder,
     RightShoulder,
-    L2,
-    R2,
     DpadUp,
     DpadDown,
     LeftThumbClick,

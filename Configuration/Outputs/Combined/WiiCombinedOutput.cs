@@ -21,8 +21,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.ClassicB, StandardButtonType.B},
         {WiiInputType.ClassicX, StandardButtonType.X},
         {WiiInputType.ClassicY, StandardButtonType.Y},
-        {WiiInputType.ClassicLt, StandardButtonType.L2},
-        {WiiInputType.ClassicRt, StandardButtonType.R2},
         {WiiInputType.ClassicZl, StandardButtonType.LeftShoulder},
         {WiiInputType.ClassicZr, StandardButtonType.RightShoulder},
         {WiiInputType.ClassicMinus, StandardButtonType.Back},
@@ -171,7 +169,14 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.NunchukRotationPitch, StandardAxisType.RightStickY}
     };
 
-    private WiiControllerType? _detectedType;
+    private bool _controllerFound;
+
+    private WiiControllerType _detectedType;
+
+    private WiiGuitarType _detectedGuitarType = WiiGuitarType.Gh3;
+
+    private readonly ObservableAsPropertyHelper<bool> _isGuitar;
+    public bool IsGuitar => _detectedType is WiiControllerType.Guitar;
 
     public WiiCombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, WiiInput.WiiTwiType,
@@ -183,22 +188,40 @@ public class WiiCombinedOutput : CombinedTwiOutput
         else
             CreateDefaults();
 
+        _isGuitar = this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
+            .ToProperty(this, x => x.IsGuitar);
+
         Outputs.Connect().Filter(x => x is OutputAxis)
-            .Filter(this.WhenAnyValue(x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs)
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton)
-            .Filter(this.WhenAnyValue(x => x.DetectedType).Select(CreateFilter)).Bind(out var digitalOutputs)
+            .Filter(this.WhenAnyValue(x => x.ControllerFound,  x => x.DetectedType).Select(CreateFilter)).Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
     }
 
-    public string DetectedType => _detectedType?.ToString() ?? "None";
-
-    private static Func<Output, bool> CreateFilter(string s)
+    public WiiControllerType DetectedType
     {
-        return output =>
-            s == "None" || (output.Input is WiiInput wiiInput && wiiInput.WiiControllerType.ToString() == s);
+        get => _detectedType;
+        set => this.RaiseAndSetIfChanged(ref _detectedType, value);
+    }
+    
+    public WiiGuitarType DetectedGuitarType
+    {
+        get => _detectedGuitarType;
+        set => this.RaiseAndSetIfChanged(ref _detectedGuitarType, value);
+    }
+    
+    public bool ControllerFound
+    {
+        get => _controllerFound;
+        set => this.RaiseAndSetIfChanged(ref _controllerFound, value);
+    }
+
+    private static Func<Output, bool> CreateFilter((bool controllerFound, WiiControllerType controllerType) tuple)
+    {
+        return output => !tuple.controllerFound || (output.Input is WiiInput wiiInput && wiiInput.WiiControllerType == tuple.controllerType);
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
@@ -242,9 +265,11 @@ public class WiiCombinedOutput : CombinedTwiOutput
         if (tapAnalog == null && tapFrets == null) return Outputs.Items;
         var outputs = new List<Output>(Outputs.Items);
         // Map Tap bar to Upper frets on RB guitars
-        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
+        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar &&
+            Model.RhythmType is RhythmType.RockBand)
         {
-            outputs.AddRange(TapRb.Select(pair => new RbButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
+            outputs.AddRange(TapRb.Select(pair => new RbButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
+                Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
 
             outputs.Remove(tapAnalog);
         }
@@ -266,7 +291,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
         return new SerializedWiiCombinedOutput(Sda, Scl, Outputs.Items.ToList());
     }
 
-
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
@@ -277,27 +301,32 @@ public class WiiCombinedOutput : CombinedTwiOutput
             wiiControllerType);
         if (!wiiControllerType.Any())
         {
-            this.RaisePropertyChanging(nameof(DetectedType));
-            _detectedType = null;
-            this.RaisePropertyChanged(nameof(DetectedType));
+            ControllerFound = false;
             return;
         }
 
+        ControllerFound = true;
+
         var type = BitConverter.ToUInt16(wiiControllerType);
         var newType = ControllerTypeById.GetValueOrDefault(type);
-        if (newType == _detectedType) return;
-        this.RaisePropertyChanging(nameof(DetectedType));
-        _detectedType = newType;
-        this.RaisePropertyChanged(nameof(DetectedType));
-    }
-
-    private bool OutputValid(Output output)
-    {
-        if (_detectedType != null)
-            return output.Input is WiiInput wiiInput &&
-                   wiiInput.WiiControllerType == _detectedType;
-
-        return true;
+        if (newType == WiiControllerType.Guitar)
+        {
+            var gh3 = (wiiRaw[0] & (1 << 7)) != 0;
+            var wt = (wiiRaw[5] & (1 << 2)) == 0;
+            if (gh3)
+            {
+                DetectedGuitarType = WiiGuitarType.Gh3;
+            }
+            else if (wt)
+            {
+                DetectedGuitarType = WiiGuitarType.WorldTour;
+            }
+            else
+            {
+                DetectedGuitarType = WiiGuitarType.Gh5;
+            }
+        }
+        DetectedType = newType;
     }
 
     public override void UpdateBindings()

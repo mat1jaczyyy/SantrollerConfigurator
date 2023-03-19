@@ -89,11 +89,19 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
-                <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
-                           Content="Current Extension: " />
-                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
-                               Text="{Binding DetectedType}" />
+                <StackPanel Orientation="Horizontal" >
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding ControllerFound}">
+                        <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                               Content="Current Extension: " />
+                        <TextBlock IsVisible="{Binding IsGuitar}" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   Text="{Binding DetectedGuitarType, Converter={StaticResource EnumToStringConverter}}" />
+                        <TextBlock IsVisible="{Binding !IsGuitar}"  VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Text="{Binding DetectedType, Converter={StaticResource EnumToStringConverter}}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !ControllerFound}">
+                        <Label VerticalAlignment="Center" VerticalContentAlignment="Center">No Extension Found</Label>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
 
@@ -234,7 +242,7 @@
                                    Width="300">
                                 Slider Bar Sensitivity
                             </Label>
-                            <NumericUpDown Value="{Binding Sensitivity}" Maximum="50" VerticalAlignment="Center"
+                            <NumericUpDown Value="{Binding Sensitivity}" Maximum="60" VerticalAlignment="Center"
                                            Width="200" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">

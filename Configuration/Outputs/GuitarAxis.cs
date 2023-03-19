@@ -72,6 +72,23 @@ public class GuitarAxis : OutputAxis
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps3Mask
             or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)) return "";
         var led = Input is FixedInput ? "" : CalculateLeds(mode);
+        if (Type == GuitarAxisType.Slider)
+        {
+            switch (mode)
+            {
+                case ConfigField.Ps3:
+                    return $"{GenerateOutput(mode)} = {Input.Generate(mode)}; {led}";
+                case ConfigField.Xbox360:
+                    return $@"
+                        if ({GenerateOutput(mode)} > 0x80) {{
+                            {GenerateOutput(mode)} = ({Input.Generate(mode)}-1) << 8 |  {Input.Generate(mode)}
+                        }} else {{
+                            {GenerateOutput(mode)} = ({Input.Generate(mode)}) << 8 |  {Input.Generate(mode)}
+                        }}
+                        {led}
+                    ";
+            }
+        }
         switch (mode)
         {
             // Xb1 is RB only, so no slider

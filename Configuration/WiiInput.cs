@@ -94,6 +94,7 @@ public class WiiInput : TwiInput
             {WiiInputType.GuitarBlue, WiiControllerType.Guitar},
             {WiiInputType.GuitarRed, WiiControllerType.Guitar},
             {WiiInputType.GuitarOrange, WiiControllerType.Guitar},
+            {WiiInputType.GuitarTapAll, WiiControllerType.Guitar},
             {WiiInputType.GuitarTapYellow, WiiControllerType.Guitar},
             {WiiInputType.GuitarTapGreen, WiiControllerType.Guitar},
             {WiiInputType.GuitarTapBlue, WiiControllerType.Guitar},
@@ -144,7 +145,7 @@ public class WiiInput : TwiInput
         {WiiInputType.DrumKickPedalPressure, "drumVelocity[DRUM_KICK]"},
         {WiiInputType.GuitarJoystickX, "((wiiData[0] & 0x3f) - 32) << 10"},
         {WiiInputType.GuitarJoystickY, "((wiiData[1] & 0x3f) - 32) << 10"},
-        {WiiInputType.GuitarTapBar, "(wiiData[2] & 0x1f) << 11"},
+        {WiiInputType.GuitarTapBar, "lastTapWiiGh5"},
         {WiiInputType.GuitarWhammy, "(wiiData[3] & 0x1f) << 11"},
         {WiiInputType.NunchukAccelerationX, "accX"},
         {WiiInputType.NunchukAccelerationY, "accY"},
@@ -243,7 +244,7 @@ public class WiiInput : TwiInput
         {WiiControllerType.MotionPlus, "WII_MOTION_PLUS"}
     };
 
-    private readonly int[] drumVelocity = new int[8];
+    private readonly int[] _drumVelocity = new int[8];
 
     public WiiInput(WiiInputType input, ConfigViewModel model, int? sda = null,
         int? scl = null,
@@ -426,22 +427,22 @@ public class WiiInput : TwiInput
                 switch (which)
                 {
                     case 0x1B:
-                        drumVelocity[(int) DrumType.DrumKick] = vel;
+                        _drumVelocity[(int) DrumType.DrumKick] = vel;
                         break;
                     case 0x12:
-                        drumVelocity[(int) DrumType.DrumGreen] = vel;
+                        _drumVelocity[(int) DrumType.DrumGreen] = vel;
                         break;
                     case 0x19:
-                        drumVelocity[(int) DrumType.DrumRed] = vel;
+                        _drumVelocity[(int) DrumType.DrumRed] = vel;
                         break;
                     case 0x11:
-                        drumVelocity[(int) DrumType.DrumYellow] = vel;
+                        _drumVelocity[(int) DrumType.DrumYellow] = vel;
                         break;
                     case 0x0F:
-                        drumVelocity[(int) DrumType.DrumBlue] = vel;
+                        _drumVelocity[(int) DrumType.DrumBlue] = vel;
                         break;
                     case 0x0E:
-                        drumVelocity[(int) DrumType.DrumOrange] = vel;
+                        _drumVelocity[(int) DrumType.DrumOrange] = vel;
                         break;
                 }
 
@@ -455,12 +456,12 @@ public class WiiInput : TwiInput
                     WiiInputType.DrumYellow => wiiButtonsHigh & (1 << 5),
                     WiiInputType.DrumRed => wiiButtonsHigh & (1 << 6),
                     WiiInputType.DrumOrange => wiiButtonsHigh & (1 << 7),
-                    WiiInputType.DrumGreenPressure => drumVelocity[(int) DrumType.DrumGreen],
-                    WiiInputType.DrumRedPressure => drumVelocity[(int) DrumType.DrumRed],
-                    WiiInputType.DrumYellowPressure => drumVelocity[(int) DrumType.DrumYellow],
-                    WiiInputType.DrumBluePressure => drumVelocity[(int) DrumType.DrumBlue],
-                    WiiInputType.DrumOrangePressure => drumVelocity[(int) DrumType.DrumOrange],
-                    WiiInputType.DrumKickPedalPressure => drumVelocity[(int) DrumType.DrumKick],
+                    WiiInputType.DrumGreenPressure => _drumVelocity[(int) DrumType.DrumGreen],
+                    WiiInputType.DrumRedPressure => _drumVelocity[(int) DrumType.DrumRed],
+                    WiiInputType.DrumYellowPressure => _drumVelocity[(int) DrumType.DrumYellow],
+                    WiiInputType.DrumBluePressure => _drumVelocity[(int) DrumType.DrumBlue],
+                    WiiInputType.DrumOrangePressure => _drumVelocity[(int) DrumType.DrumOrange],
+                    WiiInputType.DrumKickPedalPressure => _drumVelocity[(int) DrumType.DrumKick],
                     _ => RawValue
                 };
                 break;

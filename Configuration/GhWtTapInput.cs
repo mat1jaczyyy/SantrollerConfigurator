@@ -103,10 +103,10 @@ public class GhWtTapInput : Input
 
     public GhWtInputType Input { get; set; }
     public bool Combined { get; }
-    public byte Sensitivity
+    public int Sensitivity
     {
-        get => Model.WtSensitivity;
-        set => Model.WtSensitivity = value;
+        get => 60 - Model.WtSensitivity;
+        set => Model.WtSensitivity = (byte) (60 - value);
     }
 
     public override InputType? InputType => Types.InputType.WtNeckInput;
