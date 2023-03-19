@@ -302,7 +302,7 @@ public class Led : Output
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return EnumToStringConverter.Convert(Command);
+        return "Led Command - " + EnumToStringConverter.Convert(Command);
     }
 
     protected override IEnumerable<PinConfig> GetOwnPinConfigs()

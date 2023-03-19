@@ -74,7 +74,7 @@ public class Rumble : Output
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return EnumToStringConverter.Convert(RumbleMotorType);
+        return "Rumble Motor - " + EnumToStringConverter.Convert(RumbleMotorType);
     }
 
     protected override IEnumerable<PinConfig> GetOwnPinConfigs()
