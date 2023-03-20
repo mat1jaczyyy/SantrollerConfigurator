@@ -18,19 +18,30 @@ public abstract class TwiConfig : PinConfig
         _scl = scl;
         _clock = clock;
     }
+    protected abstract bool Reassignable { get; }
 
     public override string Type => _type;
 
     public int Sda
     {
         get => _sda;
-        set => this.RaiseAndSetIfChanged(ref _sda, value);
+        set
+        {
+            if (!Reassignable) return;
+            this.RaiseAndSetIfChanged(ref _sda, value);
+            Update();
+        }
     }
 
     public int Scl
     {
         get => _scl;
-        set => this.RaiseAndSetIfChanged(ref _scl, value);
+        set
+        {
+            if (!Reassignable) return;
+            this.RaiseAndSetIfChanged(ref _scl, value);
+            Update();
+        }
     }
 
     public override IEnumerable<int> Pins => new List<int> {_sda, _scl};

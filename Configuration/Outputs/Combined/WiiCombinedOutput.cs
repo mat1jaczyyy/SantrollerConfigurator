@@ -258,12 +258,12 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     public override IEnumerable<Output> ValidOutputs()
     {
+        var outputs = new List<Output>(base.ValidOutputs());
         var tapAnalog =
-            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapBar}});
+            outputs.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapBar}});
         var tapFrets =
-            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
-        if (tapAnalog == null && tapFrets == null) return Outputs.Items;
-        var outputs = new List<Output>(Outputs.Items);
+            outputs.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
+        if (tapAnalog == null && tapFrets == null) return outputs;
         // Map Tap bar to Upper frets on RB guitars
         if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar &&
             Model.RhythmType is RhythmType.RockBand)

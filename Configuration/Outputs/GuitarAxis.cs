@@ -80,10 +80,11 @@ public class GuitarAxis : OutputAxis
                     return $"{GenerateOutput(mode)} = {Input.Generate(mode)}; {led}";
                 case ConfigField.Xbox360:
                     return $@"
+                        {GenerateOutput(mode)} = {Input.Generate(mode)};
                         if ({GenerateOutput(mode)} > 0x80) {{
-                            {GenerateOutput(mode)} = ({Input.Generate(mode)}-1) << 8 |  {Input.Generate(mode)}
+                            {GenerateOutput(mode)} |= ({GenerateOutput(mode)}-1) << 8;
                         }} else {{
-                            {GenerateOutput(mode)} = ({Input.Generate(mode)}) << 8 |  {Input.Generate(mode)}
+                            {GenerateOutput(mode)} |= ({GenerateOutput(mode)}) << 8;
                         }}
                         {led}
                     ";

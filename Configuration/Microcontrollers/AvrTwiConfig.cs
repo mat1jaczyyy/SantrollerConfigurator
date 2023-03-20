@@ -10,4 +10,5 @@ public class AvrTwiConfig : TwiConfig
     }
 
     public override string Definition => "GC_TWI";
+    protected override bool Reassignable => false;
 }
