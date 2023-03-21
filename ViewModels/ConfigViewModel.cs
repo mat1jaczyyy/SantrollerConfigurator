@@ -442,27 +442,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public IScreen HostScreen { get; }
     public bool IsPico => Device.IsPico();
 
-    [RelayCommand]
-    public void AddLedBinding()
-    {
-        var first = Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((DeviceType, EmulationType))).First();
-        Bindings.Add(new Led(this, false, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
-            first));
-    }
-    [RelayCommand]
-    public void AddRumbleBinding()
-    {
-        Bindings.Add(new Rumble(this, 0, RumbleMotorType.Left));
-    }
-
-    [RelayCommand]
-    public void AddConsoleShortcut()
-    {
-        Bindings.Add(new EmulationMode(this,
-            new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
-            EmulationModeType.XboxOne));
-    }
-
     public void SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceControllerType type, RhythmType rhythmType,
         EmulationType emulationType)
     {

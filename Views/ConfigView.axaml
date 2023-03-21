@@ -13,6 +13,7 @@
              xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
              xmlns:emulationMode="clr-namespace:GuitarConfigurator.NetCore.Configuration.EmulationMode"
              xmlns:rumble="clr-namespace:GuitarConfigurator.NetCore.Configuration.Rumble"
+             xmlns:joystickToDpad="clr-namespace:GuitarConfigurator.NetCore.Configuration.JoystickToDpad"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
@@ -89,15 +90,26 @@
                                Text="{Binding DetectedType}" />
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type joystickToDpad:JoystickToDpad}">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding Up}" IsEnabled="False">Up</CheckBox>
+                        <CheckBox IsChecked="{Binding Down}" IsEnabled="False">Down</CheckBox>
+                        <CheckBox IsChecked="{Binding Left}" IsEnabled="False">Left</CheckBox>
+                        <CheckBox IsChecked="{Binding Right}" IsEnabled="False">Right</CheckBox>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
-                <StackPanel Orientation="Horizontal" >
+                <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding ControllerFound}">
                         <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
                                Content="Current Extension: " />
                         <TextBlock IsVisible="{Binding IsGuitar}" VerticalAlignment="Center"
                                    HorizontalAlignment="Center"
                                    Text="{Binding DetectedGuitarType, Converter={StaticResource EnumToStringConverter}}" />
-                        <TextBlock IsVisible="{Binding !IsGuitar}"  VerticalAlignment="Center" HorizontalAlignment="Center"
+                        <TextBlock IsVisible="{Binding !IsGuitar}" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
                                    Text="{Binding DetectedType, Converter={StaticResource EnumToStringConverter}}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !ControllerFound}">
@@ -243,7 +255,8 @@
                                    Width="300">
                                 Slider Bar Sensitivity
                             </Label>
-                            <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Sensitivity}" Maximum="60" VerticalAlignment="Center"
+                            <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Sensitivity}" Maximum="60"
+                                           VerticalAlignment="Center"
                                            Width="200" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
@@ -328,6 +341,22 @@
                                   Items="{Binding AvailableSdaPins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}"
                                   Width="200" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type joystickToDpad:JoystickToDpad}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Height="50">
+                        <Label VerticalAlignment="Center" Width="300">
+                            Threshold
+                        </Label>
+                        <Slider Value="{Binding Threshold}"
+                                Minimum="1"
+                                Maximum="32767"
+                                IsSnapToTickEnabled="True"
+                                TickFrequency="1" Width="240" />
+                        <NumericUpDown Value="{Binding Threshold}" Minimum="1"
+                                       Maximum="32767" Width="150" Height="30" Margin="10 0 0 0 " />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -635,12 +664,12 @@
                                    IsVisible="{Binding !ChildOfCombined}">
                                 Multiplier
                             </Label>
-                            <Slider Value="{Binding DjValue}"
+                            <Slider Value="{Binding Max}"
                                     Minimum="1"
                                     Maximum="8192"
                                     IsSnapToTickEnabled="True"
                                     TickFrequency="1" Width="240" />
-                            <NumericUpDown Value="{Binding DjValue}" Minimum="1"
+                            <NumericUpDown Value="{Binding Max}" Minimum="1"
                                            Maximum="8192" Width="150" Height="30" Margin="10 0 0 0 " />
                         </StackPanel>
                     </StackPanel>
@@ -839,7 +868,8 @@
                            Width="300">
                         Debounce
                     </Label>
-                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Debounce}" VerticalAlignment="Center" Width="200" />
+                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Debounce}" VerticalAlignment="Center"
+                                   Width="200" />
                 </StackPanel>
             </DataTemplate>
 

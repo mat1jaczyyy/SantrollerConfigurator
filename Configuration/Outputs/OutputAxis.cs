@@ -84,7 +84,6 @@ public abstract partial class OutputAxis : Output
     public int ValueLower => _valueLower.Value;
     public int ValueUpper => _valueUpper.Value;
     public bool InputIsUint => _inputIsUInt.Value;
-    public bool InputIsDj { get; }
 
     public int Min
     {
@@ -115,11 +114,6 @@ public abstract partial class OutputAxis : Output
 
     public string? CalibrationText => GetCalibrationText();
 
-    public int DjValue
-    {
-        get => Max;
-        set => _calibrationMax = InputIsDj ? value : _calibrationMax;
-    }
     private Thickness ComputeDeadZoneMargin((int min, int max, bool trigger, bool inputIsUint, int deadZone) s)
     {
 
@@ -222,7 +216,6 @@ public abstract partial class OutputAxis : Output
         var deadZone = (float) values.deadZone;
         var trigger = values.trigger;
         var inverted = min > max;
-        if (InputIsDj) return (int) (val * max);
         if (trigger)
         {
             // Trigger is uint, so if the input is not, shove it forward to put it into the right range

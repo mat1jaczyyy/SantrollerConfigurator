@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using GuitarConfigurator.NetCore.Configuration.DJ;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
+using GuitarConfigurator.NetCore.Configuration.Leds;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -117,7 +118,14 @@ public class EmptyOutput : Output
                     SimpleType.Ps2InputSimple => new Ps2CombinedOutput(Model),
                     SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model),
                     SimpleType.DjTurntableSimple => new DjCombinedOutput(Model),
-                    SimpleType.RFSimple => new RfRxOutput(Model, Array.Empty<ulong>()),
+                    SimpleType.JoystickToDpad => new JoystickToDpad.JoystickToDpad(Model, short.MaxValue / 2),
+                    SimpleType.Led => new Led(Model, !Model.IsApa102, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
+                        Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((Model.DeviceType, Model.EmulationType))).First()),
+                    SimpleType.Rumble => new Rumble.Rumble(Model, 0, RumbleMotorType.Left),
+                    SimpleType.ConsoleMode => new EmulationMode.EmulationMode(Model,
+                        new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model),
+                        EmulationModeType.XboxOne),
+                    SimpleType.RfSimple => new RfRxOutput(Model, Array.Empty<ulong>()),
                     _ => null
                 },
                 StandardAxisType standardAxisType => new ControllerAxis(Model,

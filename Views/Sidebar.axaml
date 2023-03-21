@@ -232,18 +232,6 @@
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Add Binding
                 </Button>
-                <Button Command="{Binding AddLedBindingCommand}" HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center" Margin="20 20 20 0">
-                    Add LED Binding
-                </Button>
-                <Button Command="{Binding AddRumbleBindingCommand}" HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center" Margin="20 20 20 0">
-                    Add Rumble Binding
-                </Button>
-                <Button Command="{Binding AddConsoleShortcutCommand}" HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center" Margin="20 20 20 0">
-                    Add Console Mode Binding
-                </Button>
                 <Button Command="{Binding BindAllCommand}" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Bind All
