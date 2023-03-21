@@ -95,6 +95,7 @@ public class JoystickToDpad : Output
                     new AnalogToDigital(new WiiInput(wiiInputType, model), AnalogToDigitalType.JoyLow, Threshold,
                         model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown));
             }
+            UpdateDetails();
             return;
         }
 
@@ -110,6 +111,7 @@ public class JoystickToDpad : Output
         _outputs.Add(new ControllerButton(model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.LeftY, model), AnalogToDigitalType.JoyLow, Threshold,
                 model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown));
+        UpdateDetails();
     }
 
     public override bool IsCombined => false;
@@ -170,6 +172,11 @@ public class JoystickToDpad : Output
     {
         base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType);
+        foreach (var output in _outputs)
+        {
+            output.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+                ps2ControllerType, wiiControllerType);
+        }
         Up = _outputs.Where(s => s.Type is StandardButtonType.DpadUp)
             .Any(x => x.ValueRaw != 0);
         Down = _outputs.Where(s => s.Type is StandardButtonType.DpadDown)

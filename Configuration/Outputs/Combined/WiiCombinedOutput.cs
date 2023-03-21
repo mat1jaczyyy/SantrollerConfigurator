@@ -188,8 +188,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
             Outputs.AddRange(outputs);
         else
             CreateDefaults();
-        
-        CreateDefaults();
 
         _isGuitar = this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
             .ToProperty(this, x => x.IsGuitar);

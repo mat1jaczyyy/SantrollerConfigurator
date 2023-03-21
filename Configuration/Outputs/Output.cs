@@ -602,14 +602,14 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public List<PinConfig> GetPinConfigs()
     {
         return Outputs.Items
-            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.PinConfigs ?? Array.Empty<PinConfig>())
+            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.PinConfigs)
             .Distinct().Concat(GetOwnPinConfigs()).ToList();
     }
 
     public List<DevicePin> GetPins()
     {
         return Outputs.Items
-            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.Pins ?? Array.Empty<DevicePin>())
+            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.Pins)
             .Distinct().Concat(GetOwnPins()).ToList();
     }
 
@@ -618,10 +618,22 @@ public abstract partial class Output : ReactiveObject, IDisposable
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
         byte[] wiiControllerType)
     {
-        foreach (var output in Outputs.Items)
-            output.Input.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+        if (Enabled)
+        {
+            Input.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                 ghWtRaw,
                 ps2ControllerType, wiiControllerType);
+        }
+
+        foreach (var output in Outputs.Items)
+        {
+            if (output != this)
+            {
+                output.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+                    ghWtRaw,
+                    ps2ControllerType, wiiControllerType);
+            }
+        }
     }
 
     public void UpdateErrors()
