@@ -8,7 +8,7 @@ using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfigurator.NetCore.Configuration;
+namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public abstract class InputWithPin : Input
 {

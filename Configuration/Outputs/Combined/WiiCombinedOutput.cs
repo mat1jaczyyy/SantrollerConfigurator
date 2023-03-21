@@ -4,8 +4,9 @@ using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using DynamicData;
-using GuitarConfigurator.NetCore.Configuration.DJ;
+using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -187,6 +188,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
             Outputs.AddRange(outputs);
         else
             CreateDefaults();
+        
+        CreateDefaults();
 
         _isGuitar = this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
             .ToProperty(this, x => x.IsGuitar);
@@ -194,7 +197,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs)
             .Subscribe();
-        Outputs.Connect().Filter(x => x is OutputButton)
+        Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
             .Filter(this.WhenAnyValue(x => x.ControllerFound,  x => x.DetectedType).Select(CreateFilter)).Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;
@@ -221,7 +224,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     private static Func<Output, bool> CreateFilter((bool controllerFound, WiiControllerType controllerType) tuple)
     {
-        return output => !tuple.controllerFound || (output.Input is WiiInput wiiInput && wiiInput.WiiControllerType == tuple.controllerType);
+        return output => !tuple.controllerFound || output is JoystickToDpad || (output.Input is WiiInput wiiInput && wiiInput.WiiControllerType == tuple.controllerType);
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
@@ -264,7 +267,9 @@ public class WiiCombinedOutput : CombinedTwiOutput
             Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
-
+        var dpad = new JoystickToDpad(Model, short.MaxValue / 2, true);
+        dpad.Enabled = false;
+        Outputs.Add(dpad);
         UpdateBindings();
     }
 

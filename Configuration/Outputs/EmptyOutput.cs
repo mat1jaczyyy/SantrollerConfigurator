@@ -5,10 +5,10 @@ using System.Reactive.Linq;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
-using GuitarConfigurator.NetCore.Configuration.DJ;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
-using GuitarConfigurator.NetCore.Configuration.Leds;
+using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -118,11 +118,10 @@ public class EmptyOutput : Output
                     SimpleType.Ps2InputSimple => new Ps2CombinedOutput(Model),
                     SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model),
                     SimpleType.DjTurntableSimple => new DjCombinedOutput(Model),
-                    SimpleType.JoystickToDpad => new JoystickToDpad.JoystickToDpad(Model, short.MaxValue / 2),
                     SimpleType.Led => new Led(Model, !Model.IsApa102, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
                         Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((Model.DeviceType, Model.EmulationType))).First()),
-                    SimpleType.Rumble => new Rumble.Rumble(Model, 0, RumbleMotorType.Left),
-                    SimpleType.ConsoleMode => new EmulationMode.EmulationMode(Model,
+                    SimpleType.Rumble => new Rumble(Model, 0, RumbleMotorType.Left),
+                    SimpleType.ConsoleMode => new EmulationMode(Model,
                         new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model),
                         EmulationModeType.XboxOne),
                     SimpleType.RfSimple => new RfRxOutput(Model, Array.Empty<ulong>()),

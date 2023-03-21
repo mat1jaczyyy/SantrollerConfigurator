@@ -8,7 +8,7 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
-namespace GuitarConfigurator.NetCore.Configuration;
+namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public class GhWtTapInput : Input
 {

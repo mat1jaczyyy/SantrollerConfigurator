@@ -5,7 +5,9 @@ using System.Reactive.Linq;
 using Avalonia.Media;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
+using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -108,7 +110,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
             .Bind(out var analogOutputs)
             .Subscribe();
-        Outputs.Connect().Filter(x => x is OutputButton)
+        Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
             .Bind(out var digitalOutputs)
             .Subscribe();
@@ -144,8 +146,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     private static Func<Output, bool> CreateFilter((bool controllerFound, Ps2ControllerType controllerType) tuple)
     {
-        return output => tuple.controllerFound ||
-                         (output.Input?.InnermostInput() is Ps2Input ps2Input &&
+        return output => tuple.controllerFound || output is JoystickToDpad ||
+                         (output.Input.InnermostInput() is Ps2Input ps2Input &&
                           ps2Input.SupportsType(tuple.controllerType));
     }
 
@@ -206,7 +208,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                     Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
             }
         }
-
+        Outputs.Add(new JoystickToDpad(Model, short.MaxValue / 2, false));
         UpdateBindings();
     }
 

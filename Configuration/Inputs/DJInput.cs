@@ -7,7 +7,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfigurator.NetCore.Configuration.DJ;
+namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public class DjInput : TwiInput
 {

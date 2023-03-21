@@ -1,3 +1,4 @@
+using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -19,6 +20,6 @@ public class SerializedEmulationMode : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        return new EmulationMode.EmulationMode(model, Input.Generate(model), Type);
+        return new EmulationMode(model, Input.Generate(model), Type);
     }
 }

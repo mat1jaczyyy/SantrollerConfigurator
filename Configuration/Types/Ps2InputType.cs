@@ -114,5 +114,7 @@ public enum Ps2InputType
     Cross,
 
     [Description("Gamepad - Square Button")]
-    Square
+    Square,
+    [Description("All - Map Joystick To Dpad")]
+    JoystickToDpad
 }

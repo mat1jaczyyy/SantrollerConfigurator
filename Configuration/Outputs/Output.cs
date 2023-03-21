@@ -17,9 +17,9 @@ using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
-using GuitarConfigurator.NetCore.Configuration.DJ;
-using GuitarConfigurator.NetCore.Configuration.Leds;
+using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -130,7 +130,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
         _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
             .ToProperty(this, x => x.ValueRaw);
         _imageOpacity = this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
-            .Select(s => s.Item3 || s.Item2?.IsAnalog == true ? 1 : (s.Item1 == 0 ? 0 : 0.35) + 0.65)
+            .Select(s => s.Item3 || s.Item2.IsAnalog == true ? 1 : (s.Item1 == 0 ? 0 : 0.35) + 0.65)
             .ToProperty(this, s => s.ImageOpacity);
         _combinedOpacity = this.WhenAnyValue(x => x.Enabled)
             .Select(s => s ? 1 : 0.5)
@@ -177,19 +177,19 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public InputType? SelectedInputType
     {
-        get => Input?.InputType;
+        get => Input.InputType;
         set => SetInput(value, null, null, null, null, null);
     }
 
     public WiiInputType WiiInputType
     {
-        get => (Input?.InnermostInput() as WiiInput)?.Input ?? WiiInputType.ClassicA;
+        get => (Input.InnermostInput() as WiiInput)?.Input ?? WiiInputType.ClassicA;
         set => SetInput(SelectedInputType, value, null, null, null, null);
     }
 
     public Ps2InputType Ps2InputType
     {
-        get => (Input?.InnermostInput() as Ps2Input)?.Input ?? Ps2InputType.Cross;
+        get => (Input.InnermostInput() as Ps2Input)?.Input ?? Ps2InputType.Cross;
         set => SetInput(SelectedInputType, null, value, null, null, null);
     }
 
@@ -201,19 +201,19 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public DjInputType DjInputType
     {
-        get => (Input?.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
+        get => (Input.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
         set => SetInput(SelectedInputType, null, null, null, null, value);
     }
 
     public Gh5NeckInputType Gh5NeckInputType
     {
-        get => (Input?.InnermostInput() as Gh5NeckInput)?.Input ?? Gh5NeckInputType.Green;
+        get => (Input.InnermostInput() as Gh5NeckInput)?.Input ?? Gh5NeckInputType.Green;
         set => SetInput(SelectedInputType, null, null, null, value, null);
     }
 
     public GhWtInputType GhWtInputType
     {
-        get => (Input?.InnermostInput() as GhWtTapInput)?.Input ?? GhWtInputType.TapGreen;
+        get => (Input.InnermostInput() as GhWtTapInput)?.Input ?? GhWtInputType.TapGreen;
         set => SetInput(SelectedInputType, null, null, value, null, null);
     }
 
@@ -310,7 +310,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public virtual void Dispose()
     {
-        Input?.Dispose();
+        Input.Dispose();
     }
 
     private object? GetKey()
@@ -478,45 +478,45 @@ public abstract partial class Output : ReactiveObject, IDisposable
             case InputType.DigitalPinInput:
                 input = new DirectInput(lastPin, pinMode, Model);
                 break;
-            case InputType.TurntableInput when Input?.InnermostInput() is not DjInput:
+            case InputType.TurntableInput when Input.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;
                 input = new DjInput(djInputType.Value, Model);
                 break;
-            case InputType.TurntableInput when Input?.InnermostInput() is DjInput dj:
+            case InputType.TurntableInput when Input.InnermostInput() is DjInput dj:
                 djInputType ??= DjInputType.LeftGreen;
                 input = new DjInput(djInputType.Value, Model, dj.Sda, dj.Scl);
                 break;
-            case InputType.Gh5NeckInput when Input?.InnermostInput() is not Gh5NeckInput:
+            case InputType.Gh5NeckInput when Input.InnermostInput() is not Gh5NeckInput:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
                 input = new Gh5NeckInput(gh5NeckInputType.Value, Model);
                 break;
-            case InputType.Gh5NeckInput when Input?.InnermostInput() is Gh5NeckInput gh5:
+            case InputType.Gh5NeckInput when Input.InnermostInput() is Gh5NeckInput gh5:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
                 input = new Gh5NeckInput(gh5NeckInputType.Value, Model, gh5.Sda, gh5.Scl);
                 break;
-            case InputType.WtNeckInput when Input?.InnermostInput() is not GhWtTapInput:
+            case InputType.WtNeckInput when Input.InnermostInput() is not GhWtTapInput:
                 ghWtInputType ??= GhWtInputType.TapGreen;
                 input = new GhWtTapInput(ghWtInputType.Value, Model, Model.Microcontroller.GetFirstAnalogPin(),
                     Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(),
                     Model.Microcontroller.GetFirstDigitalPin());
                 break;
-            case InputType.WtNeckInput when Input?.InnermostInput() is GhWtTapInput wt:
+            case InputType.WtNeckInput when Input.InnermostInput() is GhWtTapInput wt:
                 ghWtInputType ??= GhWtInputType.TapGreen;
                 input = new GhWtTapInput(ghWtInputType.Value, Model, wt.Pin, wt.PinS0, wt.PinS1, wt.PinS2);
                 break;
-            case InputType.WiiInput when Input?.InnermostInput() is not WiiInput:
+            case InputType.WiiInput when Input.InnermostInput() is not WiiInput:
                 wiiInput ??= WiiInputType.ClassicA;
                 input = new WiiInput(wiiInput.Value, Model);
                 break;
-            case InputType.WiiInput when Input?.InnermostInput() is WiiInput wii:
+            case InputType.WiiInput when Input.InnermostInput() is WiiInput wii:
                 wiiInput ??= WiiInputType.ClassicA;
                 input = new WiiInput(wiiInput.Value, Model, wii.Sda, wii.Scl);
                 break;
-            case InputType.Ps2Input when Input?.InnermostInput() is not Ps2Input:
+            case InputType.Ps2Input when Input.InnermostInput() is not Ps2Input:
                 ps2InputType ??= Ps2InputType.Cross;
                 input = new Ps2Input(ps2InputType.Value, Model);
                 break;
-            case InputType.Ps2Input when Input?.InnermostInput() is Ps2Input ps2:
+            case InputType.Ps2Input when Input.InnermostInput() is Ps2Input ps2:
                 ps2InputType ??= Ps2InputType.Cross;
                 input = new Ps2Input(ps2InputType.Value, Model, ps2.Miso, ps2.Mosi, ps2.Sck,
                     ps2.Att,
@@ -558,7 +558,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public abstract string GetImagePath(DeviceControllerType type, RhythmType rhythmType);
 
-    public Bitmap? GetImage(DeviceControllerType type, RhythmType rhythmType)
+    public Bitmap GetImage(DeviceControllerType type, RhythmType rhythmType)
     {
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var bitmap = GetImagePath(type, rhythmType);
@@ -602,14 +602,14 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public List<PinConfig> GetPinConfigs()
     {
         return Outputs.Items
-            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input?.PinConfigs ?? Array.Empty<PinConfig>())
+            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.PinConfigs ?? Array.Empty<PinConfig>())
             .Distinct().Concat(GetOwnPinConfigs()).ToList();
     }
 
     public List<DevicePin> GetPins()
     {
         return Outputs.Items
-            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input?.Pins ?? Array.Empty<DevicePin>())
+            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.Pins ?? Array.Empty<DevicePin>())
             .Distinct().Concat(GetOwnPins()).ToList();
     }
 
@@ -619,7 +619,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
         byte[] wiiControllerType)
     {
         foreach (var output in Outputs.Items)
-            output.Input?.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+            output.Input.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                 ghWtRaw,
                 ps2ControllerType, wiiControllerType);
     }

@@ -7,7 +7,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 
-namespace GuitarConfigurator.NetCore.Configuration;
+namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public class DirectInput : InputWithPin
 {
@@ -58,7 +58,7 @@ public class DirectInput : InputWithPin
     {
         if (Model.Microcontroller is not AvrController) return string.Join("\n", bindings.Select(binding => binding.Item2));
         var replacements = new Dictionary<string, string>();
-        var seenPins = allBindings.Select(s => s.Input?.InnermostInput()).OfType<DirectInput>().Where(s => s.IsAnalog)
+        var seenPins = allBindings.Select(s => s.Input.InnermostInput()).OfType<DirectInput>().Where(s => s.IsAnalog)
             .Select(s => s.Pin).Distinct().OrderBy(s => s).Select((pin, index) => (pin, index))
             .ToDictionary(s => s.pin, s => s.index);
         foreach (var (item1, item2) in bindings)

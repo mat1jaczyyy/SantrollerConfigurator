@@ -8,7 +8,7 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using static GuitarConfigurator.NetCore.Configuration.Outputs.Combined.WiiCombinedOutput;
 
-namespace GuitarConfigurator.NetCore.Configuration;
+namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public class WiiInput : TwiInput
 {

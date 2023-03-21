@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace GuitarConfigurator.NetCore.Configuration.DJ;
+namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum DjInputType
 {

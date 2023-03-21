@@ -1,3 +1,4 @@
+using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -18,6 +19,6 @@ public class SerializedRumble : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        return new Rumble.Rumble(model, Pin, Type);
+        return new Rumble(model, Pin, Type);
     }
 }

@@ -7,13 +7,10 @@
              xmlns:conversions="clr-namespace:GuitarConfigurator.NetCore.Configuration.Conversions"
              xmlns:combined="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs.Combined"
              xmlns:output="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs"
-             xmlns:dj="clr-namespace:GuitarConfigurator.NetCore.Configuration.DJ"
              xmlns:config="clr-namespace:GuitarConfigurator.NetCore.Configuration"
-             xmlns:leds="clr-namespace:GuitarConfigurator.NetCore.Configuration.Leds"
              xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
-             xmlns:emulationMode="clr-namespace:GuitarConfigurator.NetCore.Configuration.EmulationMode"
-             xmlns:rumble="clr-namespace:GuitarConfigurator.NetCore.Configuration.Rumble"
-             xmlns:joystickToDpad="clr-namespace:GuitarConfigurator.NetCore.Configuration.JoystickToDpad"
+             xmlns:joystickToDpad="clr-namespace:GuitarConfigurator.NetCore.Configuration.Other"
+             xmlns:inputs="clr-namespace:GuitarConfigurator.NetCore.Configuration.Inputs"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
@@ -88,16 +85,6 @@
                            Content="Current Controller Type: " />
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                Text="{Binding DetectedType}" />
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type joystickToDpad:JoystickToDpad}">
-                <StackPanel Orientation="Horizontal">
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding Up}" IsEnabled="False">Up</CheckBox>
-                        <CheckBox IsChecked="{Binding Down}" IsEnabled="False">Down</CheckBox>
-                        <CheckBox IsChecked="{Binding Left}" IsEnabled="False">Left</CheckBox>
-                        <CheckBox IsChecked="{Binding Right}" IsEnabled="False">Right</CheckBox>
-                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
@@ -223,7 +210,7 @@
             </DataTemplate>
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
-            <DataTemplate DataType="{x:Type emulationMode:EmulationMode}">
+            <DataTemplate DataType="{x:Type joystickToDpad:EmulationMode}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
@@ -238,7 +225,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type config:GhWtTapInput}">
+            <DataTemplate DataType="{x:Type inputs:GhWtTapInput}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
@@ -310,7 +297,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type config:Gh5NeckInput}">
+            <DataTemplate DataType="{x:Type inputs:Gh5NeckInput}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
@@ -344,23 +331,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type joystickToDpad:JoystickToDpad}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Height="50">
-                        <Label VerticalAlignment="Center" Width="300">
-                            Threshold
-                        </Label>
-                        <Slider Value="{Binding Threshold}"
-                                Minimum="1"
-                                Maximum="32767"
-                                IsSnapToTickEnabled="True"
-                                TickFrequency="1" Width="240" />
-                        <NumericUpDown Value="{Binding Threshold}" Minimum="1"
-                                       Maximum="32767" Width="150" Height="30" Margin="10 0 0 0 " />
-                    </StackPanel>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type leds:Led}">
+            <DataTemplate DataType="{x:Type joystickToDpad:Led}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding IsLed}">
                         <Label VerticalAlignment="Center"
@@ -395,7 +366,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type rumble:Rumble}">
+            <DataTemplate DataType="{x:Type joystickToDpad:Rumble}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
@@ -421,7 +392,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type dj:DjInput}">
+            <DataTemplate DataType="{x:Type inputs:DjInput}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
@@ -455,7 +426,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type config:Ps2Input}">
+            <DataTemplate DataType="{x:Type inputs:Ps2Input}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
@@ -529,7 +500,23 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type config:WiiInput}">
+            
+            <DataTemplate DataType="{x:Type joystickToDpad:JoystickToDpad}">
+                <StackPanel Orientation="Vertical">
+                    <Label HorizontalAlignment="Center">Map Joystick to Dpad</Label>
+                    <Image ToolTip.Tip="{Binding Input}"
+                           HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
+                           Source="{Binding Image}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Width="300">
+                            Threshold
+                        </Label>
+                        <NumericUpDown Value="{Binding Threshold}" Minimum="1"
+                                       Maximum="32767" Width="200" Height="30" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type inputs:WiiInput}">
                 <StackPanel Orientation="Vertical">
                     <Label HorizontalAlignment="Center" IsVisible="{Binding Combined}"
                            Content="{Binding Input, Converter={StaticResource EnumToStringConverter}}" />
@@ -563,7 +550,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type config:MultiplexerInput}">
+            <DataTemplate DataType="{x:Type inputs:MultiplexerInput}">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center" Width="300">Analog Pin</Label>
@@ -613,7 +600,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type config:DirectInput}">
+            <DataTemplate DataType="{x:Type inputs:DirectInput}">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
                         <Label VerticalAlignment="Center" Width="300">Pin Mode</Label>
@@ -911,7 +898,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type config:MacroInput}">
+            <DataTemplate DataType="{x:Type inputs:MacroInput}">
                 <StackPanel Orientation="Horizontal">
                     <ContentControl Content="{Binding Child1}"
                                     ContentTemplate="{StaticResource OutputTemplates}" />
@@ -1156,15 +1143,16 @@
                     <ToggleSwitch HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
                                   IsChecked="{Binding Enabled}" OnContent="Enabled" OffContent="Disabled" />
                 </Panel>
-                <ContentControl Content="{Binding}"
+                <ContentControl IsVisible="{Binding DisplayInputFirst}" Content="{Binding}"
                                 ContentTemplate="{StaticResource OutputTemplates}" />
                 <Panel IsVisible="{Binding !DisplayInputFirst}">
-                    <ContentControl Content="{Binding Input}"
+                    <ContentControl Content="{Binding}"
                                     ContentTemplate="{StaticResource OutputTemplates}" />
-
                     <ToggleSwitch HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
                                   IsChecked="{Binding Enabled}" OnContent="Enabled" OffContent="Disabled" />
                 </Panel>
+                <ContentControl IsVisible="{Binding !DisplayInputFirst}" Content="{Binding Input}"
+                                ContentTemplate="{StaticResource OutputTemplates}" />
                 <WrapPanel Orientation="Horizontal">
                     <WrapPanel.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.And}">

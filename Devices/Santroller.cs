@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using GuitarConfigurator.NetCore.Configuration;
-using GuitarConfigurator.NetCore.Configuration.JoystickToDpad;
+using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -241,8 +241,7 @@ public class Santroller : IConfigurableDevice
                 var ghWtRaw = ReadData(0, (byte)Commands.CommandReadGhWt, sizeof(int));
                 var ps2ControllerType = ReadData(0, (byte)Commands.CommandGetExtensionPs2, 1);
                 var wiiControllerType = ReadData(0, (byte)Commands.CommandGetExtensionWii, sizeof(short));
-                // Make sure JoystickToDpad is updated last as it relies on all the other outputs 
-                foreach (var output in model.Bindings.OrderBy(s => s is JoystickToDpad ? 1 : 0))
+                foreach (var output in model.Bindings)
                     output.Update(model.Bindings.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                         djRightRaw, gh5Raw,
                         ghWtRaw, ps2ControllerType, wiiControllerType);

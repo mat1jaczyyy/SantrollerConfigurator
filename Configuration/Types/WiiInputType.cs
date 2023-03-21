@@ -219,5 +219,8 @@ public enum WiiInputType
     ClassicMinus,
 
     [Description("Classic Controller - Home Button")]
-    ClassicHome
+    ClassicHome,
+    
+    [Description("All - Map Joystick To Dpad")]
+    JoystickToDpad
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
@@ -24,7 +25,6 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
         Enabled = GetBytes(new BitArray(outputs.Select(s => s.Enabled).ToArray()));
     }
 
-    [ProtoMember(1)] public SerializedInput? Input => null;
     [ProtoMember(2)] public int Pin { get; }
     [ProtoMember(3)] public int PinS0 { get; }
 
