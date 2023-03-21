@@ -239,9 +239,21 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 pair.Value));
 
         foreach (var pair in Axis)
-            Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
-                Colors.Black,
-                Colors.Black, Array.Empty<byte>(), -30000, 30000, 10, pair.Value));
+        {
+            if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger || pair.Key is WiiInputType.GuitarWhammy)
+            {
+                Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 8000, pair.Value));
+            }
+            else
+            {
+                Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), -30000, 30000, 4000, pair.Value));
+            }
+            
+        }
 
         Outputs.Add(new ControllerAxis(Model,
             new WiiInput(WiiInputType.GuitarTapBar, Model, Sda, Scl, true),

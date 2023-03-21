@@ -234,23 +234,19 @@
                 </Button>
                 <Button Command="{Binding AddLedBindingCommand}" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
-                    Add LED
+                    Add LED Binding
                 </Button>
                 <Button Command="{Binding AddRumbleBindingCommand}" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
-                    Add Rumble
+                    Add Rumble Binding
                 </Button>
                 <Button Command="{Binding AddConsoleShortcutCommand}" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
-                    Add Console Shortcut
+                    Add Console Mode Binding
                 </Button>
                 <Button Command="{Binding BindAllCommand}" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Bind All
-                </Button>
-                <Button Command="{Binding ResetWithConfirmationCommand}"
-                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
-                    Load Defaults
                 </Button>
                 <Button Command="{Binding ExpandAllCommand}"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
@@ -259,6 +255,10 @@
                 <Button Command="{Binding CollapseAllCommand}"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
                     Collapse All
+                </Button>
+                <Button Command="{Binding ResetWithConfirmationCommand}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                    Load Defaults
                 </Button>
                 <Button Command="{Binding ClearOutputsCommand}"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">

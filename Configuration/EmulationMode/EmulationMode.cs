@@ -62,7 +62,7 @@ public class EmulationMode : Output
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return EnumToStringConverter.Convert(Type) + " Console Binding";
+        return EnumToStringConverter.Convert(Type) + " Console Mode Binding";
     }
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)

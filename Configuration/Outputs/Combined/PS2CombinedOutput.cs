@@ -85,7 +85,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     private Ps2ControllerType _detectedType;
     private bool _controllerFound;
-    
+
     public Ps2CombinedOutput(ConfigViewModel model, int? miso = null, int? mosi = null,
         int? sck = null, int? att = null, int? ack = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, Ps2Input.Ps2SpiType,
@@ -94,7 +94,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         _ackConfig = Model.Microcontroller
             .GetOrSetPin(model, Ps2Input.Ps2AckType, ack ?? Model.Microcontroller.SupportedAckPins()[0],
                 DevicePinMode.Floating);
-        _attConfig = Model.Microcontroller.GetOrSetPin(model, Ps2Input.Ps2AttType, att ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
+        _attConfig = Model.Microcontroller.GetOrSetPin(model, Ps2Input.Ps2AttType,
+            att ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         Outputs.Clear();
@@ -104,10 +105,12 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             CreateDefaults();
 
         Outputs.Connect().Filter(x => x is OutputAxis)
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs)
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
+            .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton)
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter)).Bind(out var digitalOutputs)
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
+            .Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
@@ -132,11 +135,13 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         get => _detectedType;
         set => this.RaiseAndSetIfChanged(ref _detectedType, value);
     }
+
     public bool ControllerFound
     {
         get => _controllerFound;
         set => this.RaiseAndSetIfChanged(ref _controllerFound, value);
     }
+
     private static Func<Output, bool> CreateFilter((bool controllerFound, Ps2ControllerType controllerType) tuple)
     {
         return output => tuple.controllerFound ||
@@ -184,10 +189,23 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
             0, StandardAxisType.RightStickY));
         foreach (var pair in Axis)
-            Outputs.Add(new ControllerAxis(Model,
-                new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
-                Colors.Black,
-                Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
+        {
+            
+            if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger || pair.Key is Ps2InputType.GuitarWhammy)
+            {
+                Outputs.Add(new ControllerAxis(Model,
+                    new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, pair.Value));
+            }
+            else
+            {
+                Outputs.Add(new ControllerAxis(Model,
+                    new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
+            }
+        }
 
         UpdateBindings();
     }
@@ -255,6 +273,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
         Outputs.RemoveMany(Outputs.Items.Where(s => s is Ps3Axis));
     }
+
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
         return "Combined/PS2.png";

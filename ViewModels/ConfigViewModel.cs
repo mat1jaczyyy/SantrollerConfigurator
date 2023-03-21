@@ -668,7 +668,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             _ = ShowUnoShortDialog.Handle((Arduino) Device).ToTask();
             return;
         }
-
+        UpdateBindings();
         UpdateErrors();
 
         Write();
@@ -1184,7 +1184,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         // Pass 1: work out debounces and map inputs to debounces
         var inputs = new Dictionary<string, List<int>>();
-        var macros = new List<Output>();
         foreach (var groupedOutput in groupedOutputs)
         foreach (var (input, output) in groupedOutput)
         {
@@ -1195,8 +1194,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 if (!debounces.ContainsKey(output.LocalisedName + generatedInput))
                     debounces[output.LocalisedName + generatedInput] = debounces.Count;
-
-                macros.Add(output);
             }
             else
             {

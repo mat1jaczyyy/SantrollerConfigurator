@@ -6,7 +6,6 @@ using Avalonia;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
-using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
@@ -139,12 +138,13 @@ public abstract partial class OutputAxis : Output
             var mid = (max + min) / 2;
             min = mid - s.deadZone;
             max = mid + s.deadZone;
+            min += short.MaxValue;
+            max += short.MaxValue;
         }
 
         var left = Math.Min(min / ushort.MaxValue * ProgressWidth, ProgressWidth);
 
-        var right = ProgressWidth - Math.Min(max / ushort.MaxValue * ProgressWidth, ProgressWidth);
-
+        var right = ProgressWidth - Math.Min(max / ushort.MaxValue * ProgressWidth, ProgressWidth);;
         return new Thickness(left, 0, right, 0);
     }
 
