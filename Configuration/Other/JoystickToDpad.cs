@@ -146,7 +146,7 @@ public class JoystickToDpad : Output
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
-        var buttons = "Dpad";
+        var buttons = "DPad";
         if (Up) buttons += "Up";
         if (Down) buttons += "Down";
         if (Left) buttons += "Left";

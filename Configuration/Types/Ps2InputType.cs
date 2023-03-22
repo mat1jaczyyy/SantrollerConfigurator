@@ -95,10 +95,10 @@ public enum Ps2InputType
 
     [Description("Gamepad - Start Button")]
     Start,
-    [Description("Gamepad - D-Pad Up")] Up,
-    [Description("Gamepad - D-Pad Right")] Right,
-    [Description("Gamepad - D-Pad Down")] Down,
-    [Description("Gamepad - D-Pad Left")] Left,
+    [Description("Gamepad - D-Pad Up")] DPadUp,
+    [Description("Gamepad - D-Pad Right")] DPadRight,
+    [Description("Gamepad - D-Pad Down")] DPadDown,
+    [Description("Gamepad - D-Pad Left")] DPadLeft,
     [Description("Gamepad - L2 Button")] L2,
     [Description("Gamepad - R2 Button")] R2,
     [Description("Gamepad - L1 Button")] L1,
