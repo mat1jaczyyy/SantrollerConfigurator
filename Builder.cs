@@ -19,6 +19,19 @@ public class Builder : Microsoft.Build.Utilities.Task
 
     private const bool ForceBuild = false;
 
+    private void setAttributesNormal(DirectoryInfo dir)
+    {
+        foreach (var subDir in dir.GetDirectories())
+        {
+            setAttributesNormal(subDir);
+            subDir.Attributes = FileAttributes.Normal;
+        }
+        foreach (var file in dir.GetFiles())
+        {
+            file.Attributes = FileAttributes.Normal;
+        }
+    }
+
     private async Task<bool> ExecuteAsync()
     {
         var appdataFolder = Path.Combine(Parameter1, "SantrollerConfigurator");
@@ -107,7 +120,8 @@ public class Builder : Microsoft.Build.Utilities.Task
             pioProcess.WaitForExit(-1);
 
             // Now that we have packages downloaded, remove the cache, remove piolibs and download again. This will get us a .cache directory with only packages
-
+            setAttributesNormal(new DirectoryInfo(Path.Combine(pioFolder, ".cache")));
+            setAttributesNormal(new DirectoryInfo(Path.Combine(firmwareDir, ".pio")));
             Directory.Delete(Path.Combine(pioFolder, ".cache"), true);
             Directory.Delete(Path.Combine(firmwareDir, ".pio"), true);
             pioProcess.Start();
@@ -120,6 +134,7 @@ public class Builder : Microsoft.Build.Utilities.Task
                 var path = Path.Combine(pioFolder, "packages", "framework-arduinoespressif32", "tools", "sdk", dir);
                 if (Directory.Exists(path))
                 {
+                    setAttributesNormal(new DirectoryInfo(path));
                     Directory.Delete(path, true);
                 }
             }
@@ -128,6 +143,7 @@ public class Builder : Microsoft.Build.Utilities.Task
             var path2 = Path.Combine(pioFolder, "packages", "framework-arduinopico", "lib", "btstack", "port");
             if (Directory.Exists(path2))
             {
+                setAttributesNormal(new DirectoryInfo(path2));
                 Directory.Delete(path2, true);
             }
             Compress("python.tar.xz", pythonFolder);
@@ -136,6 +152,7 @@ public class Builder : Microsoft.Build.Utilities.Task
 
         if (Directory.Exists(Path.Combine(firmwareDir, ".pio")))
         {
+            setAttributesNormal(new DirectoryInfo(Path.Combine(firmwareDir, ".pio")));
             Directory.Delete(Path.Combine(firmwareDir, ".pio"), true);
         }
 
