@@ -108,6 +108,7 @@ public class GhWtTapInput : Input
         get => 60 - Model.WtSensitivity;
         set => Model.WtSensitivity = (byte) (60 - value);
     }
+    public override string Title => EnumToStringConverter.Convert(Input);
 
     public override InputType? InputType => Types.InputType.WtNeckInput;
     public override bool IsUint => true;

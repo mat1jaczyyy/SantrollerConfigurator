@@ -62,7 +62,7 @@ public class Rumble : Output
     public override bool SupportsLedOff => false;
 
     public override bool IsKeyboard => false;
-    public override bool IsController => false;
+    public virtual bool IsController => false;
 
     public override bool Valid => true;
 

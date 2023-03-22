@@ -45,7 +45,7 @@ public class EmptyOutput : Output
             .Select(ControllerEnumConverter.GetTypes).Select(s => s.Where(s2 => model.IsPico || s2 is not SimpleType.WtNeckSimple)).ToProperty(this, x => x.CombinedTypes);
     }
 
-    public override bool IsController => _isController.Value;
+    public virtual bool IsController => _isController.Value;
     public override bool IsKeyboard => _isKeyboard.Value;
 
     public override bool Valid => true;

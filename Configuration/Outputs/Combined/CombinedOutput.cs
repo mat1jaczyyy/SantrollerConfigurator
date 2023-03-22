@@ -20,7 +20,6 @@ public abstract class CombinedOutput : Output
     public override bool IsCombined => true;
     public override bool IsStrum => false;
     public override bool IsKeyboard => false;
-    public override bool IsController => true;
 
 
     public override bool Valid => true;

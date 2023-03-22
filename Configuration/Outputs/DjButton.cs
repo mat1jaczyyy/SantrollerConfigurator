@@ -23,7 +23,6 @@ public class DjButton : OutputButton
     public override string LedOffLabel => "Released LED Colour";
 
     public override bool IsKeyboard => false;
-    public override bool IsController => true;
 
 
     public override bool IsStrum => false;

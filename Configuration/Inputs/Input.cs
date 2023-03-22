@@ -36,15 +36,6 @@ public abstract class Input : ReactiveObject, IDisposable
         get => _analog;
         set => this.RaiseAndSetIfChanged(ref _analog, value);
     }
-
-    private Output? _output;
-
-    public Output? Output
-    {
-        get => _output;
-        set => this.RaiseAndSetIfChanged(ref _output, value);
-    }
-
     public abstract bool IsUint { get; }
 
     public int RawValue
@@ -84,6 +75,8 @@ public abstract class Input : ReactiveObject, IDisposable
 
     public abstract string GetImagePath();
 
+    public abstract string Title { get; }
+    
     private Bitmap GetImage()
     {
         if (_image != null) return _image;

@@ -150,7 +150,7 @@ public class KeyboardButton : OutputButton
         or Key.VolumeMute or Key.VolumeUp;
 
     public override bool IsKeyboard => true;
-    public override bool IsController => false;
+    public virtual bool IsController => false;
 
 
     public override bool Valid => true;
@@ -170,7 +170,7 @@ public class KeyboardButton : OutputButton
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return EnumToStringConverter.Convert(Key);
+        return Keys.ContainsKey(Key) ? Keys[Key] : "";
     }
 
     public override string GenerateOutput(ConfigField mode)

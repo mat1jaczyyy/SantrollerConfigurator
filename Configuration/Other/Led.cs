@@ -289,7 +289,7 @@ public class Led : Output
     public override bool SupportsLedOff => !Command.IsAuth() && !Command.IsPlayer();
 
     public override bool IsKeyboard => false;
-    public override bool IsController => false;
+    public virtual bool IsController => false;
 
     public override bool Valid => true;
 

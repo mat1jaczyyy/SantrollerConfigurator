@@ -39,7 +39,7 @@ public class DirectInput : InputWithPin
             ? modes.Where(mode => mode is not (DevicePinMode.BusKeep or DevicePinMode.PullDown))
             : modes;
     }
-
+    public override string Title => "Direct";
 
     public override SerializedInput Serialise()
     {

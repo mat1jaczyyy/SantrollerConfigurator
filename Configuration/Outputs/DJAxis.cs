@@ -22,7 +22,6 @@ public class DjAxis : OutputAxis
     public DjAxisType Type { get; }
 
     public override bool IsKeyboard => false;
-    public override bool IsController => true;
 
     public override bool Valid => true;
 

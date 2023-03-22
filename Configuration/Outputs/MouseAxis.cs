@@ -19,7 +19,7 @@ public class MouseAxis : OutputAxis
     }
 
     public override bool IsKeyboard => true;
-    public override bool IsController => false;
+    public virtual bool IsController => false;
 
 
     public override bool Valid => true;

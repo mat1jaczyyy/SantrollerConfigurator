@@ -82,7 +82,7 @@ public class Gh5NeckInput : TwiInput
         Input = input;
         IsAnalog = Input == Gh5NeckInputType.TapBar;
     }
-
+    public override string Title => EnumToStringConverter.Convert(Input);
     public bool Combined { get; }
 
     public bool BindableTwi { get; }

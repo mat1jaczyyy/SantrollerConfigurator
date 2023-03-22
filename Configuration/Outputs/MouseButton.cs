@@ -18,7 +18,7 @@ public class MouseButton : OutputButton
     }
 
     public override bool IsKeyboard => true;
-    public override bool IsController => false;
+    public virtual bool IsController => false;
 
     public MouseButtonType Type { get; }
 

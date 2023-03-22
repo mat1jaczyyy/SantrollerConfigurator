@@ -12,6 +12,15 @@ using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Configuration.Other;
 
+public class JoystickToDpadInput : FixedInput
+{
+    public override string Title => "Map joystick to Dpad";
+
+    public JoystickToDpadInput(ConfigViewModel model) : base(model, 0)
+    {
+    }
+}
+
 public class JoystickToDpad : Output
 {
     private int _threshold;
@@ -70,7 +79,7 @@ public class JoystickToDpad : Output
     private List<ControllerButton> _outputs = new();
 
     public JoystickToDpad(ConfigViewModel model, int threshold, bool wii) : base(
-        model, new FixedInput(model, 0), Colors.Black, Colors.Black, Array.Empty<byte>(), false)
+        model, new JoystickToDpadInput(model), Colors.Black, Colors.Black, Array.Empty<byte>())
     {
         Threshold = threshold;
         Wii = wii;
@@ -95,6 +104,7 @@ public class JoystickToDpad : Output
                     new AnalogToDigital(new WiiInput(wiiInputType, model), AnalogToDigitalType.JoyLow, Threshold,
                         model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown));
             }
+
             UpdateDetails();
             return;
         }
@@ -118,13 +128,11 @@ public class JoystickToDpad : Output
     public override bool IsStrum => false;
 
     public override bool IsKeyboard => false;
-    public override bool IsController => false;
 
     public override bool Valid => true;
     public override string LedOnLabel => "";
     public override string LedOffLabel => "";
-    
-    
+
 
     public override IEnumerable<Output> ValidOutputs()
     {
@@ -177,6 +185,7 @@ public class JoystickToDpad : Output
             output.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
                 ps2ControllerType, wiiControllerType);
         }
+
         Up = _outputs.Where(s => s.Type is StandardButtonType.DpadUp)
             .Any(x => x.ValueRaw != 0);
         Down = _outputs.Where(s => s.Type is StandardButtonType.DpadDown)

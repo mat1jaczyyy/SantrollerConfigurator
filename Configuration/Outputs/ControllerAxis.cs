@@ -74,7 +74,6 @@ public class ControllerAxis : OutputAxis
     }
 
     public override bool IsKeyboard => false;
-    public override bool IsController => true;
     public override bool Valid => _valid.Value;
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)

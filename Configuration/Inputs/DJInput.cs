@@ -103,7 +103,7 @@ public class DjInput : TwiInput
                     {right}
                   }}";
     }
-
+    public override string Title => EnumToStringConverter.Convert(Input);
     public override string GetImagePath()
     {
         return $"DJ/{Input}.png";

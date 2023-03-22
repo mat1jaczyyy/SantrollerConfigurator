@@ -284,7 +284,7 @@ public class Ps2Input : SpiInput
 
         return retDs2;
     }
-
+    public override string Title => EnumToStringConverter.Convert(Input);
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Data,
         byte[] wiiRaw, byte[] djLeftRaw,

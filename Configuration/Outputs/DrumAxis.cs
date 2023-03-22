@@ -90,7 +90,6 @@ public class DrumAxis : OutputAxis
     public override string LedOffLabel => "Drum not Hit LED Colour";
 
     public override bool IsKeyboard => false;
-    public override bool IsController => true;
 
     public int Threshold
     {

@@ -38,6 +38,7 @@ public class MacroInput : Input
     {
         return $"{Child1.Generate(mode)} && {Child2.Generate(mode)}";
     }
+    public override string Title => "Macro";
 
     public override SerializedInput Serialise()
     {

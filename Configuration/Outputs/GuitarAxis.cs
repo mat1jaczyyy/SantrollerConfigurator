@@ -22,7 +22,6 @@ public class GuitarAxis : OutputAxis
     public GuitarAxisType Type { get; }
 
     public override bool IsKeyboard => false;
-    public override bool IsController => true;
 
     public override bool Valid => true;
 

@@ -92,17 +92,10 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     private Color _ledOn;
 
-    public bool DisplayInputFirst { get; }
-
     private bool ShouldUpdateDetails { get; set; }
 
-    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
-        bool displayInputFirst = true)
-    {
-        DisplayInputFirst = displayInputFirst;
+    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices) {
         _input = input;
-        Input.Output = this;
-
         LedOn = ledOn;
         LedOff = ledOff;
         LedIndices = new ObservableCollection<byte>(ledIndices);
@@ -112,15 +105,15 @@ public abstract partial class Output : ReactiveObject, IDisposable
             .ToProperty(this, x => x.AvailableIndices);
         _image = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
             .Select(x => GetImage(x.Item1, x.Item2)).ToProperty(this, x => x.Image);
-        _isDj = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is DjInput)
+        _isDj = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is DjInput)
             .ToProperty(this, x => x.IsDj);
-        _isWii = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is WiiInput)
+        _isWii = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is WiiInput)
             .ToProperty(this, x => x.IsWii);
-        _isGh5 = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is Gh5NeckInput)
+        _isGh5 = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is Gh5NeckInput)
             .ToProperty(this, x => x.IsGh5);
-        _isPs2 = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is Ps2Input)
+        _isPs2 = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is Ps2Input)
             .ToProperty(this, x => x.IsPs2);
-        _isWt = this.WhenAnyValue(x => x.Input).Select(x => x?.InnermostInput() is GhWtTapInput)
+        _isWt = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is GhWtTapInput)
             .ToProperty(this, x => x.IsWt);
         _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToProperty(this, x => x.AreLedsEnabled);
@@ -273,7 +266,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public abstract bool IsKeyboard { get; }
     public bool IsLed => this is Led;
-    public abstract bool IsController { get; }
 
     public bool ChildOfCombined => Model.IsCombinedChild(this);
     public bool IsEmpty => this is EmptyOutput;
@@ -406,7 +398,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
         await InputManager.Instance!.Process.FirstAsync();
         await Task.Delay(200);
         var lastEvent = await InputManager.Instance.Process.FirstAsync();
-        Console.WriteLine(lastEvent);
         switch (lastEvent)
         {
             case RawKeyEventArgs keyEventArgs:

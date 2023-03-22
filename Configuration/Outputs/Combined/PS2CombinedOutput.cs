@@ -146,7 +146,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     private static Func<Output, bool> CreateFilter((bool controllerFound, Ps2ControllerType controllerType) tuple)
     {
-        return output => tuple.controllerFound || output is JoystickToDpad ||
+        return output => !tuple.controllerFound || output is JoystickToDpad ||
                          (output.Input.InnermostInput() is Ps2Input ps2Input &&
                           ps2Input.SupportsType(tuple.controllerType));
     }
@@ -192,8 +192,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             0, StandardAxisType.RightStickY));
         foreach (var pair in Axis)
         {
-            
-            if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger || pair.Key is Ps2InputType.GuitarWhammy)
+            if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
+                pair.Key is Ps2InputType.GuitarWhammy)
             {
                 Outputs.Add(new ControllerAxis(Model,
                     new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
@@ -208,6 +208,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                     Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value));
             }
         }
+
         Outputs.Add(new JoystickToDpad(Model, short.MaxValue / 2, false));
         UpdateBindings();
     }
@@ -232,16 +233,21 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             return;
         }
 
-        ControllerFound = true;
         var type = ps2ControllerType[0];
-        if (!Enum.IsDefined(typeof(Ps2ControllerType), type)) return;
+        if (!Enum.IsDefined(typeof(Ps2ControllerType), type))
+        {
+            ControllerFound = false;
+            return;
+        }
+
+        ControllerFound = true;
         var newType = (Ps2ControllerType) type;
         DetectedType = newType;
     }
 
     public override void UpdateBindings()
     {
-        if (Model.DeviceType != DeviceControllerType.Guitar)
+        if (Model.DeviceType == DeviceControllerType.Guitar)
         {
             if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))
             {

@@ -37,7 +37,7 @@ public class FixedInput : Input
     {
         throw new NotImplementedException();
     }
-
+    public override string Title => "Fixed";
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
         byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,

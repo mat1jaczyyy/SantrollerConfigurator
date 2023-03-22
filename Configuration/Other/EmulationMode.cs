@@ -14,7 +14,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Other;
 public class EmulationMode : Output
 {
     public EmulationMode(ConfigViewModel model, Input input, EmulationModeType type) : base(
-        model, input, Colors.Black, Colors.Black, Array.Empty<byte>(), false)
+        model, input, Colors.Black, Colors.Black, Array.Empty<byte>())
     {
         Type = type;
     }
@@ -50,7 +50,7 @@ public class EmulationMode : Output
     public override bool IsStrum => false;
 
     public override bool IsKeyboard => false;
-    public override bool IsController => false;
+    public virtual bool IsController => false;
 
     public override bool Valid => true;
     public override string LedOnLabel => "";

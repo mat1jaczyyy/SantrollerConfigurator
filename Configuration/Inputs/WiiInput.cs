@@ -572,6 +572,7 @@ break;
                                        }}
                                     }}";
     }
+    public override string Title => EnumToStringConverter.Convert(Input);
 
     public override string GetImagePath()
     {

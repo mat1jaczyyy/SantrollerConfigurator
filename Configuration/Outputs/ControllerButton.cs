@@ -27,7 +27,6 @@ public class ControllerButton : OutputButton
     public StandardButtonType Type { get; }
 
     public override bool IsKeyboard => false;
-    public override bool IsController => true;
 
     public override bool IsStrum => Type is StandardButtonType.DpadUp or StandardButtonType.DpadDown;
 

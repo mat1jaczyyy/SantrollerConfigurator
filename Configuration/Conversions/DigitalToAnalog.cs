@@ -54,6 +54,7 @@ public class DigitalToAnalog : Input
     {
         return Child;
     }
+    public override string Title => Child.Title;
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,

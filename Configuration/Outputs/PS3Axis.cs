@@ -25,7 +25,6 @@ public class Ps3Axis : OutputAxis
     public override bool Valid => true;
 
     public override bool IsKeyboard => false;
-    public override bool IsController => true;
     public override string LedOnLabel => "Pressed LED Colour";
     public override string LedOffLabel => "Released LED Colour";
 
