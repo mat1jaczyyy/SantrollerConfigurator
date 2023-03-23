@@ -164,7 +164,7 @@ public class JoystickToDpad : Output
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        return mode is ConfigField.Ps3 or ConfigField.Xbox360 or ConfigField.XboxOne
+        return mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne
             ? $"MAP_JOYSTICK_DPAD(report, {Threshold});"
             : "";
     }

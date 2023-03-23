@@ -41,7 +41,7 @@ public class Ps3Axis : OutputAxis
 
     public override string GenerateOutput(ConfigField mode)
     {
-        return mode == ConfigField.Ps3 ? GetReportField(Type) : "";
+        return mode is ConfigField.Ps3 or ConfigField.Ps4 ? GetReportField(Type) : "";
     }
 
     protected override string MinCalibrationText()

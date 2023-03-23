@@ -38,6 +38,8 @@ public abstract class OutputButton : Output
     {
         switch (mode)
         {
+            case ConfigField.Ps4Mask:
+                return $"maskbit(PS4_REPORT, {GenerateOutput(mode).Replace("report->", "")});";
             case ConfigField.Ps3Mask:
                 return $"maskbit(PS3_REPORT, {GenerateOutput(mode).Replace("report->", "")});";
             case ConfigField.Xbox360Mask:

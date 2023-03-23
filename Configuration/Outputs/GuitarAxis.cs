@@ -69,15 +69,13 @@ public class GuitarAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps3Mask
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps4Mask or ConfigField.Ps3Mask
             or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)) return "";
         var led = Input is FixedInput ? "" : CalculateLeds(mode);
         if (Type == GuitarAxisType.Slider)
         {
             switch (mode)
             {
-                case ConfigField.Ps3:
-                    return $"{GenerateOutput(mode)} = {Input.Generate(mode)}; {led}";
                 case ConfigField.Xbox360:
                     return $@"
                         {GenerateOutput(mode)} = {Input.Generate(mode)};
@@ -88,6 +86,9 @@ public class GuitarAxis : OutputAxis
                         }}
                         {led}
                     ";
+                case ConfigField.Ps3:
+                case ConfigField.Ps4:
+                    return $"{GenerateOutput(mode)} = {Input.Generate(mode)}; {led}";
             }
         }
         switch (mode)
@@ -123,6 +124,7 @@ public class GuitarAxis : OutputAxis
                 return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)}; {led}";
             case ConfigField.Xbox360Mask:
             case ConfigField.XboxOneMask:
+            case ConfigField.Ps4Mask:
             case ConfigField.Ps3Mask:
                 return GetMaskField(GenerateOutput(mode), mode);
             default:

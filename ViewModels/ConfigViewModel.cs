@@ -789,11 +789,15 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         lines.Add($"#define TICK_PS3 {GenerateTick(ConfigField.Ps3)}");
 
+        lines.Add($"#define TICK_PS4 {GenerateTick(ConfigField.Ps4)}");
+
         lines.Add($"#define TICK_XINPUT {GenerateTick(ConfigField.Xbox360)}");
 
         lines.Add($"#define TICK_XBOX_ONE {GenerateTick(ConfigField.XboxOne)}");
 
         lines.Add($"#define PS3_MASK {GenerateTick(ConfigField.Ps3Mask)}");
+
+        lines.Add($"#define PS4_MASK {GenerateTick(ConfigField.Ps4Mask)}");
 
         lines.Add($"#define XINPUT_MASK {GenerateTick(ConfigField.Xbox360Mask)}");
 

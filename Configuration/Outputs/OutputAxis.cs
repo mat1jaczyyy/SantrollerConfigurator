@@ -117,7 +117,6 @@ public abstract partial class OutputAxis : Output
 
     private Thickness ComputeDeadZoneMargin((int min, int max, bool trigger, bool inputIsUint, int deadZone) s)
     {
-
         float min = Math.Min(s.min, s.max);
         float max = Math.Max(s.min, s.max);
         var inverted = s.min > s.max;
@@ -139,7 +138,8 @@ public abstract partial class OutputAxis : Output
 
         var left = Math.Min(min / ushort.MaxValue * ProgressWidth, ProgressWidth);
 
-        var right = ProgressWidth - Math.Min(max / ushort.MaxValue * ProgressWidth, ProgressWidth);;
+        var right = ProgressWidth - Math.Min(max / ushort.MaxValue * ProgressWidth, ProgressWidth);
+        ;
         return new Thickness(left, 0, right, 0);
     }
 
@@ -194,7 +194,7 @@ public abstract partial class OutputAxis : Output
                 break;
         }
     }
-    
+
     [RelayCommand]
     private void Calibrate()
     {
@@ -207,7 +207,10 @@ public abstract partial class OutputAxis : Output
 
         this.RaisePropertyChanged(nameof(CalibrationText));
     }
-    private int Calculate((bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType deviceControllerType) values)
+
+    private int Calculate(
+        (bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType
+            deviceControllerType) values)
     {
         if (!values.enabled) return 0;
         double val = values.value;
@@ -327,9 +330,11 @@ public abstract partial class OutputAxis : Output
                 function = "handle_calibration_ps3_accel";
                 break;
             case ConfigField.Ps3 when trigger:
+            case ConfigField.Ps4 when trigger:
                 function = "handle_calibration_ps3_360_trigger";
                 break;
             case ConfigField.Ps3:
+            case ConfigField.Ps4:
                 normal = true;
                 function = "handle_calibration_ps3";
                 break;
@@ -351,7 +356,7 @@ public abstract partial class OutputAxis : Output
             {
                 min += DeadZone;
             }
-            
+
             multiplier = 1f / (max - min) * ushort.MaxValue;
         }
         else
