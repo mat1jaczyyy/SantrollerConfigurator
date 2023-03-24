@@ -91,6 +91,8 @@ public abstract partial class Output : ReactiveObject, IDisposable
     private Color _ledOff;
 
     private Color _ledOn;
+    
+    public virtual bool LedsRequireColours => true;
 
     private bool ShouldUpdateDetails { get; set; }
 

@@ -152,7 +152,9 @@ public enum RumbleCommand
     StageKitBlue7,
 
     [Description("Stage Kit Strobe Blue Led 8")]
-    StageKitBlue8
+    StageKitBlue8,
+
+    [Description("PS4 Light Bar")] Ps4LightBar
 }
 
 public static class RumbleCommandMethods
@@ -196,18 +198,25 @@ public class Led : Output
     private int _pin;
 
     public Led(ConfigViewModel model, bool outputEnabled, int pin, Color ledOn,
-        Color ledOff, byte[] ledIndices, RumbleCommand command) : base(model, new FixedInput(model, 0), ledOn, ledOff, ledIndices)
+        Color ledOff, byte[] ledIndices, RumbleCommand command) : base(model, new FixedInput(model, 0), ledOn, ledOff,
+        ledIndices)
     {
         Pin = pin;
         OutputEnabled = outputEnabled;
         Command = command;
         _rumbleCommands.AddRange(Enum.GetValues<RumbleCommand>());
         _rumbleCommands.Connect()
-            .Filter(this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.EmulationType).Select(FilterLeds))
+            .Filter(this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.EmulationType, x => x.Model.IsApa102).Select(FilterLeds))
             .Bind(out var rumbleCommands)
             .Subscribe();
         RumbleCommands = rumbleCommands;
+        _ledRequiresColours = this.WhenAnyValue(x => x.Command).Select(s => s is not RumbleCommand.Ps4LightBar)
+            .ToProperty(this, x => x.LedsRequireColours);
     }
+
+    private readonly ObservableAsPropertyHelper<bool> _ledRequiresColours;
+
+    public override bool LedsRequireColours => _ledRequiresColours.Value;
 
     public bool OutputEnabled
     {
@@ -246,9 +255,10 @@ public class Led : Output
     }
 
     private RumbleCommand _command;
+
     public RumbleCommand Command
     {
-        get=>_command;
+        get => _command;
         set
         {
             this.RaiseAndSetIfChanged(ref _command, value);
@@ -318,16 +328,16 @@ public class Led : Output
         };
     }
 
-    public static Func<RumbleCommand, bool> FilterLeds((DeviceControllerType, EmulationType) type)
+    public static Func<RumbleCommand, bool> FilterLeds((DeviceControllerType controllerType, EmulationType emulationType, bool isApa102) type)
     {
-        switch (type.Item2)
+        switch (type.emulationType)
         {
             case EmulationType.KeyboardMouse or EmulationType.BluetoothKeyboardMouse:
                 return command => command.IsKeyboard();
             case EmulationType.StageKit:
                 return command => command.IsStageKit() || command.IsPlayer();
             case EmulationType.Controller or EmulationType.Bluetooth:
-                switch (type.Item1)
+                switch (type.controllerType)
                 {
                     case DeviceControllerType.Gamepad:
                     case DeviceControllerType.ArcadeStick:
@@ -337,7 +347,10 @@ public class Led : Output
                     case DeviceControllerType.Guitar:
                     case DeviceControllerType.LiveGuitar:
                     case DeviceControllerType.Drum:
-                        return command => command.IsAuth() || command.IsPlayer() || command.IsSantroller();
+                        return command =>
+                            command.IsAuth() || command.IsPlayer() || command.IsSantroller() ||
+                            // Lightbar only works with APA102s, as it requires full RGB
+                            (type.isApa102 && command is RumbleCommand.Ps4LightBar);
                     case DeviceControllerType.Turntable:
                         return command => command.IsDj() || command.IsAuth() || command.IsPlayer();
                 }
@@ -360,18 +373,23 @@ public class Led : Output
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode is ConfigField.StrobeLed && Command != RumbleCommand.StageKitStrobe) return "";
         if (mode is not (ConfigField.StrobeLed or ConfigField.AuthLed or ConfigField.PlayerLed or ConfigField.RumbleLed
-                or ConfigField.KeyboardLed) ||
+                or ConfigField.KeyboardLed or ConfigField.LightBarLed) ||
             !AreLedsEnabled) return "";
         switch (mode)
         {
+            case ConfigField.StrobeLed when Command is not RumbleCommand.StageKitStrobe:
             case ConfigField.PlayerLed when !Command.IsPlayer():
             case ConfigField.AuthLed when !Command.IsAuth():
             case ConfigField.RumbleLed when Command.IsPlayer() || Command.IsAuth():
+            case ConfigField.LightBarLed when Command is not RumbleCommand.Ps4LightBar:
+                return "";
             case ConfigField.KeyboardLed when Command.IsKeyboard():
                 return "";
-        }
+            case ConfigField.LightBarLed:
+                return string.Join("\n",
+                    LedIndices.Select(index => Model.LedType.GetLedAssignment("red", "green", "blue", index)));
+;        }
 
         var allOff = "(rumble_left == 0x00 rumble_right == 0xFF)";
         var on = "";

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
 
@@ -31,11 +32,32 @@ public static class LedTypeMethods
         };
     }
 
+    private static IEnumerable<string> GetLedStrings(this LedType type, string r, string g, string b)
+    {
+        return type switch
+        {
+            LedType.APA102_RGB => new[] {r, g, b},
+            LedType.APA102_RBG => new[] {r, b, g},
+            LedType.APA102_GRB => new[] {g, r, b},
+            LedType.APA102_GBR => new[] {g, b, r},
+            LedType.APA102_BRG => new[] {b, r, g},
+            LedType.APA102_BGR => new[] {b, g, r},
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
     public static string GetLedAssignment(this LedType type, Color color, byte index)
     {
         var data = GetLedBytes(type, color);
         return string.Join("\n",
-            data.Zip(new[] {'r', 'g', 'b'}).Select(b => $"ledState[{index - 1}].{b.Second} = {b.First};"));
+            data.Zip(new[] {'r', 'g', 'b'}).Select(pair => $"ledState[{index - 1}].{pair.Second} = {pair.First};"));
+    }
+
+    public static string GetLedAssignment(this LedType type, string r, string g, string b, byte index)
+    {
+        var data = GetLedStrings(type, r, g, b);
+        return string.Join("\n",
+            data.Zip(new[] {'r', 'g', 'b'}).Select(pair => $"ledState[{index - 1}].{pair.Second} = {pair.First};"));
     }
 
     public static string GetLedAssignment(this LedType type, Color on, Color off, string value, byte index)

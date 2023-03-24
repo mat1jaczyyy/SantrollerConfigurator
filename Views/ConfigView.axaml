@@ -338,7 +338,7 @@
                                   Items="{Binding RumbleCommands}"
                                   ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding LedsRequireColours}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
@@ -1156,6 +1156,7 @@
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding Path="AreLedsEnabled" />
                             <Binding Path="!IsCombined" />
+                            <Binding Path="LedsRequireColours"/>
                         </MultiBinding>
                     </StackPanel.IsVisible>
                     <Label VerticalAlignment="Center"
@@ -1169,6 +1170,7 @@
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding Path="AreLedsEnabled" />
                             <Binding Path="!IsCombined" />
+                            <Binding Path="LedsRequireColours"/>
                         </MultiBinding>
                     </StackPanel.IsVisible>
                     <Label VerticalAlignment="Center"
