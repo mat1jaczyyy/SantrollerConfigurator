@@ -366,27 +366,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public abstract string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType);
 
-    public static string GetMaskField(string type, ConfigField mode)
-    {
-        switch (mode)
-        {
-            case ConfigField.MouseMask:
-                return $"maskfield(USB_Mouse_Data_t, {type.Replace("report->", "")});";
-            case ConfigField.ConsumerMask:
-                return $"maskfield(USB_ConsumerControl_Data_t, {type.Replace("report->", "")});";
-            case ConfigField.KeyboardMask:
-                return $"maskfield(USB_NKRO_Data_t, {type.Replace("report->", "")});";
-            case ConfigField.Ps3Mask:
-                return $"maskfield(PS3_REPORT, {type.Replace("report->", "")});";
-            case ConfigField.Xbox360Mask:
-                return $"maskfield(XINPUT_REPORT, {type.Replace("report->", "")});";
-            case ConfigField.XboxOneMask:
-                return $"maskfield(XBOX_ONE_REPORT, {type.Replace("report->", "")});";
-        }
-
-        return "";
-    }
-
     public static string GetReportField(object type)
     {
         var typeName = type.ToString()!;
@@ -537,6 +516,11 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
                 Input = new DigitalToAnalog(input, oldOn, Model);
                 break;
+        }
+
+        if (this is EmulationMode)
+        {
+            Input = input;
         }
 
         this.RaisePropertyChanged(nameof(WiiInputType));

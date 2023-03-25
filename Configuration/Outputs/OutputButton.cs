@@ -36,18 +36,6 @@ public abstract class OutputButton : Output
     /// <exception cref="IncompleteConfigurationException"></exception>
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        switch (mode)
-        {
-            case ConfigField.Ps4Mask:
-                return $"maskbit(PS4_REPORT, {GenerateOutput(mode).Replace("report->", "")});";
-            case ConfigField.Ps3Mask:
-                return $"maskbit(PS3_REPORT, {GenerateOutput(mode).Replace("report->", "")});";
-            case ConfigField.Xbox360Mask:
-                return $"maskbit(XINPUT_REPORT, {GenerateOutput(mode).Replace("report->", "")});";
-            case ConfigField.XboxOneMask:
-                return $"maskbit(XBOX_ONE_REPORT, {GenerateOutput(mode).Replace("report->", "")});";
-        }
-
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce + 1};");
@@ -94,10 +82,10 @@ public abstract class OutputButton : Output
         {
             var otherIndex = debounceIndex[0] == 1 ? 0 : 1;
             return
-                $"if (({Input.Generate(mode)}) && (!debounce[{otherIndex}])) {{ {led2}; {reset}; {extra};}} {led}";
+                $"if (({Input.Generate(mode)}) && (!debounce[{otherIndex}])) {{ {led2} {reset} {extra}}} {led}";
         }
 
-        return $"if (({Input.Generate(mode)})) {{ {led2}; {reset}; {extra}; }} {led}";
+        return $"if (({Input.Generate(mode)})) {{ {led2} {reset} {extra} }} {led}";
     }
 
     public override void UpdateBindings()

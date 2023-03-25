@@ -117,8 +117,8 @@ public class DrumAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps3Mask
-            or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)) return "";
+        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, combined, extra);
+        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
 
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
@@ -140,19 +140,6 @@ public class DrumAxis : OutputAxis
             case ConfigField.Ps3:
                 if (ButtonsPs3.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsPs3[Type])} = 1";
                 break;
-            case ConfigField.Xbox360Mask:
-                padFlag = Xbox360PadFlag;
-                cymbalFlag = Xbox360CymbalFlag;
-                if (ButtonsXbox360.ContainsKey(Type))
-                    outputButtons += GetMaskField(GetReportField(ButtonsXbox360[Type]), mode);
-                break;
-            case ConfigField.XboxOneMask:
-                if (ButtonsXboxOne.ContainsKey(Type))
-                    outputButtons += GetMaskField(GetReportField(ButtonsXboxOne[Type]), mode);
-                break;
-            case ConfigField.Ps3Mask:
-                if (ButtonsPs3.ContainsKey(Type)) outputButtons += GetMaskField(GetReportField(ButtonsPs3[Type]), mode);
-                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
         }
@@ -161,65 +148,27 @@ public class DrumAxis : OutputAxis
             switch (Type)
             {
                 case DrumAxisType.YellowCymbal:
-                    if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask)
-                    {
-                        outputButtons += GetMaskField(GetReportField(YellowCymbalFlag), mode);
-                        outputButtons += GetMaskField(GetReportField(cymbalFlag), mode);
-                    }
-                    else
-                    {
-                        outputButtons += $"\n{GetReportField(YellowCymbalFlag)} = 1";
-                        outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
-                    }
+                    outputButtons += $"\n{GetReportField(YellowCymbalFlag)} = 1";
+                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
 
                     break;
                 case DrumAxisType.BlueCymbal:
-
-                    if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask)
-                    {
-                        outputButtons += GetMaskField(GetReportField(BlueCymbalFlag), mode);
-                        outputButtons += GetMaskField(GetReportField(cymbalFlag), mode);
-                    }
-                    else
-                    {
-                        outputButtons += $"\n{GetReportField(BlueCymbalFlag)} = 1";
-                        outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
-                    }
+                    outputButtons += $"\n{GetReportField(BlueCymbalFlag)} = 1";
+                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
 
                     break;
                 case DrumAxisType.GreenCymbal:
-
-                    if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask)
-                    {
-                        outputButtons += GetMaskField(GetReportField(cymbalFlag), mode);
-                    }
-                    else
-                    {
-                        outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
-                    }
-
+                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
                     break;
                 case DrumAxisType.Green:
                 case DrumAxisType.Red:
                 case DrumAxisType.Yellow:
                 case DrumAxisType.Blue:
 
-                    if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask)
-                    {
-                        outputButtons += GetMaskField(GetReportField(padFlag), mode);
-                    }
-                    else
-                    {
-                        outputButtons += $"\n{GetReportField(padFlag)} = 1";
-                    }
+                    outputButtons += $"\n{GetReportField(padFlag)} = 1";
 
                     break;
             }
-
-        if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)
-        {
-            return outputButtons + GetMaskField(GenerateOutput(mode), mode);
-        }
 
         var assignedVal = "val_real";
         var valType = "uint16_t";
@@ -255,7 +204,6 @@ public class DrumAxis : OutputAxis
             }
         }
 
-        var led = CalculateLeds(mode);
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
@@ -267,7 +215,6 @@ public class DrumAxis : OutputAxis
         }}
         {valType} val = {assignedVal};
         {GenerateOutput(mode)} = val;
-        {led}
     }}
     if ({ifStatement}) {{
         {decrement} 

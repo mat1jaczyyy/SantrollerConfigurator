@@ -119,7 +119,7 @@ public class EmptyOutput : Output
                     SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model),
                     SimpleType.DjTurntableSimple => new DjCombinedOutput(Model),
                     SimpleType.Led => new Led(Model, !Model.IsApa102, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
-                        Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((Model.DeviceType, Model.EmulationType))).First()),
+                        Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((Model.DeviceType, Model.EmulationType, Model.IsApa102))).First()),
                     SimpleType.Rumble => new Rumble(Model, 0, RumbleMotorType.Left),
                     SimpleType.ConsoleMode => new EmulationMode(Model,
                         new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model),

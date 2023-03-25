@@ -508,11 +508,6 @@ public class WiiInput : TwiInput
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-        if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask or ConfigField.XboxOneMask
-            or ConfigField.ConsumerMask or ConfigField.KeyboardMask or ConfigField.MouseMask)
-        {
-            return string.Join("\n", bindings.Select(binding => binding.Item2));
-        }
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
         foreach (var binding in bindings)
         {

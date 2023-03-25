@@ -177,8 +177,8 @@ public class KeyboardButton : OutputButton
     {
         switch (IsMediaKey)
         {
-            case true when mode is not (ConfigField.Consumer or ConfigField.ConsumerMask):
-            case false when mode is not (ConfigField.Keyboard or ConfigField.KeyboardMask):
+            case true when mode is not ConfigField.Consumer:
+            case false when mode is not ConfigField.Keyboard:
                 return "";
             default:
                 return Key == Key.Delete ? GetReportField("Del") : GetReportField(Key);

@@ -42,8 +42,7 @@ public class ControllerButton : OutputButton
 
     public override string GenerateOutput(ConfigField mode)
     {
-        return mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360
-            or ConfigField.Ps3Mask or ConfigField.Ps4Mask or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)
+        return mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360)
             ? ""
             : GetReportField(Type);
     }

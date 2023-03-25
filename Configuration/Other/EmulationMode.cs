@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Linq;
 using Avalonia.Media;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -17,10 +20,17 @@ public class EmulationMode : Output
         model, input, Colors.Black, Colors.Black, Array.Empty<byte>())
     {
         Type = type;
+        _emulationModes.AddRange(Enum.GetValues<EmulationModeType>());
+        _emulationModes.Connect()
+            .Filter(this.WhenAnyValue(x => x.Model.RhythmType, x => x.Model.DeviceType).Select(CreateFilter)).Bind(out var modes)
+            .Subscribe();
+        EmulationModes = modes;
+
     }
 
+    private SourceList<EmulationModeType> _emulationModes = new();
     private EmulationModeType _emulationModeType;
-
+    public ReadOnlyObservableCollection<EmulationModeType> EmulationModes { get; }
     public EmulationModeType Type
     {
         get => _emulationModeType;
@@ -30,8 +40,10 @@ public class EmulationMode : Output
             UpdateDetails();
         }
     }
-
-    public EmulationModeType[] EmulationModes { get; } = Enum.GetValues<EmulationModeType>();
+    private static Func<EmulationModeType, bool> CreateFilter((RhythmType rhythmType, DeviceControllerType deviceControllerType) tuple)
+    {
+        return mode => mode != EmulationModeType.Wii || tuple.deviceControllerType is DeviceControllerType.Drum or DeviceControllerType.Guitar && tuple.rhythmType == RhythmType.RockBand;
+    }
 
     private string GetDefinition()
     {
@@ -86,8 +98,7 @@ public class EmulationMode : Output
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         return $@"
             if ({ifStatement}) {{
-                consoleType = {GetDefinition()};
-                reset_usb();
+                set_console_type({GetDefinition()});
             }}";
     }
 

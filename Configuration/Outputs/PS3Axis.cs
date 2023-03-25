@@ -62,7 +62,7 @@ public class Ps3Axis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        return mode is not (ConfigField.Ps3 or ConfigField.Ps3Mask) ? "" : base.Generate(mode, debounceIndex, combined, extra);
+        return mode is not (ConfigField.Ps3 or ConfigField.Shared) ? "" : base.Generate(mode, debounceIndex, combined, extra);
     }
 
     public override SerializedOutput Serialize()

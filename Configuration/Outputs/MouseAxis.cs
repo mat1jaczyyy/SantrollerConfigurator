@@ -116,7 +116,7 @@ public class MouseAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        return mode is not (ConfigField.Mouse or ConfigField.MouseMask)
+        return mode is not (ConfigField.Mouse or ConfigField.Shared)
             ? ""
             : base.Generate(mode, debounceIndex, combined, extra);
     }

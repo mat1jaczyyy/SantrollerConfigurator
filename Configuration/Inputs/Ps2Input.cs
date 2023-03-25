@@ -400,11 +400,6 @@ public class Ps2Input : SpiInput
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-        if (mode is ConfigField.Ps3Mask or ConfigField.Xbox360Mask or ConfigField.XboxOneMask
-            or ConfigField.ConsumerMask or ConfigField.KeyboardMask or ConfigField.MouseMask)
-        {
-            return string.Join("\n", bindings.Select(binding => binding.Item2));
-        }
         Dictionary<Ps2InputType, string> ds2Axis = new();
         Dictionary<Ps2ControllerType, List<string>> mappedBindings = new();
         foreach (var binding in bindings)

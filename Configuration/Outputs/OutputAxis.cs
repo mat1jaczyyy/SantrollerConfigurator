@@ -323,18 +323,17 @@ public abstract partial class OutputAxis : Output
                 normal = true;
                 function = "handle_calibration_xbox";
                 break;
-            case ConfigField.Ps3 when whammy:
-                function = "handle_calibration_ps3_whammy";
-                break;
+            // For LED stuff (Shared), we can use the standard handle_calibration_ps3 instead.
             case ConfigField.Ps3 when accel:
                 function = "handle_calibration_ps3_accel";
                 break;
-            case ConfigField.Ps3 when trigger:
-            case ConfigField.Ps4 when trigger:
+            case ConfigField.Ps3 or ConfigField.Shared when whammy:
+                function = "handle_calibration_ps3_whammy";
+                break;
+            case ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared when trigger:
                 function = "handle_calibration_ps3_360_trigger";
                 break;
-            case ConfigField.Ps3:
-            case ConfigField.Ps4:
+            case ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared:
                 normal = true;
                 function = "handle_calibration_ps3";
                 break;
@@ -382,30 +381,23 @@ public abstract partial class OutputAxis : Output
 
     protected string CalculateLeds(ConfigField mode)
     {
-        var led = "";
-        if (!AreLedsEnabled) return led;
-        foreach (var index in LedIndices)
-        {
-            var ledRead = mode == ConfigField.Xbox360
-                ? $"{GenerateOutput(mode)} << 8"
-                : GenerateOutput(mode);
-            led += $@"if (!ledState[{index - 1}].select) {{
-                        {Model.LedType.GetLedAssignment(LedOn, LedOff, ledRead, index)}
-                    }}";
-        }
-
-        return led;
+        if (!AreLedsEnabled) return "";
+        var ledRead = GenerateOutput(mode);
+        return LedIndices.Aggregate("",
+            (current, index) =>
+                current +
+                $@"if (!ledState[{index - 1}].select) {{{Model.LedType.GetLedAssignment(LedOn, LedOff, ledRead, index)}}}");
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        var output = GenerateOutput(mode);
-        if (!output.Any()) return "";
-        var mask = GetMaskField(output, mode);
-        if (mask.Any()) return mask;
+        if (mode == ConfigField.Shared)
+        {
+            return Input is FixedInput ? "" : CalculateLeds(mode);
+        }
 
-        var led = Input is FixedInput ? "" : CalculateLeds(mode);
-        return $"{output} = {GenerateAssignment(mode, false, false, false)}; {led}";
+        var output = GenerateOutput(mode);
+        return output.Any() ? $"{output} = {GenerateAssignment(mode, false, false, false)};" : "";
     }
 
     public override void UpdateBindings()

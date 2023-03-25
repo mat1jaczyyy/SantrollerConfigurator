@@ -76,8 +76,7 @@ public class DjAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode is ConfigField.Xbox360Mask or ConfigField.XboxOneMask or ConfigField.Ps3Mask)
-            return base.Generate(mode, debounceIndex, combined, extra);
+        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, combined, extra);
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
@@ -89,8 +88,7 @@ public class DjAxis : OutputAxis
             gen = mode == ConfigField.Xbox360 ? gen : $"{gen} + {sbyte.MaxValue}";
         }
 
-        var led = Input is FixedInput ? "" : CalculateLeds(mode);
-        return $"{GenerateOutput(mode)} = {gen}; {led}";
+        return $"{GenerateOutput(mode)} = {gen};";
     }
 
     protected override string MinCalibrationText()

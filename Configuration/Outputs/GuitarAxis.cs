@@ -69,9 +69,8 @@ public class GuitarAxis : OutputAxis
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps4Mask or ConfigField.Ps3Mask
-            or ConfigField.Xbox360Mask or ConfigField.XboxOneMask)) return "";
-        var led = Input is FixedInput ? "" : CalculateLeds(mode);
+        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, combined, extra);
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (Type == GuitarAxisType.Slider)
         {
             switch (mode)
@@ -84,21 +83,17 @@ public class GuitarAxis : OutputAxis
                         }} else {{
                             {GenerateOutput(mode)} |= ({GenerateOutput(mode)}) << 8;
                         }}
-                        {led}
                     ";
                 case ConfigField.Ps3:
                 case ConfigField.Ps4:
-                    return $"{GenerateOutput(mode)} = {Input.Generate(mode)}; {led}";
+                    return $"{GenerateOutput(mode)} = {Input.Generate(mode)};";
             }
         }
         switch (mode)
         {
             // Xb1 is RB only, so no slider
-            case ConfigField.XboxOneMask when Type == GuitarAxisType.Slider:
             case ConfigField.XboxOne when Type == GuitarAxisType.Slider:
                 return "";
-            case ConfigField.Ps3Mask when Type == GuitarAxisType.Tilt:
-                return GetMaskField(GenerateOutput(mode), mode) + GetMaskField("tilt_pc", mode);
             case ConfigField.Ps3
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.GuitarHero} &&
                      Type == GuitarAxisType.Tilt:
@@ -106,7 +101,7 @@ public class GuitarAxis : OutputAxis
                          {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
                       }} else {{
                          report->tilt_pc = -{GenerateAssignment(mode, false, false, false)};
-                      }} {led}";
+                      }}";
             // PS3 RB expects tilt as a digital bit, so map that here
             // On pc, we use a standard axis because that works better in games like clone hero
             case ConfigField.Ps3
@@ -116,19 +111,14 @@ public class GuitarAxis : OutputAxis
                          {GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)} == 0xFF;
                       }} else {{
                          report->tilt_pc = -{GenerateAssignment(mode, false, false, false)};
-                      }} {led}";
+                      }}";
             // Xbox 360 Pickup Selector is actually on one of the triggers.
             case ConfigField.Xbox360
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
                      Type == GuitarAxisType.Pickup:
-                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)}; {led}";
-            case ConfigField.Xbox360Mask:
-            case ConfigField.XboxOneMask:
-            case ConfigField.Ps4Mask:
-            case ConfigField.Ps3Mask:
-                return GetMaskField(GenerateOutput(mode), mode);
+                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)};";
             default:
-                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)}; {led}";
+                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)};";
         }
     }
 

@@ -36,8 +36,6 @@ public class DjButton : OutputButton
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
-        if (mode is ConfigField.Xbox360Mask or ConfigField.XboxOneMask or ConfigField.Ps3Mask)
-            return base.Generate(mode, debounceIndex, combined, extra);
         if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360))
             return "";
         // Turntables also hit the standard buttons when you push each button
