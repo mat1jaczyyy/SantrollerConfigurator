@@ -510,7 +510,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         if (_deviceControllerType is not DeviceControllerType.Guitar || _rhythmType is not RhythmType.RockBand)
-            Bindings.RemoveAll(Bindings.Where(s => s is RbButton));
+            Bindings.RemoveAll(Bindings.Where(s => s is GuitarButton));
 
         if (_deviceControllerType == DeviceControllerType.Turntable)
             if (!Bindings.Any(s => s is DjCombinedOutput))
@@ -524,8 +524,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         new DirectInput(0, DevicePinMode.PullUp, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType));
                     break;
-                case RBButtonType buttonType:
-                    Bindings.Add(new RbButton(this,
+                case InstrumentButtonType buttonType:
+                    Bindings.Add(new GuitarButton(this,
                         new DirectInput(0, DevicePinMode.PullUp, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType));
                     break;
@@ -737,7 +737,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (EmulationType is EmulationType.KeyboardMouse or EmulationType.BluetoothKeyboardMouse) return;
         foreach (var type in Enum.GetValues<StandardAxisType>())
         {
-            if (ControllerEnumConverter.GetAxisText(_deviceControllerType, _rhythmType, type) == null) continue;
+            if (ControllerEnumConverter.GetAxisText(_deviceControllerType, type) == null) continue;
             if (DeviceType == DeviceControllerType.Turntable &&
                 type is StandardAxisType.LeftStickX or StandardAxisType.LeftStickY) continue;
             Bindings.Add(new ControllerAxis(this,
@@ -748,7 +748,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         foreach (var type in Enum.GetValues<StandardButtonType>())
         {
-            if (ControllerEnumConverter.GetButtonText(_deviceControllerType, _rhythmType, type) ==
+            if (ControllerEnumConverter.GetButtonText(_deviceControllerType, type) ==
                 null) continue;
             Bindings.Add(new ControllerButton(this,
                 new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),

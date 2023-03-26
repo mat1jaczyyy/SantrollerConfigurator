@@ -22,7 +22,7 @@ public class ControllerAxis : OutputAxis
     {
         Type = type;
         _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
-            .Select(s => ControllerEnumConverter.GetAxisText(s.Item1, s.Item2, s.Item3) != null)
+            .Select(s => ControllerEnumConverter.GetAxisText(s.Item1, s.Item3) != null)
             .ToProperty(this, s => s.Valid);
         UpdateDetails();
     }
@@ -78,7 +78,7 @@ public class ControllerAxis : OutputAxis
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return ControllerEnumConverter.GetAxisText(deviceControllerType, rhythmType,
+        return ControllerEnumConverter.GetAxisText(deviceControllerType,
             Type) ?? Type.ToString();
     }
 
@@ -152,8 +152,7 @@ public class ControllerAxis : OutputAxis
 
     protected override bool SupportsCalibration()
     {
-        return Type is not (StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
-            or StandardAxisType.AccelerationZ);
+        return true;
     }
     public override SerializedOutput Serialize()
     {

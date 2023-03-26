@@ -23,13 +23,13 @@ public class GhwtCombinedOutput : CombinedOutput
         {GhWtInputType.TapOrange, StandardButtonType.LeftShoulder}
     };
 
-    private static readonly Dictionary<GhWtInputType, RBButtonType> TapRb = new()
+    private static readonly Dictionary<GhWtInputType, InstrumentButtonType> TapRb = new()
     {
-        {GhWtInputType.TapGreen, RBButtonType.UpperGreen},
-        {GhWtInputType.TapRed, RBButtonType.UpperRed},
-        {GhWtInputType.TapYellow, RBButtonType.UpperYellow},
-        {GhWtInputType.TapBlue, RBButtonType.UpperBlue},
-        {GhWtInputType.TapOrange, RBButtonType.UpperOrange}
+        {GhWtInputType.TapGreen, InstrumentButtonType.SoloGreen},
+        {GhWtInputType.TapRed, InstrumentButtonType.SoloRed},
+        {GhWtInputType.TapYellow, InstrumentButtonType.SoloYellow},
+        {GhWtInputType.TapBlue, InstrumentButtonType.SoloBlue},
+        {GhWtInputType.TapOrange, InstrumentButtonType.SoloOrange}
     };
 
 
@@ -136,7 +136,7 @@ public class GhwtCombinedOutput : CombinedOutput
         // Map Tap bar to Upper frets on RB guitars
         if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
         {
-            outputs.AddRange(TapRb.Select(pair => new RbButton(Model, new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
+            outputs.AddRange(TapRb.Select(pair => new GuitarButton(Model, new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
 
             outputs.Remove(tapAnalog);
         }

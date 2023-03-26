@@ -11,7 +11,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 public class SerializedRBButton : SerializedOutput
 {
     public SerializedRBButton(SerializedInput input, Color ledOn, Color ledOff, byte[] ledIndex, byte debounce,
-        RBButtonType type)
+        InstrumentButtonType type)
     {
         Input = input;
         LedOn = ledOn.ToUint32();
@@ -26,11 +26,11 @@ public class SerializedRBButton : SerializedOutput
     [ProtoMember(3)] public uint LedOff { get; }
     [ProtoMember(6)] public byte[] LedIndex { get; }
     [ProtoMember(4)] public byte Debounce { get; }
-    [ProtoMember(5)] public RBButtonType Type { get; }
+    [ProtoMember(5)] public InstrumentButtonType Type { get; }
 
     public override Output Generate(ConfigViewModel model)
     {
-        return new RbButton(model, Input.Generate(model), Color.FromUInt32(LedOn),
+        return new GuitarButton(model, Input.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
     }
 }

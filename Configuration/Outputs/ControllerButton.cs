@@ -19,7 +19,7 @@ public class ControllerButton : OutputButton
     {
         Type = type;
         _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
-            .Select(s => ControllerEnumConverter.GetButtonText(s.Item1, s.Item2, s.Item3) != null)
+            .Select(s => ControllerEnumConverter.GetButtonText(s.Item1, s.Item3) != null)
             .ToProperty(this, s => s.Valid);
         UpdateDetails();
     }
@@ -37,7 +37,7 @@ public class ControllerButton : OutputButton
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return ControllerEnumConverter.GetButtonText(deviceControllerType, rhythmType, Type) ?? Type.ToString();
+        return ControllerEnumConverter.GetButtonText(deviceControllerType, Type) ?? Type.ToString();
     }
 
     public override string GenerateOutput(ConfigField mode)

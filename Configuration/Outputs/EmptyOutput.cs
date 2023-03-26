@@ -136,7 +136,7 @@ public class EmptyOutput : Output
                     new DirectInput(0, DevicePinMode.PullUp, Model), Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
                     standardButtonType),
-                RBButtonType standardButtonType => new RbButton(Model,
+                InstrumentButtonType standardButtonType => new GuitarButton(Model,
                     new DirectInput(0, DevicePinMode.PullUp, Model), Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
                     standardButtonType),

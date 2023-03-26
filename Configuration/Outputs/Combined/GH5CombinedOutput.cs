@@ -33,13 +33,13 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         {Gh5NeckInputType.TapOrange, StandardButtonType.LeftShoulder}
     };
     
-    private static readonly Dictionary<Gh5NeckInputType, RBButtonType> TapsRb = new()
+    private static readonly Dictionary<Gh5NeckInputType, InstrumentButtonType> TapsRb = new()
     {
-        {Gh5NeckInputType.TapGreen, RBButtonType.UpperGreen},
-        {Gh5NeckInputType.TapRed, RBButtonType.UpperRed},
-        {Gh5NeckInputType.TapYellow, RBButtonType.UpperYellow},
-        {Gh5NeckInputType.TapBlue, RBButtonType.UpperBlue},
-        {Gh5NeckInputType.TapOrange, RBButtonType.UpperOrange}
+        {Gh5NeckInputType.TapGreen, InstrumentButtonType.SoloGreen},
+        {Gh5NeckInputType.TapRed, InstrumentButtonType.SoloRed},
+        {Gh5NeckInputType.TapYellow, InstrumentButtonType.SoloYellow},
+        {Gh5NeckInputType.TapBlue, InstrumentButtonType.SoloBlue},
+        {Gh5NeckInputType.TapOrange, InstrumentButtonType.SoloOrange}
     };
 
 
@@ -104,7 +104,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         // Map Tap bar to Upper frets on RB guitars
         if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
         {
-            outputs.AddRange(TapsRb.Select(pair => new RbButton(Model, new Gh5NeckInput(pair.Key, Model, Sda, Scl, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
+            outputs.AddRange(TapsRb.Select(pair => new GuitarButton(Model, new Gh5NeckInput(pair.Key, Model, Sda, Scl, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
 
             outputs.Remove(tapAnalog);
         }

@@ -57,6 +57,7 @@ public abstract class OutputButton : Output
                     {decrement} 
                     {outputVar} = true; 
                     {leds}
+                    {extra}
                 }}";
         }
 

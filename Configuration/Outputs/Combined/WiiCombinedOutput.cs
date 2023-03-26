@@ -90,13 +90,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.GuitarTapOrange, StandardButtonType.LeftShoulder}
     };
 
-    private static readonly Dictionary<WiiInputType, RBButtonType> TapRb = new()
+    private static readonly Dictionary<WiiInputType, InstrumentButtonType> TapRb = new()
     {
-        {WiiInputType.GuitarTapGreen, RBButtonType.UpperGreen},
-        {WiiInputType.GuitarTapRed, RBButtonType.UpperRed},
-        {WiiInputType.GuitarTapYellow, RBButtonType.UpperYellow},
-        {WiiInputType.GuitarTapBlue, RBButtonType.UpperBlue},
-        {WiiInputType.GuitarTapOrange, RBButtonType.UpperOrange}
+        {WiiInputType.GuitarTapGreen, InstrumentButtonType.SoloGreen},
+        {WiiInputType.GuitarTapRed, InstrumentButtonType.SoloRed},
+        {WiiInputType.GuitarTapYellow, InstrumentButtonType.SoloYellow},
+        {WiiInputType.GuitarTapBlue, InstrumentButtonType.SoloBlue},
+        {WiiInputType.GuitarTapOrange, InstrumentButtonType.SoloOrange}
     };
 
     private static readonly Dictionary<WiiInputType, StandardAxisType> Axis = new()
@@ -283,7 +283,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar &&
             Model.RhythmType is RhythmType.RockBand)
         {
-            outputs.AddRange(TapRb.Select(pair => new RbButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
+            outputs.AddRange(TapRb.Select(pair => new GuitarButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
 
             outputs.Remove(tapAnalog);

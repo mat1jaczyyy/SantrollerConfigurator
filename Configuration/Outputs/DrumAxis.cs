@@ -55,16 +55,28 @@ public class DrumAxis : OutputAxis
         {DrumAxisType.Yellow, "report->yellowVelocity"},
         {DrumAxisType.Blue, "report->blueVelocity"},
         {DrumAxisType.Orange, "report->orangeVelocity"},
-        {DrumAxisType.Kick, "report->kickVelocity"}
+        {DrumAxisType.GreenCymbal, "report->greenVelocity"},
+        {DrumAxisType.YellowCymbal, "report->yellowVelocity"},
+        {DrumAxisType.BlueCymbal, "report->blueVelocity"},
+        {DrumAxisType.Kick, "report->kickVelocity"},
+        {DrumAxisType.Kick2, "report->kickVelocity"}
+    };
+
+    private static readonly Dictionary<DrumAxisType, string> AxisMappingsXb1 = new()
+    {
+        {DrumAxisType.Green, "report->greenVelocity"},
+        {DrumAxisType.Red, "report->redVelocity"},
+        {DrumAxisType.Yellow, "report->yellowVelocity"},
+        {DrumAxisType.Blue, "report->blueVelocity"},
+        {DrumAxisType.Orange, "report->orangeVelocity"},
+        {DrumAxisType.GreenCymbal, "report->greenCymbalVelocity"},
+        {DrumAxisType.YellowCymbal, "report->yellowCymbalVelocity"},
+        {DrumAxisType.BlueCymbal, "report->blueCymbalVelocity"},
+        {DrumAxisType.Kick, "report->kickVelocity"},
+        {DrumAxisType.Kick2, "report->kickVelocity"}
     };
 
     private const StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
-
-    private const StandardButtonType Ps3CymbalFlag = StandardButtonType.RightThumbClick;
-    private const StandardButtonType Ps3PadFlag = StandardButtonType.LeftThumbClick;
-    private const StandardButtonType Xbox360CymbalFlag = StandardButtonType.LeftShoulder;
-    private const StandardButtonType Xbox360PadFlag = StandardButtonType.RightThumbClick;
-
     private const StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
     private int _debounce;
 
@@ -111,6 +123,11 @@ public class DrumAxis : OutputAxis
 
     public override string GenerateOutput(ConfigField mode)
     {
+        if (mode == ConfigField.XboxOne)
+        {
+            return AxisMappingsXb1.ContainsKey(Type) ? AxisMappingsXb1[Type] : "";
+        }
+
         return AxisMappings.ContainsKey(Type) ? AxisMappings[Type] : "";
     }
 
@@ -124,14 +141,10 @@ public class DrumAxis : OutputAxis
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce + 1};");
-        var padFlag = Ps3PadFlag;
-        var cymbalFlag = Ps3CymbalFlag;
         var outputButtons = "";
         switch (mode)
         {
             case ConfigField.Xbox360:
-                padFlag = Xbox360PadFlag;
-                cymbalFlag = Xbox360CymbalFlag;
                 if (ButtonsXbox360.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = 1";
                 break;
             case ConfigField.XboxOne:
@@ -149,23 +162,23 @@ public class DrumAxis : OutputAxis
             {
                 case DrumAxisType.YellowCymbal:
                     outputButtons += $"\n{GetReportField(YellowCymbalFlag)} = 1";
-                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+                    outputButtons += $"\n{GetReportField("cymbalFlag")} = 1";
 
                     break;
                 case DrumAxisType.BlueCymbal:
                     outputButtons += $"\n{GetReportField(BlueCymbalFlag)} = 1";
-                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+                    outputButtons += $"\n{GetReportField("cymbalFlag")} = 1";
 
                     break;
                 case DrumAxisType.GreenCymbal:
-                    outputButtons += $"\n{GetReportField(cymbalFlag)} = 1";
+                    outputButtons += $"\n{GetReportField("cymbalFlag")} = 1";
                     break;
                 case DrumAxisType.Green:
                 case DrumAxisType.Red:
                 case DrumAxisType.Yellow:
                 case DrumAxisType.Blue:
 
-                    outputButtons += $"\n{GetReportField(padFlag)} = 1";
+                    outputButtons += $"\n{GetReportField("padFlag")} = 1";
 
                     break;
             }
@@ -204,6 +217,16 @@ public class DrumAxis : OutputAxis
             }
         }
 
+        var rfExtra = "";
+        // For bluetooth and RF, stuff the cymbal data into some unused bytes for rf reasons
+        if (mode == ConfigField.Ps3 && Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
+        {
+            rfExtra = $@"
+                if (rf_or_bluetooth) {{
+                    {GenerateOutput(ConfigField.XboxOne)} = val_real >> 8;
+                }}  
+            ";
+        }
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
@@ -215,6 +238,7 @@ public class DrumAxis : OutputAxis
         }}
         {valType} val = {assignedVal};
         {GenerateOutput(mode)} = val;
+        {rfExtra}
     }}
     if ({ifStatement}) {{
         {decrement} 

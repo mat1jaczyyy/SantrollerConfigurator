@@ -97,7 +97,7 @@ public class GuitarAxis : OutputAxis
             case ConfigField.Ps3
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.GuitarHero} &&
                      Type == GuitarAxisType.Tilt:
-                return $@"if (consoleType == PS3) {{
+                return $@"if (consoleType == PS3 || consoleType == REAL_PS3) {{
                          {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
                       }} else {{
                          report->tilt_pc = -{GenerateAssignment(mode, false, false, false)};
@@ -107,7 +107,7 @@ public class GuitarAxis : OutputAxis
             case ConfigField.Ps3
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
                      Type == GuitarAxisType.Tilt:
-                return $@"if (consoleType == PS3) {{
+                return $@"if (consoleType == PS3 || consoleType == REAL_PS3) {{
                          {GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)} == 0xFF;
                       }} else {{
                          report->tilt_pc = -{GenerateAssignment(mode, false, false, false)};

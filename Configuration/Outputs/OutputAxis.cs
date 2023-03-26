@@ -292,11 +292,6 @@ public abstract partial class OutputAxis : Output
     {
         if (Input is FixedInput or DigitalToAnalog) return Input.Generate(mode);
 
-        var accel = forceAccel || this is ControllerAxis
-        {
-            Type: StandardAxisType.Gyro or StandardAxisType.AccelerationX or StandardAxisType.AccelerationY
-            or StandardAxisType.AccelerationZ
-        };
         string function;
         var trigger = Trigger || forceTrigger;
         var normal = false;
@@ -324,7 +319,7 @@ public abstract partial class OutputAxis : Output
                 function = "handle_calibration_xbox";
                 break;
             // For LED stuff (Shared), we can use the standard handle_calibration_ps3 instead.
-            case ConfigField.Ps3 when accel:
+            case ConfigField.Ps3 when forceAccel:
                 function = "handle_calibration_ps3_accel";
                 break;
             case ConfigField.Ps3 or ConfigField.Shared when whammy:
@@ -366,7 +361,7 @@ public abstract partial class OutputAxis : Output
         }
 
         var generated = "(" + Input.Generate(mode);
-        generated += (Trigger || accel) switch
+        generated += (Trigger || forceAccel) switch
         {
             true when !InputIsUint => ") + INT16_MAX",
             false when InputIsUint => ") - INT16_MAX",

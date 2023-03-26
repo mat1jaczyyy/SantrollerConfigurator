@@ -7,9 +7,5 @@ public enum StandardAxisType
     LeftStickX,
     LeftStickY,
     RightStickX,
-    RightStickY,
-    AccelerationX,
-    AccelerationY,
-    AccelerationZ,
-    Gyro
+    RightStickY
 }
