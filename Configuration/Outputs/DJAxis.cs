@@ -18,7 +18,10 @@ public class DjAxis : OutputAxis
         Type = type;
         UpdateDetails();
     }
-
+    public override bool ShouldFlip(ConfigField mode)
+    {
+        return false;
+    }
     public DjAxisType Type { get; }
 
     public override bool IsKeyboard => false;

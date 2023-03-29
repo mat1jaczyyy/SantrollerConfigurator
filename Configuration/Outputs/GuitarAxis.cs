@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
-using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -36,6 +35,10 @@ public class GuitarAxis : OutputAxis
                 _ => ""
             };
         }
+    }
+    public override bool ShouldFlip(ConfigField mode)
+    {
+        return false;
     }
 
     public override string LedOffLabel

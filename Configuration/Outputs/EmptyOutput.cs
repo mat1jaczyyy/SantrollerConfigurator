@@ -34,10 +34,10 @@ public class EmptyOutput : Output
         Array.Empty<byte>())
     {
         _isController = this.WhenAnyValue(x => x.Model.EmulationType)
-            .Select(x => x is EmulationType.Controller)
+            .Select(x => Model.GetSimpleEmulationType() is EmulationType.Controller)
             .ToProperty(this, x => x.IsController);
         _isKeyboard = this.WhenAnyValue(x => x.Model.EmulationType)
-            .Select(x => x is EmulationType.KeyboardMouse)
+            .Select(x => Model.GetSimpleEmulationType() is EmulationType.KeyboardMouse)
             .ToProperty(this, x => x.IsKeyboard);
 
         _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType,

@@ -17,7 +17,10 @@ public class MouseAxis : OutputAxis
         Type = type;
         UpdateDetails();
     }
-
+    public override bool ShouldFlip(ConfigField mode)
+    {
+        return false;
+    }
     public override bool IsKeyboard => true;
     public virtual bool IsController => false;
 

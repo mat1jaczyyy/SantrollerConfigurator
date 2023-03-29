@@ -7,7 +7,6 @@ public enum ConfigField
     XboxOne,
     Ps3,
     Ps4,
-    RfRx,
     Consumer,
     Keyboard,
     Mouse,

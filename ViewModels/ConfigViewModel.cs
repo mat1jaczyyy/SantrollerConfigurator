@@ -134,16 +134,16 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
             .ToProperty(this, x => x.IsRhythm);
         _isController = this.WhenAnyValue(x => x.EmulationType)
-            .Select(x => x is EmulationType.Controller or EmulationType.Bluetooth)
+            .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.Controller)
             .ToProperty(this, x => x.IsController);
         _isKeyboard = this.WhenAnyValue(x => x.EmulationType)
-            .Select(x => x is EmulationType.KeyboardMouse or EmulationType.BluetoothKeyboardMouse)
+            .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.KeyboardMouse)
             .ToProperty(this, x => x.IsKeyboard);
         _isApa102 = this.WhenAnyValue(x => x.LedType)
             .Select(x => x is LedType.APA102_BGR or LedType.APA102_BRG or LedType.APA102_GBR or LedType.APA102_GRB
                 or LedType.APA102_RBG or LedType.APA102_RGB)
             .ToProperty(this, x => x.IsApa102);
-        
+
         if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults();
         if (Main is {IsUno: false, IsMega: false}) return;
         Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output));
@@ -342,8 +342,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             if (value)
             {
                 // These pins get handled by the usb host lib, but we need them defined regardless
-                _usbHostDp = Microcontroller.GetOrSetPin(this, UsbHostPinTypeDp, AvailablePinsDp.First(), DevicePinMode.Skip);
-                _usbHostDm = Microcontroller.GetOrSetPin(this, UsbHostPinTypeDm, AvailablePinsDm.First(), DevicePinMode.Skip);
+                _usbHostDp = Microcontroller.GetOrSetPin(this, UsbHostPinTypeDp, AvailablePinsDp.First(),
+                    DevicePinMode.Skip);
+                _usbHostDm = Microcontroller.GetOrSetPin(this, UsbHostPinTypeDm, AvailablePinsDm.First(),
+                    DevicePinMode.Skip);
                 this.RaisePropertyChanged(nameof(UsbHostDp));
                 this.RaisePropertyChanged(nameof(UsbHostDm));
             }
@@ -428,6 +430,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         .Select(s => s.Key).ToList();
 
     public List<int> AvailablePins => Microcontroller.GetAllPins(false);
+
     // Since DM and DP need to be next to eachother, you cannot use pins at the far ends
     public List<int> AvailablePinsDm => AvailablePins.Skip(1).ToList();
     public List<int> AvailablePinsDp => AvailablePins.SkipLast(1).ToList();
@@ -462,7 +465,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             Bindings.RemoveAll(Bindings.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
         }
-        
+
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
         if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
 
@@ -653,6 +656,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             _ = ShowUnoShortDialog.Handle((Arduino) Device).ToTask();
             return;
         }
+
         UpdateBindings();
         UpdateErrors();
 
@@ -675,7 +679,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 var first = Microcontroller.GetAllPins(false).First();
                 _rfCe = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
                 _rfCsn = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
-                
+
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
                 this.RaisePropertyChanged(nameof(RfSck));
@@ -703,6 +707,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 _rfCsn = null;
             }
         }
+
         // If going from say bluetooth controller to standard controller, the pin bindings can stay
         if (GetSimpleEmulationTypeFor(EmulationType) == GetSimpleEmulationTypeFor(emulationType))
         {
@@ -820,7 +825,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         lines.Add($"#define LED_TYPE {GetLedType()}");
 
-        lines.Add(GenerateTick(ConfigField.RfRx));
         if (IsApa102)
         {
             lines.Add($"#define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}");
@@ -897,6 +901,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             case EmulationType.Bluetooth:
             case EmulationType.Controller:
             case EmulationType.RfController:
+            case EmulationType.StageKit:
                 return EmulationType.Controller;
             case EmulationType.KeyboardMouse:
             case EmulationType.BluetoothKeyboardMouse:
@@ -906,6 +911,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 return EmulationType;
         }
     }
+
     public EmulationType GetSimpleEmulationType()
     {
         return GetSimpleEmulationTypeFor(EmulationType);
@@ -1207,12 +1213,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         if (UsbHostEnabled)
         {
-            pins["USB Host"] = new List<int>{UsbHostDm, UsbHostDp};
+            pins["USB Host"] = new List<int> {UsbHostDm, UsbHostDp};
         }
 
         if (IsRf)
         {
-            pins["RF"] = new List<int>{RfMiso, RfMosi, RfCe, RfSck, RfCsn};
+            pins["RF"] = new List<int> {RfMiso, RfMosi, RfCe, RfSck, RfCsn};
         }
 
         return pins;

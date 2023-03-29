@@ -44,6 +44,11 @@ public class Ps3Axis : OutputAxis
         return mode is ConfigField.Ps3 or ConfigField.Ps4 ? GetReportField(Type) : "";
     }
 
+    public override bool ShouldFlip(ConfigField mode)
+    {
+        return false;
+    }
+
     protected override string MinCalibrationText()
     {
         return "Release the button";

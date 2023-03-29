@@ -131,6 +131,11 @@ public class DrumAxis : OutputAxis
         return AxisMappings.ContainsKey(Type) ? AxisMappings[Type] : "";
     }
 
+    public override bool ShouldFlip(ConfigField mode)
+    {
+        return false;
+    }
+
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {

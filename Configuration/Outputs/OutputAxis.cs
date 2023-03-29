@@ -273,6 +273,8 @@ public abstract partial class OutputAxis : Output
 
     public abstract string GenerateOutput(ConfigField mode);
 
+    public abstract bool ShouldFlip(ConfigField mode);
+
     protected abstract string MinCalibrationText();
     protected abstract string MaxCalibrationText();
     protected abstract bool SupportsCalibration();
@@ -334,6 +336,11 @@ public abstract partial class OutputAxis : Output
                 break;
             default:
                 return "";
+        }
+
+        if (ShouldFlip(mode))
+        {
+            function = "-" + function;
         }
 
         var min = Min;

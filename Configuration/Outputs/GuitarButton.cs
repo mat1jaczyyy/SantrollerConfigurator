@@ -64,6 +64,7 @@ public class GuitarButton : OutputButton
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
     {
+        if (mode is not (ConfigField.Shared or ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne)) return "";
         // GHL Guitars map strum up and strum down to dpad up and down, and also the stick
         if (Model.DeviceType is DeviceControllerType.LiveGuitar &&
             Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp &&
