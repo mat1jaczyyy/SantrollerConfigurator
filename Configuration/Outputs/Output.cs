@@ -263,8 +263,8 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public SourceList<Output> Outputs { get; }
 
-    public ReadOnlyObservableCollection<Output> AnalogOutputs { get; set; }
-    public ReadOnlyObservableCollection<Output> DigitalOutputs { get; set; }
+    public ReadOnlyObservableCollection<Output> AnalogOutputs { get; protected set; }
+    public ReadOnlyObservableCollection<Output> DigitalOutputs { get; protected set; }
 
     public abstract bool IsKeyboard { get; }
     public bool IsLed => this is Led;
@@ -356,7 +356,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
         if (newOutput == null) return;
         newOutput.Expanded = Expanded;
-        Model.Bindings.Insert(Model.Bindings.IndexOf(this), newOutput);
+        Model.Bindings.Insert(Model.Bindings.Items.IndexOf(this), newOutput);
         Model.RemoveOutput(this);
     }
 

@@ -33,7 +33,7 @@ public class PinToStringConverter : IMultiValueConverter
             ConfigViewModel => model.PinConfigs,
             _ => new List<PinConfig>()
         };
-        return microcontroller.GetPin(pin, selectedPin, model.Bindings, twi, spi, configs, model,
+        return microcontroller.GetPin(pin, selectedPin, model.Bindings.Items, twi, spi, configs, model,
             values[4] is ComboBoxItem);
     }
 }

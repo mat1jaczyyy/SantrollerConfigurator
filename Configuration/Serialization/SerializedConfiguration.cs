@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
@@ -11,7 +12,7 @@ public class SerializedConfiguration
 {
     public SerializedConfiguration(ConfigViewModel model)
     {
-        Bindings = model.Bindings.Select(s => s.Serialize()).ToList();
+        Bindings = model.Bindings.Items.Select(s => s.Serialize()).ToList();
         LedType = model.LedType;
         DeviceType = model.DeviceType;
         EmulationType = model.EmulationType;

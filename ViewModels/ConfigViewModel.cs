@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -45,6 +46,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
     private readonly ObservableAsPropertyHelper<bool> _isRf;
     private readonly ObservableAsPropertyHelper<bool> _isRhythm;
+    
+    public ReadOnlyObservableCollection<Output> Outputs { get; }
 
     private readonly ObservableAsPropertyHelper<string?> _writeToolTip;
 
@@ -122,7 +125,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
         GoBackCommand = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
             this.WhenAnyValue(x => x.Main.Working).Select(s => !s));
-        Bindings = new AvaloniaList<Output>();
 
         _writeToolTip = this.WhenAnyValue(x => x.HasError)
             .Select(s => s ? "There are errors in your configuration" : null).ToProperty(this, s => s.WriteToolTip);
@@ -143,6 +145,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Select(x => x is LedType.APA102_BGR or LedType.APA102_BRG or LedType.APA102_GBR or LedType.APA102_GRB
                 or LedType.APA102_RBG or LedType.APA102_RGB)
             .ToProperty(this, x => x.IsApa102);
+        Bindings.Connect()
+            .Bind(out var outputs)
+            .Subscribe();
+        Outputs = outputs;
 
         if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults();
         if (Main is {IsUno: false, IsMega: false}) return;
@@ -400,7 +406,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public Microcontroller Microcontroller { get; }
 
-    public AvaloniaList<Output> Bindings { get; }
+    public SourceList<Output> Bindings { get; } = new();
     public bool IsRhythm => _isRhythm.Value;
     public bool IsController => _isController.Value;
     public bool IsKeyboard => _isKeyboard.Value;
@@ -454,24 +460,25 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private void UpdateBindings()
     {
-        foreach (var binding in Bindings) binding.UpdateBindings();
+        foreach (var binding in Bindings.Items) binding.UpdateBindings();
 
         var (extra, types) =
-            ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings);
-        Bindings.RemoveAll(extra);
+            ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
+        Bindings.RemoveMany(extra);
 
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum) ||
             _rhythmType is not RhythmType.RockBand)
         {
-            Bindings.RemoveAll(Bindings.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
         }
+        InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this);
 
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
-        if (Bindings.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
+        if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
 
         if (EmulationType == EmulationType.Controller)
         {
-            if (!Bindings.Any(s => s is EmulationMode))
+            if (!Bindings.Items.Any(s => s is EmulationMode))
             {
                 Bindings.Add(new EmulationMode(this,
                     new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
@@ -494,29 +501,29 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (_deviceControllerType == DeviceControllerType.Drum)
         {
             IEnumerable<DrumAxisType> difference = DrumAxisTypeMethods.GetDifferenceFor(_rhythmType).ToHashSet();
-            Bindings.RemoveAll(Bindings.Where(s => s is DrumAxis axis && difference.Contains(axis.Type)));
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is DrumAxis axis && difference.Contains(axis.Type)));
         }
         else
         {
-            Bindings.RemoveAll(Bindings.Where(s => s is DrumAxis));
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is DrumAxis));
         }
 
         if (_deviceControllerType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar)
         {
             IEnumerable<GuitarAxisType> difference = GuitarAxisTypeMethods
                 .GetDifferenceFor(_rhythmType, _deviceControllerType).ToHashSet();
-            Bindings.RemoveAll(Bindings.Where(s => s is GuitarAxis axis && difference.Contains(axis.Type)));
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarAxis axis && difference.Contains(axis.Type)));
         }
         else
         {
-            Bindings.RemoveAll(Bindings.Where(s => s is GuitarAxis));
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarAxis));
         }
 
         if (_deviceControllerType is not DeviceControllerType.Guitar || _rhythmType is not RhythmType.RockBand)
-            Bindings.RemoveAll(Bindings.Where(s => s is GuitarButton));
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarButton));
 
         if (_deviceControllerType == DeviceControllerType.Turntable)
-            if (!Bindings.Any(s => s is DjCombinedOutput))
+            if (!Bindings.Items.Any(s => s is DjCombinedOutput))
                 Bindings.Add(new DjCombinedOutput(this));
 
         foreach (var type in types)
@@ -717,7 +724,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             return;
         }
 
-        if (Bindings.Any())
+        if (Bindings.Items.Any())
         {
             var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
                 "The following action will clear all your bindings, are you sure you want to do this?")).ToTask();
@@ -770,7 +777,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void Generate(PlatformIo pio)
     {
-        var outputs = Bindings.SelectMany(binding => binding.Outputs.Items).ToList();
+        var outputs = Bindings.Items.SelectMany(binding => binding.Outputs.Items).ToList();
         var inputs = outputs.Select(binding => binding.Input.InnermostInput()).OfType<Input>().ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
         var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
@@ -936,7 +943,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private async Task BindAllAsync()
     {
-        foreach (var binding in Bindings)
+        foreach (var binding in Bindings.Items)
         {
             if (binding.Input.InnermostInput() is not DirectInput direct) continue;
             var response = await ShowBindAllDialog.Handle((this, binding, direct)).ToTask();
@@ -953,7 +960,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             return;
         }
 
-        foreach (var binding in Bindings) binding.Outputs.Remove(output);
+        foreach (var binding in Bindings.Items) binding.Outputs.Remove(output);
         output.Dispose();
 
         UpdateErrors();
@@ -962,7 +969,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [RelayCommand]
     public void ClearOutputs()
     {
-        foreach (var binding in Bindings) binding.Dispose();
+        foreach (var binding in Bindings.Items) binding.Dispose();
 
         Bindings.Clear();
         UpdateErrors();
@@ -974,7 +981,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             "The following action will clear all your inputs, are you sure you want to do this?")).ToTask();
         if (!yesNo.Response) return;
 
-        foreach (var binding in Bindings) binding.Dispose();
+        foreach (var binding in Bindings.Items) binding.Dispose();
 
         Bindings.Clear();
         UpdateErrors();
@@ -983,13 +990,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [RelayCommand]
     public void ExpandAll()
     {
-        foreach (var binding in Bindings) binding.Expanded = true;
+        foreach (var binding in Bindings.Items) binding.Expanded = true;
     }
 
     [RelayCommand]
     public void CollapseAll()
     {
-        foreach (var binding in Bindings) binding.Expanded = false;
+        foreach (var binding in Bindings.Items) binding.Expanded = false;
     }
 
     [RelayCommand]
@@ -999,7 +1006,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             "The following action will clear all your inputs, are you sure you want to do this?")).ToTask();
         if (!yesNo.Response) return;
 
-        foreach (var binding in Bindings) binding.Dispose();
+        foreach (var binding in Bindings.Items) binding.Dispose();
 
         Bindings.Clear();
         UpdateBindings();
@@ -1030,7 +1037,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private string GenerateLedTick()
     {
-        var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
+        var outputs = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).ToList();
         if (_ledType == LedType.None ||
             !outputs.Any(s => s.LedIndices.Any())) return "";
         var ledMax = outputs.SelectMany(output => output.LedIndices).Max();
@@ -1047,7 +1054,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private string GenerateTick(ConfigField mode)
     {
-        var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
+        var outputs = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).ToList();
         var groupedOutputs = outputs
             .SelectMany(s =>
                 s.Input.Inputs().Zip(Enumerable.Repeat(s, s.Input.Inputs().Count)) ??
@@ -1095,7 +1102,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 // we need to ensure that DigitalToAnalog is last
                 return current + group
                     .First().First.InnermostInput()
-                    .GenerateAll(Bindings.ToList(), group.OrderByDescending(s => s.First is DigitalToAnalog ? 0 : 1)
+                    .GenerateAll(Bindings.Items.ToList(), group.OrderByDescending(s => s.First is DigitalToAnalog ? 0 : 1)
                         .Select(s =>
                         {
                             var input = s.First;
@@ -1154,7 +1161,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private int CalculateDebounceTicks()
     {
-        var outputs = Bindings.SelectMany(binding => binding.ValidOutputs()).ToList();
+        var outputs = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).ToList();
         var groupedOutputs = outputs
             .SelectMany(s =>
                 s.Input.Inputs().Zip(Enumerable.Repeat(s, s.Input.Inputs().Count)))
@@ -1188,13 +1195,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public bool IsCombinedChild(Output output)
     {
-        return !Bindings.Contains(output);
+        return !Bindings.Items.Contains(output);
     }
 
     public Dictionary<string, List<int>> GetPins(string type)
     {
         var pins = new Dictionary<string, List<int>>();
-        foreach (var binding in Bindings)
+        foreach (var binding in Bindings.Items)
         {
             var configs = binding.GetPinConfigs();
             //Exclude digital or analog pins (which use a guid containing a -
@@ -1227,7 +1234,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public void UpdateErrors()
     {
         var foundError = false;
-        foreach (var output in Bindings)
+        foreach (var output in Bindings.Items)
         {
             output.UpdateErrors();
             if (!string.IsNullOrEmpty(output.ErrorText)) foundError = true;

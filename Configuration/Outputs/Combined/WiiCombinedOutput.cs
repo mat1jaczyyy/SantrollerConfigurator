@@ -193,10 +193,12 @@ public class WiiCombinedOutput : CombinedTwiOutput
             .ToProperty(this, x => x.IsGuitar);
 
         Outputs.Connect().Filter(x => x is OutputAxis)
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter)).Bind(out var analogOutputs)
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
+            .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
-            .Filter(this.WhenAnyValue(x => x.ControllerFound,  x => x.DetectedType).Select(CreateFilter)).Bind(out var digitalOutputs)
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
+            .Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
@@ -207,13 +209,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
         get => _detectedType;
         set => this.RaiseAndSetIfChanged(ref _detectedType, value);
     }
-    
+
     public WiiGuitarType DetectedGuitarType
     {
         get => _detectedGuitarType;
         set => this.RaiseAndSetIfChanged(ref _detectedGuitarType, value);
     }
-    
+
     public bool ControllerFound
     {
         get => _controllerFound;
@@ -222,7 +224,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     private static Func<Output, bool> CreateFilter((bool controllerFound, WiiControllerType controllerType) tuple)
     {
-        return output => !tuple.controllerFound || output is JoystickToDpad || (output.Input is WiiInput wiiInput && wiiInput.WiiControllerType == tuple.controllerType);
+        return output => !tuple.controllerFound || output is JoystickToDpad || (output.Input is WiiInput wiiInput &&
+            wiiInput.WiiControllerType == tuple.controllerType);
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
@@ -241,7 +244,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
         foreach (var pair in Axis)
         {
-            if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger || pair.Key is WiiInputType.GuitarWhammy)
+            if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
+                pair.Key is WiiInputType.GuitarWhammy)
             {
                 Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                     Colors.Black,
@@ -253,7 +257,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), -30000, 30000, 4000, pair.Value));
             }
-            
         }
 
         Outputs.Add(new ControllerAxis(Model,
@@ -341,6 +344,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 DetectedGuitarType = WiiGuitarType.Gh5;
             }
         }
+
         DetectedType = newType;
     }
 
@@ -435,6 +439,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
                     StandardAxisType.RightStickY)));
             }
         }
+
+        InstrumentButtonTypeExtensions.ConvertBindings(Outputs, Model);
 
         // Map all DJ Hero axis and buttons
         var currentAxisDj = Outputs.Items.OfType<DjAxis>();

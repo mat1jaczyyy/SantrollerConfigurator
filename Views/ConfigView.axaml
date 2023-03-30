@@ -1206,7 +1206,7 @@
                              IsIndeterminate="False" Minimum="0" Maximum="100" Height="30" />
             </StackPanel>
             <ScrollViewer VerticalContentAlignment="Center">
-                <ItemsControl Items="{Binding Bindings}">
+                <ItemsControl Items="{Binding Outputs}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="output:Output">
                             <StackPanel>

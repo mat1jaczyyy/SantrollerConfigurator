@@ -209,7 +209,7 @@ public class Santroller : IConfigurableDevice
 
             try
             {
-                var direct = model.Bindings.Select(s => s.Input!.InnermostInput())
+                var direct = model.Bindings.Items.Select(s => s.Input!.InnermostInput())
                     .OfType<DirectInput>().ToList();
                 var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins);
                 var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins);
@@ -241,8 +241,8 @@ public class Santroller : IConfigurableDevice
                 var ghWtRaw = ReadData(0, (byte)Commands.CommandReadGhWt, sizeof(int));
                 var ps2ControllerType = ReadData(0, (byte)Commands.CommandGetExtensionPs2, 1);
                 var wiiControllerType = ReadData(0, (byte)Commands.CommandGetExtensionWii, sizeof(short));
-                foreach (var output in model.Bindings)
-                    output.Update(model.Bindings.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
+                foreach (var output in model.Bindings.Items)
+                    output.Update(model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                         djRightRaw, gh5Raw,
                         ghWtRaw, ps2ControllerType, wiiControllerType);
             }

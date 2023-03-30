@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
