@@ -89,19 +89,20 @@
                 </StackPanel>
 
                 <StackPanel IsVisible="{Binding IsRf}" Orientation="Vertical">
+                    <CheckBox HorizontalAlignment="Stretch" Margin="40 40 40 0" IsChecked="{Binding RfModuleDetected}" IsEnabled="False">nRF24L01+ Found</CheckBox>
+                    <CheckBox HorizontalAlignment="Stretch" Margin="40 40 40 0" IsChecked="{Binding Connected}" IsEnabled="False">Connected to Receiver</CheckBox>
                     <StackPanel>
                         <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Channel"
                                    TextAlignment="Center" />
                         <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding RfChannel}"
-                                       Minimum="1"
+                                       Minimum="0"
                                        Maximum="5" HorizontalAlignment="Stretch" />
-
                     </StackPanel>
                     <StackPanel>
                         <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Device ID"
                                    TextAlignment="Center" />
                         <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding RfId}"
-                                       Minimum="1"
+                                       Minimum="0"
                                        Maximum="5" HorizontalAlignment="Stretch" />
 
                     </StackPanel>
@@ -148,6 +149,14 @@
                                   SelectedItem="{Binding RfCe}"
                                   Items="{Binding AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding PowerLevel}">
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Power Level"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding PowerLevel}"
+                                  Items="{Binding RfPowerLevels}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     </StackPanel>
                 </StackPanel>
 

@@ -72,6 +72,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private MouseMovementType _mouseMovementType;
 
     private DirectPinConfig? _rfCe;
+    private bool _connected = false;
+    private bool _rfModuleDetected = false;
 
     private byte _rfChannel;
 
@@ -89,6 +91,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private bool _xinputOnWindows;
 
     private bool _usbHostEnabled;
+    private RfPowerLevel _powerLevel;
 
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
@@ -171,6 +174,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public MainWindowViewModel Main { get; }
 
     public IEnumerable<DeviceControllerType> DeviceControllerTypes => Enum.GetValues<DeviceControllerType>();
+    public IEnumerable<RfPowerLevel>RfPowerLevels => Enum.GetValues<RfPowerLevel>();
 
     public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
 
@@ -243,6 +247,24 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _rfCsn?.Pin ?? 0;
         set => _rfCsn!.Pin = value;
     }
+    public RfPowerLevel PowerLevel
+    {
+        get => _powerLevel;
+        set => this.RaiseAndSetIfChanged(ref _powerLevel, value);
+    }
+
+    public bool RfModuleDetected
+    {
+        get => _rfModuleDetected;
+        set => this.RaiseAndSetIfChanged(ref _rfModuleDetected, value);
+    }
+    public bool Connected
+    {
+        get => _connected;
+        set => this.RaiseAndSetIfChanged(ref _connected, value);
+    }
+
+
 
     public int UsbHostDm
     {
@@ -293,6 +315,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _rfChannel;
         set => this.RaiseAndSetIfChanged(ref _rfChannel, value);
     }
+    
 
     public bool HasError
     {
@@ -456,6 +479,22 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.RaiseAndSetIfChanged(ref _deviceControllerType, type, nameof(DeviceType));
         this.RaiseAndSetIfChanged(ref _rhythmType, rhythmType, nameof(RhythmType));
         this.RaiseAndSetIfChanged(ref _emulationType, emulationType, nameof(EmulationType));
+        if (_rfSpiConfig == null && IsRf)
+        {
+            var pins = Microcontroller.SpiPins(RfRxOutput.SpiType);
+            var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
+            var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
+            var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
+            _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, mosi, miso, sck, true, true,
+                true,
+                4000000);
+            this.RaisePropertyChanged(nameof(RfMiso));
+            this.RaisePropertyChanged(nameof(RfMosi));
+            this.RaisePropertyChanged(nameof(RfSck));
+            var first = Microcontroller.GetAllPins(false).First();
+            _rfCe = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
+            _rfCsn = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
+        }
     }
 
     private void UpdateBindings()
@@ -651,7 +690,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.L1, this), EmulationModeType.Switch));
                 break;
             case DeviceInputType.Rf:
-                Bindings.Add(new RfRxOutput(this, 0, 1));
+                Bindings.Add(new RfRxOutput(this, 0, 1, RfPowerLevel.Min));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -778,7 +817,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public void Generate(PlatformIo pio)
     {
         var outputs = Bindings.Items.SelectMany(binding => binding.Outputs.Items).ToList();
-        var inputs = outputs.Select(binding => binding.Input.InnermostInput()).OfType<Input>().ToList();
+        var inputs = outputs.Select(binding => binding.Input.InnermostInput()).ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
         var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
         var lines = new List<string>();
@@ -846,6 +885,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             lines.Add("#define RF_TX");
             lines.Add($"#define RADIO_CE {_rfCe!.Pin}");
             lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");
+            lines.Add($"#define RF_POWER_LEVEL {(byte)_powerLevel}");
             if (BindableSpi)
             {
                 lines.Add($"#define RADIO_MOSI {_rfSpiConfig!.Mosi}");
@@ -1269,5 +1309,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private void RemoveDevice(IConfigurableDevice device)
     {
+    }
+
+    public void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType, byte[] rfRaw)
+    {
+        if (!rfRaw.Any()) return;
+        Connected = rfRaw[0] != 0;
+        RfModuleDetected = rfRaw[1] != 0;
     }
 }

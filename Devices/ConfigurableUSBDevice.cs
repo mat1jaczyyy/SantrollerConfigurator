@@ -49,7 +49,11 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public bool DeviceAdded(IConfigurableDevice device)
     {
-        if (Board.ArdwiinoName.Contains("pico"))
+        if (device is Arduino arduino2 && arduino2.Board.ArdwiinoName == Board.ArdwiinoName)
+        {
+            _bootloaderPath?.SetResult(arduino2.GetSerialPort());
+        }
+        else if (Board.ArdwiinoName.Contains("pico"))
         {
             if (device is PicoDevice pico) _bootloaderPath?.SetResult(pico.GetPath());
         }
@@ -72,6 +76,10 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     public async Task<string?> GetUploadPortAsync()
     {
         if (!Board.ArdwiinoName.Contains("pico") && !Board.HasUsbmcu) return null;
+        if (!Device.IsOpen)
+        {
+            
+        }
         _bootloaderPath = new TaskCompletionSource<string?>();
         Bootloader();
         return await _bootloaderPath.Task;
@@ -86,6 +94,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     {
         return Board.IsGeneric();
     }
+
     public bool IsMini()
     {
         return Board.IsMini();
@@ -101,7 +110,8 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     public byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
     {
         if (!Device.IsOpen) return Array.Empty<byte>();
-        const UsbCtrlFlags requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class | UsbCtrlFlags.Recipient_Interface;
+        const UsbCtrlFlags requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class |
+                                         UsbCtrlFlags.Recipient_Interface;
         var buffer = new byte[size];
 
         var sp = new UsbSetupPacket(

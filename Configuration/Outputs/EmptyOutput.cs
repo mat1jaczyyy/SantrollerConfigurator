@@ -125,7 +125,7 @@ public class EmptyOutput : Output
                     SimpleType.ConsoleMode => new EmulationMode(Model,
                         new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model),
                         EmulationModeType.XboxOne),
-                    SimpleType.RfSimple => new RfRxOutput(Model, 1, 1),
+                    SimpleType.RfSimple => new RfRxOutput(Model, 1, 1, RfPowerLevel.Min),
                     _ => null
                 },
                 StandardAxisType standardAxisType => new ControllerAxis(Model,

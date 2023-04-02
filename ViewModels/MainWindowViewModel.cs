@@ -332,17 +332,24 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 envs[0] = envs[0].Replace("_8", "");
                 envs[0] = envs[0].Replace("_16", "");
             }
+
             if (config.Microcontroller.Board.HasUsbmcu)
             {
-                envs = new[] {envs[0]+"_usb", envs[0]};
-            };
+                envs = new[] {envs[0] + "_usb", envs[0]};
+            }
+
+            ;
             var state = Observable.Return(new PlatformIo.PlatformIoState(0, "", null));
             var currentPercentage = 0;
-            const int endingPercentage = 90;
+            int endingPercentage = 90;
+            if (config.Device.IsMini())
+            {
+                endingPercentage = 100;
+            }
+
             var stepPercentage = endingPercentage / envs.Length;
             foreach (var env in envs)
             {
-
                 Programming = true;
                 var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
                     "Writing",
@@ -350,6 +357,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 state = state.Concat(command);
                 currentPercentage += stepPercentage;
             }
+
             var output = new StringBuilder();
             var behaviorSubject =
                 new BehaviorSubject<PlatformIo.PlatformIoState>(new PlatformIo.PlatformIoState(0, "", null));
@@ -363,8 +371,15 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     ProgressbarColor = "red";
                     config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => Programming = false);
                 },
-                () => { Programming = false; });
-            
+                () =>
+                {
+                    Programming = false;
+                    if (config.Device.IsMini())
+                    {
+                        Working = false;
+                    }
+                });
+
             return state.OnErrorResumeNext(Observable.Return(behaviorSubject.Value));
         }
 

@@ -34,11 +34,9 @@ public class Santroller : IConfigurableDevice
     private SantrollerUsbDevice? _usbDevice;
     private SerialPort? _serialPort;
     private PlatformIoPort? _platformIoPort;
-    private Version Version { get; }
     private Board Board { get; set; }
     private Microcontroller _microcontroller;
     public bool Valid { get; }
-    public string RfId { get; private set; }
 
     public string Serial { get; private set; }
 
@@ -51,9 +49,7 @@ public class Santroller : IConfigurableDevice
 
     public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort version)
     {
-        Version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, version & 0xf);
         _usbDevice = new SantrollerUsbDevice(device, path, product, serial, version);
-        RfId = "";
         Serial = "";
         _microcontroller = new Pico(Board.Generic);
         Load();
@@ -68,9 +64,7 @@ public class Santroller : IConfigurableDevice
     public Santroller(PlatformIo pio, PlatformIoPort port)
     {
         _platformIoPort = port;
-        RfId = "";
         Serial = "";
-        Version = new Version(1, 0, 0);
         Valid = false;
         _microcontroller = new Pico(Board.Generic);
         try
@@ -90,7 +84,6 @@ public class Santroller : IConfigurableDevice
                 return;
             }
 
-            Version = Version.Parse(_serialPort.ReadLine().Trim());
             Load();
             Valid = true;
         }
@@ -153,7 +146,7 @@ public class Santroller : IConfigurableDevice
         var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
         Board = m.Board;
         _microcontroller = m;
-        RfId = GenerateRfId();
+        GenerateRfId();
         
     }
 
@@ -242,6 +235,9 @@ public class Santroller : IConfigurableDevice
                 var ps2ControllerType = ReadData(0, (byte)Commands.CommandGetExtensionPs2, 1);
                 var wiiControllerType = ReadData(0, (byte)Commands.CommandGetExtensionWii, sizeof(short));
                 var rfRaw = ReadData(0, (byte)Commands.CommandReadRf, 2);
+                model.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
+                    djRightRaw, gh5Raw,
+                    ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw);
                 foreach (var output in model.Bindings.Items)
                     output.Update(model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                         djRightRaw, gh5Raw,
@@ -448,7 +444,7 @@ public class Santroller : IConfigurableDevice
         {
             return "Santroller - please disconnect and reconnect in PC mode";
         }
-        var ret = $"Santroller - {Board.Name} - {Version}";
+        var ret = $"Santroller - {Board.Name}";
         if (_deviceControllerType != null) ret += $" - {_deviceControllerType}";
 
         return ret;
@@ -459,6 +455,7 @@ public class Santroller : IConfigurableDevice
         CommandReboot = 0x30,
         CommandJumpBootloader,
         CommandJumpBootloaderUno,
+        CommandJumpBootloaderUnoUsbThenSerial,
         CommandReadConfig,
         CommandReadFCpu,
         CommandReadBoard,
@@ -475,7 +472,7 @@ public class Santroller : IConfigurableDevice
         CommandSetLeds,
         CommandSetDetect,
         CommandReadSerial,
-        CommandReadRf,
+        CommandReadRf
     }
     
 

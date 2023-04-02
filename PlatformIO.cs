@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.Utils;
@@ -17,6 +18,7 @@ public class PlatformIo
     private readonly string _pythonExecutable;
 
     private readonly Process _portProcess;
+    private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
     public PlatformIo()
     {
@@ -117,6 +119,7 @@ public class PlatformIo
 
         async Task Process()
         {
+            await _semaphore.WaitAsync();
             var percentageStep = (progressEndingPercentage - progressStartingPercentage);
             var currentProgress = progressStartingPercentage;
             var uploading = command.Length > 1;
@@ -163,7 +166,9 @@ public class PlatformIo
 
                 if (device != null)
                 {
+                    Console.WriteLine("Detecting port please wait");
                     var port = await device.GetUploadPortAsync().ConfigureAwait(false);
+                    Console.WriteLine(port);
                     if (port != null)
                     {
                         args.Add("--upload-port");
@@ -182,6 +187,7 @@ public class PlatformIo
 
             var state = 0;
             process.Start();
+            Console.WriteLine("Starting process "+environment);
 
             // process.BeginOutputReadLine();
             // process.BeginErrorReadLine();
@@ -320,12 +326,22 @@ public class PlatformIo
                 if (uploading)
                 {
                     currentProgress = progressEndingPercentage;
-                    platformIoOutput.OnNext(new PlatformIoState(currentProgress,
-                        $"{progressMessage} - Waiting for Device", null));
+                    if (device!.IsMini())
+                    {
+                        platformIoOutput.OnNext(new PlatformIoState(currentProgress,
+                            $"{progressMessage} - Done", null));
+                    }
+                    else
+                    {
+                        platformIoOutput.OnNext(new PlatformIoState(currentProgress,
+                            $"{progressMessage} - Waiting for Device", null));
+                    }
+                    
                 }
 
                 platformIoOutput.OnCompleted();
             }
+            _semaphore.Release(1);
         }
 
         _ = Process();
