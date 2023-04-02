@@ -78,6 +78,14 @@ public class GuitarButton : OutputButton
             return base.Generate(mode, debounceIndex, combined, "");
         
         //This stuff is only relevant for rock band guitars
+        
+        // Set solo flag
+        if (Type is InstrumentButtonType.SoloBlue or InstrumentButtonType.SoloGreen
+            or InstrumentButtonType.SoloOrange or InstrumentButtonType.SoloRed
+            or InstrumentButtonType.SoloYellow)
+        {
+            extra = "report->solo=true;";
+        }
         // For RF and bluetooth, we shove in a XB1 style version too, so that that can be used at the other end.
         var ret = "";
         switch (mode)
@@ -89,18 +97,12 @@ public class GuitarButton : OutputButton
                 }}";
                 break;
             // XB1 also needs to set the normal face buttons, which can conveniently be done using the PS3 format
+            // Also sets solo flag too
             case ConfigField.XboxOne:
-                return ret + base.Generate(mode, debounceIndex, combined, $"{GenerateOutput(ConfigField.Ps3)}=true;");
+                return ret + base.Generate(mode, debounceIndex, combined, $"{GenerateOutput(ConfigField.Ps3)}=true;{extra}");
         }
 
 
-        // Set xb360 and ps3 use a solo flag for the solo frets
-        if (Type is InstrumentButtonType.SoloBlue or InstrumentButtonType.SoloGreen
-            or InstrumentButtonType.SoloOrange or InstrumentButtonType.SoloRed
-            or InstrumentButtonType.SoloYellow)
-        {
-            extra = "report->solo=true;";
-        }
 
         return ret + base.Generate(mode, debounceIndex, combined, extra);
     }

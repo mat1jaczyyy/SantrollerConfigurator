@@ -129,11 +129,12 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
+        byte[] rfRaw)
     {
         base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType,
-            wiiControllerType);
+            wiiControllerType, rfRaw);
         _detected = gh5Raw.Any();
     }
 

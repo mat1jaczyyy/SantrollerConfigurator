@@ -176,14 +176,14 @@ public class JoystickToDpad : Output
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
         byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType)
+        byte[] wiiControllerType, byte[] rfRaw)
     {
         base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
-            ps2ControllerType, wiiControllerType);
+            ps2ControllerType, wiiControllerType, rfRaw);
         foreach (var output in _outputs)
         {
             output.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
-                ps2ControllerType, wiiControllerType);
+                ps2ControllerType, wiiControllerType, rfRaw);
         }
 
         Up = _outputs.Where(s => s.Type is StandardButtonType.DpadUp)

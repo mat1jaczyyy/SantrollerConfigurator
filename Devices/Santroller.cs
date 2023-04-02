@@ -241,10 +241,11 @@ public class Santroller : IConfigurableDevice
                 var ghWtRaw = ReadData(0, (byte)Commands.CommandReadGhWt, sizeof(int));
                 var ps2ControllerType = ReadData(0, (byte)Commands.CommandGetExtensionPs2, 1);
                 var wiiControllerType = ReadData(0, (byte)Commands.CommandGetExtensionWii, sizeof(short));
+                var rfRaw = ReadData(0, (byte)Commands.CommandReadRf, 2);
                 foreach (var output in model.Bindings.Items)
                     output.Update(model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                         djRightRaw, gh5Raw,
-                        ghWtRaw, ps2ControllerType, wiiControllerType);
+                        ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw);
             }
             catch (Exception ex)
             {
@@ -473,8 +474,8 @@ public class Santroller : IConfigurableDevice
         CommandGetExtensionPs2,
         CommandSetLeds,
         CommandSetDetect,
-        CommandReadVersion,
-        CommandReadSerial
+        CommandReadSerial,
+        CommandReadRf,
     }
     
 

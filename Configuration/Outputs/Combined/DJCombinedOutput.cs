@@ -4,7 +4,6 @@ using System.Linq;
 using Avalonia.Media;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -84,11 +83,12 @@ public class DjCombinedOutput : CombinedTwiOutput
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
+        byte[] rfRaw)
     {
         base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType,
-            wiiControllerType);
+            wiiControllerType, rfRaw);
         DetectedLeft = djLeftRaw.Any();
         DetectedRight = djRightRaw.Any();
     }

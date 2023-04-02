@@ -196,8 +196,14 @@ public class DrumAxis : OutputAxis
             valType = "uint8_t";
             assignedVal = "val_real >> 12";
         }
-        // Xbox 360 GH and PS3 use uint16_t velocities
-        else if (Model.RhythmType == RhythmType.GuitarHero || mode != ConfigField.Xbox360)
+        // PS3 uses 8 bit velocities
+        else if (mode == ConfigField.Ps3)
+        {
+            valType = "uint8_t";
+            assignedVal = "val_real >> 8";
+        }
+        // Xbox 360 GH use uint16_t velocities
+        else if (Model.RhythmType == RhythmType.GuitarHero)
         {
             assignedVal = "val_real >> 8";
         }
@@ -224,7 +230,8 @@ public class DrumAxis : OutputAxis
 
         var rfExtra = "";
         // For bluetooth and RF, stuff the cymbal data into some unused bytes for rf reasons
-        if (mode == ConfigField.Ps3 && Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
+        if (mode == ConfigField.Ps3 &&
+            Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
         {
             rfExtra = $@"
                 if (rf_or_bluetooth) {{
@@ -232,6 +239,7 @@ public class DrumAxis : OutputAxis
                 }}  
             ";
         }
+
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"

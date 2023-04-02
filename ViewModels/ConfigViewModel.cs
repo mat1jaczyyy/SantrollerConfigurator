@@ -461,6 +461,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private void UpdateBindings()
     {
         foreach (var binding in Bindings.Items) binding.UpdateBindings();
+        InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this);
 
         var (extra, types) =
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
@@ -471,7 +472,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
         }
-        InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this);
 
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
         if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
@@ -651,7 +651,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.L1, this), EmulationModeType.Switch));
                 break;
             case DeviceInputType.Rf:
-                Bindings.Add(new RfRxOutput(this, Array.Empty<ulong>()));
+                Bindings.Add(new RfRxOutput(this, 0, 1));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -841,8 +841,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         if (IsRf)
         {
-            lines.Add($"#define TRANSMIT_RADIO_ID {RfId}");
-            lines.Add($"#define DEST_RADIO_ID {RfChannel}");
+            lines.Add($"#define RF_DEVICE_ID {RfId}");
+            lines.Add($"#define RF_CHANNEL {RfChannel}");
             lines.Add("#define RF_TX");
             lines.Add($"#define RADIO_CE {_rfCe!.Pin}");
             lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");

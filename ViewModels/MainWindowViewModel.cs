@@ -118,6 +118,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 {
                     item = AvailableDevices.Items.First();
                 }
+
                 foreach (var change in s)
                 {
                     SelectedDevice = change.Reason switch
@@ -323,22 +324,38 @@ namespace GuitarConfigurator.NetCore.ViewModels
         {
             StartWorking();
             config.Generate(Pio);
-            var env = config.Microcontroller.Board.Environment;
-            if (config.Microcontroller.Board.HasUsbmcu) env += "_usb";
+            var envs = new[] {config.Microcontroller.Board.Environment};
+
 
             if (NewDevice)
             {
-                env = env.Replace("_8", "");
-                env = env.Replace("_16", "");
+                envs[0] = envs[0].Replace("_8", "");
+                envs[0] = envs[0].Replace("_16", "");
             }
+            if (config.Microcontroller.Board.HasUsbmcu)
+            {
+                envs = new[] {envs[0]+"_usb", envs[0]};
+            };
+            var state = Observable.Return(new PlatformIo.PlatformIoState(0, "", null));
+            var currentPercentage = 0;
+            const int endingPercentage = 90;
+            var stepPercentage = endingPercentage / envs.Length;
+            foreach (var env in envs)
+            {
 
+                Programming = true;
+                var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
+                    "Writing",
+                    currentPercentage, currentPercentage + stepPercentage, config.Device);
+                state = state.Concat(command);
+                currentPercentage += stepPercentage;
+            }
             var output = new StringBuilder();
-            Programming = true;
-            var command = Pio.RunPlatformIo(env, new[] { "run", "--target", "upload" },
-                "Writing",
-                0, 90, config.Device);
-            command.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
+            var behaviorSubject =
+                new BehaviorSubject<PlatformIo.PlatformIoState>(new PlatformIo.PlatformIoState(0, "", null));
+            state.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
                 {
+                    behaviorSubject.OnNext(s);
                     UpdateProgress(s);
                     if (s.Log != null) output.Append(s.Log + "\n");
                 }, _ =>
@@ -347,7 +364,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => Programming = false);
                 },
                 () => { Programming = false; });
-            return command.OnErrorResumeNext(Observable.Return(command.Value));
+            
+            return state.OnErrorResumeNext(Observable.Return(behaviorSubject.Value));
         }
 
         public void Complete(int total)
@@ -379,10 +397,17 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 if (_currentDrivesTemp.Remove(drive.RootDirectory.FullName)) continue;
 
-                var uf2 = Path.Combine(drive.RootDirectory.FullName, "INFO_UF2.txt");
-                if (drive.IsReady)
-                    if (File.Exists(uf2) && File.ReadAllText(uf2).Contains("RPI-RP2"))
-                        AvailableDevices.Add(new PicoDevice(Pio, drive.RootDirectory.FullName));
+                try
+                {
+                    var uf2 = Path.Combine(drive.RootDirectory.FullName, "INFO_UF2.txt");
+                    if (drive.IsReady)
+                        if (File.Exists(uf2) && File.ReadAllText(uf2).Contains("RPI-RP2"))
+                            AvailableDevices.Add(new PicoDevice(Pio, drive.RootDirectory.FullName));
+                }
+                catch (IOException)
+                {
+                    // Expected if the pico is unplugged   
+                }
 
                 _currentDrives.Add(drive.RootDirectory.FullName);
             }
@@ -519,7 +544,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 await AssetUtils.ExtractXzAsync("dfu.7z", driverFolder);
 
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
-                info.ArgumentList.AddRange(new[] { "-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf") });
+                info.ArgumentList.AddRange(new[] {"-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf")});
                 info.UseShellExecute = true;
                 info.CreateNoWindow = true;
                 info.Verb = "runas";
@@ -532,7 +557,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var rules = Path.Combine(appdataFolder, UdevFile);
                 await AssetUtils.ExtractFileAsync(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
-                info.ArgumentList.AddRange(new[] { "cp", rules, UdevPath });
+                info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});
                 info.UseShellExecute = true;
                 Process.Start(info);
             }

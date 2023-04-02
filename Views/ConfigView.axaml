@@ -94,7 +94,10 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:RfRxOutput}">
-                <CheckBox IsChecked="{Binding Connected}" IsEnabled="False">Connected to Transmitter</CheckBox>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding RfModuleDetected}" IsEnabled="False">nRF24L01+ Found</CheckBox>
+                    <CheckBox IsChecked="{Binding Connected}" IsEnabled="False">Connected to Transmitter</CheckBox>
+                </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}" />
             <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
@@ -1033,6 +1036,26 @@
                                   ItemTemplate="{StaticResource PinToStringTemplate}"
                                   Width="200" />
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Channel
+                        </Label>
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Channel}" Minimum="1" Maximum="50"
+                                       VerticalAlignment="Center"
+                                       Width="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Device count
+                        </Label>
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding DeviceCount}" Minimum="1" Maximum="5"
+                                       VerticalAlignment="Center"
+                                       Width="200" />
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
@@ -1156,7 +1179,7 @@
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding Path="AreLedsEnabled" />
                             <Binding Path="!IsCombined" />
-                            <Binding Path="LedsRequireColours"/>
+                            <Binding Path="LedsRequireColours" />
                         </MultiBinding>
                     </StackPanel.IsVisible>
                     <Label VerticalAlignment="Center"
@@ -1170,7 +1193,7 @@
                         <MultiBinding Converter="{x:Static BoolConverters.And}">
                             <Binding Path="AreLedsEnabled" />
                             <Binding Path="!IsCombined" />
-                            <Binding Path="LedsRequireColours"/>
+                            <Binding Path="LedsRequireColours" />
                         </MultiBinding>
                     </StackPanel.IsVisible>
                     <Label VerticalAlignment="Center"
