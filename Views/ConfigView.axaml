@@ -88,6 +88,12 @@
                     <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False">Right Turntable Found</CheckBox>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type other:UsbHostInput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="{Binding ConnectedDevices}"></Label>
+                    <Label>Devices connected</Label>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox IsChecked="{Binding Detected}" IsEnabled="False">Detected</CheckBox>
@@ -236,6 +242,20 @@
             </DataTemplate>
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
+            
+            <DataTemplate DataType="{x:Type other:UsbHostInput}">
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center"
+                           Width="300">
+                        Connected devices
+                    </Label>
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center"
+                           Width="200" Content="{Binding UsbHostInfo}">
+                    </Label>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:GhWtTapInput}">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Vertical" IsVisible="{Binding !Combined}">

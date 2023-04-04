@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Configuration.Other;
 
@@ -31,6 +33,22 @@ public class UsbHostInput : Output
         UpdateDetails();
     }
 
+    private int _connectedDevices = 0;
+    
+    private string _usbHostInfo = "";
+
+    public string UsbHostInfo
+    {
+        get => _usbHostInfo;
+        set => this.RaiseAndSetIfChanged(ref _usbHostInfo, value);
+    }
+
+    public int ConnectedDevices
+    {
+        get => _connectedDevices;
+        set => this.RaiseAndSetIfChanged(ref _connectedDevices, value);
+    }
+
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 
@@ -39,7 +57,6 @@ public class UsbHostInput : Output
     public override bool Valid => true;
     public override string LedOnLabel => "";
     public override string LedOffLabel => "";
-
 
     public override IEnumerable<Output> ValidOutputs()
     {
@@ -69,7 +86,7 @@ public class UsbHostInput : Output
     public override void UpdateBindings()
     {
     }
-    
+
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
@@ -78,7 +95,37 @@ public class UsbHostInput : Output
     {
         base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw);
-        // TODO: use usbHostRaw here
-        UpdateDetails();
+        var buffer = "";
+        if (!usbHostRaw.Any()) return;
+        for (var i = 0; i < usbHostRaw.Length; i += 3)
+        {
+            var consoleType = (ConsoleType) usbHostRaw[i];
+            string subType;
+            var rhythmType = "";
+            if (consoleType == ConsoleType.Xbox360)
+            {
+                var xInputSubType = (XInputSubType) usbHostRaw[i + 1];
+                subType = EnumToStringConverter.Convert(xInputSubType);
+                if (xInputSubType is XInputSubType.Drums or XInputSubType.Guitar or XInputSubType.GuitarAlternate)
+                {
+                    rhythmType = " "+EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
+                }
+            }
+            else
+            {
+                var deviceType = (DeviceControllerType) usbHostRaw[i + 1];
+                subType = EnumToStringConverter.Convert(deviceType);
+                if (deviceType is DeviceControllerType.Drum or DeviceControllerType.Guitar)
+                {
+                    rhythmType = " "+EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
+                }
+                
+            }
+            buffer += $@"{consoleType} {subType}{rhythmType}\n";
+        }
+
+        ConnectedDevices = usbHostRaw.Length / 3;
+
+        UsbHostInfo = buffer.Trim();
     }
 }
