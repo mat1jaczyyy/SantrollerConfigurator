@@ -83,7 +83,6 @@ public class Santroller : IConfigurableDevice
             {
                 return;
             }
-
             Load();
             Valid = true;
         }
@@ -146,7 +145,6 @@ public class Santroller : IConfigurableDevice
         var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
         Board = m.Board;
         _microcontroller = m;
-        GenerateRfId();
         
     }
 
@@ -331,14 +329,6 @@ public class Santroller : IConfigurableDevice
         return Board.IsPico();
     }
 
-    public string GenerateRfId()
-    {
-        var data = ReadData(0, (byte)Commands.CommandReadSerial, 20);
-        Serial = Encoding.UTF8.GetString(data);
-        using SHA256 sha256Hash = SHA256.Create();
-        var bytes = sha256Hash.ComputeHash(data);
-        return "0x" + BitConverter.ToUInt64(bytes).ToString("X");
-    }
 
     public Microcontroller GetMicrocontroller(ConfigViewModel model)
     {

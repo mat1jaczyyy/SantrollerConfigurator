@@ -1042,7 +1042,7 @@
                                Width="300">
                             Channel
                         </Label>
-                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Channel}" Minimum="0" Maximum="5"
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Channel}" Minimum="0" Maximum="125"
                                        VerticalAlignment="Center"
                                        Width="200" />
                     </StackPanel>
@@ -1067,6 +1067,19 @@
                         <ComboBox VerticalAlignment="Center"
                                   SelectedItem="{Binding PowerLevel}"
                                   Items="{Binding RfPowerLevels}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                    </StackPanel>
+                    
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            RF Data Rate
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding DataRate}"
+                                  Items="{Binding RfDataRates}"
                                   ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     </StackPanel>
                 </StackPanel>

@@ -96,7 +96,7 @@
                                    TextAlignment="Center" />
                         <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding RfChannel}"
                                        Minimum="0"
-                                       Maximum="5" HorizontalAlignment="Stretch" />
+                                       Maximum="125" HorizontalAlignment="Stretch" />
                     </StackPanel>
                     <StackPanel>
                         <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Device ID"
@@ -156,6 +156,14 @@
                         <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
                                   SelectedItem="{Binding PowerLevel}"
                                   Items="{Binding RfPowerLevels}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding PowerLevel}">
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Data Rate"
+                                   TextAlignment="Center" />
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
+                                  SelectedItem="{Binding DataRate}"
+                                  Items="{Binding RfDataRates}"
                                   ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     </StackPanel>
                 </StackPanel>

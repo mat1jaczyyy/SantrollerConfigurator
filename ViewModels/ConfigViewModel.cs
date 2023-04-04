@@ -46,7 +46,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
     private readonly ObservableAsPropertyHelper<bool> _isRf;
     private readonly ObservableAsPropertyHelper<bool> _isRhythm;
-    
+
     public ReadOnlyObservableCollection<Output> Outputs { get; }
 
     private readonly ObservableAsPropertyHelper<string?> _writeToolTip;
@@ -92,6 +92,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private bool _usbHostEnabled;
     private RfPowerLevel _powerLevel;
+    private RfDataRate _dataRate;
 
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
@@ -174,7 +175,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public MainWindowViewModel Main { get; }
 
     public IEnumerable<DeviceControllerType> DeviceControllerTypes => Enum.GetValues<DeviceControllerType>();
-    public IEnumerable<RfPowerLevel>RfPowerLevels => Enum.GetValues<RfPowerLevel>();
+    public IEnumerable<RfPowerLevel> RfPowerLevels => Enum.GetValues<RfPowerLevel>();
+    public IEnumerable<RfDataRate> RfDataRates => Enum.GetValues<RfDataRate>();
 
     public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
 
@@ -247,10 +249,17 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _rfCsn?.Pin ?? 0;
         set => _rfCsn!.Pin = value;
     }
+
     public RfPowerLevel PowerLevel
     {
         get => _powerLevel;
         set => this.RaiseAndSetIfChanged(ref _powerLevel, value);
+    }
+
+    public RfDataRate DataRate
+    {
+        get => _dataRate;
+        set => this.RaiseAndSetIfChanged(ref _dataRate, value);
     }
 
     public bool RfModuleDetected
@@ -258,12 +267,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _rfModuleDetected;
         set => this.RaiseAndSetIfChanged(ref _rfModuleDetected, value);
     }
+
     public bool Connected
     {
         get => _connected;
         set => this.RaiseAndSetIfChanged(ref _connected, value);
     }
-
 
 
     public int UsbHostDm
@@ -315,7 +324,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _rfChannel;
         set => this.RaiseAndSetIfChanged(ref _rfChannel, value);
     }
-    
+
 
     public bool HasError
     {
@@ -690,7 +699,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.L1, this), EmulationModeType.Switch));
                 break;
             case DeviceInputType.Rf:
-                Bindings.Add(new RfRxOutput(this, 0, 1, RfPowerLevel.Min));
+                Bindings.Add(new RfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -885,7 +894,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             lines.Add("#define RF_TX");
             lines.Add($"#define RADIO_CE {_rfCe!.Pin}");
             lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");
-            lines.Add($"#define RF_POWER_LEVEL {(byte)_powerLevel}");
+            lines.Add($"#define RF_POWER_LEVEL {(byte) _powerLevel}");
+            lines.Add($"#define RF_DATA_RATE {(byte) _dataRate}");
             if (BindableSpi)
             {
                 lines.Add($"#define RADIO_MOSI {_rfSpiConfig!.Mosi}");
@@ -1142,7 +1152,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 // we need to ensure that DigitalToAnalog is last
                 return current + group
                     .First().First.InnermostInput()
-                    .GenerateAll(Bindings.Items.ToList(), group.OrderByDescending(s => s.First is DigitalToAnalog ? 0 : 1)
+                    .GenerateAll(Bindings.Items.ToList(), group
+                        .OrderByDescending(s => s.First is DigitalToAnalog ? 0 : 1)
                         .Select(s =>
                         {
                             var input = s.First;
@@ -1311,7 +1322,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
     }
 
-    public void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType, byte[] rfRaw)
+    public void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
+        byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
+        byte[] wiiControllerType, byte[] rfRaw)
     {
         if (!rfRaw.Any()) return;
         Connected = rfRaw[0] != 0;
