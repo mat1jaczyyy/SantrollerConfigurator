@@ -108,6 +108,11 @@ public class Arduino : IConfigurableDevice
         return Board.IsMini();
     }
 
+    public void Reconnect()
+    {
+        
+    }
+
     public bool LoadConfiguration(ConfigViewModel model)
     {
         return false;

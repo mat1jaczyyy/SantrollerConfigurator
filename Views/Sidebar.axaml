@@ -64,7 +64,9 @@
                     <StackPanel>
                         <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="USB Host"
                                    TextAlignment="Center" />
-                        <ToggleSwitch HorizontalAlignment="Center" Margin="20 20 20 0" HorizontalContentAlignment="Center" IsChecked="{Binding UsbHostEnabled}" OnContent="Enabled"
+                        <ToggleSwitch HorizontalAlignment="Center" Margin="20 20 20 0"
+                                      HorizontalContentAlignment="Center" IsChecked="{Binding UsbHostEnabled}"
+                                      OnContent="Enabled"
                                       OffContent="Disabled" />
 
                     </StackPanel>
@@ -89,8 +91,14 @@
                 </StackPanel>
 
                 <StackPanel IsVisible="{Binding IsRf}" Orientation="Vertical">
-                    <CheckBox HorizontalAlignment="Stretch" Margin="40 40 40 0" IsChecked="{Binding RfModuleDetected}" IsEnabled="False">nRF24L01+ Found</CheckBox>
-                    <CheckBox HorizontalAlignment="Stretch" Margin="40 40 40 0" IsChecked="{Binding Connected}" IsEnabled="False">Connected to Receiver</CheckBox>
+                    <CheckBox HorizontalAlignment="Stretch" Margin="40 40 40 0" IsChecked="{Binding RfModuleDetected}"
+                              IsEnabled="False">
+                        nRF24L01+ Found
+                    </CheckBox>
+                    <CheckBox HorizontalAlignment="Stretch" Margin="40 40 40 0" IsChecked="{Binding Connected}"
+                              IsEnabled="False">
+                        Connected to Receiver
+                    </CheckBox>
                     <StackPanel>
                         <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="RF Channel"
                                    TextAlignment="Center" />
@@ -176,7 +184,13 @@
                               ItemTemplate="{StaticResource EnumToStringTemplate}"
                               Items="{Binding MouseMovementTypes}" />
                 </StackPanel>
-                <StackPanel IsVisible="{Binding IsController}">
+                <StackPanel>
+                    <StackPanel.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="IsController"></Binding>
+                            <Binding Path="!IsStageKit"></Binding>
+                        </MultiBinding>
+                    </StackPanel.IsVisible>
                     <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"

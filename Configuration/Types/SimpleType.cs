@@ -15,9 +15,11 @@ public enum SimpleType
 
     [Description("Automatic DJ Hero Turntable Inputs")]
     DjTurntableSimple,
+
+    [Description("USB Host Inputs")] UsbHost,
+    [Description("RF Inputs")] RfSimple,
     [Description("LED Binding")] Led,
     [Description("Rumble Binding")] Rumble,
-    [Description("Console Mode Binding")] ConsoleMode,
-    
-    [Description("RF Inputs")] RfSimple
+    [Description("Console Mode Binding")] ConsoleMode
 }
+    

@@ -402,9 +402,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             Message = state.Message;
         }
 
-#pragma warning disable VSTHRD100
         private async void DevicePoller_Tick(object? sender, ElapsedEventArgs e)
-#pragma warning restore VSTHRD100
         {
             var drives = DriveInfo.GetDrives();
             _currentDrivesTemp.UnionWith(_currentDrives);
@@ -416,7 +414,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 {
                     var uf2 = Path.Combine(drive.RootDirectory.FullName, "INFO_UF2.txt");
                     if (drive.IsReady)
-                        if (File.Exists(uf2) && File.ReadAllText(uf2).Contains("RPI-RP2"))
+                        if (File.Exists(uf2) && (await File.ReadAllTextAsync(uf2)).Contains("RPI-RP2"))
                             AvailableDevices.Add(new PicoDevice(Pio, drive.RootDirectory.FullName));
                 }
                 catch (IOException)

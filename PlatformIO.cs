@@ -330,6 +330,7 @@ public class PlatformIo
                     {
                         platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                             $"{progressMessage} - Done", null));
+                        device.Reconnect();
                     }
                     else
                     {

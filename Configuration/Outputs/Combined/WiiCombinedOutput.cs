@@ -313,11 +313,11 @@ public class WiiCombinedOutput : CombinedTwiOutput
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
-        byte[] rfRaw)
+        byte[] rfRaw, byte[] usbHostRaw)
     {
         base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType,
-            wiiControllerType, rfRaw);
+            wiiControllerType, rfRaw, usbHostRaw);
         if (!wiiControllerType.Any())
         {
             ControllerFound = false;

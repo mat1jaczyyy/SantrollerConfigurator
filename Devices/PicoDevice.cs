@@ -76,6 +76,11 @@ public class PicoDevice : IConfigurableDevice
         return false;
     }
 
+    public void Reconnect()
+    {
+        
+    }
+
     public string GetPath()
     {
         return _path;

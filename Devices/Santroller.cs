@@ -233,13 +233,18 @@ public class Santroller : IConfigurableDevice
                 var ps2ControllerType = ReadData(0, (byte)Commands.CommandGetExtensionPs2, 1);
                 var wiiControllerType = ReadData(0, (byte)Commands.CommandGetExtensionWii, sizeof(short));
                 var rfRaw = ReadData(0, (byte)Commands.CommandReadRf, 2);
+                var usbHostRaw = Array.Empty<byte>();
+                if (model.UsbHostEnabled)
+                {
+                    usbHostRaw = ReadData(0, (byte)Commands.CommandReadUsbHost);
+                }
                 model.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                     djRightRaw, gh5Raw,
                     ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw);
                 foreach (var output in model.Bindings.Items)
                     output.Update(model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                         djRightRaw, gh5Raw,
-                        ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw);
+                        ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw);
             }
             catch (Exception ex)
             {
@@ -322,6 +327,26 @@ public class Santroller : IConfigurableDevice
     public bool IsMini()
     {
         return Board.IsMini();
+    }
+
+    public void Reconnect()
+    {
+        if (!IsMini() || _platformIoPort is null) return;
+        _serialPort = new SerialPort(_platformIoPort.Port, 57600, Parity.None, 8, StopBits.One);
+        _serialPort.RtsEnable = true;
+        _serialPort.DtrEnable = true;
+        // Unfortunately, we do need a pretty hefty timeout, as the pro minis bootloader takes a bit
+        _serialPort.ReadTimeout = 6000;
+        _serialPort.WriteTimeout = 100;
+        _serialPort.Open();
+        // Santroller devices announce themselves over serial to make it easier to detect them.
+        // Sometimes, there will be an extra null byte at the start of transmission, so we need to strip that out
+        var line = _serialPort.ReadLine().Replace("\0", "").Trim();
+        if (line != "Santroller")
+        {
+            return;
+        }
+        Load();
     }
 
     public bool IsPico()
@@ -462,7 +487,8 @@ public class Santroller : IConfigurableDevice
         CommandSetLeds,
         CommandSetDetect,
         CommandReadSerial,
-        CommandReadRf
+        CommandReadRf,
+        CommandReadUsbHost
     }
     
 

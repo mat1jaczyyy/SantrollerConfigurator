@@ -100,6 +100,10 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         return Board.IsMini();
     }
 
+    public void Reconnect()
+    {
+    }
+
     public bool IsPico()
     {
         return Board.IsPico();

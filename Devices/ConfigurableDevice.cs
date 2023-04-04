@@ -25,4 +25,5 @@ public interface IConfigurableDevice
     public bool IsGeneric();
     public bool IsPico();
     public bool IsMini();
+    void Reconnect();
 }

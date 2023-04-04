@@ -593,7 +593,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public virtual void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType, byte[] rfRaw)
+        byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw)
     {
         if (Enabled)
         {
@@ -608,7 +608,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
             {
                 output.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                     ghWtRaw,
-                    ps2ControllerType, wiiControllerType, rfRaw);
+                    ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw);
             }
         }
     }

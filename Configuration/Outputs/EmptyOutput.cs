@@ -41,9 +41,9 @@ public class EmptyOutput : Output
             .Select(x => Model.GetSimpleEmulationType() is EmulationType.KeyboardMouse)
             .ToProperty(this, x => x.IsKeyboard);
 
-        _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType,
+        _combinedTypes = this.WhenAnyValue(vm => vm.Model.UsbHostEnabled,  vm => vm.Model.DeviceType,
                 vm => vm.Model.RhythmType)
-            .Select(ControllerEnumConverter.GetTypes).Select(s => s.Where(s2 => model.IsPico || s2 is not SimpleType.WtNeckSimple)).ToProperty(this, x => x.CombinedTypes);
+            .Select(tuple => ControllerEnumConverter.GetTypes((tuple.Item2, tuple.Item3)).Where(s2 => (model.IsPico || s2 is not SimpleType.WtNeckSimple) && tuple.Item1 || s2 is not SimpleType.UsbHost)).ToProperty(this, x => x.CombinedTypes);
     }
 
     public virtual bool IsController => _isController.Value;
@@ -126,6 +126,7 @@ public class EmptyOutput : Output
                         new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model),
                         EmulationModeType.XboxOne),
                     SimpleType.RfSimple => new RfRxOutput(Model, 1, 1, RfPowerLevel.Min, RfDataRate.One),
+                    SimpleType.UsbHost => new UsbHostInput(Model),
                     _ => null
                 },
                 StandardAxisType standardAxisType => new ControllerAxis(Model,

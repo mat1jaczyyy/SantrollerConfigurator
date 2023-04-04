@@ -111,6 +111,11 @@ public class Dfu : IConfigurableDevice
         return false;
     }
 
+    public void Reconnect()
+    {
+        
+    }
+
     public bool IsGeneric()
     {
         return false;

@@ -46,6 +46,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
     private readonly ObservableAsPropertyHelper<bool> _isRf;
     private readonly ObservableAsPropertyHelper<bool> _isRhythm;
+    private readonly ObservableAsPropertyHelper<bool> _isStageKit;
 
     public ReadOnlyObservableCollection<Output> Outputs { get; }
 
@@ -139,6 +140,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _isRhythm = this.WhenAnyValue(x => x.DeviceType)
             .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
             .ToProperty(this, x => x.IsRhythm);
+        _isStageKit = this.WhenAnyValue(x => x.EmulationType)
+            .Select(x => x is EmulationType.StageKit)
+            .ToProperty(this, x => x.IsStageKit);
         _isController = this.WhenAnyValue(x => x.EmulationType)
             .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.Controller)
             .ToProperty(this, x => x.IsController);
@@ -299,7 +303,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
-    //TODO: have a rf connected and initialised bool here too, that show in the sidebar
     public byte LedCount
     {
         get => _ledCount;
@@ -440,6 +443,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public SourceList<Output> Bindings { get; } = new();
     public bool IsRhythm => _isRhythm.Value;
+    public bool IsStageKit => _isStageKit.Value;
     public bool IsController => _isController.Value;
     public bool IsKeyboard => _isKeyboard.Value;
     public bool IsApa102 => _isApa102.Value;
@@ -515,16 +519,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
         Bindings.RemoveMany(extra);
 
-        if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum) ||
-            _rhythmType is not RhythmType.RockBand)
-        {
-            Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
-        }
-
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
         if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
 
-        if (EmulationType == EmulationType.Controller)
+        if (GetSimpleEmulationType() == EmulationType.Controller)
         {
             if (!Bindings.Items.Any(s => s is EmulationMode))
             {
@@ -537,13 +535,27 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Bindings.Add(new EmulationMode(this,
                     new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
                     EmulationModeType.Ps4Or5));
-                Bindings.Add(new EmulationMode(this,
-                    new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
-                    EmulationModeType.Wii));
+                if (_deviceControllerType is DeviceControllerType.Guitar or DeviceControllerType.Drum)
+                {
+                    Bindings.Add(new EmulationMode(this,
+                        new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                        EmulationModeType.Wii));
+                }
+
                 Bindings.Add(new EmulationMode(this,
                     new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
                     EmulationModeType.Switch));
             }
+        }
+
+        if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
+        {
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
+        }
+        
+        if (_deviceControllerType is DeviceControllerType.Turntable)
+        {
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Ps4Or5 or EmulationModeType.XboxOne}));
         }
 
         if (_deviceControllerType == DeviceControllerType.Drum)
@@ -794,7 +806,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             return;
         }
 
-        if (EmulationType is EmulationType.KeyboardMouse or EmulationType.BluetoothKeyboardMouse) return;
+        if (GetSimpleEmulationType() is EmulationType.KeyboardMouse) {return;}
         foreach (var type in Enum.GetValues<StandardAxisType>())
         {
             if (ControllerEnumConverter.GetAxisText(_deviceControllerType, type) == null) continue;
@@ -1307,7 +1319,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     santroller.StartTicking(this);
                 }
             }
-            else if (!Main.Programming)
+            else if (Main is {Programming: false, Working: true})
             {
                 Main.Complete(100);
                 Device = device;
