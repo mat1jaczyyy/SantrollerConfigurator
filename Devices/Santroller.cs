@@ -52,6 +52,10 @@ public class Santroller : IConfigurableDevice
         _usbDevice = new SantrollerUsbDevice(device, path, product, serial, version);
         Serial = "";
         _microcontroller = new Pico(Board.Generic);
+        if (device is IUsbDevice usbDevice)
+        {
+            usbDevice.ClaimInterface(2);
+        }
         Load();
         if (Board.Name == Board.Generic.Name)
         {
@@ -116,6 +120,32 @@ public class Santroller : IConfigurableDevice
 
         return buffer;
     }
+    
+    private async Task<byte[]> ReadDataAsync(ushort wValue, byte bRequest, ushort size = 128)
+    {
+        if (_usbDevice != null)
+        {
+            return _usbDevice.ReadData(wValue, bRequest, size);
+        }
+
+        if (_serialPort == null) return Array.Empty<byte>();
+        _serialPort.Write(new[] { (byte)0x1f, bRequest, (byte)(wValue & 0xFF), (byte)((wValue << 8) & 0xFF) }, 0,
+            4);
+        var size2 = _serialPort.ReadByte();
+        if (size2 > size) return Array.Empty<byte>();
+        var buffer = new byte[size2];
+        using var memoryStream = new MemoryStream();
+        var readBytes = 0;
+        while (readBytes < size2)
+        {
+            var bytesRead = await _serialPort.BaseStream.ReadAsync(buffer, readBytes, buffer.Length - readBytes);
+            memoryStream.Write(buffer, 0, bytesRead);
+            readBytes += bytesRead;
+        }
+
+        return buffer;
+    }
+
 
 
     private void WriteData(ushort wValue, byte bRequest, byte[] buffer)
@@ -208,7 +238,7 @@ public class Santroller : IConfigurableDevice
                 foreach (var (port, mask) in ports)
                 {
                     var wValue = (ushort)(port | (mask << 8));
-                    var data = ReadData(wValue, (byte)Commands.CommandReadDigital, sizeof(byte));
+                    var data = await ReadDataAsync(wValue, (byte)Commands.CommandReadDigital, sizeof(byte));
                     if (data.Length == 0) return;
 
                     var pins = data[0];
@@ -219,24 +249,24 @@ public class Santroller : IConfigurableDevice
                 {
                     var mask = model.Microcontroller.GetAnalogMask(devicePin);
                     var wValue = (ushort)(model.Microcontroller.GetChannel(devicePin.Pin, false) | (mask << 8));
-                    var val = BitConverter.ToUInt16(ReadData(wValue, (byte)Commands.CommandReadAnalog,
+                    var val = BitConverter.ToUInt16(await ReadDataAsync(wValue, (byte)Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     _analogRaw[devicePin.Pin] = val;
                 }
 
-                var ps2Raw = ReadData(0, (byte)Commands.CommandReadPs2, 9);
-                var wiiRaw = ReadData(0, (byte)Commands.CommandReadWii, 8);
-                var djLeftRaw = ReadData(0, (byte)Commands.CommandReadDjLeft, 3);
-                var djRightRaw = ReadData(0, (byte)Commands.CommandReadDjRight, 3);
-                var gh5Raw = ReadData(0, (byte)Commands.CommandReadGh5, 2);
-                var ghWtRaw = ReadData(0, (byte)Commands.CommandReadGhWt, sizeof(int));
-                var ps2ControllerType = ReadData(0, (byte)Commands.CommandGetExtensionPs2, 1);
-                var wiiControllerType = ReadData(0, (byte)Commands.CommandGetExtensionWii, sizeof(short));
-                var rfRaw = ReadData(0, (byte)Commands.CommandReadRf, 2);
+                var ps2Raw = await ReadDataAsync(0, (byte)Commands.CommandReadPs2, 9);
+                var wiiRaw = await ReadDataAsync(0, (byte)Commands.CommandReadWii, 8);
+                var djLeftRaw = await ReadDataAsync(0, (byte)Commands.CommandReadDjLeft, 3);
+                var djRightRaw = await ReadDataAsync(0, (byte)Commands.CommandReadDjRight, 3);
+                var gh5Raw = await ReadDataAsync(0, (byte)Commands.CommandReadGh5, 2);
+                var ghWtRaw = await ReadDataAsync(0, (byte)Commands.CommandReadGhWt, sizeof(int));
+                var ps2ControllerType = await ReadDataAsync(0, (byte)Commands.CommandGetExtensionPs2, 1);
+                var wiiControllerType = await ReadDataAsync(0, (byte)Commands.CommandGetExtensionWii, sizeof(short));
+                var rfRaw = await ReadDataAsync(0, (byte)Commands.CommandReadRf, 2);
                 var usbHostRaw = Array.Empty<byte>();
                 if (model.UsbHostEnabled)
                 {
-                    usbHostRaw = ReadData(0, (byte)Commands.CommandReadUsbHost);
+                    usbHostRaw = await ReadDataAsync(0, (byte)Commands.CommandReadUsbHost, 24);
                 }
                 model.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                     djRightRaw, gh5Raw,
@@ -251,12 +281,6 @@ public class Santroller : IConfigurableDevice
                 Console.WriteLine(ex);
             }
 
-            // Serial port is slow
-            if (_serialPort != null)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(1000));
-            }
-
             await Task.Delay(TimeSpan.FromMilliseconds(500));
         }
     }
@@ -267,7 +291,7 @@ public class Santroller : IConfigurableDevice
         var data = new List<byte>();
         while (true)
         {
-            var chunk = ReadData(start, (byte)Commands.CommandReadConfig, 64);
+            var chunk = await ReadDataAsync(start, (byte)Commands.CommandReadConfig, 64);
             if (!chunk.Any()) break;
             data.AddRange(chunk);
             start += 64;
@@ -400,7 +424,7 @@ public class Santroller : IConfigurableDevice
                     var devicePin = new DevicePin(pin, DevicePinMode.PullUp);
                     var mask = microcontroller.GetAnalogMask(devicePin);
                     var wValue = (ushort)(microcontroller.GetChannel(pin, true) | (mask << 8));
-                    var val = BitConverter.ToUInt16(ReadData(wValue, (byte)Commands.CommandReadAnalog,
+                    var val = BitConverter.ToUInt16(await ReadDataAsync(wValue, (byte)Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     if (analogVals.ContainsKey(pin))
                     {
@@ -431,7 +455,7 @@ public class Santroller : IConfigurableDevice
             foreach (var (port, mask) in ports)
             {
                 var wValue = (ushort)(port | (mask << 8));
-                var pins = (byte)(ReadData(wValue, (byte)Commands.CommandReadDigital, sizeof(byte))[0] & mask);
+                var pins = (byte)((await ReadDataAsync(wValue, (byte)Commands.CommandReadDigital, sizeof(byte)))[0] & mask);
                 if (tickedPorts.ContainsKey(port))
                     if (tickedPorts[port] != pins)
                     {

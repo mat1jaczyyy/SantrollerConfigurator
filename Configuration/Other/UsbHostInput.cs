@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
+using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -121,7 +122,7 @@ public class UsbHostInput : Output
                 }
                 
             }
-            buffer += $@"{consoleType} {subType}{rhythmType}\n";
+            buffer += $"{consoleType} {rhythmType} {subType}\n";
         }
 
         ConnectedDevices = usbHostRaw.Length / 3;

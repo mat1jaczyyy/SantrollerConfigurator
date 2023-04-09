@@ -124,6 +124,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             wValue,
             2,
             buffer.Length);
+        
         Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
         Array.Resize(ref buffer, length);
         return buffer;

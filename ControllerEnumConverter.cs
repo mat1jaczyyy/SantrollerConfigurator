@@ -274,7 +274,7 @@ public class ControllerEnumConverter : IMultiValueConverter
         var otherBindings = deviceControllerType switch
         {
             DeviceControllerType.Drum => DrumAxisTypeMethods.GetTypeFor(rhythmType).Cast<object>(),
-            DeviceControllerType.Gamepad => Enum.GetValues<Ps3AxisType>().Cast<object>(),
+            DeviceControllerType.Gamepad => Enum.GetValues<Ps3AxisType>().Cast<object>().Concat(AxisLabelsStandard.Keys.Cast<object>()),
             DeviceControllerType.Turntable => Enum.GetValues<DjInputType>()
                 .Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable))
                 .Cast<object>()
@@ -283,7 +283,7 @@ public class ControllerEnumConverter : IMultiValueConverter
                 .GetTypeFor(deviceControllerType, rhythmType)
                 .Cast<object>()
                 .Concat(InstrumentButtonTypeExtensions.GetButtons(deviceControllerType, rhythmType).Cast<object>()),
-            _ => AxisLabelsStandard.Cast<object>()
+            _ => AxisLabelsStandard.Keys.Cast<object>()
         };
         // Most devices, except for the Guitars actually use standard button bindings, and then may have additional special buttons which are handled above.
         if (deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar))

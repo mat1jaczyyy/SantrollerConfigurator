@@ -84,25 +84,25 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox IsChecked="{Binding DetectedLeft}" IsEnabled="False">Left Turntable Found</CheckBox>
-                    <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False">Right Turntable Found</CheckBox>
+                    <CheckBox IsChecked="{Binding DetectedLeft}" IsEnabled="False" VerticalAlignment="Center">Left Turntable Found</CheckBox>
+                    <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False" VerticalAlignment="Center">Right Turntable Found</CheckBox>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type other:UsbHostInput}">
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="{Binding ConnectedDevices}"></Label>
-                    <Label>Devices connected</Label>
+                    <Label Content="{Binding ConnectedDevices}" VerticalAlignment="Center"></Label>
+                    <Label VerticalAlignment="Center">Devices connected</Label>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:Gh5CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox IsChecked="{Binding Detected}" IsEnabled="False">Detected</CheckBox>
+                    <CheckBox IsChecked="{Binding Detected}" VerticalAlignment="Center" IsEnabled="False">Detected</CheckBox>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:RfRxOutput}">
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox IsChecked="{Binding RfModuleDetected}" IsEnabled="False">nRF24L01+ Found</CheckBox>
-                    <CheckBox IsChecked="{Binding Connected}" IsEnabled="False">Connected to Transmitter</CheckBox>
+                    <CheckBox IsChecked="{Binding RfModuleDetected}" VerticalAlignment="Center" IsEnabled="False">nRF24L01+ Found</CheckBox>
+                    <CheckBox IsChecked="{Binding Connected}" VerticalAlignment="Center" IsEnabled="False">Connected to Transmitter</CheckBox>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}" />
@@ -242,7 +242,7 @@
             </DataTemplate>
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
-            
+
             <DataTemplate DataType="{x:Type other:UsbHostInput}">
                 <StackPanel Orientation="Horizontal">
                     <Label VerticalAlignment="Center"
@@ -1076,7 +1076,7 @@
                                        VerticalAlignment="Center"
                                        Width="200" />
                     </StackPanel>
-                    
+
 
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
@@ -1089,7 +1089,7 @@
                                   Items="{Binding RfPowerLevels}"
                                   ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     </StackPanel>
-                    
+
 
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"

@@ -15,5 +15,6 @@ public enum InputType
     [Description("GH5 neck input")]
     Gh5NeckInput,
     MacroInput,
-    RfInput
+    RfInput,
+    UsbHostInput
 }

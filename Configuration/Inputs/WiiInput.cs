@@ -298,7 +298,11 @@ public class WiiInput : TwiInput
         var checkedType = newType;
         if (checkedType == WiiControllerType.ClassicControllerPro) checkedType = WiiControllerType.ClassicController;
 
-        if (checkedType != WiiControllerType) {return;}
+        if (checkedType != WiiControllerType)
+        {
+            return;
+        }
+
         var wiiButtonsLow = ~wiiData[4];
         var wiiButtonsHigh = ~wiiData[5];
         var highResolution = checkedType == WiiControllerType.ClassicController && wiiData.Length == 8;
@@ -512,6 +516,12 @@ public class WiiInput : TwiInput
         foreach (var binding in bindings)
         {
             if (binding.Item1 is not WiiInput input) continue;
+            // digital inputs get mapped to the same buttons, so no need to generate stuff specific to each type
+            if (mode != ConfigField.Shared && !binding.Item1.IsAnalog)
+            {
+                continue;
+            }
+
             if (!mappedBindings.ContainsKey(input.WiiControllerType))
                 mappedBindings.Add(input.WiiControllerType, new List<string>());
 
@@ -519,6 +529,14 @@ public class WiiInput : TwiInput
         }
 
         var ret = "";
+        var ret2 = "";
+
+        if (mode != ConfigField.Shared)
+        {
+            ret2 += string.Join("\n",
+                bindings.Where(binding => !binding.Item1.IsAnalog).Select(binding => binding.Item2).Distinct());
+        }
+
         if (mappedBindings.ContainsKey(WiiControllerType.ClassicController))
         {
             var mappings = mappedBindings[WiiControllerType.ClassicController];
@@ -559,14 +577,15 @@ break;
             ret += @$"case {CType[input]}:
     {string.Join("\n", mappings)};
     break;";
-        return !ret.Any()
+        return ret2 + (!ret.Any()
             ? ""
             : @$"if (wiiValid) {{
-                                       switch(wiiControllerType) {{
-                                           {ret} 
-                                       }}
-                                    }}";
+                   switch(wiiControllerType) {{
+                       {ret} 
+                   }}
+                }}");
     }
+
     public override string Title => EnumToStringConverter.Convert(Input);
 
     public override string GetImagePath()

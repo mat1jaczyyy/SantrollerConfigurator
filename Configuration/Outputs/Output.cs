@@ -227,7 +227,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
 
     public IEnumerable<InputType> InputTypes =>
-        Enum.GetValues<InputType>().Where(s => (s is not InputType.MultiplexerInput || Model.IsPico) && (s is not InputType.MacroInput || this is OutputButton));
+        Enum.GetValues<InputType>().Where(s => (s is not InputType.MultiplexerInput || Model.IsPico) && (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput);
 
     public string LocalisedName => _localisedName.Value;
     public bool IsDj => _isDj.Value;
