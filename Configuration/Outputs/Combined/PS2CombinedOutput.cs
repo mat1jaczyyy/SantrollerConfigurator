@@ -223,11 +223,11 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
-        byte[] rfRaw, byte[] usbHostRaw)
+        byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw)
     {
         base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType,
-            wiiControllerType, rfRaw, usbHostRaw);
+            wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
         if (!ps2ControllerType.Any())
         {
             ControllerFound = false;

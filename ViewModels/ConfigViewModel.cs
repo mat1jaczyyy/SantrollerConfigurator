@@ -552,10 +552,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
         }
-        
+
         if (_deviceControllerType is DeviceControllerType.Turntable)
         {
-            Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Ps4Or5 or EmulationModeType.XboxOne}));
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode
+            {
+                Type: EmulationModeType.Ps4Or5 or EmulationModeType.XboxOne
+            }));
         }
 
         if (_deviceControllerType == DeviceControllerType.Drum)
@@ -806,7 +809,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             return;
         }
 
-        if (GetSimpleEmulationType() is EmulationType.KeyboardMouse) {return;}
+        if (GetSimpleEmulationType() is EmulationType.KeyboardMouse)
+        {
+            return;
+        }
+
         foreach (var type in Enum.GetValues<StandardAxisType>())
         {
             if (ControllerEnumConverter.GetAxisText(_deviceControllerType, type) == null) continue;
@@ -931,8 +938,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         lines.Add($"#define DEVICE_TYPE {(byte) DeviceType}");
 
         lines.Add($"#define RHYTHM_TYPE {(byte) RhythmType}");
-        lines.Add(
-            $"#define BLUETOOTH {(EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse).ToString().ToLower()}");
+        if (EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
+        {
+            lines.Add(
+                $"#define BLUETOOTH_TX {(EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse).ToString().ToLower()}");
+        }
+
         if (KvEnabled)
         {
             lines.Add(

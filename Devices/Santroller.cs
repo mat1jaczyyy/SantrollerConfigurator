@@ -274,7 +274,7 @@ public class Santroller : IConfigurableDevice
                 foreach (var output in model.Bindings.Items)
                     output.Update(model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                         djRightRaw, gh5Raw,
-                        ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw);
+                        ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, TODO);
             }
             catch (Exception ex)
             {
@@ -329,13 +329,11 @@ public class Santroller : IConfigurableDevice
 
     public Task<string?> GetUploadPortAsync()
     {
-        if (_platformIoPort != null)
-        {
-            _serialPort?.Close();
-            return Task.FromResult((string?)_platformIoPort.Port);
-        }
+        if (_platformIoPort == null)
+            return _usbDevice != null ? _usbDevice.GetUploadPortAsync() : Task.FromResult<string?>(null);
+        _serialPort?.Close();
+        return Task.FromResult((string?)_platformIoPort.Port);
 
-        return _usbDevice != null ? _usbDevice.GetUploadPortAsync() : Task.FromResult<string?>(null);
     }
 
     public bool IsAvr()
