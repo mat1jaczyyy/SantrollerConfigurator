@@ -268,13 +268,15 @@ public class Santroller : IConfigurableDevice
                 {
                     usbHostRaw = await ReadDataAsync(0, (byte)Commands.CommandReadUsbHost, 24);
                 }
+                // TODO: this
+                var bluetoothRaw = Array.Empty<byte>();
                 model.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                     djRightRaw, gh5Raw,
                     ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw);
                 foreach (var output in model.Bindings.Items)
                     output.Update(model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                         djRightRaw, gh5Raw,
-                        ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, TODO);
+                        ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
             }
             catch (Exception ex)
             {
