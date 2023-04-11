@@ -399,7 +399,42 @@ public abstract partial class OutputAxis : Output
         }
 
         var output = GenerateOutput(mode);
-        return output.Any() ? $"{output} = {GenerateAssignment(mode, false, false, false)};" : "";
+        if (!output.Any())
+        {
+            return "";
+        }
+
+        if (Input is not DigitalToAnalog dta) return $"{output} = {GenerateAssignment(mode, false, false, false)};";
+        
+        // Digital to Analog stores values based on uint16_t for trigger, and int16_t for sticks
+        var val = dta.On;
+
+        switch (mode)
+        {
+            // x360 triggers are int16_t
+            case ConfigField.Xbox360 when !Trigger:
+                break;
+            // xb1 triggers and axis are already of the above form
+            case ConfigField.XboxOne:
+                break;
+            // 360 triggers, and ps3 and ps4 triggers are uint8_t
+            case ConfigField.Xbox360 or ConfigField.Ps3 or ConfigField.Ps4 when Trigger:
+                val >>= 8;
+                break;
+            // ps3 and ps4 axis are uint8_t, so we both need to shift and add 128
+            case ConfigField.Ps3 or ConfigField.Ps4 when !Trigger:
+                val = (val >> 8) + 128;
+                break;
+            // Mouse is always not a trigger, and is int8_t
+            case ConfigField.Mouse:
+                val >>= 8;
+                break;
+            default:
+                return "";
+        }
+
+        return $"if ({Input.Generate(mode)}) {{{output} = {val};}}";
+
     }
 
     public override void UpdateBindings()

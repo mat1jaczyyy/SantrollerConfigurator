@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -150,13 +151,13 @@ public class DrumAxis : OutputAxis
         switch (mode)
         {
             case ConfigField.Xbox360:
-                if (ButtonsXbox360.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = 1";
+                if (ButtonsXbox360.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = true;";
                 break;
             case ConfigField.XboxOne:
-                if (ButtonsXboxOne.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXboxOne[Type])} = 1";
+                if (ButtonsXboxOne.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXboxOne[Type])} = true;";
                 break;
             case ConfigField.Ps3:
-                if (ButtonsPs3.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsPs3[Type])} = 1";
+                if (ButtonsPs3.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsPs3[Type])} = true;";
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
@@ -166,51 +167,56 @@ public class DrumAxis : OutputAxis
             switch (Type)
             {
                 case DrumAxisType.YellowCymbal:
-                    outputButtons += $"\n{GetReportField(YellowCymbalFlag)} = 1";
-                    outputButtons += $"\n{GetReportField("cymbalFlag")} = 1";
+                    outputButtons += $"\n{GetReportField(YellowCymbalFlag)} = true;";
+                    outputButtons += $"\n{GetReportField("cymbalFlag")} = true;";
 
                     break;
                 case DrumAxisType.BlueCymbal:
-                    outputButtons += $"\n{GetReportField(BlueCymbalFlag)} = 1";
-                    outputButtons += $"\n{GetReportField("cymbalFlag")} = 1";
+                    outputButtons += $"\n{GetReportField(BlueCymbalFlag)} = true;";
+                    outputButtons += $"\n{GetReportField("cymbalFlag")} = true;";
 
                     break;
                 case DrumAxisType.GreenCymbal:
-                    outputButtons += $"\n{GetReportField("cymbalFlag")} = 1";
+                    outputButtons += $"\n{GetReportField("cymbalFlag")} = true;";
                     break;
                 case DrumAxisType.Green:
                 case DrumAxisType.Red:
                 case DrumAxisType.Yellow:
                 case DrumAxisType.Blue:
 
-                    outputButtons += $"\n{GetReportField("padFlag")} = 1";
+                    outputButtons += $"\n{GetReportField("padFlag")} = true;";
 
                     break;
             }
-
+        
+        // If someone specified a digital input, then we need to take the value they have specified and convert it to the target consoles expected output
+        var dtaVal = 0;
+        if (Input is DigitalToAnalog dta)
+        {
+            dtaVal = dta.On;
+        }
         var assignedVal = "val_real";
-        var valType = "uint16_t";
         // Xbox one uses 4 bit velocities
         if (mode == ConfigField.XboxOne)
         {
-            valType = "uint8_t";
             assignedVal = "val_real >> 12";
+            dtaVal >>= 12;
         }
         // PS3 uses 8 bit velocities
         else if (mode == ConfigField.Ps3)
         {
-            valType = "uint8_t";
             assignedVal = "val_real >> 8";
+            dtaVal >>= 8;
         }
-        // Xbox 360 GH use uint16_t velocities
+        // Xbox 360 GH use uint8_t velocities
         else if (Model.RhythmType == RhythmType.GuitarHero)
         {
             assignedVal = "val_real >> 8";
+            dtaVal >>= 8;
         }
         // And then 360 RB use inverted int16_t values, though the first bit is specified based on the type
         else
         {
-            valType = "int16_t";
             switch (Type)
             {
                 // Stuff mapped to the y axis is inverted
@@ -219,16 +225,45 @@ public class DrumAxis : OutputAxis
                 case DrumAxisType.Yellow:
                 case DrumAxisType.YellowCymbal:
                     assignedVal = "-(0x7fff - (val >> 1))";
+                    dtaVal = -(0x7fff - (dtaVal >> 1));
                     break;
                 case DrumAxisType.Red:
                 case DrumAxisType.Blue:
                 case DrumAxisType.BlueCymbal:
                     assignedVal = "(0x7fff - (val >> 1))";
+                    dtaVal = (0x7fff - (dtaVal >> 1));
                     break;
             }
         }
 
+        
         var rfExtra = "";
+        // If someone has mapped digital inputs to the drums, then we can shortcut a bunch of the tests, and just need to use the calculated value from above
+        if (Input is DigitalToAnalog dta2)
+        {
+            // For bluetooth and RF, stuff the cymbal data into some unused bytes for rf reasons
+            if (mode == ConfigField.Ps3 &&
+                Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
+            {
+                rfExtra = $@"
+                if (rf_or_bluetooth) {{
+                    {GenerateOutput(ConfigField.XboxOne)} = {dta2.On >> 8};
+                }}  
+            ";
+            }
+            return $@"
+            {{
+                if ({Input.Generate(mode)}) {{
+                    {reset}
+                    {GenerateOutput(mode)} = {dtaVal};
+                    {rfExtra}
+                }}
+                if ({ifStatement}) {{
+                    {decrement} 
+                    {outputButtons}
+                }}
+            }}";
+        }
         // For bluetooth and RF, stuff the cymbal data into some unused bytes for rf reasons
         if (mode == ConfigField.Ps3 &&
             Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
@@ -239,25 +274,23 @@ public class DrumAxis : OutputAxis
                 }}  
             ";
         }
-
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
-{{
-    uint16_t val_real = {GenerateAssignment(mode, false, false, false)};
-    if (val_real) {{
-        if (val_real > {Threshold}) {{
-            {reset}
-        }}
-        {valType} val = {assignedVal};
-        {GenerateOutput(mode)} = val;
-        {rfExtra}
-    }}
-    if ({ifStatement}) {{
-        {decrement} 
-        {outputButtons}
-    }}
-}}";
+        {{
+            uint16_t val_real = {GenerateAssignment(mode, false, false, false)};
+            if (val_real) {{
+                if (val_real > {Threshold}) {{
+                    {reset}
+                }}
+                {GenerateOutput(mode)} = {assignedVal};
+                {rfExtra}
+            }}
+            if ({ifStatement}) {{
+                {decrement} 
+                {outputButtons}
+            }}
+        }}";
     }
 
     protected override string MinCalibrationText()

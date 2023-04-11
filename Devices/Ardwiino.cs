@@ -451,8 +451,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     config.all.main.tiltType == 2)
                 {
                     bindings.Add(new ControllerAxis(model,
-                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model),
-                            -32767, model), on,
+                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
                         0, StandardAxisType.RightStickY));
                 }
@@ -522,8 +521,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         ledIndex = new[] {ledIndexes[(int) (XboxTilt + XboxBtnCount)]};
 
                     bindings.Add(new ControllerAxis(model,
-                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model),
-                            -32767, model), on,
+                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
                         0, StandardAxisType.RightStickY));
                 }

@@ -888,7 +888,7 @@
                                Width="300">
                             Value
                         </Label>
-                        <NumericUpDown Value="{Binding On}" Maximum="{Binding Maximum}" VerticalAlignment="Center"
+                        <NumericUpDown Value="{Binding On}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" VerticalAlignment="Center"
                                        Width="200" />
                     </StackPanel>
                 </StackPanel>

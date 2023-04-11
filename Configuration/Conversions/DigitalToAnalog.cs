@@ -13,47 +13,68 @@ namespace GuitarConfigurator.NetCore.Configuration.Conversions;
 
 public class DigitalToAnalog : Input
 {
-    private readonly ObservableAsPropertyHelper<int> _maximum;
+    private readonly bool _trigger;
 
-    private readonly ObservableAsPropertyHelper<int> _minimum;
-
-    public DigitalToAnalog(Input child, int on, ConfigViewModel model) : base(model)
+    public DigitalToAnalog(Input child, int on, bool trigger, ConfigViewModel model) : base(model)
     {
+        _trigger = trigger;
         Child = child;
         On = on;
+        Tilt = false;
         this.WhenAnyValue(x => x.Child.RawValue).Subscribe(s => RawValue = s > 0 ? On : 0);
-        _minimum = this.WhenAnyValue(x => x.Child.IsUint).Select(s => s ? (int) ushort.MinValue : short.MinValue)
-            .ToProperty(this, x => x.Minimum);
-        _maximum = this.WhenAnyValue(x => x.Child.IsUint).Select(s => s ? (int) ushort.MaxValue : short.MaxValue)
-            .ToProperty(this, x => x.Maximum);
+        if (trigger)
+        {
+            Minimum = ushort.MinValue;
+            Maximum = ushort.MaxValue;
+        }
+        else
+        {
+            Minimum = short.MinValue;
+            Maximum = short.MaxValue;
+        }
+
+        IsAnalog = Child.IsAnalog;
+    }
+
+    public DigitalToAnalog(Input child, ConfigViewModel model) : base(model)
+    {
+        _trigger = false;
+        Child = child;
+        On = -32767;
+        Tilt = true;
+        this.WhenAnyValue(x => x.Child.RawValue).Subscribe(s => RawValue = s > 0 ? On : 0);
+
+        Minimum = short.MinValue;
+        Maximum = short.MaxValue;
         IsAnalog = Child.IsAnalog;
     }
 
     public Input Child { get; }
     public int On { get; set; }
-    public int Minimum => _minimum.Value;
-    public int Maximum => _maximum.Value;
+    public bool Tilt { get; }
+    public int Minimum { get; }
+    public int Maximum { get; }
 
     public override IList<DevicePin> Pins => Child.Pins;
     public override IList<PinConfig> PinConfigs => Child.PinConfigs;
     public override InputType? InputType => Child.InputType;
-    public override bool IsUint => Child.IsUint;
+    public override bool IsUint => _trigger;
 
     public override string Generate(ConfigField mode)
     {
-        var gen = Child.Generate(mode);
-        return mode == ConfigField.Xbox360 ? $"({gen})?{On}:{{output}}" : $"({gen})?{(On >> 8) + 128}:{{output}}";
+        return Child.Generate(mode);
     }
 
     public override SerializedInput Serialise()
     {
-        return new SerializedDigitalToAnalog(Child.Serialise(), On);
+        return new SerializedDigitalToAnalog(Child.Serialise(), On, _trigger, Tilt);
     }
 
     public override Input InnermostInput()
     {
         return Child;
     }
+
     public override string Title => Child.Title;
 
     public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
