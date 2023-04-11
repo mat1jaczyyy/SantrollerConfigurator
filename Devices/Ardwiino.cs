@@ -493,15 +493,42 @@ public class Ardwiino : ConfigurableUsbDevice
                     pinMode = DevicePinMode.Floating;
 
                 var debounce = config.debounce.buttons;
-                if (deviceType == DeviceControllerType.Guitar &&
-                    (genButton == StandardButtonType.DpadUp || genButton == StandardButtonType.DpadDown))
-                    debounce = config.debounce.strum;
-
-                if (deviceType == DeviceControllerType.Turntable && genButton == StandardButtonType.LeftThumbClick)
-                    genButton = StandardButtonType.Y;
+                switch (deviceType)
+                {
+                    case DeviceControllerType.Guitar when
+                        (genButton == StandardButtonType.DpadUp || genButton == StandardButtonType.DpadDown):
+                        debounce = config.debounce.strum;
+                        break;
+                    case DeviceControllerType.Turntable when genButton == StandardButtonType.LeftThumbClick:
+                        genButton = StandardButtonType.Y;
+                        break;
+                }
 
                 bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, model), on, off,
                     ledIndex, debounce, genButton));
+            }
+            switch (deviceType)
+            {
+                case DeviceControllerType.Guitar or DeviceControllerType.Drum:
+                {
+                    var a = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.A});
+                    if (a.HasValue)
+                    {
+                        bindings.Add(new EmulationMode(model, a.Value.Input, EmulationModeType.Wii));
+                    }
+
+                    break;
+                }
+                case DeviceControllerType.LiveGuitar:
+                {
+                    var a = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.A});
+                    if (a.HasValue)
+                    {
+                        bindings.Add(new EmulationMode(model, a.Value.Input, EmulationModeType.Ps3));
+                    }
+
+                    break;
+                }
             }
         }
         else if (config.all.main.tiltType == 2)
@@ -541,10 +568,24 @@ public class Ardwiino : ConfigurableUsbDevice
                         output.Enabled = false;
 
                 bindings.Add(wii);
+                switch (deviceType)
+                {
+                    case DeviceControllerType.Guitar:
+                        bindings.Add(new EmulationMode(model, new WiiInput(WiiInputType.GuitarGreen, model, sda, scl), EmulationModeType.Wii));
+                        break;
+                    case DeviceControllerType.Drum:
+                        bindings.Add(new EmulationMode(model, new WiiInput(WiiInputType.DrumMinus, model, sda, scl), EmulationModeType.Wii));
+                        break;
+                }
             }
             else if (config.all.main.inputType == (int) InputControllerType.Ps2)
             {
                 bindings.Add(new Ps2CombinedOutput(model, miso, mosi, sck, att, ack));
+                if (deviceType == DeviceControllerType.Guitar)
+                {
+                    bindings.Add(new EmulationMode(model, new Ps2Input(Ps2InputType.GuitarGreen, model, sda, scl),
+                        EmulationModeType.Wii));
+                }
             }
         }
 
@@ -593,35 +634,8 @@ public class Ardwiino : ConfigurableUsbDevice
             }
         }
 
-        var a = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.A});
-        if (a.HasValue)
-        {
-            bindings.Add(new EmulationMode(model, a.Value.Input, EmulationModeType.XboxOne));
-        }
         
-        var b = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.B});
-        if (b.HasValue)
-        {
-            bindings.Add(new EmulationMode(model, b.Value.Input, EmulationModeType.Ps3));
-        }
         
-        var x = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.X});
-        if (x.HasValue)
-        {
-            bindings.Add(new EmulationMode(model, x.Value.Input, EmulationModeType.Ps4Or5));
-        }
-        
-        var y = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.Y});
-        if (y.HasValue)
-        {
-            bindings.Add(new EmulationMode(model, y.Value.Input, EmulationModeType.Wii));
-        }
-        
-        var lb = bindings.FirstOrOptional(binding => binding is ControllerButton {Type: StandardButtonType.LeftShoulder});
-        if (lb.HasValue)
-        {
-            bindings.Add(new EmulationMode(model, lb.Value.Input, EmulationModeType.Switch));
-        }
 
         model.LedType = ledType;
         if (model.IsApa102)

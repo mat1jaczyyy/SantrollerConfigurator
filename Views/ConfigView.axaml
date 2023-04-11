@@ -882,7 +882,7 @@
                 <StackPanel>
                     <ContentControl Content="{Binding Child}"
                                     ContentTemplate="{StaticResource OutputTemplates}" />
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel IsVisible="{Binding !Tilt}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">

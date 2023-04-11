@@ -4,6 +4,8 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum EmulationModeType
 {
+    [Description("Xbox 360")]
+    Xbox360,
     [Description("Xbox One / Series S / Series X")]
     XboxOne,
     [Description("Wii Rock Band")]
