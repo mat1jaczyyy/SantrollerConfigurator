@@ -180,7 +180,7 @@ public class PlatformIo
             //Some pio stuff uses Standard Output, some uses Standard Error, its easier to just flatten both of those to a single stream
             process.StartInfo.Arguments =
                 $"-c \"import subprocess;subprocess.run([{string.Join(",", args.Select(s => $"'{s}'"))}],stderr=subprocess.STDOUT)\"".Replace("\\", "\\\\");
-            Console.WriteLine(process.StartInfo.Arguments);
+            
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;

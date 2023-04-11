@@ -9,7 +9,6 @@ public class MainViewModel : ReactiveObject, IRoutableViewModel
     {
         Main = screen;
         HostScreen = screen;
-        // FretSmasher.StartLinux();
     }
 
     public MainWindowViewModel Main { get; }
