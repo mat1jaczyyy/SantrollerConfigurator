@@ -40,7 +40,7 @@ public class DigitalToAnalog : Input
     {
         _trigger = false;
         Child = child;
-        On = -32767;
+        On = 32767;
         Tilt = true;
         this.WhenAnyValue(x => x.Child.RawValue).Subscribe(s => RawValue = s > 0 ? On : 0);
 

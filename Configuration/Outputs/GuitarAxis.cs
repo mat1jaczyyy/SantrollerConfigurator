@@ -169,10 +169,11 @@ public class GuitarAxis : OutputAxis
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 // PS3 RB expects tilt as a digital bit, so map that here
                 // On pc, we use a standard axis because that works better in games like clone hero
+                // Clone hero specifically seems to want tilt to go negative by default
                 return $@"if (consoleType == PS3 || consoleType == REAL_PS3) {{
                          {GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)} == 0xFF;
                       }} else {{
-                         report->tilt_pc = {GenerateAssignment(mode, false, false, false)};
+                         report->tilt_pc = 255 - ({GenerateAssignment(mode, false, false, false)});
                       }}";
             // Xbox 360 Pickup Selector is actually on one of the triggers.
             case ConfigField.Xbox360

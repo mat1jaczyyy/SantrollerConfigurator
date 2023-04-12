@@ -20,7 +20,7 @@ public class SerializedDigitalToAnalog : SerializedInput
     [ProtoMember(1)] private SerializedInput Child { get; }
     [ProtoMember(2)] private int On { get; }
     [ProtoMember(3)] private bool Trigger { get; }
-    [ProtoMember(3)] private bool Tilt { get; }
+    [ProtoMember(4)] private bool Tilt { get; }
 
     public override Input Generate(ConfigViewModel model)
     {

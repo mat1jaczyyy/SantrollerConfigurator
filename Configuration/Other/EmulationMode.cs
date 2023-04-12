@@ -84,6 +84,7 @@ public class EmulationMode : Output
         var image = Type switch
         {
             EmulationModeType.XboxOne => "XboxOne",
+            EmulationModeType.Xbox360 => "Xbox360",
             EmulationModeType.Wii => "Wii",
             EmulationModeType.Ps3 => "PS3",
             EmulationModeType.Ps4Or5 => "PS4",
