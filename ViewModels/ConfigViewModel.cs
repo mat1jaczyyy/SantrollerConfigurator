@@ -569,7 +569,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarAxis));
         }
 
-        if (_deviceControllerType is not DeviceControllerType.Guitar || _rhythmType is not RhythmType.RockBand)
+        if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarButton));
 
         if (_deviceControllerType == DeviceControllerType.Turntable)
