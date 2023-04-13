@@ -115,6 +115,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 }
             }
         });
+        if (device is Santroller santroller)
+        {
+            LocalAddress = santroller.GetBluetoothAddress();
+        }
+        else
+        {
+            LocalAddress = "Write config to retrieve address";
+        }
         HostScreen = screen;
         Microcontroller = device.GetMicrocontroller(this);
         ShowIssueDialog = new Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>();
@@ -210,6 +218,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public ICommand GoBackCommand { get; }
 
+    public string LocalAddress { get; }
     public MouseMovementType MouseMovementType
     {
         get => _mouseMovementType;

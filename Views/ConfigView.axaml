@@ -108,6 +108,8 @@
             <DataTemplate DataType="{x:Type output:BluetoothOutput}">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox IsChecked="{Binding Connected}" VerticalAlignment="Center" IsEnabled="False">Connected to Transmitter</CheckBox>
+                    <Label VerticalAlignment="Center">Local Address</Label>
+                    <Label Content="{Binding LocalAddress}" VerticalAlignment="Center"></Label>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}" />

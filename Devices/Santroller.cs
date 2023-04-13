@@ -513,7 +513,8 @@ public class Santroller : IConfigurableDevice
         CommandStartBtScan,
         CommandStopBtScan,
         CommandGetBtDevices,
-        CommandGetBtState
+        CommandGetBtState,
+        CommandGetBtAddress
     }
     
 
@@ -535,5 +536,10 @@ public class Santroller : IConfigurableDevice
     public byte[] GetBtScanResults()
     {
         return ReadData(0, (byte) Commands.CommandGetBtDevices);
+    }
+    
+    public string GetBluetoothAddress()
+    {
+        return Encoding.Default.GetString(ReadData(0, (byte) Commands.CommandGetBtAddress));
     }
 }

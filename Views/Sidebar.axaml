@@ -94,6 +94,11 @@
                               IsEnabled="False">
                         Connected to Receiver
                     </CheckBox>
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Local Address"
+                                   TextAlignment="Center" />
+                        <TextBlock Margin="20 20 20 0" Text="{Binding LocalAddress}" HorizontalAlignment="Stretch" />
+                    </StackPanel>
                 </StackPanel>
                 <StackPanel IsVisible="{Binding IsRf}" Orientation="Vertical">
                     <CheckBox HorizontalAlignment="Stretch" Margin="40 40 40 0" IsChecked="{Binding RfModuleDetected}"

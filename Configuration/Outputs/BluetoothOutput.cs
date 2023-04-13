@@ -94,6 +94,14 @@ public partial class BluetoothOutput : CombinedOutput
         _scanning = this.WhenAnyValue(s => s.ScanTimer).Select(scanTimer => scanTimer != 11).ToProperty(this, x => x.Scanning);
         Addresses.Add(macAddress.Any() ? macAddress : NoDeviceText);
         _macAddress = Addresses.First();
+        if (Model.Device is Santroller santroller)
+        {
+            LocalAddress = santroller.GetBluetoothAddress();
+        }
+        else
+        {
+            LocalAddress = "Write config to retrieve address";
+        }
     }
 
 
@@ -101,6 +109,7 @@ public partial class BluetoothOutput : CombinedOutput
     private const string NoDeviceText = "No device found";
     private readonly ObservableAsPropertyHelper<string> _scanText;
     private readonly ObservableAsPropertyHelper<bool> _scanning;
+    public string LocalAddress { get; }
     private string _macAddress;
     private bool _connected = false;
 
