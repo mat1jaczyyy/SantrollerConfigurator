@@ -45,6 +45,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly ObservableAsPropertyHelper<bool> _isController;
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
     private readonly ObservableAsPropertyHelper<bool> _isRf;
+    private readonly ObservableAsPropertyHelper<bool> _isBluetooth;
     private readonly ObservableAsPropertyHelper<bool> _isRhythm;
     private readonly ObservableAsPropertyHelper<bool> _isStageKit;
 
@@ -137,6 +138,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _isRf = this.WhenAnyValue(x => x.EmulationType)
             .Select(x => x is EmulationType.RfController or EmulationType.RfKeyboardMouse)
             .ToProperty(this, x => x.IsRf);
+        _isBluetooth = this.WhenAnyValue(x => x.EmulationType)
+            .Select(x => x is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
+            .ToProperty(this, x => x.IsBluetooth);
         _isRhythm = this.WhenAnyValue(x => x.DeviceType)
             .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
             .ToProperty(this, x => x.IsRhythm);
@@ -449,6 +453,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public bool IsApa102 => _isApa102.Value;
     public bool BindableSpi => Microcontroller.SpiAssignable;
     public bool IsRf => _isRf.Value;
+    public bool IsBluetooth => _isBluetooth.Value;
     public string? WriteToolTip => _writeToolTip.Value;
 
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
@@ -1292,12 +1297,17 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
     }
 
-    public void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
-        byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType, byte[] rfRaw)
+    public void Update(byte[] rfRaw, byte[] btRaw)
     {
-        if (!rfRaw.Any()) return;
-        Connected = rfRaw[0] != 0;
-        RfModuleDetected = rfRaw[1] != 0;
+        if (IsRf && rfRaw.Any())
+        {
+            Connected = rfRaw[0] != 0;
+            RfModuleDetected = rfRaw[1] != 0;
+        }
+
+        if (IsBluetooth && btRaw.Any())
+        {
+            Connected = btRaw[0] != 0;
+        }
     }
 }

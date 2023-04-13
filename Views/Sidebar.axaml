@@ -89,7 +89,12 @@
 
                     </StackPanel>
                 </StackPanel>
-
+                <StackPanel IsVisible="{Binding IsBluetooth}" Orientation="Vertical">
+                    <CheckBox HorizontalAlignment="Stretch" Margin="40 40 40 0" IsChecked="{Binding Connected}"
+                              IsEnabled="False">
+                        Connected to Receiver
+                    </CheckBox>
+                </StackPanel>
                 <StackPanel IsVisible="{Binding IsRf}" Orientation="Vertical">
                     <CheckBox HorizontalAlignment="Stretch" Margin="40 40 40 0" IsChecked="{Binding RfModuleDetected}"
                               IsEnabled="False">
