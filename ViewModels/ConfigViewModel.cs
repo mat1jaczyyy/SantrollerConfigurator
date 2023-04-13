@@ -569,6 +569,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarAxis));
         }
 
+        if (_deviceControllerType is not DeviceControllerType.Guitar && _rhythmType is not RhythmType.RockBand)
+        {
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
+        }
+
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarButton));
 
@@ -1190,7 +1195,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                             return new Tuple<Input, string>(input, generated);
                         })
                         .Where(s => !string.IsNullOrEmpty(s.Item2))
-                        .ToList(), mode);
+                        .Distinct().ToList(), mode);
             });
         // Flick off intersecting outputs when multiple buttons are pressed
         if (mode == ConfigField.Shared)

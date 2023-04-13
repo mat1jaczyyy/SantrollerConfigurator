@@ -322,6 +322,7 @@ public abstract partial class OutputAxis : Output
                 break;
             // For LED stuff (Shared), we can use the standard handle_calibration_ps3 instead.
             case ConfigField.Ps3 when forceAccel:
+                normal = true;
                 function = "handle_calibration_ps3_accel";
                 break;
             case ConfigField.Ps3 or ConfigField.Shared when whammy:
