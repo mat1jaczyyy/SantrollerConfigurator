@@ -198,7 +198,6 @@ public class ControllerEnumConverter : IMultiValueConverter
         if (values[1] is not DeviceControllerType || values[2] is not RhythmType) return null;
 
         var deviceControllerType = (DeviceControllerType) values[1]!;
-        var rhythmType = (RhythmType) values[2]!;
         switch (values[0])
         {
             case StandardAxisType axis:
@@ -206,7 +205,7 @@ public class ControllerEnumConverter : IMultiValueConverter
             case StandardButtonType button:
                 return GetButtonText(deviceControllerType, button);
         }
-
+        // Maybe we just change out all this nice description stuff for something else
         var valueType = values[0]!.GetType();
         var fieldInfo = valueType.GetField(values[0]!.ToString()!, BindingFlags.Static | BindingFlags.Public)!;
         var attributes = (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
@@ -214,7 +213,7 @@ public class ControllerEnumConverter : IMultiValueConverter
         return attributes.Length > 0 ? attributes[0].Description : fieldInfo.Name;
     }
 
-    public static string? GetAxisText(DeviceControllerType deviceControllerType,
+    public static string GetAxisText(DeviceControllerType deviceControllerType,
         StandardAxisType axis)
     {
         // All the instruments handle their own axis'
