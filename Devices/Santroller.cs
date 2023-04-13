@@ -268,8 +268,7 @@ public class Santroller : IConfigurableDevice
                 {
                     usbHostRaw = await ReadDataAsync(0, (byte)Commands.CommandReadUsbHost, 24);
                 }
-                // TODO: this
-                var bluetoothRaw = Array.Empty<byte>();
+                var bluetoothRaw = await ReadDataAsync(0, (byte)Commands.CommandGetBtState, 1);
                 model.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                     djRightRaw, gh5Raw,
                     ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw);
@@ -512,12 +511,31 @@ public class Santroller : IConfigurableDevice
         CommandSetDetect,
         CommandReadSerial,
         CommandReadRf,
-        CommandReadUsbHost
+        CommandReadUsbHost,
+        CommandStartBtScan,
+        CommandStopBtScan,
+        CommandGetBtDevices,
+        CommandGetBtState
     }
     
 
     public string GetSerialPort()
     {
         return _platformIoPort?.Port ?? "";
+    }
+
+    public void StartScan()
+    {
+        WriteData(0, (byte)Commands.CommandStartBtScan, Array.Empty<byte>());
+    }
+
+    public void StopScan()
+    {
+        WriteData(0, (byte) Commands.CommandStopBtScan, Array.Empty<byte>());
+    }
+
+    public byte[] GetBtScanResults()
+    {
+        return ReadData(0, (byte) Commands.CommandGetBtDevices);
     }
 }

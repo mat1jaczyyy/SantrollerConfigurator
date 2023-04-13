@@ -17,6 +17,7 @@ public enum SimpleType
     DjTurntableSimple,
 
     [Description("USB Host Inputs")] UsbHost,
+    [Description("Bluetooth Inputs")] Bluetooth,
     [Description("RF Inputs")] RfSimple,
     [Description("LED Binding")] Led,
     [Description("Rumble Binding")] Rumble,

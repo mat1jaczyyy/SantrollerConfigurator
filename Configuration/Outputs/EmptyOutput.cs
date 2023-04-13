@@ -43,7 +43,7 @@ public class EmptyOutput : Output
 
         _combinedTypes = this.WhenAnyValue(vm => vm.Model.UsbHostEnabled,  vm => vm.Model.DeviceType,
                 vm => vm.Model.RhythmType)
-            .Select(tuple => ControllerEnumConverter.GetTypes((tuple.Item2, tuple.Item3)).Where(s2 => (model.IsPico || s2 is not SimpleType.WtNeckSimple) && tuple.Item1 || s2 is not SimpleType.UsbHost)).ToProperty(this, x => x.CombinedTypes);
+            .Select(tuple => ControllerEnumConverter.GetTypes((tuple.Item2, tuple.Item3)).Where(s2 => (model.IsPico || s2 is not (SimpleType.WtNeckSimple or SimpleType.Bluetooth)) && tuple.Item1 || s2 is not SimpleType.UsbHost)).ToProperty(this, x => x.CombinedTypes);
     }
 
     public virtual bool IsController => _isController.Value;
@@ -127,6 +127,7 @@ public class EmptyOutput : Output
                         EmulationModeType.XboxOne),
                     SimpleType.RfSimple => new RfRxOutput(Model, 1, 1, RfPowerLevel.Min, RfDataRate.One),
                     SimpleType.UsbHost => new UsbHostInput(Model),
+                    SimpleType.Bluetooth => new BluetoothOutput(Model, ""),
                     _ => null
                 },
                 StandardAxisType standardAxisType => new ControllerAxis(Model,

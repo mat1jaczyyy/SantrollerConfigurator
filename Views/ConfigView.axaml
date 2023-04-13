@@ -105,6 +105,11 @@
                     <CheckBox IsChecked="{Binding Connected}" VerticalAlignment="Center" IsEnabled="False">Connected to Transmitter</CheckBox>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type output:BluetoothOutput}">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding Connected}" VerticalAlignment="Center" IsEnabled="False">Connected to Transmitter</CheckBox>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}" />
             <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
                 <StackPanel Orientation="Horizontal">
@@ -1101,6 +1106,22 @@
                                   SelectedItem="{Binding DataRate}"
                                   Items="{Binding RfDataRates}"
                                   ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type output:BluetoothOutput}">
+                <StackPanel>
+                    <Button Content="{Binding ScanText}" IsEnabled="{Binding !Scanning}" Command="{Binding ScanCommand}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Selected Device
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding MacAddress}"
+                                  Items="{Binding Addresses}"
+                                  Width="200" />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
