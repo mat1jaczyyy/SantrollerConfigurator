@@ -37,16 +37,9 @@ public partial class PlatformIoPort
 {
     public static PlatformIoPort[] FromJson(string json)
     {
-        var serializeOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
-            WriteIndented = true,
-            TypeInfoResolver = SourceGenerationContext.Default
-        };
-#pragma warning disable IL2026
-        return JsonSerializer.Deserialize<PlatformIoPort[]>(json, serializeOptions)!;
-#pragma warning restore IL2026
+        return JsonSerializer.Deserialize(json, SourceGenerationContext.Default.PlatformIoPortArray)!;
     }
 }
+[JsonSourceGenerationOptions(WriteIndented = true)]
 [JsonSerializable(typeof(PlatformIoPort[]))]
 internal partial class SourceGenerationContext : JsonSerializerContext { }

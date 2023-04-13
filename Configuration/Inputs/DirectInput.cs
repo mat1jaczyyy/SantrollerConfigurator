@@ -33,7 +33,7 @@ public class DirectInput : InputWithPin
 
     private IEnumerable<DevicePinMode> GetPinModes()
     {
-        var modes = Enum.GetValues(typeof(DevicePinMode)).Cast<DevicePinMode>()
+        var modes = Enum.GetValues<DevicePinMode>()
             .Where(mode => mode is not (DevicePinMode.Output or DevicePinMode.Analog));
         return Model.Microcontroller.Board.IsAvr()
             ? modes.Where(mode => mode is not (DevicePinMode.BusKeep or DevicePinMode.PullDown))

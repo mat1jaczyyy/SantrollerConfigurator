@@ -159,8 +159,8 @@ public class Ardwiino : ConfigurableUsbDevice
             readConfig = ReadConfigPre807Command;
         else if (Version < new Version(7, 0, 3)) readConfig = ReadConfigPre703Command;
 
-        var data = new byte[Marshal.SizeOf(typeof(ArdwiinoConfiguration))];
-        var sizeOfAll = Marshal.SizeOf(typeof(FullArdwiinoConfiguration));
+        var data = new byte[Marshal.SizeOf<ArdwiinoConfiguration>()];
+        var sizeOfAll = Marshal.SizeOf<FullArdwiinoConfiguration>();
         var offset = 0;
         var offsetId = 0;
         var maxSize = data.Length;
@@ -170,7 +170,7 @@ public class Ardwiino : ConfigurableUsbDevice
         config.neck = new NeckConfig();
         config.axisScale = new AxisScaleConfig();
         config.axisScale.axis = new AxisScale[XboxAxisCount];
-        foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
+        foreach (int axis in Enum.GetValues<ControllerAxisType>())
         {
             config.axisScale.axis[axis].multiplier = 1;
             config.axisScale.axis[axis].offset = short.MinValue;
@@ -192,20 +192,16 @@ public class Ardwiino : ConfigurableUsbDevice
             {
                 config.all = StructTools.RawDeserialize<FullArdwiinoConfiguration>(data, 0);
                 version = config.all.main.version;
-                if (version > 13)
-                    maxSize = Marshal.SizeOf(typeof(Configuration14));
-                else if (version > 12)
-                    maxSize = Marshal.SizeOf(typeof(Configuration13));
-                else if (version > 11)
-                    maxSize = Marshal.SizeOf(typeof(Configuration12));
-                else if (version > 10)
-                    maxSize = Marshal.SizeOf(typeof(Configuration11));
-                else if (version > 8)
-                    maxSize = Marshal.SizeOf(typeof(Configuration10));
-                else if (version == 8)
-                    maxSize = Marshal.SizeOf(typeof(Configuration8));
-                else
-                    maxSize = sizeOfAll;
+                maxSize = version switch
+                {
+                    > 13 => Marshal.SizeOf<Configuration14>(),
+                    > 12 => Marshal.SizeOf<Configuration13>(),
+                    > 11 => Marshal.SizeOf<Configuration12>(),
+                    > 10 => Marshal.SizeOf<Configuration11>(),
+                    > 8 => Marshal.SizeOf<Configuration10>(),
+                    8 => Marshal.SizeOf<Configuration8>(),
+                    _ => sizeOfAll
+                };
             }
         }
 
@@ -241,7 +237,7 @@ public class Ardwiino : ConfigurableUsbDevice
         else if (version > 11)
         {
             var configOld = StructTools.RawDeserialize<Configuration12>(data, 0);
-            foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
+            foreach (int axis in Enum.GetValues<ControllerAxisType>())
             {
                 config.axisScale.axis[axis].multiplier = configOld.axisScale.axis[axis].multiplier;
                 config.axisScale.axis[axis].offset = configOld.axisScale.axis[axis].offset;
@@ -426,7 +422,7 @@ public class Ardwiino : ConfigurableUsbDevice
             if (deviceType == DeviceControllerType.Turntable)
                 bindings.Add(new DjCombinedOutput(model, sda, scl));
 
-            foreach (int axis in Enum.GetValues(typeof(ControllerAxisType)))
+            foreach (int axis in Enum.GetValues<ControllerAxisType>())
             {
                 var pin = config.all.pins.axis![axis];
                 if (pin.pin == NotUsed) continue;
@@ -474,7 +470,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 }
             }
 
-            foreach (int button in Enum.GetValues(typeof(ControllerButtons)))
+            foreach (int button in Enum.GetValues<ControllerButtons>())
             {
                 var pin = config.all.pins.pins![button];
                 if (pin == NotUsed) continue;
