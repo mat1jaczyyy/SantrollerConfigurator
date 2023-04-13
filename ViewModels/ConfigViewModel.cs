@@ -522,19 +522,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
         if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
 
-        if (GetSimpleEmulationType() == EmulationType.Controller)
-        {
-            if (!Bindings.Items.Any(s => s is EmulationMode))
-            {
-                if (_deviceControllerType is DeviceControllerType.Guitar or DeviceControllerType.Drum)
-                {
-                    Bindings.Add(new EmulationMode(this,
-                        new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
-                        EmulationModeType.Wii));
-                }
-            }
-        }
-
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
         {
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
@@ -666,34 +653,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             case DeviceInputType.Direct:
                 _ = SetDefaultBindingsAsync(EmulationType);
-                if (DeviceType is DeviceControllerType.Guitar or DeviceControllerType.Drum)
-                {
-                    Bindings.Add(new EmulationMode(this,
-                        new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
-                        EmulationModeType.Wii));
-                }
                 break;
             case DeviceInputType.Wii:
                 Bindings.Add(new WiiCombinedOutput(this));
-
-                if (DeviceType is DeviceControllerType.Guitar)
-                {
-                    Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.GuitarGreen, this), EmulationModeType.Wii));
-                }
-                if (DeviceType is DeviceControllerType.Drum)
-                {
-                    Bindings.Add(new EmulationMode(this, new WiiInput(WiiInputType.DrumPlus, this), EmulationModeType.Wii));
-                }
                 break;
             case DeviceInputType.Ps2:
                 Bindings.Add(new Ps2CombinedOutput(this));
-                if (DeviceType is DeviceControllerType.Guitar)
-                {
-                    Bindings.Add(new EmulationMode(this, new Ps2Input(Ps2InputType.GuitarGreen, this),
-                        EmulationModeType.Wii));
-                }
-
-                break;
+               break;
             case DeviceInputType.Rf:
                 Bindings.Add(new RfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One));
                 break;
