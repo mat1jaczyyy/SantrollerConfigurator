@@ -137,7 +137,6 @@ public class Builder : Microsoft.Build.Utilities.Task
                 SetAttributesNormal(new DirectoryInfo(path));
                 Directory.Delete(path, true);
             }
-            // TODO: This isnt working? we could just remove these files in our fork if we wanted
             // Drop some unused code from the pico bluetooth stack
             var path2 = Path.Combine(pioFolder, "packages", "framework-arduinopico", "lib", "btstack", "port");
             if (Directory.Exists(path2))

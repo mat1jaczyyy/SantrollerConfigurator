@@ -1302,6 +1302,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Device.DeviceAdded(device);
     }
 
+    public bool UsingBluetooth()
+    {
+        return IsBluetooth || Bindings.Items.Any(s => s is BluetoothOutput);
+    }
+
     private void RemoveDevice(IConfigurableDevice device)
     {
     }

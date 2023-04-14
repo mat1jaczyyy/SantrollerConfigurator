@@ -333,7 +333,7 @@
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
-                            SCL Pin
+                            SCL (Labelled as CLK or C) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
                                   SelectedItem="{Binding Scl}"
@@ -345,7 +345,7 @@
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
-                            SDA Pin
+                            SDA (Labelled as Data or D) Pin
                         </Label>
                         <ComboBox VerticalAlignment="Center"
                                   SelectedItem="{Binding Sda}"

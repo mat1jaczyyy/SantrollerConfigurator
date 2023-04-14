@@ -324,7 +324,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
         {
             StartWorking();
             config.Generate(Pio);
-            var envs = new[] {config.Microcontroller.Board.Environment};
+            var environment = config.Microcontroller.Board.Environment;
+            if (config.UsingBluetooth() && config.IsPico)
+            {
+                environment = "picow";
+            }
+            var envs = new[] {environment};
 
 
             if (NewDevice)

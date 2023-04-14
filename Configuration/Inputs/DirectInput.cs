@@ -70,9 +70,6 @@ public class DirectInput : InputWithPin
         return string.Join("\n", bindings.Select(b => b.Item1.IsAnalog ? replacements[b.Item2] : b.Item2));
     }
 
-    public override void Dispose()
-    {
-    }
 
     public override IReadOnlyList<string> RequiredDefines()
     {
