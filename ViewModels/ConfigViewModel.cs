@@ -1077,7 +1077,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var ledMax = outputs.SelectMany(output => output.LedIndices).Max();
         var ret =
             "spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);spi_transfer(APA102_SPI_PORT, 0x00);";
-        for (var i = 0; i <= ledMax; i++)
+        for (var i = 0; i < ledMax; i++)
             ret +=
                 $"spi_transfer(APA102_SPI_PORT, 0xff);spi_transfer(APA102_SPI_PORT, ledState[{i}].r);spi_transfer(APA102_SPI_PORT, ledState[{i}].g);spi_transfer(APA102_SPI_PORT, ledState[{i}].b);";
 

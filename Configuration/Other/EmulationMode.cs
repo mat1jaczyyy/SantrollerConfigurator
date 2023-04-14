@@ -49,7 +49,7 @@ public class EmulationMode : Output
     {
         return Type switch
         {
-            EmulationModeType.Xbox360 => "WINDOWS_XBOX360",
+            EmulationModeType.Xbox360 => "XBOX360",
             EmulationModeType.XboxOne => "XBOXONE",
             EmulationModeType.Wii => "WII_RB",
             EmulationModeType.Ps3 => "PS3",
