@@ -1091,8 +1091,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var outputs = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).ToList();
         var groupedOutputs = outputs
             .SelectMany(s =>
-                s.Input.Inputs().Zip(Enumerable.Repeat(s, s.Input.Inputs().Count)) ??
-                new List<(Input First, Output Second)>())
+                s.Input.Inputs().Zip(Enumerable.Repeat(s, s.Input.Inputs().Count)))
             .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
         var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
 

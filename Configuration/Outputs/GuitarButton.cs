@@ -82,7 +82,7 @@ public class GuitarButton : OutputButton
         // Set solo flag
         if (Type is InstrumentButtonType.SoloBlue or InstrumentButtonType.SoloGreen
             or InstrumentButtonType.SoloOrange or InstrumentButtonType.SoloRed
-            or InstrumentButtonType.SoloYellow)
+            or InstrumentButtonType.SoloYellow && mode is not ConfigField.Shared)
         {
             extra = "report->solo=true;";
         }
