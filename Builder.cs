@@ -10,23 +10,25 @@ namespace GuitarConfigurator.NetCore;
 
 public class Builder : Microsoft.Build.Utilities.Task
 {
-
     public string Parameter1 { get; set; } = null!;
     public string Parameter2 { get; set; } = null!;
+
     public override bool Execute()
     {
-        string platform = "linux";
+        var platform = "linux";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) platform = "windows";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) platform = "macos";
-        var firmwareUrl = "https://github.com/sanjay900/Ardwiino/releases/download/latest/firmware.tar.xz";
+        const string firmwareUrl = "https://github.com/sanjay900/Ardwiino/releases/download/latest/firmware.tar.xz";
         var platformIoUrl =
             $"https://github.com/sanjay900/santroller-libs/releases/download/latest/platformio-{platform}.tar.xz";
         var firmwareFileLoc = Path.Combine(Parameter2, "Assets", "platformio.version");
         var platformioFileLoc = Path.Combine(Parameter2, "Assets", "firmware.version");
         var firmwareCommit = GetCommit("Ardwiino", "master");
         var platformIoCommit = GetCommit("santroller-libs", "main");
-        var firmwareChanged = !File.Exists(firmwareFileLoc) || !File.ReadAllText(firmwareFileLoc).Equals(firmwareCommit);
-        var platformioChanged = !File.Exists(platformioFileLoc) || !File.ReadAllText(platformioFileLoc).Equals(platformIoCommit);
+        var firmwareChanged =
+            !File.Exists(firmwareFileLoc) || !File.ReadAllText(firmwareFileLoc).Equals(firmwareCommit);
+        var platformioChanged = !File.Exists(platformioFileLoc) ||
+                                !File.ReadAllText(platformioFileLoc).Equals(platformIoCommit);
         var webClient = new HttpClient();
         if (firmwareChanged)
         {
@@ -34,13 +36,11 @@ public class Builder : Microsoft.Build.Utilities.Task
             File.WriteAllBytes(Path.Combine(Parameter2, "Assets", "firmware.tar.xz"), result);
             File.WriteAllText(firmwareFileLoc, firmwareCommit);
         }
-        
+
         if (!platformioChanged) return true;
-        {
-            var result = webClient.GetByteArrayAsync(platformIoUrl).Result;
-            File.WriteAllBytes(Path.Combine(Parameter2, "Assets", "platformio.tar.xz"), result);
-            File.WriteAllText(platformioFileLoc, platformIoCommit);
-        }
+        var result2 = webClient.GetByteArrayAsync(platformIoUrl).Result;
+        File.WriteAllBytes(Path.Combine(Parameter2, "Assets", "platformio.tar.xz"), result2);
+        File.WriteAllText(platformioFileLoc, platformIoCommit);
 
         return true;
     }
@@ -54,5 +54,4 @@ public class Builder : Microsoft.Build.Utilities.Task
         var res = response.Content.ReadAsStringAsync().Result;
         return res.Split('\n').First(s => s.EndsWith($"refs/heads/{branch}")).Split(' ')[0].Substring(4);
     }
-
 }
