@@ -451,3 +451,5 @@ $RECYCLE.BIN/
 Assets/firmware.tar.xz
 Assets/python.tar.xz
 Assets/platformio.tar.xz
+Assets/platformio.version
+Assets/firmware.version

@@ -35,6 +35,15 @@ public class AssetUtils
         XZInit.GlobalInit(lib);
     }
 
+    public static async Task<string> ReadFileAsync(string file)
+    {
+        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
+        var uri = new Uri($"avares://{assemblyName}/Assets/{file}");
+        await using var target = assets!.Open(uri);
+        var reader = new StreamReader(target);
+        return await reader.ReadToEndAsync();
+    }
     public static async Task ExtractXzAsync(string archiveFile, string location)
     {
         var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
@@ -42,9 +51,12 @@ public class AssetUtils
         var uri = new Uri($"avares://{assemblyName}/Assets/{archiveFile}");
         await using var target = assets!.Open(uri);
         var decompOpts = new XZDecompressOptions();
-        var opts = new XZThreadedDecompressOptions();
-        opts.Threads = Environment.ProcessorCount;
-        await using XZStream zs = new XZStream(target, decompOpts, opts);
+        var opts = new XZThreadedDecompressOptions
+        {
+            Threads = Environment.ProcessorCount
+        };
+        await using var zs = new XZStream(target, decompOpts, opts);
+        
         await TarFile.ExtractToDirectoryAsync(zs, location, true);
     }
 

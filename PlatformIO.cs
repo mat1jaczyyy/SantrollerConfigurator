@@ -30,7 +30,7 @@ public class PlatformIo
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             _pythonExecutable = Path.Combine(appdataFolder, "python", "python.exe");
 
-        FirmwareDir = Path.Combine(appdataFolder, "firmware");
+        FirmwareDir = Path.Combine(appdataFolder, "Ardwiino");
 
         _portProcess = new Process();
         _portProcess.EnableRaisingEvents = true;
@@ -56,39 +56,29 @@ public class PlatformIo
         await AssetUtils.ExtractXzAsync("firmware.tar.xz", appdataFolder);
 
         var pythonDir = Path.Combine(appdataFolder, "python");
-        
-        // TODO: make some sort of check to check if an update is needed here
-        // TODO: could easily just package the version name in a "version.txt" file inside of the folder?
-        // if (Directory.Exists(pythonDir) && needsUpdate)
-        // {
-            // Directory.Delete(pythonDir, true);
-        // }
-
-        if (!Directory.Exists(pythonDir))
-        {
-            platformIoOutput.OnNext(new PlatformIoState(30, "Extracting Python", ""));
-            await AssetUtils.ExtractXzAsync("python.tar.xz", appdataFolder);
-        }
-        
-
         var platformIoDir = Path.Combine(appdataFolder, "platformio");
-        // TODO: make some sort of check to check if an update is needed here
-        // TODO: could easily just package the version name in a "version.txt" file inside of the folder?
-        // if (Directory.Exists(platformIoDir) && needsUpdate)
-        // {
-        //     Directory.Delete(platformIoDir, true);
-        // }
+        var platformIoVersion = Path.Combine(appdataFolder, "platformio.version");
+        if (Directory.Exists(platformIoDir))
+        {
+            var outdated = true;
+            if (File.Exists(platformIoVersion))
+            {
+                outdated = await File.ReadAllTextAsync(platformIoVersion) != await AssetUtils.ReadFileAsync("firmware.version");
+            }
+
+            if (outdated)
+            {
+                Directory.Delete(platformIoDir, true);
+                Directory.Delete(pythonDir, true);
+            }
+        }
         if (!Directory.Exists(platformIoDir))
         {
             platformIoOutput.OnNext(new PlatformIoState(60, "Extracting Platform.IO", ""));
             await AssetUtils.ExtractXzAsync("platformio.tar.xz", appdataFolder);
 
-            await File.WriteAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"),
-                (await File.ReadAllTextAsync(Path.Combine(FirmwareDir, "platformio.ini"))).Replace(
-                    "post:ardwiino_script_post.py",
-                    "post:ardwiino_script_post_tool.py")).ConfigureAwait(false);
+            await AssetUtils.ExtractFileAsync("platformio.version", platformIoVersion);
         }
-
         platformIoOutput.OnCompleted();
     }
 

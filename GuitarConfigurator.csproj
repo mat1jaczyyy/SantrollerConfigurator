@@ -32,7 +32,6 @@
         <AvaloniaResource Include="Assets\**" />
         <AvaloniaResource Include="Assets\firmware.tar.xz" />
         <AvaloniaResource Include="Assets\platformio.tar.xz" />
-        <AvaloniaResource Include="Assets\python.tar.xz" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
