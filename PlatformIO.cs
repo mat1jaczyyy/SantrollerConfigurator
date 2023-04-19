@@ -51,7 +51,34 @@ public class PlatformIo
     private async Task InitialisePlatformIoAsync(IObserver<PlatformIoState> platformIoOutput)
     {
         var appdataFolder = AssetUtils.GetAppDataFolder();
-        if (Directory.Exists(FirmwareDir)) Directory.Delete(FirmwareDir, true);
+        if (Directory.Exists(FirmwareDir))
+        {
+            Directory.Delete(FirmwareDir, true);
+        }
+        else
+        {
+            // If the firmware has not been extracted, make sure the user has enough free space for it.
+            var matching = 0;
+            long free = 0;
+            var info = DriveInfo.GetDrives().First();
+            foreach (var driveInfo in DriveInfo.GetDrives())
+            {
+                if (driveInfo.RootDirectory.FullName.Length <= matching ||
+                    !Path.GetFullPath(FirmwareDir).StartsWith(driveInfo.RootDirectory.FullName)) continue;
+                matching = driveInfo.RootDirectory.FullName.Length;
+                free = driveInfo.AvailableFreeSpace;
+                info = driveInfo;
+            }
+
+            free = free / 1024 / 1024 / 1024;
+            if (free < 3)
+            {
+                platformIoOutput.OnError(new Exception(
+                    $"Not enough free space, you need 3GB of space free on your {info.Name} drive to use this program"));
+                return;
+            }
+        }
+
         platformIoOutput.OnNext(new PlatformIoState(0, "Extracting Firmware", ""));
         await AssetUtils.ExtractXzAsync("firmware.tar.xz", appdataFolder);
 
@@ -63,7 +90,8 @@ public class PlatformIo
             var outdated = true;
             if (File.Exists(platformIoVersion))
             {
-                outdated = await File.ReadAllTextAsync(platformIoVersion) != await AssetUtils.ReadFileAsync("platformio.version");
+                outdated = await File.ReadAllTextAsync(platformIoVersion) !=
+                           await AssetUtils.ReadFileAsync("platformio.version");
             }
 
             if (outdated)
@@ -72,6 +100,7 @@ public class PlatformIo
                 Directory.Delete(pythonDir, true);
             }
         }
+
         if (!Directory.Exists(platformIoDir))
         {
             platformIoOutput.OnNext(new PlatformIoState(60, "Extracting Platform.IO", ""));
@@ -79,6 +108,7 @@ public class PlatformIo
 
             await AssetUtils.ExtractFileAsync("platformio.version", platformIoVersion);
         }
+
         platformIoOutput.OnCompleted();
     }
 
@@ -169,15 +199,16 @@ public class PlatformIo
 
             //Some pio stuff uses Standard Output, some uses Standard Error, its easier to just flatten both of those to a single stream
             process.StartInfo.Arguments =
-                $"-c \"import subprocess;subprocess.run([{string.Join(",", args.Select(s => $"'{s}'"))}],stderr=subprocess.STDOUT)\"".Replace("\\", "\\\\");
-            
+                $"-c \"import subprocess;subprocess.run([{string.Join(",", args.Select(s => $"'{s}'"))}],stderr=subprocess.STDOUT)\""
+                    .Replace("\\", "\\\\");
+
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
 
             var state = 0;
             process.Start();
-            Console.WriteLine("Starting process "+environment);
+            Console.WriteLine("Starting process " + environment);
 
             // process.BeginOutputReadLine();
             // process.BeginErrorReadLine();
@@ -327,11 +358,11 @@ public class PlatformIo
                         platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                             $"{progressMessage} - Waiting for Device", null));
                     }
-                    
                 }
 
                 platformIoOutput.OnCompleted();
             }
+
             _semaphore.Release(1);
         }
 

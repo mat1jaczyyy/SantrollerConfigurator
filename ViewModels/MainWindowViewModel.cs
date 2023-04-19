@@ -178,7 +178,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
             _timer.Elapsed += DevicePoller_Tick;
             _timer.AutoReset = false;
             StartWorking();
-            Pio.InitialisePlatformIo().Subscribe(UpdateProgress, _ => ProgressbarColor = "red", () =>
+            Pio.InitialisePlatformIo().Subscribe(UpdateProgress, ex =>
+            {
+                Complete(100);
+                ProgressbarColor = "red";
+                Message = ex.Message;
+            }, () =>
             {
                 Complete(100);
                 Working = false;
