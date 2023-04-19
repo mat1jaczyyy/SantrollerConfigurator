@@ -48,6 +48,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly ObservableAsPropertyHelper<bool> _isBluetooth;
     private readonly ObservableAsPropertyHelper<bool> _isRhythm;
     private readonly ObservableAsPropertyHelper<bool> _isStageKit;
+    private readonly ObservableAsPropertyHelper<bool> _isStandardMode;
+    private readonly ObservableAsPropertyHelper<bool> _isRetailMode;
+    private readonly ObservableAsPropertyHelper<bool> _isAdvancedMode;
 
     public ReadOnlyObservableCollection<Output> Outputs { get; }
 
@@ -95,6 +98,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private bool _usbHostEnabled;
     private RfPowerLevel _powerLevel;
     private RfDataRate _dataRate;
+    private ModeType _mode;
 
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
@@ -142,7 +146,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         _writeToolTip = this.WhenAnyValue(x => x.HasError)
             .Select(s => s ? "There are errors in your configuration" : null).ToProperty(this, s => s.WriteToolTip);
-
+        _isAdvancedMode = this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Advanced)
+            .ToProperty(this, x => x.IsAdvancedMode);
+        _isStandardMode = this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Standard)
+            .ToProperty(this, x => x.IsStandardMode);
+        _isRetailMode = this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Retail)
+            .ToProperty(this, x => x.IsRetailMode);
         _isRf = this.WhenAnyValue(x => x.EmulationType)
             .Select(x => x is EmulationType.RfController or EmulationType.RfKeyboardMouse)
             .ToProperty(this, x => x.IsRf);
@@ -195,6 +204,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public IEnumerable<RfDataRate> RfDataRates => Enum.GetValues<RfDataRate>();
 
     public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
+    public IEnumerable<ModeType> ModeTypes => Enum.GetValues<ModeType>();
 
     // Mini only supports RF
     // Only Pico supports bluetooth
@@ -219,10 +229,20 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public ICommand GoBackCommand { get; }
 
     public string LocalAddress { get; }
+
+    public bool IsStandardMode => _isStandardMode.Value;
+    public bool IsAdvancedMode => _isAdvancedMode.Value;
+    public bool IsRetailMode => _isRetailMode.Value;
     public MouseMovementType MouseMovementType
     {
         get => _mouseMovementType;
         set => this.RaiseAndSetIfChanged(ref _mouseMovementType, value);
+    }
+    
+    public ModeType Mode
+    {
+        get => _mode;
+        set => this.RaiseAndSetIfChanged(ref _mode, value);
     }
 
     public int Apa102Mosi

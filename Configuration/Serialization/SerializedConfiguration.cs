@@ -34,6 +34,7 @@ public class SerializedConfiguration
         RfCsn = model.RfCsn;
         RfChannel = model.RfChannel;
         RfDeviceId = model.RfId;
+        Mode = model.Mode;
     }
 
     [ProtoMember(1)] public LedType LedType { get; }
@@ -58,6 +59,7 @@ public class SerializedConfiguration
     [ProtoMember(20)] public int RfCsn { get; }
     [ProtoMember(21)] public byte RfChannel { get; }
     [ProtoMember(22)] public byte RfDeviceId { get; }
+    [ProtoMember(23)] public ModeType Mode { get; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
@@ -66,6 +68,7 @@ public class SerializedConfiguration
         model.XInputOnWindows = XInputOnWindows;
         model.Microcontroller.UnAssignAll();
         model.Bindings.Clear();
+        model.Mode = Mode;
         if (Bindings != null)
         {
             model.Bindings.AddRange(Bindings.Select(s => s.Generate(model)));

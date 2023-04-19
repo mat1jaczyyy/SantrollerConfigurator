@@ -63,7 +63,7 @@ public class PlatformIo
             var outdated = true;
             if (File.Exists(platformIoVersion))
             {
-                outdated = await File.ReadAllTextAsync(platformIoVersion) != await AssetUtils.ReadFileAsync("firmware.version");
+                outdated = await File.ReadAllTextAsync(platformIoVersion) != await AssetUtils.ReadFileAsync("platformio.version");
             }
 
             if (outdated)
