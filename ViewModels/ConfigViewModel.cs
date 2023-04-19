@@ -77,6 +77,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private int _strumDebounce;
 
+    private int _pollRate;
+
     private MouseMovementType _mouseMovementType;
 
     private DirectPinConfig? _rfCe;
@@ -265,6 +267,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => this.RaiseAndSetIfChanged(ref _strumDebounce, value);
     }
 
+    public int PollRate
+    {
+        get => _pollRate;
+        set => this.RaiseAndSetIfChanged(ref _pollRate, value);
+    }
+    
     public int Apa102Mosi
     {
         get => _apa102SpiConfig?.Mosi ?? 0;
@@ -672,6 +680,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _deviceControllerType = DeviceControllerType.Gamepad;
         _wtSensitivity = 30;
         _usbHostEnabled = false;
+        _pollRate = 0;
+        _strumDebounce = 0;
+        _debounce = 5;
         if (Device.IsMini())
         {
             _emulationType = EmulationType.RfController;
@@ -933,6 +944,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         lines.Add($"#define CONSOLE_TYPE {GetEmulationType()}");
 
         lines.Add($"#define DEVICE_TYPE {(byte) DeviceType}");
+
+        lines.Add($"#define POLL_RATE {PollRate}");
 
         lines.Add($"#define RHYTHM_TYPE {(byte) RhythmType}");
         if (EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)

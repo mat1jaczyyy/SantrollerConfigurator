@@ -36,6 +36,7 @@ public class SerializedConfiguration
         Mode = model.Mode;
         Debounce = model.Debounce;
         StrumDebounce = model.StrumDebounce;
+        PollRate = model.PollRate;
     }
 
     [ProtoMember(1)] public LedType LedType { get; }
@@ -62,6 +63,7 @@ public class SerializedConfiguration
     [ProtoMember(23)] public ModeType Mode { get; }
     [ProtoMember(24)] public int Debounce { get; }
     [ProtoMember(25)] public int StrumDebounce { get; }
+    [ProtoMember(26)] public int PollRate { get; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
@@ -70,6 +72,7 @@ public class SerializedConfiguration
         model.Microcontroller.UnAssignAll();
         model.Bindings.Clear();
         model.Mode = Mode;
+        model.PollRate = PollRate;
         model.Debounce = Debounce;
         model.StrumDebounce = StrumDebounce;
         if (Bindings != null)
