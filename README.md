@@ -6,6 +6,8 @@ This branch is for a new version of the tool that has not yet been released. Bel
 - A much cleaner and easier to work with codebase for both the firmware and the tool
 - New user interface that supports a lot more configuration but is also much simpler to use
   - Most inputs are also live, which means you no longer need a separate controller tester when testing your buttons work.
+- Configurable pins for most things (pico only)
+  - this means you no longer are limited to picos that expose all the required pins, as you can now pick whatever pins you want for making wii adapters or ps2 adapters
 - Custom button combos - instead of map start + select as an option, now any output can be mapped to combinations of any input.
 - Better support for different types of controllers
   - Full Pro Drum support, including fixed mappings for all the other drums as well
