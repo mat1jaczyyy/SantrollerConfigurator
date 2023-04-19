@@ -246,6 +246,20 @@
                     </ComboBox>
 
                 </StackPanel>
+                <StackPanel IsVisible="{Binding !IsAdvancedMode}">
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Debounce (0 means disabled)"
+                               TextAlignment="Center" />
+                    <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding Debounce}"
+                                   Minimum="0"
+                                   Maximum="10" HorizontalAlignment="Stretch" />
+                </StackPanel>
+                <StackPanel IsVisible="{Binding IsGuitar}">
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Strum Debounce (0 means disabled)"
+                               TextAlignment="Center" />
+                    <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding StrumDebounce}"
+                                   Minimum="0"
+                                   Maximum="10" HorizontalAlignment="Stretch" />
+                </StackPanel>
                 <StackPanel IsVisible="{Binding !IsRetailMode}">
                     <StackPanel>
                         <TextBlock HorizontalAlignment="Stretch" Margin="20 20 20 0" Text="LED Type"
@@ -262,6 +276,7 @@
                                        Maximum="180" HorizontalAlignment="Stretch" />
 
                     </StackPanel>
+                    
                     <StackPanel Orientation="Vertical" IsVisible="{Binding IsApa102}">
                         <StackPanel IsVisible="{Binding BindableSpi}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="APA102 CI / SCK Pin"

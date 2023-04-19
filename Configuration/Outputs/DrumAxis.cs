@@ -138,15 +138,21 @@ public class DrumAxis : OutputAxis
     }
 
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
-        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, combined, extra);
+        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
-
+        var debounce = Debounce + 1;
+        if (!Model.IsAdvancedMode)
+        {
+            debounce = Model.Debounce + 1;
+        }
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
-        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce + 1};");
+        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
         var outputButtons = "";
         switch (mode)
         {

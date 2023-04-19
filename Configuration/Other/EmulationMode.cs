@@ -94,7 +94,9 @@ public class EmulationMode : Output
         return $"Combined/{image}.png";
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
         if (mode != ConfigField.Detection) return "";
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));

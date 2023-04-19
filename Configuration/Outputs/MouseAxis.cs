@@ -117,11 +117,13 @@ public class MouseAxis : OutputAxis
         return "Mouse.png";
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
         return mode is not (ConfigField.Mouse or ConfigField.Shared)
             ? ""
-            : base.Generate(mode, debounceIndex, combined, extra);
+            : base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
     }
 
     protected override bool SupportsCalibration()

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -30,15 +31,30 @@ public abstract class OutputButton : Output
     /// </summary>
     /// <param name="mode"></param>
     /// <param name="debounceIndex"></param>
-    /// <param name="combined"></param>
     /// <param name="extra">Used to provide extra statements that are called if the button is pressed</param>
+    /// <param name="combinedExtra"></param>
+    /// <param name="combinedDebounce"></param>
     /// <returns></returns>
     /// <exception cref="IncompleteConfigurationException"></exception>
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
+        var extraStatement = "";
+        if (mode == ConfigField.Shared && combinedExtra.Any())
+        {
+            extraStatement = " && " + combinedExtra;
+        }
+
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
-        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={Debounce + 1};");
+        var debounce = Debounce + 1;
+        if (!Model.IsAdvancedMode)
+        {
+            debounce = Model.Debounce + 1;
+        }
+
+        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
         if (mode != ConfigField.Shared)
         {
             var outputVar = GenerateOutput(mode);
@@ -79,14 +95,7 @@ public abstract class OutputButton : Output
             ";
             }
 
-        if (combined && IsStrum)
-        {
-            var otherIndex = debounceIndex[0] == 1 ? 0 : 1;
-            return
-                $"if (({Input.Generate(mode)}) && (!debounce[{otherIndex}])) {{ {led2} {reset} {extra}}} {led}";
-        }
-
-        return $"if (({Input.Generate(mode)})) {{ {led2} {reset} {extra} }} {led}";
+        return $"if (({Input.Generate(mode)} {extraStatement})) {{ {led2} {reset} {extra} }} {led}";
     }
 
     public override void UpdateBindings()

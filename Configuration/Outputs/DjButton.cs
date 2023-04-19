@@ -34,7 +34,9 @@ public class DjButton : OutputButton
         return GetReportField(Type);
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
         if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360))
             return "";
@@ -57,7 +59,7 @@ public class DjButton : OutputButton
                 return "";
         }
 
-        return base.Generate(mode, debounceIndex, combined, extra);
+        return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
     }
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {

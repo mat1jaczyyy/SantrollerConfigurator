@@ -162,7 +162,9 @@ public class JoystickToDpad : Output
         return Wii ? $"Wii/Classic{buttons}.png" : $"PS2/{buttons}.png";
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
         return mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne
             ? $"MAP_JOYSTICK_DPAD(report, {Threshold});"

@@ -862,7 +862,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputButton}">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" IsVisible="{Binding $parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsAdvancedMode}">
                     <Label VerticalAlignment="Center"
                            VerticalContentAlignment="Center"
                            Width="300">
@@ -1376,7 +1376,7 @@
                                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                     <Binding Path="!IsCombined" />
                                                     <Binding Path="ConfigurableInput" />
-                                                    <Binding Path="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}" />
+                                                    <Binding Path="!$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode" />
                                                 </MultiBinding>
                                             </StackPanel.IsVisible>
                                             <Label VerticalAlignment="Center"

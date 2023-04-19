@@ -72,9 +72,11 @@ public class GuitarAxis : OutputAxis
         return $"{rhythmType}/{Type}.png";
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
-        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, combined, extra);
+        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
         if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         // The below is a mess... but essentially we have to handle converting the input to its respective output depending on console
         // We have to do some hyper specific stuff for digital to analog here too so its easiest to capture its value once
@@ -190,7 +192,7 @@ public class GuitarAxis : OutputAxis
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
                 return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)};";
             default:
-                return base.Generate(mode, debounceIndex, combined, extra);
+                return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
         }
     }
 

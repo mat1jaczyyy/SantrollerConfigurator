@@ -62,20 +62,27 @@ public class GuitarButton : OutputButton
         return EnumToStringConverter.Convert(Type);
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
         if (mode is not (ConfigField.Shared or ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne)) return "";
+        // If combined debounce is on, then additionally generate extra logic to ignore this input if the opposite debounce flag is active
+        if (combinedDebounce.Any() && Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp)
+        {
+            combinedExtra = string.Join(" && ", combinedDebounce.Where(s => !debounceIndex.Contains(s)).Distinct().Select(x => $"!debounce[{x}]"));
+        }
         // GHL Guitars map strum up and strum down to dpad up and down, and also the stick
         if (Model.DeviceType is DeviceControllerType.LiveGuitar &&
             Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp &&
             mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne)
         {
-            return base.Generate(mode, debounceIndex, combined,
-                $"report->strumBar={(Type is InstrumentButtonType.StrumDown ? "0xFF" : "0x00")};");
+            return base.Generate(mode, debounceIndex,
+                $"report->strumBar={(Type is InstrumentButtonType.StrumDown ? "0xFF" : "0x00")};", combinedExtra, combinedDebounce);
         }
 
         if (Model is not {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand})
-            return base.Generate(mode, debounceIndex, combined, "");
+            return base.Generate(mode, debounceIndex, "", combinedExtra, combinedDebounce);
         
         //This stuff is only relevant for rock band guitars
         
@@ -93,18 +100,18 @@ public class GuitarButton : OutputButton
             case ConfigField.Ps3:
                 // For rf and bluetooth, we shove the xb1 bits into some unused bytes of the report
                 ret += $@"if (rf_or_bluetooth) {{
-                    {base.Generate(ConfigField.XboxOne, debounceIndex, combined, "")}
+                    {base.Generate(ConfigField.XboxOne, debounceIndex, "", combinedExtra, combinedDebounce)}
                 }}";
                 break;
             // XB1 also needs to set the normal face buttons, which can conveniently be done using the PS3 format
             // Also sets solo flag too
             case ConfigField.XboxOne:
-                return ret + base.Generate(mode, debounceIndex, combined, $"{GenerateOutput(ConfigField.Ps3)}=true;{extra}");
+                return ret + base.Generate(mode, debounceIndex, $"{GenerateOutput(ConfigField.Ps3)}=true;{extra}", combinedExtra, combinedDebounce);
         }
 
 
 
-        return ret + base.Generate(mode, debounceIndex, combined, extra);
+        return ret + base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
     }
 
     public override SerializedOutput Serialize()

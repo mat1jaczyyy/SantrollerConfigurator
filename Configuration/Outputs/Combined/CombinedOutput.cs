@@ -24,7 +24,9 @@ public abstract class CombinedOutput : Output
 
     public override bool Valid => true;
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
         return "";
     }

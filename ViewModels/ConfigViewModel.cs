@@ -47,6 +47,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly ObservableAsPropertyHelper<bool> _isRf;
     private readonly ObservableAsPropertyHelper<bool> _isBluetooth;
     private readonly ObservableAsPropertyHelper<bool> _isRhythm;
+    private readonly ObservableAsPropertyHelper<bool> _isGuitar;
     private readonly ObservableAsPropertyHelper<bool> _isStageKit;
     private readonly ObservableAsPropertyHelper<bool> _isStandardMode;
     private readonly ObservableAsPropertyHelper<bool> _isRetailMode;
@@ -57,8 +58,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly ObservableAsPropertyHelper<string?> _writeToolTip;
 
     private SpiConfig? _apa102SpiConfig;
-
-    private bool _combinedDebounce;
 
     private DeviceControllerType _deviceControllerType;
 
@@ -74,11 +73,15 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private LedType _ledType;
 
+    private int _debounce;
+
+    private int _strumDebounce;
+
     private MouseMovementType _mouseMovementType;
 
     private DirectPinConfig? _rfCe;
-    private bool _connected = false;
-    private bool _rfModuleDetected = false;
+    private bool _connected;
+    private bool _rfModuleDetected;
 
     private byte _rfChannel;
 
@@ -127,6 +130,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             LocalAddress = "Write config to retrieve address";
         }
+
         HostScreen = screen;
         Microcontroller = device.GetMicrocontroller(this);
         ShowIssueDialog = new Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>();
@@ -161,6 +165,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _isRhythm = this.WhenAnyValue(x => x.DeviceType)
             .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
             .ToProperty(this, x => x.IsRhythm);
+        _isGuitar = this.WhenAnyValue(x => x.DeviceType)
+            .Select(x => x is DeviceControllerType.LiveGuitar or DeviceControllerType.Guitar)
+            .ToProperty(this, x => x.IsGuitar);
         _isStageKit = this.WhenAnyValue(x => x.EmulationType)
             .Select(x => x is EmulationType.StageKit)
             .ToProperty(this, x => x.IsStageKit);
@@ -233,16 +240,29 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public bool IsStandardMode => _isStandardMode.Value;
     public bool IsAdvancedMode => _isAdvancedMode.Value;
     public bool IsRetailMode => _isRetailMode.Value;
+
     public MouseMovementType MouseMovementType
     {
         get => _mouseMovementType;
         set => this.RaiseAndSetIfChanged(ref _mouseMovementType, value);
     }
-    
+
     public ModeType Mode
     {
         get => _mode;
         set => this.RaiseAndSetIfChanged(ref _mode, value);
+    }
+
+    public int Debounce
+    {
+        get => _debounce;
+        set => this.RaiseAndSetIfChanged(ref _debounce, value);
+    }
+
+    public int StrumDebounce
+    {
+        get => _strumDebounce;
+        set => this.RaiseAndSetIfChanged(ref _strumDebounce, value);
     }
 
     public int Apa102Mosi
@@ -440,11 +460,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
-    public bool CombinedDebounce
-    {
-        get => _combinedDebounce;
-        set => this.RaiseAndSetIfChanged(ref _combinedDebounce, value);
-    }
 
     public DeviceControllerType DeviceType
     {
@@ -476,6 +491,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public SourceList<Output> Bindings { get; } = new();
     public bool IsRhythm => _isRhythm.Value;
+    public bool IsGuitar => _isGuitar.Value;
     public bool IsStageKit => _isStageKit.Value;
     public bool IsController => _isController.Value;
     public bool IsKeyboard => _isKeyboard.Value;
@@ -693,7 +709,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 break;
             case DeviceInputType.Ps2:
                 Bindings.Add(new Ps2CombinedOutput(this));
-               break;
+                break;
             case DeviceInputType.Rf:
                 Bindings.Add(new RfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One));
                 break;
@@ -1113,12 +1129,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .SelectMany(s =>
                 s.Input.Inputs().Zip(Enumerable.Repeat(s, s.Input.Inputs().Count)))
             .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
-        var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
-
+        var combined = DeviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
+                       StrumDebounce > 0;
         Dictionary<string, int> debounces = new();
-        if (combined)
-            foreach (var output in outputs.Where(output => output.IsStrum))
-                debounces[output.LocalisedName] = debounces.Count;
+        var strumIndices = new List<int>();
 
         // Pass 1: work out debounces and map inputs to debounces
         var inputs = new Dictionary<string, List<int>>();
@@ -1139,6 +1153,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             else
             {
                 if (!debounces.ContainsKey(generatedInput)) debounces[generatedInput] = debounces.Count;
+            }
+
+            if (combined && output is GuitarButton {Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown})
+            {
+                strumIndices.Add(debounces[generatedInput]);
             }
 
             if (!inputs.ContainsKey(generatedInput)) inputs[generatedInput] = new List<int>();
@@ -1163,7 +1182,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                             var output = s.Second;
                             var generatedInput = input.Generate(mode);
                             var index = new List<int> {0};
-                            var extra = "";
                             if (output is OutputButton or DrumAxis or EmulationMode)
                             {
                                 index = new List<int> {debounces[generatedInput]};
@@ -1173,20 +1191,19 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                     {
                                         output = output.Serialize().Generate(this);
                                         output.Input = input;
-                                        index = new List<int> {debounces[generatedInput]};
                                     }
                                     else
                                     {
                                         if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
                                         seen.Add(output);
-                                        index = output.Input!.Inputs()
+                                        index = output.Input.Inputs()
                                             .Select(input1 => debounces[input1.Generate(mode)])
                                             .ToList();
                                     }
                                 }
                             }
 
-                            var generated = output.Generate(mode, index, combined, extra);
+                            var generated = output.Generate(mode, index, "", "", strumIndices);
 
                             if (output is OutputAxis axis && mode != ConfigField.Shared)
                                 generated = generated.Replace("{output}", axis.GenerateOutput(mode));
@@ -1220,7 +1237,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .SelectMany(s =>
                 s.Input.Inputs().Zip(Enumerable.Repeat(s, s.Input.Inputs().Count)))
             .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
-        var combined = DeviceType == DeviceControllerType.Guitar && CombinedDebounce;
+        var combined = DeviceType == DeviceControllerType.Guitar && StrumDebounce > 0;
 
         Dictionary<string, int> debounces = new();
         if (combined)

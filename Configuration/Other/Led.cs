@@ -380,7 +380,9 @@ public class Led : Output
         return $"Led/{Command}.png";
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra)
+    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce)
     {
         if (mode is not (ConfigField.StrobeLed or ConfigField.AuthLed or ConfigField.PlayerLed or ConfigField.RumbleLed
                 or ConfigField.KeyboardLed or ConfigField.LightBarLed)) return "";

@@ -554,7 +554,9 @@ public abstract partial class Output : ReactiveObject, IDisposable
         }
     }
 
-    public abstract string Generate(ConfigField mode, List<int> debounceIndex, bool combined, string extra);
+    public abstract string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+        string combinedExtra,
+        List<int> combinedDebounce);
 
     public virtual IEnumerable<Output> ValidOutputs()
     {

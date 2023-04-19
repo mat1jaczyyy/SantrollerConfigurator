@@ -18,7 +18,6 @@ public class SerializedConfiguration
         EmulationType = model.EmulationType;
         RhythmType = model.RhythmType;
         XInputOnWindows = model.XInputOnWindows;
-        CombinedDebounce = model.CombinedDebounce;
         Apa102Mosi = model.Apa102Mosi;
         Apa102Sck = model.Apa102Sck;
         LedCount = model.LedCount;
@@ -35,11 +34,12 @@ public class SerializedConfiguration
         RfChannel = model.RfChannel;
         RfDeviceId = model.RfId;
         Mode = model.Mode;
+        Debounce = model.Debounce;
+        StrumDebounce = model.StrumDebounce;
     }
 
     [ProtoMember(1)] public LedType LedType { get; }
     [ProtoMember(2)] public bool XInputOnWindows { get; }
-    [ProtoMember(3)] public bool CombinedDebounce { get; }
     [ProtoMember(4)] public DeviceControllerType DeviceType { get; }
     [ProtoMember(5)] public EmulationType EmulationType { get; }
     [ProtoMember(6)] public RhythmType RhythmType { get; }
@@ -60,15 +60,18 @@ public class SerializedConfiguration
     [ProtoMember(21)] public byte RfChannel { get; }
     [ProtoMember(22)] public byte RfDeviceId { get; }
     [ProtoMember(23)] public ModeType Mode { get; }
+    [ProtoMember(24)] public int Debounce { get; }
+    [ProtoMember(25)] public int StrumDebounce { get; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
         model.SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceType, RhythmType, EmulationType);
-        model.CombinedDebounce = CombinedDebounce;
         model.XInputOnWindows = XInputOnWindows;
         model.Microcontroller.UnAssignAll();
         model.Bindings.Clear();
         model.Mode = Mode;
+        model.Debounce = Debounce;
+        model.StrumDebounce = StrumDebounce;
         if (Bindings != null)
         {
             model.Bindings.AddRange(Bindings.Select(s => s.Generate(model)));
