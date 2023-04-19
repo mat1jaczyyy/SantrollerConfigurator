@@ -156,7 +156,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .ToProperty(this, x => x.IsAdvancedMode);
         _isStandardMode = this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Standard)
             .ToProperty(this, x => x.IsStandardMode);
-        _isRetailMode = this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Retail)
+        _isRetailMode = this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Core)
             .ToProperty(this, x => x.IsRetailMode);
         _isRf = this.WhenAnyValue(x => x.EmulationType)
             .Select(x => x is EmulationType.RfController or EmulationType.RfKeyboardMouse)

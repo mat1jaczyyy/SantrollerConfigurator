@@ -793,12 +793,17 @@
                             </StackPanel>
 
                         </StackPanel>
-                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                                Command="{Binding CalibrateCommand}" HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
-                                Margin="10 0 0 0">
-                            Calibrate
-                        </Button>
+                        <StackPanel Orientation="Horizontal" Height="50">
+                            <Label VerticalAlignment="Center" Width="300"
+                                   IsVisible="{Binding !ChildOfCombined}">
+                                Calibrate
+                            </Label>
+                            <Button IsVisible="{Binding !IsDigitalToAnalog}"
+                                    Command="{Binding CalibrateCommand}" 
+                                    HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
+                                Calibrate
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
                 </Panel>
             </DataTemplate>
@@ -889,12 +894,17 @@
                             </StackPanel>
 
                         </StackPanel>
-                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                                Command="{Binding CalibrateCommand}" HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
-                                Margin="10 0 0 0">
-                            Calibrate
-                        </Button>
+                        <StackPanel Orientation="Horizontal" Height="50">
+                            <Label VerticalAlignment="Center" Width="300"
+                                   IsVisible="{Binding !ChildOfCombined}">
+                                Calibrate
+                            </Label>
+                            <Button IsVisible="{Binding !IsDigitalToAnalog}"
+                                    Command="{Binding CalibrateCommand}" 
+                                    HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
+                                Calibrate
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -984,12 +994,17 @@
                         </StackPanel>
 
                     </StackPanel>
-                    <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                            Command="{Binding CalibrateCommand}" HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100"
-                            Margin="10 0 0 0">
-                        Calibrate
-                    </Button>
+                    <StackPanel Orientation="Horizontal" Height="50">
+                        <Label VerticalAlignment="Center" Width="300"
+                               IsVisible="{Binding !ChildOfCombined}">
+                            Calibrate
+                        </Label>
+                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
+                                Command="{Binding CalibrateCommand}" 
+                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
+                            Calibrate
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputButton}">
