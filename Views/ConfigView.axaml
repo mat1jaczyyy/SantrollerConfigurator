@@ -311,7 +311,7 @@
                                            VerticalAlignment="Center"
                                            Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300">
@@ -323,7 +323,7 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
                                       Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300">
@@ -335,7 +335,7 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
                                       Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300">
@@ -347,7 +347,7 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
                                       Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300">

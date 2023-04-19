@@ -111,11 +111,11 @@ public abstract partial class Output : ReactiveObject, IDisposable
             .ToProperty(this, x => x.IsDj);
         _isWii = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is WiiInput)
             .ToProperty(this, x => x.IsWii);
-        _isGh5 = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is Gh5NeckInput)
+        _isGh5 = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is Gh5NeckInput && this is not GuitarAxis)
             .ToProperty(this, x => x.IsGh5);
         _isPs2 = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is Ps2Input)
             .ToProperty(this, x => x.IsPs2);
-        _isWt = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is GhWtTapInput)
+        _isWt = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is GhWtTapInput && this is not GuitarAxis)
             .ToProperty(this, x => x.IsWt);
         _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToProperty(this, x => x.AreLedsEnabled);
@@ -227,7 +227,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
 
     public IEnumerable<InputType> InputTypes =>
-        Enum.GetValues<InputType>().Where(s => (s is not InputType.MultiplexerInput || Model.IsPico) && (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput);
+        Enum.GetValues<InputType>().Where(s => (this is not GuitarAxis{Type: GuitarAxisType.Slider} || s is InputType.Gh5NeckInput or InputType.WtNeckInput ) && (s is not InputType.MultiplexerInput || Model.IsPico) && (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput);
 
     public string LocalisedName => _localisedName.Value;
     public bool IsDj => _isDj.Value;
@@ -460,6 +460,10 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 break;
             case InputType.Gh5NeckInput when Input.InnermostInput() is not Gh5NeckInput:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
+                if (this is GuitarAxis)
+                {
+                    gh5NeckInputType = Gh5NeckInputType.TapBar;
+                }
                 input = new Gh5NeckInput(gh5NeckInputType.Value, Model);
                 break;
             case InputType.Gh5NeckInput when Input.InnermostInput() is Gh5NeckInput gh5:
@@ -468,6 +472,10 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 break;
             case InputType.WtNeckInput when Input.InnermostInput() is not GhWtTapInput:
                 ghWtInputType ??= GhWtInputType.TapGreen;
+                if (this is GuitarAxis)
+                {
+                    ghWtInputType = GhWtInputType.TapBar;
+                }
                 input = new GhWtTapInput(ghWtInputType.Value, Model, Model.Microcontroller.GetFirstAnalogPin(),
                     Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(),
                     Model.Microcontroller.GetFirstDigitalPin());
@@ -497,7 +505,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
             default:
                 return;
         }
-
         switch (input.IsAnalog)
         {
             case true when this is OutputAxis:

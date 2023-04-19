@@ -18,7 +18,7 @@
     <Window.Resources>
         <netCore:OutputTemplateSelector x:Key="SidebarTemplate">
             <DataTemplate DataType="viewModels:ConfigViewModel">
-                <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="240">
+                <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="300">
                     <ExperimentalAcrylicBorder.Material>
                         <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" BackgroundSource="Digger" />
                     </ExperimentalAcrylicBorder.Material>
@@ -30,7 +30,7 @@
     </Window.Resources>
     <DockPanel>
         <DockPanel Height="30" DockPanel.Dock="Top" IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="240" IsVisible="{Binding HasSidebar}">
+            <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="300" IsVisible="{Binding HasSidebar}">
                 <ExperimentalAcrylicBorder.Material>
                     <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" BackgroundSource="Digger" />
                 </ExperimentalAcrylicBorder.Material>
