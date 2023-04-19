@@ -6,6 +6,7 @@ This branch is for a new version of the tool that has not yet been released. Bel
 - A much cleaner and easier to work with codebase for both the firmware and the tool
 - New user interface that supports a lot more configuration but is also much simpler to use
   - Most inputs are also live, which means you no longer need a separate controller tester when testing your buttons work.
+- Custom button combos - instead of map start + select as an option, now any output can be mapped to combinations of any input.
 - Better support for different types of controllers
   - Full Pro Drum support, including fixed mappings for all the other drums as well
   - Full support for the Rock Band guitars, including the solo frets
