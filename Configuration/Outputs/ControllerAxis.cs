@@ -101,6 +101,7 @@ public class ControllerAxis : OutputAxis
             case DeviceControllerType.FlightStick:
             case DeviceControllerType.DancePad:
             case DeviceControllerType.ArcadePad:
+            case DeviceControllerType.StageKit:
                 return $"Others/Xbox360/360_{Type}.png";
             case DeviceControllerType.Guitar:
             case DeviceControllerType.Drum:

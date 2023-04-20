@@ -338,11 +338,11 @@ public class Led : Output
         {
             case EmulationType.KeyboardMouse or EmulationType.BluetoothKeyboardMouse:
                 return command => command.IsKeyboard();
-            case EmulationType.StageKit:
-                return command => command.IsStageKit() || command.IsPlayer();
             case EmulationType.Controller or EmulationType.Bluetooth:
                 switch (type.controllerType)
                 {
+                    case DeviceControllerType.StageKit:
+                        return command => command.IsStageKit() || command.IsPlayer() || command.IsAuth() || command.IsSantroller();
                     case DeviceControllerType.Gamepad:
                     case DeviceControllerType.ArcadeStick:
                     case DeviceControllerType.FlightStick:
@@ -361,7 +361,7 @@ public class Led : Output
                             // Lightbar only works with APA102s, as it requires full RGB
                             (type.isApa102 && command is RumbleCommand.Ps4LightBar));
                     case DeviceControllerType.Turntable:
-                        return command => command.IsDj() || command.IsAuth() || command.IsPlayer();
+                        return command => command.IsDj() || command.IsAuth() || command.IsPlayer() || command.IsSantroller();
                 }
 
                 break;

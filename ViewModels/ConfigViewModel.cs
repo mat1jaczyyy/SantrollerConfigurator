@@ -170,8 +170,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _isGuitar = this.WhenAnyValue(x => x.DeviceType)
             .Select(x => x is DeviceControllerType.LiveGuitar or DeviceControllerType.Guitar)
             .ToProperty(this, x => x.IsGuitar);
-        _isStageKit = this.WhenAnyValue(x => x.EmulationType)
-            .Select(x => x is EmulationType.StageKit)
+        _isStageKit = this.WhenAnyValue(x => x.DeviceType)
+            .Select(x => x is DeviceControllerType.StageKit)
             .ToProperty(this, x => x.IsStageKit);
         _isController = this.WhenAnyValue(x => x.EmulationType)
             .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.Controller)
@@ -811,11 +811,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _emulationType = emulationType;
         this.RaisePropertyChanged(nameof(EmulationType));
         ClearOutputs();
-        if (emulationType == EmulationType.StageKit)
-        {
-            DeviceType = DeviceControllerType.Gamepad;
-            return;
-        }
 
         if (GetSimpleEmulationType() is EmulationType.KeyboardMouse)
         {
@@ -824,7 +819,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         foreach (var type in Enum.GetValues<StandardAxisType>())
         {
-            if (ControllerEnumConverter.GetAxisText(_deviceControllerType, type) == null) continue;
+            if (!ControllerEnumConverter.GetAxisText(_deviceControllerType, type).Any()) continue;
             if (DeviceType == DeviceControllerType.Turntable &&
                 type is StandardAxisType.LeftStickX or StandardAxisType.LeftStickY) continue;
             Bindings.Add(new ControllerAxis(this,
@@ -991,7 +986,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             case EmulationType.Bluetooth:
             case EmulationType.Controller:
             case EmulationType.RfController:
-            case EmulationType.StageKit:
                 return EmulationType.Controller;
             case EmulationType.KeyboardMouse:
             case EmulationType.BluetoothKeyboardMouse:

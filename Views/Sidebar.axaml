@@ -206,13 +206,7 @@
                               ItemTemplate="{StaticResource EnumToStringTemplate}"
                               Items="{Binding MouseMovementTypes}" />
                 </StackPanel>
-                <StackPanel>
-                    <StackPanel.IsVisible>
-                        <MultiBinding Converter="{x:Static BoolConverters.And}">
-                            <Binding Path="IsController"></Binding>
-                            <Binding Path="!IsStageKit"></Binding>
-                        </MultiBinding>
-                    </StackPanel.IsVisible>
+                <StackPanel IsVisible="{Binding IsController}">
                     <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Controller Type"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"

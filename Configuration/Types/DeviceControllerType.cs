@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum DeviceControllerType
@@ -10,5 +12,6 @@ public enum DeviceControllerType
     Guitar = 7,
     LiveGuitar = 8,
     Drum = 9,
-    Turntable = 10
+    Turntable = 10,
+    [Description("Rock Band Stage Kit")] StageKit = 11
 }

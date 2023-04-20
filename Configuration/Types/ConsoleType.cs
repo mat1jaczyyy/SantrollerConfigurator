@@ -7,9 +7,8 @@ public enum ConsoleType
     Universal=0,
     KeyboardMouse,
     Midi,
-    StageKit,
     [Description("Xbox 360")]
-    Xbox360,
+    Xbox360=4,
     [Description("PS3")]
     Ps3,
     [Description("Wii Rock Band")]

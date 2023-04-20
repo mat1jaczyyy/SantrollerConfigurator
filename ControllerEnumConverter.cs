@@ -185,7 +185,6 @@ public class ControllerEnumConverter : IMultiValueConverter
                         StandardButtonType.DpadRight),
                     "D-pad Right"
                 },
-                
             };
 
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
@@ -205,6 +204,7 @@ public class ControllerEnumConverter : IMultiValueConverter
             case StandardButtonType button:
                 return GetButtonText(deviceControllerType, button);
         }
+
         // Maybe we just change out all this nice description stuff for something else
         var valueType = values[0]!.GetType();
         var fieldInfo = valueType.GetField(values[0]!.ToString()!, BindingFlags.Static | BindingFlags.Public)!;
@@ -218,14 +218,17 @@ public class ControllerEnumConverter : IMultiValueConverter
     {
         // All the instruments handle their own axis'
         return deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick
-            or DeviceControllerType.DancePad or DeviceControllerType.FlightStick or DeviceControllerType.Gamepad? AxisLabelsStandard[axis] : "";
+            or DeviceControllerType.DancePad or DeviceControllerType.FlightStick or DeviceControllerType.Gamepad
+            ? AxisLabelsStandard[axis]
+            : "";
     }
 
     public static string? GetButtonText(DeviceControllerType deviceControllerType,
         StandardButtonType button)
     {
         if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick
-            or DeviceControllerType.DancePad or DeviceControllerType.FlightStick or DeviceControllerType.Drum or DeviceControllerType.Turntable)
+            or DeviceControllerType.DancePad or DeviceControllerType.FlightStick or DeviceControllerType.Drum
+            or DeviceControllerType.Turntable or DeviceControllerType.StageKit)
             deviceControllerType = DeviceControllerType.Gamepad;
         return ButtonLabels.GetValueOrDefault(
             new Tuple<DeviceControllerType, StandardButtonType>(deviceControllerType, button));
@@ -273,7 +276,8 @@ public class ControllerEnumConverter : IMultiValueConverter
         var otherBindings = deviceControllerType switch
         {
             DeviceControllerType.Drum => DrumAxisTypeMethods.GetTypeFor(rhythmType).Cast<object>(),
-            DeviceControllerType.Gamepad => Enum.GetValues<Ps3AxisType>().Cast<object>().Concat(AxisLabelsStandard.Keys.Cast<object>()),
+            DeviceControllerType.Gamepad => Enum.GetValues<Ps3AxisType>().Cast<object>()
+                .Concat(AxisLabelsStandard.Keys.Cast<object>()),
             DeviceControllerType.Turntable => Enum.GetValues<DjInputType>()
                 .Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable))
                 .Cast<object>()

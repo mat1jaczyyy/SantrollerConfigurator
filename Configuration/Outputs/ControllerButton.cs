@@ -42,7 +42,8 @@ public class ControllerButton : OutputButton
 
     public override string GenerateOutput(ConfigField mode)
     {
-        return mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360
+        return mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared or ConfigField.XboxOne
+            or ConfigField.Xbox360
             ? GetReportField(Type)
             : "";
     }
@@ -56,6 +57,7 @@ public class ControllerButton : OutputButton
             case DeviceControllerType.FlightStick:
             case DeviceControllerType.DancePad:
             case DeviceControllerType.ArcadePad:
+            case DeviceControllerType.StageKit:
                 return $"Others/Xbox360/360_{Type}.png";
             case DeviceControllerType.Guitar:
             case DeviceControllerType.Drum:
