@@ -1,6 +1,8 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using DynamicData;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -9,17 +11,15 @@ using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.Main;
 using LibUsbDotNet.WinUsb;
-using Nefarius.Drivers.WinUSB;
 using Nefarius.Utilities.DeviceManagement.Extensions;
 using Nefarius.Utilities.DeviceManagement.PnP;
-using Version = SemanticVersioning.Version;
 
 namespace GuitarConfigurator.NetCore.Devices;
 
 #if Windows
 public class ConfigurableUsbDeviceManager
 {
-    private readonly DeviceNotificationListener _deviceNotificationListener = new DeviceNotificationListener();
+    private readonly DeviceNotificationListener _deviceNotificationListener = new();
     private MainWindowViewModel _model;
     private const string RevisionString = "REV_";
 
@@ -27,7 +27,6 @@ public class ConfigurableUsbDeviceManager
     public ConfigurableUsbDeviceManager(MainWindowViewModel model)
     {
         _model = model;
-        
     }
 
     public void Register()
@@ -44,15 +43,16 @@ public class ConfigurableUsbDeviceManager
         }
     }
 
-    private void DeviceNotify(EventType eventType, string path)
+    private async void DeviceNotify(EventType eventType, string path)
     {
-        var usbDevice = PnPDevice
-            .GetDeviceByInterfaceId(path)
-            .ToUsbPnPDevice();
-        Console.WriteLine(path);
-        var ids = UsbSymbolicName.Parse(path);
+        await Task.Delay(100);
         Dispatcher.UIThread.Post(() =>
         {
+            var ids = UsbSymbolicName.Parse(path);
+
+            var usbDevice = PnPDevice
+                .GetDeviceByInterfaceId(path, DeviceLocationFlags.Phantom)
+                .ToUsbPnPDevice();
             if (eventType == EventType.DeviceArrival)
             {
                 var vid = ids.Vid;
@@ -60,39 +60,41 @@ public class ConfigurableUsbDeviceManager
                 var serial = ids.SerialNumber;
                 if (vid == Dfu.DfuVid && (pid == Dfu.DfuPid16U2 || pid == Dfu.DfuPid8U2))
                 {
-                    _model.AvailableDevices.Add(new Dfu(new RegDeviceNotifyInfoEventArgs(new RegDeviceNotifyInfo(path, path, serial))));
+                    _model.AvailableDevices.Add(
+                        new Dfu(new RegDeviceNotifyInfoEventArgs(new RegDeviceNotifyInfo(path, path, serial))));
                 }
                 else if (vid == 0x1209 && pid is 0x2882 or 0x2884)
                 {
                     var children = usbDevice.GetProperty<string[]>(DevicePropertyKey.Device_Children);
+                    if (children == null)
+                    {
+                        return;
+                    }
                     foreach (var child in children)
                     {
-                        try
+                        var childDevice = PnPDevice
+                            .GetDeviceByInstanceId(child, DeviceLocationFlags.Phantom)
+                            .ToUsbPnPDevice();
+                        var hardwareIds = childDevice.GetProperty<string[]>(DevicePropertyKey.Device_HardwareIds);
+                        var product = childDevice.GetProperty<string>(DevicePropertyKey.Device_FriendlyName);
+                        var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
+                        ushort revision = 0;
+                        foreach (var id in hardwareIds)
                         {
-                            var childDevice = PnPDevice
-                                .GetDeviceByInstanceId(child)
-                                .ToUsbPnPDevice();
-                            var hardwareIds = childDevice.GetProperty<string[]>(DevicePropertyKey.Device_HardwareIds);
-                            var product = childDevice.GetProperty<string>(DevicePropertyKey.Device_FriendlyName);
-                            var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
-                            ushort revision = 0;
-                            foreach (var id in hardwareIds)
+                            var index = id.IndexOf(RevisionString, StringComparison.Ordinal);
+                            if (index > -1)
                             {
-                                var index = id.IndexOf(RevisionString, StringComparison.Ordinal);
-                                if (index > -1)
-                                {
-                                    revision = ushort.Parse(id.Substring(index + RevisionString.Length, 4),
-                                        NumberStyles.HexNumber);
-                                }
+                                revision = ushort.Parse(id.Substring(index + RevisionString.Length, 4),
+                                    NumberStyles.HexNumber);
                             }
+                        }
 
-                            Console.WriteLine(product);
-                            Console.WriteLine(serial);
-                            Console.WriteLine(revision);
-                            WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
+                        WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
+                        if (dev != null)
+                        {
                             switch (product)
                             {
-                                case "Santroller" when _model is {Programming: true, IsPico: false}:
+                                case "Santroller" when _model is { Programming: true, IsPico: false }:
                                     return;
                                 case "Santroller":
                                     _model.AvailableDevices.Add(new Santroller(_model.Pio, child, dev, product, serial,
@@ -107,17 +109,14 @@ public class ConfigurableUsbDeviceManager
                                     break;
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex);
-                        }
                     }
                 }
             }
             else
             {
+                var serial = ids.SerialNumber;
                 _model.AvailableDevices.RemoveMany(
-                    _model.AvailableDevices.Items.Where(device => device.IsSameDevice(path)));
+                    _model.AvailableDevices.Items.Where(device => device.IsSameDevice(path) || device.IsSameDevice(serial)));
             }
         });
     }
@@ -129,7 +128,7 @@ public class ConfigurableUsbDeviceManager
             Device = info;
         }
     }
-    
+
     private class RegDeviceNotifyInfo : IUsbDeviceNotifyInfo
     {
         private readonly string _path;
@@ -178,7 +177,6 @@ public class ConfigurableUsbDeviceManager
         _deviceNotificationListener.DeviceArrived -= DeviceArrived;
         _deviceNotificationListener.DeviceRemoved -= DeviceRemoved;
 
-// start listening for plugins or unplugs of GUID_DEVINTERFACE_USB_DEVICE interface devices
         _deviceNotificationListener.StopListen(DeviceInterfaceIds.UsbDevice);
     }
 }
