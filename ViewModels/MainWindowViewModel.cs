@@ -20,6 +20,8 @@ using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
+using Nefarius.Utilities.DeviceManagement.Drivers;
+using Nefarius.Utilities.DeviceManagement.PnP;
 using ReactiveUI;
 using Timer = System.Timers.Timer;
 
@@ -303,7 +305,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 environment = "picow";
             }
-            var envs = new[] {environment};
+
+            var envs = new[] { environment };
 
 
             if (NewDevice)
@@ -314,7 +317,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             if (config.Microcontroller.Board.HasUsbmcu)
             {
-                envs = new[] {envs[0] + "_usb", envs[0]};
+                envs = new[] { envs[0] + "_usb", envs[0] };
             }
 
             ;
@@ -330,7 +333,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             foreach (var env in envs)
             {
                 Programming = true;
-                var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
+                var command = Pio.RunPlatformIo(env, new[] { "run", "--target", "upload" },
                     "Writing",
                     currentPercentage, currentPercentage + stepPercentage, config.Device);
                 state = state.Concat(command);
@@ -418,26 +421,24 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     if (existingPorts.Contains(port.Port)) continue;
                     _currentPorts.Add(port.Port);
                     var arduino = new Arduino(Pio, port);
-                    _ = Task.Delay(1000).ContinueWith(_ =>
+                    await Task.Delay(1000);
+                    if (arduino.Board.IsGeneric())
                     {
-                        if (arduino.Board.IsGeneric())
+                        // If a device is generic, then we have no real way of detecting it and must send a detection packet to work out what it is
+                        var santroller = new Santroller(Pio, port);
+                        if (santroller.Valid)
                         {
-                            // If a device is generic, then we have no real way of detecting it and must send a detection packet to work out what it is
-                            var santroller = new Santroller(Pio, port);
-                            if (santroller.Valid)
-                            {
-                                AvailableDevices.Add(santroller);
-                            }
-                            else
-                            {
-                                AvailableDevices.Add(arduino);
-                            }
+                            AvailableDevices.Add(santroller);
                         }
                         else
                         {
                             AvailableDevices.Add(arduino);
                         }
-                    }, TaskScheduler.Default);
+                    }
+                    else
+                    {
+                        AvailableDevices.Add(arduino);
+                    }
                 }
 
                 var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
@@ -454,49 +455,36 @@ namespace GuitarConfigurator.NetCore.ViewModels
         }
 
 
-        
-
         private static bool CheckDependencies()
         {
             // Call check dependencies on startup, and pop up a dialog saying drivers are missing would you like to install if they are missing
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
-                var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
-                info.ArgumentList.Add("-e");
-                info.RedirectStandardOutput = true;
-                info.CreateNoWindow = true;
-                var process = Process.Start(info);
-                if (process == null) return false;
-                var output = process.StandardOutput.ReadToEnd();
-                // Check if the driver exists (we install this specific version of the driver so its easiest to check for it.)
-                return output.Contains("Atmel USB Devices") && output.Contains("Atmel Corporation") &&
-                       output.Contains("10/02/2010 1.2.2.0");
+                return DriverStore.ExistingDrivers.Any(s => s.Contains("atmel_usb_dfu"));
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return File.Exists(UdevPath);
-
-            return true;
+            return !RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || File.Exists(UdevPath);
         }
 
         private static async Task InstallDependenciesAsync()
         {
             if (CheckDependencies()) return;
             //TODO: pop open a dialog before doing this
-            //TODO: replace this with something using nefarious since that can just do this for us
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
+                var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
                 var appdataFolder = AssetUtils.GetAppDataFolder();
                 var driverFolder = Path.Combine(appdataFolder, "drivers");
-                await AssetUtils.ExtractXzAsync("dfu.7z", driverFolder);
-
+                await AssetUtils.ExtractXzAsync("dfu.tar.xz", appdataFolder);
+                
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.AddRange(new[] {"-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf")});
                 info.UseShellExecute = true;
                 info.CreateNoWindow = true;
+                info.WindowStyle = ProcessWindowStyle.Hidden;
                 info.Verb = "runas";
                 Process.Start(info);
+                
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -505,7 +493,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var rules = Path.Combine(appdataFolder, UdevFile);
                 await AssetUtils.ExtractFileAsync(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
-                info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});
+                info.ArgumentList.AddRange(new[] { "cp", rules, UdevPath });
                 info.UseShellExecute = true;
                 Process.Start(info);
             }
