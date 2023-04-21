@@ -430,7 +430,7 @@ public class Led : Output
 
         // On PS3 or 360, DJ leds respond to both values being the same. For PC reasons, we have a seperate euphoria command
         if (Command.IsDj())
-            return $@"if (consoleType != UNIVERSAL && consoleType != XBOX360)) {{
+            return $@"if (consoleType != UNIVERSAL && consoleType != WINDOWS && rumble_left == rumble_right)) {{
                 {between}
             }} else if ((rumble_right == {(int) RumbleCommand.DjEuphoria}) {{
                 {between}

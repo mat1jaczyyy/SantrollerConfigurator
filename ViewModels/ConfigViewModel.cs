@@ -1126,7 +1126,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         for (var i = 0; i <= ledMax; i += 16) ret += "spi_transfer(APA102_SPI_PORT, 0xff);";
 
-        return ret.Replace('\r', ' ').Replace('\n', ' ') + GenerateTick(ConfigField.StrobeLed);
+        return GenerateTick(ConfigField.StrobeLed) + ret.Replace('\r', ' ').Replace('\n', ' ');
     }
 
     private string GenerateTick(ConfigField mode)

@@ -6,7 +6,7 @@ namespace GuitarConfigurator.NetCore;
 
 public static class ProgramWindowsDebug
 {
-#if false
+#if Windows
     [System.Runtime.InteropServices.DllImport("kernel32.dll")]
     private static extern bool AllocConsole();
     public static void Main(string[] args)

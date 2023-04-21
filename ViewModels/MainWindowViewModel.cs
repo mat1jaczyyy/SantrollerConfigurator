@@ -22,11 +22,6 @@ using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
 using ReactiveUI;
 using Timer = System.Timers.Timer;
-#if Windows
-using GuitarConfigurator.NetCore.Notify;
-using LibUsbDotNet.Info;
-using LibUsbDotNet.WinUsb;
-#endif
 
 namespace GuitarConfigurator.NetCore.ViewModels
 {
@@ -34,14 +29,12 @@ namespace GuitarConfigurator.NetCore.ViewModels
     {
         private static readonly string UdevFile = "99-ardwiino.rules";
         private static readonly string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
-
+        private ConfigurableUsbDeviceManager _manager;
         private readonly ObservableAsPropertyHelper<bool> _connected;
 
         private readonly List<string> _currentDrives = new();
         private readonly HashSet<string> _currentDrivesTemp = new();
         private readonly List<string> _currentPorts = new();
-
-        private readonly IDeviceNotifier _deviceListener;
 
         private readonly ObservableAsPropertyHelper<bool> _is32U4;
 
@@ -107,6 +100,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 .Filter(this.WhenAnyValue(s => s.SelectedDevice).Select(CreateFilter))
                 .Bind(out var deviceInputTypes).Subscribe();
             DeviceInputTypes = deviceInputTypes;
+            _manager = new ConfigurableUsbDeviceManager(this);
             ConfigureCommand = ReactiveCommand.CreateFromObservable(
                 () => Router.Navigate.Execute(new ConfigViewModel(this, SelectedDevice!))
             );
@@ -168,13 +162,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 DeviceInputType = DeviceInputType.Direct;
                 this.RaisePropertyChanged(nameof(DeviceInputType));
             });
-#if Windows
-            _deviceListener = new WindowsDeviceNotifierAvalonia();
-
-#else
-            _deviceListener = new LinuxDeviceNotifier();
-#endif
-            _deviceListener.OnDeviceNotify += OnDeviceNotify;
             _timer.Elapsed += DevicePoller_Tick;
             _timer.AutoReset = false;
             StartWorking();
@@ -188,21 +175,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 Complete(100);
                 Working = false;
                 Installed = true;
-#if Windows
-                List<UsbRegistry> deviceListAll = new List<UsbRegistry>();
-                List<WinUsbRegistry> deviceList = new List<WinUsbRegistry>();
-                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.UsbGuid, out deviceList);
-                deviceListAll.AddRange(deviceList);
-                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.ArdwiinoGuid, out deviceList);
-                deviceListAll.AddRange(deviceList);
-                WinUsbRegistry.GetWinUsbRegistryList(WindowsDeviceNotifierAvalonia.SantrollerGuid, out deviceList);
-                deviceListAll.AddRange(deviceList);
-                (_deviceListener as WindowsDeviceNotifierAvalonia)!.StartEventLoop();
-#else
-                List<UsbRegistry> deviceListAll = UsbDevice.AllDevices.AsList();
-#endif
-                foreach (var dev in deviceListAll) OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
-
+                _manager.Register();
                 _timer.Start();
             });
 
@@ -316,10 +289,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         public PlatformIo Pio { get; } = new();
 
-        public void Dispose()
-        {
-            _deviceListener.OnDeviceNotify -= OnDeviceNotify;
-        }
 
         // The Router associated with this Screen.
         // Required by the IScreen interface.
@@ -485,52 +454,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         }
 
 
-        private void OnDeviceNotify(object? sender, DeviceNotifyEventArgs e)
-        {
-            Dispatcher.UIThread.Post(() =>
-            {
-                if (e.DeviceType != DeviceType.DeviceInterface) return;
-                if (e.EventType == EventType.DeviceArrival)
-                {
-                    var vid = e.Device.IdVendor;
-                    var pid = e.Device.IdProduct;
-                    if (vid == Dfu.DfuVid && (pid == Dfu.DfuPid16U2 || pid == Dfu.DfuPid8U2))
-                    {
-                        AvailableDevices.Add(new Dfu(e));
-                    }
-                    else if (e.Device.Open(out var dev))
-                    {
-                        var info = dev.Info;
-                        var revision = (ushort) info.Descriptor.BcdDevice;
-                        var product = info.ProductString?.Split(new[] {'\0'}, 2)[0];
-                        var serial = info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
-                        switch (product)
-                        {
-                            case "Santroller" when Programming && !IsPico:
-                                return;
-                            case "Santroller":
-                                AvailableDevices.Add(new Santroller(Pio, e.Device.Name, dev, product, serial,
-                                    revision));
-                                break;
-                            case "Ardwiino" when Programming:
-                            case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
-                                return;
-                            case "Ardwiino":
-                                AvailableDevices.Add(new Ardwiino(Pio, e.Device.Name, dev, product, serial, revision));
-                                break;
-                            default:
-                                dev.Close();
-                                break;
-                        }
-                    }
-                }
-                else
-                {
-                    AvailableDevices.RemoveMany(
-                        AvailableDevices.Items.Where(device => device.IsSameDevice(e.Device.Name)));
-                }
-            });
-        }
+        
 
         private static bool CheckDependencies()
         {
@@ -559,6 +483,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         {
             if (CheckDependencies()) return;
             //TODO: pop open a dialog before doing this
+            //TODO: replace this with something using nefarious since that can just do this for us
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86);
@@ -591,42 +516,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
             }
         }
 
-        private class RegDeviceNotifyInfo : IUsbDeviceNotifyInfo
+
+        public void Dispose()
         {
-            private readonly UsbRegistry _dev;
-
-            public RegDeviceNotifyInfo(UsbRegistry dev)
-            {
-                _dev = dev;
-            }
-
-            public UsbSymbolicName SymbolicName => UsbSymbolicName.Parse(_dev.SymbolicName);
-
-            public string Name => _dev.DevicePath;
-
-            public Guid ClassGuid => _dev.DeviceInterfaceGuids[0];
-
-            public int IdVendor => _dev.Vid;
-
-            public int IdProduct => _dev.Pid;
-
-            public string SerialNumber => _dev.Device.Info.SerialString;
-
-            public bool Open(out UsbDevice usbDevice)
-            {
-                usbDevice = _dev.Device;
-                return usbDevice != null && usbDevice.Open();
-            }
-        }
-
-        private class DeviceNotifyArgsRegistry : DeviceNotifyEventArgs
-        {
-            public DeviceNotifyArgsRegistry(UsbRegistry dev)
-            {
-                Device = new RegDeviceNotifyInfo(dev);
-                DeviceType = DeviceType.DeviceInterface;
-                EventType = EventType.DeviceArrival;
-            }
+            _manager.Dispose();
         }
     }
 }
