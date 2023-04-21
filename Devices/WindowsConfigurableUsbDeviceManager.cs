@@ -144,7 +144,7 @@ public class ConfigurableUsbDeviceManager
 
         public UsbSymbolicName SymbolicName => UsbSymbolicName.Parse(_instanceId);
 
-        public string Name => _path;
+        public string Name => instanceId;
 
         public Guid ClassGuid => DeviceInterfaceIds.UsbDevice;
 
