@@ -61,7 +61,7 @@ public class ConfigurableUsbDeviceManager
                 if (vid == Dfu.DfuVid && (pid == Dfu.DfuPid16U2 || pid == Dfu.DfuPid8U2))
                 {
                     _model.AvailableDevices.Add(
-                        new Dfu(new RegDeviceNotifyInfoEventArgs(new RegDeviceNotifyInfo(path, path, serial))));
+                        new Dfu(new RegDeviceNotifyInfoEventArgs(new RegDeviceNotifyInfo(path, PnPDevice.GetInstanceIdFromInterfaceId(path), serial))));
                 }
                 else if (vid == 0x1209 && pid is 0x2882 or 0x2884)
                 {
