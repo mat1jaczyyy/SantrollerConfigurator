@@ -156,7 +156,7 @@ public class ConfigurableUsbDeviceManager
 
         public bool Open(out UsbDevice usbDevice)
         {
-            WinUsbDevice.Open(_path, out var winUsbDevice);
+            LibusbKDevice.Open(_path, out var winUsbDevice);
             usbDevice = winUsbDevice;
             return winUsbDevice != null && winUsbDevice.Open();
         }
