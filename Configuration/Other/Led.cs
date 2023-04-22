@@ -13,214 +13,276 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Other;
 
-public enum StageKitFogCommands
+public enum StageKitCommand
 {
-    On = 1,
-    Off
+    Fog,
+    Strobe,
+    LedGreen,
+    LedRed,
+    LedYellow,
+    LedBlue,
 }
 
-public enum RumbleCommand
+public enum StageKitStrobeSpeed
 {
-    [Description("Authenticated with console LED")]
-    Auth,
-    [Description("First Player LED")] Player1,
-    [Description("Second Player LED")] Player2,
-    [Description("Third Player LED")] Player3,
-    [Description("Fourth Player LED")] Player4,
+    Slow,
+    Medium,
+    Fast,
+    Fastest,
+}
+
+public enum FiveFretGuitar
+{
+    Open,
+    Green,
+    Red,
+    Yellow,
+    Blue,
+    Orange
+}
+
+public enum SixFretGuitar
+{
+    Open,
+    Black1,
+    Black2,
+    Black3,
+    White1,
+    White2,
+    White3,
+}
+
+public enum RockBandDrum
+{
+    KickPedal,
+    RedPad,
+    YellowPad,
+    BluePad,
+    GreenPad,
+    YellowCymbal,
+    BlueCymbal,
+    GreenCymbal
+}
+
+public enum GuitarHeroDrum
+{
+    KickPedal,
+    RedPad,
+    YellowCymbal,
+    BluePad,
+    OrangeCymbal,
+    GreenPad
+}
+
+public enum Turntable
+{
+    GreenNoteBoth,
+    RedNoteBoth,
+    BlueNoteBoth,
+    GreenNoteLeft,
+    RedNoteLeft,
+    BlueNoteLeft,
+    GreenNoteRight,
+    RedNoteRight,
+    BlueNoteRight,
+}
+
+public enum LedCommandType
+{
     [Description("Num Lock LED")] KeyboardNumLock,
     [Description("Caps Lock LED")] KeyboardCapsLock,
     [Description("Scroll Lock LED")] KeyboardScrollLock,
-    [Description("Stage Kit Fog")] StageKitFog,
-    [Description("Combo LED")] SantrollerCombo = 10,
-    [Description("Solo LED")] SantrollerSolo,
-    [Description("Open Note LED")] SantrollerOpen,
-    [Description("Green LED")] SantrollerGreen,
-    [Description("Red LED")] SantrollerRed,
-    [Description("Yellow LED")] SantrollerYellow,
-    [Description("Blue LED")] SantrollerBlue,
-    [Description("Orange LED")] SantrollerOrange,
-    [Description("Blue Cymbal LED")] SantrollerCymbalBlue,
-    [Description("Yellow Cymbal LED")] SantrollerCymbalYellow,
-    [Description("Green Cymbal LED")] SantrollerCymbalGreen,
-    [Description("Kick LED")] SantrollerKick,
 
-    [Description("Star Power Gauge (Inactive) LED")]
-    SantrollerStarPowerFill,
+    [Description("Authenticated with console LED")]
+    Auth,
+    [Description("Player LEDs")] Player,
+    [Description("Combo LEDs")] Combo,
+    [Description("Input Reactive LEDs")] InputReactive,
 
-    [Description("Star Power Gauge (Active) LED")]
-    SantrollerStarPowerActive,
+    [Description("Star Power Percentage (When not active) LED")]
+    StarPowerInactive,
+
+    [Description("Star Power Percentage (When active) LED")]
+    StarPowerActive,
     [Description("DJ Hero Euphoria LED")] DjEuphoria,
 
-    [Description("Stage Kit Strobe Light")]
-    StageKitStrobe,
-
-    [Description("Stage Kit Green Led 1")]
-    StageKitGreen1 = 0x40,
-
-    [Description("Stage Kit Green Led 2")]
-    StageKitGreen2,
-
-    [Description("Stage Kit Green Led 3")]
-    StageKitGreen3,
-
-    [Description("Stage Kit Green Led 4")]
-    StageKitGreen4,
-
-    [Description("Stage Kit Green Led 5")]
-    StageKitGreen5,
-
-    [Description("Stage Kit Green Led 6")]
-    StageKitGreen6,
-
-    [Description("Stage Kit Green Led 7")]
-    StageKitGreen7,
-
-    [Description("Stage Kit Green Led 8")]
-    StageKitGreen8,
-
-    [Description("Stage Kit Red Led 1")]
-    StageKitRed1 = 0x80,
-
-    [Description("Stage Kit Red Led 2")]
-    StageKitRed2,
-
-    [Description("Stage Kit Red Led 3")]
-    StageKitRed3,
-
-    [Description("Stage Kit Red Led 4")]
-    StageKitRed4,
-
-    [Description("Stage Kit Red Led 5")]
-    StageKitRed5,
-
-    [Description("Stage Kit Red Led 6")]
-    StageKitRed6,
-
-    [Description("Stage Kit Red Led 7")]
-    StageKitRed7,
-
-    [Description("Stage Kit Red Led 8")]
-    StageKitRed8,
-
-    [Description("Stage Kit Yellow Led 1")]
-    StageKitYellow1 = 0x60,
-
-    [Description("Stage Kit Yellow Led 2")]
-    StageKitYellow2,
-
-    [Description("Stage Kit Yellow Led 3")]
-    StageKitYellow3,
-
-    [Description("Stage Kit Yellow Led 4")]
-    StageKitYellow4,
-
-    [Description("Stage Kit Yellow Led 5")]
-    StageKitYellow5,
-
-    [Description("Stage Kit Yellow Led 6")]
-    StageKitYellow6,
-
-    [Description("Stage Kit Yellow Led 7")]
-    StageKitYellow7,
-
-    [Description("Stage Kit Yellow Led 8")]
-    StageKitYellow8,
-
-    [Description("Stage Kit Blue Led 1")]
-    StageKitBlue1 = 0x20,
-
-    [Description("Stage Kit Blue Led 2")]
-    StageKitBlue2,
-
-    [Description("Stage Kit Blue Led 3")]
-    StageKitBlue3,
-
-    [Description("Stage Kit Blue Led 4")]
-    StageKitBlue4,
-
-    [Description("Stage Kit Blue Led 5")]
-    StageKitBlue5,
-
-    [Description("Stage Kit Blue Led 6")]
-    StageKitBlue6,
-
-    [Description("Stage Kit Blue Led 7")]
-    StageKitBlue7,
-
-    [Description("Stage Kit Blue Led 8")]
-    StageKitBlue8,
+    [Description("Stage Kit")] StageKitLed,
 
     [Description("PS4 Light Bar")] Ps4LightBar
 }
 
-public static class RumbleCommandMethods
+public enum RumbleCommand
 {
-    public static bool IsStageKit(this RumbleCommand command)
-    {
-        return command.ToString().StartsWith("StageKit");
-    }
-
-    public static bool IsSantroller(this RumbleCommand command)
-    {
-        return command.ToString().StartsWith("Santroller");
-    }
-
-    public static bool IsPlayer(this RumbleCommand command)
-    {
-        return command.ToString().StartsWith("Player");
-    }
-
-    public static bool IsKeyboard(this RumbleCommand command)
-    {
-        return command.ToString().StartsWith("Keyboard");
-    }
-
-    public static bool IsDj(this RumbleCommand command)
-    {
-        return command is RumbleCommand.DjEuphoria;
-    }
-    
-    public static bool IsDrum(this RumbleCommand command)
-    {
-        return command is RumbleCommand.SantrollerCymbalBlue or RumbleCommand.SantrollerCymbalYellow or RumbleCommand.SantrollerCymbalBlue or RumbleCommand.SantrollerKick;
-    }
-
-    public static bool IsAuth(this RumbleCommand command)
-    {
-        return command is RumbleCommand.Auth;
-    }
+    StageKitFogOn = 1,
+    StageKitFogOff,
+    StageKitStrobeLightSlow,
+    StageKitStrobeLightMedium,
+    StageKitStrobeLightFast,
+    StageKitStrobeLightFastest,
+    StageKitStrobeLightOff,
+    SantrollerStarPowerGauge,
+    SantrollerStarPowerActive,
+    SantrollerMultiplier,
+    SantrollerSolo,
+    StageKitStrobeLightBlue = 0x20,
+    StageKitStrobeLightGreen = 0x40,
+    StageKitStrobeLightYellow = 0x60,
+    StageKitStrobeLightRed = 0x80,
+    SantrollerInputSpecific = 0x90,
+    SantrollerEuphoriaLed = 0xA0,
+    StageKitReset = 0xFF
 }
 
 public class Led : Output
 {
-    private readonly SourceList<RumbleCommand> _rumbleCommands = new();
+    private readonly SourceList<LedCommandType> _rumbleCommands = new();
     private bool _outputEnabled;
 
     private int _pin;
 
     public Led(ConfigViewModel model, bool outputEnabled, int pin, Color ledOn,
-        Color ledOff, byte[] ledIndices, RumbleCommand command) : base(model, new FixedInput(model, 0), ledOn, ledOff,
+        Color ledOff, byte[] ledIndices, LedCommandType command, int param, int param2) : base(model,
+        new FixedInput(model, 0),
+        ledOn, ledOff,
         ledIndices)
     {
+        Player = 1;
+        Combo = 1;
+        StageKitLed = 1;
+        FiveFretGuitar = 0;
+        SixFretGuitar = 0;
+        GuitarHeroDrum = 0;
+        RockBandDrum = 0;
+        Turntable = 0;
+        StageKitCommand = 0;
+        StrobeSpeed = 0;
+        switch (command)
+        {
+            case LedCommandType.InputReactive:
+                switch (model.DeviceType)
+                {
+                    case DeviceControllerType.Guitar:
+                        FiveFretGuitar = (FiveFretGuitar) param;
+                        break;
+                    case DeviceControllerType.LiveGuitar:
+                        SixFretGuitar = (SixFretGuitar) param;
+                        break;
+                    case DeviceControllerType.Drum when Model.RhythmType is RhythmType.GuitarHero:
+                        GuitarHeroDrum = (GuitarHeroDrum) param;
+                        break;
+                    case DeviceControllerType.Drum when Model.RhythmType is RhythmType.RockBand:
+                        RockBandDrum = (RockBandDrum) param;
+                        break;
+                    case DeviceControllerType.Turntable:
+                        Turntable = (Turntable) param;
+                        break;
+                }
+
+                break;
+            case LedCommandType.Player:
+                Player = param + 1;
+                break;
+            case LedCommandType.Combo:
+                Combo = param + 1;
+                break;
+            case LedCommandType.StageKitLed:
+                StageKitCommand = (StageKitCommand) param;
+                switch (StageKitCommand)
+                {
+                    case StageKitCommand.Strobe:
+                        StrobeSpeed = (StageKitStrobeSpeed) param2;
+                        break;
+                    default:
+                        StageKitLed = param2 + 1;
+                        break;
+                }
+
+                break;
+        }
+
         Pin = pin;
         OutputEnabled = outputEnabled;
         Command = command;
-        _rumbleCommands.AddRange(Enum.GetValues<RumbleCommand>());
+        _rumbleCommands.AddRange(Enum.GetValues<LedCommandType>());
         _rumbleCommands.Connect()
-            .Filter(this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.EmulationType, x => x.Model.RhythmType, x => x.Model.IsApa102).Select(FilterLeds))
+            .Filter(this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.EmulationType, x => x.Model.RhythmType,
+                x => x.Model.IsApa102).Select(FilterLeds))
             .Bind(out var rumbleCommands)
             .Subscribe();
         RumbleCommands = rumbleCommands;
-        _ledRequiresColours = this.WhenAnyValue(x => x.Command).Select(s => s is not RumbleCommand.Ps4LightBar)
+        _ledsRequireColours = this.WhenAnyValue(x => x.Command).Select(s => s is not LedCommandType.Ps4LightBar)
             .ToProperty(this, x => x.LedsRequireColours);
+
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType)
+            .Select(s => s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.Guitar)
+            .ToPropertyEx(this, x => x.FiveFretMode);
+
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType)
+            .Select(s => s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.LiveGuitar)
+            .ToPropertyEx(this, x => x.SixFretMode);
+
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType, x => x.Model.RhythmType)
+            .Select(s =>
+                s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.Drum &&
+                s.Item3 is RhythmType.GuitarHero)
+            .ToPropertyEx(this, x => x.GuitarHeroDrumsMode);
+
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType, x => x.Model.RhythmType)
+            .Select(s =>
+                s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.Drum &&
+                s.Item3 is RhythmType.RockBand)
+            .ToPropertyEx(this, x => x.RockBandDrumsMode);
+
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType)
+            .Select(s => s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.Turntable)
+            .ToPropertyEx(this, x => x.TurntableMode);
+
+        this.WhenAnyValue(x => x.Command).Select(s => s is LedCommandType.Player)
+            .ToPropertyEx(this, x => x.PlayerMode);
+
+        this.WhenAnyValue(x => x.Command).Select(s => s is LedCommandType.Combo)
+            .ToPropertyEx(this, x => x.ComboMode);
+
+        this.WhenAnyValue(x => x.Command, x => x.StageKitCommand).Select(s =>
+                s.Item1 is LedCommandType.StageKitLed && s.Item2 is StageKitCommand.Strobe)
+            .ToPropertyEx(this, x => x.StageKitStrobeSpeedMode);
+
+        this.WhenAnyValue(x => x.Command, x => x.StageKitCommand).Select(s =>
+                s.Item1 is LedCommandType.StageKitLed && s.Item2 is StageKitCommand.LedBlue or StageKitCommand.LedGreen
+                    or StageKitCommand.LedRed or StageKitCommand.LedYellow)
+            .ToPropertyEx(this, x => x.StageKitLedMode);
+        
+        this.WhenAnyValue(x => x.Command).Select(s => s is LedCommandType.StageKitLed)
+            .ToPropertyEx(this, x => x.StageKitMode);
+        UpdateDetails();
     }
 
-    private readonly ObservableAsPropertyHelper<bool> _ledRequiresColours;
+    private ObservableAsPropertyHelper<bool> _ledsRequireColours;
+    public override bool LedsRequireColours => _ledsRequireColours.Value;
+    // ReSharper disable UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public bool FiveFretMode { get; }
+    [ObservableAsProperty] public bool SixFretMode { get; }
+    [ObservableAsProperty] public bool GuitarHeroDrumsMode { get; }
+    [ObservableAsProperty] public bool RockBandDrumsMode { get; }
+    [ObservableAsProperty] public bool TurntableMode { get; }
+    [ObservableAsProperty] public bool PlayerMode { get; }
+    [ObservableAsProperty] public bool ComboMode { get; }
+    [ObservableAsProperty] public bool StageKitStrobeSpeedMode { get; }
+    [ObservableAsProperty] public bool StageKitLedMode { get; }
+    [ObservableAsProperty] public bool StageKitMode { get; }
 
-    public override bool LedsRequireColours => _ledRequiresColours.Value;
+    // ReSharper enable UnassignedGetOnlyAutoProperty
+    public StageKitCommand[] StageKitCommands { get; } = Enum.GetValues<StageKitCommand>();
+    public StageKitStrobeSpeed[] StageKitStrobeSpeeds { get; } = Enum.GetValues<StageKitStrobeSpeed>();
+    public FiveFretGuitar[] FiveFretGuitars { get; } = Enum.GetValues<FiveFretGuitar>();
+    public SixFretGuitar[] SixFretGuitars { get; } = Enum.GetValues<SixFretGuitar>();
+    public RockBandDrum[] RockBandDrums { get; } = Enum.GetValues<RockBandDrum>();
+    public GuitarHeroDrum[] GuitarHeroDrums { get; } = Enum.GetValues<GuitarHeroDrum>();
+    public Turntable[] Turntables { get; } = Enum.GetValues<Turntable>();
 
     public bool OutputEnabled
     {
@@ -258,11 +320,10 @@ public class Led : Output
         }
     }
 
-    private RumbleCommand _command;
-
-    public RumbleCommand Command
+    private LedCommandType _command;
+    public LedCommandType Command
     {
-        get => _command;
+        get=>_command;
         set
         {
             this.RaiseAndSetIfChanged(ref _command, value);
@@ -270,37 +331,43 @@ public class Led : Output
         }
     }
 
+    [Reactive] public int Player { get; set; }
+    [Reactive] public StageKitStrobeSpeed StrobeSpeed { get; set; }
+    [Reactive] public int StageKitLed { get; set; }
+
+    [Reactive] public int Combo { get; set; }
+
+    [Reactive] public GuitarHeroDrum GuitarHeroDrum { get; set; }
+    [Reactive] public RockBandDrum RockBandDrum { get; set; }
+    [Reactive] public Turntable Turntable { get; set; }
+    [Reactive] public FiveFretGuitar FiveFretGuitar { get; set; }
+    [Reactive] public SixFretGuitar SixFretGuitar { get; set; }
+
+    [Reactive] public StageKitCommand StageKitCommand { get; set; }
+
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 
-    public ReadOnlyObservableCollection<RumbleCommand> RumbleCommands { get; }
+    public ReadOnlyObservableCollection<LedCommandType> RumbleCommands { get; }
 
 
-    public override string LedOnLabel
+    public override string LedOnLabel => Command switch
     {
-        get
-        {
-            if (Command is RumbleCommand.StageKitFog) return "Fog Inactive LED Colour";
+        LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => "Fog Active LED Colour",
+        LedCommandType.Player or LedCommandType.Auth => "LED Colour",
+        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Start Power Full Colour",
+        _ => "Active LED Colour"
+    };
 
-            if (Command.IsPlayer() || Command.IsAuth()) return "LED Colour";
+    public override string LedOffLabel => Command switch
+    {
+        LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => "Fog Inactive LED Colour",
+        LedCommandType.Player or LedCommandType.Auth => "LED Colour",
+        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Start Power Empty Colour",
+        _ => "Inactive LED Colour"
+    };
 
-            if (Command is RumbleCommand.SantrollerStarPowerActive or RumbleCommand.SantrollerStarPowerFill)
-                return "Start Power Gauge Full Colour";
-
-            return "Active LED Colour";
-        }
-    }
-
-    public override string LedOffLabel =>
-        Command switch
-        {
-            RumbleCommand.StageKitFog => "Fog Inactive LED Colour",
-            RumbleCommand.SantrollerStarPowerActive or RumbleCommand.SantrollerStarPowerFill =>
-                "Start Power Gauge Empty Colour",
-            _ => "Inactive LED Colour"
-        };
-
-    public override bool SupportsLedOff => !Command.IsAuth() && !Command.IsPlayer();
+    public override bool SupportsLedOff => Command is not LedCommandType.Auth or LedCommandType.Player;
 
     public override bool IsKeyboard => false;
     public virtual bool IsController => false;
@@ -332,47 +399,77 @@ public class Led : Output
         };
     }
 
-    public static Func<RumbleCommand, bool> FilterLeds((DeviceControllerType controllerType, EmulationType emulationType, RhythmType rhythmType, bool isApa102) type)
+    public static Func<LedCommandType, bool> FilterLeds(
+        (DeviceControllerType controllerType, EmulationType emulationType, RhythmType rhythmType, bool isApa102) type)
     {
-        switch (type.emulationType)
+        return command =>
         {
-            case EmulationType.KeyboardMouse or EmulationType.BluetoothKeyboardMouse:
-                return command => command.IsKeyboard();
-            case EmulationType.Controller or EmulationType.Bluetooth:
-                switch (type.controllerType)
+            return type.emulationType switch
+            {
+                EmulationType.KeyboardMouse or EmulationType.BluetoothKeyboardMouse => command is
+                    LedCommandType.KeyboardCapsLock or LedCommandType.KeyboardScrollLock
+                    or LedCommandType.KeyboardNumLock,
+                EmulationType.Controller or EmulationType.Bluetooth => command switch
                 {
-                    case DeviceControllerType.StageKit:
-                        return command => command.IsStageKit() || command.IsPlayer() || command.IsAuth() || command.IsSantroller();
-                    case DeviceControllerType.Gamepad:
-                    case DeviceControllerType.ArcadeStick:
-                    case DeviceControllerType.FlightStick:
-                    case DeviceControllerType.DancePad:
-                    case DeviceControllerType.ArcadePad:
-                    case DeviceControllerType.Guitar:
-                    case DeviceControllerType.LiveGuitar:
-                    case DeviceControllerType.Drum when type.rhythmType is RhythmType.GuitarHero:
-                        return command => !command.IsDrum() &&
-                            (command.IsAuth() || command.IsPlayer() || command.IsSantroller() ||
-                            // Lightbar only works with APA102s, as it requires full RGB
-                            (type.isApa102 && command is RumbleCommand.Ps4LightBar));
-                    case DeviceControllerType.Drum when type.rhythmType is RhythmType.RockBand:
-                        return command => command != RumbleCommand.SantrollerOrange &&
-                            (command.IsAuth() || command.IsPlayer() || command.IsSantroller() ||
-                            // Lightbar only works with APA102s, as it requires full RGB
-                            (type.isApa102 && command is RumbleCommand.Ps4LightBar));
-                    case DeviceControllerType.Turntable:
-                        return command => command.IsDj() || command.IsAuth() || command.IsPlayer() || command.IsSantroller();
-                }
-
-                break;
-        }
-
-        return _ => false;
+                    LedCommandType.Auth or LedCommandType.Player => true,
+                    LedCommandType.Combo or LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive
+                        or LedCommandType.InputReactive or LedCommandType.StageKitLed when
+                        type.controllerType is DeviceControllerType.Drum or DeviceControllerType.Guitar
+                            or DeviceControllerType.LiveGuitar or DeviceControllerType.Turntable
+                            or DeviceControllerType.StageKit => true,
+                    LedCommandType.DjEuphoria when type.controllerType is DeviceControllerType.Turntable => true,
+                    _ => false
+                },
+                _ => false
+            };
+        };
     }
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command, OutputEnabled, Pin);
+        var param1 = 0;
+        var param2 = 0;
+        switch (Command)
+        {
+            case LedCommandType.InputReactive:
+                switch (Model.DeviceType)
+                {
+                    case DeviceControllerType.Guitar:
+                        param1 = (int) FiveFretGuitar;
+                        break;
+                    case DeviceControllerType.LiveGuitar:
+                        param1 = (int) SixFretGuitar;
+                        break;
+                    case DeviceControllerType.Drum when Model.RhythmType is RhythmType.GuitarHero:
+                        param1 = (int) GuitarHeroDrum;
+                        break;
+                    case DeviceControllerType.Drum when Model.RhythmType is RhythmType.RockBand:
+                        param1 = (int) RockBandDrum;
+                        break;
+                    case DeviceControllerType.Turntable:
+                        param1 = (int) Turntable;
+                        break;
+                }
+
+                break;
+            case LedCommandType.Player:
+                param1 = Player - 1;
+                break;
+            case LedCommandType.Combo:
+                param1 = Combo - 1;
+                break;
+            case LedCommandType.StageKitLed:
+                param1 = (int) StageKitCommand;
+                param2 = StageKitCommand switch
+                {
+                    StageKitCommand.Strobe => (int) StrobeSpeed,
+                    _ => StageKitLed - 1
+                };
+
+                break;
+        }
+
+        return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command, param1, param2, OutputEnabled, Pin);
     }
 
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
@@ -385,119 +482,196 @@ public class Led : Output
         List<int> combinedDebounce)
     {
         if (mode is not (ConfigField.StrobeLed or ConfigField.AuthLed or ConfigField.PlayerLed or ConfigField.RumbleLed
-                or ConfigField.KeyboardLed or ConfigField.LightBarLed)) return "";
-        switch (mode)
-        {
-            case ConfigField.StrobeLed when Command is not RumbleCommand.StageKitStrobe:
-            case ConfigField.PlayerLed when !Command.IsPlayer():
-            case ConfigField.AuthLed when !Command.IsAuth():
-            case ConfigField.RumbleLed when Command.IsPlayer() || Command.IsAuth():
-            case ConfigField.LightBarLed when Command is not RumbleCommand.Ps4LightBar:
-                return "";
-            case ConfigField.KeyboardLed when !Command.IsKeyboard():
-                return "";
-            case ConfigField.LightBarLed:
-                return string.Join("\n",
-                    LedIndices.Select(index => Model.LedType.GetLedAssignment("red", "green", "blue", index)));
-;        }
-
+            or ConfigField.KeyboardLed or ConfigField.LightBarLed)) return "";
         var allOff = "(rumble_left == 0x00 rumble_right == 0xFF)";
         var on = "";
         var off = "";
         if (PinConfig != null)
         {
-            on = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, true)+";";
-            off = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, false)+";";
+            on = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, true) + ";";
+            off = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, false) + ";";
         }
 
         var between = "";
+        var starPowerBetween = "";
         foreach (var index in LedIndices)
         {
             on += $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, index)}";
             off += $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, index)}";
             between +=
                 $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, LedOff, "rumble_left", index)}";
+            starPowerBetween +=
+                $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, LedOff, "last_start_power", index)}";
         }
 
-        // Player and Auth commands are a set and forget type thing, they are never switched off after being turned on
-        if (Command.IsPlayer())
-            return $@"
-                if (player == {(int) Command}) {{
+        switch (Command)
+        {
+            case LedCommandType.Ps4LightBar when mode is ConfigField.LightBarLed:
+                return string.Join("\n",
+                    LedIndices.Select(index => Model.LedType.GetLedAssignment("red", "green", "blue", index)));
+            // Player and Auth commands are a set and forget type thing, they are never switched off after being turned on
+            case LedCommandType.Player when mode is ConfigField.PlayerLed:
+                return $@"
+                if (player == {Player}) {{
                     {on}
                 }}";
+            case LedCommandType.Auth when mode is ConfigField.AuthLed:
+                return on;
+        }
 
-        if (Command.IsAuth()) return on;
+        if (mode is ConfigField.KeyboardLed && Command is LedCommandType.KeyboardCapsLock
+                or LedCommandType.KeyboardNumLock
+                or LedCommandType.KeyboardScrollLock)
+        {
+            return
+                $@"if (leds & {1 << (Command - LedCommandType.KeyboardCapsLock)}) {{
+                    {on}
+                }} else {{
+                    {off}
+                }}";
+        }
 
-        // On PS3 or 360, DJ leds respond to both values being the same. For PC reasons, we have a seperate euphoria command
-        if (Command.IsDj())
-            return $@"if (consoleType != UNIVERSAL && consoleType != WINDOWS && rumble_left == rumble_right)) {{
-                {between}
-            }} else if ((rumble_right == {(int) RumbleCommand.DjEuphoria}) {{
+        switch (Command)
+        {
+            case LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Strobe &&
+                                                 mode == ConfigField.StrobeLed:
+                return @$"if (last_strobe && last_strobe - millis() > stage_kit_millis[strobe_delay]) {{
+                        last_strobe = millis();
+                        {on}
+                    }} else if (last_strobe && last_strobe - millis() > 10) {{
+                        {off}
+                    }}";
+            case LedCommandType.StarPowerActive when
+                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.StrobeLed:
+                return $@"if (star_power_active) {{
+                             {starPowerBetween}
+                          }}";
+            case LedCommandType.StarPowerInactive when
+                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.StrobeLed:
+                return $@"if (!star_power_active) {{
+                             {starPowerBetween}
+                          }}";
+            case LedCommandType.StarPowerInactive or LedCommandType.StarPowerActive when
+                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.RumbleLed:
+                return
+                    $@"if (rumble_right == {RumbleCommand.SantrollerStarPowerGauge} && rumble_left != {RumbleCommand.SantrollerStarPowerGauge}) {{
+                           last_star_power = rumble_left;
+                      }}";
+            case LedCommandType.StarPowerInactive when
+                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.RumbleLed:
+                return $@"if (rumble_right == {RumbleCommand.SantrollerStarPowerActive}) {{
+                           if (rumble_left && !star_power_active) {{
+                                {off}
+                                star_power_active = true;
+                           }}
+                      }}";
+            case LedCommandType.StarPowerActive when
+                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.RumbleLed:
+                return $@"if (rumble_right == {RumbleCommand.SantrollerStarPowerActive}) {{
+                           if (!rumble_left && star_power_active) {{
+                                {off}
+                                star_power_active = false;
+                           }}
+                      }}";
+        }
+
+        if (mode is not ConfigField.RumbleLed) return "";
+
+
+        switch (Command)
+        {
+            case LedCommandType.DjEuphoria:
+                return $@"if (rumble_left != rumble_right)) {{
                 {between}
             }}";
-
-        if (Command.IsSantroller())
-            // Only support santroller commands on PC (either universal or xinput + windows)
-            return
-                $@"if ((consoleType == UNIVERSAL || consoleType == WINDOWS) && rumble_right == {(int) Command}) {{
+            case LedCommandType.Combo:
+                return $@"if (rumble_right == {(int) RumbleCommand.SantrollerMultiplier}) {{
+                    if (rumble_left == {Combo + 10}) {{
+                        {on}
+                    }} else {{
+                        {off}
+                    }}
+                }}";
+            case LedCommandType.InputReactive:
+            {
+                var santrollerCmd = Model.DeviceType switch
+                {
+                    DeviceControllerType.Guitar => (int) FiveFretGuitar,
+                    DeviceControllerType.LiveGuitar => (int) SixFretGuitar,
+                    DeviceControllerType.Drum when Model.RhythmType is RhythmType.GuitarHero => (int) GuitarHeroDrum,
+                    DeviceControllerType.Drum when Model.RhythmType is RhythmType.RockBand => (int) RockBandDrum,
+                    DeviceControllerType.Turntable => (int) Turntable,
+                    _ => 0
+                };
+                return $@"if (rumble_right == {(int) (RumbleCommand.SantrollerInputSpecific + santrollerCmd)}) {{
                     if (rumble_left == 1) {{
                         {on}
                     }} else {{
                         {off}
                     }}
                 }}";
-
-        if (Command.IsKeyboard())
-            return
-                $@"if (leds & {1 << (Command - RumbleCommand.KeyboardNumLock)}) {{
-                    {on}
-                }} else {{
-                    {off}
-                }}";
+            }
+        }
 
 
-        if (!Command.IsStageKit()) return "";
-        switch (Command)
+        if (Command is not LedCommandType.StageKitLed) return "";
+        // TODO: maybe instead of this allOff thing, we just have yet another ConfigField specifically for the off state and then put them all in there
+        switch (StageKitCommand)
         {
-            // Strobe is special because it well... strobes
-            case RumbleCommand.StageKitStrobe:
-                // In strobe mode, we just blink the led at a rate dictate by strobe_delay, only leaving it on for 10ms
-                if (mode == ConfigField.StrobeLed)
-                    return @$"if (last_strobe && last_strobe - millis() > stage_kit_millis[strobe_delay]) {{
-                                last_strobe = millis();
-                                {on}
-                            }} else if (last_strobe && last_strobe - millis() > 10) {{
-                                {off}
-                            }}";
-
-                // In rumble mode, we update strobe_delay based on packets receive, turning strobe off if requested
-                return $@"
-                        if (rumble_left == 0 && rumble_right >= 3 && rumble_right <= 7) {{
-                            strobe_delay = 5 - (rumble_right - 2);
-                        }}
-                        if (strobe_delay == 0 || {allOff}) {{
-                            strobe_delay = 0;
-                            {off}
-                        }}
-                        ";
-
-            // For fog, there is both an on and off command so we can just handle that 
-            case RumbleCommand.StageKitFog:
-                return $@"if (rumble_left == 0 && rumble_right == {StageKitFogCommands.Off} || {allOff}) {{
-                              {off}
-                          }} else if (rumble_left == 0 && rumble_right == {StageKitFogCommands.On}) {{
-                              {on}
-                          }}";
-            // for the leds, we need to turn the led on if the bit is set, and off if it is not.
-            case >= RumbleCommand.StageKitGreen1:
+            case StageKitCommand.Fog:
+                return $@"if ((rumble_left == 0 && rumble_right == {RumbleCommand.StageKitFogOff}) || {allOff}) {{
+                          {off}
+                      }} else if (rumble_left == 0 && rumble_right == {RumbleCommand.StageKitFogOn}) {{
+                          {on}
+                      }}";
+            case StageKitCommand.Strobe:
+                return
+                    $@"if (rumble_left == 0 && rumble_right >= {RumbleCommand.StageKitStrobeLightSlow} && rumble_right <= {RumbleCommand.StageKitStrobeLightFastest}) {{
+                           strobe_delay = 5 - (rumble_right - {RumbleCommand.StageKitFogOff});
+                      }}
+                      if (strobe_delay == 0 || {allOff}) {{
+                          strobe_delay = 0;
+                          {off}
+                      }}";
+            case StageKitCommand.LedBlue:
             {
-                var led = 1 << ((int) Command & 0xf);
-                var group = (int) Command & 0xf0;
-                return @$"if ((rumble_left & {led} == 0) && (rumble_right == {group} || {allOff})) {{
-                              {off}
-                          }} else if (rumble_left & ({led}) && rumble_right == {group}) {{
-                              {on}
-                          }}";
+                var led = 1 << (StageKitLed - 1);
+                return
+                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightBlue} || {allOff})) {{
+                          {off}
+                      }} else if (rumble_left & ({led}) && rumble_right == {RumbleCommand.StageKitStrobeLightBlue}) {{
+                          {on}
+                      }}";
+            }
+            case StageKitCommand.LedGreen:
+            {
+                var led = 1 << (StageKitLed - 1);
+                return
+                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightGreen} || {allOff})) {{
+                          {off}
+                      }} else if (rumble_left & ({led}) && rumble_right == {RumbleCommand.StageKitStrobeLightGreen}) {{
+                          {on}
+                      }}";
+            }
+            case StageKitCommand.LedRed:
+            {
+                var led = 1 << (StageKitLed - 1);
+                return
+                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightRed} || {allOff})) {{
+                          {off}
+                      }} else if (rumble_left & ({led}) && rumble_right == {RumbleCommand.StageKitStrobeLightRed}) {{
+                          {on}
+                      }}";
+            }
+            case StageKitCommand.LedYellow:
+            {
+                var led = 1 << (StageKitLed - 1);
+                return
+                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightYellow} || {allOff})) {{
+                          {off}
+                      }} else if (rumble_left & ({led}) && rumble_right == {RumbleCommand.StageKitStrobeLightYellow}) {{
+                          {on}
+                      }}";
             }
             default:
                 return "";

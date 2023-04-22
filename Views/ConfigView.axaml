@@ -405,15 +405,110 @@
                                   Items="{Binding RumbleCommands}"
                                   ItemTemplate="{StaticResource EnumToStringTemplate}" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" IsVisible="{Binding LedsRequireColours}">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding StageKitMode}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
-                            Enable Digital Output
+                            Stage Kit Command
                         </Label>
-                        <ToggleSwitch IsChecked="{Binding OutputEnabled}" OnContent="Enabled"
-                                      OffContent="Disabled" />
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding StageKitCommand}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                  Items="{Binding StageKitCommands}" />
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding FiveFretMode}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Guitar Input
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding FiveFretGuitar}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                  Items="{Binding FiveFretGuitars}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding SixFretMode}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Live Guitar Input
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding SixFretGuitar}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                  Items="{Binding SixFretGuitars}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding RockBandDrumsMode}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Drum Input
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding RockBandDrum}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                  Items="{Binding RockBandDrums}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding GuitarHeroDrumsMode}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Drum Input
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding GuitarHeroDrum}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                  Items="{Binding GuitarHeroDrums}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding TurntableMode}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Turntable Input
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Turntable}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                  Items="{Binding Turntables}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding StageKitStrobeSpeedMode}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Strobe Speed
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding StrobeSpeed}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                  Items="{Binding StageKitStrobeSpeeds}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding StageKitLedMode}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Led
+                        </Label>
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding StageKitLed}" Minimum="1"
+                                       Maximum="8" Width="200" Height="30" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding PlayerMode}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Player
+                        </Label>
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Player}" Minimum="1"
+                                       Maximum="4" Width="200" Height="30" />
+                    </StackPanel> 
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding ComboMode}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Combo
+                        </Label>
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Combo}" Minimum="1"
+                                       Maximum="244" Width="200" Height="30" />
+                    </StackPanel> 
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding OutputEnabled}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"

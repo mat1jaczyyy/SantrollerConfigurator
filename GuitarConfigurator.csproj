@@ -57,6 +57,7 @@
         <PackageReference Include="Mono.Posix.NETStandard" Version="5.20.1-preview" />
         <PackageReference Include="Nefarius.Utilities.DeviceManagement" Version="3.9.255" />
         <PackageReference Include="protobuf-net" Version="3.2.0" />
+        <PackageReference Include="ReactiveUI.Fody" Version="18.4.34" />
         <PackageReference Include="System.IO.Ports" Version="8.0.0-preview.1.23110.8" />
         <PackageReference Include="SemanticVersioning" Version="2.0.2" />
         <PackageReference Include="System.Text.Json" Version="8.0.0-preview.1.23110.8" />

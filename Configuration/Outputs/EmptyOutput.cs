@@ -41,9 +41,11 @@ public class EmptyOutput : Output
             .Select(x => Model.GetSimpleEmulationType() is EmulationType.KeyboardMouse)
             .ToProperty(this, x => x.IsKeyboard);
 
-        _combinedTypes = this.WhenAnyValue(vm => vm.Model.UsbHostEnabled,  vm => vm.Model.DeviceType,
+        _combinedTypes = this.WhenAnyValue(vm => vm.Model.UsbHostEnabled, vm => vm.Model.DeviceType,
                 vm => vm.Model.RhythmType)
-            .Select(tuple => ControllerEnumConverter.GetTypes((tuple.Item2, tuple.Item3)).Where(s2 => (model.IsPico || s2 is not (SimpleType.WtNeckSimple or SimpleType.Bluetooth)) && tuple.Item1 || s2 is not SimpleType.UsbHost)).ToProperty(this, x => x.CombinedTypes);
+            .Select(tuple => ControllerEnumConverter.GetTypes((tuple.Item2, tuple.Item3)).Where(s2 =>
+                (model.IsPico || s2 is not (SimpleType.WtNeckSimple or SimpleType.Bluetooth)) && tuple.Item1 ||
+                s2 is not SimpleType.UsbHost)).ToProperty(this, x => x.CombinedTypes);
     }
 
     public virtual bool IsController => _isController.Value;
@@ -119,8 +121,10 @@ public class EmptyOutput : Output
                     SimpleType.Ps2InputSimple => new Ps2CombinedOutput(Model),
                     SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model),
                     SimpleType.DjTurntableSimple => new DjCombinedOutput(Model),
-                    SimpleType.Led => new Led(Model, !Model.IsApa102, 0, Colors.Black, Colors.Black, Array.Empty<byte>(),
-                        Enum.GetValues<RumbleCommand>().Where(Led.FilterLeds((Model.DeviceType, Model.EmulationType, Model.RhythmType, Model.IsApa102))).First()),
+                    SimpleType.Led => new Led(Model, !Model.IsApa102, 0, Colors.Black, Colors.Black,
+                        Array.Empty<byte>(),
+                        Enum.GetValues<LedCommandType>().Where(Led.FilterLeds((Model.DeviceType, Model.EmulationType,
+                            Model.RhythmType, Model.IsApa102))).First(), 0, 0),
                     SimpleType.Rumble => new Rumble(Model, 0, RumbleMotorType.Left),
                     SimpleType.ConsoleMode => new EmulationMode(Model,
                         new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model),
@@ -158,7 +162,9 @@ public class EmptyOutput : Output
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0, guitarAxisType),
                 GuitarAxisType.Slider => new GuitarAxis(Model,
-                    new GhWtTapInput(GhWtInputType.TapBar, Model, Model.Microcontroller.GetFirstAnalogPin(), Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin()),
+                    new GhWtTapInput(GhWtInputType.TapBar, Model, Model.Microcontroller.GetFirstAnalogPin(),
+                        Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(),
+                        Model.Microcontroller.GetFirstDigitalPin()),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
                     short.MinValue, short.MaxValue, 0, GuitarAxisType.Slider),
                 DjAxisType djAxisType => new DjAxis(Model,
