@@ -12,6 +12,7 @@ namespace GuitarConfigurator.NetCore;
 
 public class AssetUtils
 {
+    public delegate void ExtractionProgress(float progress);
     public static async Task ExtractFileAsync(string file, string location)
     {
         await using var f = File.OpenWrite(location);
@@ -44,7 +45,20 @@ public class AssetUtils
         var reader = new StreamReader(target);
         return await reader.ReadToEndAsync();
     }
-    public static async Task ExtractXzAsync(string archiveFile, string location)
+
+    private static async Task GetProgress(XZStream stream, IAsyncResult extract, ExtractionProgress extractionProgress)
+    {
+        while (!extract.IsCompleted)
+        {
+            
+            stream.GetProgress(out var progressIn, out _);
+            var progress = (progressIn / (float) stream.TotalIn) - 0.01f;
+            extractionProgress(progress);
+            await Task.Delay(100);
+        }
+    } 
+
+    public static async Task ExtractXzAsync(string archiveFile, string location, ExtractionProgress extractionProgress)
     {
         var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
@@ -56,8 +70,8 @@ public class AssetUtils
             Threads = Environment.ProcessorCount
         };
         await using var zs = new XZStream(target, decompOpts, opts);
-        
-        await TarFile.ExtractToDirectoryAsync(zs, location, true);
+        var task = TarFile.ExtractToDirectoryAsync(zs, location, true);
+        await GetProgress(zs, task, extractionProgress);
     }
 
     public static string GetAppDataFolder()

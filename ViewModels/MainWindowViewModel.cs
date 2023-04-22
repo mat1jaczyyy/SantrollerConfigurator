@@ -475,7 +475,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
                 var appdataFolder = AssetUtils.GetAppDataFolder();
                 var driverFolder = Path.Combine(appdataFolder, "drivers");
-                await AssetUtils.ExtractXzAsync("dfu.tar.xz", appdataFolder);
+                await AssetUtils.ExtractXzAsync("dfu.tar.xz", appdataFolder, _ => {});
                 
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.AddRange(new[] {"-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf")});

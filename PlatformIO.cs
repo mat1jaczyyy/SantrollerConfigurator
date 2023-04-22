@@ -80,7 +80,7 @@ public class PlatformIo
         }
 
         platformIoOutput.OnNext(new PlatformIoState(0, "Extracting Firmware", ""));
-        await AssetUtils.ExtractXzAsync("firmware.tar.xz", appdataFolder);
+        await AssetUtils.ExtractXzAsync("firmware.tar.xz", appdataFolder, progress => platformIoOutput.OnNext(new PlatformIoState(progress * 10, "Extracting Firmware", "")));
 
         var pythonDir = Path.Combine(appdataFolder, "python");
         var platformIoDir = Path.Combine(appdataFolder, "platformio");
@@ -103,8 +103,8 @@ public class PlatformIo
 
         if (!Directory.Exists(platformIoDir))
         {
-            platformIoOutput.OnNext(new PlatformIoState(60, "Extracting Platform.IO", ""));
-            await AssetUtils.ExtractXzAsync("platformio.tar.xz", appdataFolder);
+            platformIoOutput.OnNext(new PlatformIoState(10, "Extracting Platform.IO", ""));
+            await AssetUtils.ExtractXzAsync("platformio.tar.xz", appdataFolder, progress => platformIoOutput.OnNext(new PlatformIoState(10 + (progress * 90), "Extracting Firmware", "")));
 
             await AssetUtils.ExtractFileAsync("platformio.version", platformIoVersion);
         }
