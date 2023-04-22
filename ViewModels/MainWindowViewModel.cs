@@ -173,7 +173,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             });
         }
 
-        public Task Begin()
+        public void Begin()
         {
             _timer.Elapsed += DevicePoller_Tick;
             _timer.AutoReset = false;
@@ -192,7 +192,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 _timer.Start();
             });
 
-            return InstallDependenciesAsync();
+            _ = InstallDependenciesAsync();
         }
         
         public ReactiveCommand<Unit, IRoutableViewModel> ConfigureCommand { get; }
