@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls.ApplicationLifetimes;
 using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.Utils;
 
@@ -18,7 +19,8 @@ public class PlatformIo
     private readonly string _pythonExecutable;
 
     private readonly Process _portProcess;
-    private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private Process? currentProcess = null;
+    private SemaphoreSlim _semaphore = new(1, 1);
 
     public PlatformIo()
     {
@@ -44,6 +46,19 @@ public class PlatformIo
         _portProcess.StartInfo.RedirectStandardOutput = true;
         _portProcess.StartInfo.RedirectStandardError = true;
         _portProcess.StartInfo.CreateNoWindow = true;
+        // Make sure we kill all python processes on exit
+        var lifetime = (ClassicDesktopStyleApplicationLifetime) Avalonia.Application.Current!.ApplicationLifetime!;
+        lifetime.Exit += Exit;
+    }
+
+    private void Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    {
+        if (!_portProcess.HasExited)
+        {
+            _portProcess.Kill();
+        }
+
+        currentProcess?.Kill();
     }
 
     public string FirmwareDir { get; }
@@ -207,6 +222,7 @@ public class PlatformIo
             process.StartInfo.RedirectStandardError = true;
 
             var state = 0;
+            currentProcess = process;
             process.Start();
             Console.WriteLine("Starting process " + environment);
 
