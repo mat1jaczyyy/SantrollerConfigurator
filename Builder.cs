@@ -21,8 +21,8 @@ public class Builder : Microsoft.Build.Utilities.Task
         const string firmwareUrl = "https://github.com/sanjay900/Ardwiino/releases/download/latest/firmware.tar.xz";
         var platformIoUrl =
             $"https://github.com/sanjay900/santroller-libs/releases/download/latest/platformio-{platform}.tar.xz";
-        var firmwareFileLoc = Path.Combine(Parameter2, "Assets", "platformio.version");
-        var platformioFileLoc = Path.Combine(Parameter2, "Assets", "firmware.version");
+        var firmwareFileLoc = Path.Combine(Parameter2, "Assets", "firmware.version");
+        var platformioFileLoc = Path.Combine(Parameter2, "Assets", "platformio.version");
         var firmwareCommit = GetCommit("Ardwiino", "master");
         var platformIoCommit = GetCommit("santroller-libs", "main");
         var firmwareChanged =
