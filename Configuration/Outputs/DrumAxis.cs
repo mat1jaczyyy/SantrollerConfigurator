@@ -8,6 +8,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
@@ -79,9 +80,6 @@ public class DrumAxis : OutputAxis
 
     private const StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
     private const StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
-    private int _debounce;
-
-    private int _threshold;
 
     public DrumAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
         int deadZone, int threshold, int debounce, DrumAxisType type) : base(model, input, ledOn, ledOff, ledIndices,
@@ -104,17 +102,9 @@ public class DrumAxis : OutputAxis
 
     public override bool IsKeyboard => false;
 
-    public int Threshold
-    {
-        get => _threshold;
-        set => this.RaiseAndSetIfChanged(ref _threshold, value);
-    }
+    [Reactive] public int Threshold { get; set; }
 
-    public int Debounce
-    {
-        get => _debounce;
-        set => this.RaiseAndSetIfChanged(ref _debounce, value);
-    }
+    [Reactive] public int Debounce { get; set; }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
@@ -142,7 +132,8 @@ public class DrumAxis : OutputAxis
         string combinedExtra,
         List<int> combinedDebounce)
     {
-        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
+        if (mode == ConfigField.Shared)
+            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
         var debounce = Debounce + 1;
@@ -150,6 +141,7 @@ public class DrumAxis : OutputAxis
         {
             debounce = Model.Debounce + 1;
         }
+
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
@@ -157,10 +149,12 @@ public class DrumAxis : OutputAxis
         switch (mode)
         {
             case ConfigField.Xbox360:
-                if (ButtonsXbox360.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = true;";
+                if (ButtonsXbox360.ContainsKey(Type))
+                    outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = true;";
                 break;
             case ConfigField.XboxOne:
-                if (ButtonsXboxOne.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsXboxOne[Type])} = true;";
+                if (ButtonsXboxOne.ContainsKey(Type))
+                    outputButtons += $"\n{GetReportField(ButtonsXboxOne[Type])} = true;";
                 break;
             case ConfigField.Ps3:
                 if (ButtonsPs3.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsPs3[Type])} = true;";
@@ -194,13 +188,14 @@ public class DrumAxis : OutputAxis
 
                     break;
             }
-        
+
         // If someone specified a digital input, then we need to take the value they have specified and convert it to the target consoles expected output
         var dtaVal = 0;
         if (Input is DigitalToAnalog dta)
         {
             dtaVal = dta.On;
         }
+
         var assignedVal = "val_real";
         // Xbox one uses 4 bit velocities
         if (mode == ConfigField.XboxOne)
@@ -242,7 +237,7 @@ public class DrumAxis : OutputAxis
             }
         }
 
-        
+
         var rfExtra = "";
         // If someone has mapped digital inputs to the drums, then we can shortcut a bunch of the tests, and just need to use the calculated value from above
         if (Input is DigitalToAnalog dta2)
@@ -257,6 +252,7 @@ public class DrumAxis : OutputAxis
                 }}  
             ";
             }
+
             return $@"
             {{
                 if ({Input.Generate(mode)}) {{
@@ -270,6 +266,7 @@ public class DrumAxis : OutputAxis
                 }}
             }}";
         }
+
         // For bluetooth and RF, stuff the cymbal data into some unused bytes for rf reasons
         if (mode == ConfigField.Ps3 &&
             Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
@@ -280,6 +277,7 @@ public class DrumAxis : OutputAxis
                 }}  
             ";
         }
+
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"

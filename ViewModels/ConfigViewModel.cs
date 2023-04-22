@@ -28,6 +28,7 @@ using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.Input;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Other;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.ViewModels;
 
@@ -41,21 +42,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public static readonly int UnoPinTypeRxPin = 0;
     public static readonly int UnoPinTypeTxPin = 1;
     public IConfigurableDevice Device { get; private set; }
-    private readonly ObservableAsPropertyHelper<bool> _isApa102;
-    private readonly ObservableAsPropertyHelper<bool> _isController;
-    private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
-    private readonly ObservableAsPropertyHelper<bool> _isRf;
-    private readonly ObservableAsPropertyHelper<bool> _isBluetooth;
-    private readonly ObservableAsPropertyHelper<bool> _isRhythm;
-    private readonly ObservableAsPropertyHelper<bool> _isGuitar;
-    private readonly ObservableAsPropertyHelper<bool> _isStageKit;
-    private readonly ObservableAsPropertyHelper<bool> _isStandardMode;
-    private readonly ObservableAsPropertyHelper<bool> _isRetailMode;
-    private readonly ObservableAsPropertyHelper<bool> _isAdvancedMode;
 
     public ReadOnlyObservableCollection<Output> Outputs { get; }
 
-    private readonly ObservableAsPropertyHelper<string?> _writeToolTip;
 
     private SpiConfig? _apa102SpiConfig;
 
@@ -63,31 +52,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private EmulationType _emulationType;
 
-    private bool _fininalised;
-
-    private bool _hasError;
-
-    private byte _ledCount;
-
-    private byte _wtSensitivity;
-
     private LedType _ledType;
 
-    private int _debounce;
-
-    private int _strumDebounce;
-
-    private int _pollRate;
-
-    private MouseMovementType _mouseMovementType;
-
     private DirectPinConfig? _rfCe;
-    private bool _connected;
-    private bool _rfModuleDetected;
-
-    private byte _rfChannel;
-
-    private byte _rfId;
 
     private DirectPinConfig? _rfCsn;
 
@@ -98,12 +65,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private RhythmType _rhythmType;
 
-    private bool _xinputOnWindows;
-
     private bool _usbHostEnabled;
-    private RfPowerLevel _powerLevel;
-    private RfDataRate _dataRate;
-    private ModeType _mode;
 
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
@@ -150,39 +112,39 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         GoBackCommand = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
             this.WhenAnyValue(x => x.Main.Working).Select(s => !s));
 
-        _writeToolTip = this.WhenAnyValue(x => x.HasError)
-            .Select(s => s ? "There are errors in your configuration" : null).ToProperty(this, s => s.WriteToolTip);
-        _isAdvancedMode = this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Advanced)
-            .ToProperty(this, x => x.IsAdvancedMode);
-        _isStandardMode = this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Standard)
-            .ToProperty(this, x => x.IsStandardMode);
-        _isRetailMode = this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Core)
-            .ToProperty(this, x => x.IsRetailMode);
-        _isRf = this.WhenAnyValue(x => x.EmulationType)
+        this.WhenAnyValue(x => x.HasError)
+            .Select(s => s ? "There are errors in your configuration" : null).ToPropertyEx(this, s => s.WriteToolTip);
+        this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Advanced)
+            .ToPropertyEx(this, x => x.IsAdvancedMode);
+        this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Standard)
+            .ToPropertyEx(this, x => x.IsStandardMode);
+        this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Core)
+            .ToPropertyEx(this, x => x.IsRetailMode);
+        this.WhenAnyValue(x => x.EmulationType)
             .Select(x => x is EmulationType.RfController or EmulationType.RfKeyboardMouse)
-            .ToProperty(this, x => x.IsRf);
-        _isBluetooth = this.WhenAnyValue(x => x.EmulationType)
+            .ToPropertyEx(this, x => x.IsRf);
+        this.WhenAnyValue(x => x.EmulationType)
             .Select(x => x is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
-            .ToProperty(this, x => x.IsBluetooth);
-        _isRhythm = this.WhenAnyValue(x => x.DeviceType)
+            .ToPropertyEx(this, x => x.IsBluetooth);
+        this.WhenAnyValue(x => x.DeviceType)
             .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
-            .ToProperty(this, x => x.IsRhythm);
-        _isGuitar = this.WhenAnyValue(x => x.DeviceType)
+            .ToPropertyEx(this, x => x.IsRhythm);
+        this.WhenAnyValue(x => x.DeviceType)
             .Select(x => x is DeviceControllerType.LiveGuitar or DeviceControllerType.Guitar)
-            .ToProperty(this, x => x.IsGuitar);
-        _isStageKit = this.WhenAnyValue(x => x.DeviceType)
+            .ToPropertyEx(this, x => x.IsGuitar);
+        this.WhenAnyValue(x => x.DeviceType)
             .Select(x => x is DeviceControllerType.StageKit)
-            .ToProperty(this, x => x.IsStageKit);
-        _isController = this.WhenAnyValue(x => x.EmulationType)
+            .ToPropertyEx(this, x => x.IsStageKit);
+        this.WhenAnyValue(x => x.EmulationType)
             .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.Controller)
-            .ToProperty(this, x => x.IsController);
-        _isKeyboard = this.WhenAnyValue(x => x.EmulationType)
+            .ToPropertyEx(this, x => x.IsController);
+        this.WhenAnyValue(x => x.EmulationType)
             .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.KeyboardMouse)
-            .ToProperty(this, x => x.IsKeyboard);
-        _isApa102 = this.WhenAnyValue(x => x.LedType)
+            .ToPropertyEx(this, x => x.IsKeyboard);
+        this.WhenAnyValue(x => x.LedType)
             .Select(x => x is LedType.APA102_BGR or LedType.APA102_BRG or LedType.APA102_GBR or LedType.APA102_GRB
                 or LedType.APA102_RBG or LedType.APA102_RGB)
-            .ToProperty(this, x => x.IsApa102);
+            .ToPropertyEx(this, x => x.IsApa102);
         Bindings.Connect()
             .Bind(out var outputs)
             .Subscribe();
@@ -239,40 +201,16 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public string LocalAddress { get; }
 
-    public bool IsStandardMode => _isStandardMode.Value;
-    public bool IsAdvancedMode => _isAdvancedMode.Value;
-    public bool IsRetailMode => _isRetailMode.Value;
+    [Reactive] public MouseMovementType MouseMovementType { get; set; }
 
-    public MouseMovementType MouseMovementType
-    {
-        get => _mouseMovementType;
-        set => this.RaiseAndSetIfChanged(ref _mouseMovementType, value);
-    }
+    [Reactive] public ModeType Mode { get; set; }
 
-    public ModeType Mode
-    {
-        get => _mode;
-        set => this.RaiseAndSetIfChanged(ref _mode, value);
-    }
+    [Reactive] public int Debounce { get; set; }
 
-    public int Debounce
-    {
-        get => _debounce;
-        set => this.RaiseAndSetIfChanged(ref _debounce, value);
-    }
+    [Reactive] public int StrumDebounce { get; set; }
 
-    public int StrumDebounce
-    {
-        get => _strumDebounce;
-        set => this.RaiseAndSetIfChanged(ref _strumDebounce, value);
-    }
+    [Reactive] public int PollRate { get; set; }
 
-    public int PollRate
-    {
-        get => _pollRate;
-        set => this.RaiseAndSetIfChanged(ref _pollRate, value);
-    }
-    
     public int Apa102Mosi
     {
         get => _apa102SpiConfig?.Mosi ?? 0;
@@ -315,29 +253,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => _rfCsn!.Pin = value;
     }
 
-    public RfPowerLevel PowerLevel
-    {
-        get => _powerLevel;
-        set => this.RaiseAndSetIfChanged(ref _powerLevel, value);
-    }
+    [Reactive] public RfPowerLevel PowerLevel { get; set; }
 
-    public RfDataRate DataRate
-    {
-        get => _dataRate;
-        set => this.RaiseAndSetIfChanged(ref _dataRate, value);
-    }
+    [Reactive] public RfDataRate DataRate { get; set; }
 
-    public bool RfModuleDetected
-    {
-        get => _rfModuleDetected;
-        set => this.RaiseAndSetIfChanged(ref _rfModuleDetected, value);
-    }
+    [Reactive] public bool RfModuleDetected { get; set; }
 
-    public bool Connected
-    {
-        get => _connected;
-        set => this.RaiseAndSetIfChanged(ref _connected, value);
-    }
+    [Reactive] public bool Connected { get; set; }
 
 
     public int UsbHostDm
@@ -364,43 +286,19 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
-    public byte LedCount
-    {
-        get => _ledCount;
-        set => this.RaiseAndSetIfChanged(ref _ledCount, value);
-    }
+    [Reactive] public byte LedCount { get; set; }
 
-    public byte WtSensitivity
-    {
-        get => _wtSensitivity;
-        set => this.RaiseAndSetIfChanged(ref _wtSensitivity, value);
-    }
+    [Reactive] public byte WtSensitivity { get; set; }
 
 
-    public byte RfId
-    {
-        get => _rfId;
-        set => this.RaiseAndSetIfChanged(ref _rfId, value);
-    }
+    [Reactive] public byte RfId { get; set; }
 
-    public byte RfChannel
-    {
-        get => _rfChannel;
-        set => this.RaiseAndSetIfChanged(ref _rfChannel, value);
-    }
+    [Reactive] public byte RfChannel { get; set; }
 
 
-    public bool HasError
-    {
-        get => _hasError;
-        set => this.RaiseAndSetIfChanged(ref _hasError, value);
-    }
+    [Reactive] public bool HasError { get; set; }
 
-    public bool Finalised
-    {
-        get => _fininalised;
-        set => this.RaiseAndSetIfChanged(ref _fininalised, value);
-    }
+    [Reactive] public bool Finalised { get; set; }
 
     public LedType LedType
     {
@@ -428,11 +326,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
-    public bool XInputOnWindows
-    {
-        get => _xinputOnWindows;
-        set => this.RaiseAndSetIfChanged(ref _xinputOnWindows, value);
-    }
+    [Reactive] public bool XInputOnWindows {get; set;}
 
     public bool UsbHostEnabled
     {
@@ -498,16 +392,24 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public Microcontroller Microcontroller { get; }
 
     public SourceList<Output> Bindings { get; } = new();
-    public bool IsRhythm => _isRhythm.Value;
-    public bool IsGuitar => _isGuitar.Value;
-    public bool IsStageKit => _isStageKit.Value;
-    public bool IsController => _isController.Value;
-    public bool IsKeyboard => _isKeyboard.Value;
-    public bool IsApa102 => _isApa102.Value;
-    public bool BindableSpi => Microcontroller.SpiAssignable;
-    public bool IsRf => _isRf.Value;
-    public bool IsBluetooth => _isBluetooth.Value;
-    public string? WriteToolTip => _writeToolTip.Value;
+
+    // ReSharper disable UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public bool IsStandardMode { get; }
+    [ObservableAsProperty] public bool IsAdvancedMode { get; }
+    [ObservableAsProperty] public bool IsRetailMode { get; }
+
+    [ObservableAsProperty] public bool IsRhythm { get; }
+    [ObservableAsProperty] public bool IsGuitar { get; }
+    [ObservableAsProperty] public bool IsStageKit { get; }
+    [ObservableAsProperty] public bool IsController { get; }
+    [ObservableAsProperty] public bool IsKeyboard { get; }
+    [ObservableAsProperty] public bool IsApa102 { get; }
+    [ObservableAsProperty] public bool BindableSpi { get; }
+    [ObservableAsProperty] public bool IsRf { get; }
+    [ObservableAsProperty] public bool IsBluetooth { get; }
+
+    [ObservableAsProperty] public string? WriteToolTip { get; }
+    // ReSharper enable UnassignedGetOnlyAutoProperty
 
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
         .Where(s => s.Value is SpiPinType.Mosi)
@@ -678,11 +580,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ClearOutputs();
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
-        _wtSensitivity = 30;
+        WtSensitivity = 30;
         _usbHostEnabled = false;
-        _pollRate = 0;
-        _strumDebounce = 0;
-        _debounce = 5;
+        PollRate = 0;
+        StrumDebounce = 0;
+        Debounce = 5;
         if (Device.IsMini())
         {
             _emulationType = EmulationType.RfController;
@@ -914,8 +816,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             lines.Add("#define RF_TX");
             lines.Add($"#define RADIO_CE {_rfCe!.Pin}");
             lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");
-            lines.Add($"#define RF_POWER_LEVEL {(byte) _powerLevel}");
-            lines.Add($"#define RF_DATA_RATE {(byte) _dataRate}");
+            lines.Add($"#define RF_POWER_LEVEL {(byte) PowerLevel}");
+            lines.Add($"#define RF_DATA_RATE {(byte) DataRate}");
             if (BindableSpi)
             {
                 lines.Add($"#define RADIO_MOSI {_rfSpiConfig!.Mosi}");
@@ -1166,7 +1068,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 if (!debounces.ContainsKey(generatedInput)) debounces[generatedInput] = debounces.Count;
             }
 
-            if (combined && output is GuitarButton {Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown})
+            if (combined && output is GuitarButton
+                {
+                    Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown
+                })
             {
                 strumIndices.Add(debounces[generatedInput]);
             }

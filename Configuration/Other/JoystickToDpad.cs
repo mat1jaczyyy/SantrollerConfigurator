@@ -9,6 +9,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Other;
 
@@ -23,44 +24,16 @@ public class JoystickToDpadInput : FixedInput
 
 public class JoystickToDpad : Output
 {
-    private int _threshold;
-
-    public int Threshold
-    {
-        get => _threshold;
-        set => this.RaiseAndSetIfChanged(ref _threshold, value);
-    }
-
-    private bool _up;
-    private bool _down;
-    private bool _left;
-    private bool _right;
-
     private bool Wii { get; }
+    [Reactive] public int Threshold { get; set; }
 
-    public bool Up
-    {
-        get => _up;
-        set => this.RaiseAndSetIfChanged(ref _up, value);
-    }
+    [Reactive] public bool Up { get; set; }
 
-    public bool Down
-    {
-        get => _down;
-        set => this.RaiseAndSetIfChanged(ref _down, value);
-    }
+    [Reactive] public bool Down { get; set; }
 
-    public bool Left
-    {
-        get => _left;
-        set => this.RaiseAndSetIfChanged(ref _left, value);
-    }
+    [Reactive] public bool Left { get; set; }
 
-    public bool Right
-    {
-        get => _right;
-        set => this.RaiseAndSetIfChanged(ref _right, value);
-    }
+    [Reactive] public bool Right { get; set; }
 
     private static readonly List<WiiInputType> JoystickToDpadXWii = new()
     {

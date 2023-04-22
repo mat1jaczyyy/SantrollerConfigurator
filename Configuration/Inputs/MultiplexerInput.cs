@@ -8,6 +8,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
@@ -18,11 +19,8 @@ public class MultiplexerInput : DirectInput
     public DirectPinConfig PinConfigS2 { get; }
     public DirectPinConfig PinConfigS3 { get; }
 
-    private readonly ObservableAsPropertyHelper<bool> _isSixteenChannel;
-
 
     private MultiplexerType _multiplexerType;
-    private int _channel;
 
     public MultiplexerInput(int pin, int channel, int s0, int s1, int s2, int s3, MultiplexerType multiplexerType,
         ConfigViewModel model) : base(
@@ -42,17 +40,14 @@ public class MultiplexerInput : DirectInput
         {
             Model.Microcontroller.AssignPin(PinConfigS3);
         }
-        _isSixteenChannel = this.WhenAnyValue(x => x.MultiplexerType).Select(s => s is MultiplexerType.SixteenChannel)
-            .ToProperty(this, x => x.IsSixteenChannel);
+        this.WhenAnyValue(x => x.MultiplexerType).Select(s => s is MultiplexerType.SixteenChannel)
+            .ToPropertyEx(this, x => x.IsSixteenChannel);
     }
 
-    public bool IsSixteenChannel => _isSixteenChannel.Value;
+    // ReSharper disable once UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public bool IsSixteenChannel { get; }
 
-    public int Channel
-    {
-        get => _channel;
-        set => this.RaiseAndSetIfChanged(ref _channel, value);
-    }
+    [Reactive] public int Channel {get; set;}
 
     public MultiplexerType MultiplexerType
     {

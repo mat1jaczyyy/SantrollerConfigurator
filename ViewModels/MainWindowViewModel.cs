@@ -24,6 +24,7 @@ using LibUsbDotNet.Main;
 using Nefarius.Utilities.DeviceManagement.Drivers;
 using Nefarius.Utilities.DeviceManagement.PnP;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Timer = System.Timers.Timer;
 
 namespace GuitarConfigurator.NetCore.ViewModels
@@ -33,55 +34,19 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private static readonly string UdevFile = "99-santroller.rules";
         private static readonly string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
         private ConfigurableUsbDeviceManager _manager;
-        private readonly ObservableAsPropertyHelper<bool> _connected;
 
         private readonly List<string> _currentDrives = new();
         private readonly HashSet<string> _currentDrivesTemp = new();
         private readonly List<string> _currentPorts = new();
 
-        private readonly ObservableAsPropertyHelper<bool> _is32U4;
-
-        private readonly ObservableAsPropertyHelper<bool> _isDfu;
-
-        private readonly ObservableAsPropertyHelper<bool> _isMega;
-
-        private readonly ObservableAsPropertyHelper<bool> _isPico;
-
-        private readonly ObservableAsPropertyHelper<bool> _isUno;
-        private readonly ObservableAsPropertyHelper<bool> _isGeneric;
-
-        private readonly ObservableAsPropertyHelper<bool> _migrationSupported;
-
-        private readonly ObservableAsPropertyHelper<bool> _newDevice;
-        private readonly ObservableAsPropertyHelper<bool> _hasSidebar;
-
         private readonly Timer _timer = new();
 
-        private Arduino32U4Type _arduino32U4Type;
-
-        private DeviceInputType _deviceInputType;
-
-        private bool _installed;
-
-        private MegaType _megaType;
-
-        private string _message = "Connected";
 
         private Board _picoType = Board.Rp2040Boards[0];
 
 
         public bool Programming { get; private set; }
 
-        private double _progress;
-
-        private string _progressbarcolor = "#FF0078D7";
-
-        private bool _readyToConfigure;
-
-        private IConfigurableDevice? _selectedDevice;
-
-        private UnoMegaType _unoMegaType;
-        private AvrType _avrType;
 
         private SourceList<DeviceInputType> _allDeviceInputTypes = new();
         public ReadOnlyObservableCollection<DeviceInputType> DeviceInputTypes { get; }
@@ -91,8 +56,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
             get;
         }
 
-        private bool _working = true;
-
         private static Func<DeviceInputType, bool> CreateFilter(IConfigurableDevice? s)
         {
             return type => type != DeviceInputType.Rf || s?.IsGeneric() != true;
@@ -100,6 +63,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         public MainWindowViewModel()
         {
+            Message = "Connected";
+            ProgressbarColor = "#FF0078D7";
+            Working = true;
             ShowYesNoDialog =
                 new Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>();
             AssetUtils.InitNativeLibrary();
@@ -135,36 +101,36 @@ namespace GuitarConfigurator.NetCore.ViewModels
             });
             Devices = devices;
             Router.Navigate.Execute(new MainViewModel(this));
-            _hasSidebar = Router.CurrentViewModel
+            Router.CurrentViewModel
                 .Select(s => s is ConfigViewModel)
-                .ToProperty(this, s => s.HasSidebar);
-            _migrationSupported = this.WhenAnyValue(x => x.SelectedDevice)
+                .ToPropertyEx(this, s => s.HasSidebar);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s?.MigrationSupported != false)
-                .ToProperty(this, s => s.MigrationSupported);
-            _connected = this.WhenAnyValue(x => x.SelectedDevice)
+                .ToPropertyEx(this, s => s.MigrationSupported);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s != null)
-                .ToProperty(this, s => s.Connected);
-            _isPico = this.WhenAnyValue(x => x.SelectedDevice)
+                .ToPropertyEx(this, s => s.Connected);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s?.IsPico() == true)
-                .ToProperty(this, s => s.IsPico);
-            _is32U4 = this.WhenAnyValue(x => x.SelectedDevice)
+                .ToPropertyEx(this, s => s.IsPico);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is Arduino arduino && arduino.Is32U4())
-                .ToProperty(this, s => s.Is32U4);
-            _isUno = this.WhenAnyValue(x => x.SelectedDevice)
+                .ToPropertyEx(this, s => s.Is32U4);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is Arduino arduino && arduino.IsUno())
-                .ToProperty(this, s => s.IsUno);
-            _isMega = this.WhenAnyValue(x => x.SelectedDevice)
+                .ToPropertyEx(this, s => s.IsUno);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is Arduino arduino && arduino.IsMega())
-                .ToProperty(this, s => s.IsMega);
-            _isDfu = this.WhenAnyValue(x => x.SelectedDevice)
+                .ToPropertyEx(this, s => s.IsMega);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is Dfu)
-                .ToProperty(this, s => s.IsDfu);
-            _isGeneric = this.WhenAnyValue(x => x.SelectedDevice)
+                .ToPropertyEx(this, s => s.IsDfu);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s?.IsGeneric() == true)
-                .ToProperty(this, s => s.IsGeneric);
-            _newDevice = this.WhenAnyValue(x => x.SelectedDevice)
+                .ToPropertyEx(this, s => s.IsGeneric);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is not (null or Ardwiino or Santroller))
-                .ToProperty(this, s => s.NewDevice);
+                .ToPropertyEx(this, s => s.NewDevice);
             // Make sure that the selected device input type is reset so that we don't end up doing something invalid like using RF on a generic serial device
             this.WhenAnyValue(s => s.SelectedDevice).Subscribe(s =>
             {
@@ -194,7 +160,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             _ = InstallDependenciesAsync();
         }
-        
+
         public ReactiveCommand<Unit, IRoutableViewModel> ConfigureCommand { get; }
 
         // The command that navigates a user back.
@@ -203,14 +169,21 @@ namespace GuitarConfigurator.NetCore.ViewModels
         internal SourceList<IConfigurableDevice> AvailableDevices { get; } = new();
 
         public ReadOnlyObservableCollection<IConfigurableDevice> Devices { get; }
-        public bool MigrationSupported => _migrationSupported.Value;
-        public bool IsPico => _isPico.Value;
-        public bool Is32U4 => _is32U4.Value;
-        public bool IsUno => _isUno.Value;
-        public bool IsMega => _isMega.Value;
-        public bool IsDfu => _isDfu.Value;
-        public bool IsGeneric => _isGeneric.Value;
-        public bool NewDevice => _newDevice.Value;
+
+        // ReSharper disable UnassignedGetOnlyAutoProperty
+        [ObservableAsProperty] public bool MigrationSupported { get; }
+        [ObservableAsProperty] public bool IsPico { get; }
+        [ObservableAsProperty] public bool Is32U4 { get; }
+        [ObservableAsProperty] public bool IsUno { get; }
+        [ObservableAsProperty] public bool IsMega { get; }
+        [ObservableAsProperty] public bool IsDfu { get; }
+        [ObservableAsProperty] public bool IsGeneric { get; }
+        [ObservableAsProperty] public bool NewDevice { get; }
+
+        [ObservableAsProperty] public bool Connected { get; }
+
+        [ObservableAsProperty] public bool HasSidebar { get; }
+        // ReSharper enable UnassignedGetOnlyAutoProperty
 
         public IEnumerable<Arduino32U4Type> Arduino32U4Types => Enum.GetValues<Arduino32U4Type>();
         public IEnumerable<MegaType> MegaTypes => Enum.GetValues<MegaType>();
@@ -218,87 +191,32 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public IEnumerable<AvrType> AvrTypes => Enum.GetValues<AvrType>();
         public IEnumerable<Board> PicoTypes => Board.Rp2040Boards;
 
-        public AvrType AvrType
-        {
-            get => _avrType;
-            set => this.RaiseAndSetIfChanged(ref _avrType, value);
-        }
+        [Reactive] public AvrType AvrType { get; set; }
 
-        public UnoMegaType UnoMegaType
-        {
-            get => _unoMegaType;
-            set => this.RaiseAndSetIfChanged(ref _unoMegaType, value);
-        }
+        [Reactive] public UnoMegaType UnoMegaType { get; set; }
 
-        public MegaType MegaType
-        {
-            get => _megaType;
-            set => this.RaiseAndSetIfChanged(ref _megaType, value);
-        }
+        [Reactive] public MegaType MegaType { get; set; }
 
-        public DeviceInputType DeviceInputType
-        {
-            get => _deviceInputType;
-            set => this.RaiseAndSetIfChanged(ref _deviceInputType, value);
-        }
+        [Reactive] public DeviceInputType DeviceInputType { get; set; }
 
-        public Arduino32U4Type Arduino32U4Type
-        {
-            get => _arduino32U4Type;
-            set => this.RaiseAndSetIfChanged(ref _arduino32U4Type, value);
-        }
+        [Reactive] public Arduino32U4Type Arduino32U4Type { get; set; }
 
-        public Board PicoType
-        {
-            get => _picoType;
-            set => this.RaiseAndSetIfChanged(ref _picoType, value);
-        }
+        [Reactive] public Board PicoType { get; set; }
 
-        public IConfigurableDevice? SelectedDevice
-        {
-            get => _selectedDevice;
-            set => this.RaiseAndSetIfChanged(ref _selectedDevice, value);
-        }
+        [Reactive] public IConfigurableDevice? SelectedDevice { get; set; }
 
 
-        public bool Working
-        {
-            get => _working;
-            set => this.RaiseAndSetIfChanged(ref _working, value);
-        }
+        [Reactive] public bool Working { get; set; }
 
-        public bool Installed
-        {
-            get => _installed;
-            set => this.RaiseAndSetIfChanged(ref _installed, value);
-        }
+        [Reactive] public bool Installed { get; set; }
 
-        public string ProgressbarColor
-        {
-            get => _progressbarcolor;
-            set => this.RaiseAndSetIfChanged(ref _progressbarcolor, value);
-        }
+        [Reactive] public string ProgressbarColor { get; set; }
 
-        public bool Connected => _connected.Value;
-        public bool HasSidebar => _hasSidebar.Value;
+        [Reactive] public bool ReadyToConfigure { get; set; }
 
-        public bool ReadyToConfigure
-        {
-            get => _readyToConfigure;
-            set => this.RaiseAndSetIfChanged(ref _readyToConfigure, value);
-        }
+        [Reactive] public double Progress { get; set; }
 
-        public double Progress
-        {
-            get => _progress;
-            set => this.RaiseAndSetIfChanged(ref _progress, value);
-        }
-
-        public string Message
-        {
-            get => _message;
-            set => this.RaiseAndSetIfChanged(ref _message, value);
-        }
+        [Reactive] public string Message { get; set; }
 
         public PlatformIo Pio { get; } = new();
 
@@ -512,13 +430,13 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});
                 info.UseShellExecute = true;
                 Process.Start(info);
-                
+
                 // And then reload rules and trigger
                 info = new ProcessStartInfo("pkexec");
                 info.ArgumentList.AddRange(new[] {"udevadm", "control", "--reload-rules"});
                 info.UseShellExecute = true;
                 Process.Start(info);
-                
+
                 info = new ProcessStartInfo("pkexec");
                 info.ArgumentList.AddRange(new[] {"udevadm", "trigger"});
                 info.UseShellExecute = true;

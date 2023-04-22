@@ -8,16 +8,12 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public class DjCombinedOutput : CombinedTwiOutput
 {
-
-    private bool _detectedLeft;
-
-    private bool _detectedRight;
-
     public DjCombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
         IReadOnlyCollection<Output>? outputs = null) :
         base(model, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ", sda, scl)
@@ -38,17 +34,9 @@ public class DjCombinedOutput : CombinedTwiOutput
         DigitalOutputs = digitalOutputs;
     }
 
-    public bool DetectedLeft
-    {
-        get => _detectedLeft;
-        set => this.RaiseAndSetIfChanged(ref _detectedLeft, value);
-    }
+    [Reactive] public bool DetectedLeft { get; set; }
 
-    public bool DetectedRight
-    {
-        get => _detectedRight;
-        set => this.RaiseAndSetIfChanged(ref _detectedRight, value);
-    }
+    [Reactive] public bool DetectedRight { get; set; }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
@@ -92,6 +80,7 @@ public class DjCombinedOutput : CombinedTwiOutput
         DetectedLeft = djLeftRaw.Any();
         DetectedRight = djRightRaw.Any();
     }
+
     public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
     {
         return "Combined/DJ.png";

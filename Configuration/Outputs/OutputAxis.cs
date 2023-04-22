@@ -10,6 +10,7 @@ using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
@@ -26,21 +27,7 @@ public abstract partial class OutputAxis : Output
 {
     private const float ProgressWidth = 400;
 
-    private readonly ObservableAsPropertyHelper<Thickness> _computedDeadZoneMargin;
-    private readonly ObservableAsPropertyHelper<Thickness> _computedMinMaxMargin;
-    private readonly ObservableAsPropertyHelper<bool> _inputIsUInt;
-    private readonly ObservableAsPropertyHelper<bool> _isDigitalToAnalog;
-    private readonly ObservableAsPropertyHelper<int> _value;
-    private readonly ObservableAsPropertyHelper<int> _valueLower;
-
-    private readonly ObservableAsPropertyHelper<int> _valueRawLower;
-    private readonly ObservableAsPropertyHelper<int> _valueRawUpper;
-    private readonly ObservableAsPropertyHelper<int> _valueUpper;
-    private int _calibrationMax;
-    private int _calibrationMin;
     private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.None;
-
-    private int _deadZone;
 
     protected OutputAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
@@ -54,64 +41,60 @@ public abstract partial class OutputAxis : Output
         Max = max;
         Min = min;
         DeadZone = deadZone;
-        _inputIsUInt = this.WhenAnyValue(x => x.Input).Select(i => i is {IsUint: true})
-            .ToProperty(this, x => x.InputIsUint);
+        this.WhenAnyValue(x => x.Input).Select(i => i is {IsUint: true})
+            .ToPropertyEx(this, x => x.InputIsUint);
         var calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue);
         calibrationWatcher.Subscribe(ApplyCalibration);
-        _valueRawLower = this.WhenAnyValue(x => x.ValueRaw).Select(s => s < 0 ? -s : 0)
-            .ToProperty(this, x => x.ValueRawLower);
-        _valueRawUpper = this.WhenAnyValue(x => x.ValueRaw).Select(s => s > 0 ? s : 0)
-            .ToProperty(this, x => x.ValueRawUpper);
+        this.WhenAnyValue(x => x.ValueRaw).Select(s => s < 0 ? -s : 0)
+            .ToPropertyEx(this, x => x.ValueRawLower);
+        this.WhenAnyValue(x => x.ValueRaw).Select(s => s > 0 ? s : 0)
+            .ToPropertyEx(this, x => x.ValueRawUpper);
 
-        _value = this
+        this
             .WhenAnyValue(x => x.Enabled, x => x.ValueRaw, x => x.Min, x => x.Max, x => x.DeadZone, x => x.Trigger,
-                x => x.Model.DeviceType).Select(Calculate).ToProperty(this, x => x.Value);
-        _valueLower = this.WhenAnyValue(x => x.Value).Select(s => s < 0 ? -s : 0).ToProperty(this, x => x.ValueLower);
-        _valueUpper = this.WhenAnyValue(x => x.Value).Select(s => s > 0 ? s : 0).ToProperty(this, x => x.ValueUpper);
-        _computedDeadZoneMargin = this
+                x => x.Model.DeviceType).Select(Calculate).ToPropertyEx(this, x => x.Value);
+        this.WhenAnyValue(x => x.Value).Select(s => s < 0 ? -s : 0).ToPropertyEx(this, x => x.ValueLower);
+        this.WhenAnyValue(x => x.Value).Select(s => s > 0 ? s : 0).ToPropertyEx(this, x => x.ValueUpper);
+        this
             .WhenAnyValue(x => x.Min, x => x.Max, x => x.Trigger, x => x.InputIsUint, x => x.DeadZone)
-            .Select(ComputeDeadZoneMargin).ToProperty(this, x => x.ComputedDeadZoneMargin);
-        _computedMinMaxMargin = this.WhenAnyValue(x => x.Min, x => x.Max, x => x.InputIsUint)
-            .Select(ComputeMinMaxMargin).ToProperty(this, x => x.CalibrationMinMaxMargin);
-        _isDigitalToAnalog = this.WhenAnyValue(x => x.Input).Select(s => s is DigitalToAnalog)
-            .ToProperty(this, x => x.IsDigitalToAnalog);
+            .Select(ComputeDeadZoneMargin).ToPropertyEx(this, x => x.ComputedDeadZoneMargin);
+        this.WhenAnyValue(x => x.Min, x => x.Max, x => x.InputIsUint)
+            .Select(ComputeMinMaxMargin).ToPropertyEx(this, x => x.CalibrationMinMaxMargin);
+        this.WhenAnyValue(x => x.Input).Select(s => s is DigitalToAnalog)
+            .ToPropertyEx(this, x => x.IsDigitalToAnalog);
     }
 
     public float FullProgressWidth => ProgressWidth;
     public float HalfProgressWidth => ProgressWidth / 2;
-    public int ValueRawLower => _valueRawLower.Value;
-    public int ValueRawUpper => _valueRawUpper.Value;
-    public int Value => _value.Value;
-    public int ValueLower => _valueLower.Value;
-    public int ValueUpper => _valueUpper.Value;
-    public bool InputIsUint => _inputIsUInt.Value;
 
-    public int Min
-    {
-        get => _calibrationMin;
-        set => this.RaiseAndSetIfChanged(ref _calibrationMin, value);
-    }
+    // ReSharper disable UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public int ValueRawLower { get; }
 
-    public int Max
-    {
-        get => _calibrationMax;
-        set => this.RaiseAndSetIfChanged(ref _calibrationMax, value);
-    }
+    [ObservableAsProperty] public int ValueRawUpper { get; }
 
-    public Thickness ComputedDeadZoneMargin => _computedDeadZoneMargin.Value;
-    public Thickness CalibrationMinMaxMargin => _computedMinMaxMargin.Value;
+    [ObservableAsProperty] public int Value { get; }
 
-    public int DeadZone
-    {
-        get => _deadZone;
-        set => this.RaiseAndSetIfChanged(ref _deadZone, value);
-    }
+    [ObservableAsProperty] public int ValueLower { get; }
+
+    [ObservableAsProperty] public int ValueUpper { get; }
+
+    [ObservableAsProperty] public bool InputIsUint { get; }
+    [ObservableAsProperty] public bool IsDigitalToAnalog { get; }
+
+    [ObservableAsProperty] public Thickness ComputedDeadZoneMargin { get; }
+    [ObservableAsProperty] public Thickness CalibrationMinMaxMargin { get; }
+
+    // ReSharper enable UnassignedGetOnlyAutoProperty
+    [Reactive] public int Min { get; set; }
+
+    [Reactive] public int Max { get; set; }
+
+    [Reactive] public int DeadZone { get; set; }
 
 
     public bool Trigger { get; }
     public override bool IsCombined => false;
     public override bool IsStrum => false;
-    public bool IsDigitalToAnalog => _isDigitalToAnalog.Value;
 
     public string? CalibrationText => GetCalibrationText();
 
@@ -408,7 +391,7 @@ public abstract partial class OutputAxis : Output
         }
 
         if (Input is not DigitalToAnalog dta) return $"{output} = {GenerateAssignment(mode, false, false, false)};";
-        
+
         // Digital to Analog stores values based on uint16_t for trigger, and int16_t for sticks
         var val = dta.On;
 
@@ -437,7 +420,6 @@ public abstract partial class OutputAxis : Output
         }
 
         return $"if ({Input.Generate(mode)}) {{{output} = {val};}}";
-
     }
 
     public override void UpdateBindings()

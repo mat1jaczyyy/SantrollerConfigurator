@@ -22,7 +22,7 @@ public class ControllerAxis : OutputAxis
     {
         Type = type;
         _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
-            .Select(s => ControllerEnumConverter.GetAxisText(s.Item1, s.Item3) != null)
+            .Select(s => ControllerEnumConverter.GetAxisText(s.Item1, s.Item3).Any())
             .ToProperty(this, s => s.Valid);
         UpdateDetails();
     }

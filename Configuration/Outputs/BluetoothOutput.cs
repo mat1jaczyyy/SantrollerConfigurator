@@ -16,6 +16,7 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
@@ -90,10 +91,10 @@ public partial class BluetoothOutput : CombinedOutput
         Input = new BluetoothInput(this);
         _timer.Interval = TimeSpan.FromSeconds(1);
         _timer.Tick += Tick;
-        _scanText = this.WhenAnyValue(s => s.ScanTimer).Select(scanTimer => scanTimer == 11 ? "Start Scan" : $"Scanning... ({scanTimer})").ToProperty(this, x => x.ScanText);
-        _scanning = this.WhenAnyValue(s => s.ScanTimer).Select(scanTimer => scanTimer != 11).ToProperty(this, x => x.Scanning);
+        this.WhenAnyValue(s => s.ScanTimer).Select(scanTimer => scanTimer == 11 ? "Start Scan" : $"Scanning... ({scanTimer})").ToPropertyEx(this, x => x.ScanText);
+        this.WhenAnyValue(s => s.ScanTimer).Select(scanTimer => scanTimer != 11).ToPropertyEx(this, x => x.Scanning);
         Addresses.Add(macAddress.Any() ? macAddress : NoDeviceText);
-        _macAddress = Addresses.First();
+        MacAddress = Addresses.First();
         if (Model.Device is Santroller santroller)
         {
             LocalAddress = santroller.GetBluetoothAddress();
@@ -107,39 +108,23 @@ public partial class BluetoothOutput : CombinedOutput
 
     private const int BtAddressLength = 18;
     private const string NoDeviceText = "No device found";
-    private readonly ObservableAsPropertyHelper<string> _scanText;
-    private readonly ObservableAsPropertyHelper<bool> _scanning;
     public string LocalAddress { get; }
-    private string _macAddress;
-    private bool _connected = false;
 
     public AvaloniaList<string> Addresses { get; } = new();
 
     private DispatcherTimer _timer = new();
 
-    private int _scanTimer = 11;
+    // ReSharper disable UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public string ScanText { get; } = "";
 
-    public string ScanText => _scanText.Value;
+    [ObservableAsProperty] public bool Scanning { get; }
+    // ReSharper enable UnassignedGetOnlyAutoProperty
 
-    public bool Scanning => _scanning.Value;
+    [Reactive] public int ScanTimer {get; set;}
 
-    public int ScanTimer
-    {
-        get => _scanTimer;
-        set => this.RaiseAndSetIfChanged(ref _scanTimer, value);
-    }
+    [Reactive] public string MacAddress {get; set;}
 
-    public string MacAddress
-    {
-        get => _macAddress;
-        set => this.RaiseAndSetIfChanged(ref _macAddress, value);
-    }
-
-    public bool Connected
-    {
-        get => _connected;
-        set => this.RaiseAndSetIfChanged(ref _connected, value);
-    }
+    [Reactive] public bool Connected {get; set;}
 
     public override bool IsCombined => true;
     public override bool IsStrum => false;

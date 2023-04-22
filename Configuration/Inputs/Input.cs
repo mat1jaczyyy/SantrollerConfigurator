@@ -11,16 +11,14 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public abstract class Input : ReactiveObject, IDisposable
 {
-    private bool _analog;
 
     private Bitmap? _image;
-
-    private int _rawValue;
 
     protected Input(ConfigViewModel model)
     {
@@ -31,18 +29,10 @@ public abstract class Input : ReactiveObject, IDisposable
 
     public Bitmap Image => GetImage();
 
-    public bool IsAnalog
-    {
-        get => _analog;
-        set => this.RaiseAndSetIfChanged(ref _analog, value);
-    }
+    [Reactive] public bool IsAnalog { get; set; }
+    [Reactive] public int RawValue { get; set; }
     public abstract bool IsUint { get; }
 
-    public int RawValue
-    {
-        get => _rawValue;
-        set => this.RaiseAndSetIfChanged(ref _rawValue, value);
-    }
 
     public abstract IList<DevicePin> Pins { get; }
     public abstract IList<PinConfig> PinConfigs { get; }
@@ -76,7 +66,7 @@ public abstract class Input : ReactiveObject, IDisposable
     public abstract string GetImagePath();
 
     public abstract string Title { get; }
-    
+
     private Bitmap GetImage()
     {
         if (_image != null) return _image;

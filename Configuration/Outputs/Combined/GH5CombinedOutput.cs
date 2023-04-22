@@ -9,6 +9,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
@@ -33,8 +34,6 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     };
 
 
-    private bool _detected;
-
     public Gh5CombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model,
         "gh5", 100000, "GH5", sda, scl)
@@ -54,11 +53,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         DigitalOutputs = digitalOutputs;
     }
 
-    public bool Detected
-    {
-        get => _detected;
-        set => this.RaiseAndSetIfChanged(ref _detected, value);
-    }
+    [Reactive] public bool Detected {get; set;}
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
@@ -120,7 +115,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType,
             wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
-        _detected = gh5Raw.Any();
+        Detected = gh5Raw.Any();
     }
 
     public override void UpdateBindings()

@@ -10,8 +10,8 @@ namespace GuitarConfigurator.NetCore;
 
 public class Builder : Microsoft.Build.Utilities.Task
 {
-    public string Parameter1 { get; set; } = null!;
-    public string Parameter2 { get; set; } = null!;
+    public string Parameter1 { get; set; } = "";
+    public string Parameter2 { get; set; } = "";
 
     public override bool Execute()
     {

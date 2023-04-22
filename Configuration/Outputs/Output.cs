@@ -24,6 +24,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
@@ -55,87 +56,55 @@ public class LedIndex : ReactiveObject
 
 public abstract partial class Output : ReactiveObject, IDisposable
 {
-    private readonly ObservableAsPropertyHelper<bool> _areLedsEnabled;
-
-    private readonly ObservableAsPropertyHelper<LedIndex[]> _availableIndices;
-
-    private readonly ObservableAsPropertyHelper<IBrush> _combinedBackground;
-
-    private readonly ObservableAsPropertyHelper<double> _combinedOpacity;
-
     private readonly Guid _id = new();
-
-    private readonly ObservableAsPropertyHelper<Bitmap?> _image;
-
-    private readonly ObservableAsPropertyHelper<double> _imageOpacity;
-
-    private readonly ObservableAsPropertyHelper<bool> _isDj;
-    private readonly ObservableAsPropertyHelper<bool> _isGh5;
-    private readonly ObservableAsPropertyHelper<bool> _isPs2;
-    private readonly ObservableAsPropertyHelper<bool> _isWii;
-    private readonly ObservableAsPropertyHelper<bool> _isWt;
-
-    private readonly ObservableAsPropertyHelper<string> _ledIndicesDisplay;
-    private readonly ObservableAsPropertyHelper<string> _localisedName;
-
-    private readonly ObservableAsPropertyHelper<int> _valueRaw;
     protected readonly ConfigViewModel Model;
 
-    private string _buttonText = "Click to assign";
 
-    private bool _enabled = true;
-
-    private bool _expanded;
-
-    private Input _input;
-    private Color _ledOff;
-
-    private Color _ledOn;
-    
     public virtual bool LedsRequireColours => true;
 
     private bool ShouldUpdateDetails { get; set; }
 
-    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices) {
-        _input = input;
+    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices)
+    {
+        ButtonText = "Click to assign";
+        Input = input;
         LedOn = ledOn;
         LedOff = ledOff;
         LedIndices = new ObservableCollection<byte>(ledIndices);
         Model = model;
-        _availableIndices = this.WhenAnyValue(x => x.Model.LedCount)
+        this.WhenAnyValue(x => x.Model.LedCount)
             .Select(x => Enumerable.Range(1, x).Select(s => new LedIndex(this, (byte) s)).ToArray())
-            .ToProperty(this, x => x.AvailableIndices);
-        _image = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
-            .Select(x => GetImage(x.Item1, x.Item2)).ToProperty(this, x => x.Image);
-        _isDj = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is DjInput)
-            .ToProperty(this, x => x.IsDj);
-        _isWii = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is WiiInput)
-            .ToProperty(this, x => x.IsWii);
-        _isGh5 = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is Gh5NeckInput && this is not GuitarAxis)
-            .ToProperty(this, x => x.IsGh5);
-        _isPs2 = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is Ps2Input)
-            .ToProperty(this, x => x.IsPs2);
-        _isWt = this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is GhWtTapInput && this is not GuitarAxis)
-            .ToProperty(this, x => x.IsWt);
-        _areLedsEnabled = this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
-            .ToProperty(this, x => x.AreLedsEnabled);
-        _localisedName = this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
+            .ToPropertyEx(this, x => x.AvailableIndices);
+        this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
+            .Select(x => GetImage(x.Item1, x.Item2)).ToPropertyEx(this, x => x.Image);
+        this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is DjInput)
+            .ToPropertyEx(this, x => x.IsDj);
+        this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is WiiInput)
+            .ToPropertyEx(this, x => x.IsWii);
+        this.WhenAnyValue(x => x.Input)
+            .Select(x => x.InnermostInput() is Gh5NeckInput && this is not GuitarAxis)
+            .ToPropertyEx(this, x => x.IsGh5);
+        this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is Ps2Input)
+            .ToPropertyEx(this, x => x.IsPs2);
+        this.WhenAnyValue(x => x.Input)
+            .Select(x => x.InnermostInput() is GhWtTapInput && this is not GuitarAxis)
+            .ToPropertyEx(this, x => x.IsWt);
+        this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
+            .ToPropertyEx(this, x => x.AreLedsEnabled);
+        this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
             .Select(x => GetName(x.Item1, x.Item2))
-            .ToProperty(this, x => x.LocalisedName);
-        _valueRaw = this.WhenAnyValue(x => x.Input!.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
-            .ToProperty(this, x => x.ValueRaw);
-        _imageOpacity = this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
+            .ToPropertyEx(this, x => x.LocalisedName);
+        this.WhenAnyValue(x => x.Input!.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
+            .ToPropertyEx(this, x => x.ValueRaw);
+        this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
             .Select(s => s.Item3 || s.Item2.IsAnalog == true ? 1 : (s.Item1 == 0 ? 0 : 0.35) + 0.65)
-            .ToProperty(this, s => s.ImageOpacity);
-        _combinedOpacity = this.WhenAnyValue(x => x.Enabled)
+            .ToPropertyEx(this, s => s.ImageOpacity);
+        this.WhenAnyValue(x => x.Enabled)
             .Select(s => s ? 1 : 0.5)
-            .ToProperty(this, s => s.CombinedOpacity);
-        _combinedBackground = this.WhenAnyValue(x => x.Enabled)
+            .ToPropertyEx(this, s => s.CombinedOpacity);
+        this.WhenAnyValue(x => x.Enabled)
             .Select(enabled => enabled ? Brush.Parse("#99000000") : Brush.Parse("#33000000"))
-            .ToProperty(this, s => s.CombinedBackground);
-        _ledIndicesDisplay = this.WhenAnyValue(x => x.LedIndices)
-            .Select(s => string.Join(", ", s))
-            .ToProperty(this, s => s.LedIndicesDisplay);
+            .ToPropertyEx(this, s => s.CombinedBackground);
         Outputs = new SourceList<Output>();
         Outputs.Add(this);
         AnalogOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
@@ -150,25 +119,16 @@ public abstract partial class Output : ReactiveObject, IDisposable
         this.RaisePropertyChanged(nameof(ShouldUpdateDetails));
     }
 
-    public Input Input
-    {
-        get => _input;
-        set => this.RaiseAndSetIfChanged(ref _input, value);
-    }
+    [Reactive] public Input Input { get; set; }
 
-    public Bitmap? Image => _image.Value;
 
-    public bool Enabled
-    {
-        get => _enabled;
-        set => this.RaiseAndSetIfChanged(ref _enabled, value);
-    }
+    [Reactive] public bool Enabled { get; set; }
 
-    public bool Expanded
-    {
-        get => _expanded;
-        set => this.RaiseAndSetIfChanged(ref _expanded, value);
-    }
+    [Reactive] public bool Expanded { get; set; }
+
+    [Reactive] public Color LedOn { get; set; }
+
+    [Reactive] public Color LedOff { get; set; }
 
     public InputType? SelectedInputType
     {
@@ -227,36 +187,34 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
 
     public IEnumerable<InputType> InputTypes =>
-        Enum.GetValues<InputType>().Where(s => (this is not GuitarAxis{Type: GuitarAxisType.Slider} || s is InputType.Gh5NeckInput or InputType.WtNeckInput ) && (s is not InputType.MultiplexerInput || Model.IsPico) && (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput);
+        Enum.GetValues<InputType>().Where(s =>
+            (this is not GuitarAxis {Type: GuitarAxisType.Slider} ||
+             s is InputType.Gh5NeckInput or InputType.WtNeckInput) &&
+            (s is not InputType.MultiplexerInput || Model.IsPico) &&
+            (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput);
 
-    public string LocalisedName => _localisedName.Value;
-    public bool IsDj => _isDj.Value;
-    public bool IsWii => _isWii.Value;
-    public bool IsPs2 => _isPs2.Value;
-    public bool IsGh5 => _isGh5.Value;
-    public bool IsWt => _isWt.Value;
-    public bool AreLedsEnabled => _areLedsEnabled.Value;
+    // ReSharper disable UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public Bitmap? Image { get; }
+    [ObservableAsProperty] public string LocalisedName { get; } = "";
+    [ObservableAsProperty] public bool IsDj { get; }
+    [ObservableAsProperty] public bool IsWii { get; }
+    [ObservableAsProperty] public bool IsPs2 { get; }
+    [ObservableAsProperty] public bool IsGh5 { get; }
+    [ObservableAsProperty] public bool IsWt { get; }
+    [ObservableAsProperty] public bool AreLedsEnabled { get; }
+    [ObservableAsProperty] public LedIndex[] AvailableIndices { get; } = Array.Empty<LedIndex>();
+
+    [ObservableAsProperty] public double CombinedOpacity { get; }
+    [ObservableAsProperty] public IBrush CombinedBackground { get; } = Brush.Parse("#99000000");
+
+    [ObservableAsProperty] public double ImageOpacity { get; }
+
+    [ObservableAsProperty] public int ValueRaw { get; }
+    // ReSharper enable UnassignedGetOnlyAutoProperty
 
     public abstract bool IsCombined { get; }
-    public string LedIndicesDisplay => _ledIndicesDisplay.Value;
-    public LedIndex[] AvailableIndices => _availableIndices.Value;
     public ObservableCollection<byte> LedIndices { get; set; }
     public string Id => _id.ToString();
-
-    public Color LedOn
-    {
-        get => _ledOn;
-        set => this.RaiseAndSetIfChanged(ref _ledOn, value);
-    }
-
-    public Color LedOff
-    {
-        get => _ledOff;
-        set => this.RaiseAndSetIfChanged(ref _ledOff, value);
-    }
-
-    public double ImageOpacity => _imageOpacity.Value;
-    public int ValueRaw => _valueRaw.Value;
 
 
     public abstract bool IsStrum { get; }
@@ -274,11 +232,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public abstract bool Valid { get; }
 
-    public string ButtonText
-    {
-        get => _buttonText;
-        set => this.RaiseAndSetIfChanged(ref _buttonText, value);
-    }
+    [Reactive] public string ButtonText { get; set; }
 
     public virtual string ErrorText
     {
@@ -296,10 +250,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public abstract string LedOffLabel { get; }
 
     public virtual bool SupportsLedOff => true;
-
-    public double CombinedOpacity => _combinedOpacity.Value;
-
-    public IBrush CombinedBackground => _combinedBackground.Value;
     public bool ConfigurableInput => Input is not FixedInput;
 
     public virtual void Dispose()
@@ -423,7 +373,9 @@ public abstract partial class Output : ReactiveObject, IDisposable
         GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
     {
         Input input;
-        var lastPin = inputType is InputType.AnalogPinInput or InputType.MultiplexerInput ? Model.Microcontroller.GetFirstAnalogPin() : 0;
+        var lastPin = inputType is InputType.AnalogPinInput or InputType.MultiplexerInput
+            ? Model.Microcontroller.GetFirstAnalogPin()
+            : 0;
         var pinMode = DevicePinMode.PullUp;
         if (Input.InnermostInput() is DirectInput direct)
         {
@@ -441,7 +393,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 input = new DirectInput(lastPin, DevicePinMode.Analog, Model);
                 break;
             case InputType.MultiplexerInput:
-                input = new MultiplexerInput(lastPin, 0,0,0,0,0,MultiplexerType.EightChannel, Model);
+                input = new MultiplexerInput(lastPin, 0, 0, 0, 0, 0, MultiplexerType.EightChannel, Model);
                 break;
             case InputType.MacroInput:
                 input = new MacroInput(new DirectInput(lastPin, pinMode, Model),
@@ -464,6 +416,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 {
                     gh5NeckInputType = Gh5NeckInputType.TapBar;
                 }
+
                 input = new Gh5NeckInput(gh5NeckInputType.Value, Model);
                 break;
             case InputType.Gh5NeckInput when Input.InnermostInput() is Gh5NeckInput gh5:
@@ -476,6 +429,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 {
                     ghWtInputType = GhWtInputType.TapBar;
                 }
+
                 input = new GhWtTapInput(ghWtInputType.Value, Model, Model.Microcontroller.GetFirstAnalogPin(),
                     Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(),
                     Model.Microcontroller.GetFirstDigitalPin());
@@ -505,6 +459,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
             default:
                 return;
         }
+
         switch (input.IsAnalog)
         {
             case true when this is OutputAxis:

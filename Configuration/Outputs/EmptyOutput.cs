@@ -15,6 +15,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
@@ -22,7 +23,6 @@ public class EmptyOutput : Output
 {
     private readonly ObservableAsPropertyHelper<IEnumerable<object>> _combinedTypes;
 
-    private readonly ObservableAsPropertyHelper<bool> _isController;
     private readonly ObservableAsPropertyHelper<bool> _isKeyboard;
 
     private Key? _key;
@@ -34,9 +34,9 @@ public class EmptyOutput : Output
     public EmptyOutput(ConfigViewModel model) : base(model, new FixedInput(model, 0), Colors.Black, Colors.Black,
         Array.Empty<byte>())
     {
-        _isController = this.WhenAnyValue(x => x.Model.EmulationType)
+        this.WhenAnyValue(x => x.Model.EmulationType)
             .Select(x => Model.GetSimpleEmulationType() is EmulationType.Controller)
-            .ToProperty(this, x => x.IsController);
+            .ToPropertyEx(this, x => x.IsController);
         _isKeyboard = this.WhenAnyValue(x => x.Model.EmulationType)
             .Select(x => Model.GetSimpleEmulationType() is EmulationType.KeyboardMouse)
             .ToProperty(this, x => x.IsKeyboard);
@@ -48,7 +48,8 @@ public class EmptyOutput : Output
                 s2 is not SimpleType.UsbHost)).ToProperty(this, x => x.CombinedTypes);
     }
 
-    public virtual bool IsController => _isController.Value;
+    // ReSharper disable once UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public bool IsController { get; }
     public override bool IsKeyboard => _isKeyboard.Value;
 
     public override bool Valid => true;

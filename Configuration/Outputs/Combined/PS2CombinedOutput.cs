@@ -12,6 +12,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
@@ -85,9 +86,6 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
 
-    private Ps2ControllerType _detectedType;
-    private bool _controllerFound;
-
     public Ps2CombinedOutput(ConfigViewModel model, int? miso = null, int? mosi = null,
         int? sck = null, int? att = null, int? ack = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, Ps2Input.Ps2SpiType,
@@ -132,17 +130,9 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public List<int> AvailablePins => Model.Microcontroller.GetAllPins(false);
 
-    public Ps2ControllerType DetectedType
-    {
-        get => _detectedType;
-        set => this.RaiseAndSetIfChanged(ref _detectedType, value);
-    }
+    [Reactive] public Ps2ControllerType DetectedType { get; set; }
 
-    public bool ControllerFound
-    {
-        get => _controllerFound;
-        set => this.RaiseAndSetIfChanged(ref _controllerFound, value);
-    }
+    [Reactive] public bool ControllerFound { get; set; }
 
     private static Func<Output, bool> CreateFilter((bool controllerFound, Ps2ControllerType controllerType) tuple)
     {
@@ -267,9 +257,9 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                 item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
                 StandardAxisType.RightStickX)));
         }
-        
+
         InstrumentButtonTypeExtensions.ConvertBindings(Outputs, Model);
-        
+
         switch (Model.DeviceType)
         {
             case DeviceControllerType.Guitar:
@@ -281,13 +271,16 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                         if (!InstrumentButtonTypeExtensions.LiveToGuitar.ContainsKey(guitarButton.Type)) continue;
                         Outputs.Remove(output);
                         Outputs.Add(new GuitarButton(Model, output.Input, output.LedOn, output.LedOff,
-                            output.LedIndices.ToArray(), guitarButton.Debounce, InstrumentButtonTypeExtensions.LiveToGuitar[guitarButton.Type]));
+                            output.LedIndices.ToArray(), guitarButton.Debounce,
+                            InstrumentButtonTypeExtensions.LiveToGuitar[guitarButton.Type]));
                     }
+
                     if (output is not ControllerButton button) continue;
                     if (!InstrumentButtonTypeExtensions.GuitarMappings.ContainsKey(button.Type)) continue;
                     Outputs.Remove(output);
                     Outputs.Add(new GuitarButton(Model, output.Input, output.LedOn, output.LedOff,
-                        output.LedIndices.ToArray(), button.Debounce, InstrumentButtonTypeExtensions.GuitarMappings[button.Type]));
+                        output.LedIndices.ToArray(), button.Debounce,
+                        InstrumentButtonTypeExtensions.GuitarMappings[button.Type]));
                 }
 
                 break;
@@ -301,13 +294,16 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                         if (!InstrumentButtonTypeExtensions.GuitarToLive.ContainsKey(guitarButton.Type)) continue;
                         Outputs.Remove(output);
                         Outputs.Add(new GuitarButton(Model, output.Input, output.LedOn, output.LedOff,
-                            output.LedIndices.ToArray(), guitarButton.Debounce, InstrumentButtonTypeExtensions.GuitarToLive[guitarButton.Type]));
+                            output.LedIndices.ToArray(), guitarButton.Debounce,
+                            InstrumentButtonTypeExtensions.GuitarToLive[guitarButton.Type]));
                     }
+
                     if (output is not ControllerButton button) continue;
                     if (!InstrumentButtonTypeExtensions.LiveGuitarMappings.ContainsKey(button.Type)) continue;
                     Outputs.Remove(output);
                     Outputs.Add(new GuitarButton(Model, output.Input, output.LedOn, output.LedOff,
-                        output.LedIndices.ToArray(), button.Debounce, InstrumentButtonTypeExtensions.LiveGuitarMappings[button.Type]));
+                        output.LedIndices.ToArray(), button.Debounce,
+                        InstrumentButtonTypeExtensions.LiveGuitarMappings[button.Type]));
                 }
 
                 break;
@@ -319,7 +315,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                     if (output is not GuitarButton guitarButton) continue;
                     Outputs.Remove(output);
                     Outputs.Add(new ControllerButton(Model, output.Input, output.LedOn, output.LedOff,
-                        output.LedIndices.ToArray(), guitarButton.Debounce, InstrumentButtonTypeExtensions.GuitarToStandard[guitarButton.Type]));
+                        output.LedIndices.ToArray(), guitarButton.Debounce,
+                        InstrumentButtonTypeExtensions.GuitarToStandard[guitarButton.Type]));
                 }
 
                 break;

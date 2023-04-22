@@ -9,6 +9,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
@@ -20,7 +21,7 @@ public class GuitarAxis : OutputAxis
     {
         Type = type;
         UpdateDetails();
-        _sliderInfo = this.WhenAnyValue(x => x.Value).Select(GetSliderInfo).ToProperty(this, x => x.SliderInfo);
+        this.WhenAnyValue(x => x.Value).Select(GetSliderInfo).ToPropertyEx(this, x => x.SliderInfo);
     }
 
     private string GetSliderInfo(int val)
@@ -55,9 +56,8 @@ public class GuitarAxis : OutputAxis
     }
 
 
-    private readonly ObservableAsPropertyHelper<string> _sliderInfo;
-
-    public string SliderInfo => _sliderInfo.Value;
+    // ReSharper disable once UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public string SliderInfo { get; } = "";
 
     public GuitarAxisType Type { get; }
 

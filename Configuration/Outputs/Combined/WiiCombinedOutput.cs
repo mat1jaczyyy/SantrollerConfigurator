@@ -11,6 +11,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
@@ -170,14 +171,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.NunchukRotationPitch, StandardAxisType.RightStickY}
     };
 
-    private bool _controllerFound;
-
-    private WiiControllerType _detectedType;
-
-    private WiiGuitarType _detectedGuitarType = WiiGuitarType.Gh3;
-
-    private readonly ObservableAsPropertyHelper<bool> _isGuitar;
-    public bool IsGuitar => _detectedType is WiiControllerType.Guitar;
+    // ReSharper disable once UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public bool IsGuitar { get; }
 
     public WiiCombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
         IReadOnlyCollection<Output>? outputs = null) : base(model, WiiInput.WiiTwiType,
@@ -189,8 +184,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
         else
             CreateDefaults();
 
-        _isGuitar = this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
-            .ToProperty(this, x => x.IsGuitar);
+        this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
+            .ToPropertyEx(this, x => x.IsGuitar);
 
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
@@ -204,23 +199,11 @@ public class WiiCombinedOutput : CombinedTwiOutput
         DigitalOutputs = digitalOutputs;
     }
 
-    public WiiControllerType DetectedType
-    {
-        get => _detectedType;
-        set => this.RaiseAndSetIfChanged(ref _detectedType, value);
-    }
+    [Reactive] public WiiControllerType DetectedType { get; set; }
 
-    public WiiGuitarType DetectedGuitarType
-    {
-        get => _detectedGuitarType;
-        set => this.RaiseAndSetIfChanged(ref _detectedGuitarType, value);
-    }
+    [Reactive] public WiiGuitarType DetectedGuitarType { get; set; } = WiiGuitarType.Gh3;
 
-    public bool ControllerFound
-    {
-        get => _controllerFound;
-        set => this.RaiseAndSetIfChanged(ref _controllerFound, value);
-    }
+    [Reactive] public bool ControllerFound { get; set; }
 
     private static Func<Output, bool> CreateFilter((bool controllerFound, WiiControllerType controllerType) tuple)
     {

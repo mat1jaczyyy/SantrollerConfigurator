@@ -9,6 +9,7 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Other;
 
@@ -34,22 +35,9 @@ public class UsbHostInput : Output
         UpdateDetails();
     }
 
-    private int _connectedDevices = 0;
-    
-    private string _usbHostInfo = "";
+    [Reactive] public string UsbHostInfo { get; set; } = "";
 
-    public string UsbHostInfo
-    {
-        get => _usbHostInfo;
-        set => this.RaiseAndSetIfChanged(ref _usbHostInfo, value);
-    }
-
-    public int ConnectedDevices
-    {
-        get => _connectedDevices;
-        set => this.RaiseAndSetIfChanged(ref _connectedDevices, value);
-    }
-
+    [Reactive] public int ConnectedDevices { get; set; } = 0;
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 
@@ -111,7 +99,7 @@ public class UsbHostInput : Output
                 subType = EnumToStringConverter.Convert(xInputSubType);
                 if (xInputSubType is XInputSubType.Drums or XInputSubType.Guitar or XInputSubType.GuitarAlternate)
                 {
-                    rhythmType = " "+EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
+                    rhythmType = " " + EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
                 }
             }
             else
@@ -120,10 +108,10 @@ public class UsbHostInput : Output
                 subType = EnumToStringConverter.Convert(deviceType);
                 if (deviceType is DeviceControllerType.Drum or DeviceControllerType.Guitar)
                 {
-                    rhythmType = " "+EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
+                    rhythmType = " " + EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
                 }
-                
             }
+
             buffer += $"{consoleType} {rhythmType} {subType}\n";
         }
 
