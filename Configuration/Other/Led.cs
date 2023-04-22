@@ -482,8 +482,7 @@ public class Led : Output
         List<int> combinedDebounce)
     {
         if (mode is not (ConfigField.StrobeLed or ConfigField.AuthLed or ConfigField.PlayerLed or ConfigField.RumbleLed
-            or ConfigField.KeyboardLed or ConfigField.LightBarLed)) return "";
-        var allOff = "(rumble_left == 0x00 rumble_right == 0xFF)";
+            or ConfigField.KeyboardLed or ConfigField.LightBarLed or ConfigField.OffLed)) return "";
         var on = "";
         var off = "";
         if (PinConfig != null)
@@ -575,6 +574,10 @@ public class Led : Output
                       }}";
         }
 
+        if (mode is ConfigField.OffLed && Command is LedCommandType.StageKitLed)
+        {
+            return off;
+        }
         if (mode is not ConfigField.RumbleLed) return "";
 
 
@@ -619,7 +622,7 @@ public class Led : Output
         switch (StageKitCommand)
         {
             case StageKitCommand.Fog:
-                return $@"if ((rumble_left == 0 && rumble_right == {RumbleCommand.StageKitFogOff}) || {allOff}) {{
+                return $@"if ((rumble_left == 0 && rumble_right == {RumbleCommand.StageKitFogOff})) {{
                           {off}
                       }} else if (rumble_left == 0 && rumble_right == {RumbleCommand.StageKitFogOn}) {{
                           {on}
@@ -629,7 +632,7 @@ public class Led : Output
                     $@"if (rumble_left == 0 && rumble_right >= {RumbleCommand.StageKitStrobeLightSlow} && rumble_right <= {RumbleCommand.StageKitStrobeLightFastest}) {{
                            strobe_delay = 5 - (rumble_right - {RumbleCommand.StageKitFogOff});
                       }}
-                      if (strobe_delay == 0 || {allOff}) {{
+                      if (strobe_delay == 0) {{
                           strobe_delay = 0;
                           {off}
                       }}";
@@ -637,7 +640,7 @@ public class Led : Output
             {
                 var led = 1 << (StageKitLed - 1);
                 return
-                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightBlue} || {allOff})) {{
+                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightBlue})) {{
                           {off}
                       }} else if (rumble_left & ({led}) && rumble_right == {RumbleCommand.StageKitStrobeLightBlue}) {{
                           {on}
@@ -647,7 +650,7 @@ public class Led : Output
             {
                 var led = 1 << (StageKitLed - 1);
                 return
-                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightGreen} || {allOff})) {{
+                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightGreen}) {{
                           {off}
                       }} else if (rumble_left & ({led}) && rumble_right == {RumbleCommand.StageKitStrobeLightGreen}) {{
                           {on}
@@ -657,7 +660,7 @@ public class Led : Output
             {
                 var led = 1 << (StageKitLed - 1);
                 return
-                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightRed} || {allOff})) {{
+                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightRed}) {{
                           {off}
                       }} else if (rumble_left & ({led}) && rumble_right == {RumbleCommand.StageKitStrobeLightRed}) {{
                           {on}
@@ -667,7 +670,7 @@ public class Led : Output
             {
                 var led = 1 << (StageKitLed - 1);
                 return
-                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightYellow} || {allOff})) {{
+                    @$"if ((rumble_left & {led} == 0) && (rumble_right == {RumbleCommand.StageKitStrobeLightYellow}) {{
                           {off}
                       }} else if (rumble_left & ({led}) && rumble_right == {RumbleCommand.StageKitStrobeLightYellow}) {{
                           {on}

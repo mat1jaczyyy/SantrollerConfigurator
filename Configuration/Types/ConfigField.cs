@@ -10,6 +10,7 @@ public enum ConfigField
     Consumer,
     Keyboard,
     Mouse,
+    OffLed,
     AuthLed,
     PlayerLed,
     RumbleLed,

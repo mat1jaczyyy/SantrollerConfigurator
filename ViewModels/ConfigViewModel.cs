@@ -927,6 +927,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
+        
+        lines.Add($"#define HANDLE_LED_RUMBLE_OFF {GenerateTick(ConfigField.OffLed)}");
 
         lines.Add($"#define HANDLE_PLAYER_LED {GenerateTick(ConfigField.PlayerLed)}");
 
