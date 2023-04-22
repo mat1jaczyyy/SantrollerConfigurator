@@ -190,11 +190,6 @@ public class MacroInput : Input
         {
             Child2 = input;
         }
-        this.RaisePropertyChanged(nameof(WiiInputType));
-        this.RaisePropertyChanged(nameof(Ps2InputType));
-        this.RaisePropertyChanged(nameof(GhWtInputType));
-        this.RaisePropertyChanged(nameof(Gh5NeckInputType));
-        this.RaisePropertyChanged(nameof(DjInputType));
     }
 
 
