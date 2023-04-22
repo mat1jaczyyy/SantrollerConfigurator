@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,7 +30,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     {
-        private static readonly string UdevFile = "99-ardwiino.rules";
+        private static readonly string UdevFile = "99-santroller.rules";
         private static readonly string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
         private ConfigurableUsbDeviceManager _manager;
         private readonly ObservableAsPropertyHelper<bool> _connected;
@@ -85,6 +86,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private SourceList<DeviceInputType> _allDeviceInputTypes = new();
         public ReadOnlyObservableCollection<DeviceInputType> DeviceInputTypes { get; }
 
+        public Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel> ShowYesNoDialog
+        {
+            get;
+        }
 
         private bool _working = true;
 
@@ -95,6 +100,8 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         public MainWindowViewModel()
         {
+            ShowYesNoDialog =
+                new Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>();
             AssetUtils.InitNativeLibrary();
             _allDeviceInputTypes.AddRange(Enum.GetValues<DeviceInputType>());
             _allDeviceInputTypes
@@ -164,6 +171,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 DeviceInputType = DeviceInputType.Direct;
                 this.RaisePropertyChanged(nameof(DeviceInputType));
             });
+        }
+
+        public Task Begin()
+        {
             _timer.Elapsed += DevicePoller_Tick;
             _timer.AutoReset = false;
             StartWorking();
@@ -181,9 +192,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 _timer.Start();
             });
 
-            _ = Task.Run(InstallDependenciesAsync);
+            return InstallDependenciesAsync();
         }
-
+        
         public ReactiveCommand<Unit, IRoutableViewModel> ConfigureCommand { get; }
 
         // The command that navigates a user back.
@@ -306,7 +317,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 environment = "picow";
             }
 
-            var envs = new[] { environment };
+            var envs = new[] {environment};
 
 
             if (NewDevice)
@@ -317,7 +328,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
             if (config.Microcontroller.Board.HasUsbmcu)
             {
-                envs = new[] { envs[0] + "_usb", envs[0] };
+                envs = new[] {envs[0] + "_usb", envs[0]};
             }
 
             ;
@@ -333,7 +344,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             foreach (var env in envs)
             {
                 Programming = true;
-                var command = Pio.RunPlatformIo(env, new[] { "run", "--target", "upload" },
+                var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
                     "Writing",
                     currentPercentage, currentPercentage + stepPercentage, config.Device);
                 state = state.Concat(command);
@@ -466,17 +477,23 @@ namespace GuitarConfigurator.NetCore.ViewModels
             return !RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || File.Exists(UdevPath);
         }
 
-        private static async Task InstallDependenciesAsync()
+        private async Task InstallDependenciesAsync()
         {
             if (CheckDependencies()) return;
-            //TODO: pop open a dialog before doing this
+            var yesNo = await ShowYesNoDialog.Handle(("Install", "Skip",
+                "There are some drivers missing, would you like to install them?")).ToTask();
+            if (!yesNo.Response)
+            {
+                return;
+            }
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var windowsDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
                 var appdataFolder = AssetUtils.GetAppDataFolder();
                 var driverFolder = Path.Combine(appdataFolder, "drivers");
-                await AssetUtils.ExtractXzAsync("dfu.tar.xz", appdataFolder, _ => {});
-                
+                await AssetUtils.ExtractXzAsync("dfu.tar.xz", appdataFolder, _ => { });
+
                 var info = new ProcessStartInfo(Path.Combine(windowsDir, "pnputil.exe"));
                 info.ArgumentList.AddRange(new[] {"-i", "-a", Path.Combine(driverFolder, "atmel_usb_dfu.inf")});
                 info.UseShellExecute = true;
@@ -484,7 +501,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 info.WindowStyle = ProcessWindowStyle.Hidden;
                 info.Verb = "runas";
                 Process.Start(info);
-                
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -493,7 +509,18 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var rules = Path.Combine(appdataFolder, UdevFile);
                 await AssetUtils.ExtractFileAsync(UdevFile, rules);
                 var info = new ProcessStartInfo("pkexec");
-                info.ArgumentList.AddRange(new[] { "cp", rules, UdevPath });
+                info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});
+                info.UseShellExecute = true;
+                Process.Start(info);
+                
+                // And then reload rules and trigger
+                info = new ProcessStartInfo("pkexec");
+                info.ArgumentList.AddRange(new[] {"udevadm", "control", "--reload-rules"});
+                info.UseShellExecute = true;
+                Process.Start(info);
+                
+                info = new ProcessStartInfo("pkexec");
+                info.ArgumentList.AddRange(new[] {"udevadm", "trigger"});
                 info.UseShellExecute = true;
                 Process.Start(info);
             }

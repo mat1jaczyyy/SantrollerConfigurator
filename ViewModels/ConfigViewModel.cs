@@ -804,8 +804,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 this.RaisePropertyChanged(nameof(EmulationType));
                 return;
             }
-
-            ;
         }
 
         _emulationType = emulationType;
@@ -927,8 +925,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
-        
-        lines.Add($"#define HANDLE_LED_RUMBLE_OFF {GenerateTick(ConfigField.OffLed)}");
+
+        var offLed = GenerateTick(ConfigField.OffLed);
+        if (offLed.Any())
+        {
+            lines.Add($"#define HANDLE_LED_RUMBLE_OFF {offLed}");
+        }
 
         lines.Add($"#define HANDLE_PLAYER_LED {GenerateTick(ConfigField.PlayerLed)}");
 
