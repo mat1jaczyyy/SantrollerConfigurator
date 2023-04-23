@@ -356,6 +356,7 @@ public class Led : Output
         LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => "Fog Active LED Colour",
         LedCommandType.Player or LedCommandType.Auth => "LED Colour",
         LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Star Power Full Colour",
+        LedCommandType.DjEuphoria => "Euphoria Full Colour",
         _ => "Active LED Colour"
     };
 
@@ -364,6 +365,7 @@ public class Led : Output
         LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => "Fog Inactive LED Colour",
         LedCommandType.Player or LedCommandType.Auth => "LED Colour",
         LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Star Power Empty Colour",
+        LedCommandType.DjEuphoria => "Euphoria Empty Colour",
         _ => "Inactive LED Colour"
     };
 
@@ -595,7 +597,7 @@ public class Led : Output
                 return $@"if (rumble_right == {(int) RumbleCommand.SantrollerMultiplier}) {{
                     if (rumble_left == {Combo + 10}) {{
                         {on}
-                    }} else {{
+                    }} else if (rumble_left == 0) {{
                         {off}
                     }}
                 }}";
