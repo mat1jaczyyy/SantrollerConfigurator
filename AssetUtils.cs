@@ -48,11 +48,11 @@ public class AssetUtils
 
     private static async Task GetProgress(XZStream stream, IAsyncResult extract, ExtractionProgress extractionProgress)
     {
+        float total = stream.BaseStream.Length;
         while (!extract.IsCompleted)
         {
-            
             stream.GetProgress(out var progressIn, out _);
-            var progress = (progressIn / (float) stream.TotalIn) - 0.01f;
+            var progress = progressIn / total - 0.01f;
             extractionProgress(progress);
             await Task.Delay(100);
         }
