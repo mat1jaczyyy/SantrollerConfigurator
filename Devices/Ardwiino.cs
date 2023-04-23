@@ -387,6 +387,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 break;
         }
 
+        model.LedType = ledType;
         model.SetDeviceTypeAndRhythmTypeWithoutUpdating(deviceType, rhythmType, emulationType);
         var sda = 18;
         var scl = 19;
@@ -595,7 +596,6 @@ public class Ardwiino : ConfigurableUsbDevice
         
         
 
-        model.LedType = ledType;
         if (model.IsApa102)
         {
             model.Apa102Mosi = 3;
