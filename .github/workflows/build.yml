@@ -35,7 +35,7 @@ jobs:
         run: |
           dotnet publish -c Release -r osx-x64 -p:PublishSingleFile=true -p:DebugType=None -p:DebugSymbols=false -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true --verbosity normal
           mkdir out
-          cp bin/Release/net7.0/osx-x64/publish/GuitarConfigurator out/GuitarConfigurator-macOS-64
+          cp bin/Release/net7.0/osx-x64/publish/SantrollerConfigurator out/SantrollerConfigurator-macOS-64
       - uses: actions/upload-artifact@v1
         with:
           name: mac
@@ -64,7 +64,7 @@ jobs:
         run: |
           dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true -p:DebugType=None -p:DebugSymbols=false -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true --verbosity normal
           mkdir out
-          cp bin/Release/net7.0/linux-x64/publish/GuitarConfigurator out/GuitarConfigurator-linux-64
+          cp bin/Release/net7.0/linux-x64/publish/SantrollerConfigurator out/SantrollerConfigurator-linux-64
       - uses: actions/upload-artifact@v1
         with:
           name: linux
@@ -95,7 +95,7 @@ jobs:
         run: |
           dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:DebugType=None -p:DebugSymbols=false -p:IncludeNativeLibrariesForSelfExtract=true --self-contained true --verbosity normal
           mkdir out
-          cp bin/Release/net7.0/win-x64/publish/GuitarConfigurator.exe out/GuitarConfigurator-win-64.exe
+          cp bin/Release/net7.0/win-x64/publish/SantrollerConfigurator.exe out/SantrollerConfigurator-win-64.exe
       - uses: actions/upload-artifact@v1
         with:
           name: windows

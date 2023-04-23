@@ -11,7 +11,7 @@
         TransparencyLevelHint="AcrylicBlur"
         WindowStartupLocation="CenterOwner"
         Icon="/Assets/avalonia-logo.ico"
-        Title="GuitarConfiguratorSharp"
+        Title="Santroller Configurator"
         Background="Transparent"
         Width="800"
         Height="600"

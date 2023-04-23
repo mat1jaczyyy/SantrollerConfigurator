@@ -10,7 +10,7 @@
         x:Class="GuitarConfigurator.NetCore.Views.MainWindow"
         TransparencyLevelHint="AcrylicBlur"
         Icon="/Assets/avalonia-logo.ico"
-        Title="GuitarConfiguratorSharp"
+        Title="Santroller Configurator"
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True"
         x:DataType="viewModels:MainWindowViewModel"
