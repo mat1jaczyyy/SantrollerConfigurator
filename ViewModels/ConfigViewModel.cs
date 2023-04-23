@@ -392,6 +392,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public Microcontroller Microcontroller { get; }
 
     public SourceList<Output> Bindings { get; } = new();
+    public bool BindableSpi => IsPico;
 
     // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public bool IsStandardMode { get; }
@@ -404,7 +405,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [ObservableAsProperty] public bool IsController { get; }
     [ObservableAsProperty] public bool IsKeyboard { get; }
     [ObservableAsProperty] public bool IsApa102 { get; }
-    [ObservableAsProperty] public bool BindableSpi { get; }
     [ObservableAsProperty] public bool IsRf { get; }
     [ObservableAsProperty] public bool IsBluetooth { get; }
 
@@ -470,7 +470,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
-    private void UpdateBindings()
+    public void UpdateBindings()
     {
         foreach (var binding in Bindings.Items) binding.UpdateBindings();
         InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this);

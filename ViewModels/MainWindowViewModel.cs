@@ -201,7 +201,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         [Reactive] public Arduino32U4Type Arduino32U4Type { get; set; }
 
-        [Reactive] public Board PicoType { get; set; }
+        [Reactive] public Board PicoType { get; set; } = Board.Rp2040Boards[0];
 
         [Reactive] public IConfigurableDevice? SelectedDevice { get; set; }
 

@@ -8,12 +8,15 @@ namespace GuitarConfigurator.NetCore.Utils;
 public partial class PlatformIoPort
 {
     private static readonly string VidPidPattern = "VID:PID=(\\w{4}):(\\w{4})";
-    public string Port { get; set; } = "";
+    [JsonPropertyName("port")] public string Port { get; set; } = "";
 
-    public string Description { get; set; } = "";
+    [JsonPropertyName("description")] public string Description { get; set; } = "";
 
-    public string Hwid { get; set; } = "";
 
+    [JsonPropertyName("hwid")] public string Hwid { get; set; } = "";
+
+
+    [JsonPropertyName("vid")]
     public uint Vid
     {
         get
@@ -23,6 +26,8 @@ public partial class PlatformIoPort
         }
     }
 
+
+    [JsonPropertyName("pid")]
     public uint Pid
     {
         get
@@ -40,6 +45,9 @@ public partial class PlatformIoPort
         return JsonSerializer.Deserialize(json, SourceGenerationContext.Default.PlatformIoPortArray)!;
     }
 }
+
 [JsonSourceGenerationOptions(WriteIndented = true)]
 [JsonSerializable(typeof(PlatformIoPort[]))]
-internal partial class SourceGenerationContext : JsonSerializerContext { }
+internal partial class SourceGenerationContext : JsonSerializerContext
+{
+}

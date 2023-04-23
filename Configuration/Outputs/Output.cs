@@ -122,7 +122,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     [Reactive] public Input Input { get; set; }
 
 
-    [Reactive] public bool Enabled { get; set; }
+    [Reactive] public bool Enabled { get; set; } = true;
 
     [Reactive] public bool Expanded { get; set; }
 

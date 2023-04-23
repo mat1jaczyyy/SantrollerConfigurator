@@ -618,7 +618,6 @@ public class Led : Output
 
 
         if (Command is not LedCommandType.StageKitLed) return "";
-        // TODO: maybe instead of this allOff thing, we just have yet another ConfigField specifically for the off state and then put them all in there
         switch (StageKitCommand)
         {
             case StageKitCommand.Fog:

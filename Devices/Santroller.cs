@@ -523,6 +523,11 @@ public class Santroller : IConfigurableDevice
         return _platformIoPort?.Port ?? "";
     }
 
+    public void SetLed(byte led, byte[] color)
+    {
+        WriteData(0, (byte)Commands.CommandSetLeds, new[]{led}.Concat(color).ToArray());
+    }
+
     public void StartScan()
     {
         WriteData(0, (byte)Commands.CommandStartBtScan, Array.Empty<byte>());
