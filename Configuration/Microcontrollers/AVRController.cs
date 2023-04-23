@@ -211,7 +211,8 @@ public abstract class AvrController : Microcontroller
 
     public override string GenerateAnalogRead(int pin)
     {
-        return "adc({pin})";
+        var pins = PinConfigs.OfType<DirectPinConfig>().Where(config => config.PinMode is DevicePinMode.Analog).Select(s => s.Pin).Distinct().Order();
+        return $"adc({pins.IndexOf(pin)})";
     }
 
     public override string GetPinForMicrocontroller(int pin, bool spi, bool twi)

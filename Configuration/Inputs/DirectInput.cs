@@ -56,18 +56,7 @@ public class DirectInput : InputWithPin
     public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-        if (Model.Microcontroller is not AvrController) return string.Join("\n", bindings.Select(binding => binding.Item2));
-        var replacements = new Dictionary<string, string>();
-        var seenPins = allBindings.Select(s => s.Input.InnermostInput()).OfType<DirectInput>().Where(s => s.IsAnalog)
-            .Select(s => s.Pin).Distinct().OrderBy(s => s).Select((pin, index) => (pin, index))
-            .ToDictionary(s => s.pin, s => s.index);
-        foreach (var (item1, item2) in bindings)
-        {
-            var pin = item1.Pins.First().Pin;
-            if (item1.IsAnalog) replacements[item2] = item2.Replace("{pin}", seenPins[pin].ToString());
-        }
-
-        return string.Join("\n", bindings.Select(b => b.Item1.IsAnalog ? replacements[b.Item2] : b.Item2));
+       return string.Join("\n", bindings.Select(binding => binding.Item2));
     }
 
 

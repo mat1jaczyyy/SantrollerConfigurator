@@ -446,10 +446,10 @@ public class Ardwiino : ConfigurableUsbDevice
                     (ControllerAxisType) axis == XboxTilt &&
                     config.all.main.tiltType == 2)
                 {
-                    bindings.Add(new ControllerAxis(model,
+                    bindings.Add(new GuitarAxis(model,
                         new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
-                        0, StandardAxisType.RightStickY));
+                        0, GuitarAxisType.Tilt));
                 }
                 else
                 {
@@ -492,7 +492,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 switch (deviceType)
                 {
                     case DeviceControllerType.Guitar when
-                        (genButton == StandardButtonType.DpadUp || genButton == StandardButtonType.DpadDown):
+                        genButton is StandardButtonType.DpadUp or StandardButtonType.DpadDown:
                         debounce = config.debounce.strum;
                         break;
                     case DeviceControllerType.Turntable when genButton == StandardButtonType.LeftThumbClick:
@@ -520,10 +520,10 @@ public class Ardwiino : ConfigurableUsbDevice
                     if (ledIndexes.ContainsKey((int) (XboxTilt + XboxBtnCount)))
                         ledIndex = new[] {ledIndexes[(int) (XboxTilt + XboxBtnCount)]};
 
-                    bindings.Add(new ControllerAxis(model,
+                    bindings.Add(new GuitarAxis(model,
                         new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
-                        0, StandardAxisType.RightStickY));
+                        0, GuitarAxisType.Tilt));
                 }
             }
 
@@ -548,7 +548,6 @@ public class Ardwiino : ConfigurableUsbDevice
             }
         }
 
-        // Keyboard / Mouse does not have a joystick
         if (config.all.main.mapLeftJoystickToDPad > 0)
         {
             ControllerAxis? lx = null;
