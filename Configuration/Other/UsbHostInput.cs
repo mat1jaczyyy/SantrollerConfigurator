@@ -118,5 +118,6 @@ public class UsbHostInput : Output
         ConnectedDevices = usbHostRaw.Length / 3;
 
         UsbHostInfo = buffer.Trim();
+        UpdateDetails();
     }
 }
