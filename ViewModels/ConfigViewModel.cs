@@ -212,13 +212,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _apa102SpiConfig?.Mosi ?? 0;
         set => _apa102SpiConfig!.Mosi = value;
     }
-    
-    public int Apa102Miso
-    {
-        get => _apa102SpiConfig?.Miso ?? 0;
-        set => _apa102SpiConfig!.Miso = value;
-    }
-
 
     public int Apa102Sck
     {
@@ -316,12 +309,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 var pins = Microcontroller.FreeSpiPins(Apa102SpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
-                var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, mosi, miso, sck, true, true,
+                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, mosi, -1, sck, true, true,
                     true,
                     Math.Min(Microcontroller.Board.CpuFreq / 2, 12000000))!;
-                this.RaisePropertyChanged(nameof(Apa102Miso));
                 this.RaisePropertyChanged(nameof(Apa102Mosi));
                 this.RaisePropertyChanged(nameof(Apa102Sck));
                 UpdateErrors();

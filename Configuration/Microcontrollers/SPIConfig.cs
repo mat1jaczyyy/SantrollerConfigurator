@@ -70,8 +70,10 @@ public abstract class SpiConfig : PinConfig
 
     public override string Generate()
     {
+        // On apa102, miso isn't used.
+        string miso = _miso == -1 ? "" : $"#define {Definition}_MISO {_miso}";
         return $@"
-#define {Definition}_MISO {_miso}
+{miso}
 #define {Definition}_MOSI {_mosi}
 #define {Definition}_SCK {_sck}
 #define {Definition}_CPOL {(_cpol ? 1 : 0)}

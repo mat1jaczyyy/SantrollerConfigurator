@@ -289,16 +289,6 @@
                         </StackPanel>
                         <StackPanel IsVisible="{Binding BindableSpi}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0"
-                                       Text="APA102 MISO Pin (Unconnected)"
-                                       TextAlignment="Center" />
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                                      SelectedItem="{Binding Apa102Miso}"
-                                      Items="{Binding AvailableApaMisoPins}"
-                                      ItemTemplate="{StaticResource PinToStringTemplate}" />
-
-                        </StackPanel>
-                        <StackPanel IsVisible="{Binding BindableSpi}">
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0"
                                        Text="APA102 DI / MOSI Pin"
                                        TextAlignment="Center" />
                             <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
