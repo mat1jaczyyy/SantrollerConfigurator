@@ -45,7 +45,7 @@ public class ConfigurableUsbDeviceManager
 
     private async void DeviceNotify(EventType eventType, string path)
     {
-        await Task.Delay(100);
+        await Task.Delay(200);
         Dispatcher.UIThread.Post(() =>
         {
             var ids = UsbSymbolicName.Parse(path);

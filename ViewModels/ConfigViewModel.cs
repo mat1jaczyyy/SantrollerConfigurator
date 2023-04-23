@@ -834,21 +834,21 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
         }
 
-        lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
+        lines.Add($"#define HANDLE_AUTH_LED {GenerateLedTick(ConfigField.AuthLed)}");
 
-        var offLed = GenerateTick(ConfigField.OffLed);
+        var offLed = GenerateLedTick(ConfigField.OffLed);
         if (offLed.Any())
         {
             lines.Add($"#define HANDLE_LED_RUMBLE_OFF {offLed}");
         }
 
-        lines.Add($"#define HANDLE_PLAYER_LED {GenerateTick(ConfigField.PlayerLed)}");
+        lines.Add($"#define HANDLE_PLAYER_LED {GenerateLedTick(ConfigField.PlayerLed)}");
 
-        lines.Add($"#define HANDLE_LIGHTBAR_LED {GenerateTick(ConfigField.LightBarLed)}");
+        lines.Add($"#define HANDLE_LIGHTBAR_LED {GenerateLedTick(ConfigField.LightBarLed)}");
 
-        lines.Add($"#define HANDLE_RUMBLE {GenerateTick(ConfigField.RumbleLed)}");
+        lines.Add($"#define HANDLE_RUMBLE {GenerateLedTick(ConfigField.RumbleLed)}");
 
-        lines.Add($"#define HANDLE_KEYBOARD_LED {GenerateTick(ConfigField.KeyboardLed)}");
+        lines.Add($"#define HANDLE_KEYBOARD_LED {GenerateLedTick(ConfigField.KeyboardLed)}");
 
         lines.Add($"#define CONSOLE_TYPE {GetEmulationType()}");
 
@@ -1040,9 +1040,16 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         for (var i = 0; i <= ledMax; i += 16) ret += "spi_transfer(APA102_SPI_PORT, 0xff);";
 
-        return GenerateTick(ConfigField.StrobeLed) + ret.Replace('\r', ' ').Replace('\n', ' ');
+        return GenerateLedTick(ConfigField.StrobeLed) + ret.Replace('\r', ' ').Replace('\n', ' ');
     }
 
+    private string GenerateLedTick(ConfigField mode)
+    {
+        Dictionary<byte, List<Led>> ledList; 
+        var leds = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).OfType<Led>().ToList();
+        
+        return "";
+    }
     private string GenerateTick(ConfigField mode)
     {
         var outputs = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).ToList();

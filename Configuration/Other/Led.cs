@@ -355,7 +355,7 @@ public class Led : Output
     {
         LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => "Fog Active LED Colour",
         LedCommandType.Player or LedCommandType.Auth => "LED Colour",
-        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Start Power Full Colour",
+        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Star Power Full Colour",
         _ => "Active LED Colour"
     };
 
@@ -363,7 +363,7 @@ public class Led : Output
     {
         LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => "Fog Inactive LED Colour",
         LedCommandType.Player or LedCommandType.Auth => "LED Colour",
-        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Start Power Empty Colour",
+        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Star Power Empty Colour",
         _ => "Inactive LED Colour"
     };
 
