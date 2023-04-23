@@ -600,6 +600,7 @@ public class Ardwiino : ConfigurableUsbDevice
         {
             model.Apa102Mosi = 3;
             model.Apa102Sck = 6;
+            model.Apa102Miso = 4;
             model.LedCount = ledIndexes.Values.Max();
         }
 
