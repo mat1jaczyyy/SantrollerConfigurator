@@ -40,11 +40,6 @@ namespace GuitarConfigurator.NetCore.ViewModels
         private readonly List<string> _currentPorts = new();
 
         private readonly Timer _timer = new();
-
-
-        private Board _picoType = Board.Rp2040Boards[0];
-
-
         public bool Programming { get; private set; }
 
 
@@ -429,18 +424,21 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 var info = new ProcessStartInfo("pkexec");
                 info.ArgumentList.AddRange(new[] {"cp", rules, UdevPath});
                 info.UseShellExecute = true;
-                Process.Start(info);
-
+                var process = Process.Start(info);
+                if (process == null) return;
+                await process.WaitForExitAsync();
                 // And then reload rules and trigger
                 info = new ProcessStartInfo("pkexec");
                 info.ArgumentList.AddRange(new[] {"udevadm", "control", "--reload-rules"});
-                info.UseShellExecute = true;
-                Process.Start(info);
+                info.UseShellExecute = true;process = Process.Start(info);
+                if (process == null) return;
+                await process.WaitForExitAsync();
 
                 info = new ProcessStartInfo("pkexec");
                 info.ArgumentList.AddRange(new[] {"udevadm", "trigger"});
-                info.UseShellExecute = true;
-                Process.Start(info);
+                info.UseShellExecute = true;process = Process.Start(info);
+                if (process == null) return;
+                await process.WaitForExitAsync();
             }
 
             if (!CheckDependencies())

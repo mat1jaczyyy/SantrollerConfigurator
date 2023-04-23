@@ -283,7 +283,7 @@ public class Ardwiino : ConfigurableUsbDevice
             if (led.pin != 0)
             {
                 colors[led.pin - 1] = Color.FromRgb(led.red, led.green, led.blue);
-                ledIndexes[led.pin - 1] = index;
+                ledIndexes[led.pin - 1] = (byte) (index + 1);
             }
         }
 
@@ -601,6 +601,7 @@ public class Ardwiino : ConfigurableUsbDevice
         {
             model.Apa102Mosi = 3;
             model.Apa102Sck = 6;
+            model.LedCount = ledIndexes.Values.Max();
         }
 
         model.XInputOnWindows = xinputOnWindows;

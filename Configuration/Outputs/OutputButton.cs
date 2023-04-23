@@ -47,55 +47,24 @@ public abstract class OutputButton : Output
             extraStatement = " && " + combinedExtra;
         }
 
-        var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
         var debounce = Debounce + 1;
         if (!Model.IsAdvancedMode)
         {
             debounce = Model.Debounce + 1;
         }
 
-        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
         if (mode != ConfigField.Shared)
         {
             var outputVar = GenerateOutput(mode);
-            if (!outputVar.Any()) return "";
-            var leds = "";
-            if (AreLedsEnabled && LedIndices.Any())
-                leds += $@"if (!{ifStatement}) {{
-                        {LedIndices.Aggregate("", (s, index) => s + @$"if (ledState[{index - 1}].select == 1) {{
-                            ledState[{index - 1}].select = 0; 
-                            {Model.LedType.GetLedAssignment(LedOff, index)}
-                        }}")}
-                    }}";
-
-            return
-                @$"if ({ifStatement}) {{ 
-                    {decrement} 
+            return outputVar.Any() ? @$"if ({ifStatement}) {{ 
                     {outputVar} = true; 
-                    {leds}
                     {extra}
-                }}";
+                }}" : "";
         }
 
-        var led = "";
-        var led2 = "";
-        if (AreLedsEnabled)
-            foreach (var index in LedIndices)
-            {
-                led += $@"
-                if (ledState[{index - 1}].select == 0 && {ifStatement}) {{
-                    ledState[{index - 1}].select = 1;
-                    {Model.LedType.GetLedAssignment(LedOn, index)}
-                }}";
-                led2 += $@"
-                if (!{ifStatement} && ledState[{index - 1}].select == 1) {{
-                    ledState[{index - 1}].select = 1;
-                    {Model.LedType.GetLedAssignment(LedOn, index)}
-                }}
-            ";
-            }
+        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
 
-        return $"if (({Input.Generate(mode)} {extraStatement})) {{ {led2} {reset} {extra} }} {led}";
+        return $"if (({Input.Generate(mode)} {extraStatement})) {{ {reset} {extra} }}";
     }
 
     public override void UpdateBindings()

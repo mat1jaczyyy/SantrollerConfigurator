@@ -9,13 +9,10 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia.Collections;
 using Avalonia.Input;
 using Avalonia.Media;
 using DynamicData;
-using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
-using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
@@ -24,7 +21,6 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Devices;
 using ProtoBuf;
 using ReactiveUI;
-using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.Input;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Other;
@@ -216,6 +212,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _apa102SpiConfig?.Mosi ?? 0;
         set => _apa102SpiConfig!.Mosi = value;
     }
+    
+    public int Apa102Miso
+    {
+        get => _apa102SpiConfig?.Miso ?? 0;
+        set => _apa102SpiConfig!.Miso = value;
+    }
+
 
     public int Apa102Sck
     {
@@ -313,10 +316,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 var pins = Microcontroller.FreeSpiPins(Apa102SpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
+                var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, mosi, -1, sck, true, true,
+                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, mosi, miso, sck, true, true,
                     true,
                     Math.Min(Microcontroller.Board.CpuFreq / 2, 12000000))!;
+                this.RaisePropertyChanged(nameof(Apa102Miso));
                 this.RaisePropertyChanged(nameof(Apa102Mosi));
                 this.RaisePropertyChanged(nameof(Apa102Sck));
                 UpdateErrors();
@@ -413,6 +418,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
         .Where(s => s.Value is SpiPinType.Mosi)
+        .Select(s => s.Key).ToList();
+    public List<int> AvailableApaMisoPins => Microcontroller.SpiPins(Apa102SpiType)
+        .Where(s => s.Value is SpiPinType.Miso)
         .Select(s => s.Key).ToList();
 
     public List<int> AvailableApaSckPins => Microcontroller.SpiPins(Apa102SpiType)
@@ -1082,6 +1090,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         var seen = new HashSet<Output>();
+        var debouncesRelatedToLed = new Dictionary<byte, List<(Output, List<int>)>>();
         // Handle most mappings
         // Sort in a way that any digital to analog based groups are last. This is so that seenAnalog will be filled in when necessary.
         var ret = groupedOutputs.OrderByDescending(s => s.Count(s2 => s2.Second.Input is DigitalToAnalog))
@@ -1117,13 +1126,19 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                             .ToList();
                                     }
                                 }
+                                
+                                foreach (var led in output.LedIndices)
+                                {
+                                    if (!debouncesRelatedToLed.ContainsKey(led))
+                                    {
+                                        debouncesRelatedToLed[led] = new List<(Output, List<int>)>();
+                                    }
+
+                                    debouncesRelatedToLed[led].Add((output, index));
+                                }
                             }
 
                             var generated = output.Generate(mode, index, "", "", strumIndices);
-
-                            if (output is OutputAxis axis && mode != ConfigField.Shared)
-                                generated = generated.Replace("{output}", axis.GenerateOutput(mode));
-
                             return new Tuple<Input, string>(input, generated);
                         })
                         .Where(s => !string.IsNullOrEmpty(s.Item2))
@@ -1131,6 +1146,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             });
         // Flick off intersecting outputs when multiple buttons are pressed
         if (mode == ConfigField.Shared)
+        {
             foreach (var output in macros)
             {
                 var generatedInput = output.Input.Generate(mode);
@@ -1142,6 +1158,24 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         inputs[input.Generate(mode)].Select(s => $"debounce[{s}]=0;").Distinct()));
                 ret += @$"if ({ifStatement}) {{{sharedReset}}}";
             }
+            // Handle leds, including when multiple leds are assigned to a single output.
+            foreach (var (led, relatedOutputs) in debouncesRelatedToLed)
+            {
+                ret += $"if (ledState[{led - 1}].select == 0) {{";
+                ret += string.Join(" else ", relatedOutputs.Select(tuple =>
+                {
+                    var ifStatement = string.Join(" && ", tuple.Item2.Select(x => $"debounce[{x}]"));
+                    return @$"if ({ifStatement}) {{
+                                        {LedType.GetLedAssignment(tuple.Item1.LedOn, led)}
+                                       }}";
+                }));
+                ret += $@" else {{
+                        {LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led)}
+                    }}
+                }}";
+            }
+            
+        }
 
         return ret.Replace('\r', ' ').Replace('\n', ' ').Trim();
     }

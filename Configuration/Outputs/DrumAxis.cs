@@ -143,7 +143,6 @@ public class DrumAxis : OutputAxis
         }
 
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
-        var decrement = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]--;");
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
         var outputButtons = "";
         switch (mode)
@@ -261,7 +260,6 @@ public class DrumAxis : OutputAxis
                     {rfExtra}
                 }}
                 if ({ifStatement}) {{
-                    {decrement} 
                     {outputButtons}
                 }}
             }}";
@@ -291,7 +289,6 @@ public class DrumAxis : OutputAxis
                 {rfExtra}
             }}
             if ({ifStatement}) {{
-                {decrement} 
                 {outputButtons}
             }}
         }}";
