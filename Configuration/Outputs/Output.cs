@@ -22,6 +22,7 @@ using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
+using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -64,14 +65,16 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     private bool ShouldUpdateDetails { get; set; }
 
+    private bool _configured = false;
+
     protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices)
     {
         ButtonText = "Click to assign";
+        Model = model;
         Input = input;
+        LedIndices = new ObservableCollection<byte>(ledIndices);
         LedOn = ledOn;
         LedOff = ledOff;
-        LedIndices = new ObservableCollection<byte>(ledIndices);
-        Model = model;
         this.WhenAnyValue(x => x.Model.LedCount)
             .Select(x => Enumerable.Range(1, x).Select(s => new LedIndex(this, (byte) s)).ToArray())
             .ToPropertyEx(this, x => x.AvailableIndices);
@@ -109,6 +112,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
         Outputs.Add(this);
         AnalogOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
         DigitalOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
+        _configured = true;
     }
 
     protected void UpdateDetails()
@@ -126,9 +130,43 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     [Reactive] public bool Expanded { get; set; }
 
-    [Reactive] public Color LedOn { get; set; }
+    private Color _ledOn;
+    private Color _ledOff;
 
-    [Reactive] public Color LedOff { get; set; }
+    public Color LedOn
+    {
+        get => _ledOn;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _ledOn, value);
+            if (!_configured || Model.LedType is LedType.None) return;
+            if (Model.Device is Santroller santroller)
+            {
+                foreach (var ledIndex in LedIndices)
+                {
+                    santroller.SetLed((byte) (ledIndex - 1), Model.LedType.GetLedBytes(value));
+                }
+            }
+        }
+    }
+
+    public Color LedOff
+    {
+        get => _ledOff;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _ledOff, value);
+            if (!_configured || Model.LedType is LedType.None) return;
+            if (Model.Device is Santroller santroller)
+            {
+                foreach (var ledIndex in LedIndices)
+                {
+                    santroller.SetLed((byte) (ledIndex - 1), Model.LedType.GetLedBytes(value));
+                }
+            }
+        }
+    }
+
 
     public InputType? SelectedInputType
     {
