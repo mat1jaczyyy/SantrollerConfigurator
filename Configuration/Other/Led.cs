@@ -496,11 +496,11 @@ public class Led : Output
         foreach (var index in LedIndices)
         {
             on += $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, index)}";
-            off += $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, index)}";
+            off += $@"ledState[{index - 1}].select = 0;{Model.LedType.GetLedAssignment(LedOff, index)}";
             between +=
                 $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, LedOff, "rumble_left", index)}";
             starPowerBetween +=
-                $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, LedOff, "last_start_power", index)}";
+                $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, LedOff, "last_star_power", index)}";
         }
 
         switch (Command)
@@ -542,19 +542,23 @@ public class Led : Output
                     }}";
             case LedCommandType.StarPowerActive when
                 StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.StrobeLed:
-                return $@"if (star_power_active) {{
+                return $@"if (star_power_active && last_star_power) {{
                              {starPowerBetween}
                           }}";
             case LedCommandType.StarPowerInactive when
                 StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.StrobeLed:
-                return $@"if (!star_power_active) {{
-                             {starPowerBetween}
+                return $@"if (!star_power_active && last_star_power) {{
+                            {starPowerBetween}
                           }}";
             case LedCommandType.StarPowerInactive or LedCommandType.StarPowerActive when
                 StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.RumbleLed:
                 return
                     $@"if (rumble_right == {RumbleCommand.SantrollerStarPowerGauge} && rumble_left != {RumbleCommand.SantrollerStarPowerGauge}) {{
-                           last_star_power = rumble_left;
+                           if (rumble_left) {{
+                              last_star_power = rumble_left;
+                           }} else {{
+                              {off}
+                           }}
                       }}";
             case LedCommandType.StarPowerInactive when
                 StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.RumbleLed:
