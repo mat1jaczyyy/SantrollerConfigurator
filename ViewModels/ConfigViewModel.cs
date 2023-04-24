@@ -322,7 +322,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
-    [Reactive] public bool XInputOnWindows {get; set;}
+    [Reactive] public bool XInputOnWindows { get; set; }
 
     public bool UsbHostEnabled
     {
@@ -410,6 +410,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
         .Where(s => s.Value is SpiPinType.Mosi)
         .Select(s => s.Key).ToList();
+
     public List<int> AvailableApaMisoPins => Microcontroller.SpiPins(Apa102SpiType)
         .Where(s => s.Value is SpiPinType.Miso)
         .Select(s => s.Key).ToList();
@@ -1050,34 +1051,36 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var inputs = new Dictionary<string, List<int>>();
         var macros = new List<Output>();
         foreach (var groupedOutput in groupedOutputs)
-        foreach (var (input, output) in groupedOutput)
         {
-            var generatedInput = input.Generate(mode);
-            if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
-
-            if (output.Input is MacroInput)
+            foreach (var (input, output) in groupedOutput)
             {
-                if (!debounces.ContainsKey(generatedInput))
-                    debounces[generatedInput] = debounces.Count;
+                var generatedInput = input.Generate(mode);
+                if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
 
-                macros.Add(output);
-            }
-            else
-            {
-                if (!debounces.ContainsKey(generatedInput)) debounces[generatedInput] = debounces.Count;
-            }
-
-            if (combined && output is GuitarButton
+                if (output.Input.InnermostInput() is MacroInput)
                 {
-                    Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown
-                })
-            {
-                strumIndices.Add(debounces[generatedInput]);
+                    if (!debounces.ContainsKey(generatedInput))
+                        debounces[generatedInput] = debounces.Count;
+
+                    macros.Add(output);
+                }
+                else
+                {
+                    if (!debounces.ContainsKey(generatedInput)) debounces[generatedInput] = debounces.Count;
+                }
+
+                if (combined && output is GuitarButton
+                    {
+                        Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown
+                    })
+                {
+                    strumIndices.Add(debounces[generatedInput]);
+                }
+
+                if (!inputs.ContainsKey(generatedInput)) inputs[generatedInput] = new List<int>();
+
+                inputs[generatedInput].Add(debounces[generatedInput]);
             }
-
-            if (!inputs.ContainsKey(generatedInput)) inputs[generatedInput] = new List<int>();
-
-            inputs[generatedInput].Add(debounces[generatedInput]);
         }
 
         var seen = new HashSet<Output>();
@@ -1117,7 +1120,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                             .ToList();
                                     }
                                 }
-                                
+
                                 foreach (var led in output.LedIndices)
                                 {
                                     if (!debouncesRelatedToLed.ContainsKey(led))
@@ -1169,7 +1172,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 }}";
                 }
             }
-
         }
 
         return ret.Replace('\r', ' ').Replace('\n', ' ').Trim();

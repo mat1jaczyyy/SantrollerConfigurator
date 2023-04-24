@@ -299,7 +299,7 @@ public class Pico : Microcontroller
 
     public override List<int> GetAllPins(bool isAnalog)
     {
-        return isAnalog ? AnalogPins : Enumerable.Range(0, GpioCount).ToList();
+        return isAnalog ? AnalogPins : Enumerable.Range(0, GpioCount).Where(i => i is not 23 or 24).ToList();
     }
 
     public override List<int> GetPwmPins()

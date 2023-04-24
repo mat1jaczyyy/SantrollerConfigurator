@@ -229,7 +229,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
             (this is not GuitarAxis {Type: GuitarAxisType.Slider} ||
              s is InputType.Gh5NeckInput or InputType.WtNeckInput) &&
             (s is not InputType.MultiplexerInput || Model.IsPico) &&
-            (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput);
+            (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput && s is not InputType.UsbHostInput);
 
     // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public Bitmap? Image { get; }
