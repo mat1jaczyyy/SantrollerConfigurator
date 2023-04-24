@@ -433,15 +433,13 @@ public class Santroller : IConfigurableDevice
                         sizeof(ushort)));
                     if (analogVals.ContainsKey(pin))
                     {
-                        var diff = Math.Abs(analogVals[pin] - val);
-                        if (diff > 1000)
-                        {
-                            _picking = false;
-                            return pin;
-                        }
+                        if (Math.Abs(analogVals[pin] - val) <= 1000) continue;
+                        _picking = false;
+                        return pin;
                     }
 
                     analogVals[pin] = val;
+
                 }
 
                 await Task.Delay(100);
