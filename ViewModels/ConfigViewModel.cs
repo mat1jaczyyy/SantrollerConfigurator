@@ -703,6 +703,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 "The following action will clear all your bindings, are you sure you want to do this?")).ToTask();
             if (!yesNo.Response)
             {
+                var last = _emulationType;
+                _emulationType = emulationType;
+                this.RaisePropertyChanged(nameof(EmulationType));
+                _emulationType = last;
                 this.RaisePropertyChanged(nameof(EmulationType));
                 return;
             }

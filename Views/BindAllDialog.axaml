@@ -19,8 +19,7 @@
         MinHeight="600"
         x:CompileBindings="True"
         x:DataType="viewModels:BindAllWindowViewModel"
-        ExtendClientAreaToDecorationsHint="True"
-        WindowState="Maximized">
+        ExtendClientAreaToDecorationsHint="True">
     <Panel>
         <Panel.Resources>
             <netCore:PinToStringConverter x:Key="PinToStringConverter" />

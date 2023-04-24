@@ -16,8 +16,7 @@
         MinHeight="600"
         x:CompileBindings="True"
         x:DataType="viewModels:AreYouSureWindowViewModel"
-        ExtendClientAreaToDecorationsHint="True"
-        WindowState="Maximized">
+        ExtendClientAreaToDecorationsHint="True">
     <Panel>
         <ExperimentalAcrylicBorder IsHitTestVisible="False">
             <ExperimentalAcrylicBorder.Material>
