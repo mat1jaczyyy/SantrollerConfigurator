@@ -259,6 +259,13 @@ public class PlatformIo
 
                             if (device is Santroller or Ardwiino && !isUsb) device.Bootloader();
                         }
+                        
+                        if (line.StartsWith("Looking for upload disk..."))
+                        {
+                            platformIoOutput.OnNext(new PlatformIoState(currentProgress,
+                                $"{progressMessage} - Looking for port", null));
+                            currentProgress += percentageStep / sections;
+                        }
 
                         if (line.Contains("SUCCESS"))
                             if (device is PicoDevice || sections == 5)
