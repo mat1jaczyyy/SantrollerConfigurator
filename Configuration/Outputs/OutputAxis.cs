@@ -381,7 +381,7 @@ public abstract partial class OutputAxis : Output
     {
         if (mode == ConfigField.Shared)
         {
-            return Input is FixedInput ? "" : CalculateLeds(mode);
+            return "";
         }
 
         var output = GenerateOutput(mode);
@@ -390,7 +390,7 @@ public abstract partial class OutputAxis : Output
             return "";
         }
 
-        if (Input is not DigitalToAnalog dta) return $"{output} = {GenerateAssignment(mode, false, false, false)};";
+        if (Input is not DigitalToAnalog dta) return $"{output} = {GenerateAssignment(mode, false, false, false)};{CalculateLeds(mode)}";
 
         // Digital to Analog stores values based on uint16_t for trigger, and int16_t for sticks
         var val = dta.On;

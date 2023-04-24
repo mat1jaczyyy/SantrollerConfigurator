@@ -1156,26 +1156,25 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         inputs[input.Generate(mode)].Select(s => $"debounce[{s}]=0;").Distinct()));
                 ret += @$"if ({ifStatement}) {{{sharedReset}}}";
             }
-        }
 
-        if (mode is ConfigField.Consumer or ConfigField.Keyboard or ConfigField.Mouse or ConfigField.Ps3
-                or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne && LedType is not LedType.None)
-        {
-            // Handle leds, including when multiple leds are assigned to a single output.
-            foreach (var (led, relatedOutputs) in debouncesRelatedToLed)
+            if (LedType is not LedType.None)
             {
-                ret += $"if (ledState[{led - 1}].select == 0) {{";
-                ret += string.Join(" else ", relatedOutputs.Select(tuple =>
+                // Handle leds, including when multiple leds are assigned to a single output.
+                foreach (var (led, relatedOutputs) in debouncesRelatedToLed)
                 {
-                    var ifStatement = string.Join(" && ", tuple.Item2.Select(x => $"debounce[{x}]"));
-                    return @$"if ({ifStatement}) {{
+                    ret += $"if (ledState[{led - 1}].select == 0) {{";
+                    ret += string.Join(" else ", relatedOutputs.Select(tuple =>
+                    {
+                        var ifStatement = string.Join(" && ", tuple.Item2.Select(x => $"debounce[{x}]"));
+                        return @$"if ({ifStatement}) {{
                                         {LedType.GetLedAssignment(tuple.Item1.LedOn, led)}
                                        }}";
-                }));
-                ret += $@" else {{
+                    }));
+                    ret += $@" else {{
                         {LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led)}
                     }}
                 }}";
+                }
             }
         }
 
