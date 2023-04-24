@@ -19,7 +19,7 @@ public class PlatformIo
     private readonly string _pythonExecutable;
 
     private readonly Process _portProcess;
-    private Process? currentProcess = null;
+    private Process? _currentProcess = null;
     private SemaphoreSlim _semaphore = new(1, 1);
 
     public PlatformIo()
@@ -53,12 +53,7 @@ public class PlatformIo
 
     private void Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
-        if (!_portProcess.HasExited)
-        {
-            _portProcess.Kill();
-        }
-
-        currentProcess?.Kill();
+        _currentProcess?.Kill();
     }
 
     public string FirmwareDir { get; }
@@ -222,7 +217,7 @@ public class PlatformIo
             process.StartInfo.RedirectStandardError = true;
 
             var state = 0;
-            currentProcess = process;
+            _currentProcess = process;
             process.Start();
             Console.WriteLine("Starting process " + environment);
 

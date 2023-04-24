@@ -17,7 +17,7 @@ public class GuitarAxis : OutputAxis
 {
     public GuitarAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff,
         byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type) : base(model, input, ledOn,
-        ledOff, ledIndices, min, max, deadZone, type == GuitarAxisType.Slider)
+        ledOff, ledIndices, min, max, deadZone, type is GuitarAxisType.Slider or GuitarAxisType.Whammy)
     {
         Type = type;
         UpdateDetails();
