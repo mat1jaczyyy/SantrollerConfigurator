@@ -19,7 +19,7 @@ public class PlatformIo
     private readonly string _pythonExecutable;
 
     private readonly Process _portProcess;
-    private Process? _currentProcess = null;
+    private static Process? _currentProcess = null;
     private SemaphoreSlim _semaphore = new(1, 1);
 
     public PlatformIo()
@@ -46,12 +46,9 @@ public class PlatformIo
         _portProcess.StartInfo.RedirectStandardOutput = true;
         _portProcess.StartInfo.RedirectStandardError = true;
         _portProcess.StartInfo.CreateNoWindow = true;
-        // Make sure we kill all python processes on exit
-        var lifetime = (ClassicDesktopStyleApplicationLifetime) Avalonia.Application.Current!.ApplicationLifetime!;
-        lifetime.Exit += Exit;
     }
 
-    private void Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    public static void Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         _currentProcess?.Kill();
     }

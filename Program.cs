@@ -1,25 +1,39 @@
-﻿using Avalonia;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
 
 namespace GuitarConfigurator.NetCore;
 
 public static class ProgramWindowsDebug
 {
-#if Windows
-    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
-    private static extern bool AllocConsole();
     public static void Main(string[] args)
     {
-        AllocConsole();
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
+        var tr1 = new TextWriterTraceListener(Console.Out);
+        Trace.Listeners.Add(tr1);
+        var tr2 = new TextWriterTraceListener(File.CreateText(Path.Combine(AssetUtils.GetAppDataFolder(),
+            "build.log")));
+        Trace.Listeners.Add(tr2);
+        try
+        {
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
+            // Make sure we kill all python processes on exit
+            var lifetime = (ClassicDesktopStyleApplicationLifetime) Avalonia.Application.Current!.ApplicationLifetime!;
+            lifetime.Exit += PlatformIo.Exit;
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceError(ex.ToString());
+            PlatformIo.Exit(null, new ControlledApplicationLifetimeExitEventArgs(0));
+        }
+
+        System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (sender, eventArgs) =>
+            PlatformIo.Exit(sender, new ControlledApplicationLifetimeExitEventArgs(0));
     }
-#else
-    public static void Main(string[] args)
-    {
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
-    }
-#endif
+
     public static AppBuilder BuildAvaloniaApp()
     {
         return AppBuilder.Configure<App>()

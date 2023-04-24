@@ -312,18 +312,10 @@ public class Santroller : IConfigurableDevice
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Trace.TraceError(ex.StackTrace);
         }
 
         _deviceControllerType = model.DeviceType;
-        // }
-        // catch (Exception ex) when (ex is JsonException or FormatException or InvalidOperationException)
-        // {
-        //     Console.WriteLine(ex);
-        //     throw new NotImplementedException(
-        //         "Configuration missing from Santroller device, are you sure this is a real santroller device?");
-        //     // TODO: throw a better exception here, and handle this in the gui, so that a device that appears to be missing its config doesn't do something weird.
-        // }
 
         StartTicking(model);
     }
