@@ -57,12 +57,10 @@ public class PlatformIo
 
     private async Task InitialisePlatformIoAsync(IObserver<PlatformIoState> platformIoOutput)
     {
+        platformIoOutput.OnNext(new PlatformIoState(0, "Extracting Firmware", ""));
         var appdataFolder = AssetUtils.GetAppDataFolder();
-        if (Directory.Exists(FirmwareDir))
-        {
-            Directory.Delete(FirmwareDir, true);
-        }
-        else
+        var firmwareVersion = Path.Combine(appdataFolder, "firmware.version");
+        if (!Directory.Exists(FirmwareDir))
         {
             // If the firmware has not been extracted, make sure the user has enough free space for it.
             var matching = 0;
@@ -85,9 +83,29 @@ public class PlatformIo
                 return;
             }
         }
+        else
+        {
+            if (Directory.Exists(FirmwareDir))
+            {
+                var outdated = true;
+                if (File.Exists(firmwareVersion))
+                {
+                    outdated = await File.ReadAllTextAsync(firmwareVersion) !=
+                               await AssetUtils.ReadFileAsync("platformio.version");
+                }
 
-        platformIoOutput.OnNext(new PlatformIoState(0, "Extracting Firmware", ""));
-        await AssetUtils.ExtractXzAsync("firmware.tar.xz", appdataFolder, progress => platformIoOutput.OnNext(new PlatformIoState(progress * 10, "Extracting Firmware", "")));
+                if (outdated)
+                {
+                    Directory.Delete(FirmwareDir, true);
+                }
+            }
+        }
+
+        if (!Directory.Exists(FirmwareDir))
+        {
+            await AssetUtils.ExtractXzAsync("firmware.tar.xz", appdataFolder,
+                progress => platformIoOutput.OnNext(new PlatformIoState(progress * 10, "Extracting Firmware", "")));
+        }
 
         var pythonDir = Path.Combine(appdataFolder, "python");
         var platformIoDir = Path.Combine(appdataFolder, "platformio");
