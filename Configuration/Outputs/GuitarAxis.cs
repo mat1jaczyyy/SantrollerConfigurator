@@ -234,7 +234,11 @@ public class GuitarAxis : OutputAxis
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
                 return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)};";
             default:
-                return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
+                if (Input is DigitalToAnalog)
+                {
+                    return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
+                }
+                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, Type is GuitarAxisType.Whammy)};"; 
         }
     }
 
