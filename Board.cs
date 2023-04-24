@@ -16,9 +16,11 @@ public struct Board
     public List<uint> ProductIDs { get; }
 
     public bool HasUsbmcu { get; }
+    
+    public bool MultipleFrequencies { get; }
 
     public Board(string ardwiinoName, string name, uint cpuFreq, string environment, List<uint> productIDs,
-        bool hasUsbmcu)
+        bool hasUsbmcu, bool multipleFrequencies = false)
     {
         ArdwiinoName = ardwiinoName;
         Name = name;
@@ -26,6 +28,7 @@ public struct Board
         ProductIDs = productIDs;
         CpuFreq = cpuFreq;
         HasUsbmcu = hasUsbmcu;
+        MultipleFrequencies = multipleFrequencies;
     }
 
     public static readonly Board Generic = new("generic", "Generic Serial Device", 0, "generic", new List<uint>(),
@@ -35,19 +38,19 @@ public struct Board
     {
         new("a-micro", "Arduino Micro in Bootloader Mode", 16000000, "arduino_micro_16",
             new List<uint> {0x0037, 0x0237},
-            false),
-        new("a-micro", "Arduino Micro", 16000000, "arduino_micro_16", new List<uint> {0x8037, 0x8237}, false),
-        new("micro", "Sparkfun Pro Micro 3.3V", 8000000, "sparkfun_promicro_8", new List<uint> {0x9204}, false),
-        new("micro", "Sparkfun Pro Micro 5V", 16000000, "sparkfun_promicro_16", new List<uint> {0x9206}, false),
-        new("leonardo", "Arduino Leonardo", 16000000, "arduino_leonardo_16", new List<uint> {0x8036, 0x800c}, false),
-        new("leonardo", "Arduino Leonardo 3.3V", 8000000, "arduino_leonardo_8", new List<uint>(), false),
+            false, true),
+        new("a-micro", "Arduino Micro", 16000000, "arduino_micro_16", new List<uint> {0x8037, 0x8237}, false, true),
+        new("micro", "Sparkfun Pro Micro 3.3V", 8000000, "sparkfun_promicro_8", new List<uint> {0x9204}, false, true),
+        new("micro", "Sparkfun Pro Micro 5V", 16000000, "sparkfun_promicro_16", new List<uint> {0x9206}, false, true),
+        new("leonardo", "Arduino Leonardo", 16000000, "arduino_leonardo_16", new List<uint> {0x8036, 0x800c}, false, true),
+        new("leonardo", "Arduino Leonardo 3.3V", 8000000, "arduino_leonardo_8", new List<uint>(), false, true),
         new("leonardo", "Arduino Micro / Pro Micro / Leonardo in Bootloader Mode", 16000000, "leonardo",
-            new List<uint> {0x0036}, false),
+            new List<uint> {0x0036}, false, true),
         new("micro", "Arduino Pro Micro in Bootloader Mode", 8000000, "sparkfun_promicro_8",
             new List<uint> {0x9203, 0x9207},
-            false),
+            false, true),
         new("micro", "Arduino Pro Micro in Bootloader Mode", 16000000, "sparkfun_promicro_16", new List<uint> {0x9205},
-            false)
+            false, true)
     };
 
     public static readonly Board[] Rp2040Boards =
@@ -183,8 +186,8 @@ public struct Board
 
     public static readonly Board[] MiniBoards =
     {
-        new("mini", "Arduino Pro Mini 5V", 16000000, "arduino_mini_16", new List<uint>(), false),
-        new("mini", "Arduino Pro Mini 3.3V", 8000000, "arduino_mini_8", new List<uint>(), false)
+        new("mini", "Arduino Pro Mini 5V", 16000000, "arduino_mini_16", new List<uint>(), false, true),
+        new("mini", "Arduino Pro Mini 3.3V", 8000000, "arduino_mini_8", new List<uint>(), false, true)
     };
 
     public static readonly Board[] MegaBoards =
@@ -212,9 +215,11 @@ public struct Board
     public static Board FindBoard(string ardwiinoName, uint cpuFreq)
     {
         foreach (var board in Boards)
+        {
             if (board.ArdwiinoName == ardwiinoName &&
-                (cpuFreq == 0 || board.CpuFreq == 0 || board.CpuFreq == cpuFreq))
+                (!board.MultipleFrequencies || board.CpuFreq == cpuFreq))
                 return board;
+        }
 
         return Generic;
     }

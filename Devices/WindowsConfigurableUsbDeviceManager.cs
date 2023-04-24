@@ -76,7 +76,6 @@ public class ConfigurableUsbDeviceManager
                             .GetDeviceByInstanceId(child, DeviceLocationFlags.Phantom)
                             .ToUsbPnPDevice();
                         var hardwareIds = childDevice.GetProperty<string[]>(DevicePropertyKey.Device_HardwareIds);
-                        var product = childDevice.GetProperty<string>(DevicePropertyKey.Device_FriendlyName);
                         var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
                         ushort revision = 0;
                         foreach (var id in hardwareIds)
@@ -92,6 +91,7 @@ public class ConfigurableUsbDeviceManager
                         WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
                         if (dev != null)
                         {
+                            var product = dev.Info.ProductString;
                             switch (product)
                             {
                                 case "Santroller" when _model is { Programming: true, IsPico: false }:
