@@ -348,10 +348,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
         Model.RemoveOutput(this);
     }
 
-    private void LedSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
-    {
-    }
-
     public abstract string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType);
 
     public static string GetReportField(object type)

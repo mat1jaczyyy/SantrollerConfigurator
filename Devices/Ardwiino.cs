@@ -410,6 +410,8 @@ public class Ardwiino : ConfigurableUsbDevice
                 break;
         }
 
+       
+
         if (config.all.main.inputType == (int) InputControllerType.Direct)
         {
             if (deviceType == DeviceControllerType.Guitar)
@@ -504,6 +506,15 @@ public class Ardwiino : ConfigurableUsbDevice
                 bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, model), on, off,
                     ledIndex, debounce, genButton));
             }
+            if (config.all.main.mapStartSelectToHome != 0)
+            {
+                var start = config.all.pins.pins![(int) ControllerButtons.XboxStart];
+                var select = config.all.pins.pins![(int) ControllerButtons.XboxBack];
+                bindings.Add(new ControllerButton(model,
+                    new MacroInput(new DirectInput(start, DevicePinMode.PullUp, model),
+                        new DirectInput(select, DevicePinMode.PullUp, model), model), Colors.Black, Colors.Black, new byte[] { },
+                    config.debounce.buttons, StandardButtonType.Guide));
+            }
         }
         else if (config.all.main.tiltType == 2)
         {
@@ -593,8 +604,6 @@ public class Ardwiino : ConfigurableUsbDevice
             }
         }
 
-        
-        
 
         if (model.IsApa102)
         {
