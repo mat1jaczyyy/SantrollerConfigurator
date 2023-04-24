@@ -22,7 +22,7 @@ public static class ProgramWindowsDebug
         {
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
             // Make sure we kill all python processes on exit
-            var lifetime = (ClassicDesktopStyleApplicationLifetime) Avalonia.Application.Current!.ApplicationLifetime!;
+            var lifetime = (ClassicDesktopStyleApplicationLifetime) Application.Current!.ApplicationLifetime!;
             lifetime.Exit += PlatformIo.Exit;
         }
         catch (Exception ex)
@@ -31,7 +31,7 @@ public static class ProgramWindowsDebug
             PlatformIo.Exit(null, new ControlledApplicationLifetimeExitEventArgs(0));
         }
 
-        System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (sender, eventArgs) =>
+        System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (sender, _) =>
             PlatformIo.Exit(sender, new ControlledApplicationLifetimeExitEventArgs(0));
     }
 
