@@ -5,13 +5,9 @@ using System.IO;
 using System.IO.Compression;
 using System.IO.Ports;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.Unicode;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -19,9 +15,7 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
-using LibUsbDotNet.LibUsb;
 using ProtoBuf;
-using Version = SemanticVersioning.Version;
 
 namespace GuitarConfigurator.NetCore.Devices;
 
