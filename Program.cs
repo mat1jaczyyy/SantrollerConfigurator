@@ -14,6 +14,7 @@ public static class ProgramWindowsDebug
     {
         var tr1 = new TextWriterTraceListener(Console.Out);
         Trace.Listeners.Add(tr1);
+        Directory.CreateDirectory(AssetUtils.GetAppDataFolder());
         var tr2 = new TextWriterTraceListener(File.CreateText(Path.Combine(AssetUtils.GetAppDataFolder(),
             "build.log")));
         Trace.Listeners.Add(tr2);
