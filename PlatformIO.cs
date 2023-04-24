@@ -246,6 +246,7 @@ public class PlatformIo
                 {
                     var line = await process.StandardOutput.ReadLineAsync();
                     Trace.WriteLine(line);
+                    Trace.Flush();
                     if (string.IsNullOrEmpty(line))
                     {
                         await Task.Delay(1);
