@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
@@ -50,6 +51,8 @@ public class Dfu : IConfigurableDevice
 
     public bool DeviceAdded(IConfigurableDevice device)
     {
+        Trace.WriteLine("Found device when in dfu!");
+        Trace.WriteLine(device);
         if (device is Dfu dfu) dfu.Launch();
 
         return false;
@@ -127,6 +130,7 @@ public class Dfu : IConfigurableDevice
 
     public void Launch()
     {
+        Trace.WriteLine("Launching!");
         _args.Device.Open(out var device);
         if (device != null)
         {
