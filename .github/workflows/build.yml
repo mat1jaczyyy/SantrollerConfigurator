@@ -18,7 +18,6 @@ jobs:
           keychain-password: ${{ github.run_id }}
       - name: Install Libs
         run: |
-          npm i -g appdmg
           brew install pkgconfig
           brew install libusb
       - name: Setup .NET Core SDK
