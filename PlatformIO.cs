@@ -85,19 +85,16 @@ public class PlatformIo
         }
         else
         {
-            if (Directory.Exists(FirmwareDir))
+            var outdated = true;
+            if (File.Exists(firmwareVersion))
             {
-                var outdated = true;
-                if (File.Exists(firmwareVersion))
-                {
-                    outdated = await File.ReadAllTextAsync(firmwareVersion) !=
-                               await AssetUtils.ReadFileAsync("platformio.version");
-                }
+                outdated = await File.ReadAllTextAsync(firmwareVersion) !=
+                           await AssetUtils.ReadFileAsync("firmware.version");
+            }
 
-                if (outdated)
-                {
-                    Directory.Delete(FirmwareDir, true);
-                }
+            if (outdated)
+            {
+                Directory.Delete(FirmwareDir, true);
             }
         }
 
@@ -129,7 +126,9 @@ public class PlatformIo
         if (!Directory.Exists(platformIoDir))
         {
             platformIoOutput.OnNext(new PlatformIoState(10, "Extracting Platform.IO", ""));
-            await AssetUtils.ExtractXzAsync("platformio.tar.xz", appdataFolder, progress => platformIoOutput.OnNext(new PlatformIoState(10 + (progress * 90), "Extracting Firmware", "")));
+            await AssetUtils.ExtractXzAsync("platformio.tar.xz", appdataFolder,
+                progress => platformIoOutput.OnNext(
+                    new PlatformIoState(10 + (progress * 90), "Extracting Firmware", "")));
 
             await AssetUtils.ExtractFileAsync("platformio.version", platformIoVersion);
         }
@@ -278,7 +277,7 @@ public class PlatformIo
 
                             if (device is Santroller or Ardwiino && !isUsb) device.Bootloader();
                         }
-                        
+
                         if (line.StartsWith("Looking for upload disk..."))
                         {
                             platformIoOutput.OnNext(new PlatformIoState(currentProgress,

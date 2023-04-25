@@ -21,11 +21,10 @@ namespace GuitarConfigurator.NetCore.Devices;
 
 public class Santroller : IConfigurableDevice
 {
-    public static readonly Guid ControllerGuid = new("DF59037D-7C92-4155-AC12-7D700A313D78");
     private readonly Dictionary<int, int> _analogRaw = new();
     private readonly Dictionary<int, bool> _digitalRaw = new();
     private readonly Dictionary<byte, TimeSpan> _ledTimers = new();
-    Stopwatch sw = Stopwatch.StartNew();
+    readonly Stopwatch _sw = Stopwatch.StartNew();
     private DeviceControllerType? _deviceControllerType;
     private bool _picking;
     private SantrollerUsbDevice? _usbDevice;
@@ -224,7 +223,7 @@ public class Santroller : IConfigurableDevice
             
             foreach (var (led, elapsed) in _ledTimers)
             {
-                if (sw.Elapsed - elapsed <= TimeSpan.FromSeconds(2)) continue;
+                if (_sw.Elapsed - elapsed <= TimeSpan.FromSeconds(2)) continue;
                 ClearLed(led);
                 _ledTimers.Remove(led);
             }
@@ -524,7 +523,7 @@ public class Santroller : IConfigurableDevice
 
     public void SetLed(byte led, byte[] color)
     {
-        _ledTimers[led] = sw.Elapsed;
+        _ledTimers[led] = _sw.Elapsed;
         WriteData(0, (byte) Commands.CommandSetLeds, new[] {led}.Concat(color).ToArray());
     }
 
