@@ -193,7 +193,7 @@ public class PlatformIo
                 currentProgress += percentageStep / sections;
                 if (device != null) isUsb = true;
 
-                sections = 10;
+                sections = 11;
             }
 
             args.Add("--environment");

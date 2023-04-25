@@ -230,39 +230,32 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 environment = "picow";
             }
 
-            var envs = new[] {environment};
-
 
             if (NewDevice)
             {
-                envs[0] = envs[0].Replace("_8", "");
-                envs[0] = envs[0].Replace("_16", "");
+                environment = environment.Replace("_8", "");
+                environment = environment.Replace("_16", "");
             }
 
             if (config.Microcontroller.Board.HasUsbmcu)
             {
-                envs = new[] {envs[0] + "_usb", envs[0]};
+                environment += "_usb";
             }
 
             ;
             var state = Observable.Return(new PlatformIo.PlatformIoState(0, "", null));
-            var currentPercentage = 0;
             int endingPercentage = 90;
             if (config.Device.IsMini())
             {
                 endingPercentage = 100;
             }
+            var env = environment;
+            Programming = true;
+            var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
+                "Writing",
+                0, endingPercentage, config.Device);
+            state = state.Concat(command);
 
-            var stepPercentage = endingPercentage / envs.Length;
-            foreach (var env in envs)
-            {
-                Programming = true;
-                var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
-                    "Writing",
-                    currentPercentage, currentPercentage + stepPercentage, config.Device);
-                state = state.Concat(command);
-                currentPercentage += stepPercentage;
-            }
 
             var output = new StringBuilder();
             var behaviorSubject =
@@ -430,13 +423,15 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 // And then reload rules and trigger
                 info = new ProcessStartInfo("pkexec");
                 info.ArgumentList.AddRange(new[] {"udevadm", "control", "--reload-rules"});
-                info.UseShellExecute = true;process = Process.Start(info);
+                info.UseShellExecute = true;
+                process = Process.Start(info);
                 if (process == null) return;
                 await process.WaitForExitAsync();
 
                 info = new ProcessStartInfo("pkexec");
                 info.ArgumentList.AddRange(new[] {"udevadm", "trigger"});
-                info.UseShellExecute = true;process = Process.Start(info);
+                info.UseShellExecute = true;
+                process = Process.Start(info);
                 if (process == null) return;
                 await process.WaitForExitAsync();
             }
