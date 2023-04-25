@@ -246,10 +246,20 @@ public class PlatformIo
                     var line = await process.StandardOutput.ReadLineAsync();
                     Trace.WriteLine(line);
                     Trace.Flush();
+                    
                     if (string.IsNullOrEmpty(line))
                     {
                         await Task.Delay(1);
                         continue;
+                    }
+
+                    if (line.Contains("searching for uno"))
+                    {
+                        Trace.WriteLine(device);
+                        if (device is Dfu dfu)
+                        {
+                            dfu.Launch();
+                        }
                     }
 
                     platformIoOutput.OnNext(platformIoOutput.Value.WithLog(line));
@@ -324,11 +334,6 @@ public class PlatformIo
                         platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                             $"{progressMessage} - Verifying", null));
                         state = 3;
-                    }
-
-                    if (line.Contains("searching for uno") && device is Dfu dfu)
-                    {
-                        dfu.Launch();
                     }
 
                     if (line.Contains("avrdude done.  Thank you."))
