@@ -51,8 +51,6 @@ public class Dfu : IConfigurableDevice
 
     public bool DeviceAdded(IConfigurableDevice device)
     {
-        Trace.WriteLine("Found device when in dfu!");
-        Trace.WriteLine(device);
         if (device is Dfu dfu) dfu.Launch();
 
         return false;

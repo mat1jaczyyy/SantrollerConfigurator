@@ -326,6 +326,11 @@ public class PlatformIo
                         state = 3;
                     }
 
+                    if (line.Contains("searching for uno") && device is Dfu dfu)
+                    {
+                        dfu.Launch();
+                    }
+
                     if (line.Contains("avrdude done.  Thank you."))
                     {
                         if (!main)
