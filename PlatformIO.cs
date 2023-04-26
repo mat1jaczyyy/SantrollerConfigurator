@@ -239,7 +239,7 @@ public class PlatformIo
             // process.BeginErrorReadLine();
             var buffer = new char[1];
             var hasError = false;
-            var main = sections == 5;
+            var main = !environment.EndsWith("_usb");
             while (!process.HasExited)
                 if (state == 0)
                 {

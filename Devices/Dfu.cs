@@ -123,7 +123,7 @@ public class Dfu : IConfigurableDevice
 
     public override string ToString()
     {
-        return $"{Board.Name} in DFU mode ({_port})";
+        return $"{Board.Name} ({_port})";
     }
 
     public void Launch()
