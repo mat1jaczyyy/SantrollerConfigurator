@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
@@ -113,7 +114,6 @@ public class Dfu : IConfigurableDevice
 
     public void Reconnect()
     {
-        
     }
 
     public bool IsGeneric()
@@ -129,6 +129,15 @@ public class Dfu : IConfigurableDevice
     public void Launch()
     {
         Trace.WriteLine("Launching!");
+#if Windows
+        var mcu = _args.Device.IdProduct == 0x2FF7 ? "at90usb82" : "atmega16u2";
+        
+        var appdataFolder = AssetUtils.GetAppDataFolder();
+        var dfuExecutable = Path.Combine(appdataFolder, "platformio", "dfu-programmer.exe");
+        var process = new Process();
+        process.StartInfo.FileName = dfuExecutable;
+        process.StartInfo.Arguments = $"{mcu} launch --no-reset";
+#else
         _args.Device.Open(out var device);
         if (device != null)
         {
@@ -165,5 +174,6 @@ public class Dfu : IConfigurableDevice
             device.ControlTransfer(ref sp, buffer, 0, out length);
             Console.WriteLine(length);
         }
+#endif
     }
 }
