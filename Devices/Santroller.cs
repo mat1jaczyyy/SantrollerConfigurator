@@ -84,8 +84,12 @@ public class Santroller : IConfigurableDevice
             {
                 usbHostRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHost, 24);
             }
+            var bluetoothRaw = Array.Empty<byte>();
+            if (IsPico())
+            {
+                bluetoothRaw = await ReadDataAsync(0, (byte) Commands.CommandGetBtState, 1);
+            }
 
-            var bluetoothRaw = await ReadDataAsync(0, (byte) Commands.CommandGetBtState, 1);
             _model.Update(rfRaw, bluetoothRaw);
             foreach (var output in _model.Bindings.Items)
                 output.Update(_model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
@@ -135,7 +139,7 @@ public class Santroller : IConfigurableDevice
     public Santroller(PlatformIo pio, PlatformIoPort port)
     {
         _platformIoPort = port;
-        _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
+        _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), DispatcherPriority.Background, Tick);
         Serial = "";
         Valid = false;
         _microcontroller = new Pico(Board.Generic);
@@ -541,11 +545,19 @@ public class Santroller : IConfigurableDevice
 
     public byte[] GetBtScanResults()
     {
-        return ReadData(0, (byte) Commands.CommandGetBtDevices);
+        return !IsPico() ? Array.Empty<byte>() :ReadData(0, (byte) Commands.CommandGetBtDevices);
     }
 
     public string GetBluetoothAddress()
     {
-        return Encoding.Default.GetString(ReadData(0, (byte) Commands.CommandGetBtAddress));
+        return !IsPico() ? "" : Encoding.Default.GetString(ReadData(0, (byte) Commands.CommandGetBtAddress));
+    }
+
+    public void Disconnect()
+    {
+        if (_serialPort?.IsOpen == true)
+        {
+            _serialPort.Close();
+        }
     }
 }

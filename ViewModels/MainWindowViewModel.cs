@@ -342,6 +342,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                         }
                         else
                         {
+                            santroller.Disconnect();
                             AvailableDevices.Add(arduino);
                         }
                     }
