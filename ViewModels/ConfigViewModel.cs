@@ -33,10 +33,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public static readonly string Apa102SpiType = "APA102";
     public static readonly string UsbHostPinTypeDm = "DM";
     public static readonly string UsbHostPinTypeDp = "DP";
-    public static readonly string UnoPinTypeTx = "Uno Serial Tx Pin";
-    public static readonly string UnoPinTypeRx = "Uno Serial Rx Pin";
-    public static readonly int UnoPinTypeRxPin = 0;
-    public static readonly int UnoPinTypeTxPin = 1;
     public IConfigurableDevice Device { get; private set; }
 
     public ReadOnlyObservableCollection<Output> Outputs { get; }
@@ -148,8 +144,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults();
         if (Main is {IsUno: false, IsMega: false}) return;
-        Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output));
-        Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeTx, UnoPinTypeTxPin, DevicePinMode.Output));
     }
 
     public Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?> ShowIssueDialog { get; }
@@ -1234,11 +1228,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         if (IsApa102 && _apa102SpiConfig != null) pins["APA102"] = _apa102SpiConfig.Pins.ToList();
-        if (Main.IsUno || Main.IsMega)
-        {
-            pins[UnoPinTypeTx] = new List<int> {UnoPinTypeTxPin};
-            pins[UnoPinTypeRx] = new List<int> {UnoPinTypeRxPin};
-        }
 
         if (UsbHostEnabled)
         {
