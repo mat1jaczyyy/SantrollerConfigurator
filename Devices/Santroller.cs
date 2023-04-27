@@ -135,7 +135,7 @@ public class Santroller : IConfigurableDevice
     public Santroller(PlatformIo pio, PlatformIoPort port)
     {
         _platformIoPort = port;
-        _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick);
+        _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
         Serial = "";
         Valid = false;
         _microcontroller = new Pico(Board.Generic);
