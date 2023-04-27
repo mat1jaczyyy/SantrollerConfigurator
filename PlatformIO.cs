@@ -50,7 +50,7 @@ public class PlatformIo
 
     public static void Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
-        _currentProcess?.Kill();
+        _currentProcess?.Kill(true);
     }
 
     public string FirmwareDir { get; }
