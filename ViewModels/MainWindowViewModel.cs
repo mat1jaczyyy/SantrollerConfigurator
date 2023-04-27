@@ -289,6 +289,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         private void UpdateProgress(PlatformIo.PlatformIoState state)
         {
+            ProgressbarColor = state.Message.Contains("Please unplug your device") ? "#FFd7cb00" : "#FF0078D7";
             Progress = state.Percentage;
             Message = state.Message;
         }
