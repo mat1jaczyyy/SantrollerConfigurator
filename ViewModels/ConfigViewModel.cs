@@ -580,7 +580,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ClearOutputs();
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
-        WtSensitivity = 30;
+        WtSensitivity = 30; 
         _usbHostEnabled = false;
         PollRate = 0;
         StrumDebounce = 0;
