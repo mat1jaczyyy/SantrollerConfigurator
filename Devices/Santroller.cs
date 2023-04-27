@@ -24,7 +24,80 @@ public class Santroller : IConfigurableDevice
     private readonly Dictionary<int, int> _analogRaw = new();
     private readonly Dictionary<int, bool> _digitalRaw = new();
     private readonly Dictionary<byte, TimeSpan> _ledTimers = new();
+    private ConfigViewModel? _model;
     readonly Stopwatch _sw = Stopwatch.StartNew();
+    private DispatcherTimer _timer;
+
+    private async void Tick(object? sender, EventArgs e)
+    {
+        if (_model == null) return;
+        if (!IsOpen())
+        {
+            _timer.Stop();
+            return;
+        }
+
+        foreach (var (led, elapsed) in _ledTimers)
+        {
+            if (_sw.Elapsed - elapsed <= TimeSpan.FromSeconds(2)) continue;
+            ClearLed(led);
+            _ledTimers.Remove(led);
+        }
+
+        try
+        {
+            var direct = _model.Bindings.Items.Select(s => s.Input!.InnermostInput())
+                .OfType<DirectInput>().ToList();
+            var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins);
+            var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins);
+            var ports = _model.Microcontroller.GetPortsForTicking(digital);
+            foreach (var (port, mask) in ports)
+            {
+                var wValue = (ushort) (port | (mask << 8));
+                var data = await ReadDataAsync(wValue, (byte) Commands.CommandReadDigital, sizeof(byte));
+                if (data.Length == 0) return;
+
+                var pins = data[0];
+                _model.Microcontroller.PinsFromPortMask(port, mask, pins, _digitalRaw);
+            }
+
+            foreach (var devicePin in analog)
+            {
+                var mask = _model.Microcontroller.GetAnalogMask(devicePin);
+                var wValue = (ushort) (_model.Microcontroller.GetChannel(devicePin.Pin, false) | (mask << 8));
+                var val = BitConverter.ToUInt16(await ReadDataAsync(wValue, (byte) Commands.CommandReadAnalog,
+                    sizeof(ushort)));
+                _analogRaw[devicePin.Pin] = val;
+            }
+
+            var ps2Raw = await ReadDataAsync(0, (byte) Commands.CommandReadPs2, 9);
+            var wiiRaw = await ReadDataAsync(0, (byte) Commands.CommandReadWii, 8);
+            var djLeftRaw = await ReadDataAsync(0, (byte) Commands.CommandReadDjLeft, 3);
+            var djRightRaw = await ReadDataAsync(0, (byte) Commands.CommandReadDjRight, 3);
+            var gh5Raw = await ReadDataAsync(0, (byte) Commands.CommandReadGh5, 2);
+            var ghWtRaw = await ReadDataAsync(0, (byte) Commands.CommandReadGhWt, sizeof(int));
+            var ps2ControllerType = await ReadDataAsync(0, (byte) Commands.CommandGetExtensionPs2, 1);
+            var wiiControllerType = await ReadDataAsync(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
+            var rfRaw = await ReadDataAsync(0, (byte) Commands.CommandReadRf, 2);
+            var usbHostRaw = Array.Empty<byte>();
+            if (_model.UsbHostEnabled)
+            {
+                usbHostRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHost, 24);
+            }
+
+            var bluetoothRaw = await ReadDataAsync(0, (byte) Commands.CommandGetBtState, 1);
+            _model.Update(rfRaw, bluetoothRaw);
+            foreach (var output in _model.Bindings.Items)
+                output.Update(_model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
+                    djRightRaw, gh5Raw,
+                    ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
     private DeviceControllerType? _deviceControllerType;
     private bool _picking;
     private SantrollerUsbDevice? _usbDevice;
@@ -41,6 +114,7 @@ public class Santroller : IConfigurableDevice
     public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort version)
     {
         _usbDevice = new SantrollerUsbDevice(device, path, product, serial, version);
+        _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
         Serial = "";
         _microcontroller = new Pico(Board.Generic);
         if (device is IUsbDevice usbDevice)
@@ -61,6 +135,7 @@ public class Santroller : IConfigurableDevice
     public Santroller(PlatformIo pio, PlatformIoPort port)
     {
         _platformIoPort = port;
+        _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick);
         Serial = "";
         Valid = false;
         _microcontroller = new Pico(Board.Generic);
@@ -211,80 +286,6 @@ public class Santroller : IConfigurableDevice
         return _serialPort is {IsOpen: true};
     }
 
-    private async Task TickAsync(ConfigViewModel model)
-    {
-        while (IsOpen())
-        {
-            if (_picking)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(50));
-                continue;
-            }
-            
-            foreach (var (led, elapsed) in _ledTimers)
-            {
-                if (_sw.Elapsed - elapsed <= TimeSpan.FromSeconds(2)) continue;
-                ClearLed(led);
-                _ledTimers.Remove(led);
-            }
-
-            try
-            {
-                var direct = model.Bindings.Items.Select(s => s.Input!.InnermostInput())
-                    .OfType<DirectInput>().ToList();
-                var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins);
-                var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins);
-                var ports = model.Microcontroller.GetPortsForTicking(digital);
-                foreach (var (port, mask) in ports)
-                {
-                    var wValue = (ushort) (port | (mask << 8));
-                    var data = await ReadDataAsync(wValue, (byte) Commands.CommandReadDigital, sizeof(byte));
-                    if (data.Length == 0) return;
-
-                    var pins = data[0];
-                    model.Microcontroller.PinsFromPortMask(port, mask, pins, _digitalRaw);
-                }
-
-                foreach (var devicePin in analog)
-                {
-                    var mask = model.Microcontroller.GetAnalogMask(devicePin);
-                    var wValue = (ushort) (model.Microcontroller.GetChannel(devicePin.Pin, false) | (mask << 8));
-                    var val = BitConverter.ToUInt16(await ReadDataAsync(wValue, (byte) Commands.CommandReadAnalog,
-                        sizeof(ushort)));
-                    _analogRaw[devicePin.Pin] = val;
-                }
-
-                var ps2Raw = await ReadDataAsync(0, (byte) Commands.CommandReadPs2, 9);
-                var wiiRaw = await ReadDataAsync(0, (byte) Commands.CommandReadWii, 8);
-                var djLeftRaw = await ReadDataAsync(0, (byte) Commands.CommandReadDjLeft, 3);
-                var djRightRaw = await ReadDataAsync(0, (byte) Commands.CommandReadDjRight, 3);
-                var gh5Raw = await ReadDataAsync(0, (byte) Commands.CommandReadGh5, 2);
-                var ghWtRaw = await ReadDataAsync(0, (byte) Commands.CommandReadGhWt, sizeof(int));
-                var ps2ControllerType = await ReadDataAsync(0, (byte) Commands.CommandGetExtensionPs2, 1);
-                var wiiControllerType = await ReadDataAsync(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
-                var rfRaw = await ReadDataAsync(0, (byte) Commands.CommandReadRf, 2);
-                var usbHostRaw = Array.Empty<byte>();
-                if (model.UsbHostEnabled)
-                {
-                    usbHostRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHost, 24);
-                }
-
-                var bluetoothRaw = await ReadDataAsync(0, (byte) Commands.CommandGetBtState, 1);
-                model.Update(rfRaw, bluetoothRaw);
-                foreach (var output in model.Bindings.Items)
-                    output.Update(model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
-                        djRightRaw, gh5Raw,
-                        ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            await Task.Delay(TimeSpan.FromMilliseconds(500));
-        }
-    }
-
     private async Task LoadConfigurationAsync(ConfigViewModel model)
     {
         ushort start = 0;
@@ -310,7 +311,8 @@ public class Santroller : IConfigurableDevice
 
         _deviceControllerType = model.DeviceType;
 
-        StartTicking(model);
+        _model = model;
+        _timer.Start();
     }
 
     public bool LoadConfiguration(ConfigViewModel model)
@@ -376,7 +378,8 @@ public class Santroller : IConfigurableDevice
 
     public void StartTicking(ConfigViewModel model)
     {
-        _ = Dispatcher.UIThread.InvokeAsync(() => TickAsync(model));
+        _model = model;
+        _timer.Start();
     }
 
     public void CancelDetection()
@@ -424,7 +427,6 @@ public class Santroller : IConfigurableDevice
                     }
 
                     analogVals[pin] = val;
-
                 }
 
                 await Task.Delay(100);
