@@ -29,7 +29,7 @@ public class Arduino : IConfigurableDevice
             }
         }
         // Handle any other RP2040 based boards we don't already have code for, using just the generic rp2040 board in this case
-        if (port.Vid == Board.RaspberryPiVendorID)
+        if (port.Vid == Board.RaspberryPiVendorId)
         {
             Board = Board.Rp2040Boards[0];
             MigrationSupported = true;

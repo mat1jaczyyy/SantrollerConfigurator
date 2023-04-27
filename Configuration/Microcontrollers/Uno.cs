@@ -111,6 +111,6 @@ public class Uno : AvrController
 
     public override List<int> GetAllPins(bool isAnalog)
     {
-        return isAnalog ? AnalogPins : Enumerable.Range(2, PinIndex.Length).ToList();
+        return isAnalog ? AnalogPins : Enumerable.Range(0, PinIndex.Length).ToList();
     }
 }

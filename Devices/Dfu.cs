@@ -129,7 +129,6 @@ public class Dfu : IConfigurableDevice
 
     public void Launch()
     {
-        Trace.WriteLine("Launching!");
 #if Windows
         var mcu = _args.Device.IdProduct == 0x2FF7 ? "at90usb82" : "atmega16u2";
         
@@ -140,9 +139,6 @@ public class Dfu : IConfigurableDevice
         process.StartInfo.Arguments = $"{mcu} launch --no-reset";
         process.Start();
         process.WaitForExit();
-        Trace.WriteLine(process.StartInfo.FileName);
-        Trace.WriteLine(process.StartInfo.Arguments);
-        Trace.Flush();
 #else
         _args.Device.Open(out var device);
         if (device != null)

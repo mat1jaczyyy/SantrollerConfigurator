@@ -35,11 +35,13 @@ public abstract class Microcontroller
         var selectedConfig = pinConfigs.Where(s => s.Pins.Contains(selectedPin));
         var apa102 = PinConfigs.Where(s => s.Type == ConfigViewModel.Apa102SpiType && s.Pins.Contains(possiblePin))
             .Select(s => s.Type); 
+        var unoMega = PinConfigs.Where(s => (s.Type == ConfigViewModel.UnoPinTypeRx || s.Type == ConfigViewModel.UnoPinTypeTx) && s.Pins.Contains(possiblePin))
+            .Select(s => s.Type); 
 
         var output = string.Join(" - ",
             outputs.Where(o =>
                     o.GetPinConfigs().Except(selectedConfig).Any(s => s.Pins.Contains(possiblePin)))
-                .Select(s => s.GetName(model.DeviceType, model.RhythmType)).Concat(apa102));
+                .Select(s => s.GetName(model.DeviceType, model.RhythmType)).Concat(apa102).Concat(unoMega));
         var ret = GetPinForMicrocontroller(possiblePin, twi, spi);
         if (!string.IsNullOrEmpty(output) && addText) return "* " + ret + " - " + output;
 
