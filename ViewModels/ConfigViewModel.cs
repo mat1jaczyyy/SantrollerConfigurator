@@ -143,7 +143,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Outputs = outputs;
 
         if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults();
-        if (Main is {IsUno: false, IsMega: false}) return;
     }
 
     public Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?> ShowIssueDialog { get; }
