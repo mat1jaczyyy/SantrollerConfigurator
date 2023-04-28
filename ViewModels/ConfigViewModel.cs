@@ -866,14 +866,15 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         lines.Add(Ps2Input.GeneratePs2Pressures(inputs));
+        
+        // Sort by pin index, and then map to adc number and turn into an array
         var analogPins = directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin)
             .Select(s => Microcontroller.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct().ToList();
-        // Sort by pin index, and then map to adc number and turn into an array
-        lines.Add(
-            $"#define ADC_PINS {{{string.Join(",", analogPins)}}}");
-
-        lines.Add(
-            $"#define ADC_COUNT {analogPins.Count}");
+        // Format as a c array
+        lines.Add($"#define ADC_PINS {{{string.Join(",", analogPins)}}}");
+        
+        // And also store a count
+        lines.Add($"#define ADC_COUNT {analogPins.Count}");
         lines.Add($"#define PIN_INIT {Microcontroller.GenerateInit()}");
 
         lines.Add(Microcontroller.GenerateDefinitions());
