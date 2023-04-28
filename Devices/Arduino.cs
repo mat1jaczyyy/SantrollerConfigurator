@@ -38,7 +38,7 @@ public class Arduino : IConfigurableDevice
         }
 
         // Really, really old ardwiinos had a serial protocol that response to a couple of commands for retrieving data.
-        if (port.Vid == 0x1209 && port.Pid == 0x2882)
+        if (port is {Vid: 0x1209, Pid: 0x2882})
         {
             MigrationSupported = false;
 
