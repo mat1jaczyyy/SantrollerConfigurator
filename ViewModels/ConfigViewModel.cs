@@ -797,8 +797,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var mouseTick = GenerateTick(ConfigField.Mouse);
         if (mouseTick.Any()) lines.Add($"#define TICK_MOUSE {mouseTick}");
 
-        lines.Add(
-            $"#define ADC_COUNT {directInputs.DistinctBy(s => s.PinConfig.Pin).Count(input => input.IsAnalog)}");
 
         lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
         lines.Add($"#define LED_COUNT {LedCount}");
@@ -868,11 +866,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         lines.Add(Ps2Input.GeneratePs2Pressures(inputs));
-
+        var analogPins = directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin)
+            .Select(s => Microcontroller.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct().ToList();
         // Sort by pin index, and then map to adc number and turn into an array
         lines.Add(
-            $"#define ADC_PINS {{{string.Join(",", directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin).Select(s => Microcontroller.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct())}}}");
+            $"#define ADC_PINS {{{string.Join(",", analogPins)}}}");
 
+        lines.Add(
+            $"#define ADC_COUNT {analogPins.Count}");
         lines.Add($"#define PIN_INIT {Microcontroller.GenerateInit()}");
 
         lines.Add(Microcontroller.GenerateDefinitions());
