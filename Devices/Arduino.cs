@@ -28,6 +28,7 @@ public class Arduino : IConfigurableDevice
                 return;
             }
         }
+
         // Handle any other RP2040 based boards we don't already have code for, using just the generic rp2040 board in this case
         if (port.Vid == Board.RaspberryPiVendorId)
         {
@@ -52,6 +53,7 @@ public class Arduino : IConfigurableDevice
             var tmp = Board.FindBoard(boardName, boardFreq);
             Board = new Board(boardName, $"Ardwiino - {tmp.Name} - pre 4.3.7", boardFreq, tmp.Environment,
                 tmp.ProductIDs, tmp.HasUsbmcu);
+            serial.Close();
         }
         else
         {
@@ -90,19 +92,50 @@ public class Arduino : IConfigurableDevice
     public Microcontroller GetMicrocontroller(ConfigViewModel model)
     {
         if (!_generic) return Board.FindMicrocontroller(Board);
-        Board = model.Main.AvrType switch
+        if (model.Main.IsDfu || model.Main.IsMega || model.Main.IsUno)
         {
-            AvrType.Mini => Board.MiniBoards[0],
-            AvrType.ProMicro => Board.Atmega32U4Boards[2],
-            AvrType.Leonardo =>Board.Atmega32U4Boards[4],
-            AvrType.Micro => Board.Atmega32U4Boards[1],
-            AvrType.Uno => Board.Uno,
-            AvrType.Mega => Board.MegaBoards[0],
-            AvrType.MegaAdk => Board.MegaBoards[1],
-            _ => throw new ArgumentOutOfRangeException()
-        };
+            var unoMegaType = model.Main.UnoMegaType;
+            Board = unoMegaType switch
+            {
+                UnoMegaType.Uno => Board.Uno,
+                UnoMegaType.MegaAdk => Board.MegaBoards[1],
+                UnoMegaType.Mega => Board.MegaBoards[0],
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        if (model.Main.Is32U4)
+        {
+            // Can we send a dummy clear here so that it stays in bootloader mode
+            // Is it possible to make a platform.io env that contains no code but just writes an empty sketch
+            var u4Mode = model.Main.Arduino32U4Type;
+            Board = u4Mode switch
+            {
+                Arduino32U4Type.ProMicro => Board.Atmega32U4Boards[2],
+                Arduino32U4Type.Leonardo => Board.Atmega32U4Boards[4],
+                Arduino32U4Type.Micro => Board.Atmega32U4Boards[1],
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        if (model.Main.IsGeneric)
+        {
+            Board = model.Main.AvrType switch
+            {
+                AvrType.Mini => Board.MiniBoards[0],
+                AvrType.ProMicro => Board.Atmega32U4Boards[2],
+                AvrType.Leonardo => Board.Atmega32U4Boards[4],
+                AvrType.Micro => Board.Atmega32U4Boards[1],
+                AvrType.Uno => Board.Uno,
+                AvrType.Mega => Board.MegaBoards[0],
+                AvrType.MegaAdk => Board.MegaBoards[1],
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
         return Board.FindMicrocontroller(Board);
     }
+
     public bool IsMini()
     {
         return Board.IsMini();
@@ -110,7 +143,6 @@ public class Arduino : IConfigurableDevice
 
     public void Reconnect()
     {
-        
     }
 
     public bool LoadConfiguration(ConfigViewModel model)

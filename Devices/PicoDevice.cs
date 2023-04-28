@@ -53,7 +53,7 @@ public class PicoDevice : IConfigurableDevice
 
     public Microcontroller GetMicrocontroller(ConfigViewModel model)
     {
-        return Board.FindMicrocontroller(Board.FindBoard("pico", 0));
+        return Board.FindMicrocontroller(model.Main.PicoType);
     }
 
     public Task<string?> GetUploadPortAsync()

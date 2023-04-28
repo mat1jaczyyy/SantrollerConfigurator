@@ -246,4 +246,5 @@ public abstract class AvrController : Microcontroller
     {
         return PinA0;
     }
+
 }
