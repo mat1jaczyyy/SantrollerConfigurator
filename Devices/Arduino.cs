@@ -174,7 +174,7 @@ public class Arduino : IConfigurableDevice
         switch (device)
         {
             case Arduino arduino when Is32U4() && _arduino32U4Path != null && arduino.Is32U4():
-                Console.WriteLine("Found device with port" + arduino.GetSerialPort());
+                Console.WriteLine("Found device with port: " + arduino.GetSerialPort());
                 _port = arduino.GetSerialPort();
                 _arduino32U4Path.SetResult(arduino.GetSerialPort());
                 _arduino32U4Path = null;
