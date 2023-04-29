@@ -14,14 +14,14 @@ namespace GuitarConfigurator.NetCore.Devices;
 public class Arduino : IConfigurableDevice
 {
     // public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
-    private readonly PlatformIoPort _port;
+    private string _port;
     private readonly bool _generic;
     private TaskCompletionSource<string?>? _arduino32U4Path;
 
     public Arduino(PlatformIo pio, PlatformIoPort port)
     {
         DfuDetected = new Subject<bool>();
-        _port = port;
+        _port = port.Port;
         foreach (var board in Board.Boards)
         {
             if (board.ProductIDs.Contains(port.Pid))
@@ -74,7 +74,7 @@ public class Arduino : IConfigurableDevice
 
     public bool IsSameDevice(PlatformIoPort port)
     {
-        return port == _port;
+        return port.Port == _port;
     }
 
     public bool IsSameDevice(string serialOrPath)
@@ -85,7 +85,7 @@ public class Arduino : IConfigurableDevice
     public void Bootloader()
     {
         if (!Is32U4() || Board.Name.Contains("Bootloader Mode")) return;
-        var serial = new SerialPort(_port.Port, 1200);
+        var serial = new SerialPort(_port, 1200);
         serial.Open();
         serial.Close();
     }
@@ -175,6 +175,7 @@ public class Arduino : IConfigurableDevice
         {
             case Arduino arduino when Is32U4() && _arduino32U4Path != null && arduino.Is32U4():
                 Console.WriteLine("Found device with port" + arduino.GetSerialPort());
+                _port = arduino.GetSerialPort();
                 _arduino32U4Path.SetResult(arduino.GetSerialPort());
                 _arduino32U4Path = null;
                 Board = arduino.Board;
@@ -196,12 +197,12 @@ public class Arduino : IConfigurableDevice
 
     public string GetSerialPort()
     {
-        return _port.Port;
+        return _port;
     }
 
     public override string ToString()
     {
-        return $"{Board.Name} ({_port.Port})";
+        return $"{Board.Name} ({_port})";
     }
 
     public bool Is32U4()
