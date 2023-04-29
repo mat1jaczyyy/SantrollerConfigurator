@@ -645,7 +645,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
         if (Main.Is32U4 && Device is Arduino arduino)
         {
-            if (!arduino.Board.Name.Contains("Bootloader Mode"))
+            if (!arduino.is32u4Bootloader)
             {
                 Trace.WriteLine("Jumping pro micro to bootloader mode");
                 arduino.Bootloader();
