@@ -423,9 +423,9 @@ public class Santroller : IConfigurableDevice
                     var wValue = (ushort) (microcontroller.GetChannel(pin, true) | (mask << 8));
                     var val = BitConverter.ToUInt16(await ReadDataAsync(wValue, (byte) Commands.CommandReadAnalog,
                         sizeof(ushort)));
-                    if (analogVals.ContainsKey(pin))
+                    if (analogVals.TryGetValue(pin, out var analogVal))
                     {
-                        if (Math.Abs(analogVals[pin] - val) <= 1000) continue;
+                        if (Math.Abs(analogVal - val) <= 1000) continue;
                         _picking = false;
                         return pin;
                     }

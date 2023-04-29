@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -91,7 +93,6 @@ public class Arduino : IConfigurableDevice
 
     public Microcontroller GetMicrocontroller(ConfigViewModel model)
     {
-        if (!_generic) return Board.FindMicrocontroller(Board);
         if (model.Main.IsDfu || model.Main.IsMega || model.Main.IsUno)
         {
             var unoMegaType = model.Main.UnoMegaType;
@@ -106,8 +107,14 @@ public class Arduino : IConfigurableDevice
 
         if (model.Main.Is32U4)
         {
-            // Can we send a dummy clear here so that it stays in bootloader mode
-            // Is it possible to make a platform.io env that contains no code but just writes an empty sketch
+            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude", "avrdude.conf");
+            model.Main.Pio.RunPlatformIo("avrdude",
+                new[]
+                {
+                    "pkg", "exec", "avrdude", "-c",
+                    $"avrdude -p atmega32u4 -C {configFile} -P {_port.Port} -c avr109 -e"
+                }, "", 0, 100, this).Wait();
+
             var u4Mode = model.Main.Arduino32U4Type;
             Board = u4Mode switch
             {

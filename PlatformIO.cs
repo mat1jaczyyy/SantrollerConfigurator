@@ -169,84 +169,91 @@ public class PlatformIo
             var uploading = command.Length > 1;
             var appdataFolder = AssetUtils.GetAppDataFolder();
             var pioFolder = Path.Combine(appdataFolder, "platformio");
-            var process = new Process();
-            process.EnableRaisingEvents = true;
-            process.StartInfo.FileName = _pythonExecutable;
-            process.StartInfo.WorkingDirectory = FirmwareDir;
-            process.StartInfo.EnvironmentVariables["PLATFORMIO_CORE_DIR"] = pioFolder;
-            process.StartInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
-            process.StartInfo.CreateNoWindow = true;
+            if (_currentProcess is {HasExited: false})
+            {
+                _currentProcess.Kill(true);
+            }
+
+            _currentProcess = new Process();
+            _currentProcess.EnableRaisingEvents = true;
+            _currentProcess.StartInfo.FileName = _pythonExecutable;
+            _currentProcess.StartInfo.WorkingDirectory = FirmwareDir;
+            _currentProcess.StartInfo.EnvironmentVariables["PLATFORMIO_CORE_DIR"] = pioFolder;
+            _currentProcess.StartInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
+            _currentProcess.StartInfo.CreateNoWindow = true;
             var args = new List<string>(command);
             args.Insert(0, _pythonExecutable);
             args.Insert(1, "-m");
             args.Insert(2, "platformio");
-            Console.WriteLine(string.Join(", ", args));
             var sections = 5;
             var isUsb = false;
-
-            if (device is Arduino) sections = 10;
-
-            if (environment.EndsWith("_usb"))
+            var avrdude = environment == "avrdude";
+            if (!avrdude)
             {
-                platformIoOutput.OnNext(new PlatformIoState(currentProgress,
-                    $"{progressMessage} - Looking for device", null));
-                currentProgress += percentageStep / sections;
-                if (device != null) isUsb = true;
-
-                sections = 11;
-            }
-
-            args.Add("--environment");
-            args.Add(environment);
-            if (uploading && !isUsb)
-            {
-                if (environment.Contains("pico"))
+                if (device is Arduino) sections = 10;
+                if (environment.EndsWith("_usb"))
                 {
                     platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                         $"{progressMessage} - Looking for device", null));
                     currentProgress += percentageStep / sections;
-                    sections = 4;
+                    if (device != null) isUsb = true;
+
+                    sections = 11;
                 }
 
-                if (device != null)
+                args.Add("--environment");
+                args.Add(environment);
+                if (uploading && !isUsb)
                 {
-                    Console.WriteLine("Detecting port please wait");
-                    var port = await device.GetUploadPortAsync().ConfigureAwait(false);
-                    Console.WriteLine(port);
-                    if (port != null)
+                    if (environment.Contains("pico"))
                     {
-                        args.Add("--upload-port");
-                        args.Add(port);
+                        platformIoOutput.OnNext(new PlatformIoState(currentProgress,
+                            $"{progressMessage} - Looking for device", null));
+                        currentProgress += percentageStep / sections;
+                        sections = 4;
+                    }
+
+                    if (device != null)
+                    {
+                        Console.WriteLine("Detecting port please wait");
+                        var port = await device.GetUploadPortAsync().ConfigureAwait(false);
+                        Console.WriteLine(port);
+                        if (port != null)
+                        {
+                            args.Add("--upload-port");
+                            args.Add(port);
+                        }
                     }
                 }
             }
 
             //Some pio stuff uses Standard Output, some uses Standard Error, its easier to just flatten both of those to a single stream
-            process.StartInfo.Arguments =
+            _currentProcess.StartInfo.Arguments =
                 $"-c \"import subprocess;subprocess.run([{string.Join(",", args.Select(s => $"'{s}'"))}],stderr=subprocess.STDOUT)\""
                     .Replace("\\", "\\\\");
 
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
+            _currentProcess.StartInfo.UseShellExecute = false;
+            _currentProcess.StartInfo.RedirectStandardOutput = true;
+            _currentProcess.StartInfo.RedirectStandardError = true;
 
             var state = 0;
-            _currentProcess = process;
-            process.Start();
+            _currentProcess.Start();
             Console.WriteLine("Starting process " + environment);
+            Console.WriteLine(string.Join(", ", args));
 
             // process.BeginOutputReadLine();
             // process.BeginErrorReadLine();
             var buffer = new char[1];
             var hasError = false;
             var main = !environment.EndsWith("_usb");
-            while (!process.HasExited)
+            while (!_currentProcess.HasExited)
+            {
                 if (state == 0)
                 {
-                    var line = await process.StandardOutput.ReadLineAsync();
+                    var line = await _currentProcess.StandardOutput.ReadLineAsync().ConfigureAwait(false);
                     Trace.WriteLine(line);
                     Trace.Flush();
-                    
+
                     if (string.IsNullOrEmpty(line))
                     {
                         await Task.Delay(1);
@@ -256,7 +263,8 @@ public class PlatformIo
                     if (line.Contains("searching for uno"))
                     {
                         platformIoOutput.OnNext(new PlatformIoState(currentProgress,
-                            $"{progressMessage} - Please unplug your device, hold the reset button and plug it back in", null));
+                            $"{progressMessage} - Please unplug your device, hold the reset button and plug it back in",
+                            null));
                         if (device is Dfu dfu)
                         {
                             dfu.Launch();
@@ -355,7 +363,7 @@ public class PlatformIo
                 }
                 else
                 {
-                    while (await process.StandardOutput.ReadAsync(buffer, 0, 1) > 0)
+                    while (await _currentProcess.StandardOutput.ReadAsync(buffer, 0, 1) > 0)
                     {
                         // process character...for example:
                         if (buffer[0] == '#') currentProgress += percentageStep / 50 / sections;
@@ -383,8 +391,10 @@ public class PlatformIo
                         }
                     }
                 }
+            }
 
-            await process.WaitForExitAsync();
+            Console.WriteLine(_currentProcess);
+            await _currentProcess.WaitForExitAsync();
 
             if (!hasError)
             {
