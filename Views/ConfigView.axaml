@@ -773,147 +773,150 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:DjAxis}">
-                <Panel>
-                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" IsVisible="{Binding IsVelocity}">
-                        <StackPanel Orientation="Horizontal">
-                            <Label VerticalAlignment="Center" Width="300"
-                                   IsVisible="{Binding !ChildOfCombined}">
-                                Current Value
-                            </Label>
-                            <Grid>
-                                <StackPanel Orientation="Horizontal" Width="{Binding FullProgressWidth}">
-                                    <ProgressBar CornerRadius="0 3 3 0"
-                                                 Value="{Binding ValueLower}"
-                                                 IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                 Height="30"
-                                                 Width="{Binding HalfProgressWidth}">
-                                        <ProgressBar.RenderTransform>
-                                            <ScaleTransform ScaleX="-1" />
-                                        </ProgressBar.RenderTransform>
-                                    </ProgressBar>
-                                    <ProgressBar CornerRadius="0 3 3 0"
-                                                 Value="{Binding ValueUpper}"
-                                                 IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                 Height="30"
-                                                 Width="{Binding HalfProgressWidth}" />
-                                </StackPanel>
-                                <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
-                                       Content="{Binding Value}" />
-                            </Grid>
+                <StackPanel Orientation="Vertical">
+                    <Panel>
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Center" IsVisible="{Binding IsVelocity}">
+                            <StackPanel Orientation="Horizontal">
+                                <Label VerticalAlignment="Center" Width="300"
+                                       IsVisible="{Binding !ChildOfCombined}">
+                                    Current Value
+                                </Label>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" Width="{Binding FullProgressWidth}">
+                                        <ProgressBar CornerRadius="0 3 3 0"
+                                                     Value="{Binding ValueLower}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                     Height="30"
+                                                     Width="{Binding HalfProgressWidth}">
+                                            <ProgressBar.RenderTransform>
+                                                <ScaleTransform ScaleX="-1" />
+                                            </ProgressBar.RenderTransform>
+                                        </ProgressBar>
+                                        <ProgressBar CornerRadius="0 3 3 0"
+                                                     Value="{Binding ValueUpper}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                     Height="30"
+                                                     Width="{Binding HalfProgressWidth}" />
+                                    </StackPanel>
+                                    <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
+                                           Content="{Binding Value}" />
+                                </Grid>
 
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Height="50">
-                            <Label VerticalAlignment="Center" Width="300"
-                                   IsVisible="{Binding !ChildOfCombined}">
-                                Multiplier
-                            </Label>
-                            <Slider Value="{Binding Max}"
-                                    Minimum="1"
-                                    Maximum="8192"
-                                    IsSnapToTickEnabled="True"
-                                    TickFrequency="1" Width="240" />
-                            <NumericUpDown Value="{Binding Max}" Minimum="1"
-                                           Maximum="8192" Width="150" Height="30" Margin="10 0 0 0 " />
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsFader}">
-                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal">
-                                    <Label VerticalAlignment="Center" Width="300"
-                                           IsVisible="{Binding !ChildOfCombined}">
-                                        Calibrated Value
-                                    </Label>
-                                    <Grid>
-                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding Trigger}">
-                                            <ProgressBar Value="{Binding Value}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="65536"
-                                                         Height="30"
-                                                         Width="{Binding FullProgressWidth}" />
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}"
-                                                    Width="{Binding FullProgressWidth}">
-                                            <ProgressBar CornerRadius="0 3 3 0"
-                                                         Value="{Binding ValueLower}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="{Binding HalfProgressWidth}">
-                                                <ProgressBar.RenderTransform>
-                                                    <ScaleTransform ScaleX="-1" />
-                                                </ProgressBar.RenderTransform>
-                                            </ProgressBar>
-                                            <ProgressBar CornerRadius="0 3 3 0"
-                                                         Value="{Binding ValueUpper}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="{Binding HalfProgressWidth}" />
-                                        </StackPanel>
-                                        <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
-                                               Content="{Binding Value}" Width="{Binding FullProgressWidth}" />
-                                    </Grid>
-                                </StackPanel>
-
-                                <StackPanel Orientation="Horizontal">
-                                    <Label VerticalAlignment="Center" Width="300"
-                                           IsVisible="{Binding !ChildOfCombined}">
-                                        Original Value
-                                    </Label>
-                                    <Grid>
-                                        <Rectangle Margin="{Binding CalibrationMinMaxMargin}"
-                                                   HorizontalAlignment="Stretch"
-                                                   Fill="Green" Height="30" />
-                                        <Rectangle Margin="{Binding ComputedDeadZoneMargin}" Fill="Red"
-                                                   HorizontalAlignment="Stretch" Height="30" />
-                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsUint}">
-                                            <ProgressBar Opacity="0.6"
-                                                         Value="{Binding ValueRaw}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="65536"
-                                                         Height="30"
-                                                         Width="{Binding FullProgressWidth}" />
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}"
-                                                    Width="{Binding FullProgressWidth}">
-                                            <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
-                                                         Value="{Binding ValueRawLower}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="{Binding HalfProgressWidth}">
-                                                <ProgressBar.RenderTransform>
-                                                    <ScaleTransform ScaleX="-1" />
-                                                </ProgressBar.RenderTransform>
-                                            </ProgressBar>
-                                            <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
-                                                         Value="{Binding ValueRawUpper}"
-                                                         IsIndeterminate="False" Minimum="0" Maximum="32768"
-                                                         Height="30"
-                                                         Width="{Binding HalfProgressWidth}" />
-                                        </StackPanel>
-                                        <Label VerticalAlignment="Center" HorizontalAlignment="Center"
-                                               HorizontalContentAlignment="Center"
-                                               Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth}" />
-                                    </Grid>
-                                </StackPanel>
-
-                                <TextBlock
-                                    IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                    VerticalAlignment="Center" HorizontalAlignment="Center"
-                                    Text="{Binding CalibrationText}" />
                             </StackPanel>
+                            <StackPanel Orientation="Horizontal" Height="50">
+                                <Label VerticalAlignment="Center" Width="300"
+                                       IsVisible="{Binding !ChildOfCombined}">
+                                    Multiplier
+                                </Label>
+                                <Slider Value="{Binding Max}"
+                                        Minimum="1"
+                                        Maximum="8192"
+                                        IsSnapToTickEnabled="True"
+                                        TickFrequency="1" Width="240" />
+                                <NumericUpDown Value="{Binding Max}" Minimum="1"
+                                               Maximum="8192" Width="150" Height="30" Margin="10 0 0 0 " />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding IsFader}">
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label VerticalAlignment="Center" Width="300"
+                                               IsVisible="{Binding !ChildOfCombined}">
+                                            Calibrated Value
+                                        </Label>
+                                        <Grid>
+                                            <StackPanel Orientation="Horizontal" IsVisible="{Binding Trigger}">
+                                                <ProgressBar Value="{Binding Value}"
+                                                             IsIndeterminate="False" Minimum="0" Maximum="65536"
+                                                             Height="30"
+                                                             Width="{Binding FullProgressWidth}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}"
+                                                        Width="{Binding FullProgressWidth}">
+                                                <ProgressBar CornerRadius="0 3 3 0"
+                                                             Value="{Binding ValueLower}"
+                                                             IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                             Height="30"
+                                                             Width="{Binding HalfProgressWidth}">
+                                                    <ProgressBar.RenderTransform>
+                                                        <ScaleTransform ScaleX="-1" />
+                                                    </ProgressBar.RenderTransform>
+                                                </ProgressBar>
+                                                <ProgressBar CornerRadius="0 3 3 0"
+                                                             Value="{Binding ValueUpper}"
+                                                             IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                             Height="30"
+                                                             Width="{Binding HalfProgressWidth}" />
+                                            </StackPanel>
+                                            <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
+                                                   Content="{Binding Value}" Width="{Binding FullProgressWidth}" />
+                                        </Grid>
+                                    </StackPanel>
 
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label VerticalAlignment="Center" Width="300"
+                                               IsVisible="{Binding !ChildOfCombined}">
+                                            Original Value
+                                        </Label>
+                                        <Grid>
+                                            <Rectangle Margin="{Binding CalibrationMinMaxMargin}"
+                                                       HorizontalAlignment="Stretch"
+                                                       Fill="Green" Height="30" />
+                                            <Rectangle Margin="{Binding ComputedDeadZoneMargin}" Fill="Red"
+                                                       HorizontalAlignment="Stretch" Height="30" />
+                                            <StackPanel Orientation="Horizontal" IsVisible="{Binding InputIsUint}">
+                                                <ProgressBar Opacity="0.6"
+                                                             Value="{Binding ValueRaw}"
+                                                             IsIndeterminate="False" Minimum="0" Maximum="65536"
+                                                             Height="30"
+                                                             Width="{Binding FullProgressWidth}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}"
+                                                        Width="{Binding FullProgressWidth}">
+                                                <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
+                                                             Value="{Binding ValueRawLower}"
+                                                             IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                             Height="30"
+                                                             Width="{Binding HalfProgressWidth}">
+                                                    <ProgressBar.RenderTransform>
+                                                        <ScaleTransform ScaleX="-1" />
+                                                    </ProgressBar.RenderTransform>
+                                                </ProgressBar>
+                                                <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
+                                                             Value="{Binding ValueRawUpper}"
+                                                             IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                             Height="30"
+                                                             Width="{Binding HalfProgressWidth}" />
+                                            </StackPanel>
+                                            <Label VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                   HorizontalContentAlignment="Center"
+                                                   Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth}" />
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <TextBlock
+                                        IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                        VerticalAlignment="Center" HorizontalAlignment="Center"
+                                        Text="{Binding CalibrationText}" />
+                                </StackPanel>
+
+                            </StackPanel>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Height="50">
-                            <Label VerticalAlignment="Center" Width="300"
-                                   IsVisible="{Binding !ChildOfCombined}">
-                                Calibrate
-                            </Label>
-                            <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                                    Command="{Binding CalibrateCommand}"
-                                    HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
-                                Calibrate
-                            </Button>
-                        </StackPanel>
+                    </Panel>
+
+                    <StackPanel Orientation="Horizontal" Height="50">
+                        <Label VerticalAlignment="Center" Width="300"
+                               IsVisible="{Binding !ChildOfCombined}">
+                            Calibrate
+                        </Label>
+                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
+                                Command="{Binding CalibrateCommand}"
+                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
+                            Calibrate
+                        </Button>
                     </StackPanel>
-                </Panel>
+                </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:GuitarAxis}">
                 <StackPanel>
@@ -1002,22 +1005,22 @@
                             </StackPanel>
 
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Height="50">
-                            <Label VerticalAlignment="Center" Width="300"
-                                   IsVisible="{Binding !ChildOfCombined}">
-                                Calibrate
-                            </Label>
-                            <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                                    Command="{Binding CalibrateCommand}"
-                                    HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
-                                Calibrate
-                            </Button>
-                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Height="50">
+                        <Label VerticalAlignment="Center" Width="300"
+                               IsVisible="{Binding !ChildOfCombined}">
+                            Calibrate
+                        </Label>
+                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
+                                Command="{Binding CalibrateCommand}"
+                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
+                            Calibrate
+                        </Button>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputAxis}">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
                         <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
