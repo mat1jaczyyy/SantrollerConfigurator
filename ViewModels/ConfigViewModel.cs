@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -575,7 +576,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         return Main.Write(this);
     }
 
-    public void SetDefaults()
+    public async void SetDefaults()
     {
         ClearOutputs();
         LedType = LedType.None;
@@ -640,7 +641,21 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         UpdateBindings();
         UpdateErrors();
-
+        if (Main.Is32U4 && Device is Arduino arduino)
+        {
+            if (!arduino.Board.Name.Contains("Bootloader Mode"))
+            {
+                Trace.WriteLine("Jumping pro micro to bootloader mode");
+                arduino.Bootloader();
+            }
+            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude", "avrdude.conf");
+            await Main.Pio.RunPlatformIo("avrdude",
+                new[]
+                {
+                    "pkg", "exec", "avrdude", "-c",
+                    $"avrdude -p atmega32u4 -C {configFile} -P {await Device.GetUploadPortAsync()} -c avr109 -e"
+                }, "", 0, 100, Device);
+        }
         Write();
     }
 

@@ -16,6 +16,7 @@ public class Arduino : IConfigurableDevice
     // public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
     private readonly PlatformIoPort _port;
     private readonly bool _generic;
+    private TaskCompletionSource<string?>? _arduino32U4Path;
 
     public Arduino(PlatformIo pio, PlatformIoPort port)
     {
@@ -83,7 +84,10 @@ public class Arduino : IConfigurableDevice
 
     public void Bootloader()
     {
-        // Automagically handled by pio
+        if (!Is32U4() || Board.Name.Contains("Bootloader Mode")) return;
+        var serial = new SerialPort(_port.Port, 1200);
+        serial.Open();
+        serial.Close();
     }
 
     public void BootloaderUsb()
@@ -107,14 +111,6 @@ public class Arduino : IConfigurableDevice
 
         if (model.Main.Is32U4)
         {
-            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude", "avrdude.conf");
-            model.Main.Pio.RunPlatformIo("avrdude",
-                new[]
-                {
-                    "pkg", "exec", "avrdude", "-c",
-                    $"avrdude -p atmega32u4 -C {configFile} -P {_port.Port} -c avr109 -e"
-                }, "", 0, 100, this).Wait();
-
             var u4Mode = model.Main.Arduino32U4Type;
             Board = u4Mode switch
             {
@@ -159,6 +155,11 @@ public class Arduino : IConfigurableDevice
 
     public Task<string?> GetUploadPortAsync()
     {
+        if (Is32U4() && !Board.Name.Contains("Bootloader Mode"))
+        {
+            _arduino32U4Path = new TaskCompletionSource<string?>();
+            return _arduino32U4Path.Task;
+        }
         return Task.FromResult((string?) GetSerialPort());
     }
 
@@ -171,6 +172,10 @@ public class Arduino : IConfigurableDevice
     {
         switch (device)
         {
+            case Arduino arduino when Is32U4() && _arduino32U4Path != null && arduino.Board.ArdwiinoName == Board.ArdwiinoName:
+                _arduino32U4Path.SetResult(arduino.GetSerialPort());
+                Board = arduino.Board;
+                break;
             case Dfu when !Is32U4():
             {
                 DfuDetected.OnNext(true);
