@@ -160,6 +160,7 @@ public class Arduino : IConfigurableDevice
             _arduino32U4Path = new TaskCompletionSource<string?>();
             return _arduino32U4Path.Task;
         }
+
         return Task.FromResult((string?) GetSerialPort());
     }
 
@@ -172,15 +173,15 @@ public class Arduino : IConfigurableDevice
     {
         switch (device)
         {
-            case Arduino arduino when Is32U4() && _arduino32U4Path != null && arduino.Board.ArdwiinoName == Board.ArdwiinoName:
+            case Arduino arduino when Is32U4() && _arduino32U4Path != null && arduino.Is32U4():
+                Console.WriteLine("Found device with port" + arduino.GetSerialPort());
                 _arduino32U4Path.SetResult(arduino.GetSerialPort());
+                _arduino32U4Path = null;
                 Board = arduino.Board;
                 break;
             case Dfu when !Is32U4():
-            {
                 DfuDetected.OnNext(true);
                 break;
-            }
             case Santroller:
                 return true;
         }

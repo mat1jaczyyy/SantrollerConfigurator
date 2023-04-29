@@ -634,7 +634,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         if (Main.IsUno || Main.IsMega)
         {
-            Write();
+            await Write();
             _ = ShowUnoShortDialog.Handle((Arduino) Device).ToTask();
             return;
         }
@@ -656,7 +656,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     $"avrdude -p atmega32u4 -C {configFile} -P {await Device.GetUploadPortAsync()} -c avr109 -e"
                 }, "", 0, 100, Device);
         }
-        Write();
+        await Write();
     }
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
