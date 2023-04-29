@@ -147,7 +147,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Subscribe();
         Outputs = outputs;
 
-        if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults();
+        if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults().ConfigureAwait(false);
         if (Main is {IsUno: false, IsMega: false}) return;
         Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output));
         Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeTx, UnoPinTypeTxPin, DevicePinMode.Output));
@@ -576,8 +576,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         return Main.Write(this);
     }
 
-    public async void SetDefaults()
+    public async Task SetDefaults()
     {
+        Main.Message = "Building";
+        Main.Progress = 0;
         ClearOutputs();
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
