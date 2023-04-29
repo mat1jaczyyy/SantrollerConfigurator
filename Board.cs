@@ -260,4 +260,9 @@ public struct Board
     {
         return MiniBoards.Contains(this);
     }
+
+    public bool Is32U4()
+    {
+        return Atmega32U4Boards.Contains(this);
+    }
 }

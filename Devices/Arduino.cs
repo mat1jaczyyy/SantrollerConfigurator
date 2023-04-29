@@ -16,7 +16,7 @@ public class Arduino : IConfigurableDevice
     // public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
     private string _port;
     private readonly bool _generic;
-    public bool is32u4Bootloader { get; private set; }
+    public bool Is32U4Bootloader { get; private set; }
     private TaskCompletionSource<string?>? _arduino32U4Path;
 
     public Arduino(PlatformIo pio, PlatformIoPort port)
@@ -28,7 +28,7 @@ public class Arduino : IConfigurableDevice
             if (board.ProductIDs.Contains(port.Pid))
             {
                 Board = board;
-                is32u4Bootloader = Board.Name.Contains("Bootloader Mode");
+                Is32U4Bootloader = Board.Name.Contains("Bootloader Mode");
                 MigrationSupported = true;
                 return;
             }
@@ -157,7 +157,7 @@ public class Arduino : IConfigurableDevice
 
     public Task<string?> GetUploadPortAsync()
     {
-        if (Is32U4() && !is32u4Bootloader)
+        if (Is32U4() && !Is32U4Bootloader)
         {
             _arduino32U4Path = new TaskCompletionSource<string?>();
             return _arduino32U4Path.Task;
@@ -181,7 +181,7 @@ public class Arduino : IConfigurableDevice
                 _arduino32U4Path.SetResult(arduino.GetSerialPort());
                 _arduino32U4Path = null;
                 Board = arduino.Board;
-                is32u4Bootloader = true;
+                Is32U4Bootloader = true;
                 break;
             case Dfu when !Is32U4():
                 DfuDetected.OnNext(true);

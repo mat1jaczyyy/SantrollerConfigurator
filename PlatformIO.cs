@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -163,24 +164,12 @@ public class PlatformIo
 
         async Task Process()
         {
-            await _semaphore.WaitAsync();
             var percentageStep = (progressEndingPercentage - progressStartingPercentage);
             var currentProgress = progressStartingPercentage;
             var uploading = command.Length > 1;
             var appdataFolder = AssetUtils.GetAppDataFolder();
             var pioFolder = Path.Combine(appdataFolder, "platformio");
-            if (_currentProcess is {HasExited: false})
-            {
-                _currentProcess.Kill(true);
-            }
-
-            _currentProcess = new Process();
-            _currentProcess.EnableRaisingEvents = true;
-            _currentProcess.StartInfo.FileName = _pythonExecutable;
-            _currentProcess.StartInfo.WorkingDirectory = FirmwareDir;
-            _currentProcess.StartInfo.EnvironmentVariables["PLATFORMIO_CORE_DIR"] = pioFolder;
-            _currentProcess.StartInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
-            _currentProcess.StartInfo.CreateNoWindow = true;
+            
             var args = new List<string>(command);
             args.Insert(0, _pythonExecutable);
             args.Insert(1, "-m");
@@ -217,6 +206,16 @@ public class PlatformIo
                     {
                         Console.WriteLine("Detecting port please wait");
                         var port = await device.GetUploadPortAsync().ConfigureAwait(false);
+                        if (device is Santroller santroller && santroller.Is32U4())
+                        {
+                            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude", "avrdude.conf");
+                            await RunPlatformIo("avrdude",
+                                new[]
+                                {
+                                    "pkg", "exec", "avrdude", "-c",
+                                    $"avrdude -p atmega32u4 -C {configFile} -P {port} -c avr109 -e"
+                                }, "", 0, 100, device);
+                        }
                         Console.WriteLine(port);
                         if (port != null)
                         {
@@ -226,7 +225,19 @@ public class PlatformIo
                     }
                 }
             }
+            await _semaphore.WaitAsync();
+            if (_currentProcess is {HasExited: false})
+            {
+                _currentProcess.Kill(true);
+            }
 
+            _currentProcess = new Process();
+            _currentProcess.EnableRaisingEvents = true;
+            _currentProcess.StartInfo.FileName = _pythonExecutable;
+            _currentProcess.StartInfo.WorkingDirectory = FirmwareDir;
+            _currentProcess.StartInfo.EnvironmentVariables["PLATFORMIO_CORE_DIR"] = pioFolder;
+            _currentProcess.StartInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
+            _currentProcess.StartInfo.CreateNoWindow = true;
             //Some pio stuff uses Standard Output, some uses Standard Error, its easier to just flatten both of those to a single stream
             _currentProcess.StartInfo.Arguments =
                 $"-c \"import subprocess;subprocess.run([{string.Join(",", args.Select(s => $"'{s}'"))}],stderr=subprocess.STDOUT)\""

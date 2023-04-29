@@ -347,6 +347,11 @@ public class Santroller : IConfigurableDevice
     {
         return Board.IsMini();
     }
+    
+    public bool Is32U4()
+    {
+        return Board.Is32U4();
+    }
 
     public void Reconnect()
     {

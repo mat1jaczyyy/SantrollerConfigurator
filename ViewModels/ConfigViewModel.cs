@@ -645,7 +645,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
         if (Main.Is32U4 && Device is Arduino arduino)
         {
-            if (!arduino.is32u4Bootloader)
+            if (!arduino.Is32U4Bootloader)
             {
                 Trace.WriteLine("Jumping pro micro to bootloader mode");
                 arduino.Bootloader();
@@ -1083,14 +1083,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
                 if (output.Input.InnermostInput() is MacroInput)
                 {
-                    if (!debounces.ContainsKey(generatedInput))
-                        debounces[generatedInput] = debounces.Count;
+                    debounces.TryAdd(generatedInput, debounces.Count);
 
                     macros.Add(output);
                 }
                 else
                 {
-                    if (!debounces.ContainsKey(generatedInput)) debounces[generatedInput] = debounces.Count;
+                    debounces.TryAdd(generatedInput, debounces.Count);
                 }
 
                 if (combined && output is GuitarButton
@@ -1223,12 +1222,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
             if (output.Input is MacroInput)
             {
-                if (!debounces.ContainsKey(generatedInput))
-                    debounces[generatedInput] = debounces.Count;
+                debounces.TryAdd(generatedInput, debounces.Count);
             }
             else
             {
-                if (!debounces.ContainsKey(generatedInput)) debounces[generatedInput] = debounces.Count;
+                debounces.TryAdd(generatedInput, debounces.Count);
             }
         }
 
