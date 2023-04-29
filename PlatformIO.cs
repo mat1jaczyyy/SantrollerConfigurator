@@ -245,7 +245,7 @@ public class PlatformIo
             // process.BeginErrorReadLine();
             var buffer = new char[1];
             var hasError = false;
-            var main = !environment.EndsWith("_usb");
+            var main = !environment.EndsWith("_usb") && !(device is Arduino arduino && arduino.Is32U4());
             while (!_currentProcess.HasExited)
             {
                 if (state == 0)
@@ -393,7 +393,6 @@ public class PlatformIo
                 }
             }
 
-            Console.WriteLine(_currentProcess);
             await _currentProcess.WaitForExitAsync();
 
             if (!hasError)
