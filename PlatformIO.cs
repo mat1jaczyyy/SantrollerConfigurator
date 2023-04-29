@@ -245,6 +245,7 @@ public class PlatformIo
             // process.BeginErrorReadLine();
             var buffer = new char[1];
             var hasError = false;
+            // In detect mode, the pro micro also goes through two separate programming stages.
             var main = !environment.EndsWith("_usb") && !(device is Arduino arduino && arduino.Is32U4());
             while (!_currentProcess.HasExited)
             {

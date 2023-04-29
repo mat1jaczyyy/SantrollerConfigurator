@@ -205,7 +205,7 @@ public class Arduino : IConfigurableDevice
 
     public bool IsUno()
     {
-        return Board.Uno.Name == Board.Name;
+        return Board.Uno.Name == Board.Name || Board.UsbUpload.Name == Board.Name;
     }
 
     public bool IsGeneric()
