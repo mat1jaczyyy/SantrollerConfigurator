@@ -116,10 +116,10 @@ public class DrumAxis : OutputAxis
     {
         if (mode == ConfigField.XboxOne)
         {
-            return AxisMappingsXb1.ContainsKey(Type) ? AxisMappingsXb1[Type] : "";
+            return AxisMappingsXb1.TryGetValue(Type, out var value) ? value : "";
         }
 
-        return AxisMappings.ContainsKey(Type) ? AxisMappings[Type] : "";
+        return AxisMappings.TryGetValue(Type, out var mapping) ? mapping : "";
     }
 
     public override bool ShouldFlip(ConfigField mode)
@@ -148,15 +148,15 @@ public class DrumAxis : OutputAxis
         switch (mode)
         {
             case ConfigField.Xbox360:
-                if (ButtonsXbox360.ContainsKey(Type))
-                    outputButtons += $"\n{GetReportField(ButtonsXbox360[Type])} = true;";
+                if (ButtonsXbox360.TryGetValue(Type, out var value))
+                    outputButtons += $"\n{GetReportField(value)} = true;";
                 break;
             case ConfigField.XboxOne:
-                if (ButtonsXboxOne.ContainsKey(Type))
-                    outputButtons += $"\n{GetReportField(ButtonsXboxOne[Type])} = true;";
+                if (ButtonsXboxOne.TryGetValue(Type, out var value1))
+                    outputButtons += $"\n{GetReportField(value1)} = true;";
                 break;
             case ConfigField.Ps3:
-                if (ButtonsPs3.ContainsKey(Type)) outputButtons += $"\n{GetReportField(ButtonsPs3[Type])} = true;";
+                if (ButtonsPs3.TryGetValue(Type, out var value2)) outputButtons += $"\n{GetReportField(value2)} = true;";
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);

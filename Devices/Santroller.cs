@@ -411,7 +411,6 @@ public class Santroller : IConfigurableDevice
                     break;
                 case DirectPinConfig direct:
                     if (!direct.Type.Contains("-")) importantPins.AddRange(direct.Pins);
-
                     break;
             }
 

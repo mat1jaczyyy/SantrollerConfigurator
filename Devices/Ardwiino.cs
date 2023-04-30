@@ -479,10 +479,10 @@ public class Ardwiino : ConfigurableUsbDevice
                 if (pin == NotUsed) continue;
 
                 var on = Color.FromRgb(0, 0, 0);
-                if (colors.ContainsKey(button)) on = colors[button];
+                if (colors.TryGetValue(button, out var color)) on = color;
 
                 var ledIndex = Array.Empty<byte>();
-                if (ledIndexes.ContainsKey(button)) ledIndex = new[] {ledIndexes[button]};
+                if (ledIndexes.TryGetValue(button, out var index)) ledIndex = new[] {index};
 
                 var off = Color.FromRgb(0, 0, 0);
                 var genButton = ButtonToStandard[(ControllerButtons) button];
@@ -524,13 +524,13 @@ public class Ardwiino : ConfigurableUsbDevice
                 if (pin.pin != NotUsed)
                 {
                     var on = Color.FromRgb(0, 0, 0);
-                    if (colors.ContainsKey((int) (XboxTilt + XboxBtnCount)))
-                        on = colors[(int) (XboxTilt + XboxBtnCount)];
+                    if (colors.TryGetValue((int) (XboxTilt + XboxBtnCount), out var color))
+                        on = color;
 
                     var off = Color.FromRgb(0, 0, 0);
                     var ledIndex = Array.Empty<byte>();
-                    if (ledIndexes.ContainsKey((int) (XboxTilt + XboxBtnCount)))
-                        ledIndex = new[] {ledIndexes[(int) (XboxTilt + XboxBtnCount)]};
+                    if (ledIndexes.TryGetValue((int) (XboxTilt + XboxBtnCount), out var index))
+                        ledIndex = new[] {index};
 
                     bindings.Add(new GuitarAxis(model,
                         new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), model), on,
@@ -539,24 +539,27 @@ public class Ardwiino : ConfigurableUsbDevice
                 }
             }
 
-            if (config.all.main.inputType == (int) InputControllerType.Wii)
+            switch (config.all.main.inputType)
             {
-                var wii = new WiiCombinedOutput(model, sda, scl);
-                if (config.all.main.mapNunchukAccelToRightJoy != 0)
-                    foreach (var output in wii.Outputs.Items.Where(output => output is
-                             {
-                                 Input: WiiInput
+                case (int) InputControllerType.Wii:
+                {
+                    var wii = new WiiCombinedOutput(model, sda, scl);
+                    if (config.all.main.mapNunchukAccelToRightJoy != 0)
+                        foreach (var output in wii.Outputs.Items.Where(output => output is
                                  {
-                                     Input: WiiInputType.NunchukRotationRoll or WiiInputType.NunchukRotationPitch
-                                 }
-                             }))
-                        output.Enabled = false;
+                                     Input: WiiInput
+                                     {
+                                         Input: WiiInputType.NunchukRotationRoll or WiiInputType.NunchukRotationPitch
+                                     }
+                                 }))
+                            output.Enabled = false;
 
-                bindings.Add(wii);
-            }
-            else if (config.all.main.inputType == (int) InputControllerType.Ps2)
-            {
-                bindings.Add(new Ps2CombinedOutput(model, miso, mosi, sck, att, ack));
+                    bindings.Add(wii);
+                    break;
+                }
+                case (int) InputControllerType.Ps2:
+                    bindings.Add(new Ps2CombinedOutput(model, miso, mosi, sck, att, ack));
+                    break;
             }
         }
 

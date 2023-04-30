@@ -170,7 +170,7 @@ public class KeyboardButton : OutputButton
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return Keys.ContainsKey(Key) ? Keys[Key] : "";
+        return Keys.TryGetValue(Key, out var key) ? key : "";
     }
 
     public override string GenerateOutput(ConfigField mode)

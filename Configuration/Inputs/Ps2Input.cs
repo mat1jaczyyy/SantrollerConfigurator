@@ -370,9 +370,9 @@ public class Ps2Input : SpiInput
     public bool SupportsType(Ps2ControllerType type)
     {
         var types = new List<Ps2ControllerType>();
-        if (AxisToType.ContainsKey(Input))
+        if (AxisToType.TryGetValue(Input, out var value))
         {
-            types.Add(AxisToType[Input]);
+            types.Add(value);
         }
         else if (Dualshock2Order.Contains(Input))
         {
@@ -406,9 +406,9 @@ public class Ps2Input : SpiInput
             if (binding.Item1.InnermostInput() is Ps2Input input)
             {
                 var types = new List<Ps2ControllerType>();
-                if (AxisToType.ContainsKey(input.Input))
+                if (AxisToType.TryGetValue(input.Input, out var value))
                 {
-                    types.Add(AxisToType[input.Input]);
+                    types.Add(value);
                 }
                 else if (Dualshock2Order.Contains(input.Input))
                 {
@@ -441,9 +441,9 @@ public class Ps2Input : SpiInput
         var i = 0;
         var retDs2 = "";
         foreach (var binding in Dualshock2Order)
-            if (ds2Axis.ContainsKey(binding))
+            if (ds2Axis.TryGetValue(binding, out var axi))
             {
-                retDs2 += ds2Axis[binding].Replace("generated", i.ToString()) + "\n";
+                retDs2 += axi.Replace("generated", i.ToString()) + "\n";
                 i++;
             }
 

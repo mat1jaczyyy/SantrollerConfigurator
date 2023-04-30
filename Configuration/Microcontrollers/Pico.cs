@@ -286,11 +286,11 @@ public class Pico : Microcontroller
     public override string GetPinForMicrocontroller(int pin, bool twi, bool spi)
     {
         var ret = $"GP{pin}";
-        if (twi && TwiIndexByPin.ContainsKey(pin))
-            ret += $" / TWI{TwiIndexByPin[pin]} {TwiTypeByPin[pin].ToString().ToUpper()}";
+        if (twi && TwiIndexByPin.TryGetValue(pin, out var value))
+            ret += $" / TWI{value} {TwiTypeByPin[pin].ToString().ToUpper()}";
 
-        if (spi && SpiIndexByPin.ContainsKey(pin))
-            ret += $" / SPI{SpiIndexByPin[pin]} {SpiTypesByPin[pin].ToString().ToUpper()}";
+        if (spi && SpiIndexByPin.TryGetValue(pin, out var value1))
+            ret += $" / SPI{value1} {SpiTypesByPin[pin].ToString().ToUpper()}";
 
         if (pin >= 26) ret += $" / ADC{pin - 26}";
 

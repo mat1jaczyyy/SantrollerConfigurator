@@ -12,16 +12,16 @@ public class Micro : AvrController
         3, // D1 - PD3
         1, // D2 - PD1
         0, // D3 - PD0
-        4, // D4 - PD4
+        4, // D4 / A6 - PD4
         6, // D5 - PC6
-        7, // D6 - PD7
+        7, // D6 / A7 - PD7
         6, // D7 - PE6
 
-        4, // D8 - PB4
-        5, // D9 - PB5
-        6, // D10 - PB6
+        4, // D8 / A8 - PB4
+        5, // D9 / A9 - PB5
+        6, // D10 / A10 - PB6
         7, // D11 - PB7
-        6, // D12 - PD6
+        6, // D12 / A11 - PD6
         7, // D13 - PC7
 
         3, // D14 - MISO - PB3
@@ -35,15 +35,21 @@ public class Micro : AvrController
         4, // D21 - A3 - PF4
         1, // D22 - A4 - PF1
         0, // D23 - A5 - PF0
-
-        4, // D24 / D4 - A6 - PD4
-        7, // D25 / D6 - A7 - PD7
-        4, // D26 / D8 - A8 - PB4
-        5, // D27 / D9 - A9 - PB5
-        6, // D28 / D10 - A10 - PB6
-        6, // D29 / D12 - A11 - PD6
-        5 // D30 / TX Led - PD5	
     };
+
+    protected override string? AnalogName(int pin)
+    {
+        return pin switch
+        {
+            4 => " / A6",
+            6 => " / A7",
+            8 => " / A8",
+            9 => " / A9",
+            10 => " / A10",
+            12 => " / A11",
+            _ => base.AnalogName(pin)
+        };
+    }
 
     private static readonly char[] Ports =
     {
@@ -138,7 +144,7 @@ public class Micro : AvrController
     protected override int PinA0 => 18;
 
     public override Board Board { get; }
-    public override List<int> AnalogPins => Enumerable.Range(PinA0, 11).ToList();
+    public override List<int> AnalogPins => Enumerable.Range(PinA0, 5).Concat(new List<int> {4,6,8,9,10,12}).ToList();
 
     protected override string GetInterruptForPin(int ack)
     {
@@ -166,7 +172,18 @@ public class Micro : AvrController
 
     public override int GetChannel(int pin, bool reconfigurePin)
     {
-        var chan = Channels[pin - PinA0];
+        // Convert from pin to analog number
+        pin = pin switch
+        {
+            4 => 6,
+            6 => 7,
+            8 => 8,
+            9 => 9,
+            10 => 10,
+            12 => 11,
+            _ => pin - PinA0
+        };
+        var chan = Channels[pin];
         if (reconfigurePin) chan |= 1 << 7;
         return chan;
     }

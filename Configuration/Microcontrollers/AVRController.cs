@@ -215,10 +215,16 @@ public abstract class AvrController : Microcontroller
         return $"adc({pins.IndexOf(pin)})";
     }
 
+    protected virtual string? AnalogName(int pin)
+    {
+        return pin < PinA0 ? null : $" / A{pin - PinA0}";
+    }
+
     public override string GetPinForMicrocontroller(int pin, bool spi, bool twi)
     {
         var ret = $"{pin}";
-        if (pin >= PinA0) ret += $" / A{pin - PinA0}";
+        var analogName = AnalogName(pin);
+        if (analogName != null) ret += analogName;
 
         if (pin == SpiCSn) ret += " / SPI CS";
 
