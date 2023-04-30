@@ -115,8 +115,11 @@ public abstract partial class OutputAxis : Output
             var mid = (max + min) / 2;
             min = mid - s.deadZone;
             max = mid + s.deadZone;
-            min += short.MaxValue;
-            max += short.MaxValue;
+            if (!s.inputIsUint)
+            {
+                min += short.MaxValue;
+                max += short.MaxValue;
+            }
         }
 
         var left = Math.Min(min / ushort.MaxValue * ProgressWidth, ProgressWidth);
@@ -127,16 +130,16 @@ public abstract partial class OutputAxis : Output
     }
 
 
-    private static Thickness ComputeMinMaxMargin((int, int, bool) s)
+    private static Thickness ComputeMinMaxMargin((int min, int max, bool isUint) s)
     {
-        if (!s.Item3)
+        if (!s.isUint)
         {
-            s.Item1 += short.MaxValue;
-            s.Item2 += short.MaxValue;
+            s.min += short.MaxValue;
+            s.max += short.MaxValue;
         }
 
-        float min = Math.Min(s.Item1, s.Item2);
-        float max = Math.Max(s.Item1, s.Item2);
+        float min = Math.Min(s.min, s.max);
+        float max = Math.Max(s.min, s.max);
 
         var left = Math.Min(min / ushort.MaxValue * ProgressWidth, ProgressWidth);
 
@@ -171,7 +174,7 @@ public abstract partial class OutputAxis : Output
                 else
                 {
                     // For non triggers, deadzone starts in the middle and grows in both directions
-                    DeadZone = Math.Abs((min + max) / 2 - rawValue);
+                    DeadZone = Math.Abs((max - min) / 2 - rawValue);
                 }
 
                 break;
@@ -228,6 +231,8 @@ public abstract partial class OutputAxis : Output
             if (InputIsUint)
             {
                 val -= short.MaxValue;
+                max -= short.MaxValue;
+                min -= short.MaxValue;
             }
 
             var deadZoneCalc = val - (max + min) / 2;

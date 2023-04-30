@@ -545,26 +545,26 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 case StandardAxisType axisType:
                     Bindings.Add(new ControllerAxis(this,
                         new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
-                        Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                        Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, axisType));
                     break;
                 case GuitarAxisType axisType:
                     Bindings.Add(new GuitarAxis(this, new DirectInput(Microcontroller.GetFirstAnalogPin(),
                             DevicePinMode.Analog, this),
-                        Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                        Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, axisType));
                     break;
                 case DrumAxisType axisType:
                     Bindings.Add(new DrumAxis(this,
                         new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
-                        Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                        Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, 64, 10, axisType));
                     break;
                 case DjAxisType axisType:
                     if (axisType is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity) continue;
                     Bindings.Add(new DjAxis(this,
                         new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
-                        Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue,
+                        Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, axisType));
                     break;
             }
