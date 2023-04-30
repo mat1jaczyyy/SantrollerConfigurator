@@ -348,18 +348,24 @@ public abstract partial class OutputAxis : Output
             }
 
             multiplier = 1f / (max - min) * ushort.MaxValue;
+            if (!InputIsUint)
+            {
+                max += short.MaxValue;
+                min += short.MaxValue;
+            }
         }
         else
         {
+            min += DeadZone;
+            max -= DeadZone;
+            multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
             if (InputIsUint)
             {
                 max -= short.MaxValue;
                 min -= short.MaxValue;
             }
-            min += DeadZone;
-            max -= DeadZone;
-            multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
+        
         var generated = "(" + Input.Generate(mode);
         generated += (Trigger || forceAccel) switch
         {
