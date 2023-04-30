@@ -164,7 +164,7 @@ public class GuitarAxis : OutputAxis
                                   {GenerateOutput(mode)} = {analogOn & 0xFF};
                               }}";
             case ConfigField.Ps3 or ConfigField.Ps4 when Type == GuitarAxisType.Slider && Input is not DigitalToAnalog:
-                return $"{GenerateOutput(mode)} = {Input.Generate(mode)};";
+                return $"{GenerateOutput(mode)} = {Input.Generate(mode)} >> 8;";
             // Xb1 is RB only, so no slider
             case ConfigField.XboxOne when Type == GuitarAxisType.Slider:
                 return "";

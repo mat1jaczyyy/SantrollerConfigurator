@@ -350,7 +350,6 @@ public abstract partial class OutputAxis : Output
             max -= DeadZone;
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
-
         var generated = "(" + Input.Generate(mode);
         generated += (Trigger || forceAccel) switch
         {
