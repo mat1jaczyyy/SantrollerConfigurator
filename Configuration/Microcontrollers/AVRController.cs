@@ -222,7 +222,7 @@ public abstract class AvrController : Microcontroller
 
     public override string GetPinForMicrocontroller(int pin, bool spi, bool twi)
     {
-        var ret = $"{pin}";
+        var ret = $"D{pin}";
         var analogName = AnalogName(pin);
         if (analogName != null) ret += analogName;
 
