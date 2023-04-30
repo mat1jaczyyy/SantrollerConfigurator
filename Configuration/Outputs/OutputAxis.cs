@@ -351,6 +351,11 @@ public abstract partial class OutputAxis : Output
         }
         else
         {
+            if (InputIsUint)
+            {
+                max -= short.MaxValue;
+                min -= short.MaxValue;
+            }
             min += DeadZone;
             max -= DeadZone;
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
