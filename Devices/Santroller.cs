@@ -275,9 +275,9 @@ public class Santroller : IConfigurableDevice
         _usbDevice?.BootloaderUsb();
     }
 
-    public bool DeviceAdded(IConfigurableDevice device)
+    public void DeviceAdded(IConfigurableDevice device)
     {
-        return _usbDevice != null && _usbDevice.DeviceAdded(device);
+        _usbDevice?.DeviceAdded(device);
     }
 
     private bool IsOpen()

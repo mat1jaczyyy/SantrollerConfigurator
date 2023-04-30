@@ -14,7 +14,7 @@ public interface IConfigurableDevice
     public void Bootloader();
     public void BootloaderUsb();
 
-    public bool DeviceAdded(IConfigurableDevice device);
+    public void DeviceAdded(IConfigurableDevice device);
 
     public Microcontroller GetMicrocontroller(ConfigViewModel model);
 

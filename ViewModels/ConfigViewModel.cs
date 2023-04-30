@@ -1285,6 +1285,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private void AddDevice(IConfigurableDevice device)
     {
+        Trace.WriteLine($"Add called, current device: {Device}, new device: {device}");
         if (device is Santroller santroller)
         {
             if (Device is Santroller santrollerold)

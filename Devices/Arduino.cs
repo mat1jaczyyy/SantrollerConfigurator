@@ -171,7 +171,7 @@ public class Arduino : IConfigurableDevice
         return true;
     }
 
-    public bool DeviceAdded(IConfigurableDevice device)
+    public void DeviceAdded(IConfigurableDevice device)
     {
         switch (device)
         {
@@ -186,11 +186,7 @@ public class Arduino : IConfigurableDevice
             case Dfu when !Is32U4():
                 DfuDetected.OnNext(true);
                 break;
-            case Santroller:
-                return true;
         }
-
-        return false;
     }
 
     public bool IsPico()

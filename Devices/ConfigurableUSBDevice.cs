@@ -47,7 +47,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         return Serial == serialOrPath || Path == serialOrPath;
     }
 
-    public bool DeviceAdded(IConfigurableDevice device)
+    public void DeviceAdded(IConfigurableDevice device)
     {
         if (device is Arduino arduino2 && arduino2.Board.ArdwiinoName == Board.ArdwiinoName)
         {
@@ -62,13 +62,6 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             BootloaderDevice = dfu;
             _bootloaderPath?.SetResult(dfu.Board.Environment);
         }
-
-        return device switch
-        {
-            ConfigurableUsbDevice other => other.Serial == Serial,
-            Arduino arduino => arduino.Board.ArdwiinoName == Board.UsbUpload.ArdwiinoName,
-            _ => false
-        };
     }
 
     public abstract Microcontroller GetMicrocontroller(ConfigViewModel model);

@@ -40,10 +40,8 @@ public class PicoDevice : IConfigurableDevice
     {
     }
 
-    bool IConfigurableDevice.DeviceAdded(IConfigurableDevice device)
+    void IConfigurableDevice.DeviceAdded(IConfigurableDevice device)
     {
-        if (device is Santroller controller) return true;
-        return false;
     }
 
     public bool LoadConfiguration(ConfigViewModel model)

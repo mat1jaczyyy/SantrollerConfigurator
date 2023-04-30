@@ -50,11 +50,9 @@ public class Dfu : IConfigurableDevice
         return serialOrPath == _port;
     }
 
-    public bool DeviceAdded(IConfigurableDevice device)
+    public void DeviceAdded(IConfigurableDevice device)
     {
         if (device is Dfu dfu) dfu.Launch();
-
-        return false;
     }
 
     
