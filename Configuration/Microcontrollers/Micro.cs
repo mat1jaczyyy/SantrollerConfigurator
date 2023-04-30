@@ -144,7 +144,7 @@ public class Micro : AvrController
     protected override int PinA0 => 18;
 
     public override Board Board { get; }
-    public override List<int> AnalogPins => Enumerable.Range(PinA0, 5).Concat(new List<int> {4,6,8,9,10,12}).ToList();
+    public override List<int> AnalogPins => Enumerable.Range(PinA0, 6).Concat(new List<int> {4,6,8,9,10,12}).ToList();
 
     protected override string GetInterruptForPin(int ack)
     {
