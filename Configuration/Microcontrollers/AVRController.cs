@@ -75,18 +75,6 @@ public abstract class AvrController : Microcontroller
         return conf;
     }
 
-    public override void UnAssignPins(string type)
-    {
-        var elements = PinConfigs.Where(s => s.Type == type).ToList();
-        PinConfigs.RemoveAll(elements);
-    }
-
-    public override void AssignPin(PinConfig pinConfig)
-    {
-        UnAssignPins(pinConfig.Type);
-        PinConfigs.Add(pinConfig);
-    }
-
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
         return new List<KeyValuePair<int, SpiPinType>>

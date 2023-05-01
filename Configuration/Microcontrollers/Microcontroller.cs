@@ -76,7 +76,17 @@ public abstract class Microcontroller
     public abstract List<KeyValuePair<int, SpiPinType>> FreeSpiPins(string type);
     public abstract List<KeyValuePair<int, TwiPinType>> FreeTwiPins(string type);
 
-    public abstract void UnAssignPins(string type);
+    public void UnAssignPins(string type)
+    {
+        var elements = PinConfigs.Where(s => s.Type == type).ToList();
+        PinConfigs.RemoveAll(elements);
+    }
+
+    public void AssignPin(PinConfig pinConfig)
+    {
+        UnAssignPins(pinConfig.Type);
+        PinConfigs.Add(pinConfig);
+    }
 
     public void UnAssignAll()
     {
@@ -86,7 +96,6 @@ public abstract class Microcontroller
     public abstract string GenerateAnalogRead(int pin);
 
     public abstract int GetFirstAnalogPin();
-    public abstract void AssignPin(PinConfig pinConfig);
 
     public abstract List<int> GetAllPins(bool isAnalog);
     public abstract List<int> GetPwmPins();

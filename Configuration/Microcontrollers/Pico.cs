@@ -235,17 +235,6 @@ public class Pico : Microcontroller
             .Where(s => (twi1Free && TwiIndexByPin[s.Key] == 1) || (twi0Free && TwiIndexByPin[s.Key] == 0)).ToList();
     }
 
-    public override void UnAssignPins(string type)
-    {
-        var elements = PinConfigs.Where(s => s.Type == type).ToList();
-        PinConfigs.RemoveAll(elements);
-    }
-
-    public override void AssignPin(PinConfig pinConfig)
-    {
-        UnAssignPins(pinConfig.Type);
-        PinConfigs.Add(pinConfig);
-    }
 
     public override string GenerateInit()
     {
