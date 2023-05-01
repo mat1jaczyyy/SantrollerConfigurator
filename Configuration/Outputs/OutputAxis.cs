@@ -212,6 +212,8 @@ public abstract partial class OutputAxis : Output
             if (!InputIsUint)
             {
                 val += short.MaxValue;
+                min += short.MaxValue;
+                max += short.MaxValue;
             }
 
             if (inverted)
@@ -239,8 +241,16 @@ public abstract partial class OutputAxis : Output
             if (deadZoneCalc < deadZone && deadZoneCalc > -deadZone) return 0;
 
             val -= Math.Sign(val) * deadZone;
-            min += deadZone;
-            max -= deadZone;
+            if (max > min)
+            {
+                min += deadZone;
+                max -= deadZone;
+            }
+            else
+            {
+                min -= deadZone;
+                max += deadZone;
+            }
         }
 
         if (trigger)
@@ -334,10 +344,15 @@ public abstract partial class OutputAxis : Output
 
         var min = Min;
         var max = Max;
-        bool inverted = Min > Max;
+        var inverted = Min > Max;
         float multiplier;
         if (Trigger)
         {
+            if (!InputIsUint)
+            {
+                max += short.MaxValue;
+                min += short.MaxValue;
+            }
             if (inverted)
             {
                 min -= DeadZone;
@@ -346,22 +361,26 @@ public abstract partial class OutputAxis : Output
             {
                 min += DeadZone;
             }
-            if (!InputIsUint)
-            {
-                max += short.MaxValue;
-                min += short.MaxValue;
-            }
 
             multiplier = 1f / (max - min) * ushort.MaxValue;
         }
         else
         {
-            min += DeadZone;
-            max -= DeadZone;
             if (InputIsUint)
             {
                 max -= short.MaxValue;
                 min -= short.MaxValue;
+            }
+
+            if (inverted)
+            {
+                min -= DeadZone;
+                max += DeadZone;
+            }
+            else
+            {
+                min += DeadZone;
+                max -= DeadZone;
             }
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
