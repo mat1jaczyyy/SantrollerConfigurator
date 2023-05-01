@@ -583,7 +583,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ClearOutputs();
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
-        
+
         WtSensitivity = 30;
         _usbHostEnabled = false;
         PollRate = 0;
@@ -650,7 +650,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Trace.WriteLine("Jumping pro micro to bootloader mode");
                 arduino.Bootloader();
             }
-            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude", "avrdude.conf");
+
+            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude",
+                "avrdude.conf");
             await Main.Pio.RunPlatformIo("avrdude",
                 new[]
                 {
@@ -658,6 +660,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     $"avrdude -p atmega32u4 -C {configFile} -P {await Device.GetUploadPortAsync()} -c avr109 -e"
                 }, "", 0, 100, Device);
         }
+
         await Write();
     }
 
@@ -742,11 +745,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         foreach (var type in Enum.GetValues<StandardAxisType>())
         {
             if (!ControllerEnumConverter.GetAxisText(_deviceControllerType, type).Any()) continue;
-            if (DeviceType == DeviceControllerType.Turntable &&
-                type is StandardAxisType.LeftStickX or StandardAxisType.LeftStickY) continue;
+            var isTrigger = type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
             Bindings.Add(new ControllerAxis(this,
                 new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
-                Colors.Black, Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
+                Colors.Black, Colors.Black, Array.Empty<byte>(), isTrigger ? ushort.MinValue : short.MinValue,
+                isTrigger ? ushort.MaxValue : short.MaxValue, 0,
                 type));
         }
 
@@ -884,13 +887,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         lines.Add(Ps2Input.GeneratePs2Pressures(inputs));
-        
+
         // Sort by pin index, and then map to adc number and turn into an array
         var analogPins = directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin)
             .Select(s => Microcontroller.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct().ToList();
         // Format as a c array
         lines.Add($"#define ADC_PINS {{{string.Join(",", analogPins)}}}");
-        
+
         // And also store a count
         lines.Add($"#define ADC_COUNT {analogPins.Count}");
         lines.Add($"#define PIN_INIT {Microcontroller.GenerateInit()}");

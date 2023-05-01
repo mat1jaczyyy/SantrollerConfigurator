@@ -79,7 +79,7 @@ public class ControllerAxis : OutputAxis
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return ControllerEnumConverter.GetAxisText(deviceControllerType,
-            Type) ?? Type.ToString();
+            Type);
     }
 
     private static bool IsTrigger(StandardAxisType type)
