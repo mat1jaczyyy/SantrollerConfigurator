@@ -386,7 +386,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
-    public Microcontroller Microcontroller { get; }
+    public Microcontroller Microcontroller { get; private set; }
 
     public SourceList<Output> Bindings { get; } = new();
     public bool BindableSpi => IsPico;
@@ -1301,6 +1301,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 Main.Complete(100);
                 Device = device;
+                Microcontroller = device.GetMicrocontroller(this);
                 santroller.StartTicking(this);
             }
         }
