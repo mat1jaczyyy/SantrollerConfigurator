@@ -62,8 +62,6 @@ public class ConfigurableUsbDeviceManager
                     var serial = info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
                     switch (product)
                     {
-                        case "Santroller" when _model is {Programming: true, IsPico: false}:
-                            return;
                         case "Santroller":
                             _model.AvailableDevices.Add(new Santroller(_model.Pio, e.Device.Name, dev, product, serial,
                                 revision));

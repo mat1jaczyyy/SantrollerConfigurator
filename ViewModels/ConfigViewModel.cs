@@ -1300,7 +1300,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     santroller.StartTicking(this);
                 }
             }
-            else if (Main is {Programming: false, Working: true})
+            else 
             {
                 Main.Complete(100);
                 Device = device;

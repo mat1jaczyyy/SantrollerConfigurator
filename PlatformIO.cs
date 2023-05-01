@@ -277,10 +277,6 @@ public class PlatformIo
                         platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                             $"{progressMessage} - Please unplug your device, hold the reset button and plug it back in",
                             null));
-                        if (device is Dfu dfu)
-                        {
-                            dfu.Launch();
-                        }
                     }
 
                     platformIoOutput.OnNext(platformIoOutput.Value.WithLog(line));

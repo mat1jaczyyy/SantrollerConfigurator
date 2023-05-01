@@ -202,14 +202,11 @@ public struct Board
     public static readonly Board Uno = new("uno", "Arduino Uno", 16000000, "arduino_uno",
         new List<uint> {0x0043, 0x0001, 0x0243}, true);
 
-    public static readonly Board UsbUpload = new("usb", "Arduino Uno / Mega in Firmware Update Mode", 0, "",
-        new List<uint> {0x2883}, true);
-
     public static readonly Board[] Boards = MiniBoards
         .Concat(MegaBoards)
         .Concat(Atmega32U4Boards)
         .Concat(Rp2040Boards)
-        .Concat(new[] {UsbUpload, Uno, DfuBoard})
+        .Concat(new[] {Uno, DfuBoard})
         .ToArray();
 
     public static Board FindBoard(string ardwiinoName, uint cpuFreq)
