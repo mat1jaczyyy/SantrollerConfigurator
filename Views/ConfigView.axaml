@@ -895,10 +895,12 @@
                                         </Grid>
                                     </StackPanel>
 
-                                    <TextBlock
-                                        IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                        VerticalAlignment="Center" HorizontalAlignment="Center"
-                                        Text="{Binding CalibrationText}" />
+                                    
+                                    <Label Margin="300 0 0 0"
+                                           Width="{Binding FullProgressWidth}"
+                                           IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                           HorizontalContentAlignment="Center"
+                                           Content="{Binding CalibrationText}" />
                                 </StackPanel>
 
                             </StackPanel>
@@ -998,10 +1000,11 @@
                                     </Grid>
                                 </StackPanel>
 
-                                <TextBlock
-                                    IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                    VerticalAlignment="Center" HorizontalAlignment="Center"
-                                    Text="{Binding CalibrationText}" />
+                                <Label Margin="300 0 0 0"
+                                       Width="{Binding FullProgressWidth}"
+                                       IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                       HorizontalContentAlignment="Center"
+                                       Content="{Binding CalibrationText}" />
                             </StackPanel>
 
                         </StackPanel>
@@ -1097,11 +1100,11 @@
                                            Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth}" />
                                 </Grid>
                             </StackPanel>
-
-                            <TextBlock
-                                IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                VerticalAlignment="Center" HorizontalAlignment="Center"
-                                Text="{Binding CalibrationText}" />
+                            <Label Margin="300 0 0 0"
+                                   Width="{Binding FullProgressWidth}"
+                                   IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                HorizontalContentAlignment="Center"
+                                Content="{Binding CalibrationText}" />
                         </StackPanel>
 
                     </StackPanel>
