@@ -115,6 +115,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
             this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s?.IsGeneric() == true)
                 .ToPropertyEx(this, s => s.IsGeneric);
+            this.WhenAnyValue(x => x.SelectedDevice)
+                .Select(s => s is not (null or Ardwiino or Santroller))
+                .ToPropertyEx(this, s => s.NewDevice);
             // Make sure that the selected device input type is reset so that we don't end up doing something invalid like using RF on a generic serial device
             this.WhenAnyValue(s => s.SelectedDevice).Subscribe(s =>
             {
@@ -162,6 +165,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         [ObservableAsProperty] public bool IsMega { get; }
         [ObservableAsProperty] public bool IsDfu { get; }
         [ObservableAsProperty] public bool IsGeneric { get; }
+        [ObservableAsProperty] public bool NewDevice { get; }
 
         [ObservableAsProperty] public bool Connected { get; }
 
@@ -218,8 +222,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 environment = "picow";
             }
 
-
-            if (config.Device is not (Santroller or Ardwiino))
+            if (config.Device is not (Ardwiino or Santroller))
             {
                 environment = environment.Replace("_8", "");
                 environment = environment.Replace("_16", "");
