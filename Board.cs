@@ -257,6 +257,12 @@ public struct Board
     {
         return MiniBoards.Contains(this);
     }
+    
+    public bool IsESP32()
+    {
+        //TODO: this
+        return false;
+    }
 
     public bool Is32U4()
     {

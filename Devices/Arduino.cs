@@ -146,8 +146,22 @@ public class Arduino : IConfigurableDevice
         return Board.IsMini();
     }
 
+    public bool IsESP32()
+    {
+        return false;
+    }
+
     public void Reconnect()
     {
+    }
+
+    public void Revert()
+    {
+    }
+
+    public bool HasDfuMode()
+    {
+        return Board.HasUsbmcu;
     }
 
     public bool LoadConfiguration(ConfigViewModel model)

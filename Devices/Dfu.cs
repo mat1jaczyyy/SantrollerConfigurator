@@ -77,6 +77,15 @@ public class Dfu : IConfigurableDevice
         return Board.FindMicrocontroller(board);
     }
 
+    public string GetRestoreSuffix()
+    {
+        return _args.Device.IdProduct == DfuPid8U2 ? "8" : "16";
+    }
+    
+    public string GetRestoreProcessor()
+    {
+        return _args.Device.IdProduct == DfuPid8U2 ? "at90usb82" : "atmega16u2";
+    }
     public bool LoadConfiguration(ConfigViewModel model)
     {
         return false;
@@ -104,6 +113,11 @@ public class Dfu : IConfigurableDevice
     {
         return false;
     }
+    
+    public bool IsESP32()
+    {
+        return false;
+    }
 
     public bool IsMini()
     {
@@ -114,6 +128,15 @@ public class Dfu : IConfigurableDevice
     {
     }
 
+    public void Revert()
+    {
+    }
+
+    public bool HasDfuMode()
+    {
+        return true;
+    }
+
     public bool IsGeneric()
     {
         return false;
@@ -122,5 +145,55 @@ public class Dfu : IConfigurableDevice
     public override string ToString()
     {
         return $"{Board.Name} ({_port})";
+    }
+    public void Launch()
+    {
+// #if Windows
+//         var mcu = _args.Device.IdProduct == 0x2FF7 ? "at90usb82" : "atmega16u2";
+//         
+//         var appdataFolder = AssetUtils.GetAppDataFolder();
+//         var dfuExecutable = Path.Combine(appdataFolder, "platformio", "dfu-programmer.exe");
+//         var process = new Process();
+//         process.StartInfo.FileName = dfuExecutable;
+//         process.StartInfo.Arguments = $"{mcu} launch --no-reset";
+//         process.Start();
+//         process.WaitForExit();
+// #else
+        _args.Device.Open(out var device);
+        if (device != null)
+        {
+            var requestType = UsbCtrlFlags.Direction_In | UsbCtrlFlags.RequestType_Class |
+                              UsbCtrlFlags.Recipient_Interface;
+
+            var sp = new UsbSetupPacket(
+                (byte) requestType,
+                3,
+                0,
+                0,
+                8);
+            var buffer = new byte[8];
+            device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
+            Console.WriteLine(length);
+            buffer = new byte[] {0x04, 0x03, 0x01, 0x00, 0x00};
+            requestType = UsbCtrlFlags.Direction_Out | UsbCtrlFlags.RequestType_Class |
+                          UsbCtrlFlags.Recipient_Interface;
+
+            sp = new UsbSetupPacket(
+                (byte) requestType,
+                1,
+                0,
+                0,
+                buffer.Length);
+            device.ControlTransfer(ref sp, buffer, buffer.Length, out length);
+            Console.WriteLine(length);
+            sp = new UsbSetupPacket(
+                (byte) requestType,
+                1,
+                0,
+                0,
+                0);
+            device.ControlTransfer(ref sp, buffer, 0, out length);
+            Console.WriteLine(length);
+        }
     }
 }

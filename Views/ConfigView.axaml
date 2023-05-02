@@ -1652,7 +1652,7 @@
             <StackPanel DockPanel.Dock="Bottom">
                 <WrapPanel Margin="10" HorizontalAlignment="Center">
                     <Button Content="Write Configuration" Command="{Binding WriteConfigCommand}" />
-                    <Button Content="Revert device to Arduino" Command="{Binding ResetCommand}" />
+                    <Button IsVisible="{Binding SupportsReset}" Content="Revert device to Arduino" Command="{Binding ResetCommand}" />
                     <Button Content="Configure another device" Command="{Binding GoBackCommand}" />
                 </WrapPanel>
                 <TextBlock IsVisible="{Binding WriteToolTip, Converter={x:Static ObjectConverters.IsNotNull}}"

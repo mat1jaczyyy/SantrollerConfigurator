@@ -92,9 +92,20 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     {
         return Board.IsMini();
     }
+    
+    public bool IsESP32()
+    {
+        return Board.IsESP32();
+    }
 
     public void Reconnect()
     {
+    }
+
+    public abstract void Revert();
+    public bool HasDfuMode()
+    {
+        return Board.HasUsbmcu;
     }
 
     public bool IsPico()

@@ -64,6 +64,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private bool _usbHostEnabled;
 
+    public bool ShowUnoDialog { get; }
+
+    public bool SupportsReset { get; }
+
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
         Device = device;
@@ -106,6 +110,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         WriteConfigCommand = ReactiveCommand.CreateFromObservable(Write,
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
+        ResetCommand = ReactiveCommand.CreateFromTask(ResetAsync,
+            this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
+                .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
         GoBackCommand = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
             this.WhenAnyValue(x => x.Main.Working).Select(s => !s));
 
@@ -146,8 +153,16 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Bind(out var outputs)
             .Subscribe();
         Outputs = outputs;
+        SupportsReset = !device.IsMini() && !device.IsESP32();
 
-        if (!screen.SelectedDevice!.LoadConfiguration(this)) SetDefaults().ConfigureAwait(false);
+        if (!device.LoadConfiguration(this))
+        {
+            SetDefaults().ConfigureAwait(false);
+            if (Device.HasDfuMode())
+            {
+                ShowUnoDialog = true;
+            }
+        }
         if (Main is {IsUno: false, IsMega: false}) return;
         Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output));
         Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeTx, UnoPinTypeTxPin, DevicePinMode.Output));
@@ -193,6 +208,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public int[] KvKey2 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
 
     public ICommand WriteConfigCommand { get; }
+    public ICommand ResetCommand { get; }
 
     public ICommand GoBackCommand { get; }
 
@@ -634,13 +650,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 throw new ArgumentOutOfRangeException();
         }
 
-        if (Main.IsUno || Main.IsMega)
-        {
-            await Write();
-            _ = ShowUnoShortDialog.Handle((Arduino) Device).ToTask();
-            return;
-        }
-
         UpdateBindings();
         UpdateErrors();
         if (Main.Is32U4 && Device is Arduino arduino)
@@ -1023,14 +1032,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    [RelayCommand]
     private async Task ResetAsync()
     {
         var yesNo = await ShowYesNoDialog.Handle(("Reset", "Cancel",
                 "The following action will revert your device back to an Arduino, are you sure you want to do this?"))
             .ToTask();
         if (!yesNo.Response) return;
-        //TODO: actually revert the device to an arduino
+        Device.Revert();
+        await Main.GoBack.Execute();
     }
 
     [RelayCommand]
@@ -1300,7 +1309,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     santroller.StartTicking(this);
                 }
             }
-            else 
+            else
             {
                 Main.Complete(100);
                 Device = device;

@@ -25,5 +25,8 @@ public interface IConfigurableDevice
     public bool IsGeneric();
     public bool IsPico();
     public bool IsMini();
+    public bool IsESP32();
     void Reconnect();
+    void Revert();
+    bool HasDfuMode();
 }

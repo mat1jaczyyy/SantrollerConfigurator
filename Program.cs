@@ -31,8 +31,11 @@ public static class ProgramWindowsDebug
             PlatformIo.Exit(null, new ControlledApplicationLifetimeExitEventArgs(0));
         }
 
-        System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (sender, _) =>
+        System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (sender, ex) =>
+        {
+            Trace.TraceError(ex.Exception.ToString());
             PlatformIo.Exit(sender, new ControlledApplicationLifetimeExitEventArgs(0));
+        };
     }
 
     public static AppBuilder BuildAvaloniaApp()

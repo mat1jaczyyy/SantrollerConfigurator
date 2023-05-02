@@ -27,26 +27,28 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
         this.WhenActivated(disposables =>
         {
             disposables(ViewModel!.ShowIssueDialog.RegisterHandler(DoShowDialogAsync));
-            disposables(ViewModel!.ShowUnoShortDialog.RegisterHandler(DoShowUnoDialogAsync));
             disposables(ViewModel!.ShowYesNoDialog.RegisterHandler(DoShowYesNoDialogAsync));
             disposables(ViewModel!.ShowBindAllDialog.RegisterHandler(DoShowBindAllDialogAsync));
             disposables(
                 ViewModel!.WhenAnyValue(x => x.Device).OfType<Santroller>()
                     .ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => s.StartTicking(ViewModel)));
+            if (ViewModel!.ShowUnoDialog && ViewModel!.Device is Arduino arduino)
+            {
+                DoShowUnoDialog(arduino);
+            }
         });
         AvaloniaXamlLoader.Load(this);
     }
 
-    private async Task DoShowUnoDialogAsync(InteractionContext<Arduino, ShowUnoShortWindowViewModel?> interaction)
+    private void DoShowUnoDialog(Arduino device)
     {
-        var model = new ShowUnoShortWindowViewModel(interaction.Input);
+        var model = new ShowUnoShortWindowViewModel(device);
         var dialog = new UnoShortWindow
         {
             DataContext = model
         };
 
-        var result = await dialog.ShowDialog<ShowUnoShortWindowViewModel?>((Window) VisualRoot!);
-        interaction.SetOutput(result);
+        dialog.ShowDialog<ShowUnoShortWindowViewModel?>((Window) VisualRoot!);
     }
 
     private async Task DoShowDialogAsync(

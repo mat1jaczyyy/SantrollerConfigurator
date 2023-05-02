@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Avalonia.Media;
 using DynamicData;
 using DynamicData.Kernel;
@@ -149,6 +150,10 @@ public class Ardwiino : ConfigurableUsbDevice
     public override void BootloaderUsb()
     {
         WriteData(JumpBootloaderCommandUno, RequestHidSetReport, Array.Empty<byte>());
+    }
+
+    public override void Revert()
+    {
     }
 
     public override bool LoadConfiguration(ConfigViewModel model)

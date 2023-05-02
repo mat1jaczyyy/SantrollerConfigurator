@@ -63,6 +63,11 @@ public class PicoDevice : IConfigurableDevice
     {
         return false;
     }
+    
+    public bool IsESP32()
+    {
+        return false;
+    }
 
     public bool IsPico()
     {
@@ -77,6 +82,15 @@ public class PicoDevice : IConfigurableDevice
     public void Reconnect()
     {
         
+    }
+
+    public void Revert()
+    {
+    }
+
+    public bool HasDfuMode()
+    {
+        return false;
     }
 
     public string GetPath()
