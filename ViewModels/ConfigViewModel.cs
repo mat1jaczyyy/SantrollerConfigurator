@@ -491,7 +491,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         foreach (var binding in Bindings.Items) binding.UpdateBindings();
         InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this);
-
+        if (!(IsRhythm && IsController))
+        {
+            RhythmType = RhythmType.GuitarHero;
+        }
         var (extra, types) =
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
         Bindings.RemoveMany(extra);
