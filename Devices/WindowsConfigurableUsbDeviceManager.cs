@@ -116,7 +116,7 @@ public class ConfigurableUsbDeviceManager
             {
                 var serial = ids.SerialNumber;
                 _model.AvailableDevices.RemoveMany(
-                    _model.AvailableDevices.Items.Where(device => device.IsSameDevice(path) || device.IsSameDevice(serial)));
+                    _model.AvailableDevices.Items.Where(device => device.IsSameDevice(path) || device.IsSameDevice(serial) || device.IsSameDevice(PnPDevice.GetInstanceIdFromInterfaceId(path))));
             }
         });
     }

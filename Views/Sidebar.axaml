@@ -241,7 +241,7 @@
 
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Poll Rate (0 to disable)"
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 40 40 0" Text="Poll Rate (0 for unlimited)"
                                TextAlignment="Center" />
                     <NumericUpDown FormatString="{}{0:#,0}" Margin="20 20 20 0" Value="{Binding PollRate}"
                                    Minimum="0"

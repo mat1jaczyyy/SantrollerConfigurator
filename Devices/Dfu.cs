@@ -194,6 +194,6 @@ public class Dfu : IConfigurableDevice
                 0);
             device.ControlTransfer(ref sp, buffer, 0, out _);
         }
-    }
 #endif
+    }
 }
