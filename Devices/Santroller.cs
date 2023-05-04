@@ -171,6 +171,9 @@ public class Santroller : IConfigurableDevice
         catch (UnauthorizedAccessException)
         {
         }
+        catch (IOException)
+        {
+        }
     }
 
 
