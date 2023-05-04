@@ -67,33 +67,11 @@
                     </StackPanel>
 
                     <StackPanel IsVisible="{Binding Main.NewDevice}">
-                        <StackPanel IsVisible="{Binding Main.IsDfu}" Orientation="Horizontal">
+                        <StackPanel IsVisible="{Binding Main.IsUnoMega}" Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300">
                                 Arduino Uno / Mega Type
-                            </Label>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                      SelectedItem="{Binding Main.UnoMegaType}"
-                                      Items="{Binding Main.UnoMegaTypes}"
-                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                        </StackPanel>
-                        <StackPanel IsVisible="{Binding Main.IsMega}" Orientation="Horizontal">
-                            <Label VerticalAlignment="Center"
-                                   VerticalContentAlignment="Center"
-                                   Width="300">
-                                Arduino Mega Type
-                            </Label>
-                            <ComboBox HorizontalAlignment="Stretch"
-                                      SelectedItem="{Binding Main.UnoMegaType}"
-                                      Items="{Binding Main.UnoMegaTypes}"
-                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
-                        </StackPanel>
-                        <StackPanel IsVisible="{Binding Main.IsUno}" Orientation="Horizontal">
-                            <Label VerticalAlignment="Center"
-                                   VerticalContentAlignment="Center"
-                                   Width="300">
-                                Arduino Uno Type
                             </Label>
                             <ComboBox HorizontalAlignment="Stretch"
                                       SelectedItem="{Binding Main.UnoMegaType}"

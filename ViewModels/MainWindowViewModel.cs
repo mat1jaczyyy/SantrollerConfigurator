@@ -104,6 +104,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
                 .Select(s => s is Arduino arduino && arduino.Is32U4())
                 .ToPropertyEx(this, s => s.Is32U4);
             this.WhenAnyValue(x => x.SelectedDevice)
+                .Select(s => s is Dfu || (s is Arduino arduino && (arduino.IsUno() || arduino.IsMega())))
+                .ToPropertyEx(this, s => s.IsUnoMega);
+            this.WhenAnyValue(x => x.SelectedDevice)
                 .Select(s => s is Arduino arduino && arduino.IsUno())
                 .ToPropertyEx(this, s => s.IsUno);
             this.WhenAnyValue(x => x.SelectedDevice)
@@ -162,6 +165,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         [ObservableAsProperty] public bool IsPico { get; }
         [ObservableAsProperty] public bool Is32U4 { get; }
         [ObservableAsProperty] public bool IsUno { get; }
+        [ObservableAsProperty] public bool IsUnoMega { get; }
         [ObservableAsProperty] public bool IsMega { get; }
         [ObservableAsProperty] public bool IsDfu { get; }
         [ObservableAsProperty] public bool IsGeneric { get; }
@@ -190,7 +194,27 @@ namespace GuitarConfigurator.NetCore.ViewModels
 
         [Reactive] public Board PicoType { get; set; } = Board.Rp2040Boards[0];
 
-        [Reactive] public IConfigurableDevice? SelectedDevice { get; set; }
+        private IConfigurableDevice? _selectedDevice;
+
+        public IConfigurableDevice? SelectedDevice
+        {
+            get => _selectedDevice;
+            set
+            {
+                if (value is Arduino arduino)
+                {
+                    UnoMegaType = arduino.Board.ArdwiinoName switch
+                    {
+                        "uno" => UnoMegaType.Uno,
+                        "mega2560" => UnoMegaType.Mega,
+                        "megaadk" => UnoMegaType.MegaAdk,
+                        _ => UnoMegaType.Uno
+                    };
+                }
+
+                this.RaiseAndSetIfChanged(ref _selectedDevice, value);
+            }
+        }
 
 
         [Reactive] public bool Working { get; set; }
@@ -240,6 +264,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
             {
                 endingPercentage = 100;
             }
+
             var env = environment;
             Programming = true;
             var command = Pio.RunPlatformIo(env, new[] {"run", "--target", "upload"},
