@@ -169,7 +169,7 @@ public class PlatformIo
             var uploading = command.Length > 1;
             var appdataFolder = AssetUtils.GetAppDataFolder();
             var pioFolder = Path.Combine(appdataFolder, "platformio");
-            
+
             var args = new List<string>(command);
             args.Insert(0, _pythonExecutable);
             args.Insert(1, "-m");
@@ -209,7 +209,8 @@ public class PlatformIo
                         var port = await device.GetUploadPortAsync().ConfigureAwait(false);
                         if (device.Is32U4())
                         {
-                            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude", "avrdude.conf");
+                            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages",
+                                "tool-avrdude", "avrdude.conf");
                             await RunPlatformIo("avrdude",
                                 new[]
                                 {
@@ -217,6 +218,7 @@ public class PlatformIo
                                     $"avrdude -p atmega32u4 -C {configFile} -P {port} -c avr109 -e"
                                 }, "", 0, 100, device);
                         }
+
                         Console.WriteLine(port);
                         if (port != null)
                         {
@@ -226,6 +228,7 @@ public class PlatformIo
                     }
                 }
             }
+
             await _semaphore.WaitAsync();
             if (_currentProcess is {HasExited: false})
             {
@@ -258,7 +261,7 @@ public class PlatformIo
             var buffer = new char[1];
             var hasError = false;
             // In detect mode, the pro micro also goes through two separate programming stages.
-            var main = !environment.EndsWith("_usb") && !(device is Arduino arduino && arduino.Is32U4());
+            var main = device?.HasDfuMode() == false && !(device is Arduino arduino && arduino.Is32U4());
             while (!_currentProcess.HasExited)
             {
                 if (state == 0)
