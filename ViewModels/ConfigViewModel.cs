@@ -493,7 +493,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this);
         if (!(IsRhythm && IsController))
         {
-            RhythmType = RhythmType.GuitarHero;
+            _rhythmType = RhythmType.GuitarHero;
         }
         var (extra, types) =
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
