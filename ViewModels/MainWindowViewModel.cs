@@ -334,7 +334,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
                     await Task.Delay(1000);
                     if (arduino.Board.IsGeneric())
                     {
-                        // If a device is generic, then we have no real way of detecting it and must send a detection packet to work out what it is
+                        // If a device is generic, then we have no real way of detecting it and must send a detection packet to work out what it is 
                         var santroller = new Santroller(Pio, port);
                         if (santroller.Valid)
                         {
