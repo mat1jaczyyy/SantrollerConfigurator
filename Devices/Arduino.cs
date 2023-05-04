@@ -86,7 +86,7 @@ public class Arduino : IConfigurableDevice
 
     public void Bootloader()
     {
-        if (!Is32U4() || Board.Name.Contains("Bootloader Mode")) return;
+        if (Is32U4() && Is32U4Bootloader) return;
         var serial = new SerialPort(_port, 1200);
         serial.Open();
         serial.Close();
@@ -171,11 +171,12 @@ public class Arduino : IConfigurableDevice
 
     public Task<string?> GetUploadPortAsync()
     {
-        if (Is32U4() && !Is32U4Bootloader)
+        if (IsPico() || (Is32U4() && !Is32U4Bootloader))
         {
             _arduino32U4Path = new TaskCompletionSource<string?>();
             return _arduino32U4Path.Task;
         }
+        
 
         return Task.FromResult((string?) GetSerialPort());
     }
@@ -196,6 +197,12 @@ public class Arduino : IConfigurableDevice
                 _arduino32U4Path = null;
                 Board = arduino.Board;
                 Is32U4Bootloader = true;
+                break;
+            case PicoDevice pico when IsPico() && _arduino32U4Path != null:
+                Console.WriteLine("Found device with port: " + pico.GetPath());
+                _port = pico.GetPath();
+                _arduino32U4Path.SetResult(pico.GetPath());
+                _arduino32U4Path = null;
                 break;
             case Dfu when !Is32U4():
                 DfuDetected.OnNext(true);

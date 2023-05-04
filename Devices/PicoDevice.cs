@@ -93,6 +93,11 @@ public class PicoDevice : IConfigurableDevice
         return false;
     }
 
+    public bool Is32U4()
+    {
+        return false;
+    }
+
     public string GetPath()
     {
         return _path;

@@ -108,6 +108,11 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         return Board.HasUsbmcu;
     }
 
+    public bool Is32U4()
+    {
+        return Board.Is32U4();
+    }
+
     public bool IsPico()
     {
         return Board.IsPico();

@@ -138,6 +138,11 @@ public class Dfu : IConfigurableDevice
         return true;
     }
 
+    public bool Is32U4()
+    {
+        return false;
+    }
+
     public bool IsGeneric()
     {
         return false;

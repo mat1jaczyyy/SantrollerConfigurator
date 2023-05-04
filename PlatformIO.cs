@@ -205,8 +205,9 @@ public class PlatformIo
                     if (device != null)
                     {
                         Console.WriteLine("Detecting port please wait");
+                        device.Bootloader();
                         var port = await device.GetUploadPortAsync().ConfigureAwait(false);
-                        if (device is Santroller santroller && santroller.Is32U4())
+                        if (device.Is32U4())
                         {
                             var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude", "avrdude.conf");
                             await RunPlatformIo("avrdude",

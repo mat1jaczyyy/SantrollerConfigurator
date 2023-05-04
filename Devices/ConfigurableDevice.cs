@@ -29,4 +29,5 @@ public interface IConfigurableDevice
     void Reconnect();
     void Revert();
     bool HasDfuMode();
+    bool Is32U4();
 }
