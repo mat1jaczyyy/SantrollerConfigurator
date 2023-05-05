@@ -4,9 +4,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Devices;
@@ -26,9 +24,11 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
     {
         this.WhenActivated(disposables =>
         {
+            disposables(ViewModel!.ShowUnpluggedDialog.RegisterHandler(DoShowUnpluggedDialogAsync));
             disposables(ViewModel!.ShowIssueDialog.RegisterHandler(DoShowDialogAsync));
             disposables(ViewModel!.ShowYesNoDialog.RegisterHandler(DoShowYesNoDialogAsync));
             disposables(ViewModel!.ShowBindAllDialog.RegisterHandler(DoShowBindAllDialogAsync));
+            disposables(ViewModel!.RegisterConnections());
             disposables(
                 ViewModel!.WhenAnyValue(x => x.Device).OfType<Santroller>()
                     .ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => s.StartTicking(ViewModel)));
@@ -61,6 +61,18 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
         };
         var result = await dialog.ShowDialog<RaiseIssueWindowViewModel?>((Window) VisualRoot!);
         interaction.SetOutput(result);
+    }
+    private async Task DoShowUnpluggedDialogAsync(
+        InteractionContext<(string yesText, string noText, string text), AreYouSureWindowViewModel> interaction)
+    {
+        var model = new AreYouSureWindowViewModel(interaction.Input.yesText, interaction.Input.noText,
+            interaction.Input.text);
+        var dialog = new UnpluggedWindow()
+        {
+            DataContext = model
+        };
+        await dialog.ShowDialog<AreYouSureWindowViewModel?>((Window) VisualRoot!);
+        interaction.SetOutput(model);
     }
 
     private async Task DoShowYesNoDialogAsync(

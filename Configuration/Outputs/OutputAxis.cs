@@ -25,7 +25,7 @@ public enum OutputAxisCalibrationState
 
 public abstract partial class OutputAxis : Output
 {
-    private const float ProgressWidth = 400;
+    protected const float ProgressWidth = 400;
 
     private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.None;
 
@@ -43,7 +43,7 @@ public abstract partial class OutputAxis : Output
         DeadZone = deadZone;
         this.WhenAnyValue(x => x.Input).Select(i => i is {IsUint: true})
             .ToPropertyEx(this, x => x.InputIsUint);
-        var calibrationWatcher = this.WhenAnyValue(x => x.Input!.RawValue);
+        var calibrationWatcher = this.WhenAnyValue(x => x.Input.RawValue);
         calibrationWatcher.Subscribe(ApplyCalibration);
         this.WhenAnyValue(x => x.ValueRaw).Select(s => s < 0 ? -s : 0)
             .ToPropertyEx(this, x => x.ValueRawLower);
@@ -96,7 +96,7 @@ public abstract partial class OutputAxis : Output
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 
-    public string? CalibrationText => GetCalibrationText();
+    public virtual string? CalibrationText => GetCalibrationText();
 
     private Thickness ComputeDeadZoneMargin((int min, int max, bool trigger, bool inputIsUint, int deadZone) s)
     {
@@ -149,7 +149,7 @@ public abstract partial class OutputAxis : Output
         return new Thickness(left, 0, right, 0);
     }
 
-    private void ApplyCalibration(int rawValue)
+    public virtual void ApplyCalibration(int rawValue)
     {
         switch (_calibrationState)
         {

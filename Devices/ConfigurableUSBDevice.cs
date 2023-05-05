@@ -51,16 +51,16 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     {
         if (device is Arduino arduino2 && arduino2.Board.ArdwiinoName == Board.ArdwiinoName)
         {
-            _bootloaderPath?.SetResult(arduino2.GetSerialPort());
+            _bootloaderPath?.TrySetResult(arduino2.GetSerialPort());
         }
         else if (Board.ArdwiinoName.Contains("pico"))
         {
-            if (device is PicoDevice pico) _bootloaderPath?.SetResult(pico.GetPath());
+            if (device is PicoDevice pico) _bootloaderPath?.TrySetResult(pico.GetPath());
         }
         else if (Board.HasUsbmcu && device is Dfu {Board.HasUsbmcu: true} dfu)
         {
             BootloaderDevice = dfu;
-            _bootloaderPath?.SetResult(dfu.Board.Environment);
+            _bootloaderPath?.TrySetResult(dfu.Board.Environment);
         }
     }
 

@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using Avalonia;
 using Avalonia.Media;
+using CommunityToolkit.Mvvm.Input;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -12,7 +15,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
-public class DrumAxis : OutputAxis
+public partial class DrumAxis : OutputAxis
 {
     private static readonly Dictionary<DrumAxisType, StandardButtonType> ButtonsXbox360 = new()
     {
@@ -78,6 +81,7 @@ public class DrumAxis : OutputAxis
         {DrumAxisType.Kick2, "report->kickVelocity"}
     };
 
+    private bool _calibrating;
     private const StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
     private const StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
 
@@ -89,6 +93,9 @@ public class DrumAxis : OutputAxis
         Threshold = threshold;
         Debounce = debounce;
         UpdateDetails();
+        this
+            .WhenAnyValue(x => x.Threshold)
+            .Select(ComputeDrumMargin).ToPropertyEx(this, x => x.ComputedDrumMargin);
     }
 
     public DrumAxisType Type { get; }
@@ -105,10 +112,18 @@ public class DrumAxis : OutputAxis
     [Reactive] public int Threshold { get; set; }
 
     [Reactive] public int Debounce { get; set; }
+    [ObservableAsProperty] public Thickness ComputedDrumMargin { get; }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return EnumToStringConverter.Convert(Type);
+    }
+    
+    
+    private Thickness ComputeDrumMargin(int threshold)
+    {
+        var val = (float)threshold / ushort.MaxValue * ProgressWidth;
+        return new Thickness(val - 5, 0, val + 5, 0);
     }
 
 
@@ -276,11 +291,12 @@ public class DrumAxis : OutputAxis
             ";
         }
 
+        var generated = Input.IsUint ? Input.Generate(mode) : $"(({Input.Generate(mode)}) + INT16_MAX)";
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
         {{
-            uint16_t val_real = {GenerateAssignment(mode, false, false, false)};
+            uint16_t val_real = {generated};
             if (val_real) {{
                 if (val_real > {Threshold}) {{
                     {reset}
@@ -292,6 +308,34 @@ public class DrumAxis : OutputAxis
                 {outputButtons}
             }}
         }}";
+    }
+
+
+    public override string? CalibrationText => _calibrating ? "Hit the drum" : null;
+
+    [RelayCommand]
+    private void CalibrateDrums()
+    {
+        _calibrating = !_calibrating;
+        this.RaisePropertyChanged(nameof(CalibrationText));
+    }
+
+    public override void ApplyCalibration(int rawValue)
+    {
+        if (!Input.IsUint)
+        {
+            rawValue += short.MaxValue;
+        }
+        if (_calibrating)
+        {
+            Threshold = Math.Max(rawValue, Threshold);
+        }
+    }
+
+    [RelayCommand]
+    public void ResetThreshold()
+    {
+        Threshold = 0;
     }
 
     protected override string MinCalibrationText()

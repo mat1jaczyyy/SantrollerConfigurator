@@ -68,25 +68,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public bool SupportsReset { get; }
 
+    private bool _reverting;
+
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
         Device = device;
         Main = screen;
-        Main.AvailableDevices.Connect().Subscribe(s =>
-        {
-            foreach (var change in s)
-            {
-                switch (change.Reason)
-                {
-                    case ListChangeReason.Add:
-                        AddDevice(change.Item.Current);
-                        break;
-                    case ListChangeReason.Remove:
-                        RemoveDevice(change.Item.Current);
-                        break;
-                }
-            }
-        });
         if (device is Santroller santroller)
         {
             LocalAddress = santroller.GetBluetoothAddress();
@@ -98,13 +85,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         HostScreen = screen;
         Microcontroller = device.GetMicrocontroller(this);
-        ShowIssueDialog = new Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>();
-        ShowUnoShortDialog = new Interaction<Arduino, ShowUnoShortWindowViewModel?>();
-        ShowYesNoDialog =
-            new Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>();
-        ShowBindAllDialog =
-            new Interaction<(ConfigViewModel model, Output output, DirectInput
-                input), BindAllWindowViewModel>();
         BindAllCommand = ReactiveCommand.CreateFromTask(BindAllAsync);
 
         WriteConfigCommand = ReactiveCommand.CreateFromObservable(Write,
@@ -163,20 +143,49 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 ShowUnoDialog = true;
             }
         }
+
         if (Main is {IsUno: false, IsMega: false}) return;
         Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output));
         Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeTx, UnoPinTypeTxPin, DevicePinMode.Output));
     }
 
-    public Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?> ShowIssueDialog { get; }
+    public IDisposable RegisterConnections()
+    {
+        return
+            Main.AvailableDevices.Connect().Subscribe(s =>
+            {
+                foreach (var change in s)
+                {
+                    switch (change.Reason)
+                    {
+                        case ListChangeReason.Add:
+                            AddDevice(change.Item.Current);
+                            break;
+                        case ListChangeReason.Remove:
+                            RemoveDevice(change.Item.Current);
+                            break;
+                    }
+                }
+            });
+        ;
+    }
 
-    public Interaction<Arduino, ShowUnoShortWindowViewModel?> ShowUnoShortDialog { get; }
+    public Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>
+        ShowIssueDialog { get; } =
+        new();
 
-    public Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel> ShowYesNoDialog { get; }
+    public Interaction<Arduino, ShowUnoShortWindowViewModel?> ShowUnoShortDialog { get; } = new();
+
+    public Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>
+        ShowYesNoDialog { get; } = new();
+
+    public Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>
+        ShowUnpluggedDialog { get; } =
+        new();
 
     public Interaction<(ConfigViewModel model, Output output, DirectInput input),
             BindAllWindowViewModel>
-        ShowBindAllDialog { get; }
+        ShowBindAllDialog { get; } = new();
 
     public ICommand BindAllCommand { get; }
 
@@ -495,6 +504,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             _rhythmType = RhythmType.GuitarHero;
         }
+
         var (extra, types) =
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
         Bindings.RemoveMany(extra);
@@ -1041,6 +1051,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 "The following action will revert your device back to an Arduino, are you sure you want to do this?"))
             .ToTask();
         if (!yesNo.Response) return;
+        _reverting = true;
         Device.Revert();
         await Main.GoBack.Execute();
     }
@@ -1331,6 +1342,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private void RemoveDevice(IConfigurableDevice device)
     {
+        if (!Main.Working && !_reverting)
+        {
+            ShowUnpluggedDialog.Handle(("", "", "")).ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(s => Main.GoBack.Execute(new Unit()));
+        }
     }
 
     public void Update(byte[] rfRaw, byte[] btRaw)

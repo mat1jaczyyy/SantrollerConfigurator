@@ -71,15 +71,14 @@ public abstract class Input : ReactiveObject, IDisposable
         if (_image != null) return _image;
 
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
-        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
         try
         {
-            var asset = assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{GetImagePath()}"));
+            var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{GetImagePath()}"));
             _image = new Bitmap(asset);
         }
         catch (FileNotFoundException)
         {
-            var asset = assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Generic.png"));
+            var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Generic.png"));
             _image = new Bitmap(asset);
         }
 

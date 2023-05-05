@@ -41,7 +41,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel> ShowYesNoDialog
         {
             get;
-        }
+        } = new();
 
         private static Func<DeviceInputType, bool> CreateFilter(IConfigurableDevice? s)
         {
@@ -51,10 +51,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
         public MainWindowViewModel()
         {
             Message = "Connected";
+            GoBack = ReactiveCommand.CreateFromObservable(() => Router.NavigateAndReset.Execute(Router.NavigationStack.First()));
             ProgressbarColor = "#FF0078D7";
             Working = true;
-            ShowYesNoDialog =
-                new Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>();
             AssetUtils.InitNativeLibrary();
             _allDeviceInputTypes.AddRange(Enum.GetValues<DeviceInputType>());
             _allDeviceInputTypes
@@ -65,6 +64,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
             _manager = new ConfigurableUsbDeviceManager(this);
             ConfigureCommand = ReactiveCommand.CreateFromObservable(
                 () => Router.Navigate.Execute(new ConfigViewModel(this, SelectedDevice!))
+            );
+            InitialConfigureCommand = ReactiveCommand.CreateFromObservable(
+                () => Router.Navigate.Execute(new InitialConfigViewModel(this, new ConfigViewModel(this, SelectedDevice!)))
             );
             AvailableDevices.Connect().Bind(out var devices).Subscribe();
             AvailableDevices.Connect().Subscribe(s =>
@@ -152,9 +154,10 @@ namespace GuitarConfigurator.NetCore.ViewModels
         }
 
         public ReactiveCommand<Unit, IRoutableViewModel> ConfigureCommand { get; }
+        public ReactiveCommand<Unit, IRoutableViewModel> InitialConfigureCommand { get; }
 
         // The command that navigates a user back.
-        public ReactiveCommand<Unit, IRoutableViewModel?> GoBack => Router.NavigateBack;
+        public ReactiveCommand<Unit, IRoutableViewModel> GoBack { get; }
 
         internal SourceList<IConfigurableDevice> AvailableDevices { get; } = new();
 

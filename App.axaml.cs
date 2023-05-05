@@ -23,6 +23,7 @@ public class App : Application
             throw new Exception("Invalid ApplicationLifetime");
         Locator.CurrentMutable.RegisterConstant<IScreen>(new MainWindowViewModel());
         Locator.CurrentMutable.Register<IViewFor<ConfigViewModel>>(() => new ConfigView());
+        Locator.CurrentMutable.Register<IViewFor<InitialConfigViewModel>>(() => new InitialConfigureView());
         Locator.CurrentMutable.Register<IViewFor<MainViewModel>>(() => new MainView());
         lifetime.MainWindow = new MainWindow {DataContext = Locator.Current.GetService<IScreen>()};
         lifetime.MainWindow.RequestedThemeVariant = ThemeVariant.Dark;

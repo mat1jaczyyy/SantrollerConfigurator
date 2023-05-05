@@ -193,7 +193,7 @@ public class Arduino : IConfigurableDevice
             case Arduino arduino when Is32U4() && _arduino32U4Path != null && arduino.Is32U4():
                 Console.WriteLine("Found device with port: " + arduino.GetSerialPort());
                 _port = arduino.GetSerialPort();
-                _arduino32U4Path.SetResult(arduino.GetSerialPort());
+                _arduino32U4Path.TrySetResult(arduino.GetSerialPort());
                 _arduino32U4Path = null;
                 Board = arduino.Board;
                 Is32U4Bootloader = true;
@@ -201,7 +201,7 @@ public class Arduino : IConfigurableDevice
             case PicoDevice pico when IsPico() && _arduino32U4Path != null:
                 Console.WriteLine("Found device with port: " + pico.GetPath());
                 _port = pico.GetPath();
-                _arduino32U4Path.SetResult(pico.GetPath());
+                _arduino32U4Path.TrySetResult(pico.GetPath());
                 _arduino32U4Path = null;
                 break;
             case Dfu when !Is32U4():
