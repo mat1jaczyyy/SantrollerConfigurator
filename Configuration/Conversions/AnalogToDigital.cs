@@ -7,24 +7,49 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Conversions;
 
 public class AnalogToDigital : Input
 {
+    private AnalogToDigitalType _analogToDigitalType;
     public AnalogToDigital(Input child, AnalogToDigitalType analogToDigitalType, int threshold,
         ConfigViewModel model) : base(model)
     {
         Child = child;
-        AnalogToDigitalType = analogToDigitalType;
+        _analogToDigitalType = analogToDigitalType;
         Threshold = threshold;
-        IsAnalog = Child.IsAnalog;
+        IsAnalog = false;
         this.WhenAnyValue(x => x.Child.RawValue).ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(s => RawValue = Calculate(s));
     }
 
     public Input Child { get; }
-    public AnalogToDigitalType AnalogToDigitalType { get; set; }
+    public AnalogToDigitalType AnalogToDigitalType
+    {
+        get=>_analogToDigitalType;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _analogToDigitalType, value);
+            switch (_analogToDigitalType) 
+            {
+                case AnalogToDigitalType.JoyLow:
+                    Threshold = short.MaxValue / 2;
+                    break;
+                case AnalogToDigitalType.JoyHigh:
+                    Threshold = short.MaxValue / 2;
+                    break;
+                case AnalogToDigitalType.Trigger:
+                    Threshold = ushort.MaxValue / 2;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    [Reactive]
     public int Threshold { get; set; }
     public override InputType? InputType => Child.InputType;
     public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes => Enum.GetValues<AnalogToDigitalType>();

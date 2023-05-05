@@ -100,7 +100,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
         this.WhenAnyValue(x => x.Input!.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
             .ToPropertyEx(this, x => x.ValueRaw);
         this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
-            .Select(s => s.Item3 || s.Item2.IsAnalog == true ? 1 : (s.Item1 == 0 ? 0 : 0.35) + 0.65)
+            .Select(s => s.Item3 || s.Item2.IsAnalog ? 1 : (s.Item1 == 0 ? 0 : 0.35) + 0.65)
             .ToPropertyEx(this, s => s.ImageOpacity);
         this.WhenAnyValue(x => x.Enabled)
             .Select(s => s ? 1 : 0.5)
@@ -229,7 +229,8 @@ public abstract partial class Output : ReactiveObject, IDisposable
             (this is not GuitarAxis {Type: GuitarAxisType.Slider} ||
              s is InputType.Gh5NeckInput or InputType.WtNeckInput) &&
             (s is not InputType.MultiplexerInput || Model.IsPico) &&
-            (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput && s is not InputType.UsbHostInput);
+            (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput &&
+            s is not InputType.UsbHostInput);
 
     // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public Bitmap? Image { get; }
@@ -441,7 +442,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 input = new DjInput(djInputType.Value, Model);
                 break;
             case InputType.TurntableInput when Input.InnermostInput() is DjInput dj:
-                djInputType ??= DjInputType.LeftGreen;
+                djInputType ??= dj.Input;
                 input = new DjInput(djInputType.Value, Model, dj.Sda, dj.Scl);
                 break;
             case InputType.Gh5NeckInput when Input.InnermostInput() is not Gh5NeckInput:
@@ -454,7 +455,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 input = new Gh5NeckInput(gh5NeckInputType.Value, Model);
                 break;
             case InputType.Gh5NeckInput when Input.InnermostInput() is Gh5NeckInput gh5:
-                gh5NeckInputType ??= Gh5NeckInputType.Green;
+                gh5NeckInputType ??= gh5.Input;
                 input = new Gh5NeckInput(gh5NeckInputType.Value, Model, gh5.Sda, gh5.Scl);
                 break;
             case InputType.WtNeckInput when Input.InnermostInput() is not GhWtTapInput:
@@ -469,7 +470,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
                     Model.Microcontroller.GetFirstDigitalPin());
                 break;
             case InputType.WtNeckInput when Input.InnermostInput() is GhWtTapInput wt:
-                ghWtInputType ??= GhWtInputType.TapGreen;
+                ghWtInputType ??= wt.Input;
                 input = new GhWtTapInput(ghWtInputType.Value, Model, wt.Pin, wt.PinS0, wt.PinS1, wt.PinS2);
                 break;
             case InputType.WiiInput when Input.InnermostInput() is not WiiInput:
@@ -477,7 +478,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 input = new WiiInput(wiiInput.Value, Model);
                 break;
             case InputType.WiiInput when Input.InnermostInput() is WiiInput wii:
-                wiiInput ??= WiiInputType.ClassicA;
+                wiiInput ??= wii.Input;
                 input = new WiiInput(wiiInput.Value, Model, wii.Sda, wii.Scl);
                 break;
             case InputType.Ps2Input when Input.InnermostInput() is not Ps2Input:
@@ -485,7 +486,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 input = new Ps2Input(ps2InputType.Value, Model);
                 break;
             case InputType.Ps2Input when Input.InnermostInput() is Ps2Input ps2:
-                ps2InputType ??= Ps2InputType.Cross;
+                ps2InputType ??= ps2.Input;
                 input = new Ps2Input(ps2InputType.Value, Model, ps2.Miso, ps2.Mosi, ps2.Sck,
                     ps2.Att,
                     ps2.Ack);
@@ -501,10 +502,15 @@ public abstract partial class Output : ReactiveObject, IDisposable
                 Input = input;
                 break;
             case true when this is OutputButton:
-                var oldThreshold = 0;
-                if (Input is AnalogToDigital atd) oldThreshold = atd.Threshold;
+                var oldType = input.IsUint ? AnalogToDigitalType.Trigger : AnalogToDigitalType.JoyHigh;
+                var oldThreshold = input.IsUint ? ushort.MaxValue / 2 : short.MaxValue / 2;
+                if (Input is AnalogToDigital atd)
+                {
+                    oldThreshold = atd.Threshold;
+                    oldType = atd.AnalogToDigitalType;
+                }
 
-                Input = new AnalogToDigital(input, AnalogToDigitalType.JoyHigh, oldThreshold, Model);
+                Input = new AnalogToDigital(input, oldType, oldThreshold, Model);
                 break;
             case false when this is GuitarAxis {Type: GuitarAxisType.Tilt}:
                 Input = new DigitalToAnalog(input, Model);

@@ -67,6 +67,7 @@ public class MacroInput : Input
         get => Child2.InputType;
         set => SetInput(value, false, null, null, null, null, null);
     }
+
     public WiiInputType WiiInputType2
     {
         get => (Child2.InnermostInput() as WiiInput)?.Input ?? WiiInputType.ClassicA;
@@ -91,6 +92,7 @@ public class MacroInput : Input
     [ObservableAsProperty] public bool IsPs21 { get; }
     [ObservableAsProperty] public bool IsDj2 { get; }
     [ObservableAsProperty] public bool IsWii2 { get; }
+
     [ObservableAsProperty] public bool IsPs22 { get; }
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
@@ -180,8 +182,9 @@ public class MacroInput : Input
         if (input.IsAnalog)
         {
             input = new AnalogToDigital(input, input.IsUint ? AnalogToDigitalType.Trigger : AnalogToDigitalType.JoyLow,
-                0, Model);
+                input.IsUint ? ushort.MaxValue / 2 : short.MaxValue / 2, Model);
         }
+
         if (isChild1)
         {
             Child1 = input;
@@ -207,7 +210,11 @@ public class MacroInput : Input
 
     public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
 
-    public IEnumerable<InputType> InputTypes => new [] {Types.InputType.AnalogPinInput, Types.InputType.DigitalPinInput, Types.InputType.WiiInput, Types.InputType.Ps2Input, Types.InputType.TurntableInput};
+    public IEnumerable<InputType> InputTypes => new[]
+    {
+        Types.InputType.AnalogPinInput, Types.InputType.DigitalPinInput, Types.InputType.WiiInput,
+        Types.InputType.Ps2Input, Types.InputType.TurntableInput
+    };
 
 
     [Reactive] public Input Child1 { get; set; }
