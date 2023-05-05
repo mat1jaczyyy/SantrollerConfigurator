@@ -36,8 +36,8 @@ public class Ardwiino : ConfigurableUsbDevice
     private const int XboxAxisCount = 6;
     private const int XboxTriggerCount = 2;
 
-    private const ControllerAxisType XboxWhammy = ControllerAxisType.XboxRX;
-    private const ControllerAxisType XboxTilt = ControllerAxisType.XboxRY;
+    private const ControllerAxisType XboxWhammy = ControllerAxisType.XboxRx;
+    private const ControllerAxisType XboxTilt = ControllerAxisType.XboxRy;
 
     public const ushort SerialArdwiinoRevision = 0x3122;
     // public static readonly FilterDeviceDefinition ArdwiinoDeviceFilter = new(label: "Ardwiino", classGuid: Santroller.ControllerGUID);
@@ -62,10 +62,10 @@ public class Ardwiino : ConfigurableUsbDevice
     private static readonly Dictionary<ControllerAxisType, StandardAxisType> AxisToStandard =
         new()
         {
-            {ControllerAxisType.XboxLX, StandardAxisType.LeftStickX},
-            {ControllerAxisType.XboxLY, StandardAxisType.LeftStickY},
-            {ControllerAxisType.XboxRX, StandardAxisType.RightStickX},
-            {ControllerAxisType.XboxRY, StandardAxisType.RightStickY},
+            {ControllerAxisType.XboxLx, StandardAxisType.LeftStickX},
+            {ControllerAxisType.XboxLy, StandardAxisType.LeftStickY},
+            {ControllerAxisType.XboxRx, StandardAxisType.RightStickX},
+            {ControllerAxisType.XboxRy, StandardAxisType.RightStickY},
             {ControllerAxisType.XboxLt, StandardAxisType.LeftTrigger},
             {ControllerAxisType.XboxRt, StandardAxisType.RightTrigger}
         };
@@ -213,8 +213,8 @@ public class Ardwiino : ConfigurableUsbDevice
         // Patches to all
         if (version < 9)
             // For versions below version 9, r_x is inverted from how we use it now
-            config.all.pins.axis![(byte) ControllerAxisType.XboxRX].inverted =
-                (byte) (config.all.pins.axis[(int) ControllerAxisType.XboxRX].inverted == 0 ? 1 : 0);
+            config.all.pins.axis![(byte) ControllerAxisType.XboxRx].inverted =
+                (byte) (config.all.pins.axis[(int) ControllerAxisType.XboxRx].inverted == 0 ? 1 : 0);
 
         // Read in the rest of the data, in the format that it is in
         if (version == 16 || version == 17)
@@ -258,8 +258,8 @@ public class Ardwiino : ConfigurableUsbDevice
         else if (version > 10)
         {
             var configOld = StructTools.RawDeserialize<Configuration11>(data, 0);
-            config.axisScale.axis[(int) ControllerAxisType.XboxRX].multiplier = configOld.whammy.multiplier;
-            config.axisScale.axis[(int) ControllerAxisType.XboxRX].offset = (short) configOld.whammy.offset;
+            config.axisScale.axis[(int) ControllerAxisType.XboxRx].multiplier = configOld.whammy.multiplier;
+            config.axisScale.axis[(int) ControllerAxisType.XboxRx].offset = (short) configOld.whammy.offset;
             config.pinsSP = configOld.pinsSP;
             config.rf = configOld.rf;
         }
@@ -296,7 +296,7 @@ public class Ardwiino : ConfigurableUsbDevice
         DeviceControllerType deviceType;
         var emulationType = EmulationType.Controller;
         var rhythmType = RhythmType.GuitarHero;
-        if (config.all.main.fretLEDMode == 2) ledType = LedType.APA102_BGR;
+        if (config.all.main.fretLEDMode == 2) ledType = LedType.Apa102Bgr;
 
         if ((config.all.main.subType >= (int) SubType.KeyboardGamepad &&
              config.all.main.subType <= (int) SubType.KeyboardRockBandDrums) ||
@@ -699,10 +699,10 @@ public class Ardwiino : ConfigurableUsbDevice
     {
         XboxLt,
         XboxRt,
-        XboxLX,
-        XboxLY,
-        XboxRX,
-        XboxRY
+        XboxLx,
+        XboxLy,
+        XboxRx,
+        XboxRy
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

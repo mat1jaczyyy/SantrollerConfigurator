@@ -10,7 +10,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 {
-    protected readonly SpiConfig _spiConfig;
+    protected readonly SpiConfig SpiConfig;
 
     protected CombinedSpiOutput(ConfigViewModel model, string spiType, uint spiFreq,
         bool cpol,
@@ -21,7 +21,7 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
         var config = Model.Microcontroller.GetSpiForType(SpiType);
         if (config != null)
         {
-            _spiConfig = config;
+            SpiConfig = config;
         }
         else
         {
@@ -33,13 +33,13 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
                 sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
             }
 
-            _spiConfig = Model.Microcontroller.AssignSpiPins(model, SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha,
+            SpiConfig = Model.Microcontroller.AssignSpiPins(model, SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha,
                 msbFirst, spiFreq)!;
         }
 
-        this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
-        this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
-        this.WhenAnyValue(x => x._spiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged(nameof(Sck)));
+        this.WhenAnyValue(x => x.SpiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
+        this.WhenAnyValue(x => x.SpiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
+        this.WhenAnyValue(x => x.SpiConfig.Sck).Subscribe(_ => this.RaisePropertyChanged(nameof(Sck)));
     }
 
     public bool BindableSpi { get; }
@@ -48,20 +48,20 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 
     public int Mosi
     {
-        get => _spiConfig.Mosi;
-        set => _spiConfig.Mosi = value;
+        get => SpiConfig.Mosi;
+        set => SpiConfig.Mosi = value;
     }
 
     public int Miso
     {
-        get => _spiConfig.Miso;
-        set => _spiConfig.Miso = value;
+        get => SpiConfig.Miso;
+        set => SpiConfig.Miso = value;
     }
 
     public int Sck
     {
-        get => _spiConfig.Sck;
-        set => _spiConfig.Sck = value;
+        get => SpiConfig.Sck;
+        set => SpiConfig.Sck = value;
     }
 
     public List<int> AvailableMosiPins => GetMosiPins();

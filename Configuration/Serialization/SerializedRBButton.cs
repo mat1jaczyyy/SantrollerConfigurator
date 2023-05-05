@@ -8,14 +8,14 @@ using ProtoBuf;
 namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 
 [ProtoContract(SkipConstructor = true)]
-public class SerializedRBButton : SerializedOutput
+public class SerializedRbButton : SerializedOutput
 {
-    public SerializedRBButton(SerializedInput input, Color ledOn, Color ledOff, byte[] ledIndex, byte debounce,
+    public SerializedRbButton(SerializedInput input, Color ledOn, Color ledOff, byte[] ledIndex, byte debounce,
         InstrumentButtonType type)
     {
         Input = input;
-        LedOn = ledOn.ToUint32();
-        LedOff = ledOff.ToUint32();
+        LedOn = ledOn.ToUInt32();
+        LedOff = ledOff.ToUInt32();
         LedIndex = ledIndex;
         Debounce = debounce;
         Type = type;

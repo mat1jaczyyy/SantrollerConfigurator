@@ -93,9 +93,9 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         return Board.IsMini();
     }
     
-    public bool IsESP32()
+    public bool IsEsp32()
     {
-        return Board.IsESP32();
+        return Board.IsEsp32();
     }
 
     public void Reconnect()

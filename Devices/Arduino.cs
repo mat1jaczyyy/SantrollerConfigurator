@@ -146,7 +146,7 @@ public class Arduino : IConfigurableDevice
         return Board.IsMini();
     }
 
-    public bool IsESP32()
+    public bool IsEsp32()
     {
         return false;
     }

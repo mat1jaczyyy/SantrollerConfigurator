@@ -14,8 +14,8 @@ public class SerializedKeyboardButton : SerializedOutput
         Key type)
     {
         Input = input;
-        LedOn = ledOn.ToUint32();
-        LedOff = ledOff.ToUint32();
+        LedOn = ledOn.ToUInt32();
+        LedOff = ledOff.ToUInt32();
         Debounce = debounce;
         Type = type;
         LedIndex = ledIndex;

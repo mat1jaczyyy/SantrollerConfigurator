@@ -56,7 +56,7 @@
                             <ComboBoxItem>No supported device found</ComboBoxItem>
                         </ComboBox>
                         <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.Devices.Count}"
-                                  Items="{Binding Main.Devices}"
+                                  ItemsSource="{Binding Main.Devices}"
                                   SelectedItem="{Binding Main.SelectedDevice}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -75,7 +75,7 @@
                             </Label>
                             <ComboBox HorizontalAlignment="Stretch"
                                       SelectedItem="{Binding Main.UnoMegaType}"
-                                      Items="{Binding Main.UnoMegaTypes}"
+                                      ItemsSource="{Binding Main.UnoMegaTypes}"
                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                         </StackPanel>
                         <StackPanel IsVisible="{Binding Main.Is32U4}" Orientation="Horizontal">
@@ -86,7 +86,7 @@
                             </Label>
                             <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.Is32U4}"
                                       SelectedItem="{Binding Main.Arduino32U4Type}"
-                                      Items="{Binding Main.Arduino32U4Types}"
+                                      ItemsSource="{Binding Main.Arduino32U4Types}"
                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                         </StackPanel>
                         <StackPanel IsVisible="{Binding Main.IsGeneric}" Orientation="Horizontal">
@@ -97,7 +97,7 @@
                             </Label>
                             <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsGeneric}"
                                       SelectedItem="{Binding Main.AvrType}"
-                                      Items="{Binding Main.AvrTypes}"
+                                      ItemsSource="{Binding Main.AvrTypes}"
                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                         </StackPanel>
                         <StackPanel IsVisible="{Binding Main.IsPico}" Orientation="Horizontal">
@@ -108,7 +108,7 @@
                             </Label>
                             <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsPico}"
                                       SelectedItem="{Binding Main.PicoType}"
-                                      Items="{Binding Main.PicoTypes}">
+                                      ItemsSource="{Binding Main.PicoTypes}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Name}" />
@@ -124,7 +124,7 @@
                             </Label>
                             <ComboBox HorizontalAlignment="Stretch"
                                       SelectedItem="{Binding Main.DeviceInputType}"
-                                      Items="{Binding Main.DeviceInputTypes}"
+                                      ItemsSource="{Binding Main.DeviceInputTypes}"
                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                         </StackPanel>
                     </StackPanel>

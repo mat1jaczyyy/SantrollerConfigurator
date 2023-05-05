@@ -6,10 +6,10 @@ namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public abstract class TwiConfig : PinConfig
 {
-    protected int _clock;
-    protected int _scl;
-    protected int _sda;
-    protected string _type;
+    private int _clock;
+    private int _scl;
+    private int _sda;
+    private string _type;
 
     protected TwiConfig(ConfigViewModel model, string type, int sda, int scl, int clock) : base(model)
     {

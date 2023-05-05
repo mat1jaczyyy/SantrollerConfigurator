@@ -15,8 +15,8 @@ public class SerializedMouseAxis : SerializedOutput
         int deadzone)
     {
         Input = input;
-        LedOn = ledOn.ToUint32();
-        LedOff = ledOff.ToUint32();
+        LedOn = ledOn.ToUInt32();
+        LedOff = ledOff.ToUInt32();
         Min = min;
         Max = max;
         Deadzone = deadzone;

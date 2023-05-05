@@ -8,12 +8,12 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 public enum LedType
 {
     None,
-    APA102_RGB,
-    APA102_RBG,
-    APA102_GRB,
-    APA102_GBR,
-    APA102_BRG,
-    APA102_BGR
+    Apa102Rgb,
+    Apa102Rbg,
+    Apa102Grb,
+    Apa102Gbr,
+    Apa102Brg,
+    Apa102Bgr
 }
 
 public static class LedTypeMethods
@@ -22,12 +22,12 @@ public static class LedTypeMethods
     {
         return type switch
         {
-            LedType.APA102_RGB => new[] {color.R, color.G, color.B},
-            LedType.APA102_RBG => new[] {color.R, color.B, color.G},
-            LedType.APA102_GRB => new[] {color.G, color.R, color.B},
-            LedType.APA102_GBR => new[] {color.G, color.B, color.R},
-            LedType.APA102_BRG => new[] {color.B, color.R, color.G},
-            LedType.APA102_BGR => new[] {color.B, color.G, color.R},
+            LedType.Apa102Rgb => new[] {color.R, color.G, color.B},
+            LedType.Apa102Rbg => new[] {color.R, color.B, color.G},
+            LedType.Apa102Grb => new[] {color.G, color.R, color.B},
+            LedType.Apa102Gbr => new[] {color.G, color.B, color.R},
+            LedType.Apa102Brg => new[] {color.B, color.R, color.G},
+            LedType.Apa102Bgr => new[] {color.B, color.G, color.R},
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
@@ -36,12 +36,12 @@ public static class LedTypeMethods
     {
         return type switch
         {
-            LedType.APA102_RGB => new[] {r, g, b},
-            LedType.APA102_RBG => new[] {r, b, g},
-            LedType.APA102_GRB => new[] {g, r, b},
-            LedType.APA102_GBR => new[] {g, b, r},
-            LedType.APA102_BRG => new[] {b, r, g},
-            LedType.APA102_BGR => new[] {b, g, r},
+            LedType.Apa102Rgb => new[] {r, g, b},
+            LedType.Apa102Rbg => new[] {r, b, g},
+            LedType.Apa102Grb => new[] {g, r, b},
+            LedType.Apa102Gbr => new[] {g, b, r},
+            LedType.Apa102Brg => new[] {b, r, g},
+            LedType.Apa102Bgr => new[] {b, g, r},
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

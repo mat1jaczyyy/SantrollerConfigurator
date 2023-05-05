@@ -350,9 +350,9 @@ public class Santroller : IConfigurableDevice
         return Board.IsMini();
     }
 
-    public bool IsESP32()
+    public bool IsEsp32()
     {
-        return Board.IsESP32();
+        return Board.IsEsp32();
     }
 
     public bool Is32U4()
@@ -424,7 +424,7 @@ public class Santroller : IConfigurableDevice
     public void Revert()
     {
         // No revert for esp32 or mini since they are always in a programmable state
-        if (IsESP32() || IsMini())
+        if (IsEsp32() || IsMini())
         {
             return;
         }

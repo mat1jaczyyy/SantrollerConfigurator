@@ -74,7 +74,7 @@ public class Ps3Axis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedPS3Axis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
+        return new SerializedPs3Axis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
             DeadZone);
     }
 

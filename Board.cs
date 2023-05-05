@@ -258,7 +258,7 @@ public struct Board
         return MiniBoards.Contains(this);
     }
     
-    public bool IsESP32()
+    public bool IsEsp32()
     {
         //TODO: this
         return false;

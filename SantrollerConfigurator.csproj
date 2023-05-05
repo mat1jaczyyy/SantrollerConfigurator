@@ -38,14 +38,14 @@
         <AvaloniaResource Include="Assets\platformio.version" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
-        <PackageReference Include="Microsoft.Net.ILLink.Tasks" Version="8.0.100-1.22612.2" />
-        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.0.999-cibuild0031892-beta" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.999-cibuild0031892-beta" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
+        <PackageReference Include="Microsoft.Net.ILLink.Tasks" Version="8.0.100-1.23067.1" />
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.0.999-cibuild0034274-beta" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.999-cibuild0034274-beta" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.999-cibuild0031892-beta" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.999-cibuild0031892-beta" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.999-cibuild0031892-beta" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.999-cibuild0034206-beta" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.999-cibuild0034274-beta" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.999-cibuild0034274-beta" />
         <PackageReference Include="Humanizer" Version="2.14.1" />
         <PackageReference Include="Joveler.Compression.XZ" Version="4.2.1" />
         <PackageReference Include="LibUsbDotNet" Version="2.2.55" />
@@ -57,11 +57,11 @@
         </PackageReference>
         <PackageReference Include="Mono.Posix.NETStandard" Version="5.20.1-preview" />
         <PackageReference Include="Nefarius.Utilities.DeviceManagement" Version="3.9.255" />
-        <PackageReference Include="protobuf-net" Version="3.2.0" />
+        <PackageReference Include="protobuf-net" Version="3.2.16" />
         <PackageReference Include="ReactiveUI.Fody" Version="18.4.34" />
-        <PackageReference Include="System.IO.Ports" Version="8.0.0-preview.1.23110.8" />
+        <PackageReference Include="System.IO.Ports" Version="8.0.0-preview.5.23254.7" />
         <PackageReference Include="SemanticVersioning" Version="2.0.2" />
-        <PackageReference Include="System.Text.Json" Version="8.0.0-preview.1.23110.8" />
+        <PackageReference Include="System.Text.Json" Version="8.0.0-preview.5.23254.7" />
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Views\UnoShortWindow.axaml.cs">

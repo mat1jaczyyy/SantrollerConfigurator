@@ -15,5 +15,5 @@ public class AvrSpiConfig : SpiConfig
 
     public override string Definition => "GC_SPI";
     protected override bool Reassignable => false;
-    public override IEnumerable<int> Pins => new List<int> {_mosi, _miso, _sck, _ss};
+    public override IEnumerable<int> Pins => new List<int> {Mosi, Miso, Sck, _ss};
 }

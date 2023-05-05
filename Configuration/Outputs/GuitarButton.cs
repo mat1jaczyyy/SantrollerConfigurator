@@ -116,6 +116,6 @@ public class GuitarButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedRBButton(Input!.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);
+        return new SerializedRbButton(Input!.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);
     }
 }

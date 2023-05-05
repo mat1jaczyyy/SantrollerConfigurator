@@ -115,7 +115,7 @@ public class Dfu : IConfigurableDevice
         return false;
     }
 
-    public bool IsESP32()
+    public bool IsEsp32()
     {
         return false;
     }

@@ -11,11 +11,11 @@ public abstract class SpiConfig : PinConfig
     private readonly bool _cpol;
     private readonly bool _msbfirst;
 
-    protected int _miso;
+    private int _miso;
 
-    protected int _mosi;
+    private int _mosi;
 
-    protected int _sck;
+    private int _sck;
 
     protected SpiConfig(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol, bool cpha,
         bool msbfirst, uint clock) : base(model)

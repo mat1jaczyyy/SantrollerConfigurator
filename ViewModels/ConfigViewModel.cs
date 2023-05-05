@@ -146,14 +146,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.KeyboardMouse)
             .ToPropertyEx(this, x => x.IsKeyboard);
         this.WhenAnyValue(x => x.LedType)
-            .Select(x => x is LedType.APA102_BGR or LedType.APA102_BRG or LedType.APA102_GBR or LedType.APA102_GRB
-                or LedType.APA102_RBG or LedType.APA102_RGB)
+            .Select(x => x is LedType.Apa102Bgr or LedType.Apa102Brg or LedType.Apa102Gbr or LedType.Apa102Grb
+                or LedType.Apa102Rbg or LedType.Apa102Rgb)
             .ToPropertyEx(this, x => x.IsApa102);
         Bindings.Connect()
             .Bind(out var outputs)
             .Subscribe();
         Outputs = outputs;
-        SupportsReset = !device.IsMini() && !device.IsESP32();
+        SupportsReset = !device.IsMini() && !device.IsEsp32();
 
         if (!device.LoadConfiguration(this))
         {
@@ -950,12 +950,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         switch (LedType)
         {
-            case LedType.APA102_RGB:
-            case LedType.APA102_RBG:
-            case LedType.APA102_GRB:
-            case LedType.APA102_GBR:
-            case LedType.APA102_BRG:
-            case LedType.APA102_BGR:
+            case LedType.Apa102Rgb:
+            case LedType.Apa102Rbg:
+            case LedType.Apa102Grb:
+            case LedType.Apa102Gbr:
+            case LedType.Apa102Brg:
+            case LedType.Apa102Bgr:
                 return 1;
             case LedType.None:
             default:

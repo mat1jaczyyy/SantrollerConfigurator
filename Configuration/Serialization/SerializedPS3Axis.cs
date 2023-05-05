@@ -8,14 +8,14 @@ using ProtoBuf;
 namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 
 [ProtoContract(SkipConstructor = true)]
-public class SerializedPS3Axis : SerializedOutput
+public class SerializedPs3Axis : SerializedOutput
 {
-    public SerializedPS3Axis(SerializedInput input, Ps3AxisType type, Color ledOn, Color ledOff, byte[] ledIndex,
+    public SerializedPs3Axis(SerializedInput input, Ps3AxisType type, Color ledOn, Color ledOff, byte[] ledIndex,
         int min, int max, int deadzone)
     {
         Input = input;
-        LedOn = ledOn.ToUint32();
-        LedOff = ledOff.ToUint32();
+        LedOn = ledOn.ToUInt32();
+        LedOff = ledOff.ToUInt32();
         Min = min;
         Max = max;
         Deadzone = deadzone;

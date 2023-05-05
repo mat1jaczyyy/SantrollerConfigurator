@@ -62,7 +62,7 @@
                                HorizontalAlignment="Center" Width="75"
                                Source="{Binding Image}" />
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Input.Pin}"
-                                  Items="{Binding Input.AvailablePins}"
+                                  ItemsSource="{Binding Input.AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                         <Label IsVisible="{Binding IsAnalog}" Content="Move the axis you want to use" />
                         <Label IsVisible="{Binding !IsAnalog}" Content="Press the button you want to use" />

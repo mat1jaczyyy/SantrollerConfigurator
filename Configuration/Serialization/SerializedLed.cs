@@ -12,8 +12,8 @@ public class SerializedLed : SerializedOutput
 {
     public SerializedLed(Color ledOn, Color ledOff, byte[] ledIndex, LedCommandType type, int param1, int param2, bool outputEnabled, int pin)
     {
-        LedOn = ledOn.ToUint32();
-        LedOff = ledOff.ToUint32();
+        LedOn = ledOn.ToUInt32();
+        LedOff = ledOff.ToUInt32();
         LedIndex = ledIndex;
         Type = type;
         OutputEnabled = outputEnabled;
