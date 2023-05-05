@@ -292,13 +292,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
         return new SerializedWiiCombinedOutput(Sda, Scl, Outputs.Items.ToList());
     }
 
-    public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
+    public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
         byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw)
     {
-        base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+        base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType,
             wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
         if (!wiiControllerType.Any())

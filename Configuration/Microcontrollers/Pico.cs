@@ -289,13 +289,11 @@ public class Pico : Microcontroller
 
     public override List<int> GetAllPins(bool isAnalog)
     {
-        return isAnalog ? AnalogPins : Enumerable.Range(0, GpioCount).Where(i => i is not 23 or 24).ToList();
+        return isAnalog ? AnalogPins : PwmPins;
     }
-
-    public override List<int> GetPwmPins()
-    {
-        return GetAllPins(false);
-    }
+    
+    // All pins support pwm
+    public override List<int> PwmPins { get; } = Enumerable.Range(0, GpioCount).Where(i => i is not (23 or 24)).ToList();
 
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)

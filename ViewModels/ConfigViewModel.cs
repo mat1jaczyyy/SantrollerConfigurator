@@ -1131,7 +1131,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 // we need to ensure that DigitalToAnalog is last
                 return current + group
                     .First().First.InnermostInput()
-                    .GenerateAll(Bindings.Items.ToList(), group
+                    .GenerateAll(group
                         .OrderByDescending(s => s.First is DigitalToAnalog ? 0 : 1)
                         .Select(s =>
                         {

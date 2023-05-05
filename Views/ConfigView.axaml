@@ -147,12 +147,12 @@
             <DataTemplate DataType="{x:Type output:DjAxis}">
                 <StackPanel Orientation="Horizontal">
                     <Grid>
-                        <StackPanel Orientation="Horizontal" Width="{Binding FullProgressWidth}">
+                        <StackPanel Orientation="Horizontal" Width="{Binding FullProgressWidth, Mode=OneTime}">
                             <ProgressBar CornerRadius="0 3 3 0" HorizontalAlignment="Stretch"
                                          Value="{Binding ValueLower}"
                                          IsIndeterminate="False" Minimum="0" Maximum="32768"
                                          Height="30"
-                                         Width="{Binding HalfProgressWidth}">
+                                         Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                 <ProgressBar.RenderTransform>
                                     <ScaleTransform ScaleX="-1" />
                                 </ProgressBar.RenderTransform>
@@ -161,7 +161,7 @@
                                          Value="{Binding ValueUpper}"
                                          IsIndeterminate="False" Minimum="0" Maximum="32768"
                                          Height="30"
-                                         Width="{Binding HalfProgressWidth}" />
+                                         Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                         </StackPanel>
                         <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
                                    Text="{Binding Value}" />
@@ -176,15 +176,15 @@
                                 <ProgressBar Value="{Binding Value}"
                                              IsIndeterminate="False" Minimum="0" Maximum="65536"
                                              Height="30"
-                                             Width="{Binding FullProgressWidth}" />
+                                             Width="{Binding FullProgressWidth, Mode=OneTime}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}"
-                                        Width="{Binding FullProgressWidth}">
+                                        Width="{Binding FullProgressWidth, Mode=OneTime}">
                                 <ProgressBar CornerRadius="0 3 3 0"
                                              Value="{Binding ValueLower}"
                                              IsIndeterminate="False" Minimum="0" Maximum="32768"
                                              Height="30"
-                                             Width="{Binding HalfProgressWidth}">
+                                             Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                     <ProgressBar.RenderTransform>
                                         <ScaleTransform ScaleX="-1" />
                                     </ProgressBar.RenderTransform>
@@ -193,10 +193,10 @@
                                              Value="{Binding ValueUpper}"
                                              IsIndeterminate="False" Minimum="0" Maximum="32768"
                                              Height="30"
-                                             Width="{Binding HalfProgressWidth}" />
+                                             Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                             </StackPanel>
                             <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
-                                   Content="{Binding Value}" Width="{Binding FullProgressWidth}" />
+                                   Content="{Binding Value}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
                         </Grid>
                     </StackPanel>
                     <TextBlock IsVisible="{Binding IsSlider}" VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -211,15 +211,15 @@
                                 <ProgressBar Value="{Binding Value}"
                                              IsIndeterminate="False" Minimum="0" Maximum="65536"
                                              Height="30"
-                                             Width="{Binding FullProgressWidth}" />
+                                             Width="{Binding FullProgressWidth, Mode=OneTime}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}"
-                                        Width="{Binding FullProgressWidth}">
+                                        Width="{Binding FullProgressWidth, Mode=OneTime}">
                                 <ProgressBar CornerRadius="0 3 3 0"
                                              Value="{Binding ValueLower}"
                                              IsIndeterminate="False" Minimum="0" Maximum="32768"
                                              Height="30"
-                                             Width="{Binding HalfProgressWidth}">
+                                             Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                     <ProgressBar.RenderTransform>
                                         <ScaleTransform ScaleX="-1" />
                                     </ProgressBar.RenderTransform>
@@ -228,10 +228,10 @@
                                              Value="{Binding ValueUpper}"
                                              IsIndeterminate="False" Minimum="0" Maximum="32768"
                                              Height="30"
-                                             Width="{Binding HalfProgressWidth}" />
+                                             Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                             </StackPanel>
                             <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
-                                   Content="{Binding Value}" Width="{Binding FullProgressWidth}" />
+                                   Content="{Binding Value}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
                         </Grid>
                     </StackPanel>
                 </StackPanel>
@@ -782,12 +782,12 @@
                                     Current Value
                                 </Label>
                                 <Grid>
-                                    <StackPanel Orientation="Horizontal" Width="{Binding FullProgressWidth}">
+                                    <StackPanel Orientation="Horizontal" Width="{Binding FullProgressWidth, Mode=OneTime}">
                                         <ProgressBar CornerRadius="0 3 3 0"
                                                      Value="{Binding ValueLower}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                      Height="30"
-                                                     Width="{Binding HalfProgressWidth}">
+                                                     Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                             <ProgressBar.RenderTransform>
                                                 <ScaleTransform ScaleX="-1" />
                                             </ProgressBar.RenderTransform>
@@ -796,7 +796,7 @@
                                                      Value="{Binding ValueUpper}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                      Height="30"
-                                                     Width="{Binding HalfProgressWidth}" />
+                                                     Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                                     </StackPanel>
                                     <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
                                            Content="{Binding Value}" />
@@ -830,15 +830,15 @@
                                                 <ProgressBar Value="{Binding Value}"
                                                              IsIndeterminate="False" Minimum="0" Maximum="65536"
                                                              Height="30"
-                                                             Width="{Binding FullProgressWidth}" />
+                                                             Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}"
-                                                        Width="{Binding FullProgressWidth}">
+                                                        Width="{Binding FullProgressWidth, Mode=OneTime}">
                                                 <ProgressBar CornerRadius="0 3 3 0"
                                                              Value="{Binding ValueLower}"
                                                              IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                              Height="30"
-                                                             Width="{Binding HalfProgressWidth}">
+                                                             Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                                     <ProgressBar.RenderTransform>
                                                         <ScaleTransform ScaleX="-1" />
                                                     </ProgressBar.RenderTransform>
@@ -847,10 +847,10 @@
                                                              Value="{Binding ValueUpper}"
                                                              IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                              Height="30"
-                                                             Width="{Binding HalfProgressWidth}" />
+                                                             Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                                             </StackPanel>
                                             <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
-                                                   Content="{Binding Value}" Width="{Binding FullProgressWidth}" />
+                                                   Content="{Binding Value}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                         </Grid>
                                     </StackPanel>
 
@@ -870,15 +870,15 @@
                                                              Value="{Binding ValueRaw}"
                                                              IsIndeterminate="False" Minimum="0" Maximum="65536"
                                                              Height="30"
-                                                             Width="{Binding FullProgressWidth}" />
+                                                             Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}"
-                                                        Width="{Binding FullProgressWidth}">
+                                                        Width="{Binding FullProgressWidth, Mode=OneTime}">
                                                 <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
                                                              Value="{Binding ValueRawLower}"
                                                              IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                              Height="30"
-                                                             Width="{Binding HalfProgressWidth}">
+                                                             Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                                     <ProgressBar.RenderTransform>
                                                         <ScaleTransform ScaleX="-1" />
                                                     </ProgressBar.RenderTransform>
@@ -887,17 +887,17 @@
                                                              Value="{Binding ValueRawUpper}"
                                                              IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                              Height="30"
-                                                             Width="{Binding HalfProgressWidth}" />
+                                                             Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                                             </StackPanel>
                                             <Label VerticalAlignment="Center" HorizontalAlignment="Center"
                                                    HorizontalContentAlignment="Center"
-                                                   Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth}" />
+                                                   Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                         </Grid>
                                     </StackPanel>
 
                                     
                                     <Label Margin="300 0 0 0"
-                                           Width="{Binding FullProgressWidth}"
+                                           Width="{Binding FullProgressWidth, Mode=OneTime}"
                                            IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
                                            HorizontalContentAlignment="Center"
                                            Content="{Binding CalibrationText}" />
@@ -935,15 +935,15 @@
                                             <ProgressBar Value="{Binding Value}"
                                                          IsIndeterminate="False" Minimum="0" Maximum="65536"
                                                          Height="30"
-                                                         Width="{Binding FullProgressWidth}" />
+                                                         Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}"
-                                                    Width="{Binding FullProgressWidth}">
+                                                    Width="{Binding FullProgressWidth, Mode=OneTime}">
                                             <ProgressBar CornerRadius="0 3 3 0"
                                                          Value="{Binding ValueLower}"
                                                          IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                          Height="30"
-                                                         Width="{Binding HalfProgressWidth}">
+                                                         Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                                 <ProgressBar.RenderTransform>
                                                     <ScaleTransform ScaleX="-1" />
                                                 </ProgressBar.RenderTransform>
@@ -952,10 +952,10 @@
                                                          Value="{Binding ValueUpper}"
                                                          IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                          Height="30"
-                                                         Width="{Binding HalfProgressWidth}" />
+                                                         Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                                         </StackPanel>
                                         <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
-                                               Content="{Binding Value}" Width="{Binding FullProgressWidth}" />
+                                               Content="{Binding Value}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                     </Grid>
                                 </StackPanel>
 
@@ -975,15 +975,15 @@
                                                          Value="{Binding ValueRaw}"
                                                          IsIndeterminate="False" Minimum="0" Maximum="65536"
                                                          Height="30"
-                                                         Width="{Binding FullProgressWidth}" />
+                                                         Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}"
-                                                    Width="{Binding FullProgressWidth}">
+                                                    Width="{Binding FullProgressWidth, Mode=OneTime}">
                                             <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
                                                          Value="{Binding ValueRawLower}"
                                                          IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                          Height="30"
-                                                         Width="{Binding HalfProgressWidth}">
+                                                         Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                                 <ProgressBar.RenderTransform>
                                                     <ScaleTransform ScaleX="-1" />
                                                 </ProgressBar.RenderTransform>
@@ -992,16 +992,16 @@
                                                          Value="{Binding ValueRawUpper}"
                                                          IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                          Height="30"
-                                                         Width="{Binding HalfProgressWidth}" />
+                                                         Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                                         </StackPanel>
                                         <Label VerticalAlignment="Center" HorizontalAlignment="Center"
                                                HorizontalContentAlignment="Center"
-                                               Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth}" />
+                                               Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                     </Grid>
                                 </StackPanel>
 
                                 <Label Margin="300 0 0 0"
-                                       Width="{Binding FullProgressWidth}"
+                                       Width="{Binding FullProgressWidth, Mode=OneTime}"
                                        IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
                                        HorizontalContentAlignment="Center"
                                        Content="{Binding CalibrationText}" />
@@ -1036,15 +1036,15 @@
                                         <ProgressBar Value="{Binding Value}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="65536"
                                                      Height="30"
-                                                     Width="{Binding FullProgressWidth}" />
+                                                     Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !Trigger}"
-                                                Width="{Binding FullProgressWidth}">
+                                                Width="{Binding FullProgressWidth, Mode=OneTime}">
                                         <ProgressBar CornerRadius="0 3 3 0"
                                                      Value="{Binding ValueLower}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                      Height="30"
-                                                     Width="{Binding HalfProgressWidth}">
+                                                     Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                             <ProgressBar.RenderTransform>
                                                 <ScaleTransform ScaleX="-1" />
                                             </ProgressBar.RenderTransform>
@@ -1053,10 +1053,10 @@
                                                      Value="{Binding ValueUpper}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                      Height="30"
-                                                     Width="{Binding HalfProgressWidth}" />
+                                                     Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                                     </StackPanel>
                                     <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
-                                           Content="{Binding Value}" Width="{Binding FullProgressWidth}" />
+                                           Content="{Binding Value}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                 </Grid>
                             </StackPanel>
 
@@ -1076,15 +1076,15 @@
                                                      Value="{Binding ValueRaw}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="65536"
                                                      Height="30"
-                                                     Width="{Binding FullProgressWidth}" />
+                                                     Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !InputIsUint}"
-                                                Width="{Binding FullProgressWidth}">
+                                                Width="{Binding FullProgressWidth, Mode=OneTime}">
                                         <ProgressBar Opacity="0.6" CornerRadius="0 3 3 0"
                                                      Value="{Binding ValueRawLower}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                      Height="30"
-                                                     Width="{Binding HalfProgressWidth}">
+                                                     Width="{Binding HalfProgressWidth, Mode=OneTime}">
                                             <ProgressBar.RenderTransform>
                                                 <ScaleTransform ScaleX="-1" />
                                             </ProgressBar.RenderTransform>
@@ -1093,15 +1093,15 @@
                                                      Value="{Binding ValueRawUpper}"
                                                      IsIndeterminate="False" Minimum="0" Maximum="32768"
                                                      Height="30"
-                                                     Width="{Binding HalfProgressWidth}" />
+                                                     Width="{Binding HalfProgressWidth, Mode=OneTime}" />
                                     </StackPanel>
                                     <Label VerticalAlignment="Center" HorizontalAlignment="Center"
                                            HorizontalContentAlignment="Center"
-                                           Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth}" />
+                                           Content="{Binding ValueRaw}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
                                 </Grid>
                             </StackPanel>
                             <Label Margin="300 0 0 0"
-                                   Width="{Binding FullProgressWidth}"
+                                   Width="{Binding FullProgressWidth, Mode=OneTime}"
                                    IsVisible="{Binding CalibrationText, Converter={x:Static ObjectConverters.IsNotNull}}"
                                 HorizontalContentAlignment="Center"
                                 Content="{Binding CalibrationText}" />

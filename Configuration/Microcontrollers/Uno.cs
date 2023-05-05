@@ -6,6 +6,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public class Uno : AvrController
 {
+    private static readonly int A0 = 14;
     private static readonly int[] PinIndex =
     {
         0, /* 0, port D */
@@ -45,19 +46,19 @@ public class Uno : AvrController
 
     protected override int I2CScl => 19;
 
-    protected override char[] PortNames => new[] {'B', 'C', 'D'};
+    protected override char[] PortNames { get; } = {'B', 'C', 'D'};
 
-    protected override Dictionary<Tuple<char, int>, int> PinByMask { get; } = Ports.Zip(PinIndex)
-        .Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i))
-        .ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s => s.Item3);
+    protected override Dictionary<(char, int), int> PinByMask { get; } = Ports.Zip(PinIndex)
+        .Select((tuple, i) => (tuple.First, tuple.Second, i))
+        .ToDictionary(s => (s.Item1, s.Item2), s => s.Item3);
 
-    protected override int PinA0 => 14;
+    protected override int PinA0 => A0;
 
     public override int PinCount => PinIndex.Length;
 
     public override Board Board { get; }
 
-    public override List<int> AnalogPins => Enumerable.Range(PinA0, 4).ToList();
+    public override List<int> AnalogPins { get; } = Enumerable.Range(A0, 4).ToList();
 
     protected override string GetInterruptForPin(int ack)
     {
@@ -100,10 +101,9 @@ public class Uno : AvrController
                 return null;
         }
     }
-    public override List<int> GetPwmPins()
-    {
-        return new List<int> {3,5,6,9,10,11};
-    }
+
+    public override List<int> PwmPins { get; } = new() {3, 5, 6, 9, 10, 11};
+
     public override int GetFirstDigitalPin()
     {
         return 2;

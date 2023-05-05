@@ -26,7 +26,7 @@ public class Rumble : Output
         RumbleMotorType = rumbleMotorType;
     }
 
-    public List<int> AvailablePins => Model.Microcontroller.GetPwmPins();
+    public List<int> AvailablePins => Model.Microcontroller.PwmPins;
 
     public DirectPinConfig? PinConfig { get; private set; }
 

@@ -66,14 +66,14 @@ public partial class BluetoothOutput : CombinedOutput
             throw new NotImplementedException();
         }
 
-        public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
+        public override void Update(Dictionary<int, int> analogRaw,
             Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
             byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
             byte[] wiiControllerType)
         {
         }
 
-        public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
+        public override string GenerateAll(List<Tuple<Input, string>> bindings,
             ConfigField mode)
         {
             return "";
@@ -150,12 +150,12 @@ public partial class BluetoothOutput : CombinedOutput
         return "Bluetooth Input";
     }
 
-    public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
+    public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
         byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
         byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw)
     {
-        base.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+        base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
         if (!bluetoothRaw.Any()) return;
         Connected = bluetoothRaw[0] != 0;

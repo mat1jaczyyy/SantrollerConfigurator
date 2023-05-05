@@ -49,9 +49,10 @@ public class Santroller : IConfigurableDevice
         {
             var direct = _model.Bindings.Items.Select(s => s.Input!.InnermostInput())
                 .OfType<DirectInput>().ToList();
-            var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins);
-            var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins);
+            var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins).Distinct();
+            var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins).Distinct();
             var ports = _model.Microcontroller.GetPortsForTicking(digital);
+
             foreach (var (port, mask) in ports)
             {
                 var wValue = (ushort) (port | (mask << 8));
@@ -92,9 +93,10 @@ public class Santroller : IConfigurableDevice
                 bluetoothRaw = await ReadDataAsync(0, (byte) Commands.CommandGetBtState, 1);
             }
 
+
             _model.Update(rfRaw, bluetoothRaw);
             foreach (var output in _model.Bindings.Items)
-                output.Update(_model.Bindings.Items.ToList(), _analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
+                output.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                     djRightRaw, gh5Raw,
                     ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
         }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DynamicData.Kernel;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
-using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -285,7 +284,7 @@ public class Ps2Input : SpiInput
         return retDs2;
     }
     public override string Title => EnumToStringConverter.Convert(Input);
-    public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
+    public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Data,
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
@@ -303,19 +302,21 @@ public class Ps2Input : SpiInput
         var negcon = realType is Ps2ControllerType.NegCon;
         var jogcon = realType is Ps2ControllerType.JogCon;
         var guncon = realType is Ps2ControllerType.GunCon;
-        var ds2 = realType is Ps2ControllerType.Dualshock2;
-        if (ds2 && Dualshock2Order.Contains(Input))
-        {
-            var inputs = modelBindings.SelectMany(s => s.Outputs.Items).Select(s => s.Input).OfType<Ps2Input>()
-                .Select(s => s.Input).ToHashSet();
-            var i = Dualshock2Order.Intersect(inputs).Select((s, idx) => (s, idx))
-                .FirstOrOptional(s => s.s == Input);
-            if (i.HasValue)
-            {
-                RawValue = ps2Data[i.Value.idx] << 8;
-                return;
-            }
-        }
+        // TODO: perhaps for this, we just swap to a version that polls all PS2 inputs when updating the gui, instead of this.
+        // TODO: otherwise, this is actually useless, what we need is the last written config not the current one
+        // var ds2 = realType is Ps2ControllerType.Dualshock2;
+        // if (ds2 && Dualshock2Order.Contains(Input))
+        // {
+        //     var inputs = modelBindings.SelectMany(s => s.Outputs.Items).Select(s => s.Input).OfType<Ps2Input>()
+        //         .Select(s => s.Input).ToHashSet();
+        //     var i = Dualshock2Order.Intersect(inputs).Select((s, idx) => (s, idx))
+        //         .FirstOrOptional(s => s.s == Input);
+        //     if (i.HasValue)
+        //     {
+        //         RawValue = ps2Data[i.Value.idx] << 8;
+        //         return;
+        //     }
+        // }
 
         RawValue = Input switch
         {
@@ -397,7 +398,7 @@ public class Ps2Input : SpiInput
         return types.Contains(type);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
+    public override string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
         Dictionary<Ps2InputType, string> ds2Axis = new();

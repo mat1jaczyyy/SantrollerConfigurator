@@ -65,7 +65,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     private bool ShouldUpdateDetails { get; set; }
 
-    private bool _configured = false;
+    private bool _configured;
 
     protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices)
     {
@@ -583,21 +583,14 @@ public abstract partial class Output : ReactiveObject, IDisposable
             .Distinct().Concat(GetOwnPinConfigs()).ToList();
     }
 
-    public List<DevicePin> GetPins()
-    {
-        return Outputs.Items
-            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.Pins)
-            .Distinct().Concat(GetOwnPins()).ToList();
-    }
-
-    public virtual void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
+    public virtual void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
         byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw)
     {
         if (Enabled)
         {
-            Input.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+            Input.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                 ghWtRaw,
                 ps2ControllerType, wiiControllerType);
         }
@@ -606,7 +599,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
         {
             if (output != this)
             {
-                output.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
+                output.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                     ghWtRaw,
                     ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
             }

@@ -136,10 +136,10 @@ public class Micro : AvrController
     protected override char[] PortNames { get; } = {'B', 'C', 'D', 'E', 'F'};
 
     //Skip the duplicate analog pins
-    protected override Dictionary<Tuple<char, int>, int> PinByMask { get; } = Ports.Zip(PinIndex)
-        .Select((tuple, i) => new Tuple<char, int, int>(tuple.First, tuple.Second, i))
-        .DistinctBy(s => new Tuple<char, int>(s.Item1, s.Item2))
-        .ToDictionary(s => new Tuple<char, int>(s.Item1, s.Item2), s => s.Item3);
+    protected override Dictionary<(char, int), int> PinByMask { get; } = Ports.Zip(PinIndex)
+        .Select((tuple, i) => (tuple.First, tuple.Second, i))
+        .DistinctBy(s => (s.Item1, s.Item2))
+        .ToDictionary(s => (s.Item1, s.Item2), s => s.Item3);
 
     protected override int PinA0 => 18;
 
@@ -187,11 +187,8 @@ public class Micro : AvrController
         if (reconfigurePin) chan |= 1 << 7;
         return chan;
     }
-    
-    public override List<int> GetPwmPins()
-    {
-        return new List<int> {3,5,6,9,10,11,13};
-    }
+
+    public override List<int> PwmPins { get; } = new() {3, 5, 6, 9, 10, 11, 13};
 
     public override AvrPinMode? ForcedMode(int pin)
     {

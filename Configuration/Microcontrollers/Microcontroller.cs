@@ -99,7 +99,7 @@ public abstract class Microcontroller
     public abstract int GetFirstAnalogPin();
 
     public abstract List<int> GetAllPins(bool isAnalog);
-    public abstract List<int> GetPwmPins();
+    public abstract List<int> PwmPins { get; }
 
     public abstract Dictionary<int, int> GetPortsForTicking(IEnumerable<DevicePin> digital);
 

@@ -30,7 +30,7 @@ public abstract class AvrController : Microcontroller
     public abstract int PinCount { get; }
 
     protected abstract char[] PortNames { get; }
-    protected abstract Dictionary<Tuple<char, int>, int> PinByMask { get; }
+    protected abstract Dictionary<(char, int), int> PinByMask { get; }
 
     public override string GenerateDigitalRead(int pin, bool pullUp)
     {
@@ -116,7 +116,7 @@ public abstract class AvrController : Microcontroller
         for (var i = 0; i < 8; i++)
         {
             if ((mask & (1 << i)) == 0) continue;
-            digitalRaw[PinByMask[new Tuple<char, int>(portChar, i)]] = (pins & (1 << i)) == 0;
+            digitalRaw[PinByMask[(portChar, i)]] = (pins & (1 << i)) == 0;
         }
     }
 

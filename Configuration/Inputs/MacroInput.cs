@@ -242,18 +242,18 @@ public class MacroInput : Input
         return new List<Input> {Child1, Child2};
     }
 
-    public override void Update(List<Output> modelBindings, Dictionary<int, int> analogRaw,
+    public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
         byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
     {
-        Child1.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+        Child1.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType);
-        Child2.Update(modelBindings, analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
+        Child2.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType);
     }
 
-    public override string GenerateAll(List<Output> allBindings, List<Tuple<Input, string>> bindings,
+    public override string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
         throw new InvalidOperationException("Never call GenerateAll on MacroInput, call it on its children");
