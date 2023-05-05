@@ -11,6 +11,7 @@
              xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
              xmlns:other="clr-namespace:GuitarConfigurator.NetCore.Configuration.Other"
              xmlns:inputs="clr-namespace:GuitarConfigurator.NetCore.Configuration.Inputs"
+             xmlns:types="clr-namespace:GuitarConfigurator.NetCore.Configuration.Types"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
@@ -27,6 +28,7 @@
         <netCore:EnumToStringConverter x:Key="EnumToStringConverter" />
         <netCore:PinToStringConverter x:Key="PinToStringConverter" />
         <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
+        <netCore:SimpleTypeImageConverter x:Key="SimpleTypeImageConverter" />
         <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
             <TextBlock>
                 <TextBlock.Text>
@@ -53,6 +55,20 @@
         </DataTemplate>
         <DataTemplate x:Key="EnumToStringTemplate" DataType="system:Object">
             <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
+        </DataTemplate>
+        <DataTemplate x:Key="SimpleTypeImageTemplate" DataType="system:Object">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Converter={StaticResource SimpleTypeImageConverter}}" Width="25" />
+                <Label VerticalContentAlignment="Center" VerticalAlignment="Center">
+                    <Label.Content>
+                        <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
+                            <Binding />
+                            <Binding Path="$parent[views:ConfigView].DeviceType" />
+                            <Binding Path="$parent[views:ConfigView].RhythmType" />
+                        </MultiBinding>
+                    </Label.Content>
+                </Label>
+            </StackPanel>
         </DataTemplate>
         <netCore:OutputTemplateSelector x:Key="OutputSelectionTemplate">
             <DataTemplate DataType="{x:Type other:EmulationMode}">
@@ -256,7 +272,7 @@
                                 <ComboBox VerticalAlignment="Center"
                                           SelectedItem="{Binding CombinedType}"
                                           ItemsSource="{Binding CombinedTypes}"
-                                          ItemTemplate="{StaticResource ControllerEnumTemplate}" />
+                                          ItemTemplate="{StaticResource SimpleTypeImageTemplate}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
                                 <ComboBox VerticalAlignment="Center"
