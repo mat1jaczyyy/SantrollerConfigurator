@@ -107,7 +107,6 @@ public class SimpleTypeImageConverter : IMultiValueConverter
             Ps3AxisType type => "PS3/PS3_" + type,
             _ => null
         };
-        Console.WriteLine(path);
         if (path == null)
         {
             return null;

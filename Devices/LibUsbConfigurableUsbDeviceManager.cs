@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Threading;
+using System.Reactive.Concurrency;
 using DynamicData;
 using DynamicData.Kernel;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -10,6 +10,7 @@ using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.DeviceNotify.Linux;
 using LibUsbDotNet.Main;
+using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Devices;
 
@@ -43,7 +44,7 @@ public class ConfigurableUsbDeviceManager
 
     private void OnDeviceNotify(object? sender, DeviceNotifyEventArgs e)
     {
-        Dispatcher.UIThread.Post(() =>
+        RxApp.MainThreadScheduler.Schedule(() =>
         {
             if (e.DeviceType != DeviceType.DeviceInterface) return;
             if (e.EventType == EventType.DeviceArrival)

@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -13,6 +14,7 @@ using LibUsbDotNet.Main;
 using LibUsbDotNet.WinUsb;
 using Nefarius.Utilities.DeviceManagement.Extensions;
 using Nefarius.Utilities.DeviceManagement.PnP;
+using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Devices;
 
@@ -46,7 +48,7 @@ public class ConfigurableUsbDeviceManager
     private async void DeviceNotify(EventType eventType, string path)
     {
         await Task.Delay(200);
-        Dispatcher.UIThread.Post(() =>
+        RxApp.MainThreadScheduler.Schedule(() =>
         {
             var ids = UsbSymbolicName.Parse(path);
 
