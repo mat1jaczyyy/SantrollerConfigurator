@@ -302,6 +302,14 @@
                             HorizontalContentAlignment="Center" Margin="20 20 20 0">
                         Add Binding
                     </Button>
+                    <Button Command="{Binding SaveConfigCommand}"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                        Export Config
+                    </Button>
+                    <Button Command="{Binding LoadConfigCommand}"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 20 20 0">
+                        Import Config
+                    </Button>
                     <Button Command="{Binding BindAllCommand}" HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center" Margin="20 20 20 0">
                         Bind All

@@ -10,6 +10,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using DynamicData;
@@ -93,6 +94,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
         GoBackCommand = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
             this.WhenAnyValue(x => x.Main.Working).Select(s => !s));
+
+        SaveConfigCommand = ReactiveCommand.CreateFromObservable(() => SaveConfig.Handle(this));
+
+        LoadConfigCommand = ReactiveCommand.CreateFromObservable(() => LoadConfig.Handle(this));
 
         this.WhenAnyValue(x => x.HasError)
             .Select(s => s ? "There are errors in your configuration" : null).ToPropertyEx(this, s => s.WriteToolTip);
@@ -181,6 +186,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ShowUnpluggedDialog { get; } =
         new();
 
+    public Interaction<ConfigViewModel, Unit> SaveConfig { get; } = new();
+    public Interaction<ConfigViewModel, Unit> LoadConfig { get; } = new();
+
     public Interaction<(ConfigViewModel model, Output output, DirectInput input),
             BindAllWindowViewModel>
         ShowBindAllDialog { get; } = new();
@@ -215,6 +223,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public int[] KvKey2 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
 
     public ICommand WriteConfigCommand { get; }
+    
+    public ICommand SaveConfigCommand { get; }
+    public ICommand LoadConfigCommand { get; }
     public ICommand ResetCommand { get; }
 
     public ICommand GoBackCommand { get; }
@@ -574,6 +585,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, axisType, false));
+                    break;
+                case GuitarAxisType.Slider:
+                    Bindings.Add(new GuitarAxis(this, new GhWtTapInput(GhWtInputType.TapAll, this, Microcontroller.GetFirstAnalogPin(),
+                            Microcontroller.GetFirstDigitalPin(), Microcontroller.GetFirstDigitalPin(), Microcontroller.GetFirstDigitalPin()),
+                        Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
+                        0, GuitarAxisType.Slider, false));
                     break;
                 case GuitarAxisType axisType:
                     Bindings.Add(new GuitarAxis(this, new DirectInput(Microcontroller.GetFirstAnalogPin(),
@@ -998,7 +1015,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Bindings.Clear();
         UpdateErrors();
     }
-
+    
     [RelayCommand]
     public void ExpandAll()
     {
