@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
@@ -69,6 +70,25 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public bool SupportsReset { get; }
 
+    private bool _allExpanded;
+
+    public bool AllExpanded
+    {
+        get => _allExpanded;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _allExpanded, value);
+            if (value)
+            {
+                ExpandAll();
+            }
+            else
+            {
+                CollapseAll();
+            }
+        }
+    }
+
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
         Device = device;
@@ -90,8 +110,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
         ResetCommand = ReactiveCommand.CreateFromTask(ResetAsync,
-            this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
-                .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
+            this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected)
+                .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true}));
         GoBackCommand = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
             this.WhenAnyValue(x => x.Main.Working).Select(s => !s));
 
@@ -223,7 +243,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public int[] KvKey2 { get; set; } = Enumerable.Repeat(0x00, 16).ToArray();
 
     public ICommand WriteConfigCommand { get; }
-    
+
     public ICommand SaveConfigCommand { get; }
     public ICommand LoadConfigCommand { get; }
     public ICommand ResetCommand { get; }
@@ -572,42 +592,44 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 case StandardButtonType buttonType:
                     Bindings.Add(new ControllerButton(this,
-                        new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                        new DirectInput(-1, DevicePinMode.PullUp, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType, false));
                     break;
                 case InstrumentButtonType buttonType:
                     Bindings.Add(new GuitarButton(this,
-                        new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                        new DirectInput(-1, DevicePinMode.PullUp, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType, false));
                     break;
                 case StandardAxisType axisType:
                     Bindings.Add(new ControllerAxis(this,
-                        new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
+                        new DirectInput(-1, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, axisType, false));
                     break;
                 case GuitarAxisType.Slider:
-                    Bindings.Add(new GuitarAxis(this, new GhWtTapInput(GhWtInputType.TapAll, this, Microcontroller.GetFirstAnalogPin(),
-                            Microcontroller.GetFirstDigitalPin(), Microcontroller.GetFirstDigitalPin(), Microcontroller.GetFirstDigitalPin()),
+                    Bindings.Add(new GuitarAxis(this, new GhWtTapInput(GhWtInputType.TapAll, this,
+                            -1,
+                            -1, -1,
+                            -1),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, GuitarAxisType.Slider, false));
                     break;
                 case GuitarAxisType axisType:
-                    Bindings.Add(new GuitarAxis(this, new DirectInput(Microcontroller.GetFirstAnalogPin(),
+                    Bindings.Add(new GuitarAxis(this, new DirectInput(-1,
                             DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, axisType, false));
                     break;
                 case DrumAxisType axisType:
                     Bindings.Add(new DrumAxis(this,
-                        new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
+                        new DirectInput(-1, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, 64, 10, axisType, false));
                     break;
                 case DjAxisType axisType:
                     if (axisType is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity) continue;
                     Bindings.Add(new DjAxis(this,
-                        new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
+                        new DirectInput(-1, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, axisType, false));
                     break;
@@ -660,27 +682,44 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.RaisePropertyChanged(nameof(RhythmType));
         XInputOnWindows = true;
         MouseMovementType = MouseMovementType.Relative;
+        if (Main.DeviceInputType == DeviceInputType.Direct)
+        {
+            // Write an empty config
+            Write();
+        }
+
         switch (Main.DeviceInputType)
         {
             case DeviceInputType.Direct:
                 _ = SetDefaultBindingsAsync(EmulationType);
                 break;
             case DeviceInputType.Wii:
-                Bindings.Add(new WiiCombinedOutput(this));
+                var output = new WiiCombinedOutput(this);
+                output.Expanded = true;
+                Bindings.Add(output);
                 break;
             case DeviceInputType.Ps2:
-                Bindings.Add(new Ps2CombinedOutput(this));
+                var ps2Output = new Ps2CombinedOutput(this);
+                ps2Output.Expanded = true;
+                Bindings.Add(ps2Output);
                 break;
             case DeviceInputType.Rf:
-                Bindings.Add(new RfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One));
+                var rfOutput = new RfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One);
+                rfOutput.Expanded = true;
+                Bindings.Add(rfOutput);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
+        
 
         UpdateBindings();
         UpdateErrors();
-        Write();
+        if (Main.DeviceInputType != DeviceInputType.Direct)
+        {
+            // Write the full config
+            Write();
+        }
     }
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
@@ -766,7 +805,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             if (!ControllerEnumConverter.GetAxisText(_deviceControllerType, type).Any()) continue;
             var isTrigger = type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
             Bindings.Add(new ControllerAxis(this,
-                new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
+                new DirectInput(-1, DevicePinMode.Analog, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), isTrigger ? ushort.MinValue : short.MinValue,
                 isTrigger ? ushort.MaxValue : short.MaxValue, 0,
                 type, false));
@@ -777,7 +816,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             if (ControllerEnumConverter.GetButtonText(_deviceControllerType, type) ==
                 null) continue;
             Bindings.Add(new ControllerButton(this,
-                new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
+                new DirectInput(-1, DevicePinMode.PullUp, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type, false));
         }
 
@@ -1015,7 +1054,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Bindings.Clear();
         UpdateErrors();
     }
-    
+
     [RelayCommand]
     public void ExpandAll()
     {
@@ -1302,28 +1341,31 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void AddDevice(IConfigurableDevice device)
     {
-        Trace.WriteLine($"Add called, current device: {Device},  new device: {device}");
-        if (device is Santroller santroller)
+        RxApp.MainThreadScheduler.Schedule(() =>
         {
-            if (Device is Santroller santrollerold)
+            Trace.WriteLine($"Add called, current device: {Device},  new device: {device}");
+            if (device is Santroller santroller)
             {
-                if (santrollerold.Serial == santroller.Serial)
+                if (Device is Santroller santrollerold)
+                {
+                    if (santrollerold.Serial == santroller.Serial)
+                    {
+                        Main.Complete(100);
+                        Device = device;
+                        santroller.StartTicking(this);
+                    }
+                }
+                else
                 {
                     Main.Complete(100);
                     Device = device;
+                    Microcontroller = device.GetMicrocontroller(this);
                     santroller.StartTicking(this);
                 }
             }
-            else
-            {
-                Main.Complete(100);
-                Device = device;
-                Microcontroller = device.GetMicrocontroller(this);
-                santroller.StartTicking(this);
-            }
-        }
 
-        Device.DeviceAdded(device);
+            Device.DeviceAdded(device);
+        });
     }
 
     public bool UsingBluetooth()

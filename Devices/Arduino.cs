@@ -174,6 +174,7 @@ public class Arduino : IConfigurableDevice
         if (IsPico() || (Is32U4() && !Is32U4Bootloader))
         {
             _arduino32U4Path = new TaskCompletionSource<string?>();
+            Bootloader();
             return _arduino32U4Path.Task;
         }
         

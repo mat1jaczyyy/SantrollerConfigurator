@@ -312,6 +312,10 @@ public abstract partial class Output : ReactiveObject, IDisposable
         {
             var text = string.Join(", ",
                 GetPinConfigs().Select(s => s.ErrorText).Distinct().Where(s => !string.IsNullOrEmpty(s)));
+            if (text.Contains("missing"))
+            {
+                return "Pin configuration missing!";
+            }
             return string.IsNullOrEmpty(text) ? "" : $"* Error: Conflicting pins: {text}!";
         }
     }

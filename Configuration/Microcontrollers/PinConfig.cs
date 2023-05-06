@@ -29,6 +29,10 @@ public abstract class PinConfig : ReactiveObject
 
     private string? CalculateError()
     {
+        if (Pins.Any(x => x == -1))
+        {
+            return "Output configuration missing!";
+        }
         var configs = Model.GetPins(Type);
 
         var ret = configs.Select(pinConfig => new {pinConfig, conflicting = pinConfig.Value.Intersect(Pins).ToList()})

@@ -42,7 +42,7 @@ public partial class InitialConfigViewModel : ReactiveObject, IRoutableViewModel
         HostScreen = screen;
         
         ConfigureCommand = ReactiveCommand.CreateFromObservable(
-            () => Main.Router.Navigate.Execute(model)
+            () => Main.Router.Navigate.Execute(model), this.WhenAnyValue(x=>x.Main.Working).Select(s => !s)
         );
     }
     public IDisposable RegisterConnections()

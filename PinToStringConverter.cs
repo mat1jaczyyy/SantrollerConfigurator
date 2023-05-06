@@ -15,12 +15,16 @@ public class PinToStringConverter : IMultiValueConverter
 {
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (values[0] == null || values[1] == null || values[2] == null || values[3] == null)
+        if (values[0] == null || values[1] == null || values[3] == null)
             return null;
         if (values[0] is not int || values[1] is not ConfigViewModel ||
-            values[2] is not int || values[3] is not (Output or Input or ConfigViewModel)) return null;
+            values[3] is not (Output or Input or ConfigViewModel)) return null;
         var pin = (int) values[0]!;
-        var selectedPin = (int) values[2]!;
+        var selectedPin = -1;
+        if (values[2] is not null)
+        {
+            selectedPin = (int) values[2]!;
+        }
         var model = (ConfigViewModel) values[1]!;
         var microcontroller = model.Microcontroller;
         var twi = values[3] is ITwi twiIo && twiIo.TwiPins().Contains(pin);

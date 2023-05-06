@@ -36,9 +36,7 @@
 
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock HorizontalAlignment="Center"
-                           Text="Programming initial configuration" Margin="0 0 0 20" />
-                <TextBlock HorizontalAlignment="Center"
-                           Text="Click continue to start configuring. Most options will not be available until the initial configuration is complete." />
+                           Text="Programming initial configuration, please wait." Margin="0 0 0 20" />
                 <Button Content="Configure" Command="{Binding ConfigureCommand}"
                         HorizontalAlignment="Center"
                         Margin="0 20 0 0" />
