@@ -14,7 +14,7 @@ public partial class InitialConfigureView : ReactiveUserControl<InitialConfigVie
 
     private void InitializeComponent()
     {
-        this.WhenActivated(disposables => { });
+        this.WhenActivated(disposables => { disposables(ViewModel!.RegisterConnections());});
         AvaloniaXamlLoader.Load(this);
     }
 }

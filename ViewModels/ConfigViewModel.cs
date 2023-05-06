@@ -135,7 +135,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         if (!device.LoadConfiguration(this))
         {
-            SetDefaults().ConfigureAwait(false);
+            SetDefaults();
             if (Device.HasDfuMode())
             {
                 ShowUnoDialog = true;
@@ -603,7 +603,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         return Main.Write(this);
     }
 
-    public async Task SetDefaults()
+    public void SetDefaults()
     {
         Main.Message = "Building";
         Main.Progress = 0;
@@ -663,25 +663,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         UpdateBindings();
         UpdateErrors();
-        if (Main.Is32U4 && Device is Arduino arduino)
-        {
-            if (!arduino.Is32U4Bootloader)
-            {
-                Trace.WriteLine("Jumping pro micro to bootloader mode");
-                arduino.Bootloader();
-            }
-
-            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude",
-                "avrdude.conf");
-            await Main.Pio.RunPlatformIo("avrdude",
-                new[]
-                {
-                    "pkg", "exec", "avrdude", "-c",
-                    $"avrdude -p atmega32u4 -C {configFile} -P {await Device.GetUploadPortAsync()} -c avr109 -e"
-                }, "", 0, 100, Device);
-        }
-
-        await Write();
+        Write();
     }
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
@@ -1306,7 +1288,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         HasError = foundError;
     }
 
-    private void AddDevice(IConfigurableDevice device)
+    public void AddDevice(IConfigurableDevice device)
     {
         Trace.WriteLine($"Add called, current device: {Device},  new device: {device}");
         if (device is Santroller santroller)
@@ -1337,7 +1319,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         return IsBluetooth || Bindings.Items.Any(s => s is BluetoothOutput);
     }
 
-    private void RemoveDevice(IConfigurableDevice device)
+    public void RemoveDevice(IConfigurableDevice device)
     {
         if (!Main.Working)
         {

@@ -209,14 +209,18 @@ public class PlatformIo
                         var port = await device.GetUploadPortAsync().ConfigureAwait(false);
                         if (device.Is32U4())
                         {
+                            sections += 1;
                             var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages",
                                 "tool-avrdude", "avrdude.conf");
-                            await RunPlatformIo("avrdude",
+                            var subject = RunPlatformIo("avrdude",
                                 new[]
                                 {
                                     "pkg", "exec", "avrdude", "-c",
                                     $"avrdude -p atmega32u4 -C {configFile} -P {port} -c avr109 -e"
-                                }, "", 0, 100, device);
+                                }, "Erasing device", 0, percentageStep / sections, device);
+                            subject.Subscribe(s => platformIoOutput.OnNext(s));
+                            await subject;
+                            currentProgress += percentageStep / sections;
                         }
 
                         Console.WriteLine(port);

@@ -32,16 +32,38 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 public partial class InitialConfigViewModel : ReactiveObject, IRoutableViewModel
 {
     public MainWindowViewModel Main { get; }
+    public ConfigViewModel Model { get; }
     public ReactiveCommand<Unit, IRoutableViewModel> ConfigureCommand { get; }
     public InitialConfigViewModel(MainWindowViewModel screen, ConfigViewModel model)
     {
         Main = screen;
+        Model = model;
 
         HostScreen = screen;
         
         ConfigureCommand = ReactiveCommand.CreateFromObservable(
             () => Main.Router.Navigate.Execute(model)
         );
+    }
+    public IDisposable RegisterConnections()
+    {
+        return
+            Main.AvailableDevices.Connect().Subscribe(s =>
+            {
+                foreach (var change in s)
+                {
+                    switch (change.Reason)
+                    {
+                        case ListChangeReason.Add:
+                            Model.AddDevice(change.Item.Current);
+                            break;
+                        case ListChangeReason.Remove:
+                            Model.RemoveDevice(change.Item.Current);
+                            break;
+                    }
+                }
+            });
+        ;
     }
 
     public string? UrlPathSegment => Guid.NewGuid().ToString()[..5];
