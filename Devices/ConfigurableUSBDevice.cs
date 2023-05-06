@@ -49,13 +49,13 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public void DeviceAdded(IConfigurableDevice device)
     {
-        if (device is Arduino arduino2 && arduino2.Board.ArdwiinoName == Board.ArdwiinoName)
+        if (Board.Is32U4() && device is Arduino arduino2 && arduino2.Board.Is32U4())
         {
             _bootloaderPath?.TrySetResult(arduino2.GetSerialPort());
         }
-        else if (Board.ArdwiinoName.Contains("pico"))
+        else if (device is PicoDevice pico && Board.IsPico())
         {
-            if (device is PicoDevice pico) _bootloaderPath?.TrySetResult(pico.GetPath());
+            _bootloaderPath?.TrySetResult(pico.GetPath());
         }
         else if (Board.HasUsbmcu && device is Dfu {Board.HasUsbmcu: true} dfu)
         {
@@ -88,7 +88,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     {
         return Board.IsMini();
     }
-    
+
     public bool IsEsp32()
     {
         return Board.IsEsp32();
@@ -99,6 +99,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     }
 
     public abstract void Revert();
+
     public bool HasDfuMode()
     {
         return Board.HasUsbmcu;
@@ -129,7 +130,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             wValue,
             2,
             buffer.Length);
-        
+
         Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
         Array.Resize(ref buffer, length);
         return buffer;
