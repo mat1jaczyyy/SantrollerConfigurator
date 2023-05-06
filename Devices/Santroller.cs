@@ -27,7 +27,6 @@ public class Santroller : IConfigurableDevice
     private ConfigViewModel? _model;
     readonly Stopwatch _sw = Stopwatch.StartNew();
     private DispatcherTimer _timer;
-    private bool _reverting;
 
     private async void Tick(object? sender, EventArgs e)
     {
@@ -111,7 +110,7 @@ public class Santroller : IConfigurableDevice
     private SantrollerUsbDevice? _usbDevice;
     private SerialPort? _serialPort;
     private PlatformIoPort? _platformIoPort;
-    private Board Board { get; set; }
+    internal Board Board { get; set; }
     private Microcontroller _microcontroller;
     public bool Valid { get; }
 
@@ -384,52 +383,10 @@ public class Santroller : IConfigurableDevice
     public void DeviceAdded(IConfigurableDevice device)
     {
         _usbDevice?.DeviceAdded(device);
-        if (!_reverting || _model == null) return;
-        var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude",
-            "avrdude.conf");
-        if (IsPico() && device is PicoDevice)
-        {
-            _reverting = false;
-            // Copy blank firmware back to device
-            var firmware = Path.Combine(AssetUtils.GetAppDataFolder(), "default_firmwares",
-                Board.Environment + ".uf2");
-            File.Copy(firmware, Path.Combine(device.GetUploadPortAsync().Result!, "firmware.uf2"));
         }
-        else if (Board.HasUsbmcu && device is Dfu dfu)
-        {
-            _reverting = false;
-            // Write back a default firmware
-            var firmware = Path.Combine(AssetUtils.GetAppDataFolder(), "default_firmwares",
-                Board.Environment + "_usb_" + dfu.GetRestoreSuffix() + ".hex");
-            _ = _model.Main.Pio.RunPlatformIo("avrdude",
-                new[]
-                {
-                    "pkg", "exec", "avrdude", "-c",
-                    $"avrdude -F -C {configFile} -p {dfu.GetRestoreProcessor()} -c flip1 -U flash:w:{firmware}:i"
-                }, "", 0, 100, device).Subscribe(s => { }, s => { }, () => { dfu.Launch(); });
-        }
-        else if (!IsPico() && !Board.HasUsbmcu && device is Arduino)
-        {
-            _reverting = false;
-            // Erase the device so it stays in bootloader mode, the ide can just program that
-            _ = _model.Main.Pio.RunPlatformIo("avrdude",
-                new[]
-                {
-                    "pkg", "exec", "avrdude", "-c",
-                    $"avrdude -p atmega32u4 -C {configFile} -P {device.GetUploadPortAsync().Result!} -c avr109 -e"
-                }, "", 0, 100, device).Subscribe(s => { }, s => { }, () => { });
-        }
-    }
 
     public void Revert()
     {
-        // No revert for esp32 or mini since they are always in a programmable state
-        if (IsEsp32() || IsMini())
-        {
-            return;
-        }
-
-        _reverting = true;
         Bootloader();
     }
 

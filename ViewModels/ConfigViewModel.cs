@@ -68,8 +68,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public bool SupportsReset { get; }
 
-    private bool _reverting;
-
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
         Device = device;
@@ -1051,9 +1049,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 "The following action will revert your device back to an Arduino, are you sure you want to do this?"))
             .ToTask();
         if (!yesNo.Response) return;
-        _reverting = true;
-        Device.Revert();
-        await Main.GoBack.Execute();
+        if (Device is not Santroller device) return;
+        await Main.RevertCommand.Execute(device);
     }
 
     [RelayCommand]
@@ -1342,7 +1339,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private void RemoveDevice(IConfigurableDevice device)
     {
-        if (!Main.Working && !_reverting)
+        if (!Main.Working)
         {
             ShowUnpluggedDialog.Handle(("", "", "")).ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(s => Main.GoBack.Execute(new Unit()));

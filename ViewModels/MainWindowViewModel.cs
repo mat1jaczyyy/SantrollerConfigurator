@@ -68,6 +68,9 @@ namespace GuitarConfigurator.NetCore.ViewModels
             InitialConfigureCommand = ReactiveCommand.CreateFromObservable(
                 () => Router.Navigate.Execute(new InitialConfigViewModel(this, new ConfigViewModel(this, SelectedDevice!)))
             );
+            RevertCommand = ReactiveCommand.CreateFromObservable<Santroller, IRoutableViewModel>(
+                device => Router.Navigate.Execute(new RestoreViewModel(this, device))
+            );
             AvailableDevices.Connect().Bind(out var devices).Subscribe();
             AvailableDevices.Connect().Subscribe(s =>
             {
@@ -154,6 +157,7 @@ namespace GuitarConfigurator.NetCore.ViewModels
         }
 
         public ReactiveCommand<Unit, IRoutableViewModel> ConfigureCommand { get; }
+        public ReactiveCommand<Santroller, IRoutableViewModel> RevertCommand { get; }
         public ReactiveCommand<Unit, IRoutableViewModel> InitialConfigureCommand { get; }
 
         // The command that navigates a user back.
