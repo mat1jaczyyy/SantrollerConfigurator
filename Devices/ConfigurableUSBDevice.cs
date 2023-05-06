@@ -68,11 +68,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public async Task<string?> GetUploadPortAsync()
     {
-        if (!Board.ArdwiinoName.Contains("pico") && !Board.HasUsbmcu) return null;
-        if (!Device.IsOpen)
-        {
-            
-        }
+        if (!Board.ArdwiinoName.Contains("pico") && !Board.HasUsbmcu && !Is32U4()) return null;
         _bootloaderPath = new TaskCompletionSource<string?>();
         Bootloader();
         return await _bootloaderPath.Task;

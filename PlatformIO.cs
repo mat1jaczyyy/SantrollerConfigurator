@@ -205,7 +205,6 @@ public class PlatformIo
                     if (device != null)
                     {
                         Console.WriteLine("Detecting port please wait");
-                        device.Bootloader();
                         var port = await device.GetUploadPortAsync().ConfigureAwait(false);
                         if (device.Is32U4())
                         {
