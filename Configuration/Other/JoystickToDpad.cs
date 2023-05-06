@@ -52,7 +52,7 @@ public class JoystickToDpad : Output
     private List<ControllerButton> _outputs = new();
 
     public JoystickToDpad(ConfigViewModel model, int threshold, bool wii) : base(
-        model, new JoystickToDpadInput(model), Colors.Black, Colors.Black, Array.Empty<byte>())
+        model, new JoystickToDpadInput(model), Colors.Black, Colors.Black, Array.Empty<byte>(), true)
     {
         Threshold = threshold;
         Wii = wii;
@@ -62,20 +62,20 @@ public class JoystickToDpad : Output
             {
                 _outputs.Add(new ControllerButton(model,
                     new AnalogToDigital(new WiiInput(wiiInputType, model), AnalogToDigitalType.JoyLow, Threshold,
-                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadLeft));
+                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadLeft, true));
                 _outputs.Add(new ControllerButton(model,
                     new AnalogToDigital(new WiiInput(wiiInputType, model), AnalogToDigitalType.JoyHigh, Threshold,
-                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadRight));
+                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadRight, true));
             }
 
             foreach (var wiiInputType in JoystickToDpadYWii)
             {
                 _outputs.Add(new ControllerButton(model,
                     new AnalogToDigital(new WiiInput(wiiInputType, model), AnalogToDigitalType.JoyHigh, Threshold,
-                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadUp));
+                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadUp, true));
                 _outputs.Add(new ControllerButton(model,
                     new AnalogToDigital(new WiiInput(wiiInputType, model), AnalogToDigitalType.JoyLow, Threshold,
-                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown));
+                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown, true));
             }
 
             UpdateDetails();
@@ -84,16 +84,16 @@ public class JoystickToDpad : Output
 
         _outputs.Add(new ControllerButton(model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.LeftX, model), AnalogToDigitalType.JoyLow, Threshold,
-                model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadLeft));
+                model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadLeft, true));
         _outputs.Add(new ControllerButton(model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.LeftX, model), AnalogToDigitalType.JoyHigh, Threshold,
-                model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadRight));
+                model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadRight, true));
         _outputs.Add(new ControllerButton(model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.LeftY, model), AnalogToDigitalType.JoyHigh, Threshold,
-                model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadUp));
+                model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadUp, true));
         _outputs.Add(new ControllerButton(model,
             new AnalogToDigital(new Ps2Input(Ps2InputType.LeftY, model), AnalogToDigitalType.JoyLow, Threshold,
-                model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown));
+                model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown, true));
         UpdateDetails();
     }
 
@@ -125,14 +125,19 @@ public class JoystickToDpad : Output
             : "Map Joystick to Dpad";
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    public override object GetOutputType()
     {
-        var buttons = "DPad";
+        if (!Up && !Down && !Left && !Right)
+        {
+            return Wii ? DpadType.Wii : DpadType.Ps2;
+        }
+
+        var buttons = Wii ? "Wii" : "Ps2";
         if (Up) buttons += "Up";
         if (Down) buttons += "Down";
         if (Left) buttons += "Left";
         if (Right) buttons += "Right";
-        return Wii ? $"Wii/Classic{buttons}.png" : $"PS2/{buttons}.png";
+        return Enum.Parse<DpadType>(buttons);
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
@@ -160,6 +165,8 @@ public class JoystickToDpad : Output
             output.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
                 ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
         }
+
+        if (!Enabled) return;
 
         Up = _outputs.Where(s => s.Type is StandardButtonType.DpadUp)
             .Any(x => x.ValueRaw != 0);

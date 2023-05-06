@@ -12,7 +12,7 @@ public class MouseAxis : OutputAxis
 {
     public MouseAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max, int deadZone, MouseAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
-        deadZone, false)
+        deadZone, false, false)
     {
         Type = type;
         UpdateDetails();
@@ -111,10 +111,10 @@ public class MouseAxis : OutputAxis
     {
         return EnumToStringConverter.Convert(Type);
     }
-
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    
+    public override object GetOutputType()
     {
-        return "Mouse.png";
+        return Type;
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,

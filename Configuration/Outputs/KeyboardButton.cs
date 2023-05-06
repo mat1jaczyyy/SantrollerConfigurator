@@ -140,7 +140,7 @@ public class KeyboardButton : OutputButton
 
     public KeyboardButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         byte debounce, Key type) : base(model, input, ledOn, ledOff, ledIndices,
-        debounce)
+        debounce, false)
     {
         Key = type;
         UpdateDetails();
@@ -158,12 +158,6 @@ public class KeyboardButton : OutputButton
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;
-
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
-    {
-        return "Keyboard.png";
-    }
-
     public override void UpdateBindings()
     {
     }
@@ -171,6 +165,11 @@ public class KeyboardButton : OutputButton
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return Keys.TryGetValue(Key, out var key) ? key : "";
+    }
+    
+    public override object GetOutputType()
+    {
+        return Key;
     }
 
     public override string GenerateOutput(ConfigField mode)

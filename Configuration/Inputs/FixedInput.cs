@@ -53,9 +53,4 @@ public class FixedInput : Input
     public override void Dispose()
     {
     }
-
-    public override string GetImagePath()
-    {
-        return "";
-    }
 }

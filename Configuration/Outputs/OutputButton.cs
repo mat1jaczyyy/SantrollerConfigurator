@@ -12,7 +12,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public abstract class OutputButton : Output
 {
     protected OutputButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
-        byte debounce) : base(model, input, ledOn, ledOff, ledIndices)
+        byte debounce, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, childOfCombined)
     {
         Debounce = debounce;
     }
@@ -25,6 +25,7 @@ public abstract class OutputButton : Output
     public override string LedOffLabel => "Released LED Colour";
 
     public abstract string GenerateOutput(ConfigField mode);
+
 
     /// <summary>
     ///     Generate bindings

@@ -157,9 +157,4 @@ public class GhWtTapInput : Input
         return new[]
             {"INPUT_WT_NECK", $"WT_PIN_INPUT {Pin}", $"WT_PIN_S0 {PinS0}", $"WT_PIN_S1 {PinS1}", $"WT_PIN_S2 {PinS2}"};
     }
-
-    public override string GetImagePath()
-    {
-        return $"GH/{Input}.png";
-    }
 }

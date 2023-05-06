@@ -482,9 +482,4 @@ public class Ps2Input : SpiInput
 
         return defines;
     }
-
-    public override string GetImagePath()
-    {
-        return $"PS2/{Input}.png";
-    }
 }

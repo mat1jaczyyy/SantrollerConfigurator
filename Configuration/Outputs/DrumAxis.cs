@@ -86,8 +86,8 @@ public partial class DrumAxis : OutputAxis
     private const StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
 
     public DrumAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
-        int deadZone, int threshold, int debounce, DrumAxisType type) : base(model, input, ledOn, ledOff, ledIndices,
-        min, max, deadZone, true)
+        int deadZone, int threshold, int debounce, DrumAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices,
+        min, max, deadZone, true, childOfCombined)
     {
         Type = type;
         Threshold = threshold;
@@ -117,6 +117,11 @@ public partial class DrumAxis : OutputAxis
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return EnumToStringConverter.Convert(Type);
+    }
+    
+    public override object GetOutputType()
+    {
+        return Type;
     }
     
     
@@ -358,14 +363,9 @@ public partial class DrumAxis : OutputAxis
         return true;
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
-    {
-        return $"{rhythmType}/{Type}.png";
-    }
-
     public override SerializedOutput Serialize()
     {
         return new SerializedDrumAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
-            DeadZone, Threshold, Debounce);
+            DeadZone, Threshold, Debounce, ChildOfCombined);
     }
 }

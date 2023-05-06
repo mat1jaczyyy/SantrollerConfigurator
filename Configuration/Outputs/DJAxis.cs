@@ -12,8 +12,8 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public class DjAxis : OutputAxis
 {
     public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
-        int deadZone, DjAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
-        false)
+        int deadZone, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
+        false, childOfCombined)
     {
         Type = type;
         UpdateDetails();
@@ -66,10 +66,15 @@ public class DjAxis : OutputAxis
     {
         return EnumToStringConverter.Convert(Type);
     }
+    
+    public override object GetOutputType()
+    {
+        return Type;
+    }
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDjAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone);
+        return new SerializedDjAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone, ChildOfCombined);
     }
 
     public override string GenerateOutput(ConfigField mode)
@@ -120,10 +125,6 @@ public class DjAxis : OutputAxis
         };
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
-    {
-        return $"DJ/{Type}.png";
-    }
 
     protected override bool SupportsCalibration()
     {

@@ -109,19 +109,24 @@ public class GhwtCombinedOutput : CombinedOutput
     {
         return "GHWT Slider Inputs";
     }
+    
+    public override object GetOutputType()
+    {
+        return SimpleType.WtNeckSimple;
+    }
 
     public void CreateDefaults()
     {
         Outputs.Add(new ControllerButton(Model,
             new GhWtTapInput(GhWtInputType.TapAll, Model, Pin, PinS0, PinS1, PinS2,
                 combined: true), Colors.Black,
-            Colors.Black, Array.Empty<byte>(), 5, StandardButtonType.A));
+            Colors.Black, Array.Empty<byte>(), 5, StandardButtonType.A, true));
         Outputs.Add(new GuitarAxis(Model,
             new GhWtTapInput(GhWtInputType.TapBar, Model, Pin, PinS0, PinS1, PinS2,
                 combined: true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-            GuitarAxisType.Slider));
+            GuitarAxisType.Slider, true));
         UpdateBindings();
     }
     
@@ -136,7 +141,7 @@ public class GhwtCombinedOutput : CombinedOutput
         // Map Tap bar to Upper frets on RB guitars
         if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
         {
-            outputs.AddRange(TapRb.Select(pair => new GuitarButton(Model, new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value)));
+            outputs.AddRange(TapRb.Select(pair => new GuitarButton(Model, new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value, true)));
 
             outputs.Remove(tapAnalog);
         }
@@ -146,7 +151,7 @@ public class GhwtCombinedOutput : CombinedOutput
         {
             outputs.Add(new ControllerButton(Model, new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true),
                 Colors.Black,
-                Colors.Black, Array.Empty<byte>(), 5, pair.Value));
+                Colors.Black, Array.Empty<byte>(), 5, pair.Value, true));
             outputs.Remove(tapFrets);
         }
 
@@ -171,7 +176,7 @@ public class GhwtCombinedOutput : CombinedOutput
                     combined: true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                GuitarAxisType.Slider));
+                GuitarAxisType.Slider, true));
         }
         else if (axisGuitar != null)
         {
@@ -181,12 +186,7 @@ public class GhwtCombinedOutput : CombinedOutput
                     combined: true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                StandardAxisType.LeftStickX));
+                StandardAxisType.LeftStickX, true));
         }
-    }
-
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
-    {
-        return "Combined/GHWT.png";
     }
 }

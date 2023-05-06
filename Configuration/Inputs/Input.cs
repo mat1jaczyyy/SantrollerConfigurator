@@ -16,17 +16,12 @@ namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public abstract class Input : ReactiveObject, IDisposable
 {
-
-    private Bitmap? _image;
-
     protected Input(ConfigViewModel model)
     {
         Model = model;
     }
 
     protected ConfigViewModel Model { get; }
-
-    public Bitmap Image => GetImage();
 
     [Reactive] public bool IsAnalog { get; set; }
     [Reactive] public int RawValue { get; set; }
@@ -62,26 +57,5 @@ public abstract class Input : ReactiveObject, IDisposable
     public abstract string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode);
 
-    public abstract string GetImagePath();
-
     public abstract string Title { get; }
-
-    private Bitmap GetImage()
-    {
-        if (_image != null) return _image;
-
-        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
-        try
-        {
-            var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{GetImagePath()}"));
-            _image = new Bitmap(asset);
-        }
-        catch (FileNotFoundException)
-        {
-            var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Generic.png"));
-            _image = new Bitmap(asset);
-        }
-
-        return _image;
-    }
 }

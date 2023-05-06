@@ -30,7 +30,7 @@ public class UsbHostInputInput : FixedInput
 public class UsbHostInput : Output
 {
     public UsbHostInput(ConfigViewModel model) : base(
-        model, new UsbHostInputInput(model), Colors.Black, Colors.Black, Array.Empty<byte>())
+        model, new UsbHostInputInput(model), Colors.Black, Colors.Black, Array.Empty<byte>(), false)
     {
         UpdateDetails();
     }
@@ -62,9 +62,9 @@ public class UsbHostInput : Output
         return "Usb Host Inputs";
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    public override object GetOutputType()
     {
-        return "Usb.png";
+        return SimpleType.UsbHost;
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,

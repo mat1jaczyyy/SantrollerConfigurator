@@ -20,7 +20,7 @@ public class Rumble : Output
     private RumbleMotorType _rumbleMotorType;
 
     public Rumble(ConfigViewModel model, int pin, RumbleMotorType rumbleMotorType) : base(model,
-        new FixedInput(model, 0), Colors.Black, Colors.Black, new byte[] { })
+        new FixedInput(model, 0), Colors.Black, Colors.Black, new byte[] { }, false)
     {
         Pin = pin;
         RumbleMotorType = rumbleMotorType;
@@ -96,9 +96,9 @@ public class Rumble : Output
         return new SerializedRumble(RumbleMotorType, Pin);
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    public override object GetOutputType()
     {
-        return $"Motors/{RumbleMotorType}.png";
+        return RumbleMotorType;
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,

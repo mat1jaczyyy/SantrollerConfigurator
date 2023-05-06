@@ -11,7 +11,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public class MouseButton : OutputButton
 {
     public MouseButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce,
-        MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce)
+        MouseButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce, false)
     {
         Type = type;
         UpdateDetails();
@@ -41,10 +41,10 @@ public class MouseButton : OutputButton
     {
         return EnumToStringConverter.Convert(Type);
     }
-
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    
+    public override object GetOutputType()
     {
-        return "Mouse.png";
+        return Type;
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,

@@ -56,9 +56,17 @@
         <DataTemplate x:Key="EnumToStringTemplate" DataType="system:Object">
             <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
         </DataTemplate>
-        <DataTemplate x:Key="SimpleTypeImageTemplate" DataType="system:Object">
+        <DataTemplate x:Key="ImageWithTextTemplate" DataType="system:Object">
             <StackPanel Orientation="Horizontal">
-                <Image Source="{Binding Converter={StaticResource SimpleTypeImageConverter}}" Width="25" />
+                <Image Width="25">
+                    <Image.Source>
+                        <MultiBinding Converter="{StaticResource SimpleTypeImageConverter }">
+                            <Binding />
+                            <Binding Path="$parent[views:ConfigView].DeviceType" />
+                            <Binding Path="$parent[views:ConfigView].RhythmType" />
+                        </MultiBinding>
+                    </Image.Source>
+                </Image>
                 <Label VerticalContentAlignment="Center" VerticalAlignment="Center">
                     <Label.Content>
                         <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
@@ -68,6 +76,26 @@
                         </MultiBinding>
                     </Label.Content>
                 </Label>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ImageOutputTemplate" DataType="output:Output">
+            <StackPanel Orientation="Horizontal">
+                <Image Width="75" Opacity="{Binding ImageOpacity}">
+                    <Image.Source>
+                        <MultiBinding Converter="{StaticResource SimpleTypeImageConverter }">
+                            <Binding Path="OutputType" />
+                            <Binding Path="$parent[views:ConfigView].DeviceType" />
+                            <Binding Path="$parent[views:ConfigView].RhythmType" />
+                        </MultiBinding>
+                    </Image.Source>
+                    <ToolTip.Tip>
+                        <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
+                            <Binding Path="OutputType" />
+                            <Binding Path="$parent[views:ConfigView].DeviceType" />
+                            <Binding Path="$parent[views:ConfigView].RhythmType" />
+                        </MultiBinding>
+                    </ToolTip.Tip>
+                </Image>
             </StackPanel>
         </DataTemplate>
         <netCore:OutputTemplateSelector x:Key="OutputSelectionTemplate">
@@ -260,11 +288,9 @@
                 <StackPanel IsVisible="{Binding IsEmpty}" Background="Black" MinHeight="75"
                             x:DataType="output:EmptyOutput">
                     <WrapPanel Margin="20 20 20 0">
-                        <Image ToolTip.Tip="{Binding LocalisedName}"
-                               IsVisible="{Binding IsController}"
-                               HorizontalAlignment="Center" Width="75"
-                               Source="{Binding Image}"
-                               Opacity="{Binding ImageOpacity}" />
+                        <ContentControl ContentTemplate="{StaticResource ImageOutputTemplate}"
+                                        Content="{Binding }">
+                        </ContentControl>
                         <Label IsVisible="{Binding IsKeyboard}"
                                Content="{Binding LocalisedName}" />
                         <StackPanel Orientation="Horizontal">
@@ -272,7 +298,7 @@
                                 <ComboBox VerticalAlignment="Center"
                                           SelectedItem="{Binding CombinedType}"
                                           ItemsSource="{Binding CombinedTypes}"
-                                          ItemTemplate="{StaticResource SimpleTypeImageTemplate}" />
+                                          ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" IsVisible="{Binding IsKeyboard}">
                                 <ComboBox VerticalAlignment="Center"
@@ -1653,10 +1679,11 @@
                         <Label HorizontalAlignment="Center" IsVisible="{Binding ChildOfCombined}"
                                Content="{Binding Input.Title}" />
                         <StackPanel Orientation="Horizontal">
-                            <Image IsVisible="{Binding ChildOfCombined}" ToolTip.Tip="{Binding Input.Title}"
-                                   HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
-                                   Source="{Binding Image}"
-                                   Opacity="{Binding ImageOpacity}" />
+                            <ContentControl IsVisible="{Binding ChildOfCombined}"
+                                            ContentTemplate="{StaticResource ImageOutputTemplate}"
+                                            HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
+                                            Content="{Binding }">
+                            </ContentControl>
                         </StackPanel>
                     </StackPanel>
                     <ToggleSwitch HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
@@ -1758,9 +1785,10 @@
                                         <DataTemplate DataType="output:Output">
                                             <Panel>
                                                 <StackPanel Orientation="Horizontal">
-                                                    <Image Width="75"
-                                                           Source="{Binding Image}"
-                                                           Opacity="{Binding ImageOpacity}" />
+                                                    <ContentControl
+                                                        ContentTemplate="{StaticResource ImageOutputTemplate}"
+                                                        Content="{Binding }">
+                                                    </ContentControl>
                                                     <Label VerticalAlignment="Center"
                                                            VerticalContentAlignment="Center"
                                                            Content="{Binding LocalisedName}" />

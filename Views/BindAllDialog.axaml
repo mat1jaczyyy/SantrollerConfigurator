@@ -22,6 +22,8 @@
         ExtendClientAreaToDecorationsHint="True">
     <Panel>
         <Panel.Resources>
+            <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
+            <netCore:SimpleTypeImageConverter x:Key="SimpleTypeImageConverter" />
             <netCore:PinToStringConverter x:Key="PinToStringConverter" />
             <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
                 <TextBlock>
@@ -58,9 +60,22 @@
                             <Label Content="Binding:" />
                             <Label Content="{Binding LocalisedName}" />
                         </StackPanel>
-                        <Image ToolTip.Tip="{Binding LocalisedName}"
-                               HorizontalAlignment="Center" Width="75"
-                               Source="{Binding Image}" />
+                        <Image Width="75" Opacity="{Binding Output.ImageOpacity}">
+                            <Image.Source>
+                                <MultiBinding Converter="{StaticResource SimpleTypeImageConverter }">
+                                    <Binding Path="Output" />
+                                    <Binding Path="Model.DeviceType" />
+                                    <Binding Path="Model.RhythmType" />
+                                </MultiBinding>
+                            </Image.Source>
+                            <ToolTip.Tip>
+                                <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
+                                    <Binding Path="Output.OutputType" />
+                                    <Binding Path="Model.DeviceType" />
+                                    <Binding Path="Model.RhythmType" />
+                                </MultiBinding>
+                            </ToolTip.Tip>
+                        </Image>
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Input.Pin}"
                                   ItemsSource="{Binding Input.AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />

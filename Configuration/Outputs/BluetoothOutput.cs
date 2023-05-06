@@ -78,11 +78,6 @@ public partial class BluetoothOutput : CombinedOutput
         {
             return "";
         }
-
-        public override string GetImagePath()
-        {
-            return BluetoothOutput.GetImagePath(Model.DeviceType, Model.RhythmType);
-        }
     }
 
 
@@ -140,14 +135,14 @@ public partial class BluetoothOutput : CombinedOutput
         return new SerializedBluetoothOutput(MacAddress);
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
-    {
-        return "bluetooth.png";
-    }
-
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return "Bluetooth Input";
+    }
+    
+    public override object GetOutputType()
+    {
+        return SimpleType.Bluetooth;
     }
 
     public override void Update(Dictionary<int, int> analogRaw,

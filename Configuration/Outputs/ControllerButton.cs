@@ -15,7 +15,7 @@ public class ControllerButton : OutputButton
     private readonly ObservableAsPropertyHelper<bool> _valid;
 
     public ControllerButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
-        byte debounce, StandardButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce)
+        byte debounce, StandardButtonType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, debounce, childOfCombined)
     {
         Type = type;
         _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
@@ -39,6 +39,11 @@ public class ControllerButton : OutputButton
     {
         return ControllerEnumConverter.GetButtonText(deviceControllerType, Type) ?? Type.ToString();
     }
+    
+    public override object GetOutputType()
+    {
+        return Type;
+    }
 
     public override string GenerateOutput(ConfigField mode)
     {
@@ -48,31 +53,8 @@ public class ControllerButton : OutputButton
             : "";
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
-    {
-        switch (type)
-        {
-            case DeviceControllerType.Gamepad:
-            case DeviceControllerType.ArcadeStick:
-            case DeviceControllerType.FlightStick:
-            case DeviceControllerType.DancePad:
-            case DeviceControllerType.ArcadePad:
-            case DeviceControllerType.StageKit:
-                return $"Others/Xbox360/360_{Type}.png";
-            case DeviceControllerType.Guitar:
-            case DeviceControllerType.Drum:
-                return $"{rhythmType}/{Type}.png";
-            case DeviceControllerType.LiveGuitar:
-                return $"GuitarHero/{Type}.png";
-            case DeviceControllerType.Turntable:
-                return $"DJ/{Type}.png";
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
-    }
-
     public override SerializedOutput Serialize()
     {
-        return new SerializedControllerButton(Input.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);
+        return new SerializedControllerButton(Input.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type, ChildOfCombined);
     }
 }

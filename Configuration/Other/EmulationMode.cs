@@ -17,7 +17,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Other;
 public class EmulationMode : Output
 {
     public EmulationMode(ConfigViewModel model, Input input, EmulationModeType type) : base(
-        model, input, Colors.Black, Colors.Black, Array.Empty<byte>())
+        model, input, Colors.Black, Colors.Black, Array.Empty<byte>(), false)
     {
         Type = type;
         _emulationModes.AddRange(Enum.GetValues<EmulationModeType>());
@@ -79,19 +79,9 @@ public class EmulationMode : Output
         return EnumToStringConverter.Convert(Type) + " Console Mode Binding";
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    public override object GetOutputType()
     {
-        var image = Type switch
-        {
-            EmulationModeType.XboxOne => "XboxOne",
-            EmulationModeType.Xbox360 => "Xbox360",
-            EmulationModeType.Wii => "Wii",
-            EmulationModeType.Ps3 => "PS3",
-            EmulationModeType.Ps4Or5 => "PS4",
-            EmulationModeType.Switch => "Switch",
-            _ => throw new ArgumentOutOfRangeException()
-        };
-        return $"Combined/{image}.png";
+        return Type;
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,

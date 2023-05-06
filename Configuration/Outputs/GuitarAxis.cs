@@ -16,8 +16,8 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public class GuitarAxis : OutputAxis
 {
     public GuitarAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff,
-        byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type) : base(model, input, ledOn,
-        ledOff, ledIndices, min, max, deadZone, type is GuitarAxisType.Slider or GuitarAxisType.Whammy)
+        byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type, bool childOfCombined) : base(model, input, ledOn,
+        ledOff, ledIndices, min, max, deadZone, type is GuitarAxisType.Slider or GuitarAxisType.Whammy, childOfCombined)
     {
         Type = type;
         UpdateDetails();
@@ -101,17 +101,17 @@ public class GuitarAxis : OutputAxis
     public override SerializedOutput Serialize()
     {
         return new SerializedGuitarAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
-            DeadZone);
+            DeadZone, ChildOfCombined);
     }
 
     public override string GenerateOutput(ConfigField mode)
     {
         return GetReportField(Type);
     }
-
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    
+    public override object GetOutputType()
     {
-        return $"{rhythmType}/{Type}.png";
+        return Type;
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,

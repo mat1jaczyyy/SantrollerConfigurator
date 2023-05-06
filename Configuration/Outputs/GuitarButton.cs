@@ -13,7 +13,7 @@ public class GuitarButton : OutputButton
     public readonly InstrumentButtonType Type;
 
     public GuitarButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce,
-        InstrumentButtonType type) : base(model, input, ledOn, ledOff, ledIndices, debounce)
+        InstrumentButtonType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, debounce, childOfCombined)
     {
         Type = type;
         UpdateDetails();
@@ -52,14 +52,14 @@ public class GuitarButton : OutputButton
     }
 
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
-    {
-        return $"RockBand/{Type}.png";
-    }
-
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return EnumToStringConverter.Convert(Type);
+    }
+    
+    public override object GetOutputType()
+    {
+        return Type;
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
@@ -116,6 +116,6 @@ public class GuitarButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedRbButton(Input!.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);
+        return new SerializedRbButton(Input!.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type, ChildOfCombined);
     }
 }

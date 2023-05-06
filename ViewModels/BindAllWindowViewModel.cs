@@ -26,7 +26,6 @@ public class BindAllWindowViewModel : ReactiveObject
         Output = output;
         Input = input;
         IsAnalog = input.IsAnalog;
-        Image = output.GetImage(model.DeviceType, model.RhythmType);
         LocalisedName = output.GetName(model.DeviceType, model.RhythmType);
 
         ContinueCommand = ReactiveCommand.CreateFromObservable(() => Close(true));
@@ -58,8 +57,6 @@ public class BindAllWindowViewModel : ReactiveObject
     public bool Response { get; set; }
     public bool IsAnalog { get; }
     public string LocalisedName { get; }
-
-    public Bitmap? Image { get; }
 
     private IObservable<Unit> Close(bool response)
     {

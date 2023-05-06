@@ -587,11 +587,6 @@ break;
 
     public override string Title => EnumToStringConverter.Convert(Input);
 
-    public override string GetImagePath()
-    {
-        return $"Wii/{Input}.png";
-    }
-
     public override IReadOnlyList<string> RequiredDefines()
     {
         if (Input.ToString().StartsWith("GuitarTap"))

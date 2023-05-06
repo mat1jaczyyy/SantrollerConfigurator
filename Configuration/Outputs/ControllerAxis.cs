@@ -17,8 +17,8 @@ public class ControllerAxis : OutputAxis
 
     public ControllerAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
-        int deadZone, StandardAxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max,
-        deadZone, IsTrigger(type))
+        int deadZone, StandardAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max,
+        deadZone, IsTrigger(type), childOfCombined)
     {
         Type = type;
         _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
@@ -81,6 +81,11 @@ public class ControllerAxis : OutputAxis
         return ControllerEnumConverter.GetAxisText(deviceControllerType,
             Type);
     }
+    
+    public override object GetOutputType()
+    {
+        return Type;
+    }
 
     private static bool IsTrigger(StandardAxisType type)
     {
@@ -90,29 +95,6 @@ public class ControllerAxis : OutputAxis
     public override string GenerateOutput(ConfigField mode)
     {
         return mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.XboxOne or ConfigField.Xbox360) ? "" : GetReportField(Type);
-    }
-
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
-    {
-        switch (type)
-        {
-            case DeviceControllerType.Gamepad:
-            case DeviceControllerType.ArcadeStick:
-            case DeviceControllerType.FlightStick:
-            case DeviceControllerType.DancePad:
-            case DeviceControllerType.ArcadePad:
-            case DeviceControllerType.StageKit:
-                return $"Others/Xbox360/360_{Type}.png";
-            case DeviceControllerType.Guitar:
-            case DeviceControllerType.Drum:
-                return $"{rhythmType}/{Type}.png";
-            case DeviceControllerType.LiveGuitar:
-                return $"GuitarHero/{Type}.png";
-            case DeviceControllerType.Turntable:
-                return $"DJ/{Type}.png";
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
     }
 
     protected override string MinCalibrationText()
@@ -163,7 +145,7 @@ public class ControllerAxis : OutputAxis
     public override SerializedOutput Serialize()
     {
         return new SerializedControllerAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
-            DeadZone);
+            DeadZone, ChildOfCombined);
     }
 
     public override void UpdateBindings()

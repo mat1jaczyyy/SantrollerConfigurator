@@ -32,7 +32,7 @@ public class EmptyOutput : Output
     private MouseButtonType? _mouseButtonType;
 
     public EmptyOutput(ConfigViewModel model) : base(model, new FixedInput(model, 0), Colors.Black, Colors.Black,
-        Array.Empty<byte>())
+        Array.Empty<byte>(), false)
     {
         this.WhenAnyValue(x => x.Model.EmulationType)
             .Select(x => Model.GetSimpleEmulationType() is EmulationType.Controller)
@@ -139,20 +139,20 @@ public class EmptyOutput : Output
                     new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
                     ushort.MinValue, ushort.MaxValue, 0,
-                    standardAxisType),
+                    standardAxisType, false),
                 StandardButtonType standardButtonType => new ControllerButton(Model,
                     new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model), Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
-                    standardButtonType),
+                    standardButtonType, false),
                 InstrumentButtonType standardButtonType => new GuitarButton(Model,
                     new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model), Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
-                    standardButtonType),
+                    standardButtonType, false),
                 DrumAxisType drumAxisType => new DrumAxis(Model,
                     new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
                     ushort.MinValue, ushort.MaxValue, 0,
-                    1000, 10, drumAxisType),
+                    1000, 10, drumAxisType, false),
                 Ps3AxisType ps3AxisType => new Ps3Axis(Model,
                     new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
@@ -161,21 +161,21 @@ public class EmptyOutput : Output
                 GuitarAxisType guitarAxisType and not GuitarAxisType.Slider => new GuitarAxis(Model,
                     new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0, guitarAxisType),
+                    ushort.MinValue, ushort.MaxValue, 0, guitarAxisType, false),
                 GuitarAxisType.Slider => new GuitarAxis(Model,
                     new GhWtTapInput(GhWtInputType.TapBar, Model, Model.Microcontroller.GetFirstAnalogPin(),
                         Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(),
                         Model.Microcontroller.GetFirstDigitalPin()),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0, GuitarAxisType.Slider),
+                    ushort.MinValue, ushort.MaxValue, 0, GuitarAxisType.Slider, false),
                 DjAxisType djAxisType => new DjAxis(Model,
                     new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0, djAxisType),
+                    ushort.MinValue, ushort.MaxValue, 0, djAxisType, false),
                 DjInputType djInputType => new DjButton(Model,
                     new DirectInput(Model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
-                    djInputType),
+                    djInputType, false),
                 _ => null
             },
 
@@ -222,10 +222,11 @@ public class EmptyOutput : Output
         return "";
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    public override object GetOutputType()
     {
-        return "Generic.png";
+        return "Empty";
     }
+
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
         string combinedExtra,

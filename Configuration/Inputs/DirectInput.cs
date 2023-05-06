@@ -74,9 +74,4 @@ public class DirectInput : InputWithPin
         else
             RawValue = digitalRaw.GetValueOrDefault(Pin, true) ? 0 : 1;
     }
-
-    public override string GetImagePath()
-    {
-        return "";
-    }
 }

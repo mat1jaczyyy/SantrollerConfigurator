@@ -13,7 +13,7 @@ public class DjButton : OutputButton
     public readonly DjInputType Type;
 
     public DjButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce,
-        DjInputType type) : base(model, input, ledOn, ledOff, ledIndices, debounce)
+        DjInputType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, debounce, childOfCombined)
     {
         Type = type;
         UpdateDetails();
@@ -61,17 +61,19 @@ public class DjButton : OutputButton
 
         return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
     }
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return EnumToStringConverter.Convert(Type);
     }
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+
+    public override object GetOutputType()
     {
-        return $"DJ/{Type}.png";
+        return Type;
     }
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDjButton(Input.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type);
+        return new SerializedDjButton(Input.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type, ChildOfCombined);
     }
 }

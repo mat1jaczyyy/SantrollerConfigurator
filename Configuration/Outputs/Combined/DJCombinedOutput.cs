@@ -42,6 +42,11 @@ public class DjCombinedOutput : CombinedTwiOutput
     {
         return "DJ Turntable Inputs";
     }
+    
+    public override object GetOutputType()
+    {
+        return SimpleType.DjTurntableSimple;
+    }
 
     public void CreateDefaults()
     {
@@ -50,13 +55,13 @@ public class DjCombinedOutput : CombinedTwiOutput
         Outputs.AddRange(DjInputTypes.Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable))
             .Select(button => new DjButton(Model,
                 new DjInput(button, Model, combined: true),
-                Colors.Black, Colors.Black, Array.Empty<byte>(), 5, button)));
+                Colors.Black, Colors.Black, Array.Empty<byte>(), 5, button, true)));
         Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, combined: true),
             Colors.Black,
-            Colors.Black, Array.Empty<byte>(), 0, 16, 0, DjAxisType.LeftTableVelocity));
+            Colors.Black, Array.Empty<byte>(), 0, 16, 0, DjAxisType.LeftTableVelocity, true));
         Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.RightTurntable, Model, combined: true),
             Colors.Black,
-            Colors.Black, Array.Empty<byte>(), 0, 16, 0, DjAxisType.RightTableVelocity));
+            Colors.Black, Array.Empty<byte>(), 0, 16, 0, DjAxisType.RightTableVelocity, true));
     }
 
     public override void UpdateBindings()
@@ -79,10 +84,5 @@ public class DjCombinedOutput : CombinedTwiOutput
             wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
         DetectedLeft = djLeftRaw.Any();
         DetectedRight = djRightRaw.Any();
-    }
-
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
-    {
-        return "Combined/DJ.png";
     }
 }

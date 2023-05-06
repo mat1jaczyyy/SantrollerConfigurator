@@ -67,8 +67,9 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     private bool _configured;
 
-    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices)
+    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, bool childOfCombined)
     {
+        ChildOfCombined = childOfCombined;
         ButtonText = "Click to assign";
         Model = model;
         Input = input;
@@ -78,8 +79,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
         this.WhenAnyValue(x => x.Model.LedCount)
             .Select(x => Enumerable.Range(1, x).Select(s => new LedIndex(this, (byte) s)).ToArray())
             .ToPropertyEx(this, x => x.AvailableIndices);
-        this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
-            .Select(x => GetImage(x.Item1, x.Item2)).ToPropertyEx(this, x => x.Image);
         this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is DjInput)
             .ToPropertyEx(this, x => x.IsDj);
         this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is WiiInput)
@@ -105,6 +104,10 @@ public abstract partial class Output : ReactiveObject, IDisposable
         this.WhenAnyValue(x => x.Enabled)
             .Select(s => s ? 1 : 0.5)
             .ToPropertyEx(this, s => s.CombinedOpacity);
+        this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails,
+                x => x.ChildOfCombined)
+            .Select(x => x.Item4 ? GetChildOutputType() : GetOutputType())
+            .ToPropertyEx(this, x => x.OutputType);
         this.WhenAnyValue(x => x.Enabled)
             .Select(enabled => enabled ? Brush.Parse("#99000000") : Brush.Parse("#33000000"))
             .ToPropertyEx(this, s => s.CombinedBackground);
@@ -113,6 +116,36 @@ public abstract partial class Output : ReactiveObject, IDisposable
         AnalogOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
         DigitalOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
         _configured = true;
+    }
+
+    private object GetChildOutputType()
+    {
+        if (Input.InnermostInput() is WiiInput wii)
+        {
+            return wii.Input;
+        }
+
+        if (Input.InnermostInput() is Ps2Input ps2)
+        {
+            return ps2.Input;
+        }
+
+        if (Input.InnermostInput() is DjInput dj)
+        {
+            return dj.Input;
+        }
+
+        if (Input.InnermostInput() is Gh5NeckInput gh5)
+        {
+            return gh5.Input;
+        }
+
+        if (Input.InnermostInput() is GhWtTapInput wt)
+        {
+            return wt.Input;
+        }
+
+        return GetOutputType();
     }
 
     protected void UpdateDetails()
@@ -233,7 +266,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
             s is not InputType.UsbHostInput);
 
     // ReSharper disable UnassignedGetOnlyAutoProperty
-    [ObservableAsProperty] public Bitmap? Image { get; }
+    [ObservableAsProperty] public object? OutputType { get; }
     [ObservableAsProperty] public string LocalisedName { get; } = "";
     [ObservableAsProperty] public bool IsDj { get; }
     [ObservableAsProperty] public bool IsWii { get; }
@@ -266,7 +299,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     public abstract bool IsKeyboard { get; }
     public bool IsLed => this is Led;
 
-    public bool ChildOfCombined => Model.IsCombinedChild(this);
+    public bool ChildOfCombined { get; }
     public bool IsEmpty => this is EmptyOutput;
 
     public abstract bool Valid { get; }
@@ -350,6 +383,8 @@ public abstract partial class Output : ReactiveObject, IDisposable
     }
 
     public abstract string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType);
+
+    public abstract object GetOutputType();
 
     public static string GetReportField(object type)
     {
@@ -536,25 +571,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
 
     public abstract SerializedOutput Serialize();
-
-    public abstract string GetImagePath(DeviceControllerType type, RhythmType rhythmType);
-
-    public Bitmap GetImage(DeviceControllerType type, RhythmType rhythmType)
-    {
-        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
-        var bitmap = GetImagePath(type, rhythmType);
-
-
-        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-        try
-        {
-            return new Bitmap(assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{bitmap}")));
-        }
-        catch (FileNotFoundException)
-        {
-            return new Bitmap(assets!.Open(new Uri($"avares://{assemblyName}/Assets/Icons/None.png")));
-        }
-    }
 
     public abstract string Generate(ConfigField mode, List<int> debounceIndex, string extra,
         string combinedExtra,

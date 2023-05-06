@@ -138,11 +138,6 @@ public class AnalogToDigital : Input
         Child.Dispose();
     }
 
-    public override string GetImagePath()
-    {
-        return Child.GetImagePath();
-    }
-
     public override string Title => Child.Title;
 
     public override IReadOnlyList<string> RequiredDefines()

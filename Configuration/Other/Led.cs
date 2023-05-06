@@ -148,7 +148,7 @@ public class Led : Output
         Color ledOff, byte[] ledIndices, LedCommandType command, int param, int param2) : base(model,
         new FixedInput(model, 0),
         ledOn, ledOff,
-        ledIndices)
+        ledIndices, false)
     {
         Player = 1;
         Combo = 1;
@@ -474,9 +474,9 @@ public class Led : Output
         return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command, param1, param2, OutputEnabled, Pin);
     }
 
-    public override string GetImagePath(DeviceControllerType type, RhythmType rhythmType)
+    public override object GetOutputType()
     {
-        return $"Led/{Command}.png";
+        return Command;
     }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,

@@ -104,10 +104,6 @@ public class DjInput : TwiInput
                   }}";
     }
     public override string Title => EnumToStringConverter.Convert(Input);
-    public override string GetImagePath()
-    {
-        return $"DJ/{Input}.png";
-    }
 
     public override IReadOnlyList<string> RequiredDefines()
     {

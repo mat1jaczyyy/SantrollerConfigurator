@@ -100,9 +100,4 @@ public class DigitalToAnalog : Input
     {
         Child.Dispose();
     }
-
-    public override string GetImagePath()
-    {
-        return Child.GetImagePath();
-    }
 }

@@ -497,7 +497,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public void UpdateBindings()
     {
         foreach (var binding in Bindings.Items) binding.UpdateBindings();
-        InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this);
+        InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this, false);
         if (!(IsRhythm && IsController))
         {
             _rhythmType = RhythmType.GuitarHero;
@@ -562,37 +562,37 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 case StandardButtonType buttonType:
                     Bindings.Add(new ControllerButton(this,
                         new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
-                        Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType));
+                        Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType, false));
                     break;
                 case InstrumentButtonType buttonType:
                     Bindings.Add(new GuitarButton(this,
                         new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
-                        Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType));
+                        Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType, false));
                     break;
                 case StandardAxisType axisType:
                     Bindings.Add(new ControllerAxis(this,
                         new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, axisType));
+                        0, axisType, false));
                     break;
                 case GuitarAxisType axisType:
                     Bindings.Add(new GuitarAxis(this, new DirectInput(Microcontroller.GetFirstAnalogPin(),
                             DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, axisType));
+                        0, axisType, false));
                     break;
                 case DrumAxisType axisType:
                     Bindings.Add(new DrumAxis(this,
                         new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, 64, 10, axisType));
+                        0, 64, 10, axisType, false));
                     break;
                 case DjAxisType axisType:
                     if (axisType is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity) continue;
                     Bindings.Add(new DjAxis(this,
                         new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, axisType));
+                        0, axisType, false));
                     break;
             }
     }
@@ -752,7 +752,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 new DirectInput(Microcontroller.GetFirstAnalogPin(), DevicePinMode.Analog, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), isTrigger ? ushort.MinValue : short.MinValue,
                 isTrigger ? ushort.MaxValue : short.MaxValue, 0,
-                type));
+                type, false));
         }
 
         foreach (var type in Enum.GetValues<StandardButtonType>())
@@ -761,7 +761,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 null) continue;
             Bindings.Add(new ControllerButton(this,
                 new DirectInput(Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, this),
-                Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type));
+                Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type, false));
         }
 
         UpdateErrors();
@@ -1236,11 +1236,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         return debounces.Count;
-    }
-
-    public bool IsCombinedChild(Output output)
-    {
-        return !Bindings.Items.Contains(output);
     }
 
     public Dictionary<string, List<int>> GetPins(string type)
