@@ -72,8 +72,8 @@ public class Gh5NeckInput : TwiInput
             type => Gh5Mappings.Where(mapping => mapping.Value.HasFlag(InputToButton[type]))
                 .Select(mapping => mapping.Key).ToList().AsReadOnly());
 
-    public Gh5NeckInput(Gh5NeckInputType input, ConfigViewModel model, int? sda = null,
-        int? scl = null, bool combined = false) : base(
+    public Gh5NeckInput(Gh5NeckInputType input, ConfigViewModel model, int sda = -1,
+        int scl = -1, bool combined = false) : base(
         Gh5TwiType, Gh5TwiFreq, sda, scl, model)
     {
         Combined = combined;

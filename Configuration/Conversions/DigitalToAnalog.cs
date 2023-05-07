@@ -95,9 +95,4 @@ public class DigitalToAnalog : Input
     {
         return Child.RequiredDefines();
     }
-
-    public override void Dispose()
-    {
-        Child.Dispose();
-    }
 }

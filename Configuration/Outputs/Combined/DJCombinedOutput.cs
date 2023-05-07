@@ -14,16 +14,9 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public class DjCombinedOutput : CombinedTwiOutput
 {
-    public DjCombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
-        IReadOnlyCollection<Output>? outputs = null) :
+    public DjCombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1) :
         base(model, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ", sda, scl)
     {
-        Outputs.Clear();
-        if (outputs != null)
-            Outputs.AddRange(outputs);
-        else
-            CreateDefaults();
-
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Bind(out var analogOutputs)
             .Subscribe();
@@ -34,6 +27,19 @@ public class DjCombinedOutput : CombinedTwiOutput
         DigitalOutputs = digitalOutputs;
     }
 
+    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    {
+        Outputs.Clear();
+        if (outputs.Any())
+        {
+            Outputs.AddRange(outputs);
+        }
+        else
+        {
+            CreateDefaults();
+        }
+    }
+
     [Reactive] public bool DetectedLeft { get; set; }
 
     [Reactive] public bool DetectedRight { get; set; }
@@ -42,7 +48,7 @@ public class DjCombinedOutput : CombinedTwiOutput
     {
         return "DJ Turntable Inputs";
     }
-    
+
     public override object GetOutputType()
     {
         return SimpleType.DjTurntableSimple;

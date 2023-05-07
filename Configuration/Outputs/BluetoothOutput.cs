@@ -36,10 +36,6 @@ public partial class BluetoothOutput : CombinedOutput
         public override IList<PinConfig> PinConfigs => new List<PinConfig>();
         public override InputType? InputType => Types.InputType.RfInput;
 
-        public override void Dispose()
-        {
-        }
-
         public override string Title => "Bluetooth";
 
         public override IReadOnlyList<string> RequiredDefines()

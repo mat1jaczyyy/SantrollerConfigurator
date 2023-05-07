@@ -266,12 +266,6 @@ public class MacroInput : Input
         throw new InvalidOperationException("Never call GenerateAll on MacroInput, call it on its children");
     }
 
-    public override void Dispose()
-    {
-        Child1.Dispose();
-        Child2.Dispose();
-    }
-
     public override IReadOnlyList<string> RequiredDefines()
     {
         return Child1.RequiredDefines().Concat(Child2.RequiredDefines()).ToList();

@@ -14,7 +14,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
-public abstract class Input : ReactiveObject, IDisposable
+public abstract class Input : ReactiveObject
 {
     protected Input(ConfigViewModel model)
     {
@@ -31,8 +31,6 @@ public abstract class Input : ReactiveObject, IDisposable
     public abstract IList<DevicePin> Pins { get; }
     public abstract IList<PinConfig> PinConfigs { get; }
     public abstract InputType? InputType { get; }
-
-    public abstract void Dispose();
 
     public abstract IReadOnlyList<string> RequiredDefines();
     public abstract string Generate(ConfigField mode);

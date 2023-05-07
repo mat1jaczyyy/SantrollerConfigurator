@@ -14,28 +14,14 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
 
     protected CombinedSpiOutput(ConfigViewModel model, string spiType, uint spiFreq,
         bool cpol,
-        bool cpha, bool msbFirst, string name, int? miso = null, int? mosi = null, int? sck = null) : base(model, new FixedInput(model, 0))
+        bool cpha, bool msbFirst, string name, int miso = -1, int mosi = -1, int sck = -1) : base(model,
+        new FixedInput(model, 0))
     {
         SpiType = spiType;
         BindableSpi = Model.Microcontroller.SpiAssignable;
-        var config = Model.Microcontroller.GetSpiForType(SpiType);
-        if (config != null)
-        {
-            SpiConfig = config;
-        }
-        else
-        {
-            if (miso == null || mosi == null || sck == null)
-            {
-                var pins = Model.Microcontroller.FreeSpiPins(SpiType);
-                miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
-                mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
-                sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-            }
-
-            SpiConfig = Model.Microcontroller.AssignSpiPins(model, SpiType, mosi.Value, miso.Value, sck.Value, cpol, cpha,
-                msbFirst, spiFreq)!;
-        }
+        var config = Model.GetSpiForType(SpiType);
+        SpiConfig = config ?? Model.Microcontroller.AssignSpiPins(model, SpiType, mosi, miso, sck, cpol, cpha,
+            msbFirst, spiFreq);
 
         this.WhenAnyValue(x => x.SpiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
         this.WhenAnyValue(x => x.SpiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
@@ -94,9 +80,8 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
             .Select(s => s.Key).ToList();
     }
 
-    public override void Dispose()
+    protected override IEnumerable<PinConfig> GetOwnPinConfigs()
     {
-        Model.Microcontroller.UnAssignPins(SpiType);
-        base.Dispose();
+        return new[] {SpiConfig};
     }
 }

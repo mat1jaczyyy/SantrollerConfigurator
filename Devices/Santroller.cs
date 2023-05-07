@@ -421,7 +421,7 @@ public class Santroller : IConfigurableDevice
     {
         _picking = true;
         var importantPins = new List<int>();
-        foreach (var config in microcontroller.PinConfigs)
+        foreach (var config in _model!.GetPinConfigs())
             switch (config)
             {
                 case SpiConfig spi:

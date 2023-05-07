@@ -55,7 +55,7 @@ public class LedIndex : ReactiveObject
     }
 }
 
-public abstract partial class Output : ReactiveObject, IDisposable
+public abstract partial class Output : ReactiveObject
 {
     private readonly Guid _id = new();
     protected readonly ConfigViewModel Model;
@@ -327,11 +327,6 @@ public abstract partial class Output : ReactiveObject, IDisposable
 
     public virtual bool SupportsLedOff => true;
     public bool ConfigurableInput => Input is not FixedInput;
-
-    public virtual void Dispose()
-    {
-        Input.Dispose();
-    }
 
     private object? GetKey()
     {
@@ -606,7 +601,7 @@ public abstract partial class Output : ReactiveObject, IDisposable
     {
         return Outputs.Items
             .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.PinConfigs)
-            .Distinct().Concat(GetOwnPinConfigs()).ToList();
+            .Concat(GetOwnPinConfigs()).Distinct().ToList();
     }
 
     public virtual void Update(Dictionary<int, int> analogRaw,

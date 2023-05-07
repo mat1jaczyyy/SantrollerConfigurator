@@ -48,7 +48,7 @@ public class DirectInput : InputWithPin
     public override string Generate(ConfigField mode)
     {
         return IsAnalog
-            ? Model.Microcontroller.GenerateAnalogRead(PinConfig.Pin)
+            ? Model.Microcontroller.GenerateAnalogRead(PinConfig.Pin, Model)
             : Model.Microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
     }
 

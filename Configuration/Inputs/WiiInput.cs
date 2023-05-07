@@ -245,8 +245,8 @@ public class WiiInput : TwiInput
 
     private readonly int[] _drumVelocity = new int[8];
 
-    public WiiInput(WiiInputType input, ConfigViewModel model, int? sda = null,
-        int? scl = null,
+    public WiiInput(WiiInputType input, ConfigViewModel model, int sda = -1,
+        int scl = -1,
         bool combined = false) : base(
         WiiTwiType, WiiTwiFreq, sda, scl, model)
     {

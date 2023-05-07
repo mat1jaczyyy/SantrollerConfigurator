@@ -174,15 +174,9 @@ public class WiiCombinedOutput : CombinedTwiOutput
     // ReSharper disable once UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public bool IsGuitar { get; }
 
-    public WiiCombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
-        IReadOnlyCollection<Output>? outputs = null) : base(model, WiiInput.WiiTwiType,
+    public WiiCombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1) : base(model, WiiInput.WiiTwiType,
         WiiInput.WiiTwiFreq, "Wii", sda, scl)
     {
-        Outputs.Clear();
-        if (outputs != null)
-            Outputs.AddRange(outputs);
-        else
-            CreateDefaults();
 
         this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
             .ToPropertyEx(this, x => x.IsGuitar);
@@ -197,6 +191,18 @@ public class WiiCombinedOutput : CombinedTwiOutput
             .Subscribe();
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
+    }
+    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    {
+        Outputs.Clear();
+        if (outputs.Any())
+        {
+            Outputs.AddRange(outputs);
+        }
+        else
+        {
+            CreateDefaults();
+        }
     }
 
     [Reactive] public WiiControllerType DetectedType { get; set; }

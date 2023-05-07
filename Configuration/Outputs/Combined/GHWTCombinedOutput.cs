@@ -38,28 +38,18 @@ public class GhwtCombinedOutput : CombinedOutput
     private readonly DirectPinConfig _pinConfigS1;
     private readonly DirectPinConfig _pinConfigS2;
 
-    public GhwtCombinedOutput(ConfigViewModel model, int? pin = null, int? pinS0 = null, int? pinS1 = null,
-        int? pinS2 = null,
-        IReadOnlyCollection<Output>? outputs = null) : base(model, new FixedInput(model, 0))
+    public GhwtCombinedOutput(ConfigViewModel model, int pin = -1, int pinS0 = -1, int pinS1 = -1,
+        int pinS2 = -1) : base(model, new FixedInput(model, 0))
     {
-        _pin = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtAnalogPinType,
-            pin ?? model.Microcontroller.GetFirstAnalogPin(), DevicePinMode.PullUp);
-        _pinConfigS0 = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtS0PinType,
-            pinS0 ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
-        _pinConfigS1 = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtS1PinType,
-            pinS1 ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
-        _pinConfigS2 = Model.Microcontroller.GetOrSetPin(model, GhWtTapInput.GhWtS2PinType,
-            pinS2 ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
+        _pin = new DirectPinConfig(model, GhWtTapInput.GhWtAnalogPinType, pin, DevicePinMode.PullUp);
+        _pinConfigS0 = new DirectPinConfig(model, GhWtTapInput.GhWtS0PinType, pinS0, DevicePinMode.Output);
+        _pinConfigS1 = new DirectPinConfig(model, GhWtTapInput.GhWtS1PinType, pinS1, DevicePinMode.Output);
+        _pinConfigS2 = new DirectPinConfig(model, GhWtTapInput.GhWtS2PinType, pinS2, DevicePinMode.Output);
         this.WhenAnyValue(x => x._pin.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
         this.WhenAnyValue(x => x._pinConfigS0.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS0)));
         this.WhenAnyValue(x => x._pinConfigS1.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS1)));
         this.WhenAnyValue(x => x._pinConfigS2.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS2)));
         this.WhenAnyValue(x => x.Model.WtSensitivity).Subscribe(_ => this.RaisePropertyChanged(nameof(Sensitivity)));
-        Outputs.Clear();
-        if (outputs != null)
-            Outputs.AddRange(outputs);
-        else
-            CreateDefaults();
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Bind(out var analogOutputs)
             .Subscribe();
@@ -68,6 +58,19 @@ public class GhwtCombinedOutput : CombinedOutput
             .Subscribe();
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
+    }
+
+    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    {
+        Outputs.Clear();
+        if (outputs.Any())
+        {
+            Outputs.AddRange(outputs);
+        }
+        else
+        {
+            CreateDefaults();
+        }
     }
 
     public int Pin
@@ -81,7 +84,7 @@ public class GhwtCombinedOutput : CombinedOutput
         get => _pinConfigS0.Pin;
         set => _pinConfigS0.Pin = value;
     }
-    
+
     public byte Sensitivity
     {
         get => Model.WtSensitivity;
@@ -102,14 +105,14 @@ public class GhwtCombinedOutput : CombinedOutput
 
 
     public List<int> AvailablePins => Model.Microcontroller.GetAllPins(true);
-    
+
     public List<int> AvailablePinsDigital => Model.Microcontroller.GetAllPins(false);
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return "GHWT Slider Inputs";
     }
-    
+
     public override object GetOutputType()
     {
         return SimpleType.WtNeckSimple;
@@ -129,7 +132,7 @@ public class GhwtCombinedOutput : CombinedOutput
             GuitarAxisType.Slider, true));
         UpdateBindings();
     }
-    
+
     public override IEnumerable<Output> ValidOutputs()
     {
         var tapAnalog =
@@ -139,9 +142,12 @@ public class GhwtCombinedOutput : CombinedOutput
         if (tapAnalog == null && tapFrets == null) return Outputs.Items;
         var outputs = new List<Output>(Outputs.Items);
         // Map Tap bar to Upper frets on RB guitars
-        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar && Model.RhythmType is RhythmType.RockBand)
+        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar &&
+            Model.RhythmType is RhythmType.RockBand)
         {
-            outputs.AddRange(TapRb.Select(pair => new GuitarButton(Model, new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value, true)));
+            outputs.AddRange(TapRb.Select(pair => new GuitarButton(Model,
+                new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true), Colors.Black, Colors.Black,
+                Array.Empty<byte>(), 5, pair.Value, true)));
 
             outputs.Remove(tapAnalog);
         }
@@ -188,5 +194,9 @@ public class GhwtCombinedOutput : CombinedOutput
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                 StandardAxisType.LeftStickX, true));
         }
+    }
+    protected override IEnumerable<PinConfig> GetOwnPinConfigs()
+    {
+        return new PinConfig[] {_pin, _pinConfigS0, _pinConfigS1, _pinConfigS2};
     }
 }

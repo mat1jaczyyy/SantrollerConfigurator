@@ -28,17 +28,10 @@ public class MultiplexerInput : DirectInput
         Channel = channel;
         MultiplexerType = multiplexerType;
         PinConfigS0 = new DirectPinConfig(model, Guid.NewGuid().ToString(), s0, DevicePinMode.Output);
-        Model.Microcontroller.AssignPin(PinConfigS0);
         PinConfigS1 = new DirectPinConfig(model, Guid.NewGuid().ToString(), s1, DevicePinMode.Output);
-        Model.Microcontroller.AssignPin(PinConfigS1);
         PinConfigS2 = new DirectPinConfig(model, Guid.NewGuid().ToString(), s2, DevicePinMode.Output);
-        Model.Microcontroller.AssignPin(PinConfigS2);
         // Only actually fully init the 4th pin for 16 channel multiplexers
         PinConfigS3 = new DirectPinConfig(model, Guid.NewGuid().ToString(), s3, DevicePinMode.Output);
-        if (MultiplexerType == MultiplexerType.SixteenChannel)
-        {
-            Model.Microcontroller.AssignPin(PinConfigS3);
-        }
         this.WhenAnyValue(x => x.MultiplexerType).Select(s => s is MultiplexerType.SixteenChannel)
             .ToPropertyEx(this, x => x.IsSixteenChannel);
     }
@@ -53,14 +46,8 @@ public class MultiplexerInput : DirectInput
         get => _multiplexerType;
         set
         {
-            if (value == MultiplexerType.SixteenChannel && _multiplexerType == MultiplexerType.EightChannel)
-            {
-                Model.Microcontroller.AssignPin(PinConfigS3);
-            }
-
             if (value == MultiplexerType.EightChannel && _multiplexerType == MultiplexerType.SixteenChannel)
             {
-                Model.Microcontroller.UnAssignPins(PinConfigS3.Type);
                 if (Channel > 7)
                 {
                     Channel = 7;

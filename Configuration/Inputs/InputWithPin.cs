@@ -16,7 +16,6 @@ public abstract class InputWithPin : Input
         base(model)
     {
         PinConfig = pinConfig;
-        Model.Microcontroller.AssignPin(PinConfig);
         DetectPinCommand =
             ReactiveCommand.CreateFromTask(DetectPinAsync, this.WhenAnyValue(s => s.Model.Main.Working).Select(s => !s));
         this.WhenAnyValue(x => x.PinConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
@@ -55,11 +54,6 @@ public abstract class InputWithPin : Input
 
     protected abstract string DetectionText { get; }
     public ICommand DetectPinCommand { get; }
-
-    public override void Dispose()
-    {
-        Model.Microcontroller.UnAssignPins(PinConfig.Type);
-    }
 
     private async Task DetectPinAsync()
     {

@@ -10,34 +10,19 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public abstract class CombinedTwiOutput : CombinedOutput, ITwi
 {
-
     private readonly TwiConfig _twiConfig;
 
     private readonly string _twiType;
 
 
     protected CombinedTwiOutput(ConfigViewModel model, string twiType,
-        int twiFreq, string name, int? sda = null, int? scl = null) : base(model, new FixedInput(model, 0))
+        int twiFreq, string name, int sda = -1, int scl = -1) : base(model, new FixedInput(model, 0))
 
     {
         BindableTwi = Model.Microcontroller.TwiAssignable;
         _twiType = twiType;
-        var config = Model.Microcontroller.GetTwiForType(_twiType);
-        if (config != null)
-        {
-            _twiConfig = config;
-        }
-        else
-        {
-            if (sda == null || scl == null)
-            {
-                var pins = Model.Microcontroller.FreeTwiPins(_twiType);
-                scl = pins.First(pair => pair.Value is TwiPinType.Scl).Key;
-                sda = pins.First(pair => pair.Value is TwiPinType.Sda).Key;
-            }
-
-            _twiConfig = Model.Microcontroller.AssignTwiPins(model, _twiType, sda.Value, scl.Value, twiFreq)!;
-        }
+        var config = Model.GetTwiForType(_twiType);
+        _twiConfig = config ?? Model.Microcontroller.AssignTwiPins(model, _twiType, sda, scl, twiFreq);
 
 
         this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged(nameof(Scl)));
@@ -81,9 +66,8 @@ public abstract class CombinedTwiOutput : CombinedOutput, ITwi
             .Select(s => s.Key).ToList();
     }
 
-    public override void Dispose()
+    protected override IEnumerable<PinConfig> GetOwnPinConfigs()
     {
-        Model.Microcontroller.UnAssignPins(_twiType);
-        base.Dispose();
+        return new[] {_twiConfig};
     }
 }

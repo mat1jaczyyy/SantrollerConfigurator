@@ -69,7 +69,6 @@ public class SerializedConfiguration
     {
         model.SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceType, RhythmType, EmulationType);
         model.XInputOnWindows = XInputOnWindows;
-        model.Microcontroller.UnAssignAll();
         model.Bindings.Clear();
         model.Mode = Mode;
         model.PollRate = PollRate;

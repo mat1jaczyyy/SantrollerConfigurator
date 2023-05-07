@@ -200,9 +200,9 @@ public class Ps2Input : SpiInput
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
 
-    public Ps2Input(Ps2InputType input, ConfigViewModel model, int? miso = null,
-        int? mosi = null,
-        int? sck = null, int? att = null, int? ack = null, bool combined = false) : base(
+    public Ps2Input(Ps2InputType input, ConfigViewModel model, int miso = -1,
+        int mosi = -1,
+        int sck = -1, int att = -1, int ack = -1, bool combined = false) : base(
         Ps2SpiType,
         Ps2SpiFreq, Ps2SpiCpol,
         Ps2SpiCpha, Ps2SpiMsbFirst, miso: miso, mosi: mosi, sck: sck, model: model)
@@ -210,9 +210,8 @@ public class Ps2Input : SpiInput
         Combined = combined;
         BindableSpi = !Combined && Model.Microcontroller.SpiAssignable;
         Input = input;
-        _ackConfig = Model.Microcontroller
-            .GetOrSetPin(model, Ps2AckType, ack ?? Model.Microcontroller.SupportedAckPins()[0], DevicePinMode.Floating);
-        _attConfig = Model.Microcontroller.GetOrSetPin(model, Ps2AttType, att ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
+        _ackConfig = new DirectPinConfig(model, Ps2AckType, ack, DevicePinMode.Floating);
+        _attConfig = new DirectPinConfig(model, Ps2AttType, att, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
         IsAnalog = Input <= Ps2InputType.Dualshock2R2;

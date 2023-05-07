@@ -36,14 +36,10 @@ public class GhWtTapInput : Input
         Combined = combined;
         Input = input;
         IsAnalog = input is GhWtInputType.TapBar;
-        PinConfigAnalog = model.Microcontroller.GetOrSetPin(model, GhWtAnalogPinType, pinInput, DevicePinMode.PullUp);
-        Model.Microcontroller.AssignPin(PinConfigAnalog);
-        PinConfigS0 =  model.Microcontroller.GetOrSetPin(model, GhWtS0PinType, pinS0, DevicePinMode.Output);
-        Model.Microcontroller.AssignPin(PinConfigS0);
-        PinConfigS1 =  model.Microcontroller.GetOrSetPin(model, GhWtS1PinType, pinS1, DevicePinMode.Output);
-        Model.Microcontroller.AssignPin(PinConfigS1);
-        PinConfigS2 =  model.Microcontroller.GetOrSetPin(model, GhWtS2PinType, pinS2, DevicePinMode.Output);
-        Model.Microcontroller.AssignPin(PinConfigS2);
+        PinConfigAnalog = new DirectPinConfig(model, GhWtAnalogPinType, pinInput, DevicePinMode.PullUp);
+        PinConfigS0 =  new DirectPinConfig(model, GhWtS0PinType, pinS0, DevicePinMode.Output);
+        PinConfigS1 = new DirectPinConfig(model, GhWtS1PinType, pinS1, DevicePinMode.Output);
+        PinConfigS2 = new DirectPinConfig(model, GhWtS2PinType, pinS2, DevicePinMode.Output);
         this.WhenAnyValue(x => x.PinConfigAnalog.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
         this.WhenAnyValue(x => x.PinConfigS0.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS0)));
         this.WhenAnyValue(x => x.PinConfigS1.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS1)));
@@ -142,14 +138,6 @@ public class GhWtTapInput : Input
         ConfigField mode)
     {
         return string.Join("\n", bindings.Select(binding => binding.Item2));
-    }
-
-    public override void Dispose()
-    {
-        foreach (var pinConfig in PinConfigs)
-        {
-            Model.Microcontroller.UnAssignPins(pinConfig.Type);
-        }
     }
 
     public override IReadOnlyList<string> RequiredDefines()

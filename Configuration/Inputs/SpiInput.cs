@@ -14,28 +14,13 @@ public abstract class SpiInput : Input, ISpi
     private readonly string _spiType;
 
     protected SpiInput(string spiType, uint spiFreq, bool cpol,
-        bool cpha, bool msbFirst, ConfigViewModel model, int? miso = null, int? mosi = null,
-        int? sck = null) : base(model)
+        bool cpha, bool msbFirst, ConfigViewModel model, int miso = -1, int mosi = -1,
+        int sck = -1) : base(model)
     {
         _spiType = spiType;
-        var config = Model.Microcontroller.GetSpiForType(_spiType);
-        if (config != null)
-        {
-            _spiConfig = config;
-        }
-        else
-        {
-            if (miso == null || mosi == null || sck == null)
-            {
-                var pins = Model.Microcontroller.FreeSpiPins(_spiType);
-                miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
-                mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
-                sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-            }
-
-            _spiConfig = Model.Microcontroller.AssignSpiPins(model, _spiType, mosi.Value, miso.Value, sck.Value, cpol, cpha,
-                msbFirst, spiFreq)!;
-        }
+        var config = Model.GetSpiForType(_spiType);
+        _spiConfig = config ??  Model.Microcontroller.AssignSpiPins(model, _spiType, mosi, miso, sck, cpol, cpha,
+            msbFirst, spiFreq);
 
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));
         this.WhenAnyValue(x => x._spiConfig.Mosi).Subscribe(_ => this.RaisePropertyChanged(nameof(Mosi)));
@@ -95,10 +80,5 @@ public abstract class SpiInput : Input, ISpi
         return Model.Microcontroller.SpiPins(_spiType)
             .Where(s => s.Value is SpiPinType.Sck)
             .Select(s => s.Key).ToList();
-    }
-
-    public override void Dispose()
-    {
-        Model.Microcontroller.UnAssignPins(_spiType);
     }
 }

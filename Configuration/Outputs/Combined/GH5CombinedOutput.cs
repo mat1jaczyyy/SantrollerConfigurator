@@ -34,15 +34,10 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     };
 
 
-    public Gh5CombinedOutput(ConfigViewModel model, int? sda = null, int? scl = null,
-        IReadOnlyCollection<Output>? outputs = null) : base(model,
+    public Gh5CombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1) : base(model,
         "gh5", 100000, "GH5", sda, scl)
     {
         Outputs.Clear();
-        if (outputs != null)
-            Outputs.AddRange(outputs);
-        else
-            CreateDefaults();
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Bind(out var analogOutputs)
             .Subscribe();
@@ -53,12 +48,26 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         DigitalOutputs = digitalOutputs;
     }
 
-    [Reactive] public bool Detected {get; set;}
+    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    {
+        Outputs.Clear();
+        if (outputs.Any())
+        {
+            Outputs.AddRange(outputs);
+        }
+        else
+        {
+            CreateDefaults();
+        }
+    }
+
+    [Reactive] public bool Detected { get; set; }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return "GH5 Slider Inputs";
     }
+
     public override object GetOutputType()
     {
         return SimpleType.Gh5NeckSimple;
@@ -98,7 +107,8 @@ public class Gh5CombinedOutput : CombinedTwiOutput
 
         if (tapFrets == null) return outputs;
 
-        outputs.AddRange(Taps.Select(pair => new GuitarButton(Model, new Gh5NeckInput(pair.Key, Model, Sda, Scl, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value, true)));
+        outputs.AddRange(Taps.Select(pair => new GuitarButton(Model, new Gh5NeckInput(pair.Key, Model, Sda, Scl, true),
+            Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value, true)));
 
         outputs.Remove(tapFrets);
 

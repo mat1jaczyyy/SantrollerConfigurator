@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -30,12 +31,13 @@ public class SerializedWiiCombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        // Since we filter out sda and scl from wii inputs for size, we need to make sure its assigned before we construct the inputs.
-        model.Microcontroller.AssignTwiPins(model, WiiInput.WiiTwiType, Sda, Scl, WiiInput.WiiTwiFreq);
+        var combined = new WiiCombinedOutput(model, Sda, Scl);
+        model.Bindings.Add(combined);
         var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         var array = new BitArray(Enabled);
         for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
-
-        return new WiiCombinedOutput(model, Sda, Scl, outputs);
+        model.Bindings.Remove(combined);
+        combined.SetOutputsOrDefaults(outputs);
+        return combined;
     }
 }

@@ -60,6 +60,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private DirectPinConfig? _usbHostDm;
     private DirectPinConfig? _usbHostDp;
 
+    private DirectPinConfig? _unoRx;
+    private DirectPinConfig? _unoTx;
+
     private SpiConfig? _rfSpiConfig;
 
     private RhythmType _rhythmType;
@@ -168,8 +171,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         if (Main is {IsUno: false, IsMega: false}) return;
-        Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output));
-        Microcontroller.AssignPin(new DirectPinConfig(this, UnoPinTypeTx, UnoPinTypeTxPin, DevicePinMode.Output));
+       _unoRx = new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output);
+        _unoTx = new DirectPinConfig(this, UnoPinTypeTx, UnoPinTypeTxPin, DevicePinMode.Output);
     }
 
     public IDisposable RegisterConnections()
@@ -358,14 +361,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             if (value == LedType.None)
             {
-                Microcontroller.UnAssignPins(Apa102SpiType);
+                _apa102SpiConfig = null;
             }
             else if (_ledType == LedType.None)
             {
-                var pins = Microcontroller.FreeSpiPins(Apa102SpiType);
-                var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
-                var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, mosi, -1, sck, true, true,
+                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, -1, -1, -1, true, true,
                     true,
                     Math.Min(Microcontroller.Board.CpuFreq / 2, 12000000))!;
                 this.RaisePropertyChanged(nameof(Apa102Mosi));
@@ -389,23 +389,16 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             if (value)
             {
                 // These pins get handled by the usb host lib, but we need them defined regardless
-                _usbHostDp = Microcontroller.GetOrSetPin(this, UsbHostPinTypeDp, AvailablePinsDp.First(),
+                _usbHostDp = new DirectPinConfig(this, UsbHostPinTypeDp, AvailablePinsDp.First(),
                     DevicePinMode.Skip);
-                _usbHostDm = Microcontroller.GetOrSetPin(this, UsbHostPinTypeDm, AvailablePinsDm.First(),
+                _usbHostDm = new DirectPinConfig(this, UsbHostPinTypeDm, AvailablePinsDm.First(),
                     DevicePinMode.Skip);
                 this.RaisePropertyChanged(nameof(UsbHostDp));
                 this.RaisePropertyChanged(nameof(UsbHostDm));
             }
             else
             {
-                if (_usbHostDp != null)
-                {
-                    Microcontroller.UnAssignPins(_usbHostDp.Type);
-                    _usbHostDp = null;
-                }
-
-                if (_usbHostDm == null) return;
-                Microcontroller.UnAssignPins(_usbHostDm.Type);
+                _usbHostDp = null;
                 _usbHostDm = null;
             }
 
@@ -493,7 +486,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public List<int> AvailablePinsDp => AvailablePins.SkipLast(1).ToList();
 
     public IEnumerable<PinConfig> PinConfigs =>
-        new PinConfig?[] {_apa102SpiConfig, _rfSpiConfig, _usbHostDm, _usbHostDp}.Where(s => s != null)
+        new PinConfig?[] {_apa102SpiConfig, _rfSpiConfig, _usbHostDm, _usbHostDp, _unoRx, _unoTx}.Where(s => s != null)
             .Cast<PinConfig>();
 
     public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
@@ -520,8 +513,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             this.RaisePropertyChanged(nameof(RfMosi));
             this.RaisePropertyChanged(nameof(RfSck));
             var first = Microcontroller.GetAllPins(false).First();
-            _rfCe = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
-            _rfCsn = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
+            _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
+            _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
         }
     }
 
@@ -671,8 +664,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 this.RaisePropertyChanged(nameof(RfMosi));
                 this.RaisePropertyChanged(nameof(RfSck));
                 var first = Microcontroller.GetAllPins(false).First();
-                _rfCe = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
-                _rfCsn = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
+                _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
+                _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
             }
         }
 
@@ -736,8 +729,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     true,
                     4000000);
                 var first = Microcontroller.GetAllPins(false).First();
-                _rfCe = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
-                _rfCsn = Microcontroller.GetOrSetPin(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
+                _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
+                _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
 
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
@@ -748,23 +741,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
         else
         {
-            if (_rfSpiConfig != null)
-            {
-                Microcontroller.UnAssignPins(_rfSpiConfig.Type);
-                _rfSpiConfig = null;
-            }
-
-            if (_rfCe != null)
-            {
-                Microcontroller.UnAssignPins(_rfCe.Type);
-                _rfCe = null;
-            }
-
-            if (_rfCsn != null)
-            {
-                Microcontroller.UnAssignPins(_rfCsn.Type);
-                _rfCsn = null;
-            }
+            _rfSpiConfig = null;
+            _rfCe = null;
+            _rfCsn = null;
         }
 
         // If going from say bluetooth controller to standard controller, the pin bindings can stay
@@ -954,9 +933,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         // And also store a count
         lines.Add($"#define ADC_COUNT {analogPins.Count}");
-        lines.Add($"#define PIN_INIT {Microcontroller.GenerateInit()}");
+        lines.Add($"#define PIN_INIT {Microcontroller.GenerateInit(this)}");
 
-        lines.Add(Microcontroller.GenerateDefinitions());
+        // Copy in any specific config for the different pin configs (like spi and twi config on the pico)
+        lines.Add(GetPinConfigs().Distinct().Aggregate("", (current, config) => current + config.Generate()));
 
         lines.Add($"#define ARDWIINO_BOARD \"{Microcontroller.Board.ArdwiinoName}\"");
         lines.Add(string.Join("\n",
@@ -1023,13 +1003,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         if (Bindings.Remove(output))
         {
-            output.Dispose();
             UpdateErrors();
             return;
         }
 
         foreach (var binding in Bindings.Items) binding.Outputs.Remove(output);
-        output.Dispose();
 
         UpdateErrors();
     }
@@ -1037,8 +1015,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [RelayCommand]
     public void ClearOutputs()
     {
-        foreach (var binding in Bindings.Items) binding.Dispose();
-
         Bindings.Clear();
         UpdateErrors();
     }
@@ -1048,8 +1024,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
             "The following action will clear all your inputs, are you sure you want to do this?")).ToTask();
         if (!yesNo.Response) return;
-
-        foreach (var binding in Bindings.Items) binding.Dispose();
 
         Bindings.Clear();
         UpdateErrors();
@@ -1070,11 +1044,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [RelayCommand]
     public async Task ResetWithConfirmationAsync()
     {
-        var yesNo = await ShowYesNoDialog.Handle(("Clear", "Cancel",
+        var yesNo = await ShowYesNoDialog.Handle(("Reset", "Cancel",
             "The following action will clear all your inputs, are you sure you want to do this?")).ToTask();
         if (!yesNo.Response) return;
-
-        foreach (var binding in Bindings.Items) binding.Dispose();
 
         Bindings.Clear();
         UpdateBindings();
@@ -1083,7 +1055,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private async Task ResetAsync()
     {
-        var yesNo = await ShowYesNoDialog.Handle(("Reset", "Cancel",
+        var yesNo = await ShowYesNoDialog.Handle(("Revert", "Cancel",
                 "The following action will revert your device back to an Arduino, are you sure you want to do this?"))
             .ToTask();
         if (!yesNo.Response) return;
@@ -1293,7 +1265,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         return debounces.Count;
     }
-
+    public List<PinConfig> GetPinConfigs()
+    {
+        return Bindings.Items.SelectMany(s => s.GetPinConfigs()).Distinct().ToList();
+    }
     public Dictionary<string, List<int>> GetPins(string type)
     {
         var pins = new Dictionary<string, List<int>>();
@@ -1394,5 +1369,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             Connected = btRaw[0] != 0;
         }
+    }
+
+    public TwiConfig? GetTwiForType(string twiType)
+    {
+        return Bindings.Items.Select(binding => binding.GetPinConfigs()).Select(configs => configs.OfType<TwiConfig>().FirstOrDefault(s => s.Type == twiType)).FirstOrDefault(found => found != null);
+    }
+    public SpiConfig? GetSpiForType(string spiType)
+    {
+        return Bindings.Items.Select(binding => binding.GetPinConfigs()).Select(configs => configs.OfType<SpiConfig>().FirstOrDefault(s => s.Type == spiType)).FirstOrDefault(found => found != null);
     }
 }

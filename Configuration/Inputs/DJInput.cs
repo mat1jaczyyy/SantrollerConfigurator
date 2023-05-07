@@ -14,8 +14,8 @@ public class DjInput : TwiInput
     public static readonly string DjTwiType = "dj";
     public static readonly int DjTwiFreq = 150000;
 
-    public DjInput(DjInputType input, ConfigViewModel model, int? sda = null,
-        int? scl = null, bool combined = false) : base(
+    public DjInput(DjInputType input, ConfigViewModel model, int sda = -1,
+        int scl = -1, bool combined = false) : base(
          DjTwiType, DjTwiFreq, sda, scl, model)
     {
         Combined = combined;

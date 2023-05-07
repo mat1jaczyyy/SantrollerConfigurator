@@ -86,23 +86,14 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
 
-    public Ps2CombinedOutput(ConfigViewModel model, int? miso = null, int? mosi = null,
-        int? sck = null, int? att = null, int? ack = null,
-        IReadOnlyCollection<Output>? outputs = null) : base(model, Ps2Input.Ps2SpiType,
+    public Ps2CombinedOutput(ConfigViewModel model, int miso = -1, int mosi = -1,
+        int sck = -1, int att = -1, int ack = -1) : base(model, Ps2Input.Ps2SpiType,
         Ps2Input.Ps2SpiFreq, Ps2Input.Ps2SpiCpol, Ps2Input.Ps2SpiCpha, Ps2Input.Ps2SpiMsbFirst, "PS2", miso, mosi, sck)
     {
-        _ackConfig = Model.Microcontroller
-            .GetOrSetPin(model, Ps2Input.Ps2AckType, ack ?? Model.Microcontroller.SupportedAckPins()[0],
-                DevicePinMode.Floating);
-        _attConfig = Model.Microcontroller.GetOrSetPin(model, Ps2Input.Ps2AttType,
-            att ?? model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.Output);
+        _ackConfig = new DirectPinConfig(model, Ps2Input.Ps2AckType, ack, DevicePinMode.Floating);
+        _attConfig = new DirectPinConfig(model, Ps2Input.Ps2AttType, att, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
-        Outputs.Clear();
-        if (outputs != null)
-            Outputs.AddRange(outputs);
-        else
-            CreateDefaults();
 
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
@@ -114,6 +105,19 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             .Subscribe();
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
+    }
+
+    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    {
+        Outputs.Clear();
+        if (outputs.Any())
+        {
+            Outputs.AddRange(outputs);
+        }
+        else
+        {
+            CreateDefaults();
+        }
     }
 
     public int Ack
@@ -145,7 +149,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     {
         return "PS2 Controller Inputs";
     }
-    
+
     public override object GetOutputType()
     {
         return SimpleType.Ps2InputSimple;
@@ -341,5 +345,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         }
 
         Outputs.RemoveMany(Outputs.Items.Where(s => s is Ps3Axis));
+    }
+
+    protected override IEnumerable<PinConfig> GetOwnPinConfigs()
+    {
+        return new PinConfig[] {SpiConfig, _attConfig, _ackConfig};
     }
 }

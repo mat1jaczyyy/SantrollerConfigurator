@@ -293,12 +293,11 @@ public class Led : Output
             if (value)
             {
                 if (PinConfig != null) return;
-                PinConfig = Model.Microcontroller.GetOrSetPin(Model, "led", Pin, DevicePinMode.Output);
-                Model.Microcontroller.AssignPin(PinConfig);
+                PinConfig = new DirectPinConfig(Model, "led", Pin, DevicePinMode.Output);
             }
             else
             {
-                Dispose();
+                PinConfig = null;
             }
 
             Model.UpdateErrors();
@@ -375,13 +374,6 @@ public class Led : Output
     public virtual bool IsController => false;
 
     public override bool Valid => true;
-
-    public override void Dispose()
-    {
-        if (PinConfig == null) return;
-        Model.Microcontroller.UnAssignPins(PinConfig.Type);
-        PinConfig = null;
-    }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {

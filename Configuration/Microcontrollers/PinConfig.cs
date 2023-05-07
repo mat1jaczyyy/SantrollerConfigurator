@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -31,7 +32,7 @@ public abstract class PinConfig : ReactiveObject
     {
         if (Pins.Any(x => x == -1))
         {
-            return "Output configuration missing!";
+            return "Pin configuration missing!";
         }
         var configs = Model.GetPins(Type);
 

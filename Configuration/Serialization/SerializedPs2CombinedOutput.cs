@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -38,15 +39,13 @@ public class SerializedPs2CombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        // Since we filter out sda and scl from wii inputs for size, we need to make sure its assigned before we construct the inputs.
-        model.Microcontroller.AssignSpiPins(model, Ps2Input.Ps2SpiType, Mosi, Miso, Sck, Ps2Input.Ps2SpiCpol,
-            Ps2Input.Ps2SpiCpha, Ps2Input.Ps2SpiMsbFirst, Ps2Input.Ps2SpiFreq);
-        model.Microcontroller.AssignPin(new DirectPinConfig(model, Ps2Input.Ps2AckType, Ack, DevicePinMode.Floating));
-        model.Microcontroller.AssignPin(new DirectPinConfig(model, Ps2Input.Ps2AttType, Att, DevicePinMode.Output));
+        var combined = new Ps2CombinedOutput(model, Miso, Mosi, Sck, Att, Ack);
+        model.Bindings.Add(combined);
         var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         var array = new BitArray(Enabled);
         for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
-
-        return new Ps2CombinedOutput(model, Miso, Mosi, Sck, Att, Ack, outputs);
+        model.Bindings.Remove(combined);
+        combined.SetOutputsOrDefaults(outputs);
+        return combined;
     }
 }

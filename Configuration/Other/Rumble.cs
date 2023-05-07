@@ -66,13 +66,6 @@ public class Rumble : Output
 
     public override bool Valid => true;
 
-    public override void Dispose()
-    {
-        if (PinConfig == null) return;
-        Model.Microcontroller.UnAssignPins(PinConfig.Type);
-        PinConfig = null;
-    }
-
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return "Rumble Motor - " + EnumToStringConverter.Convert(RumbleMotorType);

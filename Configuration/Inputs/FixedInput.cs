@@ -49,8 +49,4 @@ public class FixedInput : Input
     {
         return string.Join("\n", bindings.Select(binding => binding.Item2));
     }
-
-    public override void Dispose()
-    {
-    }
 }

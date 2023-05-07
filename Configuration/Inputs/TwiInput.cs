@@ -14,26 +14,12 @@ public abstract class TwiInput : Input, ITwi
 
     private readonly string _twiType;
 
-    protected TwiInput(string twiType, int twiFreq, int? sda, int? scl,
+    protected TwiInput(string twiType, int twiFreq, int sda, int scl,
         ConfigViewModel model) : base(model)
     {
         _twiType = twiType;
-        var config = Model.Microcontroller.GetTwiForType(_twiType);
-        if (config != null)
-        {
-            _twiConfig = config;
-        }
-        else
-        {
-            if (sda == null || scl == null)
-            {
-                var pins = Model.Microcontroller.FreeTwiPins(_twiType);
-                scl = pins.First(pair => pair.Value is TwiPinType.Scl).Key;
-                sda = pins.First(pair => pair.Value is TwiPinType.Sda).Key;
-            }
-
-            _twiConfig = Model.Microcontroller.AssignTwiPins(model, _twiType, sda.Value, scl.Value, twiFreq)!;
-        }
+        var config = Model.GetTwiForType(_twiType);
+        _twiConfig = config ?? Model.Microcontroller.AssignTwiPins(model, _twiType, sda, scl, twiFreq);
 
 
         this.WhenAnyValue(x => x._twiConfig.Scl).Subscribe(_ => this.RaisePropertyChanged(nameof(Scl)));
@@ -79,10 +65,5 @@ public abstract class TwiInput : Input, ITwi
     public override IReadOnlyList<string> RequiredDefines()
     {
         return new[] {$"{_twiType.ToUpper()}_TWI_PORT {_twiConfig.Definition}"};
-    }
-
-    public override void Dispose()
-    {
-        Model.Microcontroller.UnAssignPins(_twiType);
     }
 }

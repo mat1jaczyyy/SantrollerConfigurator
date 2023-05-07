@@ -133,11 +133,6 @@ public class AnalogToDigital : Input
         throw new InvalidOperationException("Never call GenerateAll on AnalogToDigital, call it on its children");
     }
 
-    public override void Dispose()
-    {
-        Child.Dispose();
-    }
-
     public override string Title => Child.Title;
 
     public override IReadOnlyList<string> RequiredDefines()

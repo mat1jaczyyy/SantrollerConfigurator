@@ -132,7 +132,7 @@ public class Pico : Microcontroller
         return PinA0;
     }
 
-    public override string GenerateAnalogRead(int pin)
+    public override string GenerateAnalogRead(int pin, ConfigViewModel model)
     {
         return $"adc({pin - PinA0})";
     }
@@ -154,36 +154,17 @@ public class Pico : Microcontroller
     }
 
 
-    public override SpiConfig? AssignSpiPins(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol,
+    public override SpiConfig AssignSpiPins(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol,
         bool cpha,
         bool msbfirst,
         uint clock)
     {
-        //Some things don't need MISO (like apa102s)
-        if ((mosi != -1 && SpiTypesByPin[mosi] != SpiPinType.Mosi) ||
-            (miso != -1 && SpiTypesByPin[miso] != SpiPinType.Miso))
-            return null;
-
-        var config = PinConfigs.OfType<PicoSpiConfig>().FirstOrDefault(c => c.Type == type);
-        if (config != null) return config;
-
-        config = new PicoSpiConfig(model, type, mosi, miso, sck, cpol, cpha, msbfirst, clock);
-        PinConfigs.Add(config);
-        return config;
+        return new PicoSpiConfig(model, type, mosi, miso, sck, cpol, cpha, msbfirst, clock);
     }
 
-    public override TwiConfig? AssignTwiPins(ConfigViewModel model, string type, int sda, int scl, int clock)
+    public override TwiConfig AssignTwiPins(ConfigViewModel model, string type, int sda, int scl, int clock)
     {
-        var pin = TwiIndexByPin[sda];
-        if (pin != TwiIndexByPin[scl] || TwiTypeByPin[sda] != TwiPinType.Sda ||
-            TwiTypeByPin[scl] != TwiPinType.Scl) return null;
-
-        var config = PinConfigs.OfType<PicoTwiConfig>().FirstOrDefault(c => c.Type == type);
-        if (config != null) return config;
-
-        config = new PicoTwiConfig(model, type, sda, scl, clock);
-        PinConfigs.Add(config);
-        return config;
+        return new PicoTwiConfig(model, type, sda, scl, clock);
     }
 
     public override string GenerateAckDefines(int ack)
@@ -203,6 +184,7 @@ public class Pico : Microcontroller
         {
             return SpiTypesByPin.Where(pin => SpiIndexByPin[pin.Key] == 0).ToList();
         }
+
         return SpiTypesByPin.ToList();
     }
 
@@ -210,37 +192,11 @@ public class Pico : Microcontroller
     {
         return TwiTypeByPin.ToList();
     }
-    public override List<KeyValuePair<int, SpiPinType>> FreeSpiPins(string type)
-    {
-        bool spi0Free = !PinConfigs.Any(s => s is PicoSpiConfig {Index: 0});
-        bool spi1Free = !PinConfigs.Any(s => s is PicoSpiConfig {Index: 1});
-        // If no pins are free, return all pins and let the user deal with the conflict
-        if (!spi0Free && !spi1Free)
-        {
-            return SpiPins(type);
-        }
-        return SpiPins(type)
-            .Where(s => (spi1Free && SpiIndexByPin[s.Key] == 1) || (spi0Free && SpiIndexByPin[s.Key] == 0)).ToList();
-    }
 
-    public override List<KeyValuePair<int, TwiPinType>> FreeTwiPins(string type)
-    {
-        bool twi0Free = !PinConfigs.Any(s => s is PicoTwiConfig {Index: 0});
-        bool twi1Free = !PinConfigs.Any(s => s is PicoTwiConfig {Index: 1});
-        // If no pins are free, return all pins and let the user deal with the conflict
-        if (!twi0Free && !twi1Free)
-        {
-            return TwiPins(type);
-        }
-        return TwiPins(type)
-            .Where(s => (twi1Free && TwiIndexByPin[s.Key] == 1) || (twi0Free && TwiIndexByPin[s.Key] == 0)).ToList();
-    }
-
-
-    public override string GenerateInit()
+    public override string GenerateInit(ConfigViewModel configViewModel)
     {
         var ret = "";
-        var pins = PinConfigs.OfType<DirectPinConfig>();
+        var pins = configViewModel.PinConfigs.OfType<DirectPinConfig>();
         foreach (var devicePin in pins)
         {
             switch (devicePin.PinMode)
@@ -291,9 +247,10 @@ public class Pico : Microcontroller
     {
         return isAnalog ? AnalogPins : PwmPins;
     }
-    
+
     // All pins support pwm
-    public override List<int> PwmPins { get; } = Enumerable.Range(0, GpioCount).Where(i => i is not (23 or 24)).ToList();
+    public override List<int> PwmPins { get; } =
+        Enumerable.Range(0, GpioCount).Where(i => i is not (23 or 24)).ToList();
 
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)
@@ -307,6 +264,7 @@ public class Pico : Microcontroller
     {
         return 0;
     }
+
     public override int GetFirstDigitalPin()
     {
         return 0;

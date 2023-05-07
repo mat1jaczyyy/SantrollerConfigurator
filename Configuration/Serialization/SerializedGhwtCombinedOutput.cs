@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -38,13 +39,13 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        model.Microcontroller.AssignPin(new DirectPinConfig(model, GhWtTapInput.GhWtAnalogPinType, Pin, DevicePinMode.Floating));
-        model.Microcontroller.AssignPin(new DirectPinConfig(model, GhWtTapInput.GhWtS0PinType, PinS0, DevicePinMode.Floating));
-        model.Microcontroller.AssignPin(new DirectPinConfig(model, GhWtTapInput.GhWtS1PinType, PinS1, DevicePinMode.Floating));
-        model.Microcontroller.AssignPin(new DirectPinConfig(model, GhWtTapInput.GhWtS2PinType, PinS2, DevicePinMode.Floating));
+        var combined = new GhwtCombinedOutput(model, Pin, PinS0, PinS1, PinS2);
+        model.Bindings.Add(combined);
         var array = new BitArray(Enabled);
         var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
-        return new GhwtCombinedOutput(model, Pin, PinS0, PinS1, PinS2, outputs);
+        model.Bindings.Remove(combined);
+        combined.SetOutputsOrDefaults(outputs);
+        return combined;
     }
 }
