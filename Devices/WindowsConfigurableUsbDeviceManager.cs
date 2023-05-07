@@ -1,3 +1,4 @@
+#if Windows
 using System;
 using System.Globalization;
 using System.Linq;
@@ -15,8 +16,6 @@ using Nefarius.Utilities.DeviceManagement.PnP;
 using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Devices;
-
-#if Windows
 public class ConfigurableUsbDeviceManager
 {
     private readonly DeviceNotificationListener _deviceNotificationListener = new();

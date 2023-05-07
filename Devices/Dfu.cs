@@ -1,4 +1,8 @@
 using System;
+#if Windows
+using System.Diagnostics;
+using System.IO;
+#endif
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;

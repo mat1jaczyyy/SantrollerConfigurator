@@ -1,3 +1,4 @@
+#if !Windows
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,6 @@ using LibUsbDotNet.Main;
 using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Devices;
-
-
-#if !Windows
 public class ConfigurableUsbDeviceManager
 {
     private readonly IDeviceNotifier _deviceListener = new LinuxDeviceNotifier();
