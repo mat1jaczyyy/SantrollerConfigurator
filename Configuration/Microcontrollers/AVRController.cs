@@ -180,7 +180,7 @@ public abstract class AvrController : Microcontroller
 
     public override string GenerateAnalogRead(int pin, ConfigViewModel model)
     {
-        var pins = model.PinConfigs.OfType<DirectPinConfig>().Where(config => config.PinMode is DevicePinMode.Analog)
+        var pins = model.GetPinConfigs().OfType<DirectPinConfig>().Where(config => config.PinMode is DevicePinMode.Analog)
             .Select(s => s.Pin).Distinct().Order();
         return $"adc({pins.IndexOf(pin)})";
     }
