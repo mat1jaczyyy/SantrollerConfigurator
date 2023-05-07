@@ -29,7 +29,7 @@ public class SerializedDjCombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        var combined = new DjCombinedOutput(model, Sda, Scl);
+        var combined = new DjCombinedOutput(model, Sda, Scl, defaults: false);
         model.Bindings.Add(combined);
         // Since we filter out sda and scl from inputs for size, we need to make sure its assigned before we construct the inputs.
         model.Microcontroller.AssignTwiPins(model, DjInput.DjTwiType, Sda, Scl, DjInput.DjTwiFreq);

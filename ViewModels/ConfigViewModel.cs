@@ -661,18 +661,24 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 _ = SetDefaultBindingsAsync(EmulationType);
                 break;
             case DeviceInputType.Wii:
-                var output = new WiiCombinedOutput(this);
-                output.Expanded = true;
+                var output = new WiiCombinedOutput(this)
+                {
+                    Expanded = true
+                };
                 Bindings.Add(output);
                 break;
             case DeviceInputType.Ps2:
-                var ps2Output = new Ps2CombinedOutput(this);
-                ps2Output.Expanded = true;
+                var ps2Output = new Ps2CombinedOutput(this)
+                {
+                    Expanded = true
+                };
                 Bindings.Add(ps2Output);
                 break;
             case DeviceInputType.Rf:
-                var rfOutput = new RfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One);
-                rfOutput.Expanded = true;
+                var rfOutput = new RfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One)
+                {
+                    Expanded = true
+                };
                 Bindings.Add(rfOutput);
                 break;
             default:

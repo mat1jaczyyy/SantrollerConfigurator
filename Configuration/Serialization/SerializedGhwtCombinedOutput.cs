@@ -35,7 +35,7 @@ public class SerializedGhwtCombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        var combined = new GhwtCombinedOutput(model, Pin, PinS0, PinS1, PinS2);
+        var combined = new GhwtCombinedOutput(model, Pin, PinS0, PinS1, PinS2, defaults: false);
         model.Bindings.Add(combined);
         var array = new BitArray(Enabled);
         var outputs = Outputs.Select(s => s.Generate(model)).ToList();

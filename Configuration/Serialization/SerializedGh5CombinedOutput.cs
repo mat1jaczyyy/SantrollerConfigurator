@@ -29,7 +29,7 @@ public class SerializedGh5CombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        var combined = new Gh5CombinedOutput(model, Sda, Scl);
+        var combined = new Gh5CombinedOutput(model, Sda, Scl, defaults: false);
         model.Bindings.Add(combined);
         var array = new BitArray(Enabled);
         var outputs = Outputs.Select(s => s.Generate(model)).ToList();

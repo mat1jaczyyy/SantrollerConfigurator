@@ -27,7 +27,7 @@ public class SerializedWiiCombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        var combined = new WiiCombinedOutput(model, Sda, Scl);
+        var combined = new WiiCombinedOutput(model, Sda, Scl, defaults: false);
         model.Bindings.Add(combined);
         var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         var array = new BitArray(Enabled);

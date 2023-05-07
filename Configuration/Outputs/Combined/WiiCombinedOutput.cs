@@ -170,12 +170,16 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.NunchukRotationPitch, StandardAxisType.RightStickY}
     };
 
-    public WiiCombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1) : base(model, WiiInput.WiiTwiType,
+    public WiiCombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1, bool defaults = true) : base(model, WiiInput.WiiTwiType,
         WiiInput.WiiTwiFreq, "Wii", sda, scl)
     {
+        Outputs.Clear();
+        if (defaults)
+        {
+            CreateDefaults();
+        }
         this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
             .ToPropertyEx(this, x => x.IsGuitar);
-
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
             .Bind(out var analogOutputs)

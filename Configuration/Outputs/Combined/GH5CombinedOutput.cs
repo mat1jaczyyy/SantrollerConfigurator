@@ -32,10 +32,14 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     };
 
 
-    public Gh5CombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1) : base(model,
+    public Gh5CombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1, bool defaults = true) : base(model,
         "gh5", 100000, "GH5", sda, scl)
     {
         Outputs.Clear();
+        if (defaults)
+        {
+            CreateDefaults();
+        }
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Bind(out var analogOutputs)
             .Subscribe();
