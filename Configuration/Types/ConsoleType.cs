@@ -4,19 +4,16 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum ConsoleType
 {
-    Universal=0,
+    Universal = 0,
     KeyboardMouse,
     Midi,
-    [Description("Xbox 360")]
-    Xbox360=4,
-    [Description("PS3")]
-    Ps3,
-    [Description("Wii Rock Band")]
-    Wii,
+    [Description("Xbox 360")] Xbox360 = 4,
+    [Description("PS3")] Ps3,
+    [Description("Wii Rock Band")] Wii,
     Switch,
-    [Description("PS4")]
-    Ps4,
+    [Description("PS4")] Ps4,
+
     [Description("Xbox One / Series S / Series X")]
     XboxOne,
-    Unknown=0xFF
+    Unknown = 0xFF
 }

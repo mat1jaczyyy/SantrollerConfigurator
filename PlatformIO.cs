@@ -17,11 +17,11 @@ namespace GuitarConfigurator.NetCore;
 
 public class PlatformIo
 {
-    private readonly string _pythonExecutable;
+    private static Process? _currentProcess;
 
     private readonly Process _portProcess;
-    private static Process? _currentProcess = null;
-    private SemaphoreSlim _semaphore = new(1, 1);
+    private readonly string _pythonExecutable;
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public PlatformIo()
     {
@@ -49,12 +49,12 @@ public class PlatformIo
         _portProcess.StartInfo.CreateNoWindow = true;
     }
 
+    public string FirmwareDir { get; }
+
     public static void Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         _currentProcess?.Kill(true);
     }
-
-    public string FirmwareDir { get; }
 
     private async Task InitialisePlatformIoAsync(IObserver<PlatformIoState> platformIoOutput)
     {
@@ -88,22 +88,15 @@ public class PlatformIo
         {
             var outdated = true;
             if (File.Exists(firmwareVersion))
-            {
                 outdated = await File.ReadAllTextAsync(firmwareVersion) !=
                            await AssetUtils.ReadFileAsync("firmware.version");
-            }
 
-            if (outdated)
-            {
-                Directory.Delete(FirmwareDir, true);
-            }
+            if (outdated) Directory.Delete(FirmwareDir, true);
         }
 
         if (!Directory.Exists(FirmwareDir))
-        {
             await AssetUtils.ExtractXzAsync("firmware.tar.xz", appdataFolder,
                 progress => platformIoOutput.OnNext(new PlatformIoState(progress * 10, "Extracting Firmware", "")));
-        }
 
         var pythonDir = Path.Combine(appdataFolder, "python");
         var platformIoDir = Path.Combine(appdataFolder, "platformio");
@@ -112,10 +105,8 @@ public class PlatformIo
         {
             var outdated = true;
             if (File.Exists(platformIoVersion))
-            {
                 outdated = await File.ReadAllTextAsync(platformIoVersion) !=
                            await AssetUtils.ReadFileAsync("platformio.version");
-            }
 
             if (outdated)
             {
@@ -129,7 +120,7 @@ public class PlatformIo
             platformIoOutput.OnNext(new PlatformIoState(10, "Extracting Platform.IO", ""));
             await AssetUtils.ExtractXzAsync("platformio.tar.xz", appdataFolder,
                 progress => platformIoOutput.OnNext(
-                    new PlatformIoState(10 + (progress * 90), "Extracting Firmware", "")));
+                    new PlatformIoState(10 + progress * 90, "Extracting Firmware", "")));
 
             await AssetUtils.ExtractFileAsync("platformio.version", platformIoVersion);
         }
@@ -164,7 +155,7 @@ public class PlatformIo
 
         async Task Process()
         {
-            var percentageStep = (progressEndingPercentage - progressStartingPercentage);
+            var percentageStep = progressEndingPercentage - progressStartingPercentage;
             var currentProgress = progressStartingPercentage;
             var uploading = command.Length > 1;
             var appdataFolder = AssetUtils.GetAppDataFolder();
@@ -233,10 +224,7 @@ public class PlatformIo
             }
 
             await _semaphore.WaitAsync();
-            if (_currentProcess is {HasExited: false})
-            {
-                _currentProcess.Kill(true);
-            }
+            if (_currentProcess is {HasExited: false}) _currentProcess.Kill(true);
 
             _currentProcess = new Process();
             _currentProcess.EnableRaisingEvents = true;
@@ -266,7 +254,6 @@ public class PlatformIo
             // In detect mode, the pro micro also goes through two separate programming stages.
             var main = device?.HasDfuMode() == false && !(device is Arduino arduino && arduino.Is32U4());
             while (!_currentProcess.HasExited)
-            {
                 if (state == 0)
                 {
                     var line = await _currentProcess.StandardOutput.ReadLineAsync().ConfigureAwait(false);
@@ -280,11 +267,9 @@ public class PlatformIo
                     }
 
                     if (line.Contains("searching for uno"))
-                    {
                         platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                             $"{progressMessage} - Please unplug your device, hold the reset button and plug it back in",
                             null));
-                    }
 
                     platformIoOutput.OnNext(platformIoOutput.Value.WithLog(line));
 
@@ -406,7 +391,6 @@ public class PlatformIo
                         }
                     }
                 }
-            }
 
             await _currentProcess.WaitForExitAsync();
 

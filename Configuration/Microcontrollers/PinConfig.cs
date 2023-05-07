@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -28,12 +27,9 @@ public abstract class PinConfig : ReactiveObject
         Model.UpdateErrors();
     }
 
-    private string? CalculateError()
+    protected virtual string? CalculateError()
     {
-        if (Pins.Any(x => x == -1))
-        {
-            return "Pin configuration missing!";
-        }
+        if (Pins.Any(x => x == -1)) return "Pin configuration missing!";
         var configs = Model.GetPins(Type);
 
         var ret = configs.Select(pinConfig => new {pinConfig, conflicting = pinConfig.Value.Intersect(Pins).ToList()})

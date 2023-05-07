@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using DynamicData;
@@ -60,7 +59,7 @@ public abstract class AvrController : Microcontroller
     {
         return new AvrSpiConfig(model, type, SpiMosi, SpiMiso, SpiSck, SpiCSn, cpol, cpha, msbfirst, clock);
     }
-    
+
     public override string GenerateAnalogWrite(int pin, string val)
     {
         return $"analogWrite({pin}, {val})";
@@ -181,7 +180,8 @@ public abstract class AvrController : Microcontroller
 
     public override string GenerateAnalogRead(int pin, ConfigViewModel model)
     {
-        var pins = model.PinConfigs.OfType<DirectPinConfig>().Where(config => config.PinMode is DevicePinMode.Analog).Select(s => s.Pin).Distinct().Order();
+        var pins = model.PinConfigs.OfType<DirectPinConfig>().Where(config => config.PinMode is DevicePinMode.Analog)
+            .Select(s => s.Pin).Distinct().Order();
         return $"adc({pins.IndexOf(pin)})";
     }
 
@@ -222,5 +222,4 @@ public abstract class AvrController : Microcontroller
     {
         return PinA0;
     }
-
 }

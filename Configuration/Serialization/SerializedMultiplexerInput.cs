@@ -1,5 +1,4 @@
 using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
@@ -9,7 +8,8 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoContract(SkipConstructor = true)]
 public class SerializedMultiplexerInput : SerializedInput
 {
-    public SerializedMultiplexerInput(int pin, int pins0, int pins1, int pins2, int pins3, MultiplexerType type, int channel)
+    public SerializedMultiplexerInput(int pin, int pins0, int pins1, int pins2, int pins3, MultiplexerType type,
+        int channel)
     {
         Pin = pin;
         PinS0 = pins0;

@@ -1,8 +1,6 @@
 using System;
-using System.IO;
 using System.IO.Ports;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -13,18 +11,18 @@ namespace GuitarConfigurator.NetCore.Devices;
 
 public class Arduino : IConfigurableDevice
 {
+    private readonly bool _generic;
+
+    private TaskCompletionSource<string?>? _arduino32U4Path;
+
     // public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
     private string _port;
-    private readonly bool _generic;
-    public bool Is32U4Bootloader { get; private set; }
-    private TaskCompletionSource<string?>? _arduino32U4Path;
 
     public Arduino(PlatformIo pio, PlatformIoPort port)
     {
         DfuDetected = new Subject<bool>();
         _port = port.Port;
         foreach (var board in Board.Boards)
-        {
             if (board.ProductIDs.Contains(port.Pid))
             {
                 Board = board;
@@ -32,7 +30,6 @@ public class Arduino : IConfigurableDevice
                 MigrationSupported = true;
                 return;
             }
-        }
 
         // Handle any other RP2040 based boards we don't already have code for, using just the generic rp2040 board in this case
         if (port.Vid == Board.RaspberryPiVendorId)
@@ -67,6 +64,8 @@ public class Arduino : IConfigurableDevice
             _generic = true;
         }
     }
+
+    public bool Is32U4Bootloader { get; private set; }
 
     public Board Board { get; set; }
 
@@ -124,7 +123,6 @@ public class Arduino : IConfigurableDevice
         }
 
         if (model.Main.IsGeneric)
-        {
             Board = model.Main.AvrType switch
             {
                 AvrType.Mini => Board.MiniBoards[0],
@@ -136,7 +134,6 @@ public class Arduino : IConfigurableDevice
                 AvrType.MegaAdk => Board.MegaBoards[1],
                 _ => throw new ArgumentOutOfRangeException()
             };
-        }
 
         return Board.FindMicrocontroller(Board);
     }
@@ -177,7 +174,7 @@ public class Arduino : IConfigurableDevice
             Bootloader();
             return _arduino32U4Path.Task;
         }
-        
+
 
         return Task.FromResult((string?) GetSerialPort());
     }
@@ -216,6 +213,16 @@ public class Arduino : IConfigurableDevice
         return Board.IsPico();
     }
 
+    public bool Is32U4()
+    {
+        return Board.Atmega32U4Boards.Contains(Board);
+    }
+
+    public bool IsGeneric()
+    {
+        return _generic;
+    }
+
     public string GetSerialPort()
     {
         return _port;
@@ -226,19 +233,9 @@ public class Arduino : IConfigurableDevice
         return $"{Board.Name} ({_port})";
     }
 
-    public bool Is32U4()
-    {
-        return Board.Atmega32U4Boards.Contains(Board);
-    }
-
     public bool IsUno()
     {
         return Board.Uno.Name == Board.Name;
-    }
-
-    public bool IsGeneric()
-    {
-        return _generic;
     }
 
     public bool IsMega()

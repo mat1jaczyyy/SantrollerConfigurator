@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -31,7 +32,7 @@ public static class ProgramWindowsDebug
             PlatformIo.Exit(null, new ControlledApplicationLifetimeExitEventArgs(0));
         }
 
-        System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (sender, ex) =>
+        TaskScheduler.UnobservedTaskException += (sender, ex) =>
         {
             Trace.TraceError(ex.Exception.ToString());
             PlatformIo.Exit(sender, new ControlledApplicationLifetimeExitEventArgs(0));

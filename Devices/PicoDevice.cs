@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
@@ -63,7 +62,7 @@ public class PicoDevice : IConfigurableDevice
     {
         return false;
     }
-    
+
     public bool IsEsp32()
     {
         return false;
@@ -81,7 +80,6 @@ public class PicoDevice : IConfigurableDevice
 
     public void Reconnect()
     {
-        
     }
 
     public void Revert()

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
@@ -17,7 +15,8 @@ public class ControllerAxis : OutputAxis
 
     public ControllerAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
-        int deadZone, StandardAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max,
+        int deadZone, StandardAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min,
+        max,
         deadZone, IsTrigger(type), childOfCombined)
     {
         Type = type;
@@ -81,7 +80,7 @@ public class ControllerAxis : OutputAxis
         return ControllerEnumConverter.GetAxisText(deviceControllerType,
             Type);
     }
-    
+
     public override object GetOutputType()
     {
         return Type;
@@ -94,7 +93,9 @@ public class ControllerAxis : OutputAxis
 
     public override string GenerateOutput(ConfigField mode)
     {
-        return mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.XboxOne or ConfigField.Xbox360) ? "" : GetReportField(Type);
+        return mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.XboxOne or ConfigField.Xbox360)
+            ? ""
+            : GetReportField(Type);
     }
 
     protected override string MinCalibrationText()
@@ -132,6 +133,7 @@ public class ControllerAxis : OutputAxis
                 return "";
         }
     }
+
     public override bool ShouldFlip(ConfigField mode)
     {
         // Need to flip y axis on PS4
@@ -142,6 +144,7 @@ public class ControllerAxis : OutputAxis
     {
         return true;
     }
+
     public override SerializedOutput Serialize()
     {
         return new SerializedControllerAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,

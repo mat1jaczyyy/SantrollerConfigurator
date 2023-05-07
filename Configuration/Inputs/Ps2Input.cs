@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DynamicData.Kernel;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -249,6 +248,8 @@ public class Ps2Input : SpiInput
     public override IList<PinConfig> PinConfigs =>
         base.PinConfigs.Concat(new List<PinConfig> {_ackConfig, _attConfig}).ToList();
 
+    public override string Title => EnumToStringConverter.Convert(Input);
+
     public override string Generate(ConfigField mode)
     {
         return Mappings[Input];
@@ -282,7 +283,7 @@ public class Ps2Input : SpiInput
 
         return retDs2;
     }
-    public override string Title => EnumToStringConverter.Convert(Input);
+
     public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Data,
         byte[] wiiRaw, byte[] djLeftRaw,

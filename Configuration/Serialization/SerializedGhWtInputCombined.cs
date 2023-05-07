@@ -1,5 +1,4 @@
 using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
@@ -18,6 +17,6 @@ public class SerializedGhWtInputCombined : SerializedInput
 
     public override Input Generate(ConfigViewModel model)
     {
-        return new GhWtTapInput(Type, model, 0,0,0,0,combined: true);
+        return new GhWtTapInput(Type, model, 0, 0, 0, 0, true);
     }
 }

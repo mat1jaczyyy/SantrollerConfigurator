@@ -1,3 +1,4 @@
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -13,10 +14,14 @@ public class SerializedJoystickToDpad : SerializedOutput
         Threshold = threshold;
         Wii = wii;
     }
+
     [ProtoMember(1)] public int Threshold { get; }
     [ProtoMember(2)] public bool Wii { get; }
+
     public override Output Generate(ConfigViewModel model)
     {
-        return new JoystickToDpad(model, Threshold, Wii);
+        var combined = new JoystickToDpad(model, Threshold, Wii);
+        model.Bindings.Add(combined);
+        return combined;
     }
 }

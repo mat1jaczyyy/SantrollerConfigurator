@@ -24,7 +24,7 @@ public enum StageKitCommand
     LedGreen,
     LedRed,
     LedYellow,
-    LedBlue,
+    LedBlue
 }
 
 public enum StageKitStrobeSpeed
@@ -32,7 +32,7 @@ public enum StageKitStrobeSpeed
     Slow,
     Medium,
     Fast,
-    Fastest,
+    Fastest
 }
 
 public enum FiveFretGuitar
@@ -53,7 +53,7 @@ public enum SixFretGuitar
     Black3,
     White1,
     White2,
-    White3,
+    White3
 }
 
 public enum RockBandDrum
@@ -88,7 +88,7 @@ public enum Turntable
     BlueNoteLeft,
     GreenNoteRight,
     RedNoteRight,
-    BlueNoteRight,
+    BlueNoteRight
 }
 
 public enum LedCommandType
@@ -140,6 +140,8 @@ public enum RumbleCommand
 public class Led : Output
 {
     private readonly SourceList<LedCommandType> _rumbleCommands = new();
+
+    private readonly ObservableAsPropertyHelper<bool> _ledsRequireColours;
     private bool _outputEnabled;
 
     private int _pin;
@@ -255,15 +257,14 @@ public class Led : Output
                 s.Item1 is LedCommandType.StageKitLed && s.Item2 is StageKitCommand.LedBlue or StageKitCommand.LedGreen
                     or StageKitCommand.LedRed or StageKitCommand.LedYellow)
             .ToPropertyEx(this, x => x.StageKitLedMode);
-        
+
         this.WhenAnyValue(x => x.Command).Select(s => s is LedCommandType.StageKitLed)
             .ToPropertyEx(this, x => x.StageKitMode);
         UpdateDetails();
     }
 
-    private ObservableAsPropertyHelper<bool> _ledsRequireColours;
-    public override bool LedsRequireColours => _ledsRequireColours.Value;
-    // ReSharper disable UnassignedGetOnlyAutoProperty
+    public override bool LedsRequireColours =>
+        _ledsRequireColours.Value; // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public bool FiveFretMode { get; }
     [ObservableAsProperty] public bool SixFretMode { get; }
     [ObservableAsProperty] public bool GuitarHeroDrumsMode { get; }
@@ -320,9 +321,10 @@ public class Led : Output
     }
 
     private LedCommandType _command;
+
     public LedCommandType Command
     {
-        get=>_command;
+        get => _command;
         set
         {
             this.RaiseAndSetIfChanged(ref _command, value);
@@ -515,14 +517,12 @@ public class Led : Output
         if (mode is ConfigField.KeyboardLed && Command is LedCommandType.KeyboardCapsLock
                 or LedCommandType.KeyboardNumLock
                 or LedCommandType.KeyboardScrollLock)
-        {
             return
                 $@"if (leds & {1 << (Command - LedCommandType.KeyboardCapsLock)}) {{
                     {on}
                 }} else {{
                     {off}
                 }}";
-        }
 
         switch (Command)
         {
@@ -572,10 +572,7 @@ public class Led : Output
                       }}";
         }
 
-        if (mode is ConfigField.OffLed && Command is LedCommandType.StageKitLed)
-        {
-            return off;
-        }
+        if (mode is ConfigField.OffLed && Command is LedCommandType.StageKitLed) return off;
         if (mode is not ConfigField.RumbleLed) return "";
 
 

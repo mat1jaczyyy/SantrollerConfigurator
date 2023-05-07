@@ -128,10 +128,12 @@
                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                         </StackPanel>
                     </StackPanel>
-                    <Button IsVisible="{Binding !Main.NewDevice}" Content="Configure" Command="{Binding Main.ConfigureCommand}"
+                    <Button IsVisible="{Binding !Main.NewDevice}" Content="Configure"
+                            Command="{Binding Main.ConfigureCommand}"
                             IsEnabled="{Binding Main.ReadyToConfigure}" HorizontalAlignment="Center"
                             Margin="0 20 0 0" />
-                    <Button IsVisible="{Binding Main.NewDevice}" Content="Configure" Command="{Binding Main.InitialConfigureCommand}"
+                    <Button IsVisible="{Binding Main.NewDevice}" Content="Configure"
+                            Command="{Binding Main.InitialConfigureCommand}"
                             IsEnabled="{Binding Main.ReadyToConfigure}" HorizontalAlignment="Center"
                             Margin="0 20 0 0" />
                 </StackPanel>

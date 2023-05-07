@@ -81,6 +81,7 @@ public class Gh5NeckInput : TwiInput
         Input = input;
         IsAnalog = Input == Gh5NeckInputType.TapBar;
     }
+
     public override string Title => EnumToStringConverter.Convert(Input);
     public bool Combined { get; }
 
@@ -100,7 +101,8 @@ public class Gh5NeckInput : TwiInput
         if (Input == Gh5NeckInputType.TapBar) return "fivetar_buttons[1]";
 
         var mappings = MappingByInput[Input];
-        return "(gh5Valid && (" +string.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})")) + "))";
+        return "(gh5Valid && (" +
+               string.Join(" || ", mappings.Select(mapping => $"(fivetar_buttons[1] == {mapping})")) + "))";
     }
 
     public override SerializedInput Serialise()

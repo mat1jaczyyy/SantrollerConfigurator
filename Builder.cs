@@ -1,14 +1,13 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Net.Http;
-using System.Net.Http.Headers;
-
+using System.Runtime.InteropServices;
+using Microsoft.Build.Utilities;
 
 namespace GuitarConfigurator.NetCore;
 
-public class Builder : Microsoft.Build.Utilities.Task
+public class Builder : Task
 {
     public string Parameter1 { get; set; } = "";
     public string Parameter2 { get; set; } = "";

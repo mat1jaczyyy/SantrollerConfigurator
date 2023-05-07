@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
-using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -12,16 +11,14 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public class DjAxis : OutputAxis
 {
     public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
-        int deadZone, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone,
+        int deadZone, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max,
+        deadZone,
         false, childOfCombined)
     {
         Type = type;
         UpdateDetails();
     }
-    public override bool ShouldFlip(ConfigField mode)
-    {
-        return false;
-    }
+
     public DjAxisType Type { get; }
 
     public override bool IsKeyboard => false;
@@ -62,11 +59,16 @@ public class DjAxis : OutputAxis
 
     public bool IsFader => Type is DjAxisType.Crossfader;
 
+    public override bool ShouldFlip(ConfigField mode)
+    {
+        return false;
+    }
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return EnumToStringConverter.Convert(Type);
     }
-    
+
     public override object GetOutputType()
     {
         return Type;
@@ -74,7 +76,8 @@ public class DjAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDjAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone, ChildOfCombined);
+        return new SerializedDjAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone,
+            ChildOfCombined);
     }
 
     public override string GenerateOutput(ConfigField mode)
@@ -86,7 +89,8 @@ public class DjAxis : OutputAxis
         string combinedExtra,
         List<int> combinedDebounce)
     {
-        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
+        if (mode == ConfigField.Shared)
+            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data

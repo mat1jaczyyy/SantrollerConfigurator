@@ -9,7 +9,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public abstract class TwiInput : Input, ITwi
 {
-
     private readonly TwiConfig _twiConfig;
 
     private readonly string _twiType;

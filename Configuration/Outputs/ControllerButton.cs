@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
@@ -15,7 +14,8 @@ public class ControllerButton : OutputButton
     private readonly ObservableAsPropertyHelper<bool> _valid;
 
     public ControllerButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
-        byte debounce, StandardButtonType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, debounce, childOfCombined)
+        byte debounce, StandardButtonType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices,
+        debounce, childOfCombined)
     {
         Type = type;
         _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
@@ -39,7 +39,7 @@ public class ControllerButton : OutputButton
     {
         return ControllerEnumConverter.GetButtonText(deviceControllerType, Type) ?? Type.ToString();
     }
-    
+
     public override object GetOutputType()
     {
         return Type;
@@ -55,6 +55,7 @@ public class ControllerButton : OutputButton
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedControllerButton(Input.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type, ChildOfCombined);
+        return new SerializedControllerButton(Input.Serialise(), LedOn, LedOff, LedIndices.ToArray(), Debounce, Type,
+            ChildOfCombined);
     }
 }

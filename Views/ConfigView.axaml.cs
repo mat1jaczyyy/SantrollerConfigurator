@@ -25,6 +25,9 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
         InitializeComponent();
     }
 
+    public RhythmType RhythmType => ViewModel!.RhythmType;
+    public DeviceControllerType DeviceType => ViewModel!.DeviceType;
+
     private void InitializeComponent()
     {
         this.WhenActivated(disposables =>
@@ -39,10 +42,7 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
             disposables(
                 ViewModel!.WhenAnyValue(x => x.Device).OfType<Santroller>()
                     .ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => s.StartTicking(ViewModel)));
-            if (ViewModel!.ShowUnoDialog && ViewModel!.Device is Arduino arduino)
-            {
-                DoShowUnoDialog(arduino);
-            }
+            if (ViewModel!.ShowUnoDialog && ViewModel!.Device is Arduino arduino) DoShowUnoDialog(arduino);
         });
         AvaloniaXamlLoader.Load(this);
     }
@@ -59,13 +59,14 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
         await using var stream = await file.OpenWriteAsync();
         Serializer.Serialize(stream, new SerializedConfiguration(obj.Input));
     }
-    
+
     private async void DoLoadConfigAsync(InteractionContext<ConfigViewModel, Unit> obj)
     {
         var extension = "." + obj.Input.Microcontroller.Board.ArdwiinoName + "config";
         var file = await ((Window) VisualRoot!).StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            AllowMultiple = false, FileTypeFilter = new[] {new FilePickerFileType(extension) {Patterns = new[] {"*" + extension}}}
+            AllowMultiple = false,
+            FileTypeFilter = new[] {new FilePickerFileType(extension) {Patterns = new[] {"*" + extension}}}
         });
         if (!file.Any()) return;
         await using var stream = await file.First().OpenReadAsync();
@@ -100,7 +101,7 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
     {
         var model = new AreYouSureWindowViewModel(interaction.Input.yesText, interaction.Input.noText,
             interaction.Input.text);
-        var dialog = new UnpluggedWindow()
+        var dialog = new UnpluggedWindow
         {
             DataContext = model
         };
@@ -134,7 +135,4 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
         await dialog.ShowDialog<BindAllWindowViewModel?>((Window) VisualRoot!);
         interaction.SetOutput(model);
     }
-
-    public RhythmType RhythmType => ViewModel!.RhythmType;
-    public DeviceControllerType DeviceType => ViewModel!.DeviceType;
 }

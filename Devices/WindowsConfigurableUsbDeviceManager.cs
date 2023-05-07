@@ -1,21 +1,3 @@
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Reactive.Concurrency;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia.Threading;
-using DynamicData;
-using GuitarConfigurator.NetCore.ViewModels;
-using LibUsbDotNet;
-using LibUsbDotNet.DeviceNotify;
-using LibUsbDotNet.DeviceNotify.Info;
-using LibUsbDotNet.Main;
-using LibUsbDotNet.WinUsb;
-using Nefarius.Utilities.DeviceManagement.Extensions;
-using Nefarius.Utilities.DeviceManagement.PnP;
-using ReactiveUI;
-
 namespace GuitarConfigurator.NetCore.Devices;
 
 #if Windows

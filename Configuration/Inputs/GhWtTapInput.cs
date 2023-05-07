@@ -22,14 +22,9 @@ public class GhWtTapInput : Input
         {GhWtInputType.TapRed, 1},
         {GhWtInputType.TapYellow, 2},
         {GhWtInputType.TapBlue, 3},
-        {GhWtInputType.TapOrange, 4},
+        {GhWtInputType.TapOrange, 4}
     };
 
-    public DirectPinConfig PinConfigAnalog { get; }
-    private DirectPinConfig PinConfigS0 { get; }
-    private DirectPinConfig PinConfigS1 { get; }
-    private DirectPinConfig PinConfigS2 { get; }
-    
     public GhWtTapInput(GhWtInputType input, ConfigViewModel model, int pinInput, int pinS0, int pinS1, int pinS2,
         bool combined = false) : base(model)
     {
@@ -37,7 +32,7 @@ public class GhWtTapInput : Input
         Input = input;
         IsAnalog = input is GhWtInputType.TapBar;
         PinConfigAnalog = new DirectPinConfig(model, GhWtAnalogPinType, pinInput, DevicePinMode.PullUp);
-        PinConfigS0 =  new DirectPinConfig(model, GhWtS0PinType, pinS0, DevicePinMode.Output);
+        PinConfigS0 = new DirectPinConfig(model, GhWtS0PinType, pinS0, DevicePinMode.Output);
         PinConfigS1 = new DirectPinConfig(model, GhWtS1PinType, pinS1, DevicePinMode.Output);
         PinConfigS2 = new DirectPinConfig(model, GhWtS2PinType, pinS2, DevicePinMode.Output);
         this.WhenAnyValue(x => x.PinConfigAnalog.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
@@ -46,7 +41,12 @@ public class GhWtTapInput : Input
         this.WhenAnyValue(x => x.PinConfigS2.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS2)));
         this.WhenAnyValue(x => x.Model.WtSensitivity).Subscribe(_ => this.RaisePropertyChanged(nameof(Sensitivity)));
     }
-    
+
+    public DirectPinConfig PinConfigAnalog { get; }
+    private DirectPinConfig PinConfigS0 { get; }
+    private DirectPinConfig PinConfigS1 { get; }
+    private DirectPinConfig PinConfigS2 { get; }
+
 
     public int Pin
     {
@@ -58,6 +58,7 @@ public class GhWtTapInput : Input
             this.RaisePropertyChanged(nameof(PinConfigs));
         }
     }
+
     public int PinS0
     {
         get => PinConfigS0.Pin;
@@ -68,7 +69,7 @@ public class GhWtTapInput : Input
             this.RaisePropertyChanged(nameof(PinConfigs));
         }
     }
-    
+
     public int PinS1
     {
         get => PinConfigS1.Pin;
@@ -79,6 +80,7 @@ public class GhWtTapInput : Input
             this.RaisePropertyChanged(nameof(PinConfigs));
         }
     }
+
     public int PinS2
     {
         get => PinConfigS2.Pin;
@@ -89,20 +91,23 @@ public class GhWtTapInput : Input
             this.RaisePropertyChanged(nameof(PinConfigs));
         }
     }
-    
-    public override IList<PinConfig> PinConfigs => new List<PinConfig> {PinConfigAnalog, PinConfigS0, PinConfigS1, PinConfigS2};
-    
-    
+
+    public override IList<PinConfig> PinConfigs => new List<PinConfig>
+        {PinConfigAnalog, PinConfigS0, PinConfigS1, PinConfigS2};
+
+
     public List<int> AvailablePins => Model.Microcontroller.GetAllPins(true);
     public List<int> AvailablePinsDigital => Model.Microcontroller.GetAllPins(false);
 
     public GhWtInputType Input { get; set; }
     public bool Combined { get; }
+
     public int Sensitivity
     {
         get => 60 - Model.WtSensitivity;
         set => Model.WtSensitivity = (byte) (60 - value);
     }
+
     public override string Title => EnumToStringConverter.Convert(Input);
 
     public override InputType? InputType => Types.InputType.WtNeckInput;
@@ -115,7 +120,7 @@ public class GhWtTapInput : Input
 
     public override string Generate(ConfigField mode)
     {
-        return Input == GhWtInputType.TapBar ? "gh5_mapping[rawWt]" : $"(rawWt & {1 << (byte)Input})";
+        return Input == GhWtInputType.TapBar ? "gh5_mapping[rawWt]" : $"(rawWt & {1 << (byte) Input})";
     }
 
     public override SerializedInput Serialise()

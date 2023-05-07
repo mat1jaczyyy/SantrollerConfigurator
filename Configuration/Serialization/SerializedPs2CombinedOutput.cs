@@ -1,11 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Media;
 using DynamicData;
-using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -44,7 +40,6 @@ public class SerializedPs2CombinedOutput : SerializedOutput
         var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         var array = new BitArray(Enabled);
         for (var i = 0; i < outputs.Count; i++) outputs[i].Enabled = array[i];
-        model.Bindings.Remove(combined);
         combined.SetOutputsOrDefaults(outputs);
         return combined;
     }

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using Avalonia.Controls;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
@@ -16,43 +15,13 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 public class GuitarAxis : OutputAxis
 {
     public GuitarAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff,
-        byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type, bool childOfCombined) : base(model, input, ledOn,
+        byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type, bool childOfCombined) : base(model,
+        input, ledOn,
         ledOff, ledIndices, min, max, deadZone, type is GuitarAxisType.Slider or GuitarAxisType.Whammy, childOfCombined)
     {
         Type = type;
         UpdateDetails();
         this.WhenAnyValue(x => x.Value).Select(GetSliderInfo).ToPropertyEx(this, x => x.SliderInfo);
-    }
-
-    private string GetSliderInfo(int val)
-    {
-        if (Type is not GuitarAxisType.Slider || !Gh5NeckInput.Gh5Mappings.ContainsKey(val))
-        {
-            return "Current Frets: None";
-        }
-        var info = Gh5NeckInput.Gh5Mappings[val];
-        var ret = "Current Frets:";
-        if ((info & BarButton.Green) != 0)
-        {
-            ret += " Green";
-        }
-        if ((info & BarButton.Red) != 0)
-        {
-            ret += " Red";
-        }
-        if ((info & BarButton.Yellow) != 0)
-        {
-            ret += " Yellow";
-        }
-        if ((info & BarButton.Blue) != 0)
-        {
-            ret += " Blue";
-        }
-        if ((info & BarButton.Orange) != 0)
-        {
-            ret += " Orange";
-        }
-        return ret.Trim();
     }
 
 
@@ -80,11 +49,6 @@ public class GuitarAxis : OutputAxis
         }
     }
 
-    public override bool ShouldFlip(ConfigField mode)
-    {
-        return false;
-    }
-
     public override string LedOffLabel
     {
         get
@@ -98,6 +62,25 @@ public class GuitarAxis : OutputAxis
         }
     }
 
+    private string GetSliderInfo(int val)
+    {
+        if (Type is not GuitarAxisType.Slider || !Gh5NeckInput.Gh5Mappings.ContainsKey(val))
+            return "Current Frets: None";
+        var info = Gh5NeckInput.Gh5Mappings[val];
+        var ret = "Current Frets:";
+        if ((info & BarButton.Green) != 0) ret += " Green";
+        if ((info & BarButton.Red) != 0) ret += " Red";
+        if ((info & BarButton.Yellow) != 0) ret += " Yellow";
+        if ((info & BarButton.Blue) != 0) ret += " Blue";
+        if ((info & BarButton.Orange) != 0) ret += " Orange";
+        return ret.Trim();
+    }
+
+    public override bool ShouldFlip(ConfigField mode)
+    {
+        return false;
+    }
+
     public override SerializedOutput Serialize()
     {
         return new SerializedGuitarAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
@@ -108,7 +91,7 @@ public class GuitarAxis : OutputAxis
     {
         return GetReportField(Type);
     }
-    
+
     public override object GetOutputType()
     {
         return Type;
@@ -118,7 +101,8 @@ public class GuitarAxis : OutputAxis
         string combinedExtra,
         List<int> combinedDebounce)
     {
-        if (mode == ConfigField.Shared) return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
+        if (mode == ConfigField.Shared)
+            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
         if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         // The below is a mess... but essentially we have to handle converting the input to its respective output depending on console
         // We have to do some hyper specific stuff for digital to analog here too so its easiest to capture its value once
@@ -127,10 +111,7 @@ public class GuitarAxis : OutputAxis
         {
             analogOn = dta.On;
             // Slider is really a uint8_t, so just cut off the extra bits
-            if (Type == GuitarAxisType.Slider)
-            {
-                analogOn &= 0xFF;
-            }
+            if (Type == GuitarAxisType.Slider) analogOn &= 0xFF;
         }
 
         switch (mode)
@@ -138,13 +119,9 @@ public class GuitarAxis : OutputAxis
             case ConfigField.Xbox360 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
                 // x360 slider is actually a int16_t BUT there is a mechanism to convert the uint8 value to its uint16_t version
                 if (analogOn > 0x80)
-                {
                     analogOn |= (analogOn - 1) << 8;
-                }
                 else
-                {
                     analogOn |= analogOn << 8;
-                }
 
                 return $@"if ({Input.Generate(mode)}) {{
                                   {GenerateOutput(mode)} = {analogOn};
@@ -235,10 +212,9 @@ public class GuitarAxis : OutputAxis
                 return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)};";
             default:
                 if (Input is DigitalToAnalog)
-                {
                     return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
-                }
-                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, Type is GuitarAxisType.Whammy)};"; 
+                return
+                    $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, Type is GuitarAxisType.Whammy)};";
         }
     }
 

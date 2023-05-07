@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -59,6 +58,8 @@ public class DigitalToAnalog : Input
     public override InputType? InputType => Child.InputType;
     public override bool IsUint => _trigger;
 
+    public override string Title => Child.Title;
+
     public override string Generate(ConfigField mode)
     {
         return Child.Generate(mode);
@@ -73,8 +74,6 @@ public class DigitalToAnalog : Input
     {
         return Child;
     }
-
-    public override string Title => Child.Title;
 
     public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,

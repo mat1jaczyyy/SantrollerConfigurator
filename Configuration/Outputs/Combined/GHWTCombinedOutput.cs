@@ -60,19 +60,6 @@ public class GhwtCombinedOutput : CombinedOutput
         DigitalOutputs = digitalOutputs;
     }
 
-    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
-    {
-        Outputs.Clear();
-        if (outputs.Any())
-        {
-            Outputs.AddRange(outputs);
-        }
-        else
-        {
-            CreateDefaults();
-        }
-    }
-
     public int Pin
     {
         get => _pin.Pin;
@@ -108,6 +95,15 @@ public class GhwtCombinedOutput : CombinedOutput
 
     public List<int> AvailablePinsDigital => Model.Microcontroller.GetAllPins(false);
 
+    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    {
+        Outputs.Clear();
+        if (outputs.Any())
+            Outputs.AddRange(outputs);
+        else
+            CreateDefaults();
+    }
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return "GHWT Slider Inputs";
@@ -122,11 +118,11 @@ public class GhwtCombinedOutput : CombinedOutput
     {
         Outputs.Add(new ControllerButton(Model,
             new GhWtTapInput(GhWtInputType.TapAll, Model, Pin, PinS0, PinS1, PinS2,
-                combined: true), Colors.Black,
+                true), Colors.Black,
             Colors.Black, Array.Empty<byte>(), 5, StandardButtonType.A, true));
         Outputs.Add(new GuitarAxis(Model,
             new GhWtTapInput(GhWtInputType.TapBar, Model, Pin, PinS0, PinS1, PinS2,
-                combined: true),
+                true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
             GuitarAxisType.Slider, true));
@@ -179,7 +175,7 @@ public class GhwtCombinedOutput : CombinedOutput
             Outputs.Remove(axisController);
             Outputs.Add(new GuitarAxis(Model,
                 new GhWtTapInput(GhWtInputType.TapBar, Model, Pin, PinS0, PinS1, PinS2,
-                    combined: true),
+                    true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                 GuitarAxisType.Slider, true));
@@ -189,12 +185,13 @@ public class GhwtCombinedOutput : CombinedOutput
             Outputs.Remove(axisGuitar);
             Outputs.Add(new ControllerAxis(Model,
                 new GhWtTapInput(GhWtInputType.TapBar, Model, Pin, PinS0, PinS1, PinS2,
-                    combined: true),
+                    true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                 StandardAxisType.LeftStickX, true));
         }
     }
+
     protected override IEnumerable<PinConfig> GetOwnPinConfigs()
     {
         return new PinConfig[] {_pin, _pinConfigS0, _pinConfigS1, _pinConfigS2};

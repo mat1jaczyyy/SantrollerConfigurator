@@ -4,11 +4,9 @@ using System.Linq;
 using Avalonia.Media;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
@@ -48,20 +46,16 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         DigitalOutputs = digitalOutputs;
     }
 
+    [Reactive] public bool Detected { get; set; }
+
     public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
     {
         Outputs.Clear();
         if (outputs.Any())
-        {
             Outputs.AddRange(outputs);
-        }
         else
-        {
             CreateDefaults();
-        }
     }
-
-    [Reactive] public bool Detected { get; set; }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
@@ -152,23 +146,20 @@ public class Gh5CombinedOutput : CombinedTwiOutput
             Outputs.Remove(axisController);
             Outputs.Add(new GuitarAxis(Model,
                 new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, Sda, Scl,
-                    combined: true),
+                    true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                 GuitarAxisType.Slider, true));
         }
         else
         {
-            if (tapAll != null)
-            {
-                Outputs.Remove(tapAll);
-            }
+            if (tapAll != null) Outputs.Remove(tapAll);
 
             if (axisGuitar == null) return;
             Outputs.Remove(axisGuitar);
             Outputs.Add(new ControllerAxis(Model,
                 new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, Sda, Scl,
-                    combined: true),
+                    true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
                 StandardAxisType.LeftStickX, true));

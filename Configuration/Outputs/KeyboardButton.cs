@@ -158,6 +158,7 @@ public class KeyboardButton : OutputButton
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;
+
     public override void UpdateBindings()
     {
     }
@@ -166,7 +167,7 @@ public class KeyboardButton : OutputButton
     {
         return Keys.TryGetValue(Key, out var key) ? key : "";
     }
-    
+
     public override object GetOutputType()
     {
         return Key;

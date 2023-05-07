@@ -1,6 +1,5 @@
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
 
@@ -24,6 +23,8 @@ public class SerializedDigitalToAnalog : SerializedInput
 
     public override Input Generate(ConfigViewModel model)
     {
-        return Tilt ? new DigitalToAnalog(Child.Generate(model), model) : new DigitalToAnalog(Child.Generate(model), On, Trigger,model);
+        return Tilt
+            ? new DigitalToAnalog(Child.Generate(model), model)
+            : new DigitalToAnalog(Child.Generate(model), On, Trigger, model);
     }
 }

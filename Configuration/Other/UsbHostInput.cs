@@ -3,23 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Other;
 
 public class UsbHostInputInput : FixedInput
 {
-    public override string Title => "Usb Host Inputs";
-
     public UsbHostInputInput(ConfigViewModel model) : base(model, 0)
     {
     }
+
+    public override string Title => "Usb Host Inputs";
 
     public override IReadOnlyList<string> RequiredDefines()
     {
@@ -37,7 +35,7 @@ public class UsbHostInput : Output
 
     [Reactive] public string UsbHostInfo { get; set; } = "";
 
-    [Reactive] public int ConnectedDevices { get; set; } = 0;
+    [Reactive] public int ConnectedDevices { get; set; }
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 
@@ -98,18 +96,14 @@ public class UsbHostInput : Output
                 var xInputSubType = (XInputSubType) usbHostRaw[i + 1];
                 subType = EnumToStringConverter.Convert(xInputSubType);
                 if (xInputSubType is XInputSubType.Drums or XInputSubType.Guitar or XInputSubType.GuitarAlternate)
-                {
                     rhythmType = " " + EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
-                }
             }
             else
             {
                 var deviceType = (DeviceControllerType) usbHostRaw[i + 1];
                 subType = EnumToStringConverter.Convert(deviceType);
                 if (deviceType is DeviceControllerType.Drum or DeviceControllerType.Guitar)
-                {
                     rhythmType = " " + EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
-                }
             }
 
             buffer += $"{consoleType} {rhythmType} {subType}\n";

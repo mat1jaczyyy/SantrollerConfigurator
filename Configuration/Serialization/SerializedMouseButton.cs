@@ -1,5 +1,5 @@
 using Avalonia.Media;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -30,7 +30,9 @@ public class SerializedMouseButton : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        return new MouseButton(model, Input.Generate(model), Color.FromUInt32(LedOn),
+        var combined = new MouseButton(model, Input.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
+        model.Bindings.Add(combined);
+        return combined;
     }
 }

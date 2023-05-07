@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -9,30 +8,25 @@ using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
-using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Types;
-using Humanizer;
 using MouseButton = Avalonia.Input.MouseButton;
 
 namespace GuitarConfigurator.NetCore;
 
 public class SimpleTypeImageConverter : IMultiValueConverter
 {
-    private static Dictionary<object, Bitmap> _icons = new();
+    private static readonly Dictionary<object, Bitmap> _icons = new();
 
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
         if (values[0] == null || values[1] == null || values[2] == null)
             return null;
-        
+
         if (values[1] is not DeviceControllerType || values[2] is not RhythmType) return null;
         var deviceControllerType = (DeviceControllerType) values[1]!;
         var rhythmType = (RhythmType) values[2]!;
         var name = values[0]!.GetType().Name + values[0] + rhythmType + deviceControllerType;
-        if (_icons.TryGetValue(name, out var image))
-        {
-            return image;
-        }
+        if (_icons.TryGetValue(name, out var image)) return image;
 
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var path = values[0] switch
@@ -53,7 +47,8 @@ public class SimpleTypeImageConverter : IMultiValueConverter
                 SimpleType.ConsoleMode => "Console",
                 _ => null
             },
-            DpadType type => (type.ToString().StartsWith("Ps2") ? "PS2/DPad" : "Wii/ClassicDPad") + type.ToString()[3..],
+            DpadType type => (type.ToString().StartsWith("Ps2") ? "PS2/DPad" : "Wii/ClassicDPad") +
+                             type.ToString()[3..],
             Key type => "Keyboard",
             MouseAxis mouse => "Mouse",
             MouseButton mouse => "Mouse",
@@ -107,10 +102,7 @@ public class SimpleTypeImageConverter : IMultiValueConverter
             Ps3AxisType type => "PS3/PS3_" + type,
             _ => null
         };
-        if (path == null)
-        {
-            return null;
-        }
+        if (path == null) return null;
 
         try
         {

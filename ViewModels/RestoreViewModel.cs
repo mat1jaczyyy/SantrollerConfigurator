@@ -1,40 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using Avalonia.Input;
-using Avalonia.Media;
 using DynamicData;
-using GuitarConfigurator.NetCore.Configuration.Conversions;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
-using GuitarConfigurator.NetCore.Configuration.Outputs;
-using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
-using GuitarConfigurator.NetCore.Configuration.Serialization;
-using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Devices;
-using ProtoBuf;
 using ReactiveUI;
-using CommunityToolkit.Mvvm.Input;
-using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Other;
-using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.ViewModels;
 
-public partial class RestoreViewModel : ReactiveObject, IRoutableViewModel
+public class RestoreViewModel : ReactiveObject, IRoutableViewModel
 {
-    public MainWindowViewModel Main { get; }
-
-    private Santroller _santroller;
-    public ReactiveCommand<Unit, IRoutableViewModel> GoBack { get; }
+    private readonly Santroller _santroller;
 
     public RestoreViewModel(MainWindowViewModel screen, Santroller device)
     {
@@ -43,8 +19,15 @@ public partial class RestoreViewModel : ReactiveObject, IRoutableViewModel
         Main.Progress = 0;
         HostScreen = screen;
         _santroller = device;
-        GoBack = ReactiveCommand.CreateFromObservable(() => Main.GoBack.Execute(), this.WhenAnyValue(x => x.Main.Working).Select(x => !x).ObserveOn(RxApp.MainThreadScheduler));
+        GoBack = ReactiveCommand.CreateFromObservable(() => Main.GoBack.Execute(),
+            this.WhenAnyValue(x => x.Main.Working).Select(x => !x).ObserveOn(RxApp.MainThreadScheduler));
     }
+
+    public MainWindowViewModel Main { get; }
+    public ReactiveCommand<Unit, IRoutableViewModel> GoBack { get; }
+
+    public string? UrlPathSegment => Guid.NewGuid().ToString()[..5];
+    public IScreen HostScreen { get; }
 
     public IDisposable RegisterConnections()
     {
@@ -52,7 +35,6 @@ public partial class RestoreViewModel : ReactiveObject, IRoutableViewModel
             Main.AvailableDevices.Connect().Subscribe(s =>
             {
                 foreach (var change in s)
-                {
                     switch (change.Reason)
                     {
                         case ListChangeReason.Add:
@@ -62,7 +44,6 @@ public partial class RestoreViewModel : ReactiveObject, IRoutableViewModel
                             RemoveDevice(change.Item.Current);
                             break;
                     }
-                }
             });
         _santroller.Bootloader();
         Main.Working = true;
@@ -125,7 +106,4 @@ public partial class RestoreViewModel : ReactiveObject, IRoutableViewModel
             Main.Complete(100);
         }
     }
-
-    public string? UrlPathSegment => Guid.NewGuid().ToString()[..5];
-    public IScreen HostScreen { get; }
 }

@@ -5,7 +5,6 @@ using System.Reactive.Linq;
 using Avalonia.Media;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -171,13 +170,9 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.NunchukRotationPitch, StandardAxisType.RightStickY}
     };
 
-    // ReSharper disable once UnassignedGetOnlyAutoProperty
-    [ObservableAsProperty] public bool IsGuitar { get; }
-
     public WiiCombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1) : base(model, WiiInput.WiiTwiType,
         WiiInput.WiiTwiFreq, "Wii", sda, scl)
     {
-
         this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
             .ToPropertyEx(this, x => x.IsGuitar);
 
@@ -192,24 +187,24 @@ public class WiiCombinedOutput : CombinedTwiOutput
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
     }
-    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
-    {
-        Outputs.Clear();
-        if (outputs.Any())
-        {
-            Outputs.AddRange(outputs);
-        }
-        else
-        {
-            CreateDefaults();
-        }
-    }
+
+    // ReSharper disable once UnassignedGetOnlyAutoProperty
+    [ObservableAsProperty] public bool IsGuitar { get; }
 
     [Reactive] public WiiControllerType DetectedType { get; set; }
 
     [Reactive] public WiiGuitarType DetectedGuitarType { get; set; } = WiiGuitarType.Gh3;
 
     [Reactive] public bool ControllerFound { get; set; }
+
+    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    {
+        Outputs.Clear();
+        if (outputs.Any())
+            Outputs.AddRange(outputs);
+        else
+            CreateDefaults();
+    }
 
     private static Func<Output, bool> CreateFilter((bool controllerFound, WiiControllerType controllerType) tuple)
     {
@@ -232,21 +227,15 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 pair.Value, true));
 
         foreach (var pair in Axis)
-        {
             if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
                 pair.Key is WiiInputType.GuitarWhammy)
-            {
                 Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 8000, pair.Value, true));
-            }
             else
-            {
                 Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), -30000, 30000, 4000, pair.Value, true));
-            }
-        }
 
         Outputs.Add(new ControllerAxis(Model,
             new WiiInput(WiiInputType.GuitarTapBar, Model, Sda, Scl, true),
@@ -322,17 +311,11 @@ public class WiiCombinedOutput : CombinedTwiOutput
             var gh3 = (wiiRaw[0] & (1 << 7)) != 0;
             var wt = (wiiRaw[5] & (1 << 2)) == 0;
             if (gh3)
-            {
                 DetectedGuitarType = WiiGuitarType.Gh3;
-            }
             else if (wt)
-            {
                 DetectedGuitarType = WiiGuitarType.WorldTour;
-            }
             else
-            {
                 DetectedGuitarType = WiiGuitarType.Gh5;
-            }
         }
 
         DetectedType = newType;
@@ -476,6 +459,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             }
         }
     }
+
     public override object GetOutputType()
     {
         return SimpleType.WiiInputSimple;

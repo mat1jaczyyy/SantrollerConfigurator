@@ -19,7 +19,7 @@ public abstract class SpiInput : Input, ISpi
     {
         _spiType = spiType;
         var config = Model.GetSpiForType(_spiType);
-        _spiConfig = config ??  Model.Microcontroller.AssignSpiPins(model, _spiType, mosi, miso, sck, cpol, cpha,
+        _spiConfig = config ?? Model.Microcontroller.AssignSpiPins(model, _spiType, mosi, miso, sck, cpol, cpha,
             msbFirst, spiFreq);
 
         this.WhenAnyValue(x => x._spiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));

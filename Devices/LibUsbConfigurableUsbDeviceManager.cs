@@ -19,21 +19,18 @@ namespace GuitarConfigurator.NetCore.Devices;
 public class ConfigurableUsbDeviceManager
 {
     private readonly IDeviceNotifier _deviceListener = new LinuxDeviceNotifier();
-    private MainWindowViewModel _model;
+    private readonly MainWindowViewModel _model;
 
     public ConfigurableUsbDeviceManager(MainWindowViewModel model)
     {
         _model = model;
-        
     }
 
-    public void Register() {
-            _deviceListener.OnDeviceNotify += OnDeviceNotify;
-            List<UsbRegistry> deviceListAll = UsbDevice.AllDevices.AsList();
-            foreach (var dev in deviceListAll)
-            {
-                OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
-            }
+    public void Register()
+    {
+        _deviceListener.OnDeviceNotify += OnDeviceNotify;
+        List<UsbRegistry> deviceListAll = UsbDevice.AllDevices.AsList();
+        foreach (var dev in deviceListAll) OnDeviceNotify(null, new DeviceNotifyArgsRegistry(dev));
     }
 
     public void Dispose()
@@ -97,6 +94,7 @@ public class ConfigurableUsbDeviceManager
             EventType = EventType.DeviceArrival;
         }
     }
+
     private class RegDeviceNotifyInfo : IUsbDeviceNotifyInfo
     {
         private readonly UsbRegistry _dev;

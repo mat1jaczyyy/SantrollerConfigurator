@@ -17,6 +17,9 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public partial class DrumAxis : OutputAxis
 {
+    private const StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
+    private const StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
+
     private static readonly Dictionary<DrumAxisType, StandardButtonType> ButtonsXbox360 = new()
     {
         {DrumAxisType.Green, StandardButtonType.A},
@@ -82,11 +85,10 @@ public partial class DrumAxis : OutputAxis
     };
 
     private bool _calibrating;
-    private const StandardButtonType BlueCymbalFlag = StandardButtonType.DpadDown;
-    private const StandardButtonType YellowCymbalFlag = StandardButtonType.DpadUp;
 
     public DrumAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
-        int deadZone, int threshold, int debounce, DrumAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices,
+        int deadZone, int threshold, int debounce, DrumAxisType type, bool childOfCombined) : base(model, input, ledOn,
+        ledOff, ledIndices,
         min, max, deadZone, true, childOfCombined)
     {
         Type = type;
@@ -114,30 +116,30 @@ public partial class DrumAxis : OutputAxis
     [Reactive] public int Debounce { get; set; }
     [ObservableAsProperty] public Thickness ComputedDrumMargin { get; }
 
+
+    public override string? CalibrationText => _calibrating ? "Hit the drum" : null;
+
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return EnumToStringConverter.Convert(Type);
     }
-    
+
     public override object GetOutputType()
     {
         return Type;
     }
-    
-    
+
+
     private Thickness ComputeDrumMargin(int threshold)
     {
-        var val = (float)threshold / ushort.MaxValue * ProgressWidth;
+        var val = (float) threshold / ushort.MaxValue * ProgressWidth;
         return new Thickness(val - 5, 0, val + 5, 0);
     }
 
 
     public override string GenerateOutput(ConfigField mode)
     {
-        if (mode == ConfigField.XboxOne)
-        {
-            return AxisMappingsXb1.TryGetValue(Type, out var value) ? value : "";
-        }
+        if (mode == ConfigField.XboxOne) return AxisMappingsXb1.TryGetValue(Type, out var value) ? value : "";
 
         return AxisMappings.TryGetValue(Type, out var mapping) ? mapping : "";
     }
@@ -157,10 +159,7 @@ public partial class DrumAxis : OutputAxis
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
         var debounce = Debounce + 1;
-        if (!Model.IsAdvancedMode)
-        {
-            debounce = Model.Debounce + 1;
-        }
+        if (!Model.IsAdvancedMode) debounce = Model.Debounce + 1;
 
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
@@ -176,7 +175,8 @@ public partial class DrumAxis : OutputAxis
                     outputButtons += $"\n{GetReportField(value1)} = true;";
                 break;
             case ConfigField.Ps3:
-                if (ButtonsPs3.TryGetValue(Type, out var value2)) outputButtons += $"\n{GetReportField(value2)} = true;";
+                if (ButtonsPs3.TryGetValue(Type, out var value2))
+                    outputButtons += $"\n{GetReportField(value2)} = true;";
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
@@ -210,10 +210,7 @@ public partial class DrumAxis : OutputAxis
 
         // If someone specified a digital input, then we need to take the value they have specified and convert it to the target consoles expected output
         var dtaVal = 0;
-        if (Input is DigitalToAnalog dta)
-        {
-            dtaVal = dta.On;
-        }
+        if (Input is DigitalToAnalog dta) dtaVal = dta.On;
 
         var assignedVal = "val_real";
         // Xbox one uses 4 bit velocities
@@ -251,7 +248,7 @@ public partial class DrumAxis : OutputAxis
                 case DrumAxisType.Blue:
                 case DrumAxisType.BlueCymbal:
                     assignedVal = "(0x7fff - (val >> 1))";
-                    dtaVal = (0x7fff - (dtaVal >> 1));
+                    dtaVal = 0x7fff - (dtaVal >> 1);
                     break;
             }
         }
@@ -264,13 +261,11 @@ public partial class DrumAxis : OutputAxis
             // For bluetooth and RF, stuff the cymbal data into some unused bytes for rf reasons
             if (mode == ConfigField.Ps3 &&
                 Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
-            {
                 rfExtra = $@"
                 if (rf_or_bluetooth) {{
                     {GenerateOutput(ConfigField.XboxOne)} = {dta2.On >> 8};
                 }}  
             ";
-            }
 
             return $@"
             {{
@@ -288,13 +283,11 @@ public partial class DrumAxis : OutputAxis
         // For bluetooth and RF, stuff the cymbal data into some unused bytes for rf reasons
         if (mode == ConfigField.Ps3 &&
             Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
-        {
             rfExtra = $@"
                 if (rf_or_bluetooth) {{
                     {GenerateOutput(ConfigField.XboxOne)} = val_real >> 8;
                 }}  
             ";
-        }
 
         var generated = Input.IsUint ? Input.Generate(mode) : $"(({Input.Generate(mode)}) + INT16_MAX)";
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
@@ -315,9 +308,6 @@ public partial class DrumAxis : OutputAxis
         }}";
     }
 
-
-    public override string? CalibrationText => _calibrating ? "Hit the drum" : null;
-
     [RelayCommand]
     private void CalibrateDrums()
     {
@@ -327,14 +317,8 @@ public partial class DrumAxis : OutputAxis
 
     public override void ApplyCalibration(int rawValue)
     {
-        if (!Input.IsUint)
-        {
-            rawValue += short.MaxValue;
-        }
-        if (_calibrating)
-        {
-            Threshold = Math.Max(rawValue, Threshold);
-        }
+        if (!Input.IsUint) rawValue += short.MaxValue;
+        if (_calibrating) Threshold = Math.Max(rawValue, Threshold);
     }
 
     [RelayCommand]

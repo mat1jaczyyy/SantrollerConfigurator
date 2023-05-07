@@ -65,9 +65,7 @@ public abstract partial class OutputAxis : Output
     }
 
     public float FullProgressWidth => ProgressWidth;
-    public float HalfProgressWidth => ProgressWidth / 2;
-
-    // ReSharper disable UnassignedGetOnlyAutoProperty
+    public float HalfProgressWidth => ProgressWidth / 2; // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public int ValueRawLower { get; }
 
     [ObservableAsProperty] public int ValueRawUpper { get; }
@@ -337,10 +335,7 @@ public abstract partial class OutputAxis : Output
                 return "";
         }
 
-        if (ShouldFlip(mode))
-        {
-            function = "-" + function;
-        }
+        if (ShouldFlip(mode)) function = "-" + function;
 
         var min = Min;
         var max = Max;
@@ -353,14 +348,11 @@ public abstract partial class OutputAxis : Output
                 max += short.MaxValue;
                 min += short.MaxValue;
             }
+
             if (inverted)
-            {
                 min -= DeadZone;
-            }
             else
-            {
                 min += DeadZone;
-            }
 
             multiplier = 1f / (max - min) * ushort.MaxValue;
         }
@@ -382,9 +374,10 @@ public abstract partial class OutputAxis : Output
                 min += DeadZone;
                 max -= DeadZone;
             }
+
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
-        
+
         var generated = "(" + Input.Generate(mode);
         generated += (Trigger || forceAccel) switch
         {
@@ -413,18 +406,13 @@ public abstract partial class OutputAxis : Output
         string combinedExtra,
         List<int> combinedDebounce)
     {
-        if (mode == ConfigField.Shared)
-        {
-            return "";
-        }
+        if (mode == ConfigField.Shared) return "";
 
         var output = GenerateOutput(mode);
-        if (!output.Any())
-        {
-            return "";
-        }
+        if (!output.Any()) return "";
 
-        if (Input is not DigitalToAnalog dta) return $"{output} = {GenerateAssignment(mode, false, false, false)};{CalculateLeds(mode)}";
+        if (Input is not DigitalToAnalog dta)
+            return $"{output} = {GenerateAssignment(mode, false, false, false)};{CalculateLeds(mode)}";
 
         // Digital to Analog stores values based on uint16_t for trigger, and int16_t for sticks
         var val = dta.On;

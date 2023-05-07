@@ -1,4 +1,5 @@
 using System;
+using System.Formats.Tar;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -6,13 +7,13 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Platform;
 using Joveler.Compression.XZ;
-using System.Formats.Tar;
 
 namespace GuitarConfigurator.NetCore;
 
 public class AssetUtils
 {
     public delegate void ExtractionProgress(float progress);
+
     public static async Task ExtractFileAsync(string file, string location)
     {
         await using var f = File.OpenWrite(location);
@@ -56,7 +57,7 @@ public class AssetUtils
             extractionProgress(progress);
             await Task.Delay(100);
         }
-    } 
+    }
 
     public static async Task ExtractXzAsync(string archiveFile, string location, ExtractionProgress extractionProgress)
     {

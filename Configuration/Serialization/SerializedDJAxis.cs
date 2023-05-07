@@ -1,5 +1,5 @@
 using Avalonia.Media;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -36,8 +36,10 @@ public class SerializedDjAxis : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        return new DjAxis(model, Input.Generate(model), Color.FromUInt32(LedOn),
+        var combined = new DjAxis(model, Input.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
             Type, ChildOfCombined);
+        model.Bindings.Add(combined);
+        return combined;
     }
 }

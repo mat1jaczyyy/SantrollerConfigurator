@@ -1,5 +1,4 @@
 using System.Collections;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;

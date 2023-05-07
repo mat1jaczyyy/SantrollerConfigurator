@@ -1,6 +1,6 @@
 using Avalonia.Input;
 using Avalonia.Media;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
@@ -31,7 +31,9 @@ public class SerializedKeyboardButton : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        return new KeyboardButton(model, Input.Generate(model), Color.FromUInt32(LedOn),
+        var combined = new KeyboardButton(model, Input.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Debounce, Type);
+        model.Bindings.Add(combined);
+        return combined;
     }
 }

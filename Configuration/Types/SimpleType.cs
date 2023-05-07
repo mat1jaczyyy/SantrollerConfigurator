@@ -23,4 +23,3 @@ public enum SimpleType
     [Description("Rumble Binding")] Rumble,
     [Description("Console Mode Binding")] ConsoleMode
 }
-    

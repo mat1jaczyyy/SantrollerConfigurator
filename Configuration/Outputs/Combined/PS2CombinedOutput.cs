@@ -107,19 +107,6 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         DigitalOutputs = digitalOutputs;
     }
 
-    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
-    {
-        Outputs.Clear();
-        if (outputs.Any())
-        {
-            Outputs.AddRange(outputs);
-        }
-        else
-        {
-            CreateDefaults();
-        }
-    }
-
     public int Ack
     {
         get => _ackConfig.Pin;
@@ -137,6 +124,15 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     [Reactive] public Ps2ControllerType DetectedType { get; set; }
 
     [Reactive] public bool ControllerFound { get; set; }
+
+    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    {
+        Outputs.Clear();
+        if (outputs.Any())
+            Outputs.AddRange(outputs);
+        else
+            CreateDefaults();
+    }
 
     private static Func<Output, bool> CreateFilter((bool controllerFound, Ps2ControllerType controllerType) tuple)
     {
@@ -190,23 +186,17 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
             0, StandardAxisType.RightStickY, true));
         foreach (var pair in Axis)
-        {
             if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
                 pair.Key is Ps2InputType.GuitarWhammy)
-            {
                 Outputs.Add(new ControllerAxis(Model,
                     new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, pair.Value, true));
-            }
             else
-            {
                 Outputs.Add(new ControllerAxis(Model,
                     new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value, true));
-            }
-        }
 
         Outputs.Add(new JoystickToDpad(Model, short.MaxValue / 2, false));
         UpdateBindings();

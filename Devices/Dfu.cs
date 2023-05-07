@@ -1,6 +1,4 @@
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
@@ -77,16 +75,6 @@ public class Dfu : IConfigurableDevice
         return Board.FindMicrocontroller(board);
     }
 
-    public string GetRestoreSuffix()
-    {
-        return _args.Device.IdProduct == DfuPid8U2 ? "8" : "16";
-    }
-
-    public string GetRestoreProcessor()
-    {
-        return _args.Device.IdProduct == DfuPid8U2 ? "at90usb82" : "atmega16u2";
-    }
-
     public bool LoadConfiguration(ConfigViewModel model)
     {
         return false;
@@ -146,6 +134,16 @@ public class Dfu : IConfigurableDevice
     public bool IsGeneric()
     {
         return false;
+    }
+
+    public string GetRestoreSuffix()
+    {
+        return _args.Device.IdProduct == DfuPid8U2 ? "8" : "16";
+    }
+
+    public string GetRestoreProcessor()
+    {
+        return _args.Device.IdProduct == DfuPid8U2 ? "at90usb82" : "atmega16u2";
     }
 
     public override string ToString()

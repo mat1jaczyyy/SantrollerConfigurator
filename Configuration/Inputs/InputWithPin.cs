@@ -17,7 +17,8 @@ public abstract class InputWithPin : Input
     {
         PinConfig = pinConfig;
         DetectPinCommand =
-            ReactiveCommand.CreateFromTask(DetectPinAsync, this.WhenAnyValue(s => s.Model.Main.Working).Select(s => !s));
+            ReactiveCommand.CreateFromTask(DetectPinAsync,
+                this.WhenAnyValue(s => s.Model.Main.Working).Select(s => !s));
         this.WhenAnyValue(x => x.PinConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
     }
 

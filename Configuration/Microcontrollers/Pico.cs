@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
 
@@ -127,6 +126,10 @@ public class Pico : Microcontroller
 
     public override List<int> AnalogPins => new() {26, 27, 28, 29};
 
+    // All pins support pwm
+    public override List<int> PwmPins { get; } =
+        Enumerable.Range(0, GpioCount).Where(i => i is not (23 or 24)).ToList();
+
     public override int GetFirstAnalogPin()
     {
         return PinA0;
@@ -180,10 +183,7 @@ public class Pico : Microcontroller
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
         // On the pico, RF only supports Spi0
-        if (type == RfRxOutput.SpiType)
-        {
-            return SpiTypesByPin.Where(pin => SpiIndexByPin[pin.Key] == 0).ToList();
-        }
+        if (type == RfRxOutput.SpiType) return SpiTypesByPin.Where(pin => SpiIndexByPin[pin.Key] == 0).ToList();
 
         return SpiTypesByPin.ToList();
     }
@@ -198,7 +198,6 @@ public class Pico : Microcontroller
         var ret = "";
         var pins = configViewModel.PinConfigs.OfType<DirectPinConfig>();
         foreach (var devicePin in pins)
-        {
             switch (devicePin.PinMode)
             {
                 case DevicePinMode.Skip:
@@ -217,7 +216,6 @@ public class Pico : Microcontroller
                     break;
                 }
             }
-        }
 
         return ret;
     }
@@ -247,10 +245,6 @@ public class Pico : Microcontroller
     {
         return isAnalog ? AnalogPins : PwmPins;
     }
-
-    // All pins support pwm
-    public override List<int> PwmPins { get; } =
-        Enumerable.Range(0, GpioCount).Where(i => i is not (23 or 24)).ToList();
 
     public override void PinsFromPortMask(int port, int mask, byte pins,
         Dictionary<int, bool> digitalRaw)

@@ -16,21 +16,23 @@ namespace GuitarConfigurator.NetCore.Configuration.Other;
 
 public class EmulationMode : Output
 {
+    private readonly SourceList<EmulationModeType> _emulationModes = new();
+    private EmulationModeType _emulationModeType;
+
     public EmulationMode(ConfigViewModel model, Input input, EmulationModeType type) : base(
         model, input, Colors.Black, Colors.Black, Array.Empty<byte>(), false)
     {
         Type = type;
         _emulationModes.AddRange(Enum.GetValues<EmulationModeType>());
         _emulationModes.Connect()
-            .Filter(this.WhenAnyValue(x => x.Model.RhythmType, x => x.Model.DeviceType).Select(CreateFilter)).Bind(out var modes)
+            .Filter(this.WhenAnyValue(x => x.Model.RhythmType, x => x.Model.DeviceType).Select(CreateFilter))
+            .Bind(out var modes)
             .Subscribe();
         EmulationModes = modes;
-
     }
 
-    private SourceList<EmulationModeType> _emulationModes = new();
-    private EmulationModeType _emulationModeType;
     public ReadOnlyObservableCollection<EmulationModeType> EmulationModes { get; }
+
     public EmulationModeType Type
     {
         get => _emulationModeType;
@@ -40,9 +42,23 @@ public class EmulationMode : Output
             UpdateDetails();
         }
     }
-    private static Func<EmulationModeType, bool> CreateFilter((RhythmType rhythmType, DeviceControllerType deviceControllerType) tuple)
+
+    public override bool IsCombined => false;
+    public override bool IsStrum => false;
+
+    public override bool IsKeyboard => false;
+    public virtual bool IsController => false;
+
+    public override bool Valid => true;
+    public override string LedOnLabel => "";
+    public override string LedOffLabel => "";
+
+    private static Func<EmulationModeType, bool> CreateFilter(
+        (RhythmType rhythmType, DeviceControllerType deviceControllerType) tuple)
     {
-        return mode => mode != EmulationModeType.Wii || tuple.deviceControllerType is DeviceControllerType.Drum or DeviceControllerType.Guitar && tuple.rhythmType == RhythmType.RockBand;
+        return mode => mode != EmulationModeType.Wii ||
+                       (tuple.deviceControllerType is DeviceControllerType.Drum or DeviceControllerType.Guitar &&
+                        tuple.rhythmType == RhythmType.RockBand);
     }
 
     private string GetDefinition()
@@ -58,16 +74,6 @@ public class EmulationMode : Output
             _ => throw new ArgumentOutOfRangeException()
         };
     }
-
-    public override bool IsCombined => false;
-    public override bool IsStrum => false;
-
-    public override bool IsKeyboard => false;
-    public virtual bool IsController => false;
-
-    public override bool Valid => true;
-    public override string LedOnLabel => "";
-    public override string LedOffLabel => "";
 
     public override SerializedOutput Serialize()
     {

@@ -11,12 +11,14 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using CommunityToolkit.Mvvm.Input;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
+using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -24,9 +26,6 @@ using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Devices;
 using ProtoBuf;
 using ReactiveUI;
-using CommunityToolkit.Mvvm.Input;
-using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Other;
 using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.ViewModels;
@@ -40,9 +39,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public static readonly string UnoPinTypeRx = "Uno Serial Rx Pin";
     public static readonly int UnoPinTypeRxPin = 0;
     public static readonly int UnoPinTypeTxPin = 1;
-    public IConfigurableDevice Device { get; private set; }
 
-    public ReadOnlyObservableCollection<Output> Outputs { get; }
+    private bool _allExpanded;
 
 
     private SpiConfig? _apa102SpiConfig;
@@ -57,53 +55,26 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private DirectPinConfig? _rfCsn;
 
-    private DirectPinConfig? _usbHostDm;
-    private DirectPinConfig? _usbHostDp;
-
-    private DirectPinConfig? _unoRx;
-    private DirectPinConfig? _unoTx;
-
     private SpiConfig? _rfSpiConfig;
 
     private RhythmType _rhythmType;
 
+    private readonly DirectPinConfig? _unoRx;
+    private readonly DirectPinConfig? _unoTx;
+
+    private DirectPinConfig? _usbHostDm;
+    private DirectPinConfig? _usbHostDp;
+
     private bool _usbHostEnabled;
-
-    public bool ShowUnoDialog { get; }
-
-    public bool SupportsReset { get; }
-
-    private bool _allExpanded;
-
-    public bool AllExpanded
-    {
-        get => _allExpanded;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _allExpanded, value);
-            if (value)
-            {
-                ExpandAll();
-            }
-            else
-            {
-                CollapseAll();
-            }
-        }
-    }
 
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
         Device = device;
         Main = screen;
         if (device is Santroller santroller)
-        {
             LocalAddress = santroller.GetBluetoothAddress();
-        }
         else
-        {
             LocalAddress = "Write config to retrieve address";
-        }
 
         HostScreen = screen;
         Microcontroller = device.GetMicrocontroller(this);
@@ -164,36 +135,33 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (!device.LoadConfiguration(this))
         {
             SetDefaults();
-            if (Device.HasDfuMode())
-            {
-                ShowUnoDialog = true;
-            }
+            if (Device.HasDfuMode()) ShowUnoDialog = true;
         }
 
         if (Main is {IsUno: false, IsMega: false}) return;
-       _unoRx = new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output);
+        _unoRx = new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output);
         _unoTx = new DirectPinConfig(this, UnoPinTypeTx, UnoPinTypeTxPin, DevicePinMode.Output);
     }
 
-    public IDisposable RegisterConnections()
+    public IConfigurableDevice Device { get; private set; }
+
+    public ReadOnlyObservableCollection<Output> Outputs { get; }
+
+    public bool ShowUnoDialog { get; }
+
+    public bool SupportsReset { get; }
+
+    public bool AllExpanded
     {
-        return
-            Main.AvailableDevices.Connect().Subscribe(s =>
-            {
-                foreach (var change in s)
-                {
-                    switch (change.Reason)
-                    {
-                        case ListChangeReason.Add:
-                            AddDevice(change.Item.Current);
-                            break;
-                        case ListChangeReason.Remove:
-                            RemoveDevice(change.Item.Current);
-                            break;
-                    }
-                }
-            });
-        ;
+        get => _allExpanded;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _allExpanded, value);
+            if (value)
+                ExpandAll();
+            else
+                CollapseAll();
+        }
     }
 
     public Interaction<(string _platformIOText, ConfigViewModel), RaiseIssueWindowViewModel?>
@@ -231,10 +199,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     // Only Pico supports bluetooth
     public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>()
         .Where(type =>
-            Device.IsMini() && type is EmulationType.RfController or EmulationType.RfKeyboardMouse ||
+            (Device.IsMini() && type is EmulationType.RfController or EmulationType.RfKeyboardMouse) ||
             Device.IsPico() ||
-            !Device.IsMini() && !Device.IsPico() &&
-            type is not (EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse));
+            (!Device.IsMini() && !Device.IsPico() &&
+             type is not (EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)));
 
     public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
 
@@ -365,7 +333,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
             else if (_ledType == LedType.None)
             {
-                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, -1, -1, -1, true, true,
+                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, -1, -2, -1, true, true,
                     true,
                     Math.Min(Microcontroller.Board.CpuFreq / 2, 12000000))!;
                 this.RaisePropertyChanged(nameof(Apa102Mosi));
@@ -438,7 +406,24 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public SourceList<Output> Bindings { get; } = new();
     public bool BindableSpi => IsPico;
 
-    // ReSharper disable UnassignedGetOnlyAutoProperty
+    public IDisposable RegisterConnections()
+    {
+        return
+            Main.AvailableDevices.Connect().Subscribe(s =>
+            {
+                foreach (var change in s)
+                    switch (change.Reason)
+                    {
+                        case ListChangeReason.Add:
+                            AddDevice(change.Item.Current);
+                            break;
+                        case ListChangeReason.Remove:
+                            RemoveDevice(change.Item.Current);
+                            break;
+                    }
+            });
+        ;
+    } // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public bool IsStandardMode { get; }
     [ObservableAsProperty] public bool IsAdvancedMode { get; }
     [ObservableAsProperty] public bool IsRetailMode { get; }
@@ -522,10 +507,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         foreach (var binding in Bindings.Items) binding.UpdateBindings();
         InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this, false);
-        if (!(IsRhythm && IsController))
-        {
-            _rhythmType = RhythmType.GuitarHero;
-        }
+        if (!(IsRhythm && IsController)) _rhythmType = RhythmType.GuitarHero;
 
         var (extra, types) =
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
@@ -535,17 +517,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
 
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
-        {
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
-        }
 
         if (_deviceControllerType is DeviceControllerType.Turntable)
-        {
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode
             {
                 Type: EmulationModeType.Ps4Or5 or EmulationModeType.XboxOne
             }));
-        }
 
         if (_deviceControllerType == DeviceControllerType.Drum)
         {
@@ -569,9 +547,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         if (_deviceControllerType is not DeviceControllerType.Guitar && _rhythmType is not RhythmType.RockBand)
-        {
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
-        }
 
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarButton));
@@ -676,10 +652,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         XInputOnWindows = true;
         MouseMovementType = MouseMovementType.Relative;
         if (Main.DeviceInputType == DeviceInputType.Direct)
-        {
             // Write an empty config
             Write();
-        }
 
         switch (Main.DeviceInputType)
         {
@@ -704,15 +678,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        
+
 
         UpdateBindings();
         UpdateErrors();
         if (Main.DeviceInputType != DeviceInputType.Direct)
-        {
             // Write the full config
             Write();
-        }
     }
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
@@ -774,10 +746,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.RaisePropertyChanged(nameof(EmulationType));
         ClearOutputs();
 
-        if (GetSimpleEmulationType() is EmulationType.KeyboardMouse)
-        {
-            return;
-        }
+        if (GetSimpleEmulationType() is EmulationType.KeyboardMouse) return;
 
         foreach (var type in Enum.GetValues<StandardAxisType>())
         {
@@ -889,10 +858,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
 
         var offLed = GenerateTick(ConfigField.OffLed);
-        if (offLed.Any())
-        {
-            lines.Add($"#define HANDLE_LED_RUMBLE_OFF {offLed}");
-        }
+        if (offLed.Any()) lines.Add($"#define HANDLE_LED_RUMBLE_OFF {offLed}");
 
         lines.Add($"#define HANDLE_PLAYER_LED {GenerateTick(ConfigField.PlayerLed)}");
 
@@ -910,10 +876,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         lines.Add($"#define RHYTHM_TYPE {(byte) RhythmType}");
         if (EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
-        {
             lines.Add(
                 $"#define BLUETOOTH_TX {(EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse).ToString().ToLower()}");
-        }
 
         if (KvEnabled)
         {
@@ -1108,35 +1072,31 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var inputs = new Dictionary<string, List<int>>();
         var macros = new List<Output>();
         foreach (var groupedOutput in groupedOutputs)
+        foreach (var (input, output) in groupedOutput)
         {
-            foreach (var (input, output) in groupedOutput)
+            var generatedInput = input.Generate(mode);
+            if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
+
+            if (output.Input.InnermostInput() is MacroInput)
             {
-                var generatedInput = input.Generate(mode);
-                if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
+                debounces.TryAdd(generatedInput, debounces.Count);
 
-                if (output.Input.InnermostInput() is MacroInput)
-                {
-                    debounces.TryAdd(generatedInput, debounces.Count);
-
-                    macros.Add(output);
-                }
-                else
-                {
-                    debounces.TryAdd(generatedInput, debounces.Count);
-                }
-
-                if (combined && output is GuitarButton
-                    {
-                        Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown
-                    })
-                {
-                    strumIndices.Add(debounces[generatedInput]);
-                }
-
-                if (!inputs.ContainsKey(generatedInput)) inputs[generatedInput] = new List<int>();
-
-                inputs[generatedInput].Add(debounces[generatedInput]);
+                macros.Add(output);
             }
+            else
+            {
+                debounces.TryAdd(generatedInput, debounces.Count);
+            }
+
+            if (combined && output is GuitarButton
+                {
+                    Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown
+                })
+                strumIndices.Add(debounces[generatedInput]);
+
+            if (!inputs.ContainsKey(generatedInput)) inputs[generatedInput] = new List<int>();
+
+            inputs[generatedInput].Add(debounces[generatedInput]);
         }
 
         var seen = new HashSet<Output>();
@@ -1180,9 +1140,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                 foreach (var led in output.LedIndices)
                                 {
                                     if (!debouncesRelatedToLed.ContainsKey(led))
-                                    {
                                         debouncesRelatedToLed[led] = new List<(Output, List<int>)>();
-                                    }
 
                                     debouncesRelatedToLed[led].Add((output, index));
                                 }
@@ -1210,7 +1168,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
 
             if (LedType is not LedType.None)
-            {
                 // Handle leds, including when multiple leds are assigned to a single output.
                 foreach (var (led, relatedOutputs) in debouncesRelatedToLed)
                 {
@@ -1227,7 +1184,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     }}
                 }}";
                 }
-            }
         }
 
         return ret.Replace('\r', ' ').Replace('\n', ' ').Trim();
@@ -1254,21 +1210,19 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
 
             if (output.Input is MacroInput)
-            {
                 debounces.TryAdd(generatedInput, debounces.Count);
-            }
             else
-            {
                 debounces.TryAdd(generatedInput, debounces.Count);
-            }
         }
 
         return debounces.Count;
     }
+
     public List<PinConfig> GetPinConfigs()
     {
         return Bindings.Items.SelectMany(s => s.GetPinConfigs()).Distinct().ToList();
     }
+
     public Dictionary<string, List<int>> GetPins(string type)
     {
         var pins = new Dictionary<string, List<int>>();
@@ -1289,15 +1243,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             pins[UnoPinTypeRx] = new List<int> {UnoPinTypeRxPin};
         }
 
-        if (UsbHostEnabled)
-        {
-            pins["USB Host"] = new List<int> {UsbHostDm, UsbHostDp};
-        }
+        if (UsbHostEnabled) pins["USB Host"] = new List<int> {UsbHostDm, UsbHostDp};
 
-        if (IsRf)
-        {
-            pins["RF"] = new List<int> {RfMiso, RfMosi, RfCe, RfSck, RfCsn};
-        }
+        if (IsRf) pins["RF"] = new List<int> {RfMiso, RfMosi, RfCe, RfSck, RfCsn};
 
         return pins;
     }
@@ -1351,10 +1299,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public void RemoveDevice(IConfigurableDevice device)
     {
         if (!Main.Working)
-        {
             ShowUnpluggedDialog.Handle(("", "", "")).ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(s => Main.GoBack.Execute(new Unit()));
-        }
     }
 
     public void Update(byte[] rfRaw, byte[] btRaw)
@@ -1365,18 +1311,20 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             RfModuleDetected = rfRaw[1] != 0;
         }
 
-        if (IsBluetooth && btRaw.Any())
-        {
-            Connected = btRaw[0] != 0;
-        }
+        if (IsBluetooth && btRaw.Any()) Connected = btRaw[0] != 0;
     }
 
     public TwiConfig? GetTwiForType(string twiType)
     {
-        return Bindings.Items.Select(binding => binding.GetPinConfigs()).Select(configs => configs.OfType<TwiConfig>().FirstOrDefault(s => s.Type == twiType)).FirstOrDefault(found => found != null);
+        return Bindings.Items.Select(binding => binding.GetPinConfigs())
+            .Select(configs => configs.OfType<TwiConfig>().FirstOrDefault(s => s.Type == twiType))
+            .FirstOrDefault(found => found != null);
     }
+
     public SpiConfig? GetSpiForType(string spiType)
     {
-        return Bindings.Items.Select(binding => binding.GetPinConfigs()).Select(configs => configs.OfType<SpiConfig>().FirstOrDefault(s => s.Type == spiType)).FirstOrDefault(found => found != null);
+        return Bindings.Items.Select(binding => binding.GetPinConfigs())
+            .Select(configs => configs.OfType<SpiConfig>().FirstOrDefault(s => s.Type == spiType))
+            .FirstOrDefault(found => found != null);
     }
 }

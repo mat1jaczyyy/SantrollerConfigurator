@@ -184,7 +184,7 @@ public class ControllerEnumConverter : IMultiValueConverter
                     new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
                         StandardButtonType.DpadRight),
                     "D-pad Right"
-                },
+                }
             };
 
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)

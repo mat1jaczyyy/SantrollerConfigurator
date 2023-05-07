@@ -2,22 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Avalonia.Media;
 using DynamicData;
-using DynamicData.Kernel;
-using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
-using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
-using LibUsbDotNet.Descriptors;
-using SemanticVersioning;
 using Version = SemanticVersioning.Version;
 
 namespace GuitarConfigurator.NetCore.Devices;
@@ -415,7 +409,6 @@ public class Ardwiino : ConfigurableUsbDevice
                 break;
         }
 
-       
 
         if (config.all.main.inputType == (int) InputControllerType.Direct)
         {
@@ -511,13 +504,15 @@ public class Ardwiino : ConfigurableUsbDevice
                 bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, model), on, off,
                     ledIndex, debounce, genButton, false));
             }
+
             if (config.all.main.mapStartSelectToHome != 0)
             {
                 var start = config.all.pins.pins![(int) ControllerButtons.XboxStart];
                 var select = config.all.pins.pins![(int) ControllerButtons.XboxBack];
                 bindings.Add(new ControllerButton(model,
                     new MacroInput(new DirectInput(start, DevicePinMode.PullUp, model),
-                        new DirectInput(select, DevicePinMode.PullUp, model), model), Colors.Black, Colors.Black, new byte[] { },
+                        new DirectInput(select, DevicePinMode.PullUp, model), model), Colors.Black, Colors.Black,
+                    new byte[] { },
                     config.debounce.buttons, StandardButtonType.Guide, false));
             }
         }
@@ -575,7 +570,6 @@ public class Ardwiino : ConfigurableUsbDevice
             var threshold = config.all.axis.joyThreshold << 8;
             foreach (var binding in bindings)
                 if (binding is ControllerAxis axis)
-                {
                     switch (axis.Type)
                     {
                         case StandardAxisType.LeftStickX:
@@ -585,7 +579,6 @@ public class Ardwiino : ConfigurableUsbDevice
                             ly = axis;
                             break;
                     }
-                }
 
             if (lx != null)
             {

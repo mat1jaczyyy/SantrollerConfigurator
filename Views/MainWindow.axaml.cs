@@ -1,11 +1,10 @@
-using System;
+using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using Avalonia.Controls;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
-using System.Threading.Tasks;
 
 namespace GuitarConfigurator.NetCore.Views;
 

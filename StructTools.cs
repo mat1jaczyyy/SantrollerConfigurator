@@ -9,7 +9,10 @@ public static class StructTools
     /// <summary>
     ///     converts byte[] to struct
     /// </summary>
-    public static T RawDeserialize<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors),] T>(byte[] rawData, int position)
+    public static T RawDeserialize<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors |
+                                    DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+        T>(byte[] rawData, int position)
     {
         var rawsize = Marshal.SizeOf<T>();
         if (rawsize > rawData.Length - position)

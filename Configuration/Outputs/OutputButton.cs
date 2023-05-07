@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -43,24 +42,20 @@ public abstract class OutputButton : Output
     {
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
         var extraStatement = "";
-        if (mode == ConfigField.Shared && combinedExtra.Any())
-        {
-            extraStatement = " && " + combinedExtra;
-        }
+        if (mode == ConfigField.Shared && combinedExtra.Any()) extraStatement = " && " + combinedExtra;
 
         var debounce = Debounce + 1;
-        if (!Model.IsAdvancedMode)
-        {
-            debounce = Model.Debounce + 1;
-        }
+        if (!Model.IsAdvancedMode) debounce = Model.Debounce + 1;
 
         if (mode != ConfigField.Shared)
         {
             var outputVar = GenerateOutput(mode);
-            return outputVar.Any() ? @$"if ({ifStatement}) {{ 
+            return outputVar.Any()
+                ? @$"if ({ifStatement}) {{ 
                     {outputVar} = true; 
                     {extra}
-                }}" : "";
+                }}"
+                : "";
         }
 
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");

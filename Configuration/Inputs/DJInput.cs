@@ -16,7 +16,7 @@ public class DjInput : TwiInput
 
     public DjInput(DjInputType input, ConfigViewModel model, int sda = -1,
         int scl = -1, bool combined = false) : base(
-         DjTwiType, DjTwiFreq, sda, scl, model)
+        DjTwiType, DjTwiFreq, sda, scl, model)
     {
         Combined = combined;
         BindableTwi = !combined && Model.Microcontroller.TwiAssignable;
@@ -33,6 +33,7 @@ public class DjInput : TwiInput
 
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
     public override bool IsUint => false;
+    public override string Title => EnumToStringConverter.Convert(Input);
 
     public override string Generate(ConfigField mode)
     {
@@ -103,7 +104,6 @@ public class DjInput : TwiInput
                     {right}
                   }}";
     }
-    public override string Title => EnumToStringConverter.Convert(Input);
 
     public override IReadOnlyList<string> RequiredDefines()
     {

@@ -269,6 +269,8 @@ public class WiiInput : TwiInput
     public override bool IsUint => !Input.ToString().ToLower().Contains("stick");
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
 
+    public override string Title => EnumToStringConverter.Convert(Input);
+
     public override string Generate(ConfigField mode)
     {
         return Mappings[Input];
@@ -297,10 +299,7 @@ public class WiiInput : TwiInput
         var checkedType = newType;
         if (checkedType == WiiControllerType.ClassicControllerPro) checkedType = WiiControllerType.ClassicController;
 
-        if (checkedType != WiiControllerType)
-        {
-            return;
-        }
+        if (checkedType != WiiControllerType) return;
 
         var wiiButtonsLow = ~wiiData[4];
         var wiiButtonsHigh = ~wiiData[5];
@@ -516,10 +515,7 @@ public class WiiInput : TwiInput
         {
             if (binding.Item1 is not WiiInput input) continue;
             // digital inputs get mapped to the same buttons, so no need to generate stuff specific to each type
-            if (mode != ConfigField.Shared && !binding.Item1.IsAnalog)
-            {
-                continue;
-            }
+            if (mode != ConfigField.Shared && !binding.Item1.IsAnalog) continue;
 
             if (!mappedBindings.ContainsKey(input.WiiControllerType))
                 mappedBindings.Add(input.WiiControllerType, new List<string>());
@@ -531,10 +527,8 @@ public class WiiInput : TwiInput
         var ret2 = "";
 
         if (mode != ConfigField.Shared)
-        {
             ret2 += string.Join("\n",
                 bindings.Where(binding => !binding.Item1.IsAnalog).Select(binding => binding.Item2).Distinct());
-        }
 
         if (mappedBindings.ContainsKey(WiiControllerType.ClassicController))
         {
@@ -584,8 +578,6 @@ break;
                    }}
                 }}");
     }
-
-    public override string Title => EnumToStringConverter.Convert(Input);
 
     public override IReadOnlyList<string> RequiredDefines()
     {

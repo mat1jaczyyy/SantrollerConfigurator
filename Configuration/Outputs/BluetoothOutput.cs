@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
@@ -22,6 +21,33 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public partial class BluetoothOutput : CombinedOutput
 {
+    private const int BtAddressLength = 18;
+    private const string NoDeviceText = "No device found";
+
+    private readonly DispatcherTimer _timer = new();
+
+
+    public BluetoothOutput(ConfigViewModel model, string macAddress) : base(model, new FixedInput(model, 0))
+    {
+        Input = new BluetoothInput(this);
+        _timer.Interval = TimeSpan.FromSeconds(1);
+        _timer.Tick += Tick;
+        this.WhenAnyValue(s => s.ScanTimer)
+            .Select(scanTimer => scanTimer == 11 ? "Start Scan" : $"Scanning... ({scanTimer})")
+            .ToPropertyEx(this, x => x.ScanText);
+        this.WhenAnyValue(s => s.ScanTimer).Select(scanTimer => scanTimer != 11).ToPropertyEx(this, x => x.Scanning);
+        Addresses.Add(macAddress.Any() ? macAddress : NoDeviceText);
+        MacAddress = Addresses.First();
+        if (Model.Device is Santroller santroller)
+            LocalAddress = santroller.GetBluetoothAddress();
+        else
+            LocalAddress = "Write config to retrieve address";
+    }
+
+    public string LocalAddress { get; }
+
+    public AvaloniaList<string> Addresses { get; } = new();
+
     private class BluetoothInput : Input
     {
         public BluetoothInput(BluetoothOutput bluetoothOutput) : base(bluetoothOutput.Model)
@@ -42,12 +68,9 @@ public partial class BluetoothOutput : CombinedOutput
         {
             var ret = new List<string>
             {
-                "BLUETOOTH_RX",
+                "BLUETOOTH_RX"
             };
-            if (BluetoothOutput.MacAddress != NoDeviceText)
-            {
-                ret.Add("BT_ADDR="+BluetoothOutput.MacAddress);
-            }
+            if (BluetoothOutput.MacAddress != NoDeviceText) ret.Add("BT_ADDR=" + BluetoothOutput.MacAddress);
 
             return ret;
         }
@@ -74,48 +97,17 @@ public partial class BluetoothOutput : CombinedOutput
         {
             return "";
         }
-    }
-
-
-    public BluetoothOutput(ConfigViewModel model, string macAddress) : base(model, new FixedInput(model, 0))
-    {
-        Input = new BluetoothInput(this);
-        _timer.Interval = TimeSpan.FromSeconds(1);
-        _timer.Tick += Tick;
-        this.WhenAnyValue(s => s.ScanTimer).Select(scanTimer => scanTimer == 11 ? "Start Scan" : $"Scanning... ({scanTimer})").ToPropertyEx(this, x => x.ScanText);
-        this.WhenAnyValue(s => s.ScanTimer).Select(scanTimer => scanTimer != 11).ToPropertyEx(this, x => x.Scanning);
-        Addresses.Add(macAddress.Any() ? macAddress : NoDeviceText);
-        MacAddress = Addresses.First();
-        if (Model.Device is Santroller santroller)
-        {
-            LocalAddress = santroller.GetBluetoothAddress();
-        }
-        else
-        {
-            LocalAddress = "Write config to retrieve address";
-        }
-    }
-
-
-    private const int BtAddressLength = 18;
-    private const string NoDeviceText = "No device found";
-    public string LocalAddress { get; }
-
-    public AvaloniaList<string> Addresses { get; } = new();
-
-    private DispatcherTimer _timer = new();
-
-    // ReSharper disable UnassignedGetOnlyAutoProperty
+    } // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public string ScanText { get; } = "";
 
     [ObservableAsProperty] public bool Scanning { get; }
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
-    [Reactive] public int ScanTimer {get; set;}
+    [Reactive] public int ScanTimer { get; set; }
 
-    [Reactive] public string MacAddress {get; set;}
+    [Reactive] public string MacAddress { get; set; }
 
-    [Reactive] public bool Connected {get; set;}
+    [Reactive] public bool Connected { get; set; }
 
     public override bool IsCombined => true;
     public override bool IsStrum => false;
@@ -135,7 +127,7 @@ public partial class BluetoothOutput : CombinedOutput
     {
         return "Bluetooth Input";
     }
-    
+
     public override object GetOutputType()
     {
         return SimpleType.Bluetooth;
@@ -152,14 +144,11 @@ public partial class BluetoothOutput : CombinedOutput
         Connected = bluetoothRaw[0] != 0;
     }
 
-    
+
     [RelayCommand]
     public void Scan()
     {
-        if (Model.Device is not Santroller santroller)
-        {
-            return;
-        }
+        if (Model.Device is not Santroller santroller) return;
 
         _timer.Start();
         ScanTimer--;
@@ -168,10 +157,7 @@ public partial class BluetoothOutput : CombinedOutput
 
     private void Tick(object? sender, EventArgs e)
     {
-        if (Model.Device is not Santroller santroller)
-        {
-            return;
-        }
+        if (Model.Device is not Santroller santroller) return;
 
         ScanTimer--;
 
@@ -179,28 +165,20 @@ public partial class BluetoothOutput : CombinedOutput
         var deviceCount = addresses.Length / BtAddressLength;
         var addressesAsStrings = new List<string>();
         for (var i = 0; i < deviceCount; i++)
-        {
             addressesAsStrings.Add(
                 Encoding.Default.GetString(addresses[(i * BtAddressLength)..((i + 1) * BtAddressLength)]));
-        }
 
         if (deviceCount != 0)
         {
             var setNew = addressesAsStrings.ToHashSet();
             var setOld = Addresses.ToHashSet();
             var wasUnset = MacAddress == NoDeviceText;
-            if (!wasUnset)
-            {
-                setNew.Add(MacAddress); 
-            }
+            if (!wasUnset) setNew.Add(MacAddress);
             Addresses.Remove(setOld.Except(setNew));
             Addresses.Add(setNew.Except(setOld));
-            if (wasUnset)
-            {
-                MacAddress = Addresses.First();
-            }
-
-        } else if (MacAddress == NoDeviceText)
+            if (wasUnset) MacAddress = Addresses.First();
+        }
+        else if (MacAddress == NoDeviceText)
         {
             Addresses.Clear();
             Addresses.Add(NoDeviceText);

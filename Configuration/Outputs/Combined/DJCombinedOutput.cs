@@ -7,7 +7,6 @@ using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
@@ -27,22 +26,18 @@ public class DjCombinedOutput : CombinedTwiOutput
         DigitalOutputs = digitalOutputs;
     }
 
+    [Reactive] public bool DetectedLeft { get; set; }
+
+    [Reactive] public bool DetectedRight { get; set; }
+
     public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
     {
         Outputs.Clear();
         if (outputs.Any())
-        {
             Outputs.AddRange(outputs);
-        }
         else
-        {
             CreateDefaults();
-        }
     }
-
-    [Reactive] public bool DetectedLeft { get; set; }
-
-    [Reactive] public bool DetectedRight { get; set; }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {

@@ -20,32 +20,35 @@
             <DataTemplate DataType="viewModels:ConfigViewModel">
                 <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="300">
                     <ExperimentalAcrylicBorder.Material>
-                        <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" BackgroundSource="Digger" />
+                        <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1"
+                                                     BackgroundSource="Digger" />
                     </ExperimentalAcrylicBorder.Material>
-                    <views:SidebarView></views:SidebarView>
+                    <views:SidebarView />
                 </ExperimentalAcrylicBorder>
             </DataTemplate>
-            <DataTemplate></DataTemplate>
+            <DataTemplate />
         </netCore:OutputTemplateSelector>
     </Window.Resources>
     <DockPanel>
         <DockPanel Height="30" DockPanel.Dock="Top" IsHitTestVisible="False">
             <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="300" IsVisible="{Binding HasSidebar}">
                 <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" BackgroundSource="Digger" />
+                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1"
+                                                 BackgroundSource="Digger" />
                 </ExperimentalAcrylicBorder.Material>
             </ExperimentalAcrylicBorder>
             <ExperimentalAcrylicBorder>
                 <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" BackgroundSource="Digger" />
+                    <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1"
+                                                 BackgroundSource="Digger" />
                 </ExperimentalAcrylicBorder.Material>
             </ExperimentalAcrylicBorder>
         </DockPanel>
-        <ContentControl Content="{Binding Router.CurrentViewModel^}" ContentTemplate="{StaticResource SidebarTemplate}">
-        </ContentControl>
+        <ContentControl Content="{Binding Router.CurrentViewModel^}" ContentTemplate="{StaticResource SidebarTemplate}" />
         <ExperimentalAcrylicBorder>
             <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1" BackgroundSource="Digger" />
+                <ExperimentalAcrylicMaterial TintColor="#222222" MaterialOpacity="0.85" TintOpacity="1"
+                                             BackgroundSource="Digger" />
             </ExperimentalAcrylicBorder.Material>
             <rxui:RoutedViewHost VerticalAlignment="Stretch" Router="{Binding Router}" />
         </ExperimentalAcrylicBorder>

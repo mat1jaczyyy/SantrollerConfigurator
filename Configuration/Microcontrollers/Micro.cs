@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,22 +33,8 @@ public class Micro : AvrController
         5, // D20 - A2 - PF5
         4, // D21 - A3 - PF4
         1, // D22 - A4 - PF1
-        0, // D23 - A5 - PF0
+        0 // D23 - A5 - PF0
     };
-
-    protected override string? AnalogName(int pin)
-    {
-        return pin switch
-        {
-            4 => " / A6",
-            6 => " / A7",
-            8 => " / A8",
-            9 => " / A9",
-            10 => " / A10",
-            12 => " / A11",
-            _ => base.AnalogName(pin)
-        };
-    }
 
     private static readonly char[] Ports =
     {
@@ -144,7 +129,25 @@ public class Micro : AvrController
     protected override int PinA0 => 18;
 
     public override Board Board { get; }
-    public override List<int> AnalogPins => Enumerable.Range(PinA0, 6).Concat(new List<int> {4,6,8,9,10,12}).ToList();
+
+    public override List<int> AnalogPins =>
+        Enumerable.Range(PinA0, 6).Concat(new List<int> {4, 6, 8, 9, 10, 12}).ToList();
+
+    public override List<int> PwmPins { get; } = new() {3, 5, 6, 9, 10, 11, 13};
+
+    protected override string? AnalogName(int pin)
+    {
+        return pin switch
+        {
+            4 => " / A6",
+            6 => " / A7",
+            8 => " / A8",
+            9 => " / A9",
+            10 => " / A10",
+            12 => " / A11",
+            _ => base.AnalogName(pin)
+        };
+    }
 
     protected override string GetInterruptForPin(int ack)
     {
@@ -165,6 +168,7 @@ public class Micro : AvrController
     {
         return Ports[pin];
     }
+
     public override int GetFirstDigitalPin()
     {
         return 0;
@@ -187,8 +191,6 @@ public class Micro : AvrController
         if (reconfigurePin) chan |= 1 << 7;
         return chan;
     }
-
-    public override List<int> PwmPins { get; } = new() {3, 5, 6, 9, 10, 11, 13};
 
     public override AvrPinMode? ForcedMode(int pin)
     {

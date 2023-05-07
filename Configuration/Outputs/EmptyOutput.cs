@@ -44,7 +44,7 @@ public class EmptyOutput : Output
         _combinedTypes = this.WhenAnyValue(vm => vm.Model.UsbHostEnabled, vm => vm.Model.DeviceType,
                 vm => vm.Model.RhythmType)
             .Select(tuple => ControllerEnumConverter.GetTypes((tuple.Item2, tuple.Item3)).Where(s2 =>
-                (model.IsPico || s2 is not (SimpleType.WtNeckSimple or SimpleType.Bluetooth)) && tuple.Item1 ||
+                ((model.IsPico || s2 is not (SimpleType.WtNeckSimple or SimpleType.Bluetooth)) && tuple.Item1) ||
                 s2 is not SimpleType.UsbHost)).ToProperty(this, x => x.CombinedTypes);
     }
 
@@ -122,11 +122,13 @@ public class EmptyOutput : Output
                     SimpleType.Ps2InputSimple => new Ps2CombinedOutput(Model),
                     SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model),
                     SimpleType.DjTurntableSimple => new DjCombinedOutput(Model),
-                    SimpleType.Led => new Led(Model, !Model.IsApa102, Model.Microcontroller.GetFirstDigitalPin(), Colors.Black, Colors.Black,
+                    SimpleType.Led => new Led(Model, !Model.IsApa102, Model.Microcontroller.GetFirstDigitalPin(),
+                        Colors.Black, Colors.Black,
                         Array.Empty<byte>(),
                         Enum.GetValues<LedCommandType>().Where(Led.FilterLeds((Model.DeviceType, Model.EmulationType,
                             Model.RhythmType, Model.IsApa102))).First(), 0, 0),
-                    SimpleType.Rumble => new Rumble(Model, Model.Microcontroller.GetFirstDigitalPin(), RumbleMotorType.Left),
+                    SimpleType.Rumble => new Rumble(Model, Model.Microcontroller.GetFirstDigitalPin(),
+                        RumbleMotorType.Left),
                     SimpleType.ConsoleMode => new EmulationMode(Model,
                         new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model),
                         EmulationModeType.XboxOne),
@@ -141,11 +143,13 @@ public class EmptyOutput : Output
                     ushort.MinValue, ushort.MaxValue, 0,
                     standardAxisType, false),
                 StandardButtonType standardButtonType => new ControllerButton(Model,
-                    new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model), Colors.Black,
+                    new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model),
+                    Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
                     standardButtonType, false),
                 InstrumentButtonType standardButtonType => new GuitarButton(Model,
-                    new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model), Colors.Black,
+                    new DirectInput(Model.Microcontroller.GetFirstDigitalPin(), DevicePinMode.PullUp, Model),
+                    Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
                     standardButtonType, false),
                 DrumAxisType drumAxisType => new DrumAxis(Model,

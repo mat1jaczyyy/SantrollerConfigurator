@@ -30,6 +30,8 @@ public class DirectInput : InputWithPin
         new(Pin, PinMode)
     };
 
+    public override string Title => "Direct";
+
     private IEnumerable<DevicePinMode> GetPinModes()
     {
         var modes = Enum.GetValues<DevicePinMode>()
@@ -38,7 +40,6 @@ public class DirectInput : InputWithPin
             ? modes.Where(mode => mode is not (DevicePinMode.BusKeep or DevicePinMode.PullDown))
             : modes;
     }
-    public override string Title => "Direct";
 
     public override SerializedInput Serialise()
     {
@@ -55,7 +56,7 @@ public class DirectInput : InputWithPin
     public override string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-       return string.Join("\n", bindings.Select(binding => binding.Item2));
+        return string.Join("\n", bindings.Select(binding => binding.Item2));
     }
 
 

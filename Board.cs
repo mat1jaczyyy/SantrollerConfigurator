@@ -16,7 +16,7 @@ public struct Board
     public List<uint> ProductIDs { get; }
 
     public bool HasUsbmcu { get; }
-    
+
     public bool MultipleFrequencies { get; }
 
     public Board(string ardwiinoName, string name, uint cpuFreq, string environment, List<uint> productIDs,
@@ -42,7 +42,8 @@ public struct Board
         new("a-micro", "Arduino Micro", 16000000, "arduino_micro_16", new List<uint> {0x8037, 0x8237}, false, true),
         new("micro", "Sparkfun Pro Micro 3.3V", 8000000, "sparkfun_promicro_8", new List<uint> {0x9204}, false, true),
         new("micro", "Sparkfun Pro Micro 5V", 16000000, "sparkfun_promicro_16", new List<uint> {0x9206}, false, true),
-        new("leonardo", "Arduino Leonardo", 16000000, "arduino_leonardo_16", new List<uint> {0x8036, 0x800c}, false, true),
+        new("leonardo", "Arduino Leonardo", 16000000, "arduino_leonardo_16", new List<uint> {0x8036, 0x800c}, false,
+            true),
         new("leonardo", "Arduino Leonardo 3.3V", 8000000, "arduino_leonardo_8", new List<uint>(), false, true),
         new("leonardo", "Arduino Micro / Pro Micro / Leonardo in Bootloader Mode", 16000000, "sparkfun_promicro_8",
             new List<uint> {0x0036}, false, true),
@@ -65,18 +66,22 @@ public struct Board
         new("0xcb_helios", "0xCB Helios", 125000000, "0xcb_helios", new List<uint> {0xCB74}, false),
 
         //Adafruit
-        new("adafruit_feather", "Adafruit Feather RP2040", 125000000, "adafruit_feather", new List<uint> {0x80f1}, false),
+        new("adafruit_feather", "Adafruit Feather RP2040", 125000000, "adafruit_feather", new List<uint> {0x80f1},
+            false),
         new("adafruit_feather_scorpio", "Adafruit Feather RP2040 SCORPIO", 125000000, "adafruit_feather_scorpio",
             new List<uint> {0x8121}, false),
-        new("adafruit_feather_dvi", "Adafruit Feather RP2040 DVI", 125000000, "adafruit_feather_dvi", new List<uint> {0x8127},
+        new("adafruit_feather_dvi", "Adafruit Feather RP2040 DVI", 125000000, "adafruit_feather_dvi",
+            new List<uint> {0x8127},
             false),
-        new("adafruit_itsybitsy", "Adafruit ItsyBitsy RP2040", 125000000, "adafruit_itsybitsy", new List<uint> {0x80fd}, false),
+        new("adafruit_itsybitsy", "Adafruit ItsyBitsy RP2040", 125000000, "adafruit_itsybitsy", new List<uint> {0x80fd},
+            false),
         new("adafruit_qtpy", "Adafruit QT Py RP2040", 125000000, "adafruit_qtpy", new List<uint> {0x80f7}, false),
         new("adafruit_stemmafriend", "Adafruit STEMMA Friend RP2040", 125000000, "adafruit_stemmafriend",
             new List<uint> {0x80e3}, false),
         new("adafruit_trinkeyrp2040qt", "Adafruit Trinkey RP2040 QT", 125000000, "adafruit_trinkeyrp2040qt",
             new List<uint> {0x8109}, false),
-        new("adafruit_macropad2040", "Adafruit MacroPad RP2040", 125000000, "adafruit_macropad2040", new List<uint> {0x8107},
+        new("adafruit_macropad2040", "Adafruit MacroPad RP2040", 125000000, "adafruit_macropad2040",
+            new List<uint> {0x8107},
             false),
         new("adafruit_kb2040", "Adafruit KB2040", 125000000, "adafruit_kb2040", new List<uint> {0x8105}, false),
 
@@ -85,39 +90,48 @@ public struct Board
             new List<uint> {0x005e, 0x805e, 0x015e, 0x025e}, false),
 
         //BridgeTek
-        new("bridgetek_idm2040-7a", "BridgeTek IDM2040-7A", 125000000, "bridgetek_idm2040-7a", new List<uint> {0x1041}, false),
+        new("bridgetek_idm2040-7a", "BridgeTek IDM2040-7A", 125000000, "bridgetek_idm2040-7a", new List<uint> {0x1041},
+            false),
 
         //Cytron
         new("cytron_maker_nano_rp2040", "Cytron Maker Nano RP2040", 125000000, "cytron_maker_nano_rp2040",
             new List<uint> {0x100f}, false),
-        new("cytron_maker_pi_rp2040", "Cytron Maker Pi RP2040", 125000000, "cytron_maker_pi_rp2040", new List<uint> {0x1000},
+        new("cytron_maker_pi_rp2040", "Cytron Maker Pi RP2040", 125000000, "cytron_maker_pi_rp2040",
+            new List<uint> {0x1000},
             false),
 
         //DatanoiseTV
-        new("datanoisetv_picoadk", "DatanoiseTV PicoADK", 125000000, "datanoisetv_picoadk", new List<uint> {0x000a}, false),
+        new("datanoisetv_picoadk", "DatanoiseTV PicoADK", 125000000, "datanoisetv_picoadk", new List<uint> {0x000a},
+            false),
 
         //DeRuiLab
-        new("flyboard2040_core", "DeRuiLab FlyBoard2040Core", 125000000, "flyboard2040_core", new List<uint> {0x008a}, false),
+        new("flyboard2040_core", "DeRuiLab FlyBoard2040Core", 125000000, "flyboard2040_core", new List<uint> {0x008a},
+            false),
 
         //DFRobot
-        new("dfrobot_beetle_rp2040", "DFRobot Beetle RP2040", 125000000, "dfrobot_beetle_rp2040", new List<uint> {0x4253},
+        new("dfrobot_beetle_rp2040", "DFRobot Beetle RP2040", 125000000, "dfrobot_beetle_rp2040",
+            new List<uint> {0x4253},
             false),
 
         //ElectronicCat
-        new("electroniccats_huntercat_nfc", "ElectronicCats HunterCat NFC RP2040", 125000000, "electroniccats_huntercat_nfc",
+        new("electroniccats_huntercat_nfc", "ElectronicCats HunterCat NFC RP2040", 125000000,
+            "electroniccats_huntercat_nfc",
             new List<uint> {0x1037}, false),
 
         //ExtremeElectronics
         new("extelec_rc2040", "ExtremeElectronics RC2040", 125000000, "extelec_rc2040", new List<uint> {0xee20}, false),
 
         //iLabs
-        new("challenger_2040_lte", "iLabs Challenger 2040 LTE", 125000000, "challenger_2040_lte", new List<uint> {0x100b},
+        new("challenger_2040_lte", "iLabs Challenger 2040 LTE", 125000000, "challenger_2040_lte",
+            new List<uint> {0x100b},
             false),
-        new("challenger_2040_lora", "iLabs Challenger 2040 LoRa", 125000000, "challenger_2040_lora", new List<uint> {0x1023},
+        new("challenger_2040_lora", "iLabs Challenger 2040 LoRa", 125000000, "challenger_2040_lora",
+            new List<uint> {0x1023},
             false),
         new("challenger_2040_subghz", "iLabs Challenger 2040 SubGHz", 125000000, "challenger_2040_subghz",
             new List<uint> {0x1032}, false),
-        new("challenger_2040_wifi", "iLabs Challenger 2040 WiFi", 125000000, "challenger_2040_wifi", new List<uint> {0x1006},
+        new("challenger_2040_wifi", "iLabs Challenger 2040 WiFi", 125000000, "challenger_2040_wifi",
+            new List<uint> {0x1006},
             false),
         new("challenger_2040_wifi_ble", "iLabs Challenger 2040 WiFi/BLE", 125000000, "challenger_2040_wifi_ble",
             new List<uint> {0x102C}, false),
@@ -125,18 +139,22 @@ public struct Board
             new List<uint> {0x100d}, false),
         new("challenger_2040_sdrtc", "iLabs Challenger 2040 SD/RTC", 125000000, "challenger_2040_sdrtc",
             new List<uint> {0x102d}, false),
-        new("challenger_2040_nfc", "iLabs Challenger 2040 NFC", 125000000, "challenger_2040_nfc", new List<uint> {0x1036},
+        new("challenger_2040_nfc", "iLabs Challenger 2040 NFC", 125000000, "challenger_2040_nfc",
+            new List<uint> {0x1036},
             false),
         new("ilabs_rpico32", "iLabs RPICO32", 125000000, "ilabs_rpico32", new List<uint> {0x1010}, false),
 
         //Melopero
-        new("melopero_cookie_rp2040", "Melopero Cookie RP2040", 125000000, "melopero_cookie_rp2040", new List<uint> {0x1011},
+        new("melopero_cookie_rp2040", "Melopero Cookie RP2040", 125000000, "melopero_cookie_rp2040",
+            new List<uint> {0x1011},
             false),
-        new("melopero_shake_rp2040", "Melopero Shake RP2040", 125000000, "melopero_shake_rp2040", new List<uint> {0x1005},
+        new("melopero_shake_rp2040", "Melopero Shake RP2040", 125000000, "melopero_shake_rp2040",
+            new List<uint> {0x1005},
             false),
 
         //nullbits
-        new("nullbits_bit_c_pro", "nullbits Bit-C PRO", 125000000, "nullbits_bit_c_pro", new List<uint> {0x6e61}, false),
+        new("nullbits_bit_c_pro", "nullbits Bit-C PRO", 125000000, "nullbits_bit_c_pro", new List<uint> {0x6e61},
+            false),
 
         //Pimoroni
         new("pimoroni_pga2040", "Pimoroni PGA2040", 125000000, "pimoroni_pga2040", new List<uint> {0x1008}, false),
@@ -152,21 +170,25 @@ public struct Board
             new List<uint> {0x0026}, false),
 
         //Upesy
-        new("upesy_rp2040_devkit", "uPesy RP2040 DevKit", 125000000, "upesy_rp2040_devkit", new List<uint> {0x1007}, false),
+        new("upesy_rp2040_devkit", "uPesy RP2040 DevKit", 125000000, "upesy_rp2040_devkit", new List<uint> {0x1007},
+            false),
 
         //Seeed
         new("seeed_xiao_rp2040", "Seeed XIAO RP2040", 125000000, "seeed_xiao_rp2040", new List<uint> {0x000a}, false),
 
         //VCC-GND YD-2040 - Use generic SPI/4 because boards seem to come with varied flash modules but same name
-        new("vccgnd_yd_rp2040", "VCC-GND YD RP2040 0x2e8a", 125000000, "vccgnd_yd_rp2040", new List<uint> {0x800a}, false),
+        new("vccgnd_yd_rp2040", "VCC-GND YD RP2040 0x2e8a", 125000000, "vccgnd_yd_rp2040", new List<uint> {0x800a},
+            false),
 
         //Viyalab
         new("viyalab_mizu", "Viyalab Mizu RP2040", 125000000, "viyalab_mizu", new List<uint> {0x000a}, false),
 
         //Waveshare
-        new("waveshare_rp2040_zero", "Waveshare RP2040 Zero", 125000000, "waveshare_rp2040_zero", new List<uint> {0x0003},
+        new("waveshare_rp2040_zero", "Waveshare RP2040 Zero", 125000000, "waveshare_rp2040_zero",
+            new List<uint> {0x0003},
             false),
-        new("waveshare_rp2040_one", "Waveshare RP2040 One", 125000000, "waveshare_rp2040_one", new List<uint> {0x103a}, false),
+        new("waveshare_rp2040_one", "Waveshare RP2040 One", 125000000, "waveshare_rp2040_one", new List<uint> {0x103a},
+            false),
         new("waveshare_rp2040_plus_4mb", "Waveshare RP2040 Plus 4MB", 125000000, "waveshare_rp2040_plus_4mb",
             new List<uint> {0x1020}, false),
         new("waveshare_rp2040_plus_16mb", "Waveshare RP2040 Plus 16MB", 125000000, "waveshare_rp2040_plus_16mb",
@@ -177,11 +199,13 @@ public struct Board
             new List<uint> {0x1039}, false),
 
         //WIZnet
-        new("wiznet_5100s_evb_pico", "WIZnet W5100S-EVB-Pico", 125000000, "wiznet_5100s_evb_pico", new List<uint> {0x1027},
+        new("wiznet_5100s_evb_pico", "WIZnet W5100S-EVB-Pico", 125000000, "wiznet_5100s_evb_pico",
+            new List<uint> {0x1027},
             false),
         new("wiznet_wizfi360_evb_pico", "WIZnet WizFi360-EVB-Pico", 125000000, "wiznet_wizfi360_evb_pico",
             new List<uint> {0x1028}, false),
-        new("wiznet_5500_evb_pico", "WIZnet W5500-EVB-Pico", 125000000, "wiznet_5500_evb_pico", new List<uint> {0x1029}, false),
+        new("wiznet_5500_evb_pico", "WIZnet W5500-EVB-Pico", 125000000, "wiznet_5500_evb_pico", new List<uint> {0x1029},
+            false)
     };
 
     public static readonly Board[] MiniBoards =
@@ -212,11 +236,9 @@ public struct Board
     public static Board FindBoard(string ardwiinoName, uint cpuFreq)
     {
         foreach (var board in Boards)
-        {
             if (board.ArdwiinoName == ardwiinoName &&
                 (!board.MultipleFrequencies || board.CpuFreq == cpuFreq))
                 return board;
-        }
 
         return Generic;
     }
@@ -257,7 +279,7 @@ public struct Board
     {
         return MiniBoards.Contains(this);
     }
-    
+
     public bool IsEsp32()
     {
         //TODO: this

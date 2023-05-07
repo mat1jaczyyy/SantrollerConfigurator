@@ -84,9 +84,7 @@ public class MacroInput : Input
     {
         get => (Child2.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
         set => SetInput(SelectedInputType1, false, null, null, null, null, value);
-    }
-
-    // ReSharper disable UnassignedGetOnlyAutoProperty
+    } // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public bool IsDj1 { get; }
     [ObservableAsProperty] public bool IsWii1 { get; }
     [ObservableAsProperty] public bool IsPs21 { get; }
@@ -106,13 +104,11 @@ public class MacroInput : Input
             : 0;
         var pinMode = DevicePinMode.PullUp;
         if (child.InnermostInput() is DirectInput direct)
-        {
             if (direct.IsAnalog || inputType != Types.InputType.AnalogPinInput)
             {
                 lastPin = direct.Pin;
                 if (!direct.IsAnalog) pinMode = direct.PinMode;
             }
-        }
 
 
         Input input;
@@ -180,19 +176,13 @@ public class MacroInput : Input
         }
 
         if (input.IsAnalog)
-        {
             input = new AnalogToDigital(input, input.IsUint ? AnalogToDigitalType.Trigger : AnalogToDigitalType.JoyLow,
                 input.IsUint ? ushort.MaxValue / 2 : short.MaxValue / 2, Model);
-        }
 
         if (isChild1)
-        {
             Child1 = input;
-        }
         else
-        {
             Child2 = input;
-        }
     }
 
 

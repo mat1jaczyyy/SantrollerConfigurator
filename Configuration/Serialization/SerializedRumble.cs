@@ -1,3 +1,4 @@
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -14,11 +15,14 @@ public class SerializedRumble : SerializedOutput
         Type = type;
         Pin = pin;
     }
+
     [ProtoMember(1)] public RumbleMotorType Type { get; }
     [ProtoMember(2)] public int Pin { get; }
 
     public override Output Generate(ConfigViewModel model)
     {
-        return new Rumble(model, Pin, Type);
+        var combined = new Rumble(model, Pin, Type);
+        model.Bindings.Add(combined);
+        return combined;
     }
 }

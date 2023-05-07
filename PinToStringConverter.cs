@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
-using GuitarConfigurator.NetCore.Configuration;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -21,14 +20,11 @@ public class PinToStringConverter : IMultiValueConverter
             values[3] is not (Output or Input or ConfigViewModel)) return null;
         var pin = (int) values[0]!;
         var selectedPin = -1;
-        if (values[2] is not null)
-        {
-            selectedPin = (int) values[2]!;
-        }
+        if (values[2] is not null) selectedPin = (int) values[2]!;
         var model = (ConfigViewModel) values[1]!;
         var microcontroller = model.Microcontroller;
-        var twi = values[3] is ITwi twiIo && twiIo.TwiPins().Contains(pin);
-        var spi = values[3] is ISpi spiIo && spiIo.SpiPins().Contains(pin) || values[3] is ConfigViewModel;
+        var twi = values[3] is ITwi;
+        var spi = values[3] is ISpi || values[3] is ConfigViewModel;
 
         var configs = values[3] switch
         {

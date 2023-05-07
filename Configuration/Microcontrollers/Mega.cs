@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -189,9 +188,12 @@ public class Mega : AvrController
     public override Board Board { get; }
 
     public override List<int> AnalogPins => Enumerable.Range(PinA0, 5).ToList();
+
     protected override Dictionary<(char, int), int> PinByMask { get; } = Ports.Zip(PinIndex)
         .Select((tuple, i) => (tuple.First, tuple.Second, i))
         .ToDictionary(s => (s.Item1, s.Item2), s => s.Item3);
+
+    public override List<int> PwmPins => Enumerable.Range(2, 12).Concat(Enumerable.Range(44, 3)).ToList();
 
 
     protected override string GetInterruptForPin(int ack)
@@ -208,8 +210,6 @@ public class Mega : AvrController
     {
         return isAnalog ? AnalogPins : Enumerable.Range(0, PinIndex.Length).ToList();
     }
-
-    public override List<int> PwmPins => Enumerable.Range(2, 12).Concat(Enumerable.Range(44, 3)).ToList();
 
     public override int GetFirstDigitalPin()
     {

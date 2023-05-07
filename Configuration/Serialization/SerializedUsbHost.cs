@@ -1,3 +1,4 @@
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -10,6 +11,8 @@ public class SerializedUsbHost : SerializedOutput
 {
     public override Output Generate(ConfigViewModel model)
     {
-        return new UsbHostInput(model);
+        var combined = new UsbHostInput(model);
+        model.Bindings.Add(combined);
+        return combined;
     }
 }

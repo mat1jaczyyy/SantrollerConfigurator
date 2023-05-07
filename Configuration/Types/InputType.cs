@@ -8,12 +8,10 @@ public enum InputType
     MultiplexerInput,
     DigitalPinInput,
     WiiInput,
-    [Description("PS2 input")]
-    Ps2Input,
+    [Description("PS2 input")] Ps2Input,
     TurntableInput,
     WtNeckInput,
-    [Description("GH5 neck input")]
-    Gh5NeckInput,
+    [Description("GH5 neck input")] Gh5NeckInput,
     MacroInput,
     RfInput,
     UsbHostInput

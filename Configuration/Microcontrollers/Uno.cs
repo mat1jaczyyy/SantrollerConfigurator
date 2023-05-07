@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,6 +6,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 public class Uno : AvrController
 {
     private static readonly int A0 = 14;
+
     private static readonly int[] PinIndex =
     {
         0, /* 0, port D */
@@ -60,6 +60,8 @@ public class Uno : AvrController
 
     public override List<int> AnalogPins { get; } = Enumerable.Range(A0, 4).ToList();
 
+    public override List<int> PwmPins { get; } = new() {3, 5, 6, 9, 10, 11};
+
     protected override string GetInterruptForPin(int ack)
     {
         return Interrupts[ack];
@@ -101,8 +103,6 @@ public class Uno : AvrController
                 return null;
         }
     }
-
-    public override List<int> PwmPins { get; } = new() {3, 5, 6, 9, 10, 11};
 
     public override int GetFirstDigitalPin()
     {

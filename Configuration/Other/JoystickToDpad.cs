@@ -8,33 +8,21 @@ using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Other;
 
 public class JoystickToDpadInput : FixedInput
 {
-    public override string Title => "Map joystick to Dpad";
-
     public JoystickToDpadInput(ConfigViewModel model) : base(model, 0)
     {
     }
+
+    public override string Title => "Map joystick to Dpad";
 }
 
 public class JoystickToDpad : Output
 {
-    private bool Wii { get; }
-    [Reactive] public int Threshold { get; set; }
-
-    [Reactive] public bool Up { get; set; }
-
-    [Reactive] public bool Down { get; set; }
-
-    [Reactive] public bool Left { get; set; }
-
-    [Reactive] public bool Right { get; set; }
-
     private static readonly List<WiiInputType> JoystickToDpadXWii = new()
     {
         WiiInputType.ClassicLeftStickX,
@@ -49,7 +37,7 @@ public class JoystickToDpad : Output
         WiiInputType.GuitarJoystickY
     };
 
-    private List<ControllerButton> _outputs = new();
+    private readonly List<ControllerButton> _outputs = new();
 
     public JoystickToDpad(ConfigViewModel model, int threshold, bool wii) : base(
         model, new JoystickToDpadInput(model), Colors.Black, Colors.Black, Array.Empty<byte>(), true)
@@ -62,10 +50,12 @@ public class JoystickToDpad : Output
             {
                 _outputs.Add(new ControllerButton(model,
                     new AnalogToDigital(new WiiInput(wiiInputType, model), AnalogToDigitalType.JoyLow, Threshold,
-                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadLeft, true));
+                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadLeft,
+                    true));
                 _outputs.Add(new ControllerButton(model,
                     new AnalogToDigital(new WiiInput(wiiInputType, model), AnalogToDigitalType.JoyHigh, Threshold,
-                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadRight, true));
+                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadRight,
+                    true));
             }
 
             foreach (var wiiInputType in JoystickToDpadYWii)
@@ -75,7 +65,8 @@ public class JoystickToDpad : Output
                         model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadUp, true));
                 _outputs.Add(new ControllerButton(model,
                     new AnalogToDigital(new WiiInput(wiiInputType, model), AnalogToDigitalType.JoyLow, Threshold,
-                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown, true));
+                        model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown,
+                    true));
             }
 
             UpdateDetails();
@@ -96,6 +87,17 @@ public class JoystickToDpad : Output
                 model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown, true));
         UpdateDetails();
     }
+
+    private bool Wii { get; }
+    [Reactive] public int Threshold { get; set; }
+
+    [Reactive] public bool Up { get; set; }
+
+    [Reactive] public bool Down { get; set; }
+
+    [Reactive] public bool Left { get; set; }
+
+    [Reactive] public bool Right { get; set; }
 
     public override bool IsCombined => false;
     public override bool IsStrum => false;
@@ -127,10 +129,7 @@ public class JoystickToDpad : Output
 
     public override object GetOutputType()
     {
-        if (!Up && !Down && !Left && !Right)
-        {
-            return Wii ? DpadType.Wii : DpadType.Ps2;
-        }
+        if (!Up && !Down && !Left && !Right) return Wii ? DpadType.Wii : DpadType.Ps2;
 
         var buttons = Wii ? "Wii" : "Ps2";
         if (Up) buttons += "Up";
@@ -161,10 +160,8 @@ public class JoystickToDpad : Output
         base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
         foreach (var output in _outputs)
-        {
             output.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
                 ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
-        }
 
         if (!Enabled) return;
 

@@ -19,7 +19,7 @@ public partial class RaiseIssueWindow : ReactiveWindow<RaiseIssueWindowViewModel
                 Close();
             }));
         });
-        
+
         RequestedThemeVariant = ThemeVariant.Dark;
         AvaloniaXamlLoader.Load(this);
     }

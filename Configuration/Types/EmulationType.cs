@@ -15,5 +15,5 @@ public enum EmulationType
     [Description("Bluetooth Controller")] Bluetooth,
 
     [Description("Bluetooth Keyboard + Mouse")]
-    BluetoothKeyboardMouse,
+    BluetoothKeyboardMouse
 }

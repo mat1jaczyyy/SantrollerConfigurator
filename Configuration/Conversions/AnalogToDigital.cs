@@ -14,6 +14,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Conversions;
 public class AnalogToDigital : Input
 {
     private AnalogToDigitalType _analogToDigitalType;
+
     public AnalogToDigital(Input child, AnalogToDigitalType analogToDigitalType, int threshold,
         ConfigViewModel model) : base(model)
     {
@@ -26,13 +27,14 @@ public class AnalogToDigital : Input
     }
 
     public Input Child { get; }
+
     public AnalogToDigitalType AnalogToDigitalType
     {
-        get=>_analogToDigitalType;
+        get => _analogToDigitalType;
         set
         {
             this.RaiseAndSetIfChanged(ref _analogToDigitalType, value);
-            switch (_analogToDigitalType) 
+            switch (_analogToDigitalType)
             {
                 case AnalogToDigitalType.JoyLow:
                     Threshold = short.MaxValue / 2;
@@ -49,14 +51,16 @@ public class AnalogToDigital : Input
         }
     }
 
-    [Reactive]
-    public int Threshold { get; set; }
+    [Reactive] public int Threshold { get; set; }
+
     public override InputType? InputType => Child.InputType;
     public IEnumerable<AnalogToDigitalType> AnalogToDigitalTypes => Enum.GetValues<AnalogToDigitalType>();
 
     public override IList<DevicePin> Pins => Child.Pins;
     public override IList<PinConfig> PinConfigs => Child.PinConfigs;
     public override bool IsUint => Child.IsUint;
+
+    public override string Title => Child.Title;
 
 
     public override string Generate(ConfigField mode)
@@ -132,8 +136,6 @@ public class AnalogToDigital : Input
     {
         throw new InvalidOperationException("Never call GenerateAll on AnalogToDigital, call it on its children");
     }
-
-    public override string Title => Child.Title;
 
     public override IReadOnlyList<string> RequiredDefines()
     {

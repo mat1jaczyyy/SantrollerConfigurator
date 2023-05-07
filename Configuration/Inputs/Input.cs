@@ -1,10 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using Avalonia;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -32,6 +27,8 @@ public abstract class Input : ReactiveObject
     public abstract IList<PinConfig> PinConfigs { get; }
     public abstract InputType? InputType { get; }
 
+    public abstract string Title { get; }
+
     public abstract IReadOnlyList<string> RequiredDefines();
     public abstract string Generate(ConfigField mode);
 
@@ -54,6 +51,4 @@ public abstract class Input : ReactiveObject
 
     public abstract string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode);
-
-    public abstract string Title { get; }
 }

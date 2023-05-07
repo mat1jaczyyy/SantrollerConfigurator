@@ -35,7 +35,8 @@
                 </StackPanel>
                 <ScrollViewer>
                     <StackPanel>
-                        <Label Content="The device you are configuring was unplugged. Click to return to the main menu." />
+                        <Label
+                            Content="The device you are configuring was unplugged. Click to return to the main menu." />
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>

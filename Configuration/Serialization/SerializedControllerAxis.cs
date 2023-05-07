@@ -1,5 +1,5 @@
 using Avalonia.Media;
-using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -37,8 +37,11 @@ public class SerializedControllerAxis : SerializedOutput
     public override Output Generate(ConfigViewModel model)
     {
         var input = Input.Generate(model);
-        return new ControllerAxis(model, input, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Min, Max,
+        var output = new ControllerAxis(model, input, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff), LedIndex, Min,
+            Max,
             Deadzone,
             Type, ChildOfCombined);
+        model.Bindings.Add(output);
+        return output;
     }
 }

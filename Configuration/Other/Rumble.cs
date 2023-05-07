@@ -14,7 +14,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Other;
 
 public class Rumble : Output
 {
-
     private int _pin;
 
     private RumbleMotorType _rumbleMotorType;
@@ -28,7 +27,7 @@ public class Rumble : Output
 
     public List<int> AvailablePins => Model.Microcontroller.PwmPins;
 
-    public DirectPinConfig? PinConfig { get; private set; }
+    public DirectPinConfig? PinConfig { get; }
 
     public int Pin
     {

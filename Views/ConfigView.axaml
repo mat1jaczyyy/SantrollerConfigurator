@@ -7,11 +7,9 @@
              xmlns:conversions="clr-namespace:GuitarConfigurator.NetCore.Configuration.Conversions"
              xmlns:combined="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs.Combined"
              xmlns:output="clr-namespace:GuitarConfigurator.NetCore.Configuration.Outputs"
-             xmlns:config="clr-namespace:GuitarConfigurator.NetCore.Configuration"
              xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
              xmlns:other="clr-namespace:GuitarConfigurator.NetCore.Configuration.Other"
              xmlns:inputs="clr-namespace:GuitarConfigurator.NetCore.Configuration.Inputs"
-             xmlns:types="clr-namespace:GuitarConfigurator.NetCore.Configuration.Types"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:DataType="viewModels:ConfigViewModel"
              x:Class="GuitarConfigurator.NetCore.Views.ConfigView"
              x:CompileBindings="True"
@@ -134,7 +132,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type other:UsbHostInput}">
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="{Binding ConnectedDevices}" VerticalAlignment="Center"></Label>
+                    <Label Content="{Binding ConnectedDevices}" VerticalAlignment="Center" />
                     <Label VerticalAlignment="Center">Devices connected</Label>
                 </StackPanel>
             </DataTemplate>
@@ -153,7 +151,7 @@
                 <StackPanel Orientation="Horizontal">
                     <CheckBox IsChecked="{Binding Connected}" VerticalAlignment="Center" IsEnabled="False">Connected to Transmitter</CheckBox>
                     <Label VerticalAlignment="Center">Local Address</Label>
-                    <Label Content="{Binding LocalAddress}" VerticalAlignment="Center"></Label>
+                    <Label Content="{Binding LocalAddress}" VerticalAlignment="Center" />
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:GhwtCombinedOutput}" />
@@ -289,8 +287,7 @@
                             x:DataType="output:EmptyOutput">
                     <WrapPanel Margin="20 20 20 0">
                         <ContentControl ContentTemplate="{StaticResource ImageOutputTemplate}"
-                                        Content="{Binding }">
-                        </ContentControl>
+                                        Content="{Binding }" />
                         <Label IsVisible="{Binding IsKeyboard}"
                                Content="{Binding LocalisedName}" />
                         <StackPanel Orientation="Horizontal">
@@ -336,8 +333,7 @@
                     </Label>
                     <Label VerticalAlignment="Center"
                            VerticalContentAlignment="Center"
-                           Width="200" Content="{Binding UsbHostInfo}">
-                    </Label>
+                           Width="200" Content="{Binding UsbHostInfo}" />
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:GhWtTapInput}">
@@ -1682,8 +1678,7 @@
                             <ContentControl IsVisible="{Binding ChildOfCombined}"
                                             ContentTemplate="{StaticResource ImageOutputTemplate}"
                                             HorizontalAlignment="Left" Width="75" Margin="0 0 10 10"
-                                            Content="{Binding }">
-                            </ContentControl>
+                                            Content="{Binding }" />
                         </StackPanel>
                     </StackPanel>
                     <ToggleSwitch HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
@@ -1759,16 +1754,16 @@
         <DockPanel HorizontalAlignment="Stretch">
             <StackPanel DockPanel.Dock="Bottom" Margin="10">
                 <DockPanel>
-                    <StackPanel DockPanel.Dock="Left" Width="150"/>
+                    <StackPanel DockPanel.Dock="Left" Width="150" />
                     <StackPanel DockPanel.Dock="Right" Width="150">
                         <ToggleButton HorizontalAlignment="Right" IsChecked="{Binding AllExpanded}" Width="120">
                             <ToggleButton.Styles>
                                 <Style Selector="ToggleButton:checked Label#ExpandLabel">
-                                    <Setter Property="Content" Value="Collapse All"></Setter>
+                                    <Setter Property="Content" Value="Collapse All" />
                                 </Style>
 
                                 <Style Selector="ToggleButton:not(:checked) Label#ExpandLabel">
-                                    <Setter Property="Content" Value="Expand All"></Setter>
+                                    <Setter Property="Content" Value="Expand All" />
                                 </Style>
                                 <Style Selector="ToggleButton:checked Path">
                                     <Style.Animations>
@@ -1832,7 +1827,7 @@
                                 </Style>
                             </ToggleButton.Styles>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label x:Name="ExpandLabel"></Label>
+                                <Label x:Name="ExpandLabel" />
                                 <Path HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                       RenderTransformOrigin="50%,50%"
@@ -1877,8 +1872,7 @@
                                                 <StackPanel Orientation="Horizontal">
                                                     <ContentControl
                                                         ContentTemplate="{StaticResource ImageOutputTemplate}"
-                                                        Content="{Binding }">
-                                                    </ContentControl>
+                                                        Content="{Binding }" />
                                                     <Label VerticalAlignment="Center"
                                                            VerticalContentAlignment="Center"
                                                            Content="{Binding LocalisedName}" />
@@ -2010,8 +2004,7 @@
                                 </Expander>
                                 <ContentControl IsVisible="{Binding IsEmpty}"
                                                 ContentTemplate="{StaticResource EmptySelector}"
-                                                Content="{Binding}">
-                                </ContentControl>
+                                                Content="{Binding}" />
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

@@ -277,7 +277,7 @@
                                        Maximum="180" HorizontalAlignment="Stretch" />
 
                     </StackPanel>
-                    
+
                     <StackPanel Orientation="Vertical" IsVisible="{Binding IsApa102}">
                         <StackPanel IsVisible="{Binding BindableSpi}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="APA102 CI / SCK Pin"

@@ -1,19 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using Avalonia;
-using Avalonia.Controls.Selection;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
@@ -60,14 +53,13 @@ public abstract partial class Output : ReactiveObject
     private readonly Guid _id = new();
     protected readonly ConfigViewModel Model;
 
+    private readonly bool _configured;
+    private Color _ledOff;
 
-    public virtual bool LedsRequireColours => true;
+    private Color _ledOn;
 
-    private bool ShouldUpdateDetails { get; set; }
-
-    private bool _configured;
-
-    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, bool childOfCombined)
+    protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
+        bool childOfCombined)
     {
         ChildOfCombined = childOfCombined;
         ButtonText = "Click to assign";
@@ -118,43 +110,10 @@ public abstract partial class Output : ReactiveObject
         _configured = true;
     }
 
-    private object GetChildOutputType()
-    {
-        if (Input.InnermostInput() is WiiInput wii)
-        {
-            return wii.Input;
-        }
 
-        if (Input.InnermostInput() is Ps2Input ps2)
-        {
-            return ps2.Input;
-        }
+    public virtual bool LedsRequireColours => true;
 
-        if (Input.InnermostInput() is DjInput dj)
-        {
-            return dj.Input;
-        }
-
-        if (Input.InnermostInput() is Gh5NeckInput gh5)
-        {
-            return gh5.Input;
-        }
-
-        if (Input.InnermostInput() is GhWtTapInput wt)
-        {
-            return wt.Input;
-        }
-
-        return GetOutputType();
-    }
-
-    protected void UpdateDetails()
-    {
-        ShouldUpdateDetails = true;
-        this.RaisePropertyChanged(nameof(ShouldUpdateDetails));
-        ShouldUpdateDetails = false;
-        this.RaisePropertyChanged(nameof(ShouldUpdateDetails));
-    }
+    private bool ShouldUpdateDetails { get; set; }
 
     [Reactive] public Input Input { get; set; }
 
@@ -162,9 +121,6 @@ public abstract partial class Output : ReactiveObject
     [Reactive] public bool Enabled { get; set; } = true;
 
     [Reactive] public bool Expanded { get; set; }
-
-    private Color _ledOn;
-    private Color _ledOff;
 
     public Color LedOn
     {
@@ -174,12 +130,8 @@ public abstract partial class Output : ReactiveObject
             this.RaiseAndSetIfChanged(ref _ledOn, value);
             if (!_configured || Model.LedType is LedType.None) return;
             if (Model.Device is Santroller santroller)
-            {
                 foreach (var ledIndex in LedIndices)
-                {
                     santroller.SetLed((byte) (ledIndex - 1), Model.LedType.GetLedBytes(value));
-                }
-            }
         }
     }
 
@@ -191,12 +143,8 @@ public abstract partial class Output : ReactiveObject
             this.RaiseAndSetIfChanged(ref _ledOff, value);
             if (!_configured || Model.LedType is LedType.None) return;
             if (Model.Device is Santroller santroller)
-            {
                 foreach (var ledIndex in LedIndices)
-                {
                     santroller.SetLed((byte) (ledIndex - 1), Model.LedType.GetLedBytes(value));
-                }
-            }
         }
     }
 
@@ -265,7 +213,28 @@ public abstract partial class Output : ReactiveObject
             (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput &&
             s is not InputType.UsbHostInput);
 
-    // ReSharper disable UnassignedGetOnlyAutoProperty
+    private object GetChildOutputType()
+    {
+        if (Input.InnermostInput() is WiiInput wii) return wii.Input;
+
+        if (Input.InnermostInput() is Ps2Input ps2) return ps2.Input;
+
+        if (Input.InnermostInput() is DjInput dj) return dj.Input;
+
+        if (Input.InnermostInput() is Gh5NeckInput gh5) return gh5.Input;
+
+        if (Input.InnermostInput() is GhWtTapInput wt) return wt.Input;
+
+        return GetOutputType();
+    }
+
+    protected void UpdateDetails()
+    {
+        ShouldUpdateDetails = true;
+        this.RaisePropertyChanged(nameof(ShouldUpdateDetails));
+        ShouldUpdateDetails = false;
+        this.RaisePropertyChanged(nameof(ShouldUpdateDetails));
+    } // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public object? OutputType { get; }
     [ObservableAsProperty] public string LocalisedName { get; } = "";
     [ObservableAsProperty] public bool IsDj { get; }
@@ -312,10 +281,7 @@ public abstract partial class Output : ReactiveObject
         {
             var text = string.Join(", ",
                 GetPinConfigs().Select(s => s.ErrorText).Distinct().Where(s => !string.IsNullOrEmpty(s)));
-            if (text.Contains("missing"))
-            {
-                return "Pin configuration missing!";
-            }
+            if (text.Contains("missing")) return "Pin configuration missing!";
             return string.IsNullOrEmpty(text) ? "" : $"* Error: Conflicting pins: {text}!";
         }
     }
@@ -447,13 +413,11 @@ public abstract partial class Output : ReactiveObject
             : 0;
         var pinMode = DevicePinMode.PullUp;
         if (Input.InnermostInput() is DirectInput direct)
-        {
             if (direct.IsAnalog || inputType != InputType.AnalogPinInput)
             {
                 lastPin = direct.Pin;
                 if (!direct.IsAnalog) pinMode = direct.PinMode;
             }
-        }
 
 
         switch (inputType)
@@ -481,10 +445,7 @@ public abstract partial class Output : ReactiveObject
                 break;
             case InputType.Gh5NeckInput when Input.InnermostInput() is not Gh5NeckInput:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
-                if (this is GuitarAxis)
-                {
-                    gh5NeckInputType = Gh5NeckInputType.TapBar;
-                }
+                if (this is GuitarAxis) gh5NeckInputType = Gh5NeckInputType.TapBar;
 
                 input = new Gh5NeckInput(gh5NeckInputType.Value, Model);
                 break;
@@ -494,10 +455,7 @@ public abstract partial class Output : ReactiveObject
                 break;
             case InputType.WtNeckInput when Input.InnermostInput() is not GhWtTapInput:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                if (this is GuitarAxis)
-                {
-                    ghWtInputType = GhWtInputType.TapBar;
-                }
+                if (this is GuitarAxis) ghWtInputType = GhWtInputType.TapBar;
 
                 input = new GhWtTapInput(ghWtInputType.Value, Model, Model.Microcontroller.GetFirstAnalogPin(),
                     Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(),
@@ -556,10 +514,7 @@ public abstract partial class Output : ReactiveObject
                 break;
         }
 
-        if (this is EmulationMode)
-        {
-            Input = input;
-        }
+        if (this is EmulationMode) Input = input;
 
         this.RaisePropertyChanged(nameof(WiiInputType));
         this.RaisePropertyChanged(nameof(Ps2InputType));
@@ -610,21 +565,15 @@ public abstract partial class Output : ReactiveObject
         byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw)
     {
         if (Enabled)
-        {
             Input.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                 ghWtRaw,
                 ps2ControllerType, wiiControllerType);
-        }
 
         foreach (var output in Outputs.Items)
-        {
             if (output != this)
-            {
                 output.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                     ghWtRaw,
                     ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
-            }
-        }
     }
 
     public void UpdateErrors()

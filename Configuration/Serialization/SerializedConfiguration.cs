@@ -76,7 +76,9 @@ public class SerializedConfiguration
         model.StrumDebounce = StrumDebounce;
         if (Bindings != null)
         {
-            model.Bindings.AddRange(Bindings.Select(s => s.Generate(model)));
+            var generated = Bindings.Select(s => s.Generate(model)).ToList();
+            model.Bindings.Clear();
+            model.Bindings.AddRange(generated);
         }
 
         model.LedType = LedType;
@@ -84,10 +86,7 @@ public class SerializedConfiguration
         model.WtSensitivity = WtSensitivity;
         model.MouseMovementType = MouseMovementType;
         model.UsbHostEnabled = UsbHostEnabled;
-        if (UsbHostEnabled)
-        {
-            model.UsbHostDp = UsbHostDp;
-        }
+        if (UsbHostEnabled) model.UsbHostDp = UsbHostDp;
 
         if (model.IsRf)
         {

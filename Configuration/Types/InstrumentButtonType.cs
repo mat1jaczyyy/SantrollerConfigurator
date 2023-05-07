@@ -25,33 +25,29 @@ public enum InstrumentButtonType
     White1,
     White2,
     White3,
-    [Description("Strum Up")]
-    StrumUp,
-    [Description("Strum Down")]
-    StrumDown,
+    [Description("Strum Up")] StrumUp,
+    [Description("Strum Down")] StrumDown
 }
 
 public static class InstrumentButtonTypeExtensions
 {
-    
     public static readonly Dictionary<InstrumentButtonType, InstrumentButtonType> GuitarToLive = new()
     {
         {InstrumentButtonType.Green, InstrumentButtonType.Black1},
         {InstrumentButtonType.Red, InstrumentButtonType.Black2},
         {InstrumentButtonType.Yellow, InstrumentButtonType.Black3},
         {InstrumentButtonType.Blue, InstrumentButtonType.White1},
-        {InstrumentButtonType.Orange, InstrumentButtonType.White2},
+        {InstrumentButtonType.Orange, InstrumentButtonType.White2}
     };
-    
+
     public static readonly Dictionary<InstrumentButtonType, InstrumentButtonType> LiveToGuitar = new()
     {
         {InstrumentButtonType.Black1, InstrumentButtonType.Green},
         {InstrumentButtonType.Black2, InstrumentButtonType.Red},
         {InstrumentButtonType.Black3, InstrumentButtonType.Yellow},
         {InstrumentButtonType.White1, InstrumentButtonType.Blue},
-        {InstrumentButtonType.White2, InstrumentButtonType.Orange},
+        {InstrumentButtonType.White2, InstrumentButtonType.Orange}
     };
-
 
 
     public static readonly Dictionary<StandardButtonType, InstrumentButtonType> GuitarMappings = new()
@@ -62,7 +58,7 @@ public static class InstrumentButtonTypeExtensions
         {StandardButtonType.X, InstrumentButtonType.Blue},
         {StandardButtonType.LeftShoulder, InstrumentButtonType.Orange},
         {StandardButtonType.DpadUp, InstrumentButtonType.StrumUp},
-        {StandardButtonType.DpadDown, InstrumentButtonType.StrumDown},
+        {StandardButtonType.DpadDown, InstrumentButtonType.StrumDown}
     };
 
     public static readonly Dictionary<StandardButtonType, InstrumentButtonType> LiveGuitarMappings = new()
@@ -74,8 +70,9 @@ public static class InstrumentButtonTypeExtensions
         {StandardButtonType.LeftShoulder, InstrumentButtonType.White2},
         {StandardButtonType.RightShoulder, InstrumentButtonType.White3},
         {StandardButtonType.DpadUp, InstrumentButtonType.StrumUp},
-        {StandardButtonType.DpadDown, InstrumentButtonType.StrumDown},
+        {StandardButtonType.DpadDown, InstrumentButtonType.StrumDown}
     };
+
     public static readonly Dictionary<InstrumentButtonType, StandardButtonType> GuitarToStandard = new()
     {
         {InstrumentButtonType.Black1, StandardButtonType.A},
@@ -90,8 +87,9 @@ public static class InstrumentButtonTypeExtensions
         {InstrumentButtonType.Red, StandardButtonType.B},
         {InstrumentButtonType.Yellow, StandardButtonType.Y},
         {InstrumentButtonType.Blue, StandardButtonType.X},
-        {InstrumentButtonType.Orange, StandardButtonType.LeftShoulder},
+        {InstrumentButtonType.Orange, StandardButtonType.LeftShoulder}
     };
+
     private static readonly InstrumentButtonType[] GuitarButtons =
     {
         InstrumentButtonType.Green,
@@ -142,7 +140,7 @@ public static class InstrumentButtonTypeExtensions
             _ => Enumerable.Empty<InstrumentButtonType>()
         };
     }
-    
+
     public static void ConvertBindings(SourceList<Output> outputs, ConfigViewModel model, bool combined)
     {
         switch (model.DeviceType)
@@ -156,8 +154,10 @@ public static class InstrumentButtonTypeExtensions
                         if (!LiveToGuitar.ContainsKey(guitarButton.Type)) continue;
                         outputs.Remove(output);
                         outputs.Add(new GuitarButton(model, output.Input, output.LedOn, output.LedOff,
-                            output.LedIndices.ToArray(), guitarButton.Debounce, LiveToGuitar[guitarButton.Type], combined));
+                            output.LedIndices.ToArray(), guitarButton.Debounce, LiveToGuitar[guitarButton.Type],
+                            combined));
                     }
+
                     if (output is not ControllerButton button) continue;
                     if (!GuitarMappings.ContainsKey(button.Type)) continue;
                     outputs.Remove(output);
@@ -176,8 +176,10 @@ public static class InstrumentButtonTypeExtensions
                         if (!GuitarToLive.ContainsKey(guitarButton.Type)) continue;
                         outputs.Remove(output);
                         outputs.Add(new GuitarButton(model, output.Input, output.LedOn, output.LedOff,
-                            output.LedIndices.ToArray(), guitarButton.Debounce, GuitarToLive[guitarButton.Type], combined));
+                            output.LedIndices.ToArray(), guitarButton.Debounce, GuitarToLive[guitarButton.Type],
+                            combined));
                     }
+
                     if (output is not ControllerButton button) continue;
                     if (!LiveGuitarMappings.ContainsKey(button.Type)) continue;
                     outputs.Remove(output);
@@ -194,7 +196,8 @@ public static class InstrumentButtonTypeExtensions
                     if (output is not GuitarButton guitarButton) continue;
                     outputs.Remove(output);
                     outputs.Add(new ControllerButton(model, output.Input, output.LedOn, output.LedOff,
-                        output.LedIndices.ToArray(), guitarButton.Debounce, GuitarToStandard[guitarButton.Type], combined));
+                        output.LedIndices.ToArray(), guitarButton.Debounce, GuitarToStandard[guitarButton.Type],
+                        combined));
                 }
 
                 break;

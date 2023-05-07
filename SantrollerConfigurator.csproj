@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <UsingTask TaskName="Builder" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
         <ParameterGroup>
-            <Parameter1 ParameterType="System.String" />
-            <Parameter2 ParameterType="System.String" />
+            <Parameter1 ParameterType="System.String"/>
+            <Parameter2 ParameterType="System.String"/>
         </ParameterGroup>
         <Task>
-            <Using Namespace="System.Text" />
-            <Using Namespace="System.Text.Json" />
-            <Code Type="Class" Language="cs" Source="Builder.cs" />
+            <Using Namespace="System.Text"/>
+            <Using Namespace="System.Text.Json"/>
+            <Code Type="Class" Language="cs" Source="Builder.cs"/>
         </Task>
     </UsingTask>
     <PropertyGroup>
@@ -19,7 +19,7 @@
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
         <PublishReadyToRun>true</PublishReadyToRun>
-<!--        <PublishTrimmed>true</PublishTrimmed>-->
+        <!--        <PublishTrimmed>true</PublishTrimmed>-->
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">Windows</DefineConstants>
         <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">$(DefineConstants);POSIX</DefineConstants>
         <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
@@ -27,41 +27,41 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <ItemGroup>
-        <TrimmableAssembly Include="Avalonia.DesignerSupport" />
+        <TrimmableAssembly Include="Avalonia.DesignerSupport"/>
     </ItemGroup>
     <ItemGroup>
-        <AvaloniaResource Include="Assets\**" />
-        <AvaloniaResource Include="Assets\dfu.tar.xz" />
-        <AvaloniaResource Include="Assets\firmware.tar.xz" />
-        <AvaloniaResource Include="Assets\platformio.tar.xz" />
-        <AvaloniaResource Include="Assets\firmware.version" />
-        <AvaloniaResource Include="Assets\platformio.version" />
+        <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Include="Assets\dfu.tar.xz"/>
+        <AvaloniaResource Include="Assets\firmware.tar.xz"/>
+        <AvaloniaResource Include="Assets\platformio.tar.xz"/>
+        <AvaloniaResource Include="Assets\firmware.version"/>
+        <AvaloniaResource Include="Assets\platformio.version"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
-        <PackageReference Include="Microsoft.Net.ILLink.Tasks" Version="8.0.100-1.23067.1" />
-        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.0.999-cibuild0034274-beta" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.999-cibuild0034274-beta" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0"/>
+        <PackageReference Include="Microsoft.Net.ILLink.Tasks" Version="8.0.100-1.23067.1"/>
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.0.999-cibuild0034274-beta"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.999-cibuild0034274-beta"/>
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.999-cibuild0034206-beta" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.999-cibuild0034274-beta" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.999-cibuild0034274-beta" />
-        <PackageReference Include="Humanizer" Version="2.14.1" />
-        <PackageReference Include="Joveler.Compression.XZ" Version="4.2.1" />
-        <PackageReference Include="LibUsbDotNet" Version="2.2.55" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.999-cibuild0034206-beta"/>
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.999-cibuild0034274-beta"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.999-cibuild0034274-beta"/>
+        <PackageReference Include="Humanizer" Version="2.14.1"/>
+        <PackageReference Include="Joveler.Compression.XZ" Version="4.2.1"/>
+        <PackageReference Include="LibUsbDotNet" Version="2.2.55"/>
         <PackageReference Include="Microsoft.Build.Framework" Version="17.5.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.5.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Mono.Posix.NETStandard" Version="5.20.1-preview" />
-        <PackageReference Include="Nefarius.Utilities.DeviceManagement" Version="3.9.255" />
-        <PackageReference Include="protobuf-net" Version="3.2.16" />
-        <PackageReference Include="ReactiveUI.Fody" Version="18.4.34" />
-        <PackageReference Include="System.IO.Ports" Version="8.0.0-preview.5.23254.7" />
-        <PackageReference Include="SemanticVersioning" Version="2.0.2" />
-        <PackageReference Include="System.Text.Json" Version="8.0.0-preview.5.23254.7" />
+        <PackageReference Include="Mono.Posix.NETStandard" Version="5.20.1-preview"/>
+        <PackageReference Include="Nefarius.Utilities.DeviceManagement" Version="3.9.255"/>
+        <PackageReference Include="protobuf-net" Version="3.2.16"/>
+        <PackageReference Include="ReactiveUI.Fody" Version="18.4.34"/>
+        <PackageReference Include="System.IO.Ports" Version="8.0.0-preview.5.23254.7"/>
+        <PackageReference Include="SemanticVersioning" Version="2.0.2"/>
+        <PackageReference Include="System.Text.Json" Version="8.0.0-preview.5.23254.7"/>
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Views\UnoShortWindow.axaml.cs">
@@ -97,23 +97,23 @@
             <SubType>Code</SubType>
         </Compile>
         <Compile Update="Views\InitialConfigureView.axaml.cs">
-          <DependentUpon>InitialConfigure.axaml</DependentUpon>
-          <SubType>Code</SubType>
+            <DependentUpon>InitialConfigure.axaml</DependentUpon>
+            <SubType>Code</SubType>
         </Compile>
         <Compile Update="Views\UnpluggedDialog.axaml.cs">
-          <DependentUpon>UnpluggedDialog.axaml</DependentUpon>
-          <SubType>Code</SubType>
+            <DependentUpon>UnpluggedDialog.axaml</DependentUpon>
+            <SubType>Code</SubType>
         </Compile>
         <Compile Update="Views\RestoreView.axaml.cs">
-          <DependentUpon>RestoreView.axaml</DependentUpon>
-          <SubType>Code</SubType>
+            <DependentUpon>RestoreView.axaml</DependentUpon>
+            <SubType>Code</SubType>
         </Compile>
     </ItemGroup>
     <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(RuntimeIdentifier)' == ''">
-        <Copy SourceFiles="$(TargetDir)\runtimes\unix\lib\net7.0\System.IO.Ports.dll" DestinationFolder="$(TargetDir)" Condition="'$(OS)' != 'Windows_NT' " />
-        <Copy SourceFiles="$(TargetDir)\runtimes\win\lib\net7.0\System.IO.Ports.dll" DestinationFolder="$(TargetDir)" Condition="'$(OS)' == 'Windows_NT' " />
+        <Copy SourceFiles="$(TargetDir)\runtimes\unix\lib\net7.0\System.IO.Ports.dll" DestinationFolder="$(TargetDir)" Condition="'$(OS)' != 'Windows_NT' "/>
+        <Copy SourceFiles="$(TargetDir)\runtimes\win\lib\net7.0\System.IO.Ports.dll" DestinationFolder="$(TargetDir)" Condition="'$(OS)' == 'Windows_NT' "/>
     </Target>
     <Target Name="ZipOutputPath" BeforeTargets="ResolveReferences">
-        <Builder Parameter1="$(TargetDir)" Parameter2="$(MSBuildProjectDirectory)" />
+        <Builder Parameter1="$(TargetDir)" Parameter2="$(MSBuildProjectDirectory)"/>
     </Target>
 </Project>

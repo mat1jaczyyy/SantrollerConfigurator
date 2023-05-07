@@ -41,7 +41,7 @@ public class MouseButton : OutputButton
     {
         return EnumToStringConverter.Convert(Type);
     }
-    
+
     public override object GetOutputType()
     {
         return Type;

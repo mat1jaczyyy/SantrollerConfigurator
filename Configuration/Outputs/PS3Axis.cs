@@ -32,7 +32,7 @@ public class Ps3Axis : OutputAxis
     {
         return EnumToStringConverter.Convert(Type);
     }
-    
+
     public override object GetOutputType()
     {
         return Type;
@@ -68,7 +68,9 @@ public class Ps3Axis : OutputAxis
         string combinedExtra,
         List<int> combinedDebounce)
     {
-        return mode is not (ConfigField.Ps3 or ConfigField.Shared) ? "" : base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
+        return mode is not (ConfigField.Ps3 or ConfigField.Shared)
+            ? ""
+            : base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
     }
 
     public override SerializedOutput Serialize()
