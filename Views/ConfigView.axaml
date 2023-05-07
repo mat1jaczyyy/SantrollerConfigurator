@@ -948,8 +948,8 @@
                         </StackPanel>
                     </Panel>
 
-                    <StackPanel Orientation="Horizontal" Height="50" IsVisible="{Binding !ChildOfCombined}">
-                        <Label VerticalAlignment="Center" Width="300">
+                    <StackPanel Orientation="Horizontal" Height="50">
+                        <Label VerticalAlignment="Center" Width="300" IsVisible="{Binding !ChildOfCombined}">
                             Calibrate
                         </Label>
                         <Button IsVisible="{Binding !IsDigitalToAnalog}"
@@ -1051,8 +1051,8 @@
 
                         </StackPanel>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Height="50" IsVisible="{Binding !ChildOfCombined}">
-                        <Label VerticalAlignment="Center" Width="300">
+                    <StackPanel Orientation="Horizontal" Height="50">
+                        <Label VerticalAlignment="Center" Width="300" IsVisible="{Binding !ChildOfCombined}">
                             Calibrate
                         </Label>
                         <Button IsVisible="{Binding !IsDigitalToAnalog}"
@@ -1113,8 +1113,8 @@
                         </StackPanel>
 
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Height="50" IsVisible="{Binding !ChildOfCombined}">
-                        <Label VerticalAlignment="Center" Width="300">
+                    <StackPanel Orientation="Horizontal" Height="50">
+                        <Label VerticalAlignment="Center" Width="300" IsVisible="{Binding !ChildOfCombined}">
                             Calibrate
                         </Label>
                         <Button IsVisible="{Binding !IsDigitalToAnalog}"
@@ -1212,8 +1212,8 @@
                         </StackPanel>
 
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Height="50" IsVisible="{Binding !ChildOfCombined}">
-                        <Label VerticalAlignment="Center" Width="300">
+                    <StackPanel Orientation="Horizontal" Height="50">
+                        <Label VerticalAlignment="Center" Width="300" IsVisible="{Binding !ChildOfCombined}">
                             Calibrate
                         </Label>
                         <Button IsVisible="{Binding !IsDigitalToAnalog}"

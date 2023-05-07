@@ -30,7 +30,7 @@ public class InitialConfigViewModel : ReactiveObject, IRoutableViewModel
     public IDisposable RegisterConnections()
     {
         return
-            Main.AvailableDevices.Connect().Subscribe(s =>
+            Main.AvailableDevices.Connect().ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
             {
                 foreach (var change in s)
                     switch (change.Reason)
