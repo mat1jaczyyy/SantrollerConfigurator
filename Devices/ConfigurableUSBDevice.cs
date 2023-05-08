@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Utils;
@@ -130,7 +131,17 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             2,
             buffer.Length);
 
-        Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
+        if (!Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length))
+        {
+            string firstError = UsbDevice.LastErrorString;
+            if (!Device.ControlTransfer(ref sp, buffer, buffer.Length, out length))
+            {
+                Trace.TraceError($"Failed to read data from device: {UsbDevice.LastErrorString}");
+                return Array.Empty<byte>();
+            }
+            Trace.TraceWarning($"Failed to read data from device (retry succeeded): {firstError}");
+        }
+
         Array.Resize(ref buffer, length);
         return buffer;
     }
@@ -147,6 +158,15 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             wValue,
             2,
             buffer.Length);
-        Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length);
+        if (!Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length))
+        {
+            string firstError = UsbDevice.LastErrorString;
+            if (!Device.ControlTransfer(ref sp, buffer, buffer.Length, out length))
+            {
+                Trace.TraceError($"Failed to write data to device: {UsbDevice.LastErrorString}");
+                return;
+            }
+            Trace.TraceWarning($"Failed to write data to device (retry succeeded): {firstError}");
+        }
     }
 }
