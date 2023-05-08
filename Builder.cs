@@ -22,8 +22,8 @@ public class Builder : Task
             $"https://github.com/sanjay900/santroller-libs/releases/download/latest/platformio-{platform}.tar.xz";
         var firmwareFileLoc = Path.Combine(Parameter2, "Assets", "firmware.version");
         var platformioFileLoc = Path.Combine(Parameter2, "Assets", "platformio.version");
-        var firmwareCommit = GetCommit("Ardwiino", "master");
-        var platformIoCommit = GetCommit("santroller-libs", "main");
+        var firmwareCommit = GetCommit("Ardwiino");
+        var platformIoCommit = GetCommit("santroller-libs");
         var firmwareChanged =
             !File.Exists(firmwareFileLoc) || !File.ReadAllText(firmwareFileLoc).Equals(firmwareCommit);
         var platformioChanged = !File.Exists(platformioFileLoc) ||
@@ -44,13 +44,13 @@ public class Builder : Task
         return true;
     }
 
-    private string GetCommit(string project, string branch)
+    private string GetCommit(string project)
     {
         using var client = new HttpClient();
         client.BaseAddress = new Uri("https://github.com");
         var response = client.GetAsync($"sanjay900/{project}/info/refs?service=git-upload-pack").Result;
         response.EnsureSuccessStatusCode();
         var res = response.Content.ReadAsStringAsync().Result;
-        return res.Split('\n').First(s => s.EndsWith($"refs/heads/{branch}")).Split(' ')[0].Substring(4);
+        return res.Split('\n').First(s => s.EndsWith($"refs/tags/latest")).Split(' ')[0].Substring(4);
     }
 }
