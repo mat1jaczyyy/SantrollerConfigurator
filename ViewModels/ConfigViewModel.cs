@@ -1304,7 +1304,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void RemoveDevice(IConfigurableDevice device)
     {
-        if (!Main.Working)
+        if (!Main.Working && device == Device)
             ShowUnpluggedDialog.Handle(("", "", "")).ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(s => Main.GoBack.Execute(new Unit()));
     }

@@ -509,11 +509,14 @@ public class Ardwiino : ConfigurableUsbDevice
             {
                 var start = config.all.pins.pins![(int) ControllerButtons.XboxStart];
                 var select = config.all.pins.pins![(int) ControllerButtons.XboxBack];
-                bindings.Add(new ControllerButton(model,
-                    new MacroInput(new DirectInput(start, DevicePinMode.PullUp, model),
-                        new DirectInput(select, DevicePinMode.PullUp, model), model), Colors.Black, Colors.Black,
-                    new byte[] { },
-                    config.debounce.buttons, StandardButtonType.Guide, false));
+                if (start != NotUsed && select != NotUsed)
+                {
+                    bindings.Add(new ControllerButton(model,
+                        new MacroInput(new DirectInput(start, DevicePinMode.PullUp, model),
+                            new DirectInput(select, DevicePinMode.PullUp, model), model), Colors.Black, Colors.Black,
+                        new byte[] { },
+                        config.debounce.buttons, StandardButtonType.Guide, false));
+                }
             }
         }
         else if (config.all.main.tiltType == 2)
@@ -617,7 +620,6 @@ public class Ardwiino : ConfigurableUsbDevice
         model.MouseMovementType = MouseMovementType.Relative;
         model.Bindings.Clear();
         model.Bindings.AddRange(bindings);
-        model.UpdateBindings();
         model.Write();
         return true;
     }
