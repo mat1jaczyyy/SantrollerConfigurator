@@ -176,9 +176,14 @@ public class PlatformIo
                     platformIoOutput.OnNext(new PlatformIoState(currentProgress,
                         $"{progressMessage} - Looking for device", null));
                     currentProgress += percentageStep / sections;
-                    if (device != null) isUsb = true;
+                    if (device != null)
+                    {
+                        isUsb = true;
+                        device.Bootloader();
+                    }
 
                     sections = 11;
+                    
                 }
 
                 args.Add("--environment");
