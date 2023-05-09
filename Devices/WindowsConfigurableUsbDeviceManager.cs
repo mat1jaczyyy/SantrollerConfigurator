@@ -62,7 +62,7 @@ public class ConfigurableUsbDeviceManager
                     _model.AvailableDevices.Add(
                         new Dfu(new RegDeviceNotifyInfoEventArgs(new RegDeviceNotifyInfo(path, PnPDevice.GetInstanceIdFromInterfaceId(path), serial))));
                 }
-                else if (vid == 0x1209 && pid is 0x2882 or 0x2884)
+                else if((vid == 0x1209 && pid is 0x2882 or 0x2884) || vid == 0x12ba)
                 {
                     var children = usbDevice.GetProperty<string[]>(DevicePropertyKey.Device_Children);
                     if (children == null)
@@ -74,23 +74,13 @@ public class ConfigurableUsbDeviceManager
                         var childDevice = PnPDevice
                             .GetDeviceByInstanceId(child, DeviceLocationFlags.Phantom)
                             .ToUsbPnPDevice();
-                        var hardwareIds = childDevice.GetProperty<string[]>(DevicePropertyKey.Device_HardwareIds);
                         var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
-                        ushort revision = 0;
-                        foreach (var id in hardwareIds)
-                        {
-                            var index = id.IndexOf(RevisionString, StringComparison.Ordinal);
-                            if (index > -1)
-                            {
-                                revision = ushort.Parse(id.Substring(index + RevisionString.Length, 4),
-                                    NumberStyles.HexNumber);
-                            }
-                        }
 
                         WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
                         if (dev != null)
                         {
                             var product = dev.Info.ProductString;
+                            var revision = (ushort)dev.Info.Descriptor.BcdDevice;
                             switch (product)
                             {
                                 case "Santroller" when _model is { Programming: true, IsPico: false }:
