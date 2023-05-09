@@ -333,7 +333,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
             else if (_ledType == LedType.None)
             {
-                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, -1, -2, -1, true, true,
+                _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, false, -1, -1, -1, true, true,
                     true,
                     Math.Min(Microcontroller.Board.CpuFreq / 2, 12000000))!;
                 this.RaisePropertyChanged(nameof(Apa102Mosi));
@@ -491,7 +491,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
             var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
             var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-            _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, mosi, miso, sck, true, true,
+            _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true, true,
                 true,
                 4000000);
             this.RaisePropertyChanged(nameof(RfMiso));
@@ -633,7 +633,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, mosi, miso, sck, true, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true, true,
                     true,
                     4000000);
                 this.RaisePropertyChanged(nameof(RfMiso));
@@ -703,7 +703,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, mosi, miso, sck, true, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true, true,
                     true,
                     4000000);
                 var first = Microcontroller.GetAllPins(false).First();

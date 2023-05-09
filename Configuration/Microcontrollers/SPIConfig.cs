@@ -17,9 +17,10 @@ public abstract class SpiConfig : PinConfig
 
     private int _sck;
 
-    protected SpiConfig(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol, bool cpha,
+    protected SpiConfig(ConfigViewModel model, string type, bool includesMiso, int mosi, int miso, int sck, bool cpol, bool cpha,
         bool msbfirst, uint clock) : base(model)
     {
+        IncludesMiso = includesMiso;
         Type = type;
         _mosi = mosi;
         _miso = miso;
@@ -32,6 +33,8 @@ public abstract class SpiConfig : PinConfig
 
     public override string Type { get; }
     protected abstract bool Reassignable { get; }
+    
+    public bool IncludesMiso { get; }
 
     public int Mosi
     {
@@ -49,7 +52,7 @@ public abstract class SpiConfig : PinConfig
         get => _miso;
         set
         {
-            if (!Reassignable) return;
+            if (!Reassignable || !IncludesMiso) return;
             this.RaiseAndSetIfChanged(ref _miso, value);
             Update();
         }
@@ -66,12 +69,12 @@ public abstract class SpiConfig : PinConfig
         }
     }
 
-    public override IEnumerable<int> Pins => new List<int> {_mosi, _miso, _sck};
+    public override IEnumerable<int> Pins => IncludesMiso ? new List<int> {_mosi, _miso, _sck} : new List<int> {_mosi, _sck};
 
     public override string Generate()
     {
         // On apa102, miso isn't used.
-        var miso = _miso == -2 ? "" : $"#define {Definition}_MISO {_miso}";
+        var miso = IncludesMiso ? $"#define {Definition}_MISO {_miso}" : "";
         return $@"
 {miso}
 #define {Definition}_MOSI {_mosi}

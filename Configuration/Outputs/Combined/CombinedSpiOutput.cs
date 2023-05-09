@@ -20,7 +20,7 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
         SpiType = spiType;
         BindableSpi = Model.Microcontroller.SpiAssignable;
         var config = Model.GetSpiForType(SpiType);
-        SpiConfig = config ?? Model.Microcontroller.AssignSpiPins(model, SpiType, mosi, miso, sck, cpol, cpha,
+        SpiConfig = config ?? Model.Microcontroller.AssignSpiPins(model, SpiType, true, mosi, miso, sck, cpol, cpha,
             msbFirst, spiFreq);
 
         this.WhenAnyValue(x => x.SpiConfig.Miso).Subscribe(_ => this.RaisePropertyChanged(nameof(Miso)));

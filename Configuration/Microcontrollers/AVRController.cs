@@ -52,12 +52,12 @@ public abstract class AvrController : Microcontroller
     public abstract AvrPinMode? ForcedMode(int pin);
 
 
-    public override SpiConfig AssignSpiPins(ConfigViewModel model, string type, int mosi, int miso, int sck, bool cpol,
+    public override SpiConfig AssignSpiPins(ConfigViewModel model, string type, bool includesMiso, int mosi, int miso, int sck, bool cpol,
         bool cpha,
         bool msbfirst,
         uint clock)
     {
-        return new AvrSpiConfig(model, type, SpiMosi, SpiMiso, SpiSck, SpiCSn, cpol, cpha, msbfirst, clock);
+        return new AvrSpiConfig(model, type, includesMiso, SpiMosi, SpiMiso, SpiSck, SpiCSn, cpol, cpha, msbfirst, clock);
     }
 
     public override string GenerateAnalogWrite(int pin, string val)
