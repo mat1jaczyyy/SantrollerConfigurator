@@ -13,8 +13,10 @@ public static class ProgramWindowsDebug
 {
     public static void Main(string[] args)
     {
+#if !DEBUG
         var tr1 = new TextWriterTraceListener(Console.Out);
         Trace.Listeners.Add(tr1);
+#endif
         Directory.CreateDirectory(AssetUtils.GetAppDataFolder());
         var tr2 = new TextWriterTraceListener(File.CreateText(Path.Combine(AssetUtils.GetAppDataFolder(),
             "build.log")));
