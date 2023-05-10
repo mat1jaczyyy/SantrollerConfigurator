@@ -48,7 +48,7 @@
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.999-cibuild0034274-beta"/>
         <PackageReference Include="Humanizer" Version="2.14.1"/>
         <PackageReference Include="Joveler.Compression.XZ" Version="4.2.1"/>
-        <PackageReference Include="LibUsbDotNet" Version="2.2.55"/>
+        <PackageReference Include="LibUsbDotNet" Version="2.2.29"/>
         <PackageReference Include="Microsoft.Build.Framework" Version="17.5.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>

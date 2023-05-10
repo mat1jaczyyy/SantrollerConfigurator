@@ -50,7 +50,7 @@ public class ConfigurableUsbDeviceManager
                 {
                     _model.AvailableDevices.Add(new Dfu(e));
                 }
-                else if (e.Device.Open(out var dev))
+                else if (Ardwiino.HardwareIds.Contains((vid, pid)) && e.Device.Open(out var dev))
                 {
                     var info = dev.Info;
                     var revision = (ushort) info.Descriptor.BcdDevice;

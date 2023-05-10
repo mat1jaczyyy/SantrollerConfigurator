@@ -33,6 +33,31 @@ public class Ardwiino : ConfigurableUsbDevice
     private const ControllerAxisType XboxWhammy = ControllerAxisType.XboxRx;
     private const ControllerAxisType XboxTilt = ControllerAxisType.XboxRy;
 
+    public static readonly List<(int vendorId, int productId)> HardwareIds = new()
+    {
+        // Main IDs
+        (0x1209, 0x2882),
+
+        // PS3 IDs
+        (0x12BA, 0x0100),
+        (0x12BA, 0x0120),
+        (0x12BA, 0x0140),
+        (0x12BA, 0x0200),
+        (0x12BA, 0x0210),
+        (0x12BA, 0x074B),
+
+        // Wii IDs
+        (0x1BAD, 0x0004),
+        (0x1BAD, 0x0005),
+        (0x1BAD, 0x074B), // Copy-paste error present in the old firmware, included just in case
+        (0x1BAD, 0x3010),
+        (0x1BAD, 0x3110),
+        (0x0112, 0x0F0D), // IDs from unintended Wii Live Guitar configuration in old firmware
+
+        // Switch IDs
+        (0x0F0D, 0x0092),
+    };
+
     public const ushort SerialArdwiinoRevision = 0x3122;
     // public static readonly FilterDeviceDefinition ArdwiinoDeviceFilter = new(label: "Ardwiino", classGuid: Santroller.ControllerGUID);
 
