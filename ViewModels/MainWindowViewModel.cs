@@ -109,6 +109,9 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         this.WhenAnyValue(x => x.SelectedDevice)
             .Select(s => s is not (null or Ardwiino or Santroller))
             .ToPropertyEx(this, s => s.NewDevice);
+        this.WhenAnyValue(x => x.SelectedDevice)
+            .Select(s => s is not Santroller)
+            .ToPropertyEx(this, s => s.NewDeviceOrArdwiino);
         // Make sure that the selected device input type is reset so that we don't end up doing something invalid like using RF on a generic serial device
         this.WhenAnyValue(s => s.SelectedDevice).Subscribe(s =>
         {
@@ -169,6 +172,7 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     [ObservableAsProperty] public bool IsDfu { get; }
     [ObservableAsProperty] public bool IsGeneric { get; }
     [ObservableAsProperty] public bool NewDevice { get; }
+    [ObservableAsProperty] public bool NewDeviceOrArdwiino { get; }
 
     [ObservableAsProperty] public bool Connected { get; }
 
