@@ -118,7 +118,7 @@
             <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
                 <StackPanel>
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 20 20 0"
-                              SelectedItem="{Binding AnalogToDigitalType}" ItemsSource="{Binding AnalogToDigitalTypes}" />
+                              SelectedItem="{Binding AnalogToDigitalType}" ItemTemplate="{StaticResource EnumToStringTemplate}" ItemsSource="{Binding AnalogToDigitalTypes}" />
                     <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center" />
                     <ContentControl Content="{Binding Child}"
                                     ContentTemplate="{StaticResource OutputHeaderTemplates}" />
@@ -1245,7 +1245,7 @@
                                Width="300">
                             Type
                         </Label>
-                        <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding AnalogToDigitalType}"
+                        <ComboBox HorizontalAlignment="Stretch" ItemTemplate="{StaticResource EnumToStringTemplate}" SelectedItem="{Binding AnalogToDigitalType}"
                                   ItemsSource="{Binding AnalogToDigitalTypes}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">

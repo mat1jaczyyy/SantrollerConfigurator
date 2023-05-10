@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Avalonia.Media;
 
@@ -8,11 +9,17 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 public enum LedType
 {
     None,
+    [Description("APA102 - RGB")]
     Apa102Rgb,
+    [Description("APA102 - RBG")]
     Apa102Rbg,
+    [Description("APA102 - GRB")]
     Apa102Grb,
+    [Description("APA102 - GBR")]
     Apa102Gbr,
+    [Description("APA102 - BRG")]
     Apa102Brg,
+    [Description("APA102 - BGR")]
     Apa102Bgr
 }
 
