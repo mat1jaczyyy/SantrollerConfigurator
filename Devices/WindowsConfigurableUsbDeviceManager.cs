@@ -62,7 +62,7 @@ public class ConfigurableUsbDeviceManager
                     _model.AvailableDevices.Add(
                         new Dfu(new RegDeviceNotifyInfoEventArgs(new RegDeviceNotifyInfo(path, PnPDevice.GetInstanceIdFromInterfaceId(path), serial))));
                 }
-                else if((vid == 0x1209 && pid is 0x2882 or 0x2884) || vid == 0x12ba)
+                else if (Ardwiino.HardwareIds.Contains((vid, pid)))
                 {
                     var children = usbDevice.GetProperty<string[]>(DevicePropertyKey.Device_Children);
                     if (children == null)
