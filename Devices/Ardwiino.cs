@@ -440,13 +440,29 @@ public class Ardwiino : ConfigurableUsbDevice
             if (deviceType == DeviceControllerType.Guitar)
             {
                 if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
-                    bindings.Add(new Gh5CombinedOutput(model, sda, scl));
+                {
+                    var output = new Gh5CombinedOutput(model, sda, scl);
+                    model.Bindings.Add(output);
+                    output.SetOutputsOrDefaults(Array.Empty<Output>());
+                    bindings.Add(output);
+                }
 
-                if (config.neck.wtNeck != 0) bindings.Add(new GhwtCombinedOutput(model, 9));
+                if (config.neck.wtNeck != 0)
+                {
+                    var output = new GhwtCombinedOutput(model, 9);
+                    model.Bindings.Add(output);
+                    output.SetOutputsOrDefaults(Array.Empty<Output>());
+                    bindings.Add(output);
+                }
             }
 
             if (deviceType == DeviceControllerType.Turntable)
-                bindings.Add(new DjCombinedOutput(model, sda, scl));
+            {
+                var output = new DjCombinedOutput(model, sda, scl);
+                model.Bindings.Add(output);
+                output.SetOutputsOrDefaults(Array.Empty<Output>());
+                bindings.Add(output);
+            }
 
             foreach (int axis in Enum.GetValues<ControllerAxisType>())
             {
@@ -571,7 +587,10 @@ public class Ardwiino : ConfigurableUsbDevice
             {
                 case (int) InputControllerType.Wii:
                 {
+                    
                     var wii = new WiiCombinedOutput(model, sda, scl);
+                    model.Bindings.Add(wii);
+                    wii.SetOutputsOrDefaults(Array.Empty<Output>());
                     if (config.all.main.mapNunchukAccelToRightJoy != 0)
                         foreach (var output in wii.Outputs.Items.Where(output => output is
                                  {
@@ -586,7 +605,10 @@ public class Ardwiino : ConfigurableUsbDevice
                     break;
                 }
                 case (int) InputControllerType.Ps2:
-                    bindings.Add(new Ps2CombinedOutput(model, miso, mosi, sck, att, ack));
+                    var ps2 = new Ps2CombinedOutput(model, miso, mosi, sck, att, ack);
+                    model.Bindings.Add(ps2);
+                    ps2.SetOutputsOrDefaults(Array.Empty<Output>());
+                    bindings.Add(ps2);
                     break;
             }
         }

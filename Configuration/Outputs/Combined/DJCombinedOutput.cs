@@ -13,14 +13,10 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
 public class DjCombinedOutput : CombinedTwiOutput
 {
-    public DjCombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1, bool defaults = true) :
+    public DjCombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1) :
         base(model, DjInput.DjTwiType, DjInput.DjTwiFreq, "DJ", sda, scl)
     {
         Outputs.Clear();
-        if (defaults)
-        {
-            CreateDefaults();
-        }
         Outputs.Connect().Filter(x => x is OutputAxis)
             .Bind(out var analogOutputs)
             .Subscribe();
@@ -35,7 +31,7 @@ public class DjCombinedOutput : CombinedTwiOutput
 
     [Reactive] public bool DetectedRight { get; set; }
 
-    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
     {
         Outputs.Clear();
         if (outputs.Any())

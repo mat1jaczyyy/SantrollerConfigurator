@@ -203,6 +203,10 @@ public class EmptyOutput : Output
         {
             output.Expanded = true;
             Model.Bindings.Add(output);
+            if (output is CombinedOutput combinedOutput)
+            {
+                combinedOutput.SetOutputsOrDefaults(Array.Empty<Output>());
+            } 
         }
 
         _ = Dispatcher.UIThread.InvokeAsync(() =>

@@ -35,7 +35,7 @@ public class SerializedPs2CombinedOutput : SerializedOutput
 
     public override Output Generate(ConfigViewModel model)
     {
-        var combined = new Ps2CombinedOutput(model, Miso, Mosi, Sck, Att, Ack, defaults: false);
+        var combined = new Ps2CombinedOutput(model, Miso, Mosi, Sck, Att, Ack);
         model.Bindings.Add(combined);
         var outputs = Outputs.Select(s => s.Generate(model)).ToList();
         var array = new BitArray(Enabled);

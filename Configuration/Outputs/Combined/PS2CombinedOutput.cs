@@ -87,14 +87,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     private readonly DirectPinConfig _attConfig;
 
     public Ps2CombinedOutput(ConfigViewModel model, int miso = -1, int mosi = -1,
-        int sck = -1, int att = -1, int ack = -1, bool defaults = true) : base(model, Ps2Input.Ps2SpiType,
+        int sck = -1, int att = -1, int ack = -1) : base(model, Ps2Input.Ps2SpiType,
         Ps2Input.Ps2SpiFreq, Ps2Input.Ps2SpiCpol, Ps2Input.Ps2SpiCpha, Ps2Input.Ps2SpiMsbFirst, "PS2", miso, mosi, sck)
     {
         Outputs.Clear();
-        if (defaults)
-        {
-            CreateDefaults();
-        }
         _ackConfig = new DirectPinConfig(model, Ps2Input.Ps2AckType, ack, DevicePinMode.Floating);
         _attConfig = new DirectPinConfig(model, Ps2Input.Ps2AttType, att, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
@@ -130,7 +126,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     [Reactive] public bool ControllerFound { get; set; }
 
-    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
     {
         Outputs.Clear();
         if (outputs.Any())

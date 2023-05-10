@@ -170,14 +170,10 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.NunchukRotationPitch, StandardAxisType.RightStickY}
     };
 
-    public WiiCombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1, bool defaults = true) : base(model, WiiInput.WiiTwiType,
+    public WiiCombinedOutput(ConfigViewModel model, int sda = -1, int scl = -1) : base(model, WiiInput.WiiTwiType,
         WiiInput.WiiTwiFreq, "Wii", sda, scl)
     {
         Outputs.Clear();
-        if (defaults)
-        {
-            CreateDefaults();
-        }
         this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
             .ToPropertyEx(this, x => x.IsGuitar);
         Outputs.Connect().Filter(x => x is OutputAxis)
@@ -201,7 +197,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     [Reactive] public bool ControllerFound { get; set; }
 
-    public void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
     {
         Outputs.Clear();
         if (outputs.Any())

@@ -190,6 +190,11 @@ public partial class BluetoothOutput : CombinedOutput
     }
 
 
+    public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
+    {
+        
+    }
+
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
         string combinedExtra,
         List<int> combinedDebounce)
