@@ -73,6 +73,6 @@ public class DirectInput : InputWithPin
         if (IsAnalog)
             RawValue = analogRaw.GetValueOrDefault(Pin, 0);
         else
-            RawValue = digitalRaw.GetValueOrDefault(Pin, true) ? 0 : 1;
+            RawValue = (digitalRaw.GetValueOrDefault(Pin, true) ? PinMode == DevicePinMode.PullUp : PinMode == DevicePinMode.PullDown) ? 1 : 0;
     }
 }
