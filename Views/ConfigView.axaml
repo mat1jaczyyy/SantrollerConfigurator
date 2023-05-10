@@ -1879,11 +1879,35 @@
                                                 </StackPanel>
                                                 <ContentControl Content="{Binding}" HorizontalAlignment="Center"
                                                                 ContentTemplate="{StaticResource OutputHeaderTemplates}" />
-                                                <Button
-                                                    HorizontalAlignment="Right"
-                                                    Command="{Binding RemoveCommand}">
-                                                    Remove
-                                                </Button>
+
+                                                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                                                    <Button
+                                                        Command="{Binding RemoveCommand}">
+                                                        Remove
+                                                    </Button>
+                                                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                                        <Button
+                                                            Command="{Binding MoveUp}">
+                                                            <Path HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"
+                                                                  Stretch="None"
+                                                                  Stroke="White"
+                                                                  Data="M 0 7 L 7 0 L 14 7"
+                                                                  StrokeThickness="1">
+                                                            </Path>
+                                                        </Button>
+                                                        <Button
+                                                            Command="{Binding MoveDown}">
+                                                            <Path HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"
+                                                                  Stretch="None"
+                                                                  Stroke="White"
+                                                                  Data="M 0 0 L 7 7 L 14 0"
+                                                                  StrokeThickness="1">
+                                                            </Path>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </StackPanel>
                                                 <Label Foreground="Red" Margin="20 0 20 0"
                                                        Content="{Binding ErrorText}"
                                                        VerticalAlignment="Bottom"

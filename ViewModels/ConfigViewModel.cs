@@ -1333,4 +1333,15 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Select(configs => configs.OfType<SpiConfig>().FirstOrDefault(s => s.Type == spiType))
             .FirstOrDefault(found => found != null);
     }
+
+    public void MoveUp(Output output)
+    {
+        var index = Bindings.Items.IndexOf(output);
+        Bindings.Move(index, index - 1);
+    }
+    public void MoveDown(Output output)
+    {
+        var index = Bindings.Items.IndexOf(output);
+        Bindings.Move(index, index + 1);
+    }
 }

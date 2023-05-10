@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Input;
@@ -58,6 +59,9 @@ public abstract partial class Output : ReactiveObject
 
     private Color _ledOn;
 
+    public ReactiveCommand<Unit, Unit> MoveUp { get; }
+    public ReactiveCommand<Unit, Unit> MoveDown { get; }
+
     protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         bool childOfCombined)
     {
@@ -68,6 +72,10 @@ public abstract partial class Output : ReactiveObject
         LedIndices = new ObservableCollection<byte>(ledIndices);
         LedOn = ledOn;
         LedOff = ledOff;
+        MoveUp = ReactiveCommand.Create(() => Model.MoveUp(this),
+            Model.Bindings.Connect().Select(_ => Model.Bindings.Items.IndexOf(this) != 0));
+        MoveDown = ReactiveCommand.Create(() => Model.MoveDown(this),
+            Model.Bindings.Connect().Select(_ => Model.Bindings.Items.IndexOf(this) != Model.Bindings.Count - 1));
         this.WhenAnyValue(x => x.Model.LedCount)
             .Select(x => Enumerable.Range(1, x).Select(s => new LedIndex(this, (byte) s)).ToArray())
             .ToPropertyEx(this, x => x.AvailableIndices);
