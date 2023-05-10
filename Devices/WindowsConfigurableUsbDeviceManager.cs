@@ -44,7 +44,7 @@ public class ConfigurableUsbDeviceManager
 
     private async void DeviceNotify(EventType eventType, string path)
     {
-        await Task.Delay(200);
+        await Task.Delay(1000);
         RxApp.MainThreadScheduler.Schedule(() =>
         {
             var ids = UsbSymbolicName.Parse(path);
