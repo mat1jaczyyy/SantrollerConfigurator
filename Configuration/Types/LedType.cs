@@ -63,7 +63,7 @@ public static class LedTypeMethods
     public static string GetLedAssignment(this LedType type, Color on, Color off, string value, byte index)
     {
         return string.Join("",
-            type.GetLedBytes(on).Zip(type.GetLedBytes(off), new[] {'r', 'g', 'b'}).Select(b =>
+            type.GetLedBytes(off).Zip(type.GetLedBytes(on), new[] {'r', 'g', 'b'}).Select(b =>
                 $"ledState[{index - 1}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({value})) >> 8));"));
     }
 }
