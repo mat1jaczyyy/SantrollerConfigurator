@@ -1226,7 +1226,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public List<PinConfig> GetPinConfigs()
     {
-        return Bindings.Items.SelectMany(s => s.GetPinConfigs()).Distinct().ToList();
+        return Bindings.Items.SelectMany(s => s.GetPinConfigs()).Concat(PinConfigs).Distinct().ToList();
     }
 
     public Dictionary<string, List<int>> GetPins(string type)
