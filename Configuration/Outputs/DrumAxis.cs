@@ -277,6 +277,7 @@ public partial class DrumAxis : OutputAxis
                 if ({ifStatement}) {{
                     {outputButtons}
                 }}
+                {CalculateLeds(mode)}
             }}";
         }
 
@@ -305,6 +306,7 @@ public partial class DrumAxis : OutputAxis
             if ({ifStatement}) {{
                 {outputButtons}
             }}
+            {CalculateLeds(mode)}
         }}";
     }
 

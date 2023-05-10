@@ -102,7 +102,7 @@ public class DjAxis : OutputAxis
             gen = mode == ConfigField.Xbox360 ? gen : $"{gen} + {sbyte.MaxValue}";
         }
 
-        return $"{GenerateOutput(mode)} = {gen};";
+        return $"{GenerateOutput(mode)} = {gen};{CalculateLeds(mode)}";
     }
 
     protected override string MinCalibrationText()

@@ -125,7 +125,8 @@ public class GuitarAxis : OutputAxis
 
                 return $@"if ({Input.Generate(mode)}) {{
                                   {GenerateOutput(mode)} = {analogOn};
-                              }}";
+                          }}
+                          {CalculateLeds(mode)}";
             case ConfigField.Xbox360 when Type == GuitarAxisType.Slider && Input is not DigitalToAnalog:
                 // x360 slider is actually a int16_t BUT there is a mechanism to convert the uint8 value to its uint16_t version
                 return $@"
@@ -135,13 +136,14 @@ public class GuitarAxis : OutputAxis
                         }} else {{
                             {GenerateOutput(mode)} |= ({GenerateOutput(mode)}) << 8;
                         }}
+                        {CalculateLeds(mode)}
                     ";
             case ConfigField.Ps3 or ConfigField.Ps4 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
                 return $@"if ({Input.Generate(mode)}) {{
                                   {GenerateOutput(mode)} = {analogOn & 0xFF};
-                              }}";
+                              }}{CalculateLeds(mode)}";
             case ConfigField.Ps3 or ConfigField.Ps4 when Type == GuitarAxisType.Slider && Input is not DigitalToAnalog:
-                return $"{GenerateOutput(mode)} = {Input.Generate(mode)} >> 8;";
+                return $"{GenerateOutput(mode)} = {Input.Generate(mode)} >> 8;{CalculateLeds(mode)}";
             // Xb1 is RB only, so no slider
             case ConfigField.XboxOne when Type == GuitarAxisType.Slider:
                 return "";
@@ -205,16 +207,16 @@ public class GuitarAxis : OutputAxis
                 val = (val >> 8) + 128;
                 return $@"if ({Input.Generate(mode)}) {{
                                   {GenerateOutput(mode)} = {val};
-                              }}";
+                              }}{CalculateLeds(mode)}";
             case ConfigField.Xbox360
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
-                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)};";
+                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)};{CalculateLeds(mode)}";
             default:
                 if (Input is DigitalToAnalog)
                     return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
                 return
-                    $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, Type is GuitarAxisType.Whammy)};";
+                    $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, Type is GuitarAxisType.Whammy)};{CalculateLeds(mode)}";
         }
     }
 
