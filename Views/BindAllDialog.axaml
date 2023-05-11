@@ -23,7 +23,7 @@
     <Panel>
         <Panel.Resources>
             <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
-            <netCore:SimpleTypeImageConverter x:Key="SimpleTypeImageConverter" />
+            <netCore:InputImageConverter x:Key="InputImageConverter" />
             <netCore:PinToStringConverter x:Key="PinToStringConverter" />
             <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
                 <TextBlock>
@@ -62,7 +62,7 @@
                         </StackPanel>
                         <Image Width="75" Opacity="{Binding Output.ImageOpacity}">
                             <Image.Source>
-                                <MultiBinding Converter="{StaticResource SimpleTypeImageConverter }">
+                                <MultiBinding Converter="{StaticResource InputImageConverter }">
                                     <Binding Path="Output" />
                                     <Binding Path="Model.DeviceType" />
                                     <Binding Path="Model.RhythmType" />

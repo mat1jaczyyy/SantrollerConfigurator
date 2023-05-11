@@ -26,7 +26,7 @@
         <netCore:EnumToStringConverter x:Key="EnumToStringConverter" />
         <netCore:PinToStringConverter x:Key="PinToStringConverter" />
         <netCore:ControllerEnumConverter x:Key="ControllerEnumConverter" />
-        <netCore:SimpleTypeImageConverter x:Key="SimpleTypeImageConverter" />
+        <netCore:InputImageConverter x:Key="InputImageConverter" />
         <DataTemplate x:Key="PinToStringTemplate" DataType="system:Object">
             <TextBlock>
                 <TextBlock.Text>
@@ -58,7 +58,7 @@
             <StackPanel Orientation="Horizontal">
                 <Image Width="25">
                     <Image.Source>
-                        <MultiBinding Converter="{StaticResource SimpleTypeImageConverter }">
+                        <MultiBinding Converter="{StaticResource InputImageConverter }">
                             <Binding />
                             <Binding Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceType" />
                             <Binding Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).RhythmType" />
@@ -80,7 +80,7 @@
             <StackPanel Orientation="Horizontal">
                 <Image Width="75" Opacity="{Binding ImageOpacity}">
                     <Image.Source>
-                        <MultiBinding Converter="{StaticResource SimpleTypeImageConverter }">
+                        <MultiBinding Converter="{StaticResource InputImageConverter }">
                             <Binding Path="OutputType" />
                             <Binding Path="$parent[views:ConfigView].Model.DeviceType" />
                             <Binding Path="$parent[views:ConfigView].Model.RhythmType" />

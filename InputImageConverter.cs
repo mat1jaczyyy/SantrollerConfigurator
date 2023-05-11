@@ -13,9 +13,9 @@ using MouseButton = Avalonia.Input.MouseButton;
 
 namespace GuitarConfigurator.NetCore;
 
-public class SimpleTypeImageConverter : IMultiValueConverter
+public class InputImageConverter : IMultiValueConverter
 {
-    private static readonly Dictionary<object, Bitmap> _icons = new();
+    private static readonly Dictionary<object, Bitmap> Icons = new();
 
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
@@ -26,7 +26,7 @@ public class SimpleTypeImageConverter : IMultiValueConverter
         var deviceControllerType = (DeviceControllerType) values[1]!;
         var rhythmType = (RhythmType) values[2]!;
         var name = values[0]!.GetType().Name + values[0] + rhythmType + deviceControllerType;
-        if (_icons.TryGetValue(name, out var image)) return image;
+        if (Icons.TryGetValue(name, out var image)) return image;
 
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var path = values[0] switch
@@ -108,21 +108,15 @@ public class SimpleTypeImageConverter : IMultiValueConverter
         {
             var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{path}.png"));
             var bitmap = new Bitmap(asset);
-            _icons.Add(name, bitmap);
+            Icons.Add(name, bitmap);
             return bitmap;
         }
         catch (FileNotFoundException)
         {
             var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Generic.png"));
             var bitmap = new Bitmap(asset);
-            _icons.Add(name, bitmap);
+            Icons.Add(name, bitmap);
             return bitmap;
         }
-    }
-
-
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        throw new NotSupportedException();
     }
 }
