@@ -254,8 +254,8 @@ public class Santroller : IConfigurableDevice
         {
             var direct = _model.Bindings.Items.Select(s => s.Input!.InnermostInput())
                 .OfType<DirectInput>().ToList();
-            var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins).Distinct();
-            var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins).Distinct();
+            var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins).Distinct().Where(s => s.Pin != -1);
+            var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins).Distinct().Where(s => s.Pin != -1);
             var ports = _model.Microcontroller.GetPortsForTicking(digital);
 
             foreach (var (port, mask) in ports)
@@ -427,13 +427,13 @@ public class Santroller : IConfigurableDevice
             switch (config)
             {
                 case SpiConfig spi:
-                    importantPins.AddRange(spi.Pins);
+                    importantPins.AddRange(spi.Pins.Where(s => s != -1));
                     break;
                 case TwiConfig twi:
-                    importantPins.AddRange(twi.Pins);
+                    importantPins.AddRange(twi.Pins.Where(s => s != -1));
                     break;
                 case DirectPinConfig direct:
-                    if (!direct.Type.Contains("-")) importantPins.AddRange(direct.Pins);
+                    if (!direct.Type.Contains("-")) importantPins.AddRange(direct.Pins.Where(s => s != -1));
                     break;
             }
 
