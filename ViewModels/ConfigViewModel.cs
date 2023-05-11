@@ -633,7 +633,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true,
+                    true,
                     true,
                     4000000);
                 this.RaisePropertyChanged(nameof(RfMiso));
@@ -703,7 +704,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true,
+                    true,
                     true,
                     4000000);
                 var first = Microcontroller.GetAllPins(false).First();
@@ -1107,6 +1109,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         var seen = new HashSet<Output>();
         var debouncesRelatedToLed = new Dictionary<byte, List<(Output, List<int>)>>();
+        var analogRelatedToLed = new Dictionary<byte, List<OutputAxis>>();
         // Handle most mappings
         // Sort in a way that any digital to analog based groups are last. This is so that seenAnalog will be filled in when necessary.
         var ret = groupedOutputs.OrderByDescending(s => s.Count(s2 => s2.Second.Input is DigitalToAnalog))
@@ -1152,6 +1155,17 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                 }
                             }
 
+                            if (output is OutputAxis axis)
+                            {
+                                foreach (var led in output.LedIndices)
+                                {
+                                    if (!analogRelatedToLed.ContainsKey(led))
+                                        analogRelatedToLed[led] = new List<OutputAxis>();
+
+                                    analogRelatedToLed[led].Add(axis);
+                                }
+                            }
+
                             var generated = output.Generate(mode, index, "", "", strumIndices);
                             return new Tuple<Input, string>(input, generated);
                         })
@@ -1174,9 +1188,27 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
 
             if (LedType is not LedType.None)
+            {
                 // Handle leds, including when multiple leds are assigned to a single output.
                 foreach (var (led, relatedOutputs) in debouncesRelatedToLed)
                 {
+                    var analog = "";
+                    if (analogRelatedToLed.TryGetValue(led, out var analogLedOutputs))
+                    {
+                        foreach (var analogLedOutput in analogLedOutputs)
+                        {
+                            var ledRead = analogLedOutput.GenerateAssignment(ConfigField.Ps3, false, true, false);
+                            // Now we have the value, calibrated as a uint8_t
+                            analog +=
+                                $"led_tmp = {ledRead};{LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}";
+                        }
+                    }
+
+                    if (!analog.Any())
+                    {
+                        analog = LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led);
+                    }
+
                     ret += $"if (ledState[{led - 1}].select == 0) {{";
                     ret += string.Join(" else ", relatedOutputs.Select(tuple =>
                     {
@@ -1186,10 +1218,25 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                        }}";
                     }));
                     ret += $@" else {{
-                        {LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led)}
+                        {analog}
                     }}
                 }}";
                 }
+
+                foreach (var (led, analogLedOutputs) in analogRelatedToLed)
+                {
+                    if (debouncesRelatedToLed.ContainsKey(led)) continue;
+                    ret += $"if (ledState[{led - 1}].select == 0) {{";
+                    foreach (var analogLedOutput in analogLedOutputs)
+                    {
+                        var ledRead = analogLedOutput.GenerateAssignment(ConfigField.Ps3, false, true, false);
+                        // Now we have the value, calibrated as a uint8_t
+                        ret += $"led_tmp = {ledRead};{LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}";
+                    }
+
+                    ret += "}";
+                }
+            }
         }
 
         return ret.Replace('\r', ' ').Replace('\n', ' ').Trim();
@@ -1339,6 +1386,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var index = Bindings.Items.IndexOf(output);
         Bindings.Move(index, index - 1);
     }
+
     public void MoveDown(Output output)
     {
         var index = Bindings.Items.IndexOf(output);

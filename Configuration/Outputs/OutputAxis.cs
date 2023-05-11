@@ -286,7 +286,7 @@ public abstract partial class OutputAxis : Output
         };
     }
 
-    protected string GenerateAssignment(ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
+    public string GenerateAssignment(ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
     {
         if (Input is FixedInput or DigitalToAnalog) return Input.Generate();
 
@@ -399,10 +399,7 @@ public abstract partial class OutputAxis : Output
     {
         if (mode == ConfigField.Shared)
         {
-            if (!AreLedsEnabled || !LedIndices.Any()) return "";
-            var ledRead = GenerateAssignment(ConfigField.Ps3, false, true, false);
-            // Now we have the value, calibrated as a uint8_t
-            return  LedIndices.Aggregate($"led_tmp = {ledRead};", (acc, index) => acc+Model.LedType.GetLedAssignment(index, LedOn, LedOff, "led_tmp"));
+            return "";
         }
 
         var output = GenerateOutput(mode);

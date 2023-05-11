@@ -70,6 +70,6 @@ public static class LedTypeMethods
         var mulStrings = GetLedStrings(type, rScale.ToString(), gScale.ToString(), bScale.ToString());
         return string.Join("\n",
             new[] {'r', 'g', 'b'}.Zip(offBytes, mulStrings).Select(pair => 
-                pair.Third == "0" ? "" : $"ledState[{index - 1}].{pair.First} = ({var} * {pair.Third} / 255) + {pair.Second};"));
+                pair.Third == "0" ? $"ledState[{index - 1}].{pair.First} = {pair.Second};" : $"ledState[{index - 1}].{pair.First} = ({var} * {pair.Third} / 255) + {pair.Second};"));
     }
 }
