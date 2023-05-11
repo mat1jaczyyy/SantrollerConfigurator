@@ -182,7 +182,7 @@ public partial class DrumAxis : OutputAxis
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
         }
-        if (Model.RhythmType == RhythmType.RockBand && Type == DrumAxisType.Kick)
+        if (Model.RhythmType == RhythmType.RockBand && Type is DrumAxisType.Kick or DrumAxisType.Kick2)
         {
             return $@"if ({ifStatement}) {{
                 {outputButtons}
