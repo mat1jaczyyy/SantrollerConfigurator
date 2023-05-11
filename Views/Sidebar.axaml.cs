@@ -12,10 +12,7 @@ public partial class SidebarView : ReactiveUserControl<ConfigViewModel>
     {
         InitializeComponent();
     }
-
-    public RhythmType RhythmType => ViewModel!.RhythmType;
-    public DeviceControllerType DeviceType => ViewModel!.DeviceType;
-
+    public ConfigViewModel Model => ViewModel!;
     private void InitializeComponent()
     {
         this.WhenActivated(disposables => { });

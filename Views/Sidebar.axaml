@@ -39,8 +39,8 @@
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                         <Binding />
-                        <Binding Path="$parent[views:SidebarView].DeviceType" />
-                        <Binding Path="$parent[views:SidebarView].RhythmType" />
+                        <Binding Path="$parent[views:SidebarView].Model.DeviceType" />
+                        <Binding Path="$parent[views:SidebarView].Model.RhythmType" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
