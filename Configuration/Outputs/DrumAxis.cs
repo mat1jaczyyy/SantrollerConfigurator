@@ -162,6 +162,7 @@ public partial class DrumAxis : OutputAxis
         if (!Model.IsAdvancedMode) debounce = Model.Debounce + 1;
 
         var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
+        
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
         var outputButtons = "";
         switch (mode)
@@ -180,6 +181,12 @@ public partial class DrumAxis : OutputAxis
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+        }
+        if (Model.RhythmType == RhythmType.RockBand && Type == DrumAxisType.Kick)
+        {
+            return $@"if ({ifStatement}) {{
+                {outputButtons}
+            }}";
         }
 
         if (Model.RhythmType == RhythmType.RockBand && mode != ConfigField.XboxOne)
@@ -289,7 +296,6 @@ public partial class DrumAxis : OutputAxis
                     {GenerateOutput(ConfigField.XboxOne)} = val_real >> 8;
                 }}  
             ";
-
         var generated = Input.IsUint ? Input.Generate(mode) : $"(({Input.Generate(mode)}) + INT16_MAX)";
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
