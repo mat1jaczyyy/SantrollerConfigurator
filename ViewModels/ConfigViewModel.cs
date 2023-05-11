@@ -1199,8 +1199,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         {
                             var ledRead = analogLedOutput.GenerateAssignment(ConfigField.Ps3, false, true, false);
                             // Now we have the value, calibrated as a uint8_t
+                            // Only apply analog colours if non zero when conflicting with digital, so that the digital off states override
                             analog +=
-                                $"led_tmp = {ledRead};{LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}";
+                                @$"led_tmp = {ledRead};
+                                   if(led_tmp) {{
+                                        {LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}
+                                   }} else {{
+                                        {LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led)}
+                                   }}";
                         }
                     }
 
