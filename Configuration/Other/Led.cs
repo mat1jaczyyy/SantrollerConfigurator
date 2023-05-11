@@ -494,9 +494,9 @@ public class Led : Output
             on += $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, index)}";
             off += $@"ledState[{index - 1}].select = 0;{Model.LedType.GetLedAssignment(LedOff, index)}";
             between +=
-                $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, LedOff, "rumble_left", index)}";
+                $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(index, LedOn, LedOff, "rumble_left")}";
             starPowerBetween +=
-                $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, LedOff, "last_star_power", index)}";
+                $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(index, LedOn, LedOff, "last_star_power")}";
         }
 
         switch (Command)

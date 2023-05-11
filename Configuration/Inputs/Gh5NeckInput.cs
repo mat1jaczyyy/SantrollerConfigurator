@@ -93,7 +93,7 @@ public class Gh5NeckInput : TwiInput
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
     public override bool IsUint => true;
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
         if (Input <= Gh5NeckInputType.Orange)
             return $"(fivetar_buttons[0] & {1 << ((byte) Input - (byte) Gh5NeckInputType.Green)})";

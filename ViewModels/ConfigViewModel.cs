@@ -1080,7 +1080,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         foreach (var groupedOutput in groupedOutputs)
         foreach (var (input, output) in groupedOutput)
         {
-            var generatedInput = input.Generate(mode);
+            var generatedInput = input.Generate();
             if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
 
             if (output.Input.InnermostInput() is MacroInput)
@@ -1121,7 +1121,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         {
                             var input = s.First;
                             var output = s.Second;
-                            var generatedInput = input.Generate(mode);
+                            var generatedInput = input.Generate();
                             var index = new List<int> {0};
                             if (output is OutputButton or DrumAxis or EmulationMode)
                             {
@@ -1138,7 +1138,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                         if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
                                         seen.Add(output);
                                         index = output.Input.Inputs()
-                                            .Select(input1 => debounces[input1.Generate(mode)])
+                                            .Select(input1 => debounces[input1.Generate()])
                                             .ToList();
                                     }
                                 }
@@ -1163,13 +1163,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             foreach (var output in macros)
             {
-                var generatedInput = output.Input.Generate(mode);
+                var generatedInput = output.Input.Generate();
                 var ifStatement = string.Join(" && ",
                     output.Input.Inputs().Select(input =>
                         $"debounce[{debounces[generatedInput]}]"));
                 var sharedReset = output.Input.Inputs().Aggregate("",
                     (current, input) => current + string.Join("",
-                        inputs[input.Generate(mode)].Select(s => $"debounce[{s}]=0;").Distinct()));
+                        inputs[input.Generate()].Select(s => $"debounce[{s}]=0;").Distinct()));
                 ret += @$"if ({ifStatement}) {{{sharedReset}}}";
             }
 
@@ -1212,7 +1212,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         foreach (var groupedOutput in groupedOutputs)
         foreach (var (input, output) in groupedOutput)
         {
-            var generatedInput = input.Generate(ConfigField.Xbox360);
+            var generatedInput = input.Generate();
             if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
 
             if (output.Input is MacroInput)

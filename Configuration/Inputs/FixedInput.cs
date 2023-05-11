@@ -28,7 +28,7 @@ public class FixedInput : Input
         return Array.Empty<string>();
     }
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
         return Value.ToString();
     }

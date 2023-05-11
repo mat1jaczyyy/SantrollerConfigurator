@@ -276,7 +276,7 @@ public partial class DrumAxis : OutputAxis
 
             return $@"
             {{
-                if ({Input.Generate(mode)}) {{
+                if ({Input.Generate()}) {{
                     {reset}
                     {GenerateOutput(mode)} = {dtaVal};
                     {rfExtra}
@@ -284,7 +284,6 @@ public partial class DrumAxis : OutputAxis
                 if ({ifStatement}) {{
                     {outputButtons}
                 }}
-                {CalculateLeds(mode)}
             }}";
         }
 
@@ -296,7 +295,7 @@ public partial class DrumAxis : OutputAxis
                     {GenerateOutput(ConfigField.XboxOne)} = val_real >> 8;
                 }}  
             ";
-        var generated = Input.IsUint ? Input.Generate(mode) : $"(({Input.Generate(mode)}) + INT16_MAX)";
+        var generated = Input.IsUint ? Input.Generate() : $"(({Input.Generate()}) + INT16_MAX)";
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
@@ -312,7 +311,6 @@ public partial class DrumAxis : OutputAxis
             if ({ifStatement}) {{
                 {outputButtons}
             }}
-            {CalculateLeds(mode)}
         }}";
     }
 

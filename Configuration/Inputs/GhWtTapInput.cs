@@ -118,7 +118,7 @@ public class GhWtTapInput : Input
         new(PinConfigAnalog.Pin, DevicePinMode.Floating)
     };
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
         return Input == GhWtInputType.TapBar ? "gh5_mapping[rawWt]" : $"(rawWt & {1 << (byte) Input})";
     }

@@ -9,18 +9,12 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 public enum LedType
 {
     None,
-    [Description("APA102 - RGB")]
-    Apa102Rgb,
-    [Description("APA102 - RBG")]
-    Apa102Rbg,
-    [Description("APA102 - GRB")]
-    Apa102Grb,
-    [Description("APA102 - GBR")]
-    Apa102Gbr,
-    [Description("APA102 - BRG")]
-    Apa102Brg,
-    [Description("APA102 - BGR")]
-    Apa102Bgr
+    [Description("APA102 - RGB")] Apa102Rgb,
+    [Description("APA102 - RBG")] Apa102Rbg,
+    [Description("APA102 - GRB")] Apa102Grb,
+    [Description("APA102 - GBR")] Apa102Gbr,
+    [Description("APA102 - BRG")] Apa102Brg,
+    [Description("APA102 - BGR")] Apa102Bgr
 }
 
 public static class LedTypeMethods
@@ -67,10 +61,15 @@ public static class LedTypeMethods
             data.Zip(new[] {'r', 'g', 'b'}).Select(pair => $"ledState[{index - 1}].{pair.Second} = {pair.First};"));
     }
 
-    public static string GetLedAssignment(this LedType type, Color on, Color off, string value, byte index)
+    public static string GetLedAssignment(this LedType type, int index, Color on, Color off, string var)
     {
-        return string.Join("",
-            type.GetLedBytes(off).Zip(type.GetLedBytes(on), new[] {'r', 'g', 'b'}).Select(b =>
-                $"ledState[{index - 1}].{b.Third} = (uint8_t)({b.First} + ((int16_t)({b.Second - b.First} * ({value})) >> 8));"));
+        var rScale = on.R - off.R;
+        var gScale = on.G - off.G;
+        var bScale = on.B - off.B;
+        var offBytes = GetLedBytes(type, off);
+        var mulStrings = GetLedStrings(type, rScale.ToString(), gScale.ToString(), bScale.ToString());
+        return string.Join("\n",
+            new[] {'r', 'g', 'b'}.Zip(offBytes, mulStrings).Select(pair => 
+                pair.Third == "0" ? "" : $"ledState[{index - 1}].{pair.First} = ({var} * {pair.Third} / 255) + {pair.Second};"));
     }
 }

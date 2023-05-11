@@ -60,7 +60,7 @@ public abstract class OutputButton : Output
 
         var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
 
-        return $"if (({Input.Generate(mode)} {extraStatement})) {{ {reset} {extra} }}";
+        return $"if (({Input.Generate()} {extraStatement})) {{ {reset} {extra} }}";
     }
 
     public override void UpdateBindings()

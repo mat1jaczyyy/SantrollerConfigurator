@@ -98,11 +98,11 @@ public class DjAxis : OutputAxis
         var gen = GenerateAssignment(mode, accelerometer, false, false);
         if (Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity)
         {
-            gen = $"({Input.Generate(mode)} * {Max})";
+            gen = $"({Input.Generate()} * {Max})";
             gen = mode == ConfigField.Xbox360 ? gen : $"{gen} + {sbyte.MaxValue}";
         }
 
-        return $"{GenerateOutput(mode)} = {gen};{CalculateLeds(mode)}";
+        return $"{GenerateOutput(mode)} = {gen};";
     }
 
     protected override string MinCalibrationText()

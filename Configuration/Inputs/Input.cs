@@ -30,7 +30,7 @@ public abstract class Input : ReactiveObject
     public abstract string Title { get; }
 
     public abstract IReadOnlyList<string> RequiredDefines();
-    public abstract string Generate(ConfigField mode);
+    public abstract string Generate();
 
     public abstract SerializedInput Serialise();
 

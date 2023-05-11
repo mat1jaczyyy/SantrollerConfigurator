@@ -75,7 +75,7 @@ public partial class BluetoothOutput : CombinedOutput
             return ret;
         }
 
-        public override string Generate(ConfigField mode)
+        public override string Generate()
         {
             return "";
         }

@@ -60,9 +60,9 @@ public class DigitalToAnalog : Input
 
     public override string Title => Child.Title;
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
-        return Child.Generate(mode);
+        return Child.Generate();
     }
 
     public override SerializedInput Serialise()

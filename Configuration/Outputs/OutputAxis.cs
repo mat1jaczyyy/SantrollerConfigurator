@@ -288,7 +288,7 @@ public abstract partial class OutputAxis : Output
 
     protected string GenerateAssignment(ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
     {
-        if (Input is FixedInput or DigitalToAnalog) return Input.Generate(mode);
+        if (Input is FixedInput or DigitalToAnalog) return Input.Generate();
 
         string function;
         var trigger = Trigger || forceTrigger;
@@ -378,7 +378,7 @@ public abstract partial class OutputAxis : Output
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
 
-        var generated = "(" + Input.Generate(mode);
+        var generated = "(" + Input.Generate();
         generated += (Trigger || forceAccel) switch
         {
             true when !InputIsUint => ") + INT16_MAX",
@@ -392,27 +392,24 @@ public abstract partial class OutputAxis : Output
             : $"{function}({generated}, {min}, {mulInt}, {DeadZone})";
     }
 
-    protected string CalculateLeds(ConfigField mode)
-    {
-        if (!AreLedsEnabled) return "";
-        var ledRead = GenerateOutput(mode);
-        return LedIndices.Aggregate("",
-            (current, index) =>
-                current +
-                $@"if (!ledState[{index - 1}].select) {{{Model.LedType.GetLedAssignment(LedOn, LedOff, ledRead, index)}}}");
-    }
 
     public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
         string combinedExtra,
         List<int> combinedDebounce)
     {
-        if (mode == ConfigField.Shared) return "";
+        if (mode == ConfigField.Shared)
+        {
+            if (!AreLedsEnabled || !LedIndices.Any()) return "";
+            var ledRead = GenerateAssignment(ConfigField.Ps3, false, true, false);
+            // Now we have the value, calibrated as a uint8_t
+            return  LedIndices.Aggregate($"led_tmp = {ledRead};", (acc, index) => acc+Model.LedType.GetLedAssignment(index, LedOn, LedOff, "led_tmp"));
+        }
 
         var output = GenerateOutput(mode);
         if (!output.Any()) return "";
 
         if (Input is not DigitalToAnalog dta)
-            return $"{output} = {GenerateAssignment(mode, false, false, false)};{CalculateLeds(mode)}";
+            return $"{output} = {GenerateAssignment(mode, false, false, false)};";
 
         // Digital to Analog stores values based on uint16_t for trigger, and int16_t for sticks
         var val = dta.On;
@@ -441,7 +438,7 @@ public abstract partial class OutputAxis : Output
                 return "";
         }
 
-        return $"if ({Input.Generate(mode)}) {{{output} = {val};}}";
+        return $"if ({Input.Generate()}) {{{output} = {val};}}";
     }
 
     public override void UpdateBindings()

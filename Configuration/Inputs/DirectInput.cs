@@ -46,7 +46,7 @@ public class DirectInput : InputWithPin
         return new SerializedDirectInput(PinConfig.Pin, PinConfig.PinMode);
     }
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
         return IsAnalog
             ? Model.Microcontroller.GenerateAnalogRead(PinConfig.Pin, Model)

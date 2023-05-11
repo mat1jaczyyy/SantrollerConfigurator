@@ -35,7 +35,7 @@ public class DjInput : TwiInput
     public override bool IsUint => false;
     public override string Title => EnumToStringConverter.Convert(Input);
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
         switch (Input)
         {

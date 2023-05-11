@@ -63,25 +63,25 @@ public class AnalogToDigital : Input
     public override string Title => Child.Title;
 
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
         if (Child.IsUint)
             switch (AnalogToDigitalType)
             {
                 case AnalogToDigitalType.Trigger:
                 case AnalogToDigitalType.JoyHigh:
-                    return $"({Child.Generate(mode)}) > {short.MaxValue + Threshold}";
+                    return $"({Child.Generate()}) > {short.MaxValue + Threshold}";
                 case AnalogToDigitalType.JoyLow:
-                    return $"({Child.Generate(mode)}) < {short.MaxValue - Threshold}";
+                    return $"({Child.Generate()}) < {short.MaxValue - Threshold}";
             }
         else
             switch (AnalogToDigitalType)
             {
                 case AnalogToDigitalType.Trigger:
                 case AnalogToDigitalType.JoyHigh:
-                    return $"({Child.Generate(mode)}) > {Threshold}";
+                    return $"({Child.Generate()}) > {Threshold}";
                 case AnalogToDigitalType.JoyLow:
-                    return $"({Child.Generate(mode)}) < {-Threshold}";
+                    return $"({Child.Generate()}) < {-Threshold}";
             }
 
         return "";

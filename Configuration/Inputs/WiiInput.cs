@@ -271,7 +271,7 @@ public class WiiInput : TwiInput
 
     public override string Title => EnumToStringConverter.Convert(Input);
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
         return Mappings[Input];
     }

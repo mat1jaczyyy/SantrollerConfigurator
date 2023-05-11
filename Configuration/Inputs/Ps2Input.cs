@@ -250,7 +250,7 @@ public class Ps2Input : SpiInput
 
     public override string Title => EnumToStringConverter.Convert(Input);
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
         return Mappings[Input];
     }

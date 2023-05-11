@@ -217,9 +217,9 @@ public class MacroInput : Input
     public override bool IsUint => false;
 
 
-    public override string Generate(ConfigField mode)
+    public override string Generate()
     {
-        return $"{Child1.Generate(mode)} && {Child2.Generate(mode)}";
+        return $"{Child1.Generate()} && {Child2.Generate()}";
     }
 
     public override string Title => "Macro";
