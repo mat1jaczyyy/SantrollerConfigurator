@@ -21,6 +21,8 @@ public class App : Application
     {
         if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime lifetime)
             throw new Exception("Invalid ApplicationLifetime");
+
+        // Make sure we kill all python processes on exit
         Locator.CurrentMutable.RegisterConstant<IScreen>(new MainWindowViewModel());
         Locator.CurrentMutable.Register<IViewFor<ConfigViewModel>>(() => new ConfigView());
         Locator.CurrentMutable.Register<IViewFor<RestoreViewModel>>(() => new RestoreView());
@@ -28,7 +30,11 @@ public class App : Application
         Locator.CurrentMutable.Register<IViewFor<MainViewModel>>(() => new MainView());
         lifetime.MainWindow = new MainWindow {DataContext = Locator.Current.GetService<IScreen>()};
         lifetime.MainWindow.RequestedThemeVariant = ThemeVariant.Dark;
-        lifetime.Exit += (_, _) => { Environment.Exit(0); };
+        lifetime.Exit += (_, _) =>
+        {
+            PlatformIo.Exit();
+            Environment.Exit(0);
+        };
         base.OnFrameworkInitializationCompleted();
     }
 }

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
 
 namespace GuitarConfigurator.NetCore;
@@ -21,24 +18,7 @@ public static class Program
         var tr2 = new TextWriterTraceListener(File.CreateText(Path.Combine(AssetUtils.GetAppDataFolder(),
             "build.log")));
         Trace.Listeners.Add(tr2);
-        try
-        {
-            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
-            // Make sure we kill all python processes on exit
-            var lifetime = (ClassicDesktopStyleApplicationLifetime) Application.Current!.ApplicationLifetime!;
-            lifetime.Exit += PlatformIo.Exit;
-        }
-        catch (Exception ex)
-        {
-            Trace.TraceError(ex.ToString());
-            PlatformIo.Exit(null, new ControlledApplicationLifetimeExitEventArgs(0));
-        }
-
-        TaskScheduler.UnobservedTaskException += (sender, ex) =>
-        {
-            Trace.TraceError(ex.Exception.ToString());
-            PlatformIo.Exit(sender, new ControlledApplicationLifetimeExitEventArgs(0));
-        };
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
     }
 
     public static AppBuilder BuildAvaloniaApp()
