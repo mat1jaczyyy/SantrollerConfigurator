@@ -97,6 +97,11 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}" />
 
                         </StackPanel>
+                        
+                        <Label Foreground="Red"
+                               Content="{Binding UsbHostErrorText}"
+                               HorizontalAlignment="Stretch" Margin="40 5 40 0" HorizontalContentAlignment="Center"
+                               IsVisible="{Binding UsbHostErrorText, Converter={x:Static ObjectConverters.IsNotNull}}" />
                     </StackPanel>
                 </StackPanel>
                 <StackPanel IsVisible="{Binding IsBluetooth}" Orientation="Vertical">
@@ -179,6 +184,12 @@
                                       ItemsSource="{Binding AvailablePins}"
                                       ItemTemplate="{StaticResource PinToStringTemplate}" />
                         </StackPanel>
+                        
+                        <Label Foreground="Red"
+                               Content="{Binding 
+                               RfErrorText}"
+                               HorizontalAlignment="Stretch" Margin="40 5 40 0" HorizontalContentAlignment="Center"
+                               IsVisible="{Binding RfErrorText, Converter={x:Static ObjectConverters.IsNotNull}}" />
                         <StackPanel IsVisible="{Binding PowerLevel}">
                             <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="RF Power Level"
                                        TextAlignment="Center" />
@@ -297,6 +308,12 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}" />
 
                         </StackPanel>
+                        
+                        <Label Foreground="Red"
+                               Content="{Binding 
+                               Apa102ErrorText}"
+                               HorizontalAlignment="Stretch" Margin="40 5 40 0" HorizontalContentAlignment="Center"
+                               IsVisible="{Binding Apa102ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}" />
                     </StackPanel>
                     <Button Command="{Binding AddOutputCommand}" HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center" Margin="20 5 20 0">

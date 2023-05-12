@@ -667,7 +667,7 @@ public class Ardwiino : ConfigurableUsbDevice
         model.MouseMovementType = MouseMovementType.Relative;
         model.Bindings.Clear();
         model.Bindings.AddRange(bindings);
-        model.Write();
+        model.Main.Write(model, true);
         return true;
     }
 

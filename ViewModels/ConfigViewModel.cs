@@ -80,7 +80,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Microcontroller = device.GetMicrocontroller(this);
         BindAllCommand = ReactiveCommand.CreateFromTask(BindAllAsync);
 
-        WriteConfigCommand = ReactiveCommand.CreateFromObservable(Write,
+        WriteConfigCommand = ReactiveCommand.CreateFromObservable(() => Main.Write(this, true),
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
         ResetCommand = ReactiveCommand.CreateFromTask(ResetAsync,
@@ -150,6 +150,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public bool ShowUnoDialog { get; }
 
     public bool SupportsReset { get; }
+
+    [Reactive] public string? RfErrorText { get; set; }
+    [Reactive] public string? UsbHostErrorText { get; set; }
+    [Reactive] public string? Apa102ErrorText { get; set; }
 
     public bool AllExpanded
     {
@@ -320,8 +324,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     [Reactive] public bool HasError { get; set; }
 
-    [Reactive] public bool Finalised { get; set; }
-
     public LedType LedType
     {
         get => _ledType;
@@ -353,13 +355,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set
         {
             if (!IsPico) return;
-            this.RaiseAndSetIfChanged(ref _usbHostEnabled, value);
             if (value)
             {
                 // These pins get handled by the usb host lib, but we need them defined regardless
-                _usbHostDp = new DirectPinConfig(this, UsbHostPinTypeDp, AvailablePinsDp.First(),
+                _usbHostDp = new DirectPinConfig(this, UsbHostPinTypeDp, -1,
                     DevicePinMode.Skip);
-                _usbHostDm = new DirectPinConfig(this, UsbHostPinTypeDm, AvailablePinsDm.First(),
+                _usbHostDm = new DirectPinConfig(this, UsbHostPinTypeDm, -1,
                     DevicePinMode.Skip);
                 this.RaisePropertyChanged(nameof(UsbHostDp));
                 this.RaisePropertyChanged(nameof(UsbHostDm));
@@ -369,6 +370,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 _usbHostDp = null;
                 _usbHostDm = null;
             }
+
+            this.RaiseAndSetIfChanged(ref _usbHostEnabled, value);
 
             UpdateErrors();
         }
@@ -442,10 +445,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
         .Where(s => s.Value is SpiPinType.Mosi)
-        .Select(s => s.Key).ToList();
-
-    public List<int> AvailableApaMisoPins => Microcontroller.SpiPins(Apa102SpiType)
-        .Where(s => s.Value is SpiPinType.Miso)
         .Select(s => s.Key).ToList();
 
     public List<int> AvailableApaSckPins => Microcontroller.SpiPins(Apa102SpiType)
@@ -605,12 +604,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
     }
 
-
-    public IObservable<PlatformIo.PlatformIoState> Write()
-    {
-        return Main.Write(this);
-    }
-
     public void SetDefaults()
     {
         Main.Message = "Building";
@@ -640,9 +633,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
                 this.RaisePropertyChanged(nameof(RfSck));
-                var first = Microcontroller.GetAllPins(false).First();
-                _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
-                _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
+                _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", -1, DevicePinMode.PullUp);
+                _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", -1, DevicePinMode.Output);
             }
         }
 
@@ -652,9 +644,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.RaisePropertyChanged(nameof(RhythmType));
         XInputOnWindows = true;
         MouseMovementType = MouseMovementType.Relative;
-        if (Main.DeviceInputType == DeviceInputType.Direct)
-            // Write an empty config
-            Write();
 
         switch (Main.DeviceInputType)
         {
@@ -697,9 +686,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         UpdateBindings();
         UpdateErrors();
-        if (Main.DeviceInputType != DeviceInputType.Direct)
-            // Write the full config
-            Write();
+        // Write the full config
+        Main.Write(this, false);
     }
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
@@ -712,13 +700,19 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
+                if (Microcontroller.SpiAssignable)
+                {
+                    mosi = -1;
+                    miso = -1;
+                    sck = -1;
+                }
+
                 _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true,
                     true,
                     true,
                     4000000);
-                var first = Microcontroller.GetAllPins(false).First();
-                _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
-                _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
+                _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", -1, DevicePinMode.PullUp);
+                _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", -1, DevicePinMode.Output);
 
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
@@ -787,19 +781,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    public void Finalise()
-    {
-        Finalised = true;
-    }
-
-    public void Generate(PlatformIo pio)
+    public void Generate(PlatformIo pio, bool generate)
     {
         var outputs = Bindings.Items.SelectMany(binding => binding.Outputs.Items).ToList();
         var inputs = outputs.Select(binding => binding.Input.InnermostInput()).ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
         var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
         var lines = new List<string>();
-
+        // Always include the current config - even if its invalid (aka, in the case of initial configs for wii and such)
         using (var outputStream = new MemoryStream())
         {
             using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
@@ -812,115 +801,152 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             lines.Add($"#define CONFIGURATION_LEN {outputStream.ToArray().Length}");
         }
 
-
+        // Settings that are always written
         lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
-        lines.Add($"#define USB_HOST_STACK {UsbHostEnabled.ToString().ToLower()}");
-        lines.Add($"#define USB_HOST_DP_PIN {UsbHostDp}");
-
         lines.Add(
             $"#define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}");
-
-        lines.Add($"#define TICK_SHARED {GenerateTick(ConfigField.Shared)}");
-        lines.Add($"#define TICK_DETECTION {GenerateTick(ConfigField.Detection)}");
-
-        lines.Add($"#define TICK_PS3 {GenerateTick(ConfigField.Ps3)}");
-
-        lines.Add($"#define TICK_PS4 {GenerateTick(ConfigField.Ps4)}");
-
-        lines.Add($"#define TICK_XINPUT {GenerateTick(ConfigField.Xbox360)}");
-
-        lines.Add($"#define TICK_XBOX_ONE {GenerateTick(ConfigField.XboxOne)}");
-
-        var nkroTick = GenerateTick(ConfigField.Keyboard);
-        if (nkroTick.Any()) lines.Add($"#define TICK_NKRO {nkroTick}");
-
-        var consumerTick = GenerateTick(ConfigField.Consumer);
-        if (consumerTick.Any()) lines.Add($"#define TICK_CONSUMER {consumerTick}");
-
-        var mouseTick = GenerateTick(ConfigField.Mouse);
-        if (mouseTick.Any()) lines.Add($"#define TICK_MOUSE {mouseTick}");
-
-
-        lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
-        lines.Add($"#define LED_COUNT {LedCount}");
-        lines.Add($"#define WT_SENSITIVITY {WtSensitivity}");
-
-        lines.Add($"#define LED_TYPE {GetLedType()}");
-
-        if (IsApa102)
-        {
-            lines.Add($"#define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}");
-
-            lines.Add($"#define TICK_LED {GenerateLedTick()}");
-        }
-
-        if (IsRf)
-        {
-            lines.Add($"#define RF_DEVICE_ID {RfId}");
-            lines.Add($"#define RF_CHANNEL {RfChannel}");
-            lines.Add("#define RF_TX");
-            lines.Add($"#define RADIO_CE {_rfCe!.Pin}");
-            lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");
-            lines.Add($"#define RF_POWER_LEVEL {(byte) PowerLevel}");
-            lines.Add($"#define RF_DATA_RATE {(byte) DataRate}");
-            if (BindableSpi)
-            {
-                lines.Add($"#define RADIO_MOSI {_rfSpiConfig!.Mosi}");
-                lines.Add($"#define RADIO_MISO {_rfSpiConfig!.Miso}");
-                lines.Add($"#define RADIO_SCK {_rfSpiConfig!.Sck}");
-            }
-        }
-
-        lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
-
-        var offLed = GenerateTick(ConfigField.OffLed);
-        if (offLed.Any()) lines.Add($"#define HANDLE_LED_RUMBLE_OFF {offLed}");
-
-        lines.Add($"#define HANDLE_PLAYER_LED {GenerateTick(ConfigField.PlayerLed)}");
-
-        lines.Add($"#define HANDLE_LIGHTBAR_LED {GenerateTick(ConfigField.LightBarLed)}");
-
-        lines.Add($"#define HANDLE_RUMBLE {GenerateTick(ConfigField.RumbleLed)}");
-
-        lines.Add($"#define HANDLE_KEYBOARD_LED {GenerateTick(ConfigField.KeyboardLed)}");
-
+        lines.Add($"#define ARDWIINO_BOARD \"{Microcontroller.Board.ArdwiinoName}\"");
         lines.Add($"#define CONSOLE_TYPE {GetEmulationType()}");
-
         lines.Add($"#define DEVICE_TYPE {(byte) DeviceType}");
-
         lines.Add($"#define POLL_RATE {PollRate}");
-
         lines.Add($"#define RHYTHM_TYPE {(byte) RhythmType}");
-        if (EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
-            lines.Add(
-                $"#define BLUETOOTH_TX {(EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse).ToString().ToLower()}");
-
-        if (KvEnabled)
-        {
-            lines.Add(
-                $"#define KV_KEY_1 {{{string.Join(",", KvKey1.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
-            lines.Add(
-                $"#define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
-        }
 
         lines.Add(Ps2Input.GeneratePs2Pressures(inputs));
 
-        // Sort by pin index, and then map to adc number and turn into an array
-        var analogPins = directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin)
-            .Select(s => Microcontroller.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct().ToList();
-        // Format as a c array
-        lines.Add($"#define ADC_PINS {{{string.Join(",", analogPins)}}}");
+        // Actually write the config as configured
+        if (generate)
+        {
+            lines.Add($"#define USB_HOST_STACK {UsbHostEnabled.ToString().ToLower()}");
+            lines.Add($"#define USB_HOST_DP_PIN {UsbHostDp}");
 
-        // And also store a count
-        lines.Add($"#define ADC_COUNT {analogPins.Count}");
-        lines.Add($"#define PIN_INIT {Microcontroller.GenerateInit(this)}");
+            lines.Add($"#define TICK_SHARED {GenerateTick(ConfigField.Shared)}");
+            lines.Add($"#define TICK_DETECTION {GenerateTick(ConfigField.Detection)}");
 
-        // Copy in any specific config for the different pin configs (like spi and twi config on the pico)
-        lines.Add(GetPinConfigs().Distinct().Aggregate("", (current, config) => current + config.Generate()));
+            lines.Add($"#define TICK_PS3 {GenerateTick(ConfigField.Ps3)}");
 
-        lines.Add($"#define ARDWIINO_BOARD \"{Microcontroller.Board.ArdwiinoName}\"");
-        lines.Add(string.Join("\n",
-            inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}")));
+            lines.Add($"#define TICK_PS4 {GenerateTick(ConfigField.Ps4)}");
+
+            lines.Add($"#define TICK_XINPUT {GenerateTick(ConfigField.Xbox360)}");
+
+            lines.Add($"#define TICK_XBOX_ONE {GenerateTick(ConfigField.XboxOne)}");
+
+            var nkroTick = GenerateTick(ConfigField.Keyboard);
+            if (nkroTick.Any()) lines.Add($"#define TICK_NKRO {nkroTick}");
+
+            var consumerTick = GenerateTick(ConfigField.Consumer);
+            if (consumerTick.Any()) lines.Add($"#define TICK_CONSUMER {consumerTick}");
+
+            var mouseTick = GenerateTick(ConfigField.Mouse);
+            if (mouseTick.Any()) lines.Add($"#define TICK_MOUSE {mouseTick}");
+
+
+            lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
+            lines.Add($"#define LED_COUNT {LedCount}");
+            lines.Add($"#define WT_SENSITIVITY {WtSensitivity}");
+
+            lines.Add($"#define LED_TYPE {GetLedType()}");
+
+            if (IsApa102)
+            {
+                lines.Add($"#define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}");
+
+                lines.Add($"#define TICK_LED {GenerateLedTick()}");
+            }
+
+            if (IsRf)
+            {
+                lines.Add($"#define RF_DEVICE_ID {RfId}");
+                lines.Add($"#define RF_CHANNEL {RfChannel}");
+                lines.Add("#define RF_TX");
+                lines.Add($"#define RADIO_CE {_rfCe!.Pin}");
+                lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");
+                lines.Add($"#define RF_POWER_LEVEL {(byte) PowerLevel}");
+                lines.Add($"#define RF_DATA_RATE {(byte) DataRate}");
+                if (BindableSpi)
+                {
+                    lines.Add($"#define RADIO_MOSI {_rfSpiConfig!.Mosi}");
+                    lines.Add($"#define RADIO_MISO {_rfSpiConfig!.Miso}");
+                    lines.Add($"#define RADIO_SCK {_rfSpiConfig!.Sck}");
+                }
+            }
+
+            lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
+
+            var offLed = GenerateTick(ConfigField.OffLed);
+            if (offLed.Any()) lines.Add($"#define HANDLE_LED_RUMBLE_OFF {offLed}");
+
+            lines.Add($"#define HANDLE_PLAYER_LED {GenerateTick(ConfigField.PlayerLed)}");
+
+            lines.Add($"#define HANDLE_LIGHTBAR_LED {GenerateTick(ConfigField.LightBarLed)}");
+
+            lines.Add($"#define HANDLE_RUMBLE {GenerateTick(ConfigField.RumbleLed)}");
+
+            lines.Add($"#define HANDLE_KEYBOARD_LED {GenerateTick(ConfigField.KeyboardLed)}");
+            if (EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
+                lines.Add(
+                    $"#define BLUETOOTH_TX {(EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse).ToString().ToLower()}");
+
+            if (KvEnabled)
+            {
+                lines.Add(
+                    $"#define KV_KEY_1 {{{string.Join(",", KvKey1.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
+                lines.Add(
+                    $"#define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
+            }
+
+            lines.Add(Ps2Input.GeneratePs2Pressures(inputs));
+
+            // Sort by pin index, and then map to adc number and turn into an array
+            var analogPins = directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin)
+                .Select(s => Microcontroller.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct().ToList();
+            // Format as a c array
+            lines.Add($"#define ADC_PINS {{{string.Join(",", analogPins)}}}");
+
+            // And also store a count
+            lines.Add($"#define ADC_COUNT {analogPins.Count}");
+            lines.Add($"#define PIN_INIT {Microcontroller.GenerateInit(this)}");
+
+            // Copy in any specific config for the different pin configs (like spi and twi config on the pico)
+            lines.Add(GetPinConfigs().Distinct().Aggregate("", (current, config) => current + config.Generate()));
+            lines.Add(string.Join("\n",
+                inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}")));
+        }
+        else
+        {
+            // Write an empty config - the config at this point is likely invalid and won't compile
+            lines.Add($"#define USB_HOST_STACK false");
+            lines.Add($"#define USB_HOST_DP_PIN 0");
+
+            lines.Add($"#define TICK_SHARED");
+            lines.Add($"#define TICK_DETECTION");
+
+            lines.Add($"#define TICK_PS3");
+
+            lines.Add($"#define TICK_PS4");
+
+            lines.Add($"#define TICK_XINPUT");
+
+            lines.Add($"#define TICK_XBOX_ONE");
+
+            lines.Add($"#define DIGITAL_COUNT 0");
+            lines.Add($"#define LED_COUNT 0");
+            lines.Add($"#define WT_SENSITIVITY {WtSensitivity}");
+
+            lines.Add($"#define LED_TYPE 0");
+
+            lines.Add($"#define HANDLE_AUTH_LED");
+
+            lines.Add($"#define HANDLE_PLAYER_LED");
+
+            lines.Add($"#define HANDLE_LIGHTBAR_LED");
+
+            lines.Add($"#define HANDLE_RUMBLE");
+
+            lines.Add($"#define HANDLE_KEYBOARD_LED");
+            lines.Add("#define ADC_PINS {}");
+            lines.Add($"#define ADC_COUNT 0");
+            lines.Add($"#define PIN_INIT");
+        }
 
         File.WriteAllLines(configFile, lines);
     }
@@ -1245,7 +1271,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     {
                         var ledRead = analogLedOutput.GenerateAssignment(ConfigField.Ps3, false, true, false);
                         // Now we have the value, calibrated as a uint8_t
-                        ret += $"led_tmp = {ledRead};{LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}";
+                        ret +=
+                            $"led_tmp = {ledRead};{LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}";
                     }
 
                     ret += "}";
@@ -1303,16 +1330,20 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             foreach (var pinConfig in configs) pins[binding.LocalisedName].AddRange(pinConfig.Pins);
         }
 
-        if (IsApa102 && _apa102SpiConfig != null) pins["APA102"] = _apa102SpiConfig.Pins.ToList();
         if (Main.IsUno || Main.IsMega)
         {
             pins[UnoPinTypeTx] = new List<int> {UnoPinTypeTxPin};
             pins[UnoPinTypeRx] = new List<int> {UnoPinTypeRxPin};
         }
 
-        if (UsbHostEnabled) pins["USB Host"] = new List<int> {UsbHostDm, UsbHostDp};
+        if (IsApa102 && _apa102SpiConfig != null && type != Apa102SpiType)
+            pins["APA102"] = _apa102SpiConfig.Pins.ToList();
 
-        if (IsRf) pins["RF"] = new List<int> {RfMiso, RfMosi, RfCe, RfSck, RfCsn};
+        if (UsbHostEnabled && type != UsbHostPinTypeDm && type != UsbHostPinTypeDp)
+            pins["USB Host"] = new List<int> {UsbHostDm, UsbHostDp};
+
+        if (IsRf && !type.StartsWith(RfRxOutput.SpiType))
+            pins["RF"] = new List<int> {RfMiso, RfMosi, RfCe, RfSck, RfCsn};
 
         return pins;
     }
@@ -1324,6 +1355,40 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             output.UpdateErrors();
             if (!string.IsNullOrEmpty(output.ErrorText)) foundError = true;
+        }
+
+        if (UsbHostEnabled)
+        {
+            var dmText = _usbHostDm!.ErrorText;
+            var dpText = _usbHostDp!.ErrorText;
+            if (dmText != null || dpText != null)
+            {
+                foundError = true;
+            }
+
+            UsbHostErrorText = dmText ?? dpText;
+        }
+
+        if (IsRf && Microcontroller.SpiAssignable)
+        {
+            var error = _rfSpiConfig!.ErrorText;
+            var csnError = _rfCsn!.ErrorText;
+            var ceError = _rfCe!.ErrorText;
+            if (error != null || csnError != null || ceError != null)
+            {
+                foundError = true;
+            }
+            RfErrorText = error ?? csnError ?? ceError;
+        }
+
+        if (IsApa102 && Microcontroller.SpiAssignable)
+        {
+            var error = _apa102SpiConfig!.ErrorText;
+            if (error != null)
+            {
+                foundError = true;
+            }
+            Apa102ErrorText = error;
         }
 
         HasError = foundError;
