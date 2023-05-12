@@ -252,7 +252,7 @@ public class Santroller : IConfigurableDevice
 
         try
         {
-            var direct = _model.Bindings.Items.Select(s => s.Input!.InnermostInput())
+            var direct = _model.Bindings.Items.Select(s => s.Input.InnermostInput())
                 .OfType<DirectInput>().ToList();
             var digital = direct.Where(s => !s.IsAnalog).SelectMany(s => s.Pins).Distinct().Where(s => s.Pin != -1);
             var analog = direct.Where(s => s.IsAnalog).SelectMany(s => s.Pins).Distinct().Where(s => s.Pin != -1);

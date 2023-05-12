@@ -139,7 +139,7 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
 
     private static Func<DeviceInputType, bool> CreateFilter(IConfigurableDevice? s)
     {
-        return type => type != DeviceInputType.Rf || s?.IsGeneric() != true;
+        return type => (type != DeviceInputType.Rf || s?.IsGeneric() != true) && (type is not DeviceInputType.Usb || s is PicoDevice);
     }
 
     public void Begin()

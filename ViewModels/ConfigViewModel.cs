@@ -514,7 +514,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Bindings.RemoveMany(extra);
 
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
-        if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput)) return;
+        if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput or UsbHostInput)) return;
 
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
@@ -681,6 +681,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     Expanded = true
                 };
                 Bindings.Add(rfOutput);
+                break;
+            case DeviceInputType.Usb:
+                UsbHostEnabled = true;
+                var usbOutput = new UsbHostInput(this)
+                {
+                    Expanded = true
+                };
+                Bindings.Add(usbOutput);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
