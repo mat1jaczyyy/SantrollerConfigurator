@@ -9,7 +9,7 @@ using Avalonia.ReactiveUI;
 
 namespace GuitarConfigurator.NetCore;
 
-public static class ProgramWindowsDebug
+public static class Program
 {
     public static void Main(string[] args)
     {
