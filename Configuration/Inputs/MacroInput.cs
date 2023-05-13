@@ -92,12 +92,7 @@ public class MacroInput : Input
     {
         var child = isChild1 ? Child1 : Child2;
         child = child.InnermostInput();
-        var pinMode = DevicePinMode.PullUp;
-        if (child.InnermostInput() is DirectInput {IsAnalog: false} direct)
-        {
-            pinMode = direct.PinMode;
-        }
-
+        
         Input? inputOther = null;
         Input input;
         switch (inputType)
@@ -115,8 +110,8 @@ public class MacroInput : Input
                     input.IsUint ? ushort.MaxValue / 2 : short.MaxValue / 2, Model);
                 break;
             case Types.InputType.DigitalPinInput:
-                input = new DirectInput(-1, pinMode, Model);
-                inputOther = new DirectInput(-1, pinMode, Model);
+                input = new DirectInput(-1, DevicePinMode.PullUp, Model);
+                inputOther = new DirectInput(-1, DevicePinMode.PullUp, Model);
                 break;
             case Types.InputType.TurntableInput when child.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;

@@ -416,12 +416,6 @@ public abstract partial class Output : ReactiveObject
         GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
     {
         Input input;
-        var pinMode = DevicePinMode.PullUp;
-        if (Input.InnermostInput() is DirectInput {IsAnalog: false} direct)
-        {
-            pinMode = direct.PinMode;
-        }
-
 
         switch (inputType)
         {
@@ -432,11 +426,11 @@ public abstract partial class Output : ReactiveObject
                 input = new MultiplexerInput(-1, 0, -1, -1, -1, -1, MultiplexerType.EightChannel, Model);
                 break;
             case InputType.MacroInput:
-                input = new MacroInput(new DirectInput(-1, pinMode, Model),
-                    new DirectInput(-1, pinMode, Model), Model);
+                input = new MacroInput(new DirectInput(-1, DevicePinMode.PullUp, Model),
+                    new DirectInput(-1, DevicePinMode.PullUp, Model), Model);
                 break;
             case InputType.DigitalPinInput:
-                input = new DirectInput(-1, pinMode, Model);
+                input = new DirectInput(-1, DevicePinMode.PullUp, Model);
                 break;
             case InputType.TurntableInput when Input.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;
