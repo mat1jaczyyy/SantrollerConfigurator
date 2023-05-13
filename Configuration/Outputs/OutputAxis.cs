@@ -454,7 +454,17 @@ public abstract partial class OutputAxis : Output
             default:
                 return "";
         }
-
+        // On the PS3, we need to convert triggers from analog to digital
+        if (mode is ConfigField.Ps3 or ConfigField.Ps4 && this is ControllerAxis {Type: StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger})
+        {
+            var trigger = this is ControllerAxis {Type: StandardAxisType.LeftTrigger} ? "l2" : "r2";
+            return $@"if ({Input.Generate()}) {{
+                        {output} = {val};
+                        if ({output} > 60000) {{
+                            report->{trigger} = true;
+                        }}
+                   }}";
+        }
         return $"if ({Input.Generate()}) {{{output} = {val};}}";
     }
 

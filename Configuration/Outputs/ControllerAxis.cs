@@ -137,7 +137,7 @@ public class ControllerAxis : OutputAxis
     public override bool ShouldFlip(ConfigField mode)
     {
         // Need to flip y axis on PS4
-        return mode is ConfigField.Ps4 && Type is StandardAxisType.LeftStickY or StandardAxisType.RightStickY;
+        return mode is ConfigField.Ps4 or ConfigField.Ps3 && Type is StandardAxisType.LeftStickY or StandardAxisType.RightStickY;
     }
 
     protected override bool SupportsCalibration()
