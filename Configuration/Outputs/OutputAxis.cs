@@ -292,7 +292,7 @@ public abstract partial class OutputAxis : Output
 
         string function;
         var trigger = Trigger || forceTrigger;
-        var normal = false;
+        var intBased = false;
 
         switch (mode)
         {
@@ -303,7 +303,7 @@ public abstract partial class OutputAxis : Output
                 function = "handle_calibration_xbox_one_trigger";
                 break;
             case ConfigField.XboxOne:
-                normal = true;
+                intBased = true;
                 function = "handle_calibration_xbox";
                 break;
             case ConfigField.Xbox360 when whammy:
@@ -313,12 +313,12 @@ public abstract partial class OutputAxis : Output
                 function = "handle_calibration_ps3_360_trigger";
                 break;
             case ConfigField.Xbox360:
-                normal = true;
+                intBased = true;
                 function = "handle_calibration_xbox";
                 break;
             // For LED stuff (Shared), we can use the standard handle_calibration_ps3 instead.
             case ConfigField.Ps3 when forceAccel:
-                normal = true;
+                intBased = true;
                 function = "handle_calibration_ps3_accel";
                 break;
             case ConfigField.Ps3 or ConfigField.Shared when whammy:
@@ -328,7 +328,7 @@ public abstract partial class OutputAxis : Output
                 function = "handle_calibration_ps3_360_trigger";
                 break;
             case ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared:
-                normal = true;
+                intBased = true;
                 function = "handle_calibration_ps3";
                 break;
             default:
@@ -341,31 +341,7 @@ public abstract partial class OutputAxis : Output
         var max = Max;
         var inverted = Min > Max;
         float multiplier;
-        if (Trigger)
-        {
-            if (!InputIsUint)
-            {
-                max += short.MaxValue;
-                min += short.MaxValue;
-            }
-
-            if (inverted)
-                min -= DeadZone;
-            else
-                min += DeadZone;
-
-            if (min < 0)
-            {
-                min = 0;
-            }
-            if (max > ushort.MaxValue)
-            {
-                max = ushort.MaxValue;
-            }
-
-            multiplier = 1f / (max - min) * ushort.MaxValue;
-        }
-        else
+        if (intBased)
         {
             if (InputIsUint)
             {
@@ -396,17 +372,42 @@ public abstract partial class OutputAxis : Output
 
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
+        else
+        {
+            if (!InputIsUint)
+            {
+                max += short.MaxValue;
+                min += short.MaxValue;
+            }
+
+            if (inverted)
+                min -= DeadZone;
+            else
+                min += DeadZone;
+
+            if (min < 0)
+            {
+                min = 0;
+            }
+
+            if (max > ushort.MaxValue)
+            {
+                max = ushort.MaxValue;
+            }
+
+            multiplier = 1f / (max - min) * ushort.MaxValue;
+        }
 
         var generated = "(" + Input.Generate();
-        generated += (trigger || forceAccel) switch
+        generated += intBased switch
         {
-            true when !InputIsUint => ") + INT16_MAX",
-            false when InputIsUint => ") - INT16_MAX",
+            false when !InputIsUint => ") + INT16_MAX",
+            true when InputIsUint => ") - INT16_MAX",
             _ => ")"
         };
         var mulInt = (short) (multiplier * 512);
 
-        return normal
+        return intBased
             ? $"{function}({generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
             : $"{function}({generated}, {min}, {mulInt}, {DeadZone})";
     }
