@@ -78,6 +78,22 @@
                 </Label>
             </StackPanel>
         </DataTemplate>
+        <DataTemplate x:Key="ImageWithTextTemplateGeneric" DataType="system:Object">
+            <StackPanel Orientation="Horizontal">
+                <Image Width="25">
+                    <Image.Source>
+                        <MultiBinding Converter="{StaticResource InputImageConverter }">
+                            <Binding />
+                            <Binding
+                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceType" />
+                            <Binding
+                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).RhythmType" />
+                        </MultiBinding>
+                    </Image.Source>
+                </Image>
+                <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
+            </StackPanel>
+        </DataTemplate>
         <DataTemplate x:Key="ImageOutputTemplate" DataType="output:Output">
             <StackPanel Orientation="Horizontal">
                 <Image Width="75" Opacity="{Binding ImageOpacity}">
@@ -1292,7 +1308,7 @@
                         <ComboBox VerticalAlignment="Center"
                                   SelectedItem="{Binding SelectedInputType1}"
                                   ItemsSource="{Binding InputTypes}"
-                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                  ItemTemplate="{StaticResource ImageWithTextTemplateGeneric}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <StackPanel.IsVisible>
@@ -1956,7 +1972,7 @@
                                             <ComboBox VerticalAlignment="Center"
                                                       SelectedItem="{Binding SelectedInputType}"
                                                       ItemsSource="{Binding InputTypes}"
-                                                      ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                                      ItemTemplate="{StaticResource ImageWithTextTemplateGeneric}" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal">
                                             <StackPanel.IsVisible>

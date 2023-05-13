@@ -85,12 +85,12 @@ public class DjAxis : OutputAxis
         return GetReportField(Type);
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+    public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
         if (mode == ConfigField.Shared)
-            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
+            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data

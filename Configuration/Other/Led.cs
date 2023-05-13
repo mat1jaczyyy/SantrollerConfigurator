@@ -473,9 +473,9 @@ public class Led : Output
         return Command;
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+    public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
         if (mode is not (ConfigField.StrobeLed or ConfigField.AuthLed or ConfigField.PlayerLed or ConfigField.RumbleLed
             or ConfigField.KeyboardLed or ConfigField.LightBarLed or ConfigField.OffLed)) return "";

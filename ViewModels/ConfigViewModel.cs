@@ -1110,7 +1110,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         // Pass 1: work out debounces and map inputs to debounces
         var inputs = new Dictionary<string, List<int>>();
-        var macros = new List<Output>();
+        var macros = new Dictionary<string,List<(int,Input)>>();
         foreach (var outputByType in outputsByType)
         {
             foreach (var output in outputByType)
@@ -1120,7 +1120,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
                 if (output.Input is MacroInput)
                 {
-                    macros.Add(output);
+                    foreach (var input in output.Input.Inputs())
+                    {
+                        var gen = input.Generate();
+                        macros.TryAdd(gen, new List<(int, Input)>());
+                        macros[gen].AddRange(output.Input.Inputs().Where(s => s != input).Select(s => (0, s)));
+                    }
                 }
 
                 debounces.TryAdd(generatedInput, debounces.Count);
@@ -1136,36 +1141,51 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 inputs[generatedInput].Add(debounces[generatedInput]);
             }
         }
+        
+        foreach (var (key, value) in macros)
+        {
+            var list2 = new List<(int, Input)>();
+            foreach (var (_, input) in value)
+            {
+                var gen = input.Generate();
+                if (debounces.TryGetValue(gen, out var debounce))
+                {
+                    list2.Add((debounce, input));
+                }
+                macros[key] = list2;
+            }
+        }
 
-        var debouncesRelatedToLed = new Dictionary<byte, List<(Output, List<int>)>>();
+        var debouncesRelatedToLed = new Dictionary<byte, List<(Output, int)>>();
         var analogRelatedToLed = new Dictionary<byte, List<OutputAxis>>();
         // Handle most mappings
-        // Sort in a way that any digital to analog based groups are last. This is so that seenAnalog will be filled in when necessary.
-        var ret = outputsByType.OrderByDescending(s => s.Count(s2 => s2.Input is DigitalToAnalog))
+        var ret = outputsByType
             .Aggregate("", (current, group) =>
             {
                 // we need to ensure that DigitalToAnalog is last
                 return current + group
                     .First().Input.InnermostInput()
                     .GenerateAll(group
-                        .OrderByDescending(s => s.Input is DigitalToAnalog ? 0 : 1)
+                            // DigitalToAnalog and MacroInput need to be handled last
+                        .OrderByDescending(s => s.Input is DigitalToAnalog or MacroInput ? 0 : 1)
                         .Select(s =>
                         {
                             var input = s.Input;
                             var output = s;
                             var generatedInput = input.Generate();
-                            var index = new List<int> {0};
+                            var index = 0;
                             if (output is OutputButton or DrumAxis or EmulationMode)
                             {
-                                index = new List<int> {debounces[generatedInput]};
+                                index = debounces[generatedInput];
 
                                 foreach (var led in output.LedIndices)
                                 {
                                     if (!debouncesRelatedToLed.ContainsKey(led))
-                                        debouncesRelatedToLed[led] = new List<(Output, List<int>)>();
+                                        debouncesRelatedToLed[led] = new List<(Output, int)>();
 
                                     debouncesRelatedToLed[led].Add((output, index));
                                 }
+                                
                             }
 
                             if (output is OutputAxis axis)
@@ -1179,89 +1199,67 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                 }
                             }
 
-                            var generated = output.Generate(mode, index, "", "", strumIndices);
+                            var generated = output.Generate(mode, index, "", "", strumIndices, macros);
                             return new Tuple<Input, string>(input, generated);
                         })
                         .Where(s => !string.IsNullOrEmpty(s.Item2))
                         .Distinct().ToList(), mode);
             });
-        // Flick off intersecting outputs when multiple buttons are pressed
-        if (mode == ConfigField.Shared)
+        if (mode == ConfigField.Shared && LedType is not LedType.None)
         {
-            foreach (var output in macros)
+            // Handle leds, including when multiple leds are assigned to a single output.
+            foreach (var (led, relatedOutputs) in debouncesRelatedToLed)
             {
-                var ifStatement = new List<string>();
-                var sharedReset = "";
-                foreach (var input in output.Input.Inputs())
+                var analog = "";
+                if (analogRelatedToLed.TryGetValue(led, out var analogLedOutputs))
                 {
-                    var gen = input.Generate();
-                    if (!debounces.TryGetValue(gen, out var debounce)) continue;
-                    ifStatement.Add($"debounce[{debounce}]");
-                    sharedReset += $"debounce[{debounce}]=0;";
-                }
-
-                if (sharedReset.Any())
-                {
-                    ret += @$"if ({string.Join(" && ", ifStatement)}) {{{sharedReset}}}";
-                }
-            }
-
-            if (LedType is not LedType.None)
-            {
-                // Handle leds, including when multiple leds are assigned to a single output.
-                foreach (var (led, relatedOutputs) in debouncesRelatedToLed)
-                {
-                    var analog = "";
-                    if (analogRelatedToLed.TryGetValue(led, out var analogLedOutputs))
+                    foreach (var analogLedOutput in analogLedOutputs)
                     {
-                        foreach (var analogLedOutput in analogLedOutputs)
-                        {
-                            var ledRead = analogLedOutput.GenerateAssignment(ConfigField.Ps3, false, true, false);
-                            // Now we have the value, calibrated as a uint8_t
-                            // Only apply analog colours if non zero when conflicting with digital, so that the digital off states override
-                            analog +=
-                                @$"led_tmp = {ledRead};
+                        var ledRead = analogLedOutput.GenerateAssignment(ConfigField.Ps3, false, true, false);
+                        // Now we have the value, calibrated as a uint8_t
+                        // Only apply analog colours if non zero when conflicting with digital, so that the digital off states override
+                        analog +=
+                            @$"led_tmp = {ledRead};
                                    if(led_tmp) {{
                                         {LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}
                                    }} else {{
                                         {LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led)}
                                    }}";
-                        }
                     }
+                }
 
-                    if (!analog.Any())
-                    {
-                        analog = LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led);
-                    }
+                if (!analog.Any())
+                {
+                    analog = LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led);
+                }
 
-                    ret += $"if (ledState[{led - 1}].select == 0) {{";
-                    ret += string.Join(" else ", relatedOutputs.Select(tuple =>
-                    {
-                        var ifStatement = string.Join(" && ", tuple.Item2.Select(x => $"debounce[{x}]"));
-                        return @$"if ({ifStatement}) {{
+                ret += $"if (ledState[{led - 1}].select == 0) {{";
+                ret += string.Join(" else ", relatedOutputs.Select(tuple =>
+                {
+                    var ifStatement = $"debounce[{tuple.Item2}]";
+                    return @$"if ({ifStatement}) {{
                                         {LedType.GetLedAssignment(tuple.Item1.LedOn, led)}
                                        }}";
-                    }));
-                    ret += $@" else {{
+                }));
+                ret += $@" else {{
                         {analog}
                     }}
                 }}";
-                }
+            }
 
-                foreach (var (led, analogLedOutputs) in analogRelatedToLed)
+            foreach (var (led, analogLedOutputs) in analogRelatedToLed)
+            {
+                if (debouncesRelatedToLed.ContainsKey(led)) continue;
+                ret += $"if (ledState[{led - 1}].select == 0) {{";
+                foreach (var analogLedOutput in analogLedOutputs)
                 {
-                    if (debouncesRelatedToLed.ContainsKey(led)) continue;
-                    ret += $"if (ledState[{led - 1}].select == 0) {{";
-                    foreach (var analogLedOutput in analogLedOutputs)
-                    {
-                        var ledRead = analogLedOutput.GenerateAssignment(ConfigField.Ps3, false, true, false);
-                        // Now we have the value, calibrated as a uint8_t
-                        ret +=
-                            $"led_tmp = {ledRead};{LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}";
-                    }
-
-                    ret += "}";
+                    var ledRead = analogLedOutput.GenerateAssignment(ConfigField.Ps3, false, true, false);
+                    // Now we have the value, calibrated as a uint8_t
+                    ret +=
+                        $"led_tmp = {ledRead};{LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}";
                 }
+
+                ret += "}";
             }
         }
 

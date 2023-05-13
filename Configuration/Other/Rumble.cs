@@ -93,9 +93,9 @@ public class Rumble : Output
         return RumbleMotorType;
     }
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+    public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
         return mode is not ConfigField.RumbleLed
             ? ""

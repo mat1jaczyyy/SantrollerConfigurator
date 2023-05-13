@@ -26,9 +26,9 @@ public abstract class CombinedOutput : Output
 
     public abstract void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs);
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+    public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
         return "";
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -34,13 +35,14 @@ public abstract class OutputButton : Output
     /// <param name="extra">Used to provide extra statements that are called if the button is pressed</param>
     /// <param name="combinedExtra"></param>
     /// <param name="combinedDebounce"></param>
+    /// <param name="macros"></param>
     /// <returns></returns>
     /// <exception cref="IncompleteConfigurationException"></exception>
-    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+    public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
-        var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
+        var ifStatement = $"debounce[{debounceIndex}]";
         var extraStatement = "";
         if (mode == ConfigField.Shared && combinedExtra.Any()) extraStatement = " && " + combinedExtra;
 
@@ -58,9 +60,53 @@ public abstract class OutputButton : Output
                 : "";
         }
 
-        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
+        var gen = Input.Generate();
+        var reset = $"debounce[{debounceIndex}]={debounce};";
+        if (macros.TryGetValue(gen, out var inputs))
+        {
+            if (Input.InnermostInput() is WiiInput wiiInput)
+            {
+                var possibleIntersections = string.Join(" && ",
+                    inputs.Where((s) =>
+                            s.Item2 is WiiInput wiiInput2 && wiiInput2.WiiControllerType == wiiInput.WiiControllerType)
+                        .Select(s => s.Item2.Generate()));
+                if (possibleIntersections.Any())
+                {
+                    gen += $" && !({possibleIntersections})";
+                }
+            }
+            else
+            {
+                var possibleIntersections = string.Join(" && ", inputs.Select(s => s.Item2.Generate()));
+                if (possibleIntersections.Any())
+                {
+                    gen += $" && !({possibleIntersections})";
+                }
+            }
+        }
 
-        return $"if (({Input.Generate()} {extraStatement})) {{ {reset} {extra} }}";
+        if (Input is MacroInput)
+        {
+            foreach (var input in Input.Inputs())
+            {
+                var gen2 = input.Generate();
+                if (!macros.TryGetValue(gen2, out var inputs2)) continue;
+                if (Input.InnermostInput() is WiiInput wiiInput)
+                {
+                    extra += string.Join("\n",
+                        inputs2.Where((s) =>
+                                s.Item2 is WiiInput wiiInput2 &&
+                                wiiInput2.WiiControllerType == wiiInput.WiiControllerType)
+                            .Select(s => $"debounce[{s.Item1}]=0;"));
+                }
+                else
+                {
+                    extra += string.Join("\n", inputs2.Select(s => $"debounce[{s.Item1}]=0;"));
+                }
+            }
+        }
+
+        return $"if (({gen} {extraStatement})) {{ {reset} {extra} }}";
     }
 
     public override void UpdateBindings()

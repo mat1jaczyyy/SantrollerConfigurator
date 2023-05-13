@@ -150,20 +150,20 @@ public partial class DrumAxis : OutputAxis
     }
 
 
-    public override string Generate(ConfigField mode, List<int> debounceIndex, string extra,
+    public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
         if (mode == ConfigField.Shared)
-            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce);
+            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
         var debounce = Debounce + 1;
         if (!Model.IsAdvancedMode) debounce = Model.Debounce + 1;
 
-        var ifStatement = string.Join(" && ", debounceIndex.Select(x => $"debounce[{x}]"));
+        var ifStatement = $"debounce[{debounceIndex}]";
         
-        var reset = debounceIndex.Aggregate("", (current1, input1) => current1 + $"debounce[{input1}]={debounce};");
+        var reset = $"debounce[{debounceIndex}]={debounce};";
         var outputButtons = "";
         switch (mode)
         {
