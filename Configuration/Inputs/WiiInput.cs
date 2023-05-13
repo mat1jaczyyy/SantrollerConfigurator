@@ -513,7 +513,7 @@ public class WiiInput : TwiInput
         Dictionary<WiiControllerType, List<string>> mappedBindings = new();
         foreach (var binding in bindings)
         {
-            if (binding.Item1 is not WiiInput input) continue;
+            if (binding.Item1.InnermostInput() is not WiiInput input) continue;
             // digital inputs get mapped to the same buttons, so no need to generate stuff specific to each type
             if (mode != ConfigField.Shared && !binding.Item1.IsAnalog) continue;
 

@@ -126,6 +126,16 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     [Reactive] public bool ControllerFound { get; set; }
 
+    public override IEnumerable<Output> ValidOutputs()
+    {
+        var outputs = base.ValidOutputs().ToList();
+        var joyToDpad = outputs.FirstOrDefault(s => s is JoystickToDpad);
+        if (joyToDpad?.Enabled != true) return outputs;
+        outputs.Remove(joyToDpad);
+        outputs.Add(joyToDpad.ValidOutputs());
+        return outputs;
+    }
+
     public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
     {
         Outputs.Clear();

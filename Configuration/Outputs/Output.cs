@@ -300,7 +300,7 @@ public abstract partial class Output : ReactiveObject
     public abstract string LedOffLabel { get; }
 
     public virtual bool SupportsLedOff => true;
-    public bool ConfigurableInput => Input is not FixedInput;
+    public bool ConfigurableInput => Input is not (FixedInput or MacroInput);
 
     private object? GetKey()
     {
@@ -563,7 +563,7 @@ public abstract partial class Output : ReactiveObject
     public List<PinConfig> GetPinConfigs()
     {
         return Outputs.Items
-            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.PinConfigs)
+            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.Inputs()).SelectMany(s => s.PinConfigs)
             .Concat(GetOwnPinConfigs()).Distinct().ToList();
     }
 

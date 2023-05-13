@@ -221,10 +221,17 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         Outputs.Clear();
         foreach (var pair in Buttons)
-            Outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
+        {
+            var output = new ControllerButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), 10,
-                pair.Value, true));
+                pair.Value, true);
+            if (pair.Key == WiiInputType.GuitarTapAll)
+            {
+                output.Enabled = false;
+            }
+            Outputs.Add(output);
+        }
 
         foreach (var pair in Axis)
             if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
@@ -255,6 +262,12 @@ public class WiiCombinedOutput : CombinedTwiOutput
     public override IEnumerable<Output> ValidOutputs()
     {
         var outputs = new List<Output>(base.ValidOutputs());
+        var joyToDpad = outputs.FirstOrDefault(s => s is JoystickToDpad);
+        if (joyToDpad?.Enabled == true)
+        {
+            outputs.Remove(joyToDpad);
+            outputs.Add(joyToDpad.ValidOutputs());
+        }
         var tapAnalog =
             outputs.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapBar}});
         var tapFrets =

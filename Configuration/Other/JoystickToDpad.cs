@@ -143,9 +143,7 @@ public class JoystickToDpad : Output
         string combinedExtra,
         List<int> combinedDebounce)
     {
-        return mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne
-            ? $"MAP_JOYSTICK_DPAD(report, {Threshold});"
-            : "";
+        return "";
     }
 
     public override void UpdateBindings()

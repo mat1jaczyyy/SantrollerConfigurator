@@ -25,17 +25,11 @@ public class MacroInput : Input
             .Subscribe(s => RawValue = s);
         IsAnalog = false;
         this.WhenAnyValue(x => x.Child1).Select(x => x.InnermostInput() is DjInput)
-            .ToPropertyEx(this, x => x.IsDj1);
+            .ToPropertyEx(this, x => x.IsDj);
         this.WhenAnyValue(x => x.Child1).Select(x => x.InnermostInput() is WiiInput)
-            .ToPropertyEx(this, x => x.IsWii1);
+            .ToPropertyEx(this, x => x.IsWii);
         this.WhenAnyValue(x => x.Child1).Select(x => x.InnermostInput() is Ps2Input)
-            .ToPropertyEx(this, x => x.IsPs21);
-        this.WhenAnyValue(x => x.Child2).Select(x => x.InnermostInput() is DjInput)
-            .ToPropertyEx(this, x => x.IsDj2);
-        this.WhenAnyValue(x => x.Child2).Select(x => x.InnermostInput() is WiiInput)
-            .ToPropertyEx(this, x => x.IsWii2);
-        this.WhenAnyValue(x => x.Child2).Select(x => x.InnermostInput() is Ps2Input)
-            .ToPropertyEx(this, x => x.IsPs22);
+            .ToPropertyEx(this, x => x.IsPs2);
     }
 
     public InputType? SelectedInputType1
@@ -85,13 +79,11 @@ public class MacroInput : Input
         get => (Child2.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
         set => SetInput(SelectedInputType1, false, null, null, null, null, value);
     } // ReSharper disable UnassignedGetOnlyAutoProperty
-    [ObservableAsProperty] public bool IsDj1 { get; }
-    [ObservableAsProperty] public bool IsWii1 { get; }
-    [ObservableAsProperty] public bool IsPs21 { get; }
-    [ObservableAsProperty] public bool IsDj2 { get; }
-    [ObservableAsProperty] public bool IsWii2 { get; }
 
-    [ObservableAsProperty] public bool IsPs22 { get; }
+    [ObservableAsProperty] public bool IsDj { get; }
+    [ObservableAsProperty] public bool IsWii { get; }
+
+    [ObservableAsProperty] public bool IsPs2 { get; }
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
 
@@ -99,37 +91,38 @@ public class MacroInput : Input
         GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
     {
         var child = isChild1 ? Child1 : Child2;
-        var lastPin = inputType is Types.InputType.AnalogPinInput or Types.InputType.MultiplexerInput
-            ? Model.Microcontroller.GetFirstAnalogPin()
-            : 0;
+        child = child.InnermostInput();
         var pinMode = DevicePinMode.PullUp;
         if (child.InnermostInput() is DirectInput direct)
             if (direct.IsAnalog || inputType != Types.InputType.AnalogPinInput)
             {
-                lastPin = direct.Pin;
                 if (!direct.IsAnalog) pinMode = direct.PinMode;
             }
 
-
+        Input? inputOther = null;
         Input input;
         switch (inputType)
         {
             case Types.InputType.AnalogPinInput:
-                input = new DirectInput(lastPin, DevicePinMode.Analog, Model);
+                input = new DirectInput(-1, DevicePinMode.Analog, Model);
+                inputOther = new DirectInput(-1, DevicePinMode.Analog, Model);
+                inputOther = new AnalogToDigital(inputOther, inputOther.IsUint ? AnalogToDigitalType.Trigger : AnalogToDigitalType.JoyLow,
+                    input.IsUint ? ushort.MaxValue / 2 : short.MaxValue / 2, Model);
                 break;
             case Types.InputType.MultiplexerInput:
-                input = new MultiplexerInput(lastPin, 0, 0, 0, 0, 0, MultiplexerType.EightChannel, Model);
-                break;
-            case Types.InputType.MacroInput:
-                input = new MacroInput(new DirectInput(lastPin, pinMode, Model),
-                    new DirectInput(lastPin, pinMode, Model), Model);
+                input = new MultiplexerInput(-1, 0, -1, -1, -1, -1, MultiplexerType.EightChannel, Model);
+                inputOther = new MultiplexerInput(-1, 0, -1, -1, -1, -1, MultiplexerType.EightChannel, Model);
+                inputOther = new AnalogToDigital(inputOther, inputOther.IsUint ? AnalogToDigitalType.Trigger : AnalogToDigitalType.JoyLow,
+                    input.IsUint ? ushort.MaxValue / 2 : short.MaxValue / 2, Model);
                 break;
             case Types.InputType.DigitalPinInput:
-                input = new DirectInput(lastPin, pinMode, Model);
+                input = new DirectInput(-1, pinMode, Model);
+                inputOther = new DirectInput(-1, pinMode, Model);
                 break;
             case Types.InputType.TurntableInput when child.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;
                 input = new DjInput(djInputType.Value, Model);
+                inputOther = new DjInput(djInputType.Value, Model);
                 break;
             case Types.InputType.TurntableInput when child.InnermostInput() is DjInput dj:
                 djInputType ??= DjInputType.LeftGreen;
@@ -138,6 +131,7 @@ public class MacroInput : Input
             case Types.InputType.Gh5NeckInput when child.InnermostInput() is not Gh5NeckInput:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
                 input = new Gh5NeckInput(gh5NeckInputType.Value, Model);
+                inputOther = new Gh5NeckInput(gh5NeckInputType.Value, Model);
                 break;
             case Types.InputType.Gh5NeckInput when child.InnermostInput() is Gh5NeckInput gh5:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
@@ -145,9 +139,8 @@ public class MacroInput : Input
                 break;
             case Types.InputType.WtNeckInput when child.InnermostInput() is not GhWtTapInput:
                 ghWtInputType ??= GhWtInputType.TapGreen;
-                input = new GhWtTapInput(ghWtInputType.Value, Model, Model.Microcontroller.GetFirstAnalogPin(),
-                    Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(),
-                    Model.Microcontroller.GetFirstDigitalPin());
+                input = new GhWtTapInput(ghWtInputType.Value, Model, -1, -1, -1, -1);
+                inputOther = new GhWtTapInput(ghWtInputType.Value, Model, -1, -1, -1, -1);
                 break;
             case Types.InputType.WtNeckInput when child.InnermostInput() is GhWtTapInput wt:
                 ghWtInputType ??= GhWtInputType.TapGreen;
@@ -156,6 +149,7 @@ public class MacroInput : Input
             case Types.InputType.WiiInput when child.InnermostInput() is not WiiInput:
                 wiiInput ??= WiiInputType.ClassicA;
                 input = new WiiInput(wiiInput.Value, Model);
+                inputOther = new WiiInput(wiiInput.Value, Model);
                 break;
             case Types.InputType.WiiInput when child.InnermostInput() is WiiInput wii:
                 wiiInput ??= WiiInputType.ClassicA;
@@ -164,6 +158,7 @@ public class MacroInput : Input
             case Types.InputType.Ps2Input when child.InnermostInput() is not Ps2Input:
                 ps2InputType ??= Ps2InputType.Cross;
                 input = new Ps2Input(ps2InputType.Value, Model);
+                inputOther = new Ps2Input(ps2InputType.Value, Model);
                 break;
             case Types.InputType.Ps2Input when child.InnermostInput() is Ps2Input ps2:
                 ps2InputType ??= Ps2InputType.Cross;
@@ -176,13 +171,28 @@ public class MacroInput : Input
         }
 
         if (input.IsAnalog)
+        {
             input = new AnalogToDigital(input, input.IsUint ? AnalogToDigitalType.Trigger : AnalogToDigitalType.JoyLow,
                 input.IsUint ? ushort.MaxValue / 2 : short.MaxValue / 2, Model);
+        }
 
         if (isChild1)
+        {
             Child1 = input;
+            if (inputOther != null)
+            {
+                Child2 = inputOther;
+            }
+        }
         else
+        {
             Child2 = input;
+            if (inputOther != null)
+            {
+                Child1 = inputOther;
+            }
+        }
+        Model.UpdateErrors();
     }
 
 

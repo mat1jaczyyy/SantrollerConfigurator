@@ -1101,10 +1101,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private string GenerateTick(ConfigField mode)
     {
         var outputs = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).ToList();
-        var groupedOutputs = outputs
-            .SelectMany(s =>
-                s.Input.Inputs().Zip(Enumerable.Repeat(s, s.Input.Inputs().Count)))
-            .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
+        var outputsByType = outputs
+            .GroupBy(s => s.Input.InnermostInput().GetType()).ToList();
         var combined = DeviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
                        StrumDebounce > 0;
         Dictionary<string, int> debounces = new();
@@ -1113,72 +1111,53 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         // Pass 1: work out debounces and map inputs to debounces
         var inputs = new Dictionary<string, List<int>>();
         var macros = new List<Output>();
-        foreach (var groupedOutput in groupedOutputs)
-        foreach (var (input, output) in groupedOutput)
+        foreach (var outputByType in outputsByType)
         {
-            var generatedInput = input.Generate();
-            if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
-
-            if (output.Input.InnermostInput() is MacroInput)
+            foreach (var output in outputByType)
             {
-                debounces.TryAdd(generatedInput, debounces.Count);
+                var generatedInput = output.Input.Generate();
+                if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
 
-                macros.Add(output);
-            }
-            else
-            {
-                debounces.TryAdd(generatedInput, debounces.Count);
-            }
-
-            if (combined && output is GuitarButton
+                if (output.Input is MacroInput)
                 {
-                    Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown
-                })
-                strumIndices.Add(debounces[generatedInput]);
+                    macros.Add(output);
+                }
 
-            if (!inputs.ContainsKey(generatedInput)) inputs[generatedInput] = new List<int>();
+                debounces.TryAdd(generatedInput, debounces.Count);
 
-            inputs[generatedInput].Add(debounces[generatedInput]);
+                if (combined && output is GuitarButton
+                    {
+                        Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown
+                    })
+                    strumIndices.Add(debounces[generatedInput]);
+
+                if (!inputs.ContainsKey(generatedInput)) inputs[generatedInput] = new List<int>();
+
+                inputs[generatedInput].Add(debounces[generatedInput]);
+            }
         }
 
-        var seen = new HashSet<Output>();
         var debouncesRelatedToLed = new Dictionary<byte, List<(Output, List<int>)>>();
         var analogRelatedToLed = new Dictionary<byte, List<OutputAxis>>();
         // Handle most mappings
         // Sort in a way that any digital to analog based groups are last. This is so that seenAnalog will be filled in when necessary.
-        var ret = groupedOutputs.OrderByDescending(s => s.Count(s2 => s2.Second.Input is DigitalToAnalog))
+        var ret = outputsByType.OrderByDescending(s => s.Count(s2 => s2.Input is DigitalToAnalog))
             .Aggregate("", (current, group) =>
             {
                 // we need to ensure that DigitalToAnalog is last
                 return current + group
-                    .First().First.InnermostInput()
+                    .First().Input.InnermostInput()
                     .GenerateAll(group
-                        .OrderByDescending(s => s.First is DigitalToAnalog ? 0 : 1)
+                        .OrderByDescending(s => s.Input is DigitalToAnalog ? 0 : 1)
                         .Select(s =>
                         {
-                            var input = s.First;
-                            var output = s.Second;
+                            var input = s.Input;
+                            var output = s;
                             var generatedInput = input.Generate();
                             var index = new List<int> {0};
                             if (output is OutputButton or DrumAxis or EmulationMode)
                             {
                                 index = new List<int> {debounces[generatedInput]};
-                                if (output.Input is MacroInput)
-                                {
-                                    if (mode == ConfigField.Shared)
-                                    {
-                                        output = output.Serialize().Generate(this);
-                                        output.Input = input;
-                                    }
-                                    else
-                                    {
-                                        if (seen.Contains(output)) return new Tuple<Input, string>(input, "");
-                                        seen.Add(output);
-                                        index = output.Input.Inputs()
-                                            .Select(input1 => debounces[input1.Generate()])
-                                            .ToList();
-                                    }
-                                }
 
                                 foreach (var led in output.LedIndices)
                                 {
@@ -1211,14 +1190,20 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             foreach (var output in macros)
             {
-                var generatedInput = output.Input.Generate();
-                var ifStatement = string.Join(" && ",
-                    output.Input.Inputs().Select(input =>
-                        $"debounce[{debounces[generatedInput]}]"));
-                var sharedReset = output.Input.Inputs().Aggregate("",
-                    (current, input) => current + string.Join("",
-                        inputs[input.Generate()].Select(s => $"debounce[{s}]=0;").Distinct()));
-                ret += @$"if ({ifStatement}) {{{sharedReset}}}";
+                var ifStatement = new List<string>();
+                var sharedReset = "";
+                foreach (var input in output.Input.Inputs())
+                {
+                    var gen = input.Generate();
+                    if (!debounces.TryGetValue(gen, out var debounce)) continue;
+                    ifStatement.Add($"debounce[{debounce}]");
+                    sharedReset += $"debounce[{debounce}]=0;";
+                }
+
+                if (sharedReset.Any())
+                {
+                    ret += @$"if ({string.Join(" && ", ifStatement)}) {{{sharedReset}}}";
+                }
             }
 
             if (LedType is not LedType.None)
@@ -1368,6 +1353,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
             UsbHostErrorText = dmText ?? dpText;
         }
+        else
+        {
+            UsbHostErrorText = "";
+        }
 
         if (IsRf && Microcontroller.SpiAssignable)
         {
@@ -1378,7 +1367,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 foundError = true;
             }
+
             RfErrorText = error ?? csnError ?? ceError;
+        }
+        else
+        {
+            RfErrorText = "";
         }
 
         if (IsApa102 && Microcontroller.SpiAssignable)
@@ -1388,7 +1382,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 foundError = true;
             }
+
             Apa102ErrorText = error;
+        }
+        else
+        {
+            Apa102ErrorText = "";
         }
 
         HasError = foundError;
