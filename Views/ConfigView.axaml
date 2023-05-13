@@ -1311,17 +1311,17 @@
                                   IsVisible="{Binding IsWii}"
                                   SelectedItem="{Binding WiiInputType1}"
                                   ItemsSource="{Binding WiiInputTypes}"
-                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                  ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                         <ComboBox VerticalAlignment="Center"
                                   IsVisible="{Binding IsDj}"
                                   SelectedItem="{Binding DjInputType1}"
                                   ItemsSource="{Binding DjInputTypes}"
-                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                  ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                         <ComboBox VerticalAlignment="Center"
                                   IsVisible="{Binding IsPs2}"
                                   SelectedItem="{Binding Ps2InputType1}"
                                   ItemsSource="{Binding Ps2InputTypes}"
-                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                  ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                     </StackPanel>
                     <ContentControl Content="{Binding Child1}"
                                     ContentTemplate="{StaticResource OutputTemplates}">
@@ -1352,17 +1352,17 @@
                                   IsVisible="{Binding IsWii}"
                                   SelectedItem="{Binding WiiInputType2}"
                                   ItemsSource="{Binding WiiInputTypes}"
-                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                  ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                         <ComboBox VerticalAlignment="Center"
                                   IsVisible="{Binding IsDj}"
                                   SelectedItem="{Binding DjInputType2}"
                                   ItemsSource="{Binding DjInputTypes}"
-                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                  ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                         <ComboBox VerticalAlignment="Center"
                                   IsVisible="{Binding IsPs2}"
                                   SelectedItem="{Binding Ps2InputType2}"
                                   ItemsSource="{Binding Ps2InputTypes}"
-                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                                  ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                     </StackPanel>
                     <ContentControl Content="{Binding Child2}"
                                     ContentTemplate="{StaticResource OutputTemplates}" />

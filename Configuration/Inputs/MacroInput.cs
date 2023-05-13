@@ -93,11 +93,10 @@ public class MacroInput : Input
         var child = isChild1 ? Child1 : Child2;
         child = child.InnermostInput();
         var pinMode = DevicePinMode.PullUp;
-        if (child.InnermostInput() is DirectInput direct)
-            if (direct.IsAnalog || inputType != Types.InputType.AnalogPinInput)
-            {
-                if (!direct.IsAnalog) pinMode = direct.PinMode;
-            }
+        if (child.InnermostInput() is DirectInput {IsAnalog: false} direct)
+        {
+            pinMode = direct.PinMode;
+        }
 
         Input? inputOther = null;
         Input input;

@@ -416,32 +416,27 @@ public abstract partial class Output : ReactiveObject
         GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
     {
         Input input;
-        var lastPin = inputType is InputType.AnalogPinInput or InputType.MultiplexerInput
-            ? Model.Microcontroller.GetFirstAnalogPin()
-            : 0;
         var pinMode = DevicePinMode.PullUp;
-        if (Input.InnermostInput() is DirectInput direct)
-            if (direct.IsAnalog || inputType != InputType.AnalogPinInput)
-            {
-                lastPin = direct.Pin;
-                if (!direct.IsAnalog) pinMode = direct.PinMode;
-            }
+        if (Input.InnermostInput() is DirectInput {IsAnalog: false} direct)
+        {
+            pinMode = direct.PinMode;
+        }
 
 
         switch (inputType)
         {
             case InputType.AnalogPinInput:
-                input = new DirectInput(lastPin, DevicePinMode.Analog, Model);
+                input = new DirectInput(-1, DevicePinMode.Analog, Model);
                 break;
             case InputType.MultiplexerInput:
-                input = new MultiplexerInput(lastPin, 0, 0, 0, 0, 0, MultiplexerType.EightChannel, Model);
+                input = new MultiplexerInput(-1, 0, -1, -1, -1, -1, MultiplexerType.EightChannel, Model);
                 break;
             case InputType.MacroInput:
-                input = new MacroInput(new DirectInput(lastPin, pinMode, Model),
-                    new DirectInput(lastPin, pinMode, Model), Model);
+                input = new MacroInput(new DirectInput(-1, pinMode, Model),
+                    new DirectInput(-1, pinMode, Model), Model);
                 break;
             case InputType.DigitalPinInput:
-                input = new DirectInput(lastPin, pinMode, Model);
+                input = new DirectInput(-1, pinMode, Model);
                 break;
             case InputType.TurntableInput when Input.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;
@@ -465,9 +460,7 @@ public abstract partial class Output : ReactiveObject
                 ghWtInputType ??= GhWtInputType.TapGreen;
                 if (this is GuitarAxis) ghWtInputType = GhWtInputType.TapBar;
 
-                input = new GhWtTapInput(ghWtInputType.Value, Model, Model.Microcontroller.GetFirstAnalogPin(),
-                    Model.Microcontroller.GetFirstDigitalPin(), Model.Microcontroller.GetFirstDigitalPin(),
-                    Model.Microcontroller.GetFirstDigitalPin());
+                input = new GhWtTapInput(ghWtInputType.Value, Model, -1, -1, -1, -1);
                 break;
             case InputType.WtNeckInput when Input.InnermostInput() is GhWtTapInput wt:
                 ghWtInputType ??= wt.Input;
