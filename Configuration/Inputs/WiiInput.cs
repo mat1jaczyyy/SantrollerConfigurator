@@ -514,8 +514,6 @@ public class WiiInput : TwiInput
         foreach (var binding in bindings)
         {
             if (binding.Item1.InnermostInput() is not WiiInput input) continue;
-            // digital inputs get mapped to the same buttons, so no need to generate stuff specific to each type
-            if (mode != ConfigField.Shared && !binding.Item1.IsAnalog) continue;
 
             if (!mappedBindings.ContainsKey(input.WiiControllerType))
                 mappedBindings.Add(input.WiiControllerType, new List<string>());
@@ -524,43 +522,33 @@ public class WiiInput : TwiInput
         }
 
         var ret = "";
-        var ret2 = "";
-
-        if (mode != ConfigField.Shared)
-            ret2 += string.Join("\n",
-                bindings.Where(binding => !binding.Item1.IsAnalog).Select(binding => binding.Item2).Distinct());
 
         if (mappedBindings.ContainsKey(WiiControllerType.ClassicController))
         {
             var mappings = mappedBindings[WiiControllerType.ClassicController];
             mappedBindings.Remove(WiiControllerType.ClassicController);
             var mappings2 = new List<string>();
-            var mappingsDigital = mappings.Where(m => m.Contains("wiiButtons"));
-            mappings = mappings.Where(m => !m.Contains("wiiButtons")).ToList();
+            var mappingsDigital = mappings.Where(m => m.Contains("wiiButtons") || m.Contains("debounce"));
+            mappings = mappings.Where(m => !m.Contains("wiiButtons") && !m.Contains("debounce")).ToList();
             foreach (var mapping in mappings)
             {
-                var val = mapping;
-                foreach (var key in HiResMapOrder) val = val.Replace(key, HiResMap[key]);
+                var val = HiResMapOrder.Aggregate(mapping, (current, key) => current.Replace(key, HiResMap[key]));
 
                 mappings2.Add(val);
             }
 
-            if (mappings.Any())
-                ret += @$"
-case WII_CLASSIC_CONTROLLER:
-case WII_CLASSIC_CONTROLLER_PRO:
-if (hiRes) {{
-    {string.Join("\n", mappings2)};
+            var analogMappings = mappings.Any()
+                ? $@"if (hiRes) {{
+    {string.Join("\n", mappings2)}
 }} else {{
-    {string.Join("\n", mappings)};
-}}
-break;
-";
-            else
-                ret += @$"
+    {string.Join("\n", mappings)}
+}}"
+                : "";
+            ret += @$"
 case WII_CLASSIC_CONTROLLER:
 case WII_CLASSIC_CONTROLLER_PRO:
-{string.Join("\n", mappingsDigital)};
+{string.Join("\n", mappingsDigital)}
+{analogMappings}
 break;
 ";
         }
@@ -570,7 +558,7 @@ break;
             ret += @$"case {CType[input]}:
     {string.Join("\n", mappings)};
     break;";
-        return ret2 + (!ret.Any()
+        return (!ret.Any()
             ? ""
             : @$"if (wiiValid) {{
                    switch(wiiControllerType) {{
