@@ -64,6 +64,7 @@ public abstract class OutputButton : Output
         var reset = $"debounce[{debounceIndex}]={debounce};";
         if (macros.TryGetValue(gen, out var inputs))
         {
+            // Wii Inputs need a bit of special handling when it comes to macro inputs
             if (Input.InnermostInput() is WiiInput wiiInput)
             {
                 var possibleIntersections = string.Join(" && ",

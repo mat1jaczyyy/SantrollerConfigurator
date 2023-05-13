@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -41,6 +42,8 @@ public class WiiInput : TwiInput
             {WiiInputType.DrumBluePressure, WiiControllerType.Drum},
             {WiiInputType.DrumOrangePressure, WiiControllerType.Drum},
             {WiiInputType.DrumKickPedalPressure, WiiControllerType.Drum},
+            {WiiInputType.DrumJoystickX, WiiControllerType.Drum},
+            {WiiInputType.DrumJoystickY, WiiControllerType.Drum},
             {WiiInputType.GuitarJoystickX, WiiControllerType.Guitar},
             {WiiInputType.GuitarJoystickY, WiiControllerType.Guitar},
             {WiiInputType.GuitarTapBar, WiiControllerType.Guitar},
@@ -144,6 +147,8 @@ public class WiiInput : TwiInput
         {WiiInputType.DrumKickPedalPressure, "drumVelocity[DRUM_KICK]"},
         {WiiInputType.GuitarJoystickX, "((wiiData[0] & 0x3f) - 32) << 10"},
         {WiiInputType.GuitarJoystickY, "((wiiData[1] & 0x3f) - 32) << 10"},
+        {WiiInputType.DrumJoystickX, "((wiiData[0] & 0x3f) - 32) << 10"},
+        {WiiInputType.DrumJoystickY, "((wiiData[1] & 0x3f) - 32) << 10"},
         {WiiInputType.GuitarTapBar, "lastTapWiiGh5"},
         {WiiInputType.GuitarWhammy, "(wiiData[3] & 0x1f) << 11"},
         {WiiInputType.NunchukAccelerationX, "accX"},
@@ -266,7 +271,7 @@ public class WiiInput : TwiInput
 
     public override InputType? InputType => Types.InputType.WiiInput;
 
-    public override bool IsUint => !Input.ToString().ToLower().Contains("stick");
+    public override bool IsUint => UIntInputs.Contains(Input);
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
 
     public override string Title => EnumToStringConverter.Convert(Input);

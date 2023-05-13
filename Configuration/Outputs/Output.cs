@@ -416,7 +416,6 @@ public abstract partial class Output : ReactiveObject
         GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
     {
         Input input;
-
         switch (inputType)
         {
             case InputType.AnalogPinInput:
@@ -511,6 +510,21 @@ public abstract partial class Output : ReactiveObject
 
         if (this is EmulationMode) Input = input;
 
+
+        if (input.InnermostInput() is not DirectInput && this is OutputAxis axis2)
+        {
+            // Reset min and max to be safe
+            if (Input.IsUint)
+            {
+                axis2.Min = ushort.MinValue;
+                axis2.Max = ushort.MaxValue;
+            }
+            else
+            {
+                axis2.Min = short.MinValue;
+                axis2.Max = short.MaxValue;
+            }
+        }
         this.RaisePropertyChanged(nameof(WiiInputType));
         this.RaisePropertyChanged(nameof(Ps2InputType));
         this.RaisePropertyChanged(nameof(GhWtInputType));

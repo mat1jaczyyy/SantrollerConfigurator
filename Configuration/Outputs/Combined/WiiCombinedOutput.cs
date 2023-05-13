@@ -121,7 +121,25 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.NunchukStickY, StandardAxisType.LeftStickY},
         {WiiInputType.GuitarJoystickX, StandardAxisType.LeftStickX},
         {WiiInputType.GuitarJoystickY, StandardAxisType.LeftStickY},
+        {WiiInputType.DrumJoystickX, StandardAxisType.LeftStickX},
+        {WiiInputType.DrumJoystickY, StandardAxisType.LeftStickY},
         {WiiInputType.GuitarWhammy, StandardAxisType.RightStickX}
+    };
+
+    public static readonly List<WiiInputType> UIntInputs = new()
+    {
+        WiiInputType.ClassicLeftTrigger,
+        WiiInputType.ClassicRightTrigger,
+        WiiInputType.DrumGreenPressure,
+        WiiInputType.DrumRedPressure,
+        WiiInputType.DrumYellowPressure,
+        WiiInputType.DrumBluePressure,
+        WiiInputType.DrumOrangePressure,
+        WiiInputType.DrumKickPedalPressure,
+        WiiInputType.GuitarWhammy,
+        WiiInputType.GuitarTapBar,
+        WiiInputType.UDrawPenPressure,
+        WiiInputType.DrawsomePenPressure,
     };
 
     private static readonly Dictionary<DjAxisType, StandardAxisType> DjToStandard = new()
@@ -230,19 +248,25 @@ public class WiiCombinedOutput : CombinedTwiOutput
             {
                 output.Enabled = false;
             }
+
             Outputs.Add(output);
         }
 
         foreach (var pair in Axis)
-            if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
-                pair.Key is WiiInputType.GuitarWhammy)
+        {
+            if (UIntInputs.Contains(pair.Key))
+            {
                 Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 8000, pair.Value, true));
+            }
             else
+            {
                 Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                     Colors.Black,
                     Colors.Black, Array.Empty<byte>(), -30000, 30000, 4000, pair.Value, true));
+            }
+        }
 
         Outputs.Add(new ControllerAxis(Model,
             new WiiInput(WiiInputType.GuitarTapBar, Model, Sda, Scl, true),
@@ -253,8 +277,10 @@ public class WiiCombinedOutput : CombinedTwiOutput
             Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value, true));
-        var dpad = new JoystickToDpad(Model, short.MaxValue / 2, true);
-        dpad.Enabled = false;
+        var dpad = new JoystickToDpad(Model, short.MaxValue / 2, true)
+        {
+            Enabled = false
+        };
         Outputs.Add(dpad);
         UpdateBindings();
     }
@@ -268,6 +294,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             outputs.Remove(joyToDpad);
             outputs.Add(joyToDpad.ValidOutputs());
         }
+
         var tapAnalog =
             outputs.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapBar}});
         var tapFrets =

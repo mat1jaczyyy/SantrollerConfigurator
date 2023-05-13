@@ -21,7 +21,12 @@ public enum WiiInputType
 
     [Description("Classic Controller - Right Trigger")]
     ClassicRightTrigger,
+    
+    [Description("Drum - Joystick X Axis")]
+    DrumJoystickX,
 
+    [Description("Drum - Joystick Y Axis")]
+    DrumJoystickY,
     [Description("Drum - Green Pad Pressure")]
     DrumGreenPressure,
 

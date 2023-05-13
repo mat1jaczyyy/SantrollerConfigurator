@@ -354,6 +354,15 @@ public abstract partial class OutputAxis : Output
             else
                 min += DeadZone;
 
+            if (min < 0)
+            {
+                min = 0;
+            }
+            if (max > ushort.MaxValue)
+            {
+                max = ushort.MaxValue;
+            }
+
             multiplier = 1f / (max - min) * ushort.MaxValue;
         }
         else
@@ -375,18 +384,28 @@ public abstract partial class OutputAxis : Output
                 max -= DeadZone;
             }
 
+            if (min < short.MinValue)
+            {
+                min = short.MinValue;
+            }
+
+            if (max > short.MaxValue)
+            {
+                max = short.MaxValue;
+            }
+
             multiplier = 1f / (max - min) * (short.MaxValue - short.MinValue);
         }
 
         var generated = "(" + Input.Generate();
-        generated += (Trigger || forceAccel) switch
+        generated += (trigger || forceAccel) switch
         {
             true when !InputIsUint => ") + INT16_MAX",
             false when InputIsUint => ") - INT16_MAX",
             _ => ")"
         };
-
         var mulInt = (short) (multiplier * 512);
+
         return normal
             ? $"{function}({generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
             : $"{function}({generated}, {min}, {mulInt}, {DeadZone})";
