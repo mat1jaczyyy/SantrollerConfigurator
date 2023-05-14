@@ -77,15 +77,13 @@ public enum GuitarHeroDrum
     OrangeCymbal,
     GreenPad
 }
-
 public enum Turntable
 {
-    GreenNoteBoth,
-    RedNoteBoth,
-    BlueNoteBoth,
+    ScratchLeft,
     GreenNoteLeft,
     RedNoteLeft,
     BlueNoteLeft,
+    ScratchRight,
     GreenNoteRight,
     RedNoteRight,
     BlueNoteRight
@@ -601,6 +599,7 @@ public class Led : Output
                     DeviceControllerType.Turntable => (int) Turntable,
                     _ => 0
                 };
+                
                 return $@"if (rumble_right == {(int) (RumbleCommand.SantrollerInputSpecific + santrollerCmd)}) {{
                     if (rumble_left == 1) {{
                         {on}
