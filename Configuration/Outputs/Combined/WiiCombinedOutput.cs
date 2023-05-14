@@ -211,8 +211,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     [Reactive] public WiiControllerType DetectedType { get; set; }
 
-    [Reactive] public WiiGuitarType DetectedGuitarType { get; set; } = WiiGuitarType.Gh3;
-
     [Reactive] public bool ControllerFound { get; set; }
 
     public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
@@ -346,17 +344,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
         var type = BitConverter.ToUInt16(wiiControllerType);
         var newType = ControllerTypeById.GetValueOrDefault(type);
-        if (newType == WiiControllerType.Guitar)
-        {
-            var gh3 = (wiiRaw[0] & (1 << 7)) != 0;
-            var wt = (wiiRaw[5] & (1 << 2)) == 0;
-            if (gh3)
-                DetectedGuitarType = WiiGuitarType.Gh3;
-            else if (wt)
-                DetectedGuitarType = WiiGuitarType.WorldTour;
-            else
-                DetectedGuitarType = WiiGuitarType.Gh5;
-        }
 
         DetectedType = newType;
     }

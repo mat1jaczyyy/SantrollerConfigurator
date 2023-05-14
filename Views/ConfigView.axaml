@@ -193,9 +193,6 @@
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding ControllerFound}">
                         <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
                                Content="Current Extension: " />
-                        <TextBlock IsVisible="{Binding IsGuitar}" VerticalAlignment="Center"
-                                   HorizontalAlignment="Center"
-                                   Text="{Binding DetectedGuitarType, Converter={StaticResource EnumToStringConverter}}" />
                         <TextBlock IsVisible="{Binding !IsGuitar}" VerticalAlignment="Center"
                                    HorizontalAlignment="Center"
                                    Text="{Binding DetectedType, Converter={StaticResource EnumToStringConverter}}" />
