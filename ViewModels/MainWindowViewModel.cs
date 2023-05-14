@@ -183,7 +183,6 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     public IEnumerable<MegaType> MegaTypes => Enum.GetValues<MegaType>();
     public IEnumerable<UnoMegaType> UnoMegaTypes => Enum.GetValues<UnoMegaType>();
     public IEnumerable<AvrType> AvrTypes => Enum.GetValues<AvrType>();
-    public IEnumerable<Board> PicoTypes => Board.Rp2040Boards;
 
     [Reactive] public AvrType AvrType { get; set; }
 
@@ -194,8 +193,6 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     [Reactive] public DeviceInputType DeviceInputType { get; set; }
 
     [Reactive] public Arduino32U4Type Arduino32U4Type { get; set; }
-
-    [Reactive] public Board PicoType { get; set; } = Board.Rp2040Boards[0];
 
     private IConfigurableDevice? _selectedDevice;
 

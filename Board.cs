@@ -31,6 +31,76 @@ public struct Board
         MultipleFrequencies = multipleFrequencies;
     }
 
+    public static readonly List<string> PicoArdwiinoNames = new()
+    {
+        "pico",
+        "picow",
+        "0xcb_helios",
+        "adafruit_feather_rp2040",
+        "adafruit_itsybitsy_rp2040",
+        "adafruit_qtpy_rp2040",
+        "adafruit_trinkey_qt2040",
+        "adafruit_feather",
+        "adafruit_feather_scorpio",
+        "adafruit_feather_dvi",
+        "arduino_nano_rp2040_connect",
+        "adafruit_itsybitsy",
+        "adafruit_qtpy",
+        "adafruit_stemmafriend",
+        "adafruit_trinkeyrp2040qt",
+        "adafruit_macropad2040",
+        "adafruit_kb2040",
+        "arduino_nano_connect",
+        "bridgetek_idm2040-7a",
+        "cytron_maker_nano_rp2040",
+        "cytron_maker_pi_rp2040",
+        "datanoisetv_picoadk",
+        "flyboard2040_core",
+        "dfrobot_beetle_rp2040",
+        "electroniccats_huntercat_nfc",
+        "extelec_rc2040",
+        "challenger_2040_lte",
+        "challenger_2040_lora",
+        "challenger_2040_subghz",
+        "challenger_2040_wifi",
+        "challenger_2040_wifi_ble",
+        "challenger_nb_2040_wifi",
+        "challenger_2040_sdrtc",
+        "challenger_2040_nfc",
+        "ilabs_rpico32",
+        "melopero_cookie_rp2040",
+        "melopero_shake_rp2040",
+        "nullbits_bit_c_pro",
+        "pimoroni_pga2040",
+        "pimoroni_interstate75_rp2040",
+        "pimoroni_keybow2040",
+        "pimoroni_picolipo_4mb",
+        "pimoroni_picolipo_16mb",
+        "pimoroni_picosystem_rp2040",
+        "pimoroni_plasma2040",
+        "pimoroni_tiny2040",
+        "pybstick26_rp2040",
+        "solderparty_rp2040_stamp",
+        "sparkfun_promicrorp2040",
+        "sparkfun_micromod_rp2040",
+        "vgaboard_rp2040",
+        "sparkfun_thingplusrp2040",
+        "upesy_rp2040_devkit",
+        "seeed_xiao_rp2040",
+        "vccgnd_yd_rp2040",
+        "viyalab_mizu",
+        "waveshare_rp2040_zero",
+        "waveshare_rp2040_one",
+        "waveshare_rp2040_plus_4mb",
+        "waveshare_rp2040_plus_16mb",
+        "waveshare_rp2040_lcd_0_96",
+        "waveshare_rp2040_lcd_0.96",
+        "waveshare_rp2040_lcd_1_28",
+        "wiznet_5100s_evb_pico",
+        "wiznet_wizfi360_evb_pico",
+        "wiznet_5500_evb_pico"
+    };
+
     public static readonly Board Generic = new("generic", "Generic Serial Device", 0, "generic", new List<uint>(),
         false);
 
@@ -54,159 +124,8 @@ public struct Board
             false, true)
     };
 
-    public static readonly Board[] Rp2040Boards =
-    {
-        new("pico", "Raspberry PI Pico", 125000000, "pico", new List<uint> {0x000a}, false),
-        new("rpipicow", "Raspberry PI Pico W", 125000000, "picow", new List<uint>(0xf00a), false),
-        //Raspberry Pi
-        new("rpipico", "Raspberry Pi Pico", 125000000, "rpipico", new List<uint> {0x000a}, false),
-        new("rpipicow", "Raspberry Pi Pico W", 125000000, "rpipicow", new List<uint> {0xf00a}, false),
-
-        //0xCB
-        new("0xcb_helios", "0xCB Helios", 125000000, "0xcb_helios", new List<uint> {0xCB74}, false),
-
-        //Adafruit
-        new("adafruit_feather", "Adafruit Feather RP2040", 125000000, "adafruit_feather", new List<uint> {0x80f1},
-            false),
-        new("adafruit_feather_scorpio", "Adafruit Feather RP2040 SCORPIO", 125000000, "adafruit_feather_scorpio",
-            new List<uint> {0x8121}, false),
-        new("adafruit_feather_dvi", "Adafruit Feather RP2040 DVI", 125000000, "adafruit_feather_dvi",
-            new List<uint> {0x8127},
-            false),
-        new("adafruit_itsybitsy", "Adafruit ItsyBitsy RP2040", 125000000, "adafruit_itsybitsy", new List<uint> {0x80fd},
-            false),
-        new("adafruit_qtpy", "Adafruit QT Py RP2040", 125000000, "adafruit_qtpy", new List<uint> {0x80f7}, false),
-        new("adafruit_stemmafriend", "Adafruit STEMMA Friend RP2040", 125000000, "adafruit_stemmafriend",
-            new List<uint> {0x80e3}, false),
-        new("adafruit_trinkeyrp2040qt", "Adafruit Trinkey RP2040 QT", 125000000, "adafruit_trinkeyrp2040qt",
-            new List<uint> {0x8109}, false),
-        new("adafruit_macropad2040", "Adafruit MacroPad RP2040", 125000000, "adafruit_macropad2040",
-            new List<uint> {0x8107},
-            false),
-        new("adafruit_kb2040", "Adafruit KB2040", 125000000, "adafruit_kb2040", new List<uint> {0x8105}, false),
-
-        //Arduino
-        new("arduino_nano_connect", "Arduino Nano RP2040 Connect", 125000000, "arduino_nano_connect",
-            new List<uint> {0x005e, 0x805e, 0x015e, 0x025e}, false),
-
-        //BridgeTek
-        new("bridgetek_idm2040-7a", "BridgeTek IDM2040-7A", 125000000, "bridgetek_idm2040-7a", new List<uint> {0x1041},
-            false),
-
-        //Cytron
-        new("cytron_maker_nano_rp2040", "Cytron Maker Nano RP2040", 125000000, "cytron_maker_nano_rp2040",
-            new List<uint> {0x100f}, false),
-        new("cytron_maker_pi_rp2040", "Cytron Maker Pi RP2040", 125000000, "cytron_maker_pi_rp2040",
-            new List<uint> {0x1000},
-            false),
-
-        //DatanoiseTV
-        new("datanoisetv_picoadk", "DatanoiseTV PicoADK", 125000000, "datanoisetv_picoadk", new List<uint> {0x000a},
-            false),
-
-        //DeRuiLab
-        new("flyboard2040_core", "DeRuiLab FlyBoard2040Core", 125000000, "flyboard2040_core", new List<uint> {0x008a},
-            false),
-
-        //DFRobot
-        new("dfrobot_beetle_rp2040", "DFRobot Beetle RP2040", 125000000, "dfrobot_beetle_rp2040",
-            new List<uint> {0x4253},
-            false),
-
-        //ElectronicCat
-        new("electroniccats_huntercat_nfc", "ElectronicCats HunterCat NFC RP2040", 125000000,
-            "electroniccats_huntercat_nfc",
-            new List<uint> {0x1037}, false),
-
-        //ExtremeElectronics
-        new("extelec_rc2040", "ExtremeElectronics RC2040", 125000000, "extelec_rc2040", new List<uint> {0xee20}, false),
-
-        //iLabs
-        new("challenger_2040_lte", "iLabs Challenger 2040 LTE", 125000000, "challenger_2040_lte",
-            new List<uint> {0x100b},
-            false),
-        new("challenger_2040_lora", "iLabs Challenger 2040 LoRa", 125000000, "challenger_2040_lora",
-            new List<uint> {0x1023},
-            false),
-        new("challenger_2040_subghz", "iLabs Challenger 2040 SubGHz", 125000000, "challenger_2040_subghz",
-            new List<uint> {0x1032}, false),
-        new("challenger_2040_wifi", "iLabs Challenger 2040 WiFi", 125000000, "challenger_2040_wifi",
-            new List<uint> {0x1006},
-            false),
-        new("challenger_2040_wifi_ble", "iLabs Challenger 2040 WiFi/BLE", 125000000, "challenger_2040_wifi_ble",
-            new List<uint> {0x102C}, false),
-        new("challenger_nb_2040_wifi", "iLabs Challenger NB 2040 WiFi", 125000000, "challenger_nb_2040_wifi",
-            new List<uint> {0x100d}, false),
-        new("challenger_2040_sdrtc", "iLabs Challenger 2040 SD/RTC", 125000000, "challenger_2040_sdrtc",
-            new List<uint> {0x102d}, false),
-        new("challenger_2040_nfc", "iLabs Challenger 2040 NFC", 125000000, "challenger_2040_nfc",
-            new List<uint> {0x1036},
-            false),
-        new("ilabs_rpico32", "iLabs RPICO32", 125000000, "ilabs_rpico32", new List<uint> {0x1010}, false),
-
-        //Melopero
-        new("melopero_cookie_rp2040", "Melopero Cookie RP2040", 125000000, "melopero_cookie_rp2040",
-            new List<uint> {0x1011},
-            false),
-        new("melopero_shake_rp2040", "Melopero Shake RP2040", 125000000, "melopero_shake_rp2040",
-            new List<uint> {0x1005},
-            false),
-
-        //nullbits
-        new("nullbits_bit_c_pro", "nullbits Bit-C PRO", 125000000, "nullbits_bit_c_pro", new List<uint> {0x6e61},
-            false),
-
-        //Pimoroni
-        new("pimoroni_pga2040", "Pimoroni PGA2040", 125000000, "pimoroni_pga2040", new List<uint> {0x1008}, false),
-
-        //Solder Party
-        new("solderparty_rp2040_stamp", "Solder Party RP2040 Stamp", 125000000, "solderparty_rp2040_stamp",
-            new List<uint> {0xa182}, false),
-
-        //SparkFun
-        new("sparkfun_promicrorp2040", "SparkFun ProMicro RP2040", 125000000, "sparkfun_promicrorp2040",
-            new List<uint> {0x0026}, false),
-        new("sparkfun_thingplusrp2040", "SparkFun Thing Plus RP2040", 125000000, "sparkfun_thingplusrp2040",
-            new List<uint> {0x0026}, false),
-
-        //Upesy
-        new("upesy_rp2040_devkit", "uPesy RP2040 DevKit", 125000000, "upesy_rp2040_devkit", new List<uint> {0x1007},
-            false),
-
-        //Seeed
-        new("seeed_xiao_rp2040", "Seeed XIAO RP2040", 125000000, "seeed_xiao_rp2040", new List<uint> {0x000a}, false),
-
-        //VCC-GND YD-2040 - Use generic SPI/4 because boards seem to come with varied flash modules but same name
-        new("vccgnd_yd_rp2040", "VCC-GND YD RP2040 0x2e8a", 125000000, "vccgnd_yd_rp2040", new List<uint> {0x800a},
-            false),
-
-        //Viyalab
-        new("viyalab_mizu", "Viyalab Mizu RP2040", 125000000, "viyalab_mizu", new List<uint> {0x000a}, false),
-
-        //Waveshare
-        new("waveshare_rp2040_zero", "Waveshare RP2040 Zero", 125000000, "waveshare_rp2040_zero",
-            new List<uint> {0x0003},
-            false),
-        new("waveshare_rp2040_one", "Waveshare RP2040 One", 125000000, "waveshare_rp2040_one", new List<uint> {0x103a},
-            false),
-        new("waveshare_rp2040_plus_4mb", "Waveshare RP2040 Plus 4MB", 125000000, "waveshare_rp2040_plus_4mb",
-            new List<uint> {0x1020}, false),
-        new("waveshare_rp2040_plus_16mb", "Waveshare RP2040 Plus 16MB", 125000000, "waveshare_rp2040_plus_16mb",
-            new List<uint> {0x1020}, false),
-        new("waveshare_rp2040_lcd_0_96", "Waveshare RP2040 LCD 0.96", 125000000, "waveshare_rp2040_lcd_0_96",
-            new List<uint> {0x1021}, false),
-        new("waveshare_rp2040_lcd_1_28", "Waveshare RP2040 LCD 1.28", 125000000, "waveshare_rp2040_lcd_1_28",
-            new List<uint> {0x1039}, false),
-
-        //WIZnet
-        new("wiznet_5100s_evb_pico", "WIZnet W5100S-EVB-Pico", 125000000, "wiznet_5100s_evb_pico",
-            new List<uint> {0x1027},
-            false),
-        new("wiznet_wizfi360_evb_pico", "WIZnet WizFi360-EVB-Pico", 125000000, "wiznet_wizfi360_evb_pico",
-            new List<uint> {0x1028}, false),
-        new("wiznet_5500_evb_pico", "WIZnet W5500-EVB-Pico", 125000000, "wiznet_5500_evb_pico", new List<uint> {0x1029},
-            false)
-    };
+    public static readonly Board PicoBoard = new("pico", "Raspberry PI Pico", 125000000, "pico",
+        new List<uint> {0x000a}, false);
 
     public static readonly Board[] MiniBoards =
     {
@@ -229,12 +148,16 @@ public struct Board
     public static readonly Board[] Boards = MiniBoards
         .Concat(MegaBoards)
         .Concat(Atmega32U4Boards)
-        .Concat(Rp2040Boards)
-        .Concat(new[] {Uno, DfuBoard})
+        .Concat(new[] {Uno, DfuBoard, PicoBoard})
         .ToArray();
 
     public static Board FindBoard(string ardwiinoName, uint cpuFreq)
     {
+        if (PicoArdwiinoNames.Contains(ardwiinoName))
+        {
+            return PicoBoard;
+        }
+
         foreach (var board in Boards)
             if (board.ArdwiinoName == ardwiinoName &&
                 (!board.MultipleFrequencies || board.CpuFreq == cpuFreq))
@@ -251,7 +174,7 @@ public struct Board
 
         if (MegaBoards.Contains(board)) return new Mega(board);
 
-        if (Rp2040Boards.Contains(board)) return new Pico(board);
+        if (board.Name == PicoBoard.Name) return new Pico(board);
 
         // In terms of pin layout, the uno is close enough to a mini
         if (MiniBoards.Contains(board)) return new Uno(board);
@@ -267,7 +190,7 @@ public struct Board
 
     public bool IsPico()
     {
-        return Rp2040Boards.Contains(this);
+        return PicoBoard.Name == Name;
     }
 
     public bool IsGeneric()

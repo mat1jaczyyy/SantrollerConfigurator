@@ -100,22 +100,6 @@
                                       ItemsSource="{Binding Main.AvrTypes}"
                                       ItemTemplate="{StaticResource EnumToStringTemplate}" />
                         </StackPanel>
-                        <StackPanel IsVisible="{Binding Main.IsPico}" Orientation="Horizontal">
-                            <Label VerticalAlignment="Center"
-                                   VerticalContentAlignment="Center"
-                                   Width="300">
-                                RP2040 Based Board Type
-                            </Label>
-                            <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding Main.IsPico}"
-                                      SelectedItem="{Binding Main.PicoType}"
-                                      ItemsSource="{Binding Main.PicoTypes}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Name}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </StackPanel>
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding Main.NewDevice}">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"

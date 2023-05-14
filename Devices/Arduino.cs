@@ -23,18 +23,18 @@ public class Arduino : IConfigurableDevice
         DfuDetected = new Subject<bool>();
         _port = port.Port;
         foreach (var board in Board.Boards)
-            if (board.ProductIDs.Contains(port.Pid))
-            {
-                Board = board;
-                Is32U4Bootloader = Board.Name.Contains("Bootloader Mode");
-                MigrationSupported = true;
-                return;
-            }
+        {
+            if (!board.ProductIDs.Contains(port.Pid)) continue;
+            Board = board;
+            Is32U4Bootloader = Board.Name.Contains("Bootloader Mode");
+            MigrationSupported = true;
+            return;
+        }
 
         // Handle any other RP2040 based boards we don't already have code for, using just the generic rp2040 board in this case
         if (port.Vid == Board.RaspberryPiVendorId)
         {
-            Board = Board.Rp2040Boards[0];
+            Board = Board.PicoBoard;
             MigrationSupported = true;
             return;
         }
