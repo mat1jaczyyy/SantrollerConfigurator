@@ -102,8 +102,6 @@ public partial class DrumAxis : OutputAxis
 
     public DrumAxisType Type { get; }
 
-    public override bool Valid => true;
-
     public override bool IsCombined => false;
 
     public override string LedOnLabel => "Drum Hit LED Colour";

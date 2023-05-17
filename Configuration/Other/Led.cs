@@ -373,8 +373,6 @@ public class Led : Output
     public override bool IsKeyboard => false;
     public virtual bool IsController => false;
 
-    public override bool Valid => true;
-
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
         return "Led Command - " + EnumToStringConverter.Convert(Command);

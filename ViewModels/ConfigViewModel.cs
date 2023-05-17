@@ -116,6 +116,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.WhenAnyValue(x => x.DeviceType)
             .Select(x => x is DeviceControllerType.StageKit)
             .ToPropertyEx(this, x => x.IsStageKit);
+        _strumDebounceDisplay = this.WhenAnyValue(x => x.StrumDebounce)
+            .Select(x => x / 10.0f)
+            .ToProperty(this, x => x.StrumDebounceDisplay);
+        _debounceDisplay = this.WhenAnyValue(x => x.Debounce)
+            .Select(x => x / 10.0f)
+            .ToProperty(this, x => x.DebounceDisplay);
+
         this.WhenAnyValue(x => x.EmulationType)
             .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.Controller)
             .ToPropertyEx(this, x => x.IsController);
@@ -150,6 +157,21 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public bool ShowUnoDialog { get; }
 
     public bool SupportsReset { get; }
+
+    private ObservableAsPropertyHelper<float> _debounceDisplay;
+    private ObservableAsPropertyHelper<float> _strumDebounceDisplay;
+
+    public float DebounceDisplay
+    {
+        get => _debounceDisplay.Value;
+        set => Debounce = (int) (value * 10);
+    }
+
+    public float StrumDebounceDisplay
+    {
+        get => _strumDebounceDisplay.Value;
+        set => StrumDebounce = (int) (value * 10);
+    }
 
     [Reactive] public string? RfErrorText { get; set; }
     [Reactive] public string? UsbHostErrorText { get; set; }
@@ -232,6 +254,22 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public ModeType Mode { get; set; }
 
     [Reactive] public int Debounce { get; set; }
+
+    private bool _deque;
+
+    public bool Deque
+    {
+        get => _deque;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _deque, value);
+            // If we have disabled deque, then round to the nearest whole debounce
+            if (!value)
+            {
+                Debounce = (int) (Math.Round(Debounce / 10.0f) * 10);
+            }
+        }
+    }
 
     [Reactive] public int StrumDebounce { get; set; }
 
@@ -609,6 +647,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Main.Message = "Building";
         Main.Progress = 0;
         ClearOutputs();
+        Deque = false;
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
 
@@ -1110,7 +1149,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         // Pass 1: work out debounces and map inputs to debounces
         var inputs = new Dictionary<string, List<int>>();
-        var macros = new Dictionary<string,List<(int,Input)>>();
+        var macros = new Dictionary<string, List<(int, Input)>>();
         foreach (var outputByType in outputsByType)
         {
             foreach (var output in outputByType)
@@ -1141,7 +1180,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 inputs[generatedInput].Add(debounces[generatedInput]);
             }
         }
-        
+
         foreach (var (key, value) in macros)
         {
             var list2 = new List<(int, Input)>();
@@ -1152,6 +1191,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 {
                     list2.Add((debounce, input));
                 }
+
                 macros[key] = list2;
             }
         }
@@ -1166,7 +1206,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 return current + group
                     .First().Input.InnermostInput()
                     .GenerateAll(group
-                            // DigitalToAnalog and MacroInput need to be handled last
+                        // DigitalToAnalog and MacroInput need to be handled last
                         .OrderByDescending(s => s.Input is DigitalToAnalog or MacroInput ? 0 : 1)
                         .Select(s =>
                         {
@@ -1185,7 +1225,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
                                     debouncesRelatedToLed[led].Add((output, index));
                                 }
-                                
                             }
 
                             if (output is OutputAxis axis)

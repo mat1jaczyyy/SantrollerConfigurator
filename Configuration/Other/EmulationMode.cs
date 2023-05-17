@@ -48,8 +48,6 @@ public class EmulationMode : Output
 
     public override bool IsKeyboard => false;
     public virtual bool IsController => false;
-
-    public override bool Valid => true;
     public override string LedOnLabel => "";
     public override string LedOffLabel => "";
 

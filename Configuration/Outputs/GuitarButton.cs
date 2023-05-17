@@ -28,8 +28,6 @@ public class GuitarButton : OutputButton
 
     public override bool IsStrum => false;
 
-    public override bool Valid => true;
-
     public override string GenerateOutput(ConfigField mode)
     {
         // PS3 and 360 just set the standard buttons, and rely on the solo flag
@@ -48,6 +46,12 @@ public class GuitarButton : OutputButton
                 GetReportField(StandardButtonType.X),
             InstrumentButtonType.SoloOrange or InstrumentButtonType.Orange when mode is not ConfigField.XboxOne =>
                 GetReportField(StandardButtonType.LeftShoulder),
+            InstrumentButtonType.Black1 => GetReportField(StandardButtonType.A),
+            InstrumentButtonType.Black2 => GetReportField(StandardButtonType.B),
+            InstrumentButtonType.White1 => GetReportField(StandardButtonType.X),
+            InstrumentButtonType.Black3 => GetReportField(StandardButtonType.Y),
+            InstrumentButtonType.White2 => GetReportField(StandardButtonType.LeftShoulder),
+            InstrumentButtonType.White3 => GetReportField(StandardButtonType.RightShoulder),
             _ => GetReportField(Type)
         };
     }

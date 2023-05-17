@@ -152,9 +152,6 @@ public class KeyboardButton : OutputButton
     public override bool IsKeyboard => true;
     public virtual bool IsController => false;
 
-
-    public override bool Valid => true;
-
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;

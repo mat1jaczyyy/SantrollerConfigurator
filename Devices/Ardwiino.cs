@@ -218,6 +218,8 @@ public class Ardwiino : ConfigurableUsbDevice
                 version = config.all.main.version;
                 maxSize = version switch
                 {
+                    > 17 => Marshal.SizeOf<ArdwiinoConfiguration>(),
+                    > 15 => Marshal.SizeOf<Configuration16>(),
                     > 13 => Marshal.SizeOf<Configuration14>(),
                     > 12 => Marshal.SizeOf<Configuration13>(),
                     > 11 => Marshal.SizeOf<Configuration12>(),
@@ -231,12 +233,14 @@ public class Ardwiino : ConfigurableUsbDevice
 
         // Patches to all
         if (version < 9)
+        {
             // For versions below version 9, r_x is inverted from how we use it now
             config.all.pins.axis![(byte) ControllerAxisType.XboxRx].inverted =
                 (byte) (config.all.pins.axis[(int) ControllerAxisType.XboxRx].inverted == 0 ? 1 : 0);
+        }
 
         // Read in the rest of the data, in the format that it is in
-        if (version == 16 || version == 17)
+        if (version is 16 or 17)
         {
             config = StructTools.RawDeserialize<ArdwiinoConfiguration>(data, 0);
         }
@@ -289,12 +293,27 @@ public class Ardwiino : ConfigurableUsbDevice
             config.rf = configOld.rf;
         }
 
+        if (version < 18)
+        {
+            model.Deque = false;
+        }
+        else
+        {
+            model.Deque = config.deque != 0;
+        }
+
         if (version < 17 && config.all.main.subType > (int) SubType.XinputArcadePad)
         {
             config.all.main.subType += SubType.XinputTurntable - SubType.XinputArcadePad;
             if (config.all.main.subType > (int) SubType.Ps3Gamepad) config.all.main.subType += 2;
 
             if (config.all.main.subType > (int) SubType.WiiRockBandDrums) config.all.main.subType += 1;
+        }
+
+        if (version < 18)
+        {
+            config.debounce.buttons *= 10;
+            config.debounce.strum *= 10;
         }
 
         var controller = Board.FindMicrocontroller(Board);
@@ -413,6 +432,8 @@ public class Ardwiino : ConfigurableUsbDevice
 
         model.LedType = ledType;
         model.SetDeviceTypeAndRhythmTypeWithoutUpdating(deviceType, rhythmType, emulationType);
+        model.Debounce = config.debounce.buttons;
+        model.StrumDebounce = config.debounce.strum;
         var sda = 18;
         var scl = 19;
         var mosi = 3;
@@ -483,7 +504,6 @@ public class Ardwiino : ConfigurableUsbDevice
                 if (ledIndexes.ContainsKey(axis + XboxBtnCount)) ledIndex = new[] {ledIndexes[axis + XboxBtnCount]};
 
                 var off = Color.FromRgb(0, 0, 0);
-
                 if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
                     (ControllerAxisType) axis == XboxTilt &&
                     config.all.main.tiltType == 2)
@@ -505,10 +525,18 @@ public class Ardwiino : ConfigurableUsbDevice
                         min += short.MaxValue;
                         max += short.MaxValue;
                     }
-
-                    bindings.Add(new ControllerAxis(model,
-                        new DirectInput(pin.pin, DevicePinMode.Analog, model), on, off,
-                        ledIndex, min, max, axisDeadzone, genAxis, false));
+                    if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
+                        (ControllerAxisType) axis == XboxWhammy)
+                    {
+                        bindings.Add(new GuitarAxis(model, new DirectInput(pin.pin, DevicePinMode.Analog, model), on, off,
+                                ledIndex, min, max, axisDeadzone, GuitarAxisType.Whammy, false));
+                    }
+                    else
+                    {
+                        bindings.Add(new ControllerAxis(model,
+                            new DirectInput(pin.pin, DevicePinMode.Analog, model), on, off,
+                            ledIndex, min, max, axisDeadzone, genAxis, false));
+                    }
                 }
             }
 
@@ -587,7 +615,6 @@ public class Ardwiino : ConfigurableUsbDevice
             {
                 case (int) InputControllerType.Wii:
                 {
-                    
                     var wii = new WiiCombinedOutput(model, sda, scl);
                     model.Bindings.Add(wii);
                     wii.SetOutputsOrDefaults(Array.Empty<Output>());
@@ -648,10 +675,10 @@ public class Ardwiino : ConfigurableUsbDevice
                 var ledOff = ly.LedOff;
                 bindings.Add(new ControllerButton(model,
                     new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyLow, threshold, model), ledOn, ledOff,
-                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadUp, false));
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadDown, false));
                 bindings.Add(new ControllerButton(model,
                     new AnalogToDigital(ly.Input, AnalogToDigitalType.JoyHigh, threshold, model), ledOn, ledOff,
-                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadDown, false));
+                    Array.Empty<byte>(), config.debounce.buttons, StandardButtonType.DpadUp, false));
             }
         }
 
@@ -667,7 +694,8 @@ public class Ardwiino : ConfigurableUsbDevice
         model.MouseMovementType = MouseMovementType.Relative;
         model.Bindings.Clear();
         model.Bindings.AddRange(bindings);
-        model.Main.Write(model, true);
+        model.UpdateBindings();
+        model.Main.Write(model, false);
         return true;
     }
 
@@ -924,6 +952,18 @@ public class Ardwiino : ConfigurableUsbDevice
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct ArdwiinoConfiguration
+    {
+        public FullArdwiinoConfiguration all;
+        public RfConfig rf;
+        public byte pinsSP;
+        public AxisScaleConfig axisScale;
+        public DebounceConfig debounce;
+        public NeckConfig neck;
+        public byte deque;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    private struct Configuration16
     {
         public FullArdwiinoConfiguration all;
         public RfConfig rf;

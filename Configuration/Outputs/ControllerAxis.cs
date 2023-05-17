@@ -11,7 +11,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class ControllerAxis : OutputAxis
 {
-    private readonly ObservableAsPropertyHelper<bool> _valid;
 
     public ControllerAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
@@ -20,9 +19,6 @@ public class ControllerAxis : OutputAxis
         deadZone, IsTrigger(type), childOfCombined)
     {
         Type = type;
-        _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
-            .Select(s => ControllerEnumConverter.GetAxisText(s.Item1, s.Item3).Any())
-            .ToProperty(this, s => s.Valid);
         UpdateDetails();
     }
 
@@ -73,7 +69,6 @@ public class ControllerAxis : OutputAxis
     }
 
     public override bool IsKeyboard => false;
-    public override bool Valid => _valid.Value;
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {

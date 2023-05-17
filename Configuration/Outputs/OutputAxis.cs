@@ -218,12 +218,15 @@ public abstract partial class OutputAxis : Output
             {
                 min -= deadZone;
                 if (val > min) return 0;
+                if (val < max) val = max;
             }
             else
             {
                 min += deadZone;
                 if (val < min) return 0;
+                if (val > max) val = max;
             }
+
         }
         else
         {

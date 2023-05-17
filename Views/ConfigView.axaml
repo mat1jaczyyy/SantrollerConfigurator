@@ -1685,7 +1685,7 @@
             <DataTemplate />
         </netCore:OutputTemplateSelector>
         <DataTemplate DataType="output:Output" x:Key="OutputTemplate">
-            <StackPanel IsVisible="{Binding Valid}" Opacity="{Binding CombinedOpacity}">
+            <StackPanel Opacity="{Binding CombinedOpacity}">
                 <Panel>
                     <StackPanel>
                         <Label HorizontalAlignment="Center" IsVisible="{Binding ChildOfCombined}"
@@ -1761,7 +1761,7 @@
             </StackPanel>
         </DataTemplate>
         <DataTemplate DataType="output:Output" x:Key="CombinedOutputTemplate">
-            <ContentControl IsVisible="{Binding Valid}" Content="{Binding}"
+            <ContentControl  Content="{Binding}"
                             ContentTemplate="{StaticResource OutputTemplate}" Background="{Binding CombinedBackground}"
                             Padding="10" Margin="0 5 10 5" Width="520" />
         </DataTemplate>

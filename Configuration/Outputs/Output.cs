@@ -279,8 +279,6 @@ public abstract partial class Output : ReactiveObject
     public bool ChildOfCombined { get; }
     public bool IsEmpty => this is EmptyOutput;
 
-    public abstract bool Valid { get; }
-
     [Reactive] public string ButtonText { get; set; }
 
     public virtual string ErrorText

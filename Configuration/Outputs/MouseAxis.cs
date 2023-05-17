@@ -21,9 +21,6 @@ public class MouseAxis : OutputAxis
     public override bool IsKeyboard => true;
     public virtual bool IsController => false;
 
-
-    public override bool Valid => true;
-
     public MouseAxisType Type { get; }
 
     public override bool IsCombined => false;

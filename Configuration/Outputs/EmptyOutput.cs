@@ -52,8 +52,6 @@ public class EmptyOutput : Output
     [ObservableAsProperty] public bool IsController { get; }
     public override bool IsKeyboard => _isKeyboard.Value;
 
-    public override bool Valid => true;
-
     public IEnumerable<object> CombinedTypes => _combinedTypes.Value;
 
     public object? CombinedType

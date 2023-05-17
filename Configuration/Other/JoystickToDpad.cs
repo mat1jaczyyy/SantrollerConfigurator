@@ -103,8 +103,6 @@ public class JoystickToDpad : Output
     public override bool IsStrum => false;
 
     public override bool IsKeyboard => false;
-
-    public override bool Valid => true;
     public override string LedOnLabel => "";
     public override string LedOffLabel => "";
 

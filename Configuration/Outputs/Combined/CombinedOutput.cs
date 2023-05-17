@@ -21,9 +21,6 @@ public abstract class CombinedOutput : Output
     public override bool IsStrum => false;
     public override bool IsKeyboard => false;
 
-
-    public override bool Valid => true;
-
     public abstract void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs);
 
     public override string Generate(ConfigField mode, int debounceIndex, string extra,

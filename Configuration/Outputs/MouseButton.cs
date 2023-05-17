@@ -21,8 +21,6 @@ public class MouseButton : OutputButton
     public virtual bool IsController => false;
 
     public MouseButtonType Type { get; }
-
-    public override bool Valid => true;
     public override bool IsStrum => false;
 
     public override bool IsCombined => false;

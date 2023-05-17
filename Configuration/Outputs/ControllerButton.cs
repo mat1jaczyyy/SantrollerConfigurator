@@ -11,16 +11,12 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class ControllerButton : OutputButton
 {
-    private readonly ObservableAsPropertyHelper<bool> _valid;
 
     public ControllerButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         byte debounce, StandardButtonType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices,
         debounce, childOfCombined)
     {
         Type = type;
-        _valid = this.WhenAnyValue(s => s.Model.DeviceType, s => s.Model.RhythmType, s => s.Type)
-            .Select(s => ControllerEnumConverter.GetButtonText(s.Item1, s.Item3) != null)
-            .ToProperty(this, s => s.Valid);
         UpdateDetails();
     }
 
@@ -31,7 +27,6 @@ public class ControllerButton : OutputButton
     public override bool IsStrum => Type is StandardButtonType.DpadUp or StandardButtonType.DpadDown;
 
     public override bool IsCombined => false;
-    public override bool Valid => _valid.Value;
     public override string LedOnLabel => "Pressed LED Colour";
     public override string LedOffLabel => "Released LED Colour";
 

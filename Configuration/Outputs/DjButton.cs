@@ -28,8 +28,6 @@ public class DjButton : OutputButton
 
     public override bool IsStrum => false;
 
-    public override bool Valid => true;
-
     public override string GenerateOutput(ConfigField mode)
     {
         return GetReportField(Type);

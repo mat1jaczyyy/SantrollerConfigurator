@@ -23,8 +23,6 @@ public class DjAxis : OutputAxis
 
     public override bool IsKeyboard => false;
 
-    public override bool Valid => true;
-
     public override string LedOnLabel
     {
         get
