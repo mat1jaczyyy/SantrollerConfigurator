@@ -156,8 +156,14 @@ public partial class DrumAxis : OutputAxis
             return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
-        var debounce = Debounce + 1;
-        if (!Model.IsAdvancedMode) debounce = Model.Debounce + 1;
+        var debounce = Debounce;
+        if (!Model.IsAdvancedMode) debounce = (byte) Model.Debounce;
+        if (!Model.Deque)
+        {
+            // If we aren't using queue based inputs, then we want ms based inputs, not ones based on 0.1ms
+            debounce /= 10;
+        }
+        Debounce += 1;
 
         var ifStatement = $"debounce[{debounceIndex}]";
         
