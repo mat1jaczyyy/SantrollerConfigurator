@@ -158,8 +158,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public bool SupportsReset { get; }
 
-    private ObservableAsPropertyHelper<float> _debounceDisplay;
-    private ObservableAsPropertyHelper<float> _strumDebounceDisplay;
+    private readonly ObservableAsPropertyHelper<float> _debounceDisplay;
+    private readonly ObservableAsPropertyHelper<float> _strumDebounceDisplay;
 
     public float DebounceDisplay
     {
@@ -545,6 +545,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         foreach (var binding in Bindings.Items) binding.UpdateBindings();
         InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this, false);
         if (!(IsRhythm && IsController)) _rhythmType = RhythmType.GuitarHero;
+        if (!IsGuitar)
+        {
+            Deque = false;
+        }
 
         var (extra, types) =
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);

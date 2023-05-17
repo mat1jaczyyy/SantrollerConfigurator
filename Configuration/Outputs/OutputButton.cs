@@ -1,24 +1,35 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public abstract class OutputButton : Output
 {
+    private readonly ObservableAsPropertyHelper<float> _debounceDisplay;
     protected OutputButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         byte debounce, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, childOfCombined)
     {
         Debounce = debounce;
+        _debounceDisplay = this.WhenAnyValue(x => x.Debounce)
+            .Select(x => x / 10.0f)
+            .ToProperty(this, x => x.DebounceDisplay);
     }
 
     public byte Debounce { get; set; }
 
+    public float DebounceDisplay
+    {
+        get => _debounceDisplay.Value;
+        set => Debounce = (byte) (value * 10);
+    }
 
     public override bool IsCombined => false;
     public override string LedOnLabel => "Pressed LED Colour";
@@ -58,7 +69,8 @@ public abstract class OutputButton : Output
                 debounce = (byte) Model.Debounce;
             }
         }
-        if (!Model.Deque && this is not GuitarButton {IsStrum: true})
+        // Input queuing is guitar only
+        if (!Model.Deque || this is not GuitarButton {IsStrum: false})
         {
             // If we aren't using queue based inputs, then we want ms based inputs, not ones based on 0.1ms
             debounce /= 10;
