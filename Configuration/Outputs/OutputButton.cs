@@ -47,8 +47,18 @@ public abstract class OutputButton : Output
         if (mode == ConfigField.Shared && combinedExtra.Any()) extraStatement = " && " + combinedExtra;
 
         var debounce = Debounce;
-        if (!Model.IsAdvancedMode) debounce = (byte) Model.Debounce;
-        if (!Model.Deque)
+        if (!Model.IsAdvancedMode)
+        {
+            if (this is GuitarButton {IsStrum: true} && Model.StrumDebounce > 0)
+            {
+                debounce = (byte) Model.StrumDebounce;
+            }
+            else
+            {
+                debounce = (byte) Model.Debounce;
+            }
+        }
+        if (!Model.Deque && this is not GuitarButton {IsStrum: true})
         {
             // If we aren't using queue based inputs, then we want ms based inputs, not ones based on 0.1ms
             debounce /= 10;
