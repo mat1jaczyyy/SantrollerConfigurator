@@ -244,7 +244,7 @@
                                    Maximum="10" HorizontalAlignment="Stretch" />
                 </StackPanel>
                 <StackPanel IsVisible="{Binding Deque}">
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Poll Rate"
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Dequeue Rate"
                                TextAlignment="Center" />
                     <NumericUpDown FormatString="{}{0:#,0}" Margin="20 5 20 0" Value="{Binding PollRate}"
                                    Minimum="1"
