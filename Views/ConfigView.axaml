@@ -965,12 +965,11 @@
                         </StackPanel>
                     </Panel>
 
-                    <StackPanel Orientation="Horizontal" Height="50">
+                    <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
                         <Label VerticalAlignment="Center" Width="300" IsVisible="{Binding !ChildOfCombined}">
                             Calibrate
                         </Label>
-                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                                Command="{Binding CalibrateCommand}"
+                        <Button Command="{Binding CalibrateCommand}"
                                 HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
                             Calibrate
                         </Button>
@@ -1068,12 +1067,11 @@
 
                         </StackPanel>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Height="50">
+                    <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
                         <Label VerticalAlignment="Center" Width="300" IsVisible="{Binding !ChildOfCombined}">
                             Calibrate
                         </Label>
-                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                                Command="{Binding CalibrateCommand}"
+                        <Button Command="{Binding CalibrateCommand}"
                                 HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
                             Calibrate
                         </Button>
@@ -1130,12 +1128,11 @@
                         </StackPanel>
 
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Height="50">
+                    <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
                         <Label VerticalAlignment="Center" Width="300" IsVisible="{Binding !ChildOfCombined}">
                             Calibrate
                         </Label>
-                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                                Command="{Binding CalibrateDrumsCommand}"
+                        <Button Command="{Binding CalibrateDrumsCommand}"
                                 HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
                             Calibrate
                         </Button>
@@ -1229,12 +1226,11 @@
                         </StackPanel>
 
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Height="50">
+                    <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
                         <Label VerticalAlignment="Center" Width="300" IsVisible="{Binding !ChildOfCombined}">
                             Calibrate
                         </Label>
-                        <Button IsVisible="{Binding !IsDigitalToAnalog}"
-                                Command="{Binding CalibrateCommand}"
+                        <Button Command="{Binding CalibrateCommand}"
                                 HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
                             Calibrate
                         </Button>
