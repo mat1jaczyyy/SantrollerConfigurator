@@ -1249,9 +1249,13 @@
                            Width="300">
                         Debounce
                     </Label>
-                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding DebounceDisplay}" IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).Deque}" VerticalAlignment="Center"
+                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding DebounceDisplay}"
+                                   IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).Deque}"
+                                   VerticalAlignment="Center"
                                    Width="200" />
-                    <NumericUpDown Increment="0.1" Value="{Binding DebounceDisplay}" IsVisible="{Binding $parent[UserControl].((viewModels:ConfigViewModel)DataContext).Deque}" VerticalAlignment="Center"
+                    <NumericUpDown Increment="0.1" Value="{Binding DebounceDisplay}"
+                                   IsVisible="{Binding $parent[UserControl].((viewModels:ConfigViewModel)DataContext).Deque}"
+                                   VerticalAlignment="Center"
                                    Width="200" />
                 </StackPanel>
             </DataTemplate>
@@ -1274,7 +1278,37 @@
                                Width="300">
                             Threshold
                         </Label>
-                        <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center" Width="200" />
+
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding IsUint}">
+                                <ProgressBar Opacity="0.5" Value="{Binding RawAnalogValue}"
+                                             IsIndeterminate="False" Minimum="0" Maximum="65536"
+                                             Height="30"
+                                             Width="{Binding FullProgressWidth, Mode=OneTime}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsUint}"
+                                        Width="{Binding FullProgressWidth, Mode=OneTime}">
+                                <ProgressBar Opacity="0.5" CornerRadius="0 3 3 0"
+                                             Value="{Binding ValueLower}"
+                                             IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                             Height="30"
+                                             Width="{Binding HalfProgressWidth, Mode=OneTime}">
+                                    <ProgressBar.RenderTransform>
+                                        <ScaleTransform ScaleX="-1" />
+                                    </ProgressBar.RenderTransform>
+                                </ProgressBar>
+                                <ProgressBar Opacity="0.5" CornerRadius="0 3 3 0"
+                                              Value="{Binding ValueUpper}"
+                                              IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                              Height="30"
+                                              Width="{Binding HalfProgressWidth, Mode=OneTime}" />
+                            </StackPanel>
+                            <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
+                                   Content="{Binding RawAnalogValue}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
+                            <Slider Foreground="White" VerticalAlignment="Center" Width="{Binding FullProgressWidth, Mode=OneTime}" Height="50" Minimum="{Binding Min, Mode=OneTime}"
+                                    Maximum="{Binding Max, Mode=OneTime}" Value="{Binding DisplayThreshold}" IsVisible="{Binding IsUint}">
+                            </Slider>
+                        </Grid>
                     </StackPanel>
                     <ContentControl Content="{Binding Child}"
                                     ContentTemplate="{StaticResource OutputTemplates}" />
@@ -1763,7 +1797,7 @@
             </StackPanel>
         </DataTemplate>
         <DataTemplate DataType="output:Output" x:Key="CombinedOutputTemplate">
-            <ContentControl  Content="{Binding}"
+            <ContentControl Content="{Binding}"
                             ContentTemplate="{StaticResource OutputTemplate}" Background="{Binding CombinedBackground}"
                             Padding="10" Margin="0 5 10 5" Width="520" />
         </DataTemplate>

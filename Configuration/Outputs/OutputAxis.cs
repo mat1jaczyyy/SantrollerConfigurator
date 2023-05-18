@@ -25,7 +25,7 @@ public enum OutputAxisCalibrationState
 
 public abstract partial class OutputAxis : Output
 {
-    protected const float ProgressWidth = 400;
+    protected internal const float ProgressWidth = 400;
 
     private OutputAxisCalibrationState _calibrationState = OutputAxisCalibrationState.None;
 
