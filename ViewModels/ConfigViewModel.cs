@@ -122,7 +122,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _debounceDisplay = this.WhenAnyValue(x => x.Debounce)
             .Select(x => x / 10.0f)
             .ToProperty(this, x => x.DebounceDisplay);
-
+        _deviceControllerRhythmType = this.WhenAnyValue(x => x.DeviceType, x => x.RhythmType)
+            .Select(DeviceControllerRhythmTypeExtensions.FromDeviceRhythm)
+            .ToProperty(this, x => x.DeviceControllerRhythmType);
         this.WhenAnyValue(x => x.EmulationType)
             .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.Controller)
             .ToPropertyEx(this, x => x.IsController);
@@ -158,9 +160,22 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public bool SupportsReset { get; }
 
+    private readonly ObservableAsPropertyHelper<DeviceControllerRhythmType> _deviceControllerRhythmType;
+
     private readonly ObservableAsPropertyHelper<float> _debounceDisplay;
     private readonly ObservableAsPropertyHelper<float> _strumDebounceDisplay;
 
+    public DeviceControllerRhythmType DeviceControllerRhythmType
+    {
+        get => _deviceControllerRhythmType.Value;
+        set
+        {
+            var (device, rhythm) = value.ToDeviceRhythm();
+            DeviceType = device;
+            RhythmType = rhythm;
+        }
+    }
+    
     public float DebounceDisplay
     {
         get => _debounceDisplay.Value;
@@ -215,7 +230,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public MainWindowViewModel Main { get; }
 
-    public IEnumerable<DeviceControllerType> DeviceControllerTypes => Enum.GetValues<DeviceControllerType>();
+    public IEnumerable<DeviceControllerRhythmType> DeviceControllerRhythmTypes => Enum.GetValues<DeviceControllerRhythmType>();
     public IEnumerable<RfPowerLevel> RfPowerLevels => Enum.GetValues<RfPowerLevel>();
     public IEnumerable<RfDataRate> RfDataRates => Enum.GetValues<RfDataRate>();
 
@@ -264,9 +279,15 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set
         {
             this.RaiseAndSetIfChanged(ref _deque, value);
-            // If we have disabled deque, then round to the nearest whole debounce
-            if (!value)
+            if (value)
             {
+                // If we have enabled deque, then make sure the poll rate and debounce are above the min
+                PollRate = Math.Max(1, PollRate);
+                Debounce = Math.Max(5, Debounce);
+            }
+            else
+            {
+                // If we have disabled deque, then round to the nearest whole debounce
                 Debounce = (int) (Math.Round(Debounce / 10.0f) * 10);
             }
         }

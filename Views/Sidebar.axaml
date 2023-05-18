@@ -221,24 +221,9 @@
                     <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Controller Type"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                              SelectedItem="{Binding DeviceType}"
+                              SelectedItem="{Binding DeviceControllerRhythmType}"
                               ItemTemplate="{StaticResource EnumToStringTemplate}"
-                              ItemsSource="{Binding DeviceControllerTypes}" />
-                </StackPanel>
-
-                <StackPanel>
-                    <StackPanel.IsVisible>
-                        <MultiBinding Converter="{x:Static BoolConverters.And}">
-                            <Binding Path="IsRhythm" />
-                            <Binding Path="IsController" />
-                        </MultiBinding>
-                    </StackPanel.IsVisible>
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Rhythm Game Type"
-                               TextAlignment="Center" />
-                    <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                              SelectedItem="{Binding RhythmType}"
-                              ItemTemplate="{StaticResource EnumToStringTemplate}"
-                              ItemsSource="{Binding RhythmTypes}" />
+                              ItemsSource="{Binding DeviceControllerRhythmTypes}" />
                 </StackPanel>
 
                 <StackPanel>
@@ -251,11 +236,18 @@
                     </ComboBox>
 
                 </StackPanel>
-                <StackPanel>
+                <StackPanel IsVisible="{Binding !Deque}">
                     <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Poll Rate (0 for unlimited)"
                                TextAlignment="Center" />
                     <NumericUpDown FormatString="{}{0:#,0}" Margin="20 5 20 0" Value="{Binding PollRate}"
                                    Minimum="0"
+                                   Maximum="10" HorizontalAlignment="Stretch" />
+                </StackPanel>
+                <StackPanel IsVisible="{Binding Deque}">
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Poll Rate"
+                               TextAlignment="Center" />
+                    <NumericUpDown FormatString="{}{0:#,0}" Margin="20 5 20 0" Value="{Binding PollRate}"
+                                   Minimum="1"
                                    Maximum="10" HorizontalAlignment="Stretch" />
                 </StackPanel>
                 <StackPanel IsVisible="{Binding !IsAdvancedMode}">
@@ -267,10 +259,14 @@
                                       OnContent="Enabled"
                                       OffContent="Disabled" />
                     </StackPanel>
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Debounce (0 to disable)"
+                    <TextBlock IsVisible="{Binding !Deque}" HorizontalAlignment="Stretch" Margin="40 5 40 0"
+                               Text="Debounce (0 to disable)"
+                               TextAlignment="Center" />
+                    <TextBlock IsVisible="{Binding Deque}" HorizontalAlignment="Stretch" Margin="40 5 40 0"
+                               Text="Debounce"
                                TextAlignment="Center" />
                     <NumericUpDown IsVisible="{Binding Deque}" Margin="20 5 20 0" Value="{Binding DebounceDisplay}"
-                                   Minimum="0"
+                                   Minimum="0.5"
                                    Increment="0.1"
                                    Maximum="10" HorizontalAlignment="Stretch" />
                     <NumericUpDown FormatString="{}{0:#,0}" IsVisible="{Binding !Deque}" Margin="20 5 20 0"
@@ -282,54 +278,62 @@
                 <StackPanel IsVisible="{Binding IsGuitar}">
                     <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Strum Debounce (0 to disable)"
                                TextAlignment="Center" />
-                    <NumericUpDown FormatString="{}{0:#,0}" Margin="20 5 20 0" Value="{Binding StrumDebounceDisplay}"
-                                   Minimum="0"
-                                   Maximum="10" HorizontalAlignment="Stretch" />
-                </StackPanel>
-                <StackPanel IsVisible="{Binding IsGuitar}">
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Combined Strum Debounce"
-                               TextAlignment="Center" />
-                    <ToggleSwitch HorizontalAlignment="Center" Margin="20 5 20 0"
-                                  HorizontalContentAlignment="Center" IsChecked="{Binding CombinedStrumDebounce}"
-                                  OnContent="Enabled"
-                                  OffContent="Disabled" />
+                    <DockPanel Margin="20 5 20 0">
+                        <NumericUpDown Width="110" FormatString="{}{0:#,0}" Value="{Binding StrumDebounceDisplay}"
+                                       Minimum="0"
+                                       Maximum="10" HorizontalAlignment="Stretch" />
+                        <ToggleSwitch HorizontalAlignment="Right"
+                                      HorizontalContentAlignment="Right" IsChecked="{Binding CombinedStrumDebounce}"
+                                      OnContent="Combined"
+                                      OffContent="Individual" />
+                    </DockPanel>
                 </StackPanel>
                 <StackPanel IsVisible="{Binding !IsRetailMode}">
                     <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="20 5 20 0" Text="LED Type"
+                        <TextBlock IsVisible="{Binding !IsApa102}" HorizontalAlignment="Stretch" Margin="20 5 20 0"
+                                   Text="LED Type"
+                                   TextAlignment="Center" />
+                        <TextBlock IsVisible="{Binding IsApa102}" HorizontalAlignment="Stretch" Margin="20 5 20 0"
+                                   Text="LED Type / Count"
+                                   TextAlignment="Center" />
+
+                        <DockPanel HorizontalAlignment="Stretch" Margin="20 5 20 0" IsVisible="{Binding IsApa102}">
+                            <ComboBox HorizontalAlignment="Stretch"
+                                      SelectedItem="{Binding LedType}"
+                                      ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                      ItemsSource="{Binding LedTypes}" />
+                            <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding LedCount}"
+                                           Minimum="1"
+                                           Maximum="180" HorizontalAlignment="Stretch" />
+                        </DockPanel>
+                        <ComboBox Margin="20 5 20 0" IsVisible="{Binding !IsApa102}" HorizontalAlignment="Stretch"
+                                  SelectedItem="{Binding LedType}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                  ItemsSource="{Binding LedTypes}" />
+
+
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel.IsVisible>
+                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                <Binding Path="BindableSpi" />
+                                <Binding Path="IsApa102" />
+                            </MultiBinding>
+                        </StackPanel.IsVisible>
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="APA102 CI / SCK Pin"
                                    TextAlignment="Center" />
                         <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                                  SelectedItem="{Binding LedType}"
-                                  ItemTemplate="{StaticResource EnumToStringTemplate}" ItemsSource="{Binding LedTypes}" />
-                    </StackPanel>
-                    <StackPanel IsVisible="{Binding IsApa102}">
-                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Led Count"
+                                  SelectedItem="{Binding Apa102Mosi}"
+                                  ItemsSource="{Binding AvailableApaMosiPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0"
+                                   Text="APA102 DI / MOSI Pin"
                                    TextAlignment="Center" />
-                        <NumericUpDown FormatString="{}{0:#,0}" Margin="20 5 20 0" Value="{Binding LedCount}"
-                                       Minimum="1"
-                                       Maximum="180" HorizontalAlignment="Stretch" />
-
-                    </StackPanel>
-
-                    <StackPanel Orientation="Vertical" IsVisible="{Binding IsApa102}">
-                        <StackPanel IsVisible="{Binding BindableSpi}">
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="APA102 CI / SCK Pin"
-                                       TextAlignment="Center" />
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                                      SelectedItem="{Binding Apa102Mosi}"
-                                      ItemsSource="{Binding AvailableApaMosiPins}"
-                                      ItemTemplate="{StaticResource PinToStringTemplate}" />
-                        </StackPanel>
-                        <StackPanel IsVisible="{Binding BindableSpi}">
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0"
-                                       Text="APA102 DI / MOSI Pin"
-                                       TextAlignment="Center" />
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                                      SelectedItem="{Binding Apa102Sck}"
-                                      ItemsSource="{Binding AvailableApaSckPins}"
-                                      ItemTemplate="{StaticResource PinToStringTemplate}" />
-
-                        </StackPanel>
+                        <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
+                                  SelectedItem="{Binding Apa102Sck}"
+                                  ItemsSource="{Binding AvailableApaSckPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
 
                         <Label Foreground="Red"
                                Content="{Binding 

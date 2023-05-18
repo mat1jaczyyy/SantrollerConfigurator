@@ -69,8 +69,7 @@ public abstract class OutputButton : Output
                 debounce = (byte) Model.Debounce;
             }
         }
-        // Input queuing is guitar only
-        if (!Model.Deque || this is not GuitarButton {IsStrum: false})
+        if (!Model.Deque)
         {
             // If we aren't using queue based inputs, then we want ms based inputs, not ones based on 0.1ms
             debounce /= 10;
@@ -79,6 +78,10 @@ public abstract class OutputButton : Output
         
         if (mode != ConfigField.Shared)
         {
+            if (Model.Deque && this is GuitarButton {IsStrum: false})
+            {
+                ifStatement = $"{GenerateOutput(ConfigField.Shared).Replace("report->", "current_queue_report.")}";
+            }
             var outputVar = GenerateOutput(mode);
             return outputVar.Any()
                 ? @$"if ({ifStatement}) {{ 
@@ -87,7 +90,7 @@ public abstract class OutputButton : Output
                 }}"
                 : "";
         }
-
+        
         var gen = Input.Generate();
         var reset = $"debounce[{debounceIndex}]={debounce};";
 
@@ -112,7 +115,12 @@ public abstract class OutputButton : Output
             }
         }
 
-        return $"if (({gen} {extraStatement})) {{ {reset} {extra} }}";
+        var queue = "";
+        if (Model.Deque && this is GuitarButton {IsStrum: false}) {
+            queue = $"if ({ifStatement}) {{{GenerateOutput(ConfigField.Shared).Replace("report->", "current_queue_report.")} = true;}}";
+        }
+
+        return $"if (({gen} {extraStatement})) {{ {reset} {extra} }} {queue}";
     }
 
     public override void UpdateBindings()

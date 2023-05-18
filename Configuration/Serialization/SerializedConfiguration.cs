@@ -38,6 +38,7 @@ public class SerializedConfiguration
         StrumDebounce = model.StrumDebounce;
         PollRate = model.PollRate;
         CombinedStrumDebounce = model.CombinedStrumDebounce;
+        QueueBasedInputs = model.Deque;
     }
 
     [ProtoMember(1)] public LedType LedType { get; }
@@ -66,6 +67,7 @@ public class SerializedConfiguration
     [ProtoMember(25)] public int StrumDebounce { get; }
     [ProtoMember(26)] public int PollRate { get; }
     [ProtoMember(27)] public bool CombinedStrumDebounce { get; }
+    [ProtoMember(28)] public bool QueueBasedInputs { get; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
@@ -76,6 +78,7 @@ public class SerializedConfiguration
         model.PollRate = PollRate;
         model.Debounce = Debounce;
         model.StrumDebounce = StrumDebounce;
+        model.Deque = QueueBasedInputs;
         if (Bindings != null)
         {
             var generated = Bindings.Select(s => s.Generate(model)).ToList();

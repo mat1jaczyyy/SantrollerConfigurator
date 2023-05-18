@@ -26,7 +26,7 @@ public class GuitarButton : OutputButton
     public override bool IsKeyboard => false;
 
 
-    public override bool IsStrum => false;
+    public override bool IsStrum => Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp;
 
     public override string GenerateOutput(ConfigField mode)
     {

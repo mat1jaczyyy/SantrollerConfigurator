@@ -163,7 +163,7 @@ public partial class DrumAxis : OutputAxis
             // If we aren't using queue based inputs, then we want ms based inputs, not ones based on 0.1ms
             debounce /= 10;
         }
-        Debounce += 1;
+        debounce += 1;
 
         var ifStatement = $"debounce[{debounceIndex}]";
         
