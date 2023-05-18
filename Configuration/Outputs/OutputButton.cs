@@ -75,7 +75,7 @@ public abstract class OutputButton : Output
             // If we aren't using queue based inputs, then we want ms based inputs, not ones based on 0.1ms
             debounce /= 10;
         }
-        Debounce += 1;
+        debounce += 1;
         
         if (mode != ConfigField.Shared)
         {
