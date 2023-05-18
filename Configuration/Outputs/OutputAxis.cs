@@ -172,7 +172,8 @@ public abstract partial class OutputAxis : Output
                 else
                 {
                     // For non triggers, deadzone starts in the middle and grows in both directions
-                    DeadZone = Math.Abs((max - min) / 2 - rawValue);
+                    DeadZone = Math.Abs((max + min) / 2 - rawValue);
+                    
                 }
 
                 break;

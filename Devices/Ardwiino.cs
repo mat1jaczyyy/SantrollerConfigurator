@@ -689,7 +689,7 @@ public class Ardwiino : ConfigurableUsbDevice
             model.Apa102Sck = 6;
             model.LedCount = ledIndexes.Values.Max();
         }
-
+        model.CombinedStrumDebounce = config.debounce.combinedStrum != 0;
         model.XInputOnWindows = xinputOnWindows;
         model.MouseMovementType = MouseMovementType.Relative;
         model.Bindings.Clear();

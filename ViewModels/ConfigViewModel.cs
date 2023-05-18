@@ -173,6 +173,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => StrumDebounce = (int) (value * 10);
     }
 
+    [Reactive] public bool CombinedStrumDebounce { get; set; }
     [Reactive] public string? RfErrorText { get; set; }
     [Reactive] public string? UsbHostErrorText { get; set; }
     [Reactive] public string? Apa102ErrorText { get; set; }
@@ -654,7 +655,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Deque = false;
         LedType = LedType.None;
         _deviceControllerType = DeviceControllerType.Gamepad;
-
+        CombinedStrumDebounce = false;
         WtSensitivity = 30;
         _usbHostEnabled = false;
         PollRate = 0;
@@ -1152,7 +1153,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var outputsByType = outputs
             .GroupBy(s => s.Input.InnermostInput().GetType()).ToList();
         var combined = DeviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
-                       StrumDebounce > 0;
+                       CombinedStrumDebounce;
         Dictionary<string, int> debounces = new();
         var strumIndices = new List<int>();
 
@@ -1180,7 +1181,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
                 if (combined && output is GuitarButton
                     {
-                        Type: InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown
+                        IsStrum: true
                     })
                     strumIndices.Add(debounces[generatedInput]);
 
@@ -1317,29 +1318,21 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private int CalculateDebounceTicks()
     {
         var outputs = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).ToList();
-        var groupedOutputs = outputs
-            .SelectMany(s =>
-                s.Input.Inputs().Zip(Enumerable.Repeat(s, s.Input.Inputs().Count)))
-            .GroupBy(s => s.First.InnermostInput().GetType()).ToList();
-        var combined = DeviceType == DeviceControllerType.Guitar && StrumDebounce > 0;
-
+        var outputsByType = outputs
+            .GroupBy(s => s.Input.InnermostInput().GetType()).ToList();
         Dictionary<string, int> debounces = new();
-        if (combined)
-            foreach (var output in outputs.Where(output => output.IsStrum))
-                debounces[output.LocalisedName] = debounces.Count;
 
-        foreach (var groupedOutput in groupedOutputs)
-        foreach (var (input, output) in groupedOutput)
+        foreach (var outputByType in outputsByType)
         {
-            var generatedInput = input.Generate();
-            if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
+            foreach (var output in outputByType)
+            {
+                var generatedInput = output.Input.Generate();
+                if (output is not OutputButton and not DrumAxis and not EmulationMode) continue;
 
-            if (output.Input is MacroInput)
+
                 debounces.TryAdd(generatedInput, debounces.Count);
-            else
-                debounces.TryAdd(generatedInput, debounces.Count);
+            }
         }
-
         return debounces.Count;
     }
 

@@ -224,7 +224,7 @@ public class GuitarAxis : OutputAxis
     {
         return Type switch
         {
-            GuitarAxisType.Tilt => "Leave the guitar in a neutral position",
+            GuitarAxisType.Tilt => "Tilt the guitar down",
             GuitarAxisType.Whammy => "Release the whammy",
             _ => ""
         };

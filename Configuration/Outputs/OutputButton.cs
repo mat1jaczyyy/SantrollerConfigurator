@@ -90,29 +90,6 @@ public abstract class OutputButton : Output
 
         var gen = Input.Generate();
         var reset = $"debounce[{debounceIndex}]={debounce};";
-        if (macros.TryGetValue(gen, out var inputs))
-        {
-            // Wii Inputs need a bit of special handling when it comes to macro inputs
-            if (Input.InnermostInput() is WiiInput wiiInput)
-            {
-                var possibleIntersections = string.Join(" && ",
-                    inputs.Where((s) =>
-                            s.Item2 is WiiInput wiiInput2 && wiiInput2.WiiControllerType == wiiInput.WiiControllerType)
-                        .Select(s => s.Item2.Generate()));
-                if (possibleIntersections.Any())
-                {
-                    gen += $" && !({possibleIntersections})";
-                }
-            }
-            else
-            {
-                var possibleIntersections = string.Join(" && ", inputs.Select(s => s.Item2.Generate()));
-                if (possibleIntersections.Any())
-                {
-                    gen += $" && !({possibleIntersections})";
-                }
-            }
-        }
 
         if (Input is MacroInput)
         {

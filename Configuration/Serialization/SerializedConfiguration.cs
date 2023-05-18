@@ -37,6 +37,7 @@ public class SerializedConfiguration
         Debounce = model.Debounce;
         StrumDebounce = model.StrumDebounce;
         PollRate = model.PollRate;
+        CombinedStrumDebounce = model.CombinedStrumDebounce;
     }
 
     [ProtoMember(1)] public LedType LedType { get; }
@@ -64,6 +65,7 @@ public class SerializedConfiguration
     [ProtoMember(24)] public int Debounce { get; }
     [ProtoMember(25)] public int StrumDebounce { get; }
     [ProtoMember(26)] public int PollRate { get; }
+    [ProtoMember(27)] public bool CombinedStrumDebounce { get; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
@@ -86,6 +88,7 @@ public class SerializedConfiguration
         model.WtSensitivity = WtSensitivity;
         model.MouseMovementType = MouseMovementType;
         model.UsbHostEnabled = UsbHostEnabled;
+        model.CombinedStrumDebounce = CombinedStrumDebounce;
         if (UsbHostEnabled) model.UsbHostDp = UsbHostDp;
 
         if (model.IsRf)

@@ -286,6 +286,14 @@
                                    Minimum="0"
                                    Maximum="10" HorizontalAlignment="Stretch" />
                 </StackPanel>
+                <StackPanel IsVisible="{Binding IsGuitar}">
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Combined Strum Debounce"
+                               TextAlignment="Center" />
+                    <ToggleSwitch HorizontalAlignment="Center" Margin="20 5 20 0"
+                                  HorizontalContentAlignment="Center" IsChecked="{Binding CombinedStrumDebounce}"
+                                  OnContent="Enabled"
+                                  OffContent="Disabled" />
+                </StackPanel>
                 <StackPanel IsVisible="{Binding !IsRetailMode}">
                     <StackPanel>
                         <TextBlock HorizontalAlignment="Stretch" Margin="20 5 20 0" Text="LED Type"

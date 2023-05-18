@@ -75,7 +75,7 @@ public class GuitarButton : OutputButton
             or ConfigField.XboxOne)) return "";
         // If combined debounce is on, then additionally generate extra logic to ignore this input if the opposite debounce flag is active
         if (combinedDebounce.Any() && Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp)
-            combinedExtra = $"!debounce[{debounceIndex}]";
+            combinedExtra = string.Join(" && ", combinedDebounce.Where(s => s != debounceIndex).Select(x => $"!debounce[{x}]"));
         // GHL Guitars map strum up and strum down to dpad up and down, and also the stick
         if (Model.DeviceType is DeviceControllerType.LiveGuitar &&
             Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp &&
