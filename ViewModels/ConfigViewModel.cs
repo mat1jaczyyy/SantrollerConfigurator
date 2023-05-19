@@ -691,7 +691,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _usbHostEnabled = false;
         PollRate = 0;
         StrumDebounce = 0;
-        Debounce = 5;
+        Debounce = 10;
         if (Device.IsMini())
         {
             _emulationType = EmulationType.RfController;
