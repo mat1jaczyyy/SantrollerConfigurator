@@ -116,11 +116,11 @@ public abstract partial class OutputAxis : Output
             var mid = (max + min) / 2;
             min = mid - s.deadZone;
             max = mid + s.deadZone;
-            if (!s.inputIsUint)
-            {
-                min += short.MaxValue;
-                max += short.MaxValue;
-            }
+        }
+        if (!s.inputIsUint)
+        {
+            min += short.MaxValue;
+            max += short.MaxValue;
         }
 
         var left = Math.Min(min / ushort.MaxValue * ProgressWidth, ProgressWidth);

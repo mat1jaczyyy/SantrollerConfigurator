@@ -61,7 +61,8 @@ public abstract partial class Output : ReactiveObject
 
     public ReactiveCommand<Unit, Unit> MoveUp { get; }
     public ReactiveCommand<Unit, Unit> MoveDown { get; }
-
+    
+    
     protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         bool childOfCombined)
     {
@@ -91,6 +92,9 @@ public abstract partial class Output : ReactiveObject
         this.WhenAnyValue(x => x.Input)
             .Select(x => x.InnermostInput() is GhWtTapInput && this is not GuitarAxis)
             .ToPropertyEx(this, x => x.IsWt);
+        this.WhenAnyValue(x => x.Input.Title, x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
+            .Select(x => $"{x.Item1} ({GetName(x.Item2, x.Item3)})")
+            .ToPropertyEx(this, x => x.Title);
         this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToPropertyEx(this, x => x.AreLedsEnabled);
         this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
@@ -259,6 +263,8 @@ public abstract partial class Output : ReactiveObject
     [ObservableAsProperty] public double ImageOpacity { get; }
 
     [ObservableAsProperty] public int ValueRaw { get; }
+    [ObservableAsProperty] public string Title { get; }
+
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
     public abstract bool IsCombined { get; }

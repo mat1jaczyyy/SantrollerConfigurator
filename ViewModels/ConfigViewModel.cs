@@ -304,8 +304,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public int StrumDebounce { get; set; }
 
     [Reactive] public int PollRate { get; set; }
-    
-    [ObservableAsProperty] public string PollRateLabel { get; }
 
     public int Apa102Mosi
     {
@@ -511,6 +509,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [ObservableAsProperty] public bool IsBluetooth { get; }
 
     [ObservableAsProperty] public string? WriteToolTip { get; }
+    
+    [ObservableAsProperty] public string? PollRateLabel { get; }
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)

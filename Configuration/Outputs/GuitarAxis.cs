@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -42,6 +43,8 @@ public class GuitarAxis : OutputAxis
             {
                 GuitarAxisType.Tilt => "Highest Tilt LED Colour",
                 GuitarAxisType.Whammy => "Whammy Pressed LED Colour",
+                GuitarAxisType.Pickup => "Lowest Position LED Colour",
+                GuitarAxisType.Slider => "Lowest Position LED Colour",
                 _ => ""
             };
         }
@@ -55,6 +58,8 @@ public class GuitarAxis : OutputAxis
             {
                 GuitarAxisType.Tilt => "Lowest Tilt LED Colour",
                 GuitarAxisType.Whammy => "Whammy Released LED Colour",
+                GuitarAxisType.Pickup => "Lowest Position LED Colour",
+                GuitarAxisType.Slider => "Lowest Position LED Colour",
                 _ => ""
             };
         }
@@ -63,14 +68,18 @@ public class GuitarAxis : OutputAxis
     private string GetSliderInfo(int val)
     {
         if (Type is not GuitarAxisType.Slider || !Gh5NeckInput.Gh5Mappings.ContainsKey(val))
-            return "Current Frets: None";
+            return ChildOfCombined ? "None" : "Current Frets: None";
         var info = Gh5NeckInput.Gh5Mappings[val];
-        var ret = "Current Frets:";
-        if ((info & BarButton.Green) != 0) ret += " Green";
-        if ((info & BarButton.Red) != 0) ret += " Red";
-        if ((info & BarButton.Yellow) != 0) ret += " Yellow";
-        if ((info & BarButton.Blue) != 0) ret += " Blue";
-        if ((info & BarButton.Orange) != 0) ret += " Orange";
+        var ret = "";
+        if (!ChildOfCombined)
+        {
+            ret = "Current Frets: ";
+        }
+        if ((info & BarButton.Green) != 0) ret += "Green ";
+        if ((info & BarButton.Red) != 0) ret += "Red ";
+        if ((info & BarButton.Yellow) != 0) ret += "Yellow ";
+        if ((info & BarButton.Blue) != 0) ret += "Blue ";
+        if ((info & BarButton.Orange) != 0) ret += "Orange";
         return ret.Trim();
     }
 
