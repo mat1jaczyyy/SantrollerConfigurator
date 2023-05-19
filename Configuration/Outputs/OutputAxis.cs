@@ -82,6 +82,9 @@ public abstract partial class OutputAxis : Output
     [ObservableAsProperty] public Thickness ComputedDeadZoneMargin { get; }
     [ObservableAsProperty] public Thickness CalibrationMinMaxMargin { get; }
 
+    
+    public int SliderMax => InputIsUint ? ushort.MaxValue : short.MaxValue;
+    public int SliderMin => InputIsUint ? ushort.MinValue : short.MinValue;
     // ReSharper enable UnassignedGetOnlyAutoProperty
     [Reactive] public int Min { get; set; }
 

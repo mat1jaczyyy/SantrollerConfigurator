@@ -92,7 +92,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         SaveConfigCommand = ReactiveCommand.CreateFromObservable(() => SaveConfig.Handle(this));
 
         LoadConfigCommand = ReactiveCommand.CreateFromObservable(() => LoadConfig.Handle(this));
-
+        this.WhenAnyValue(x => x.Deque, x => x.PollRate)
+            .Select(GeneratePollRateLabel)
+            .ToPropertyEx(this, x => x.PollRateLabel);
         this.WhenAnyValue(x => x.HasError)
             .Select(s => s ? "There are errors in your configuration" : null).ToPropertyEx(this, s => s.WriteToolTip);
         this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Advanced)
@@ -150,6 +152,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (Main is {IsUno: false, IsMega: false}) return;
         _unoRx = new DirectPinConfig(this, UnoPinTypeRx, UnoPinTypeRxPin, DevicePinMode.Output);
         _unoTx = new DirectPinConfig(this, UnoPinTypeTx, UnoPinTypeTxPin, DevicePinMode.Output);
+    }
+
+    private static string GeneratePollRateLabel((bool dequeue, int rate) arg)
+    {
+        var rate = Math.Floor((1f / Math.Max(arg.rate, 1)) * 1000);
+        return arg.dequeue ? $"Dequeue Rate ({rate}+ fps required)" : $"Poll Rate (0 for unlimited) ({rate}hz)";
     }
 
     public IConfigurableDevice Device { get; private set; }
@@ -296,6 +304,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public int StrumDebounce { get; set; }
 
     [Reactive] public int PollRate { get; set; }
+    
+    [ObservableAsProperty] public string PollRateLabel { get; }
 
     public int Apa102Mosi
     {
