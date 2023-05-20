@@ -62,11 +62,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly DirectPinConfig? _unoRx;
     private readonly DirectPinConfig? _unoTx;
 
-    private DirectPinConfig? _usbHostDm;
-    private DirectPinConfig? _usbHostDp;
-
-    private bool _usbHostEnabled;
-
+    private readonly DirectPinConfig _usbHostDm;
+    private readonly DirectPinConfig _usbHostDp;
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
         Device = device;
@@ -141,8 +138,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Bind(out var outputs)
             .Subscribe();
         Outputs = outputs;
+        Bindings.Connect().Filter(x => x is UsbHostCombinedOutput || x.Input.InputType is InputType.UsbHostInput).Any()
+            .ToPropertyEx(this, x => x.UsbHostEnabled);
         SupportsReset = !device.IsMini() && !device.IsEsp32();
 
+        _usbHostDm = new DirectPinConfig(this, UsbHostPinTypeDm, -1, DevicePinMode.Skip);
+        _usbHostDp = new DirectPinConfig(this, UsbHostPinTypeDp, -1, DevicePinMode.Skip);
         if (!device.LoadConfiguration(this))
         {
             SetDefaults();
@@ -417,33 +418,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     [Reactive] public bool XInputOnWindows { get; set; }
 
-    public bool UsbHostEnabled
-    {
-        get => _usbHostEnabled;
-        set
-        {
-            if (!IsPico) return;
-            if (value)
-            {
-                // These pins get handled by the usb host lib, but we need them defined regardless
-                _usbHostDp = new DirectPinConfig(this, UsbHostPinTypeDp, -1,
-                    DevicePinMode.Skip);
-                _usbHostDm = new DirectPinConfig(this, UsbHostPinTypeDm, -1,
-                    DevicePinMode.Skip);
-                this.RaisePropertyChanged(nameof(UsbHostDp));
-                this.RaisePropertyChanged(nameof(UsbHostDm));
-            }
-            else
-            {
-                _usbHostDp = null;
-                _usbHostDm = null;
-            }
-
-            this.RaiseAndSetIfChanged(ref _usbHostEnabled, value);
-
-            UpdateErrors();
-        }
-    }
 
 
     public DeviceControllerType DeviceType
@@ -511,6 +485,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [ObservableAsProperty] public string? WriteToolTip { get; }
     
     [ObservableAsProperty] public string? PollRateLabel { get; }
+    
+    [ObservableAsProperty] public bool UsbHostEnabled { get; }
+
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
@@ -587,7 +564,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Bindings.RemoveMany(extra);
 
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
-        if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput or UsbHostInput)) return;
+        if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput or UsbHostCombinedOutput)) return;
 
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
@@ -688,7 +665,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _deviceControllerType = DeviceControllerType.Gamepad;
         CombinedStrumDebounce = false;
         WtSensitivity = 30;
-        _usbHostEnabled = false;
         PollRate = 0;
         StrumDebounce = 0;
         Debounce = 10;
@@ -747,8 +723,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Bindings.Add(rfOutput);
                 break;
             case DeviceInputType.Usb:
-                UsbHostEnabled = true;
-                var usbOutput = new UsbHostInput(this)
+                var usbOutput = new UsbHostCombinedOutput(this)
                 {
                     Expanded = true
                 };
@@ -1028,6 +1003,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
 
         File.WriteAllLines(configFile, lines);
+    }
+
+    public PinConfig[] UsbHostPinConfigs()
+    {
+        return UsbHostEnabled ? new PinConfig[] { _usbHostDm!, _usbHostDp!} : Array.Empty<PinConfig>();
     }
 
     private byte GetEmulationType()
@@ -1409,22 +1389,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             output.UpdateErrors();
             if (!string.IsNullOrEmpty(output.ErrorText)) foundError = true;
-        }
-
-        if (UsbHostEnabled)
-        {
-            var dmText = _usbHostDm!.ErrorText;
-            var dpText = _usbHostDp!.ErrorText;
-            if (dmText != null || dpText != null)
-            {
-                foundError = true;
-            }
-
-            UsbHostErrorText = dmText ?? dpText;
-        }
-        else
-        {
-            UsbHostErrorText = "";
         }
 
         if (IsRf && Microcontroller.SpiAssignable)

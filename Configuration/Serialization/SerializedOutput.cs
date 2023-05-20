@@ -25,7 +25,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoInclude(117, typeof(SerializedLed))]
 [ProtoInclude(118, typeof(SerializedEmulationMode))]
 [ProtoInclude(119, typeof(SerializedJoystickToDpad))]
-[ProtoInclude(120, typeof(SerializedUsbHost))]
+[ProtoInclude(120, typeof(SerializedCombinedUsbHostOutput))]
 [ProtoInclude(121, typeof(SerializedBluetoothOutput))]
 [ProtoContract]
 public abstract class SerializedOutput

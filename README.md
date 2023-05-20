@@ -24,6 +24,7 @@ being added:
 - Support for using USB devices as inputs
     - pi pico only, as this is the only support microcontroller that can do this sort of thing
     - Also support for using USB devices for handling authentication for use on retail consoles
+    - This will work by hooking up the usb pins from the input controller to a few pins on the pico.
 - Automatic console / OS detection
     - No more requirement to use PS3 mode for macos or linux, your controller will automatically detect what it is
       plugged into and pick the best emulation mode for that device.

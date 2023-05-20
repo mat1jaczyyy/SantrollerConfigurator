@@ -30,65 +30,81 @@ public class MacroInput : Input
             .ToPropertyEx(this, x => x.IsWii);
         this.WhenAnyValue(x => x.Child1).Select(x => x.InnermostInput() is Ps2Input)
             .ToPropertyEx(this, x => x.IsPs2);
+        this.WhenAnyValue(x => x.Child1).Select(x => x.InnermostInput() is UsbHostInput)
+            .ToPropertyEx(this, x => x.IsUsb);
     }
 
     public InputType? SelectedInputType1
     {
         get => Child1.InputType;
-        set => SetInput(value, true, null, null, null, null, null);
+        set => SetInput(value, true, null, null, null, null, null, null);
     }
 
     public WiiInputType WiiInputType1
     {
         get => (Child1.InnermostInput() as WiiInput)?.Input ?? WiiInputType.ClassicA;
-        set => SetInput(SelectedInputType1, true, value, null, null, null, null);
+        set => SetInput(SelectedInputType1, true, value, null, null, null, null, null);
     }
 
     public Ps2InputType Ps2InputType1
     {
         get => (Child1.InnermostInput() as Ps2Input)?.Input ?? Ps2InputType.Cross;
-        set => SetInput(SelectedInputType1, true, null, value, null, null, null);
+        set => SetInput(SelectedInputType1, true, null, value, null, null, null, null);
     }
 
     public DjInputType DjInputType1
     {
         get => (Child1.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
-        set => SetInput(SelectedInputType1, true, null, null, null, null, value);
+        set => SetInput(SelectedInputType1, true, null, null, null, null, value, null);
+    }
+    public UsbHostInputType UsbInputType1
+    {
+        get => (Child1.InnermostInput() as UsbHostInput)?.Input ?? UsbHostInputType.A;
+        set => SetInput(SelectedInputType1, true, null, null, null, null, null, value);
     }
 
     public InputType? SelectedInputType2
     {
         get => Child2.InputType;
-        set => SetInput(value, false, null, null, null, null, null);
+        set => SetInput(value, false, null, null, null, null, null, null);
     }
 
     public WiiInputType WiiInputType2
     {
         get => (Child2.InnermostInput() as WiiInput)?.Input ?? WiiInputType.ClassicA;
-        set => SetInput(SelectedInputType1, false, value, null, null, null, null);
+        set => SetInput(SelectedInputType2, false, value, null, null, null, null, null);
     }
 
     public Ps2InputType Ps2InputType2
     {
         get => (Child2.InnermostInput() as Ps2Input)?.Input ?? Ps2InputType.Cross;
-        set => SetInput(SelectedInputType1, false, null, value, null, null, null);
+        set => SetInput(SelectedInputType2, false, null, value, null, null, null, null);
     }
 
     public DjInputType DjInputType2
     {
         get => (Child2.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
-        set => SetInput(SelectedInputType1, false, null, null, null, null, value);
-    } // ReSharper disable UnassignedGetOnlyAutoProperty
+        set => SetInput(SelectedInputType2, false, null, null, null, null, value, null);
+    }
+
+    public UsbHostInputType UsbInputType2
+    {
+        get => (Child2.InnermostInput() as UsbHostInput)?.Input ?? UsbHostInputType.A;
+        set => SetInput(SelectedInputType2, false, null, null, null, null, null, value);
+    }
+    // ReSharper disable UnassignedGetOnlyAutoProperty
 
     [ObservableAsProperty] public bool IsDj { get; }
     [ObservableAsProperty] public bool IsWii { get; }
 
     [ObservableAsProperty] public bool IsPs2 { get; }
+    [ObservableAsProperty] public bool IsUsb { get; }
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
 
     private void SetInput(InputType? inputType, bool isChild1, WiiInputType? wiiInput, Ps2InputType? ps2InputType,
-        GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
+        GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType,
+        UsbHostInputType? usbInputType)
     {
         var child = isChild1 ? Child1 : Child2;
         child = child.InnermostInput();
@@ -160,6 +176,15 @@ public class MacroInput : Input
                     ps2.Att,
                     ps2.Ack);
                 break;
+            case Types.InputType.UsbHostInput when child.InnermostInput() is not UsbHostInput:
+                usbInputType ??= UsbHostInputType.A;
+                input = new UsbHostInput(Model, usbInputType.Value);
+                inputOther = new UsbHostInput(Model, usbInputType.Value);
+                break;
+            case Types.InputType.UsbHostInput when child.InnermostInput() is UsbHostInput:
+                usbInputType ??= UsbHostInputType.A;
+                input = new UsbHostInput(Model, usbInputType.Value);
+                break;
             default:
                 return;
         }
@@ -203,12 +228,28 @@ public class MacroInput : Input
         Enum.GetValues<WiiInputType>().OrderBy(s => EnumToStringConverter.Convert(s));
 
     public IEnumerable<DjInputType> DjInputTypes => Enum.GetValues<DjInputType>();
+    public IEnumerable<UsbHostInputType> UsbInputTypes => Enum.GetValues<UsbHostInputType>();
 
-    public IEnumerable<InputType> InputTypes => new[]
+    public IEnumerable<InputType> InputTypes
     {
-        Types.InputType.AnalogPinInput, Types.InputType.DigitalPinInput, Types.InputType.WiiInput,
-        Types.InputType.Ps2Input, Types.InputType.TurntableInput
-    };
+        get
+        {
+            if (Model.IsPico)
+            {
+                return new[]
+                {
+                    Types.InputType.AnalogPinInput, Types.InputType.DigitalPinInput, Types.InputType.WiiInput,
+                    Types.InputType.Ps2Input, Types.InputType.TurntableInput, Types.InputType.UsbHostInput
+                };
+            }
+
+            return new[]
+            {
+                Types.InputType.AnalogPinInput, Types.InputType.DigitalPinInput, Types.InputType.WiiInput,
+                Types.InputType.Ps2Input, Types.InputType.TurntableInput
+            };
+        }
+    }
 
 
     [Reactive] public Input Child1 { get; set; }
@@ -246,12 +287,13 @@ public class MacroInput : Input
     public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
+        byte[] usbHostInputsRaw, byte[] usbHostRaw)
     {
         Child1.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
-            ps2ControllerType, wiiControllerType);
+            ps2ControllerType, wiiControllerType, usbHostInputsRaw, usbHostRaw);
         Child2.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
-            ps2ControllerType, wiiControllerType);
+            ps2ControllerType, wiiControllerType, usbHostInputsRaw, usbHostRaw);
     }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings,

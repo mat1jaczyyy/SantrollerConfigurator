@@ -24,7 +24,6 @@ public class SerializedConfiguration
         MouseMovementType = model.MouseMovementType;
         WtSensitivity = model.WtSensitivity;
         UsbHostDp = model.UsbHostDp;
-        UsbHostEnabled = model.UsbHostEnabled;
         PowerLevel = model.PowerLevel;
         RfMiso = model.RfMiso;
         RfMosi = model.RfMosi;
@@ -52,7 +51,6 @@ public class SerializedConfiguration
     [ProtoMember(10)] public byte LedCount { get; }
     [ProtoMember(11)] public MouseMovementType MouseMovementType { get; }
     [ProtoMember(12)] public byte WtSensitivity { get; }
-    [ProtoMember(13)] public bool UsbHostEnabled { get; }
     [ProtoMember(14)] public int UsbHostDp { get; }
     [ProtoMember(15)] public RfPowerLevel PowerLevel { get; }
     [ProtoMember(16)] public int RfMosi { get; }
@@ -85,14 +83,13 @@ public class SerializedConfiguration
             model.Bindings.Clear();
             model.Bindings.AddRange(generated);
         }
+        if (model.UsbHostEnabled) model.UsbHostDp = UsbHostDp;
 
         model.LedType = LedType;
         model.LedCount = LedCount < 1 ? (byte) 1 : LedCount;
         model.WtSensitivity = WtSensitivity;
         model.MouseMovementType = MouseMovementType;
-        model.UsbHostEnabled = UsbHostEnabled;
         model.CombinedStrumDebounce = CombinedStrumDebounce;
-        if (UsbHostEnabled) model.UsbHostDp = UsbHostDp;
 
         if (model.IsRf)
         {

@@ -82,6 +82,8 @@ public abstract partial class Output : ReactiveObject
             .ToPropertyEx(this, x => x.AvailableIndices);
         this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is DjInput)
             .ToPropertyEx(this, x => x.IsDj);
+        this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is UsbHostInput)
+            .ToPropertyEx(this, x => x.IsUsb);
         this.WhenAnyValue(x => x.Input).Select(x => x.InnermostInput() is WiiInput)
             .ToPropertyEx(this, x => x.IsWii);
         this.WhenAnyValue(x => x.Input)
@@ -164,19 +166,19 @@ public abstract partial class Output : ReactiveObject
     public InputType? SelectedInputType
     {
         get => Input.InputType;
-        set => SetInput(value, null, null, null, null, null);
+        set => SetInput(value, null, null, null, null, null, null);
     }
 
     public WiiInputType WiiInputType
     {
         get => (Input.InnermostInput() as WiiInput)?.Input ?? WiiInputType.ClassicA;
-        set => SetInput(SelectedInputType, value, null, null, null, null);
+        set => SetInput(SelectedInputType, value, null, null, null, null, null);
     }
 
     public Ps2InputType Ps2InputType
     {
         get => (Input.InnermostInput() as Ps2Input)?.Input ?? Ps2InputType.Cross;
-        set => SetInput(SelectedInputType, null, value, null, null, null);
+        set => SetInput(SelectedInputType, null, value, null, null, null, null);
     }
 
     public object KeyOrMouse
@@ -188,24 +190,30 @@ public abstract partial class Output : ReactiveObject
     public DjInputType DjInputType
     {
         get => (Input.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
-        set => SetInput(SelectedInputType, null, null, null, null, value);
+        set => SetInput(SelectedInputType, null, null, null, null, value, null);
+    }
+    public UsbHostInputType UsbInputType
+    {
+        get => (Input.InnermostInput() as UsbHostInput)?.Input ?? UsbHostInputType.A;
+        set => SetInput(SelectedInputType, null, null, null, null, null, value);
     }
 
     public Gh5NeckInputType Gh5NeckInputType
     {
         get => (Input.InnermostInput() as Gh5NeckInput)?.Input ?? Gh5NeckInputType.Green;
-        set => SetInput(SelectedInputType, null, null, null, value, null);
+        set => SetInput(SelectedInputType, null, null, null, value, null, null);
     }
 
     public GhWtInputType GhWtInputType
     {
         get => (Input.InnermostInput() as GhWtTapInput)?.Input ?? GhWtInputType.TapGreen;
-        set => SetInput(SelectedInputType, null, null, value, null, null);
+        set => SetInput(SelectedInputType, null, null, value, null, null, null);
     }
 
     public IEnumerable<GhWtInputType> GhWtInputTypes => Enum.GetValues<GhWtInputType>();
 
     public IEnumerable<Gh5NeckInputType> Gh5NeckInputTypes => Enum.GetValues<Gh5NeckInputType>();
+    public IEnumerable<UsbHostInputType> UsbInputTypes => Enum.GetValues<UsbHostInputType>();
 
     public IEnumerable<object> KeyOrMouseInputs => Enum.GetValues<MouseButtonType>().Cast<object>()
         .Concat(Enum.GetValues<MouseAxisType>().Cast<object>()).Concat(KeyboardButton.Keys.Keys.Cast<object>());
@@ -251,6 +259,7 @@ public abstract partial class Output : ReactiveObject
     [ObservableAsProperty] public string LocalisedName { get; } = "";
     [ObservableAsProperty] public bool IsDj { get; }
     [ObservableAsProperty] public bool IsWii { get; }
+    [ObservableAsProperty] public bool IsUsb { get; }
     [ObservableAsProperty] public bool IsPs2 { get; }
     [ObservableAsProperty] public bool IsGh5 { get; }
     [ObservableAsProperty] public bool IsWt { get; }
@@ -263,7 +272,7 @@ public abstract partial class Output : ReactiveObject
     [ObservableAsProperty] public double ImageOpacity { get; }
 
     [ObservableAsProperty] public int ValueRaw { get; }
-    [ObservableAsProperty] public string Title { get; }
+    [ObservableAsProperty] public string Title { get; } = "";
 
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
@@ -363,10 +372,10 @@ public abstract partial class Output : ReactiveObject
 
     public abstract object GetOutputType();
 
-    public static string GetReportField(object type)
+    public static string GetReportField(object type, string field = "report")
     {
         var typeName = type.ToString()!;
-        return $"report->{char.ToLower(typeName[0])}{typeName[1..]}";
+        return $"{field}->{char.ToLower(typeName[0])}{typeName[1..]}";
     }
 
     [RelayCommand]
@@ -417,7 +426,8 @@ public abstract partial class Output : ReactiveObject
     }
 
     private void SetInput(InputType? inputType, WiiInputType? wiiInput, Ps2InputType? ps2InputType,
-        GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType)
+        GhWtInputType? ghWtInputType, Gh5NeckInputType? gh5NeckInputType, DjInputType? djInputType,
+        UsbHostInputType? usbInputType)
     {
         Input input;
         switch (inputType)
@@ -575,18 +585,18 @@ public abstract partial class Output : ReactiveObject
     public virtual void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw)
+        byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw, byte[] usbHostInputsRaw)
     {
         if (Enabled)
             Input.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                 ghWtRaw,
-                ps2ControllerType, wiiControllerType);
+                ps2ControllerType, wiiControllerType, usbHostInputsRaw, usbHostRaw);
 
         foreach (var output in Outputs.Items)
             if (output != this)
                 output.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                     ghWtRaw,
-                    ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
+                    ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
     }
 
     public void UpdateErrors()

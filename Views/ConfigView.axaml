@@ -150,7 +150,7 @@
                     <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False" VerticalAlignment="Center">Right Turntable Found</CheckBox>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type other:UsbHostInput}">
+            <DataTemplate DataType="{x:Type combined:UsbHostCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="{Binding ConnectedDevices}" VerticalAlignment="Center" />
                     <Label VerticalAlignment="Center">Devices connected</Label>
@@ -341,16 +341,40 @@
         </netCore:OutputTemplateSelector>
         <netCore:OutputTemplateSelector x:Key="OutputTemplates">
 
-            <DataTemplate DataType="{x:Type other:UsbHostInput}">
-                <StackPanel Orientation="Horizontal">
-                    <Label VerticalAlignment="Center"
-                           VerticalContentAlignment="Center"
-                           Width="300">
-                        Connected devices
-                    </Label>
-                    <Label VerticalAlignment="Center"
-                           VerticalContentAlignment="Center"
-                           Width="200" Content="{Binding UsbHostInfo}" />
+            <DataTemplate DataType="{x:Type combined:UsbHostCombinedOutput}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Connected devices
+                        </Label>
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="200" Content="{Binding UsbHostInfo}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            D- (White) Pin
+                        </Label>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  SelectedItem="{Binding UsbHostDm}"
+                                  ItemsSource="{Binding AvailablePinsDm}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            D+ (Green) Pin
+                        </Label>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  SelectedItem="{Binding UsbHostDp}"
+                                  ItemsSource="{Binding AvailablePinsDp}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:GhWtTapInput}">
@@ -643,6 +667,43 @@
                                   ItemsSource="{Binding AvailableSdaPins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}"
                                   Width="200" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            
+            <DataTemplate DataType="{x:Type inputs:UsbHostInput}">
+                <StackPanel Orientation="Vertical" IsVisible="{Binding !Combined}">
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Connected devices
+                        </Label>
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="200" Content="{Binding UsbHostInfo}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding !Combined}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            D- (White) Pin
+                        </Label>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  SelectedItem="{Binding UsbHostDm}"
+                                  ItemsSource="{Binding AvailablePinsDm}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding !Combined}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            D+ (Green) Pin
+                        </Label>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  SelectedItem="{Binding UsbHostDp}"
+                                  ItemsSource="{Binding AvailablePinsDp}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -1486,6 +1547,7 @@
                                 <Binding Path="IsWii" />
                                 <Binding Path="IsDj" />
                                 <Binding Path="IsPs2" />
+                                <Binding Path="IsUsb" />
                             </MultiBinding>
                         </StackPanel.IsVisible>
                         <Label VerticalAlignment="Center"
@@ -1508,6 +1570,11 @@
                                   SelectedItem="{Binding Ps2InputType1}"
                                   ItemsSource="{Binding Ps2InputTypes}"
                                   ItemTemplate="{StaticResource ImageWithTextTemplate}" />
+                        <ComboBox VerticalAlignment="Center"
+                                  IsVisible="{Binding IsUsb}"
+                                  SelectedItem="{Binding UsbInputType1}"
+                                  ItemsSource="{Binding UsbInputTypes}"
+                                  ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                     </StackPanel>
                     <ContentControl Content="{Binding Child1}"
                                     ContentTemplate="{StaticResource OutputTemplates}">
@@ -1517,6 +1584,8 @@
                                 <Binding Path="!IsWii" />
                                 <Binding Path="!IsDj" />
                                 <Binding Path="!IsPs2" />
+                                <Binding Path="!IsUsb" />
+                                
                             </MultiBinding>
                         </ContentControl.IsVisible>
                     </ContentControl>
@@ -1527,6 +1596,7 @@
                                 <Binding Path="IsWii" />
                                 <Binding Path="IsDj" />
                                 <Binding Path="IsPs2" />
+                                <Binding Path="IsUsb" />
                             </MultiBinding>
                         </StackPanel.IsVisible>
                         <Label VerticalAlignment="Center"
@@ -1548,6 +1618,11 @@
                                   IsVisible="{Binding IsPs2}"
                                   SelectedItem="{Binding Ps2InputType2}"
                                   ItemsSource="{Binding Ps2InputTypes}"
+                                  ItemTemplate="{StaticResource ImageWithTextTemplate}" />
+                        <ComboBox VerticalAlignment="Center"
+                                  IsVisible="{Binding IsUsb}"
+                                  SelectedItem="{Binding UsbInputType2}"
+                                  ItemsSource="{Binding UsbInputTypes}"
                                   ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                     </StackPanel>
                     <ContentControl Content="{Binding Child2}"
@@ -2167,6 +2242,11 @@
                                                       IsVisible="{Binding IsWii}"
                                                       SelectedItem="{Binding WiiInputType}"
                                                       ItemsSource="{Binding WiiInputTypes}"
+                                                      ItemTemplate="{StaticResource ImageWithTextTemplate}" />
+                                            <ComboBox VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsUsb}"
+                                                      SelectedItem="{Binding UsbInputType}"
+                                                      ItemsSource="{Binding UsbInputTypes}"
                                                       ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                                             <ComboBox VerticalAlignment="Center"
                                                       IsVisible="{Binding IsDj}"

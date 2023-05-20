@@ -141,7 +141,7 @@ public class MultiplexerInput : DirectInput
     public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType)
+        byte[] wiiControllerType, byte[] usbHostInputsRaw, byte[] usbHostRaw)
     {
         RawValue = analogRaw.GetValueOrDefault(Pin, 0);
     }

@@ -287,7 +287,8 @@ public class Ps2Input : SpiInput
     public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Data,
         byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
+        byte[] usbHostInputsRaw, byte[] usbHostRaw)
     {
         if (!ps2ControllerType.Any() || !ps2Data.Any()) return;
         var type = ps2ControllerType[0];

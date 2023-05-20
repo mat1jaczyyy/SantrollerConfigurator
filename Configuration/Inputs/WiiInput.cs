@@ -296,7 +296,8 @@ public class WiiInput : TwiInput
     public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiData, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType)
+        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
+        byte[] usbHostInputsRaw, byte[] usbHostRaw)
     {
         if (!wiiControllerType.Any()) return;
         var type = BitConverter.ToUInt16(wiiControllerType);

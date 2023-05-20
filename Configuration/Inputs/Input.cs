@@ -47,7 +47,7 @@ public abstract class Input : ReactiveObject
     public abstract void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType);
+        byte[] wiiControllerType, byte[] usbHostInputsRaw, byte[] usbHostRaw);
 
     public abstract string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode);

@@ -68,42 +68,7 @@
                               ItemTemplate="{StaticResource EnumToStringTemplate}"
                               ItemsSource="{Binding ModeTypes}" />
                 </StackPanel>
-                <StackPanel IsVisible="{Binding IsPico}" Orientation="Vertical">
-                    <StackPanel IsVisible="{Binding !IsRetailMode}">
-                        <StackPanel>
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="USB Host"
-                                       TextAlignment="Center" />
-                            <ToggleSwitch HorizontalAlignment="Center" Margin="20 5 20 0"
-                                          HorizontalContentAlignment="Center" IsChecked="{Binding UsbHostEnabled}"
-                                          OnContent="Enabled"
-                                          OffContent="Disabled" />
-
-                        </StackPanel>
-                        <StackPanel IsVisible="{Binding UsbHostEnabled}">
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="D- (White) Pin"
-                                       TextAlignment="Center" />
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                                      SelectedItem="{Binding UsbHostDm}"
-                                      ItemsSource="{Binding AvailablePinsDm}"
-                                      ItemTemplate="{StaticResource PinToStringTemplate}" />
-
-                        </StackPanel>
-                        <StackPanel IsVisible="{Binding UsbHostEnabled}">
-                            <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="D+ (Green) Pin"
-                                       TextAlignment="Center" />
-                            <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                                      SelectedItem="{Binding UsbHostDp}"
-                                      ItemsSource="{Binding AvailablePinsDp}"
-                                      ItemTemplate="{StaticResource PinToStringTemplate}" />
-
-                        </StackPanel>
-
-                        <Label Foreground="Red"
-                               Content="{Binding UsbHostErrorText}"
-                               HorizontalAlignment="Stretch" Margin="40 5 40 0" HorizontalContentAlignment="Center"
-                               IsVisible="{Binding UsbHostErrorText, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                    </StackPanel>
-                </StackPanel>
+               
                 <StackPanel IsVisible="{Binding IsBluetooth}" Orientation="Vertical">
                     <CheckBox HorizontalAlignment="Stretch" Margin="40 5 40 0" IsChecked="{Binding Connected}"
                               IsEnabled="False">

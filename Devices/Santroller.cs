@@ -49,7 +49,8 @@ public class Santroller : IConfigurableDevice
         CommandStopBtScan,
         CommandGetBtDevices,
         CommandGetBtState,
-        CommandGetBtAddress
+        CommandGetBtAddress,
+        CommandReadUsbHostInputs
     }
 
     private readonly Dictionary<int, int> _analogRaw = new();
@@ -287,7 +288,12 @@ public class Santroller : IConfigurableDevice
             var wiiControllerType = await ReadDataAsync(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
             var rfRaw = await ReadDataAsync(0, (byte) Commands.CommandReadRf, 2);
             var usbHostRaw = Array.Empty<byte>();
-            if (_model.UsbHostEnabled) usbHostRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHost, 24);
+            var usbHostInputsRaw = Array.Empty<byte>();
+            if (_model.UsbHostEnabled)
+            {
+                usbHostRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHost, 24);
+                usbHostInputsRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHostInputs, 24);
+            }
 
             var bluetoothRaw = Array.Empty<byte>();
             if (IsPico()) bluetoothRaw = await ReadDataAsync(0, (byte) Commands.CommandGetBtState, 1);
@@ -297,7 +303,7 @@ public class Santroller : IConfigurableDevice
             foreach (var output in _model.Bindings.Items)
                 output.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                     djRightRaw, gh5Raw,
-                    ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
+                    ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
         }
         catch (Exception ex)
         {

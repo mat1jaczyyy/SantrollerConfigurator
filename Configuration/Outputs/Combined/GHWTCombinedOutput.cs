@@ -39,7 +39,7 @@ public class GhwtCombinedOutput : CombinedOutput
     private readonly DirectPinConfig _pinConfigS2;
 
     public GhwtCombinedOutput(ConfigViewModel model, int pin = -1, int pinS0 = -1, int pinS1 = -1,
-        int pinS2 = -1) : base(model, new FixedInput(model, 0))
+        int pinS2 = -1) : base(model)
     {
         Outputs.Clear();
         _pin = new DirectPinConfig(model, GhWtTapInput.GhWtAnalogPinType, pin, DevicePinMode.PullUp);

@@ -1,35 +1,35 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Media;
+using System.Runtime.InteropServices;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
-using GuitarConfigurator.NetCore.Configuration.Outputs;
+using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace GuitarConfigurator.NetCore.Configuration.Other;
+namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
-public class UsbHostInputInput : FixedInput
+public class UsbHostCombinedOutput : CombinedOutput
 {
-    public UsbHostInputInput(ConfigViewModel model) : base(model, 0)
+    public UsbHostCombinedOutput(ConfigViewModel model) : base(
+        model)
     {
-    }
-
-    public override string Title => "Usb Host Inputs";
-
-    public override IReadOnlyList<string> RequiredDefines()
-    {
-        return new[] {"INPUT_USB_HOST"};
-    }
-}
-
-public class UsbHostInput : Output
-{
-    public UsbHostInput(ConfigViewModel model) : base(
-        model, new UsbHostInputInput(model), Colors.Black, Colors.Black, Array.Empty<byte>(), false)
-    {
+        _usbHostDm = model.WhenAnyValue(x => x.UsbHostDm).ToProperty(this, x => x.UsbHostDm);
+        _usbHostDp = model.WhenAnyValue(x => x.UsbHostDp).ToProperty(this, x => x.UsbHostDp);
+        Outputs.Connect().Filter(x => x is OutputAxis)
+            .AutoRefresh(s => s.LocalisedName)
+            .Filter(s => s.LocalisedName.Any())
+            .Bind(out var analogOutputs)
+            .Subscribe();
+        Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
+            .AutoRefresh(s => s.LocalisedName)
+            .Filter(s => s.LocalisedName.Any())
+            .Bind(out var digitalOutputs)
+            .Subscribe();
         UpdateDetails();
     }
 
@@ -42,15 +42,13 @@ public class UsbHostInput : Output
     public override bool IsKeyboard => false;
     public override string LedOnLabel => "";
     public override string LedOffLabel => "";
-
-    public override IEnumerable<Output> ValidOutputs()
-    {
-        return Array.Empty<Output>();
-    }
+    // Since DM and DP need to be next to eachother, you cannot use pins at the far ends
+    public List<int> AvailablePinsDm => Model.AvailablePins.Skip(1).ToList();
+    public List<int> AvailablePinsDp => Model.AvailablePins.SkipLast(1).ToList();
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedUsbHost();
+        return new SerializedCombinedUsbHostOutput();
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
@@ -63,25 +61,48 @@ public class UsbHostInput : Output
         return SimpleType.UsbHost;
     }
 
-    public override string Generate(ConfigField mode, int debounceIndex, string extra,
-        string combinedExtra,
-        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
+    public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
     {
-        return "";
+        Outputs.Clear();
+        if (outputs.Any())
+            Outputs.AddRange(outputs);
+        else
+            CreateDefaults();
+    }
+
+    public void CreateDefaults()
+    {
+        Outputs.Clear();
+        //TODO this   
     }
 
     public override void UpdateBindings()
     {
+        //TODO this
+    }
+
+    private readonly ObservableAsPropertyHelper<int> _usbHostDm;
+    private readonly ObservableAsPropertyHelper<int> _usbHostDp;
+    public int UsbHostDm
+    {
+        get => _usbHostDm.Value;
+        set => Model.UsbHostDm = value;
+    }
+    
+    public int UsbHostDp
+    {
+        get => _usbHostDp.Value;
+        set => Model.UsbHostDp = value;
     }
 
 
     public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
         byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw)
+        byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw, byte[] usbHostInputsRaw)
     {
         base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
-            ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw);
+            ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
         var buffer = "";
         if (!usbHostRaw.Any()) return;
         for (var i = 0; i < usbHostRaw.Length; i += 3)
