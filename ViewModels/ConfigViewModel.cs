@@ -846,8 +846,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         foreach (var type in Enum.GetValues<StandardButtonType>())
         {
-            if (ControllerEnumConverter.GetButtonText(_deviceControllerType, type) ==
-                null) continue;
+            if (!ControllerEnumConverter.GetButtonText(_deviceControllerType, type).Any()) continue;
             Bindings.Add(new ControllerButton(this,
                 new DirectInput(-1, DevicePinMode.PullUp, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type, false));

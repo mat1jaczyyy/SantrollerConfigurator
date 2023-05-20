@@ -195,10 +195,14 @@ public class WiiCombinedOutput : CombinedTwiOutput
         this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
             .ToPropertyEx(this, x => x.IsGuitar);
         Outputs.Connect().Filter(x => x is OutputAxis)
+            .AutoRefresh(s => s.LocalisedName)
+            .Filter(s => s.LocalisedName.Any())
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
+            .AutoRefresh(s => s.LocalisedName)
+            .Filter(s => s.LocalisedName.Any())
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
             .Bind(out var digitalOutputs)
             .Subscribe();
@@ -224,8 +228,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     private static Func<Output, bool> CreateFilter((bool controllerFound, WiiControllerType controllerType) tuple)
     {
-        return output => !tuple.controllerFound || output is JoystickToDpad || (output.Input is WiiInput wiiInput &&
-            wiiInput.WiiControllerType == tuple.controllerType);
+        return output => !tuple.controllerFound || output is JoystickToDpad || output.Input is WiiInput wiiInput &&
+            wiiInput.WiiControllerType == tuple.controllerType;
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)

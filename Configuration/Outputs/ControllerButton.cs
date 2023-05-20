@@ -32,7 +32,7 @@ public class ControllerButton : OutputButton
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
-        return ControllerEnumConverter.GetButtonText(deviceControllerType, Type) ?? Type.ToString();
+        return ControllerEnumConverter.GetButtonText(deviceControllerType, Type);
     }
 
     public override object GetOutputType()

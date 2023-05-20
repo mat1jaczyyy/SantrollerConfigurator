@@ -223,7 +223,7 @@ public class ControllerEnumConverter : IMultiValueConverter
             : "";
     }
 
-    public static string? GetButtonText(DeviceControllerType deviceControllerType,
+    public static string GetButtonText(DeviceControllerType deviceControllerType,
         StandardButtonType button)
     {
         if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick
@@ -231,7 +231,7 @@ public class ControllerEnumConverter : IMultiValueConverter
             or DeviceControllerType.Turntable or DeviceControllerType.StageKit)
             deviceControllerType = DeviceControllerType.Gamepad;
         return ButtonLabels.GetValueOrDefault(
-            new Tuple<DeviceControllerType, StandardButtonType>(deviceControllerType, button));
+            new Tuple<DeviceControllerType, StandardButtonType>(deviceControllerType, button), "");
     }
 
     public static (List<Output>, List<object>) FilterValidOutputs(DeviceControllerType controllerType,
