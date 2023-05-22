@@ -1431,6 +1431,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         RxApp.MainThreadScheduler.Schedule(() =>
         {
             Trace.WriteLine($"Add called, current device: {Device},  new device: {device}");
+            Trace.Flush();
             if (device is Santroller santroller)
             {
                 if (Device is Santroller santrollerold)
