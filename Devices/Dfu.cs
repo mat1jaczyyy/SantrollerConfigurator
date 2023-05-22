@@ -135,6 +135,10 @@ public class Dfu : IConfigurableDevice
         return false;
     }
 
+    public void Disconnect()
+    {
+    }
+
     public bool IsGeneric()
     {
         return false;
