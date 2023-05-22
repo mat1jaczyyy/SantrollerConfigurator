@@ -218,6 +218,11 @@ public class Arduino : IConfigurableDevice
         return Board.Atmega32U4Boards.Contains(Board);
     }
 
+    public void Disconnect()
+    {
+        
+    }
+
     public bool IsGeneric()
     {
         return _generic;

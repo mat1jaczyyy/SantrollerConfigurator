@@ -66,6 +66,7 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
             if (AvailableDevices.Items.Any()) item = AvailableDevices.Items.First();
 
             foreach (var change in s)
+            {
                 SelectedDevice = change.Reason switch
                 {
                     ListChangeReason.Add when SelectedDevice == null => change.Item.Current,
@@ -73,6 +74,11 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
                     ListChangeReason.Remove when SelectedDevice == null => item,
                     _ => SelectedDevice
                 };
+                if (change.Reason == ListChangeReason.Remove)
+                {
+                    change.Item.Current.Disconnect();
+                }
+            }
         });
         Devices = devices;
         Router.Navigate.Execute(new MainViewModel(this));

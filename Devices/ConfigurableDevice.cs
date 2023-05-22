@@ -30,4 +30,5 @@ public interface IConfigurableDevice
     void Revert();
     bool HasDfuMode();
     bool Is32U4();
+    void Disconnect();
 }

@@ -110,6 +110,14 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         return Board.Is32U4();
     }
 
+    public void Disconnect()
+    {
+        if (Device.IsOpen)
+        {
+            Device.Close();
+        }
+    }
+
     public bool IsPico()
     {
         return Board.IsPico();
