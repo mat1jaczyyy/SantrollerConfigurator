@@ -38,9 +38,6 @@ public class InitialConfigViewModel : ReactiveObject, IRoutableViewModel
                         case ListChangeReason.Add:
                             Model.AddDevice(change.Item.Current);
                             break;
-                        case ListChangeReason.Remove:
-                            Model.RemoveDevice(change.Item.Current);
-                            break;
                     }
             });
         ;
