@@ -556,6 +556,7 @@ public class Santroller : IConfigurableDevice
     {
         if (_serialPort?.IsOpen == true) _serialPort.Close();
         _timer.Stop();
+        
         _usbDevice?.Disconnect();
     }
 }
