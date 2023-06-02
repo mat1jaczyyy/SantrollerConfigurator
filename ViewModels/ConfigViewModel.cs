@@ -8,9 +8,11 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia;
 using Avalonia.Input;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
@@ -64,6 +66,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private readonly DirectPinConfig _usbHostDm;
     private readonly DirectPinConfig _usbHostDp;
+
     public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
     {
         Device = device;
@@ -184,7 +187,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             RhythmType = rhythm;
         }
     }
-    
+
     public float DebounceDisplay
     {
         get => _debounceDisplay.Value;
@@ -239,7 +242,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public MainWindowViewModel Main { get; }
 
-    public IEnumerable<DeviceControllerRhythmType> DeviceControllerRhythmTypes => Enum.GetValues<DeviceControllerRhythmType>();
+    public IEnumerable<DeviceControllerRhythmType> DeviceControllerRhythmTypes =>
+        Enum.GetValues<DeviceControllerRhythmType>();
+
     public IEnumerable<RfPowerLevel> RfPowerLevels => Enum.GetValues<RfPowerLevel>();
     public IEnumerable<RfDataRate> RfDataRates => Enum.GetValues<RfDataRate>();
 
@@ -419,7 +424,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public bool XInputOnWindows { get; set; }
 
 
-
     public DeviceControllerType DeviceType
     {
         get => _deviceControllerType;
@@ -483,9 +487,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [ObservableAsProperty] public bool IsBluetooth { get; }
 
     [ObservableAsProperty] public string? WriteToolTip { get; }
-    
+
     [ObservableAsProperty] public string? PollRateLabel { get; }
-    
+
     [ObservableAsProperty] public bool UsbHostEnabled { get; }
 
     // ReSharper enable UnassignedGetOnlyAutoProperty
@@ -572,7 +576,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Bindings.RemoveMany(extra);
 
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
-        if (Bindings.Items.Any(s => s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput or UsbHostCombinedOutput)) return;
+        if (Bindings.Items.Any(s =>
+                s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput or UsbHostCombinedOutput)) return;
 
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
@@ -1014,7 +1019,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public PinConfig[] UsbHostPinConfigs()
     {
-        return UsbHostEnabled ? new PinConfig[] { _usbHostDm!, _usbHostDp!} : Array.Empty<PinConfig>();
+        return UsbHostEnabled ? new PinConfig[] {_usbHostDm!, _usbHostDp!} : Array.Empty<PinConfig>();
     }
 
     private byte GetEmulationType()
@@ -1350,6 +1355,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 debounces.TryAdd(generatedInput, debounces.Count);
             }
         }
+
         return debounces.Count;
     }
 
@@ -1510,5 +1516,27 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         var index = Bindings.Items.IndexOf(output);
         Bindings.Move(index, index + 1);
+    }
+
+    public readonly Subject<object> KeyOrPointerEvent = new();
+
+    public void OnKeyEvent(KeyEventArgs args)
+    {
+        KeyOrPointerEvent.OnNext(args);
+    }
+
+    public void OnMouseEvent(PointerEventArgs args)
+    {
+        KeyOrPointerEvent.OnNext(args);
+    }
+
+    public void OnMouseEvent(PointerUpdateKind args)
+    {
+        KeyOrPointerEvent.OnNext(args);
+    }
+
+    public void OnMouseEvent(Point args)
+    {
+        KeyOrPointerEvent.OnNext(args);
     }
 }

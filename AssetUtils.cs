@@ -17,10 +17,9 @@ public class AssetUtils
     public static async Task ExtractFileAsync(string file, string location)
     {
         await using var f = File.OpenWrite(location);
-        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var uri = new Uri($"avares://{assemblyName}/Assets/{file}");
-        await using var target = assets!.Open(uri);
+        await using var target = AssetLoader.Open(uri);
         await target.CopyToAsync(f).ConfigureAwait(false);
     }
 
@@ -39,10 +38,9 @@ public class AssetUtils
 
     public static async Task<string> ReadFileAsync(string file)
     {
-        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var uri = new Uri($"avares://{assemblyName}/Assets/{file}");
-        await using var target = assets!.Open(uri);
+        await using var target = AssetLoader.Open(uri);
         var reader = new StreamReader(target);
         return await reader.ReadToEndAsync();
     }
@@ -61,10 +59,9 @@ public class AssetUtils
 
     public static async Task ExtractXzAsync(string archiveFile, string location, ExtractionProgress extractionProgress)
     {
-        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var uri = new Uri($"avares://{assemblyName}/Assets/{archiveFile}");
-        await using var target = assets!.Open(uri);
+        await using var target = AssetLoader.Open(uri);
         var decompOpts = new XZDecompressOptions();
         var opts = new XZThreadedDecompressOptions
         {

@@ -4,7 +4,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
 using Avalonia.Media;
@@ -61,8 +64,8 @@ public abstract partial class Output : ReactiveObject
 
     public ReactiveCommand<Unit, Unit> MoveUp { get; }
     public ReactiveCommand<Unit, Unit> MoveDown { get; }
-    
-    
+
+
     protected Output(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         bool childOfCombined)
     {
@@ -94,7 +97,8 @@ public abstract partial class Output : ReactiveObject
         this.WhenAnyValue(x => x.Input)
             .Select(x => x.InnermostInput() is GhWtTapInput && this is not GuitarAxis)
             .ToPropertyEx(this, x => x.IsWt);
-        this.WhenAnyValue(x => x.Input.Title, x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
+        this.WhenAnyValue(x => x.Input.Title, x => x.Model.DeviceType, x => x.Model.RhythmType,
+                x => x.ShouldUpdateDetails)
             .Select(x => $"{x.Item1} ({GetName(x.Item2, x.Item3)})")
             .ToPropertyEx(this, x => x.Title);
         this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
@@ -192,6 +196,7 @@ public abstract partial class Output : ReactiveObject
         get => (Input.InnermostInput() as DjInput)?.Input ?? DjInputType.LeftGreen;
         set => SetInput(SelectedInputType, null, null, null, null, value, null);
     }
+
     public UsbHostInputType UsbInputType
     {
         get => (Input.InnermostInput() as UsbHostInput)?.Input ?? UsbHostInputType.A;
@@ -382,43 +387,45 @@ public abstract partial class Output : ReactiveObject
     private async Task FindAndAssignAsync()
     {
         ButtonText = "Move the mouse or click / press any key to use that input";
-        await InputManager.Instance!.Process.FirstAsync();
-        await Task.Delay(200);
-        var lastEvent = await InputManager.Instance.Process.FirstAsync();
+        var lastEvent = await Model.KeyOrPointerEvent.Take(1).ToTask();
         switch (lastEvent)
         {
-            case RawKeyEventArgs keyEventArgs:
+            case KeyEventArgs keyEventArgs:
                 KeyOrMouse = keyEventArgs.Key;
                 break;
-            case RawPointerEventArgs pointerEventArgs:
-                if (pointerEventArgs is RawMouseWheelEventArgs wheelEventArgs)
-                    KeyOrMouse = Math.Abs(wheelEventArgs.Delta.X) > Math.Abs(wheelEventArgs.Delta.Y)
-                        ? MouseAxisType.ScrollX
-                        : MouseAxisType.ScrollY;
-                else
-                    switch (pointerEventArgs.Type)
-                    {
-                        case RawPointerEventType.LeftButtonDown:
-                        case RawPointerEventType.LeftButtonUp:
-                            KeyOrMouse = MouseButtonType.Left;
-                            break;
-                        case RawPointerEventType.RightButtonDown:
-                        case RawPointerEventType.RightButtonUp:
-                            KeyOrMouse = MouseButtonType.Right;
-                            break;
-                        case RawPointerEventType.MiddleButtonDown:
-                        case RawPointerEventType.MiddleButtonUp:
-                            KeyOrMouse = MouseButtonType.Middle;
-                            break;
-                        case RawPointerEventType.Move:
-                            await Task.Delay(100);
-                            var last = await InputManager.Instance.Process.Where(s => s is RawPointerEventArgs)
-                                .Cast<RawPointerEventArgs>().FirstAsync();
-                            var diff = last.Position - pointerEventArgs.Position;
-                            KeyOrMouse = Math.Abs(diff.X) > Math.Abs(diff.Y) ? MouseAxisType.X : MouseAxisType.Y;
-                            break;
-                    }
+            case PointerUpdateKind pointerUpdateKind:
+                switch (pointerUpdateKind)
+                {
+                    case PointerUpdateKind.LeftButtonPressed:
+                    case PointerUpdateKind.LeftButtonReleased:
+                        KeyOrMouse = MouseButtonType.Left;
+                        break;
+                    case PointerUpdateKind.MiddleButtonPressed:
+                    case PointerUpdateKind.MiddleButtonReleased:
+                        KeyOrMouse = MouseButtonType.Middle;
+                        break;
+                    case PointerUpdateKind.RightButtonPressed:
+                    case PointerUpdateKind.RightButtonReleased:
+                        KeyOrMouse = MouseButtonType.Right;
+                        break;
+                }
 
+                break;
+            case PointerWheelEventArgs wheelEventArgs:
+                KeyOrMouse = Math.Abs(wheelEventArgs.Delta.X) > Math.Abs(wheelEventArgs.Delta.Y)
+                    ? MouseAxisType.ScrollX
+                    : MouseAxisType.ScrollY;
+                break;
+            case Point point:
+                await Task.Delay(100);
+                while (true)
+                {
+                    var last = await Model.KeyOrPointerEvent.Take(1).ToTask();
+                    if (last is not Point lastPoint) continue;
+                    var diff = lastPoint - point;
+                    KeyOrMouse = Math.Abs(diff.X) > Math.Abs(diff.Y) ? MouseAxisType.X : MouseAxisType.Y;
+                    break;
+                }
                 break;
         }
 
@@ -539,6 +546,7 @@ public abstract partial class Output : ReactiveObject
                 axis2.Max = short.MaxValue;
             }
         }
+
         this.RaisePropertyChanged(nameof(WiiInputType));
         this.RaisePropertyChanged(nameof(Ps2InputType));
         this.RaisePropertyChanged(nameof(GhWtInputType));

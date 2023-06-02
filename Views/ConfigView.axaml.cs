@@ -41,6 +41,10 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
             disposables(
                 ViewModel!.WhenAnyValue(x => x.Device).OfType<Santroller>()
                     .ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => s.StartTicking(ViewModel)));
+            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.KeyDown += (sender, args) => ViewModel!.OnKeyEvent(args);
+            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerMoved += (sender, args) => ViewModel!.OnMouseEvent(args.GetCurrentPoint(GetValue(VisualParentProperty)).Position);
+            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerPressed += (sender, args) => ViewModel!.OnMouseEvent(args.GetCurrentPoint(GetValue(VisualParentProperty)).Properties.PointerUpdateKind);
+            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerWheelChanged += (sender, args) => ViewModel!.OnMouseEvent(args);
             if (ViewModel!.ShowUnoDialog && ViewModel!.Device is Arduino arduino) DoShowUnoDialog(arduino);
         });
         AvaloniaXamlLoader.Load(this);
