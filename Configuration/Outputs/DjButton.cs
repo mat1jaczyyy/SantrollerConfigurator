@@ -39,23 +39,25 @@ public class DjButton : OutputButton
     {
         if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360))
             return "";
-        // Turntables also hit the standard buttons when you push each button
-        switch (Type)
-        {
-            case DjInputType.LeftGreen:
-            case DjInputType.RightGreen:
-                extra = "report->a = true;";
-                break;
-            case DjInputType.LeftRed:
-            case DjInputType.RightRed:
-                extra = "report->b = true;";
-                break;
-            case DjInputType.LeftBlue:
-            case DjInputType.RightBlue:
-                extra = "report->x = true;";
-                break;
-            default:
-                return "";
+        if (mode is ConfigField.Shared) {
+            // Turntables also hit the standard buttons when you push each button
+            switch (Type)
+            {
+                case DjInputType.LeftGreen:
+                case DjInputType.RightGreen:
+                    extra = "report->a = true;";
+                    break;
+                case DjInputType.LeftRed:
+                case DjInputType.RightRed:
+                    extra = "report->b = true;";
+                    break;
+                case DjInputType.LeftBlue:
+                case DjInputType.RightBlue:
+                    extra = "report->x = true;";
+                    break;
+                default:
+                    return "";
+            }
         }
 
         return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
