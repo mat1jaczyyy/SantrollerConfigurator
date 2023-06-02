@@ -92,16 +92,10 @@ public class DjInput : TwiInput
         var right = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
                 .Select(binding => binding.Item2));
-        var leftTrigger = mode == ConfigField.Shared ? "" : Output.GetReportField(StandardAxisType.LeftTrigger) + "=0;";
-        var rightTrigger = mode == ConfigField.Shared
-            ? ""
-            : Output.GetReportField(StandardAxisType.RightTrigger) + "=0;";
         return $@"if (djLeftValid) {{
-                    {leftTrigger}
                     {left}
                   }} 
                   if (djRightValid) {{
-                    {rightTrigger}
                     {right}
                   }}";
     }
