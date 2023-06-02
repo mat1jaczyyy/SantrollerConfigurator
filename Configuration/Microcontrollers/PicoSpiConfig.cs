@@ -19,11 +19,11 @@ public class PicoSpiConfig : SpiConfig
     {
         var ret = base.CalculateError();
         if (ret != null) return ret;
-        if (Miso != -2 && Pico.SpiIndexByPin[Mosi] != Pico.TwiIndexByPin[Miso])
+        if (IncludesMiso && Pico.SpiIndexByPin[Mosi] != Pico.SpiIndexByPin[Miso])
         {
             return "Selected pins are not from the same SPI group";
         }
-        if (Pico.SpiIndexByPin[Mosi] != Pico.TwiIndexByPin[Sck])
+        if (Pico.SpiIndexByPin[Mosi] != Pico.SpiIndexByPin[Sck])
         {
             return "Selected pins are not from the same SPI group";
         }
