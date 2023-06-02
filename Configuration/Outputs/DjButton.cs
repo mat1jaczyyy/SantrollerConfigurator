@@ -39,7 +39,7 @@ public class DjButton : OutputButton
     {
         if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360))
             return "";
-        if (mode is ConfigField.Shared) {
+        if (mode is not ConfigField.Shared) {
             // Turntables also hit the standard buttons when you push each button
             switch (Type)
             {
