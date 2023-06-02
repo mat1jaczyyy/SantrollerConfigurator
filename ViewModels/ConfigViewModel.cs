@@ -1518,6 +1518,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Bindings.Move(index, index + 1);
     }
 
+    // Capture any input events (such as pointer or keyboard) - used for detecting the last input
     public readonly Subject<object> KeyOrPointerEvent = new();
 
     public void OnKeyEvent(KeyEventArgs args)
