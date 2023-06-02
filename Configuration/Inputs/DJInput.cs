@@ -86,6 +86,8 @@ public class DjInput : TwiInput
     public override string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
+        if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps4))
+            return "";
         var left = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
                 .Select(binding => binding.Item2));
