@@ -559,6 +559,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             Deque = false;
         }
 
+        if (_deviceControllerType == DeviceControllerType.Turntable)
+            if (!Bindings.Items.Any(s => s is DjCombinedOutput))
+            {
+                var dj = new DjCombinedOutput(this);
+                dj.SetOutputsOrDefaults(Array.Empty<Output>());
+                Bindings.Add(dj);
+            }
+
         var (extra, types) =
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
         Bindings.RemoveMany(extra);
@@ -601,10 +609,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarButton));
-
-        if (_deviceControllerType == DeviceControllerType.Turntable)
-            if (!Bindings.Items.Any(s => s is DjCombinedOutput))
-                Bindings.Add(new DjCombinedOutput(this));
 
         foreach (var type in types)
             switch (type)
@@ -706,6 +710,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 {
                     Expanded = true
                 };
+                output.SetOutputsOrDefaults(Array.Empty<Output>());
                 Bindings.Add(output);
                 break;
             case DeviceInputType.Ps2:
@@ -713,6 +718,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 {
                     Expanded = true
                 };
+                ps2Output.SetOutputsOrDefaults(Array.Empty<Output>());
                 Bindings.Add(ps2Output);
                 break;
             case DeviceInputType.Rf:
@@ -727,6 +733,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 {
                     Expanded = true
                 };
+                usbOutput.SetOutputsOrDefaults(Array.Empty<Output>());
                 Bindings.Add(usbOutput);
                 break;
             default:
