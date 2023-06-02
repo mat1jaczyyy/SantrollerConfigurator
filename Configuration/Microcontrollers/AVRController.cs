@@ -125,7 +125,7 @@ public abstract class AvrController : Microcontroller
         // PORTx input 1= pullup, 0 = floating
         var ddrByPort = new Dictionary<char, int>();
         var portByPort = new Dictionary<char, int>();
-        var pins = configViewModel.GetPinConfigs().OfType<DirectPinConfig>();
+        var pins = configViewModel.GetPinConfigs().OfType<DirectPinConfig>().Where(s => s.PinMode != DevicePinMode.Skip);
         foreach (var pin in pins)
         {
             var port = GetPort(pin.Pin);

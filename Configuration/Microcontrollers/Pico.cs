@@ -157,7 +157,8 @@ public class Pico : Microcontroller
     }
 
 
-    public override SpiConfig AssignSpiPins(ConfigViewModel model, string type, bool includesMiso, int mosi, int miso, int sck, bool cpol,
+    public override SpiConfig AssignSpiPins(ConfigViewModel model, string type, bool includesMiso, int mosi, int miso,
+        int sck, bool cpol,
         bool cpha,
         bool msbfirst,
         uint clock)
@@ -196,7 +197,7 @@ public class Pico : Microcontroller
     public override string GenerateInit(ConfigViewModel configViewModel)
     {
         var ret = "";
-        var pins = configViewModel.PinConfigs.OfType<DirectPinConfig>();
+        var pins = configViewModel.GetPinConfigs().OfType<DirectPinConfig>();
         foreach (var devicePin in pins)
             switch (devicePin.PinMode)
             {
@@ -204,17 +205,15 @@ public class Pico : Microcontroller
                     continue;
                 case DevicePinMode.Analog:
                     ret += $"adc_gpio_init({devicePin.Pin});";
-                    break;
+                    continue;
                 default:
-                {
                     var up = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
                     var down = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
                     ret += $"gpio_init({devicePin.Pin});";
                     ret +=
                         $"gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});";
                     ret += $"gpio_set_pulls({devicePin.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
-                    break;
-                }
+                    continue;
             }
 
         return ret;
