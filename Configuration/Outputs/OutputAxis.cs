@@ -475,7 +475,7 @@ public abstract partial class OutputAxis : Output
             var trigger = this is ControllerAxis {Type: StandardAxisType.LeftTrigger} ? "l2" : "r2";
             return $@"if ({Input.Generate()}) {{
                         {output} = {val};
-                        if ({output} > 60000) {{
+                        if ({output} > 200) {{
                             report->{trigger} = true;
                         }}
                    }}";
