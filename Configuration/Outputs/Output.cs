@@ -236,7 +236,7 @@ public abstract partial class Output : ReactiveObject
              s is InputType.Gh5NeckInput or InputType.WtNeckInput) &&
             (s is not InputType.MultiplexerInput || Model.IsPico) &&
             (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput &&
-            s is not InputType.UsbHostInput);
+            s is not InputType.UsbHostInput || Model.IsPico);
 
     private object GetChildOutputType()
     {
