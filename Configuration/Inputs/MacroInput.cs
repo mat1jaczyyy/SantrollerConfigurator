@@ -178,12 +178,12 @@ public class MacroInput : Input
                 break;
             case Types.InputType.UsbHostInput when child.InnermostInput() is not UsbHostInput:
                 usbInputType ??= UsbHostInputType.A;
-                input = new UsbHostInput(Model, usbInputType.Value);
-                inputOther = new UsbHostInput(Model, usbInputType.Value);
+                input = new UsbHostInput(usbInputType.Value, Model);
+                inputOther = new UsbHostInput(usbInputType.Value, Model);
                 break;
             case Types.InputType.UsbHostInput when child.InnermostInput() is UsbHostInput:
                 usbInputType ??= UsbHostInputType.A;
-                input = new UsbHostInput(Model, usbInputType.Value);
+                input = new UsbHostInput(usbInputType.Value, Model);
                 break;
             default:
                 return;

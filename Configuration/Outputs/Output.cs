@@ -249,6 +249,8 @@ public abstract partial class Output : ReactiveObject
         if (Input.InnermostInput() is Gh5NeckInput gh5) return gh5.Input;
 
         if (Input.InnermostInput() is GhWtTapInput wt) return wt.Input;
+        
+        if (Input.InnermostInput() is UsbHostInput usb) return usb.Input;
 
         return GetOutputType();
     }
@@ -439,6 +441,14 @@ public abstract partial class Output : ReactiveObject
         Input input;
         switch (inputType)
         {
+            case InputType.UsbHostInput when Input.InnermostInput() is not UsbHostInput:
+                usbInputType ??= UsbHostInputType.A;
+                input = new UsbHostInput(usbInputType.Value, Model);
+                break;
+            case InputType.UsbHostInput when Input.InnermostInput() is UsbHostInput usbHost:
+                usbInputType ??= usbHost.Input;
+                input = new UsbHostInput(usbInputType.Value, Model);
+                break;
             case InputType.AnalogPinInput:
                 input = new DirectInput(-1, DevicePinMode.Analog, Model);
                 break;

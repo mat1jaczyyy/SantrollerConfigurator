@@ -14,7 +14,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public class UsbHostInput : Input
 {
-    public UsbHostInput(ConfigViewModel model, UsbHostInputType input, bool combined = false) : base(model)
+    public UsbHostInput(UsbHostInputType input, ConfigViewModel model, bool combined = false) : base(model)
     {
         Combined = combined;
         Input = input;
@@ -63,7 +63,7 @@ public class UsbHostInput : Input
 
     public override string Generate()
     {
-        return Output.GetReportField(Input, "usb_host_data");
+        return Output.GetReportField(Input, "usb_host_data").Replace("->", ".");
     }
 
     public override SerializedInput Serialise()
@@ -107,7 +107,6 @@ public class UsbHostInput : Input
 
             UsbHostInfo = buffer.Trim();
         }
-
         if (usbHostInputsRaw.Length < Marshal.SizeOf<UsbHostInputs>()) return;
         var inputs = StructTools.RawDeserialize<UsbHostInputs>(usbHostInputsRaw, 0);
         RawValue = inputs.RawValue(Input);
@@ -129,7 +128,7 @@ public class UsbHostInput : Input
         private bool ButtonPressed(UsbHostInputType inputType)
         {
             if (inputType >= UsbHostInputType.LeftTrigger) return false;
-            var val = (uint) inputType + 1;
+            var val = (uint) inputType;
             if (val >= 32)
             {
                 val -= 32;

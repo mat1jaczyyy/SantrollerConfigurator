@@ -292,7 +292,7 @@ public class Santroller : IConfigurableDevice
             if (_model.UsbHostEnabled)
             {
                 usbHostRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHost, 24);
-                usbHostInputsRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHostInputs, 24);
+                usbHostInputsRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHostInputs, 100);
             }
 
             var bluetoothRaw = Array.Empty<byte>();

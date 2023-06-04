@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using Avalonia.Media;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Other;
@@ -18,6 +18,7 @@ public class UsbHostCombinedOutput : CombinedOutput
     public UsbHostCombinedOutput(ConfigViewModel model) : base(
         model)
     {
+        Outputs.Clear();
         _usbHostDm = model.WhenAnyValue(x => x.UsbHostDm).ToProperty(this, x => x.UsbHostDm);
         _usbHostDp = model.WhenAnyValue(x => x.UsbHostDp).ToProperty(this, x => x.UsbHostDp);
         Outputs.Connect().Filter(x => x is OutputAxis)
@@ -30,25 +31,103 @@ public class UsbHostCombinedOutput : CombinedOutput
             .Filter(s => s.LocalisedName.Any())
             .Bind(out var digitalOutputs)
             .Subscribe();
+        AnalogOutputs = analogOutputs;
+        DigitalOutputs = digitalOutputs;
         UpdateDetails();
     }
+
+    private static readonly Dictionary<object, UsbHostInputType> Mappings = new()
+    {
+        {StandardButtonType.X, UsbHostInputType.X},
+        {StandardButtonType.A, UsbHostInputType.A},
+        {StandardButtonType.B, UsbHostInputType.B},
+        {StandardButtonType.Y, UsbHostInputType.Y},
+        {StandardButtonType.Start, UsbHostInputType.Start},
+        {StandardButtonType.Back, UsbHostInputType.Back},
+        {StandardButtonType.LeftShoulder, UsbHostInputType.LeftShoulder},
+        {StandardButtonType.RightShoulder, UsbHostInputType.RightShoulder},
+        {StandardButtonType.LeftThumbClick, UsbHostInputType.LeftThumbClick},
+        {StandardButtonType.RightThumbClick, UsbHostInputType.RightThumbClick},
+        {StandardButtonType.Guide, UsbHostInputType.Guide},
+        {StandardButtonType.Capture, UsbHostInputType.Capture},
+        {StandardButtonType.DpadUp, UsbHostInputType.DpadUp},
+        {StandardButtonType.DpadDown, UsbHostInputType.DpadDown},
+        {StandardButtonType.DpadLeft, UsbHostInputType.DpadLeft},
+        {StandardButtonType.DpadRight, UsbHostInputType.DpadRight},
+        {StandardAxisType.LeftTrigger, UsbHostInputType.LeftTrigger},
+        {StandardAxisType.RightTrigger, UsbHostInputType.RightTrigger},
+        {StandardAxisType.LeftStickX, UsbHostInputType.LeftStickX},
+        {StandardAxisType.LeftStickY, UsbHostInputType.LeftStickY},
+        {StandardAxisType.RightStickX, UsbHostInputType.RightStickX},
+        {StandardAxisType.RightStickY, UsbHostInputType.RightStickY},
+        {Ps3AxisType.PressureDpadUp, UsbHostInputType.PressureDpadUp},
+        {Ps3AxisType.PressureDpadRight, UsbHostInputType.PressureDpadRight},
+        {Ps3AxisType.PressureDpadLeft, UsbHostInputType.PressureDpadLeft},
+        {Ps3AxisType.PressureDpadDown, UsbHostInputType.PressureDpadDown},
+        {Ps3AxisType.PressureL1, UsbHostInputType.PressureL1},
+        {Ps3AxisType.PressureR1, UsbHostInputType.PressureR1},
+        {Ps3AxisType.PressureTriangle, UsbHostInputType.PressureTriangle},
+        {Ps3AxisType.PressureCircle, UsbHostInputType.PressureCircle},
+        {Ps3AxisType.PressureCross, UsbHostInputType.PressureCross},
+        {Ps3AxisType.PressureSquare, UsbHostInputType.PressureSquare},
+        {InstrumentButtonType.Green, UsbHostInputType.Green},
+        {InstrumentButtonType.Red, UsbHostInputType.Red},
+        {InstrumentButtonType.Yellow, UsbHostInputType.Yellow},
+        {InstrumentButtonType.Blue, UsbHostInputType.Blue},
+        {InstrumentButtonType.Orange, UsbHostInputType.Orange},
+        {InstrumentButtonType.SoloGreen, UsbHostInputType.SoloGreen},
+        {InstrumentButtonType.SoloRed, UsbHostInputType.SoloRed},
+        {InstrumentButtonType.SoloYellow, UsbHostInputType.SoloYellow},
+        {InstrumentButtonType.SoloBlue, UsbHostInputType.SoloBlue},
+        {InstrumentButtonType.SoloOrange, UsbHostInputType.SoloOrange},
+        {InstrumentButtonType.StrumUp, UsbHostInputType.DpadUp},
+        {InstrumentButtonType.StrumDown, UsbHostInputType.DpadDown},
+        {DjInputType.LeftBlue, UsbHostInputType.LeftBlue},
+        {DjInputType.LeftRed, UsbHostInputType.LeftRed},
+        {DjInputType.LeftGreen, UsbHostInputType.LeftGreen},
+        {DjInputType.RightBlue, UsbHostInputType.RightBlue},
+        {DjInputType.RightRed, UsbHostInputType.RightRed},
+        {DjInputType.RightGreen, UsbHostInputType.RightGreen},
+        {DrumAxisType.YellowCymbal, UsbHostInputType.YellowCymbalVelocity},
+        {DrumAxisType.BlueCymbal, UsbHostInputType.BlueCymbalVelocity},
+        {DrumAxisType.GreenCymbal, UsbHostInputType.GreenCymbalVelocity},
+        {DrumAxisType.Green, UsbHostInputType.GreenVelocity},
+        {DrumAxisType.Red, UsbHostInputType.RedVelocity},
+        {DrumAxisType.Yellow, UsbHostInputType.YellowVelocity},
+        {DrumAxisType.Blue, UsbHostInputType.BlueVelocity},
+        {DrumAxisType.Orange, UsbHostInputType.OrangeVelocity},
+        {GuitarAxisType.Pickup, UsbHostInputType.Pickup},
+        {GuitarAxisType.Tilt, UsbHostInputType.Tilt},
+        {GuitarAxisType.Whammy, UsbHostInputType.Whammy},
+        {GuitarAxisType.Slider, UsbHostInputType.Slider},
+        {DjAxisType.LeftTableVelocity, UsbHostInputType.LeftTableVelocity},
+        {DjAxisType.RightTableVelocity, UsbHostInputType.RightTableVelocity},
+        {DjAxisType.EffectsKnob, UsbHostInputType.EffectsKnob},
+        {DjAxisType.Crossfader, UsbHostInputType.Crossfader},
+    };
+
+    private static readonly Dictionary<object, UsbHostInputType> MappingsDrumGh = new()
+    {
+        {DrumAxisType.Kick, UsbHostInputType.KickVelocity},
+    };
+
+    private static readonly Dictionary<object, UsbHostInputType> MappingsDrumRb = new()
+    {
+        {DrumAxisType.Kick, UsbHostInputType.Kick1},
+        {DrumAxisType.Kick2, UsbHostInputType.Kick2},
+    };
 
     [Reactive] public string UsbHostInfo { get; set; } = "";
 
     [Reactive] public int ConnectedDevices { get; set; }
-    public override bool IsCombined => false;
-    public override bool IsStrum => false;
-
-    public override bool IsKeyboard => false;
-    public override string LedOnLabel => "";
-    public override string LedOffLabel => "";
+    
     // Since DM and DP need to be next to eachother, you cannot use pins at the far ends
     public List<int> AvailablePinsDm => Model.AvailablePins.Skip(1).ToList();
     public List<int> AvailablePinsDp => Model.AvailablePins.SkipLast(1).ToList();
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedCombinedUsbHostOutput();
+        return new SerializedCombinedUsbHostOutput(Outputs.Items.ToList());
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
@@ -70,25 +149,102 @@ public class UsbHostCombinedOutput : CombinedOutput
             CreateDefaults();
     }
 
+    private void LoadMatchingFromDict(IReadOnlySet<object> valid, Dictionary<object, UsbHostInputType> dict)
+    {
+        foreach (var (key, value) in dict)
+        {
+            if (!valid.Contains(key))
+            {
+                continue;
+            }
+
+            Output? output = key switch
+            {
+                StandardAxisType standardAxisType => new ControllerAxis(Model,
+                    new UsbHostInput(value, Model, true),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    ushort.MinValue, ushort.MaxValue, 0,
+                    standardAxisType, true),
+                StandardButtonType standardButtonType => new ControllerButton(Model,
+                    new UsbHostInput(value, Model, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 5,
+                    standardButtonType, true),
+                InstrumentButtonType standardButtonType => new GuitarButton(Model,
+                    new UsbHostInput(value, Model, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 5,
+                    standardButtonType, true),
+                DrumAxisType drumAxisType => new DrumAxis(Model,
+                    new UsbHostInput(value, Model, true),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    ushort.MinValue, ushort.MaxValue, 0,
+                    1000, 10, drumAxisType, true),
+                Ps3AxisType ps3AxisType => new Ps3Axis(Model,
+                    new UsbHostInput(value, Model, true),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    ushort.MinValue, ushort.MaxValue, 0,
+                    ps3AxisType),
+                GuitarAxisType guitarAxisType and not GuitarAxisType.Slider => new GuitarAxis(Model,
+                    new UsbHostInput(value, Model, true),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    ushort.MinValue, ushort.MaxValue, 0, guitarAxisType, true),
+                GuitarAxisType.Slider => new GuitarAxis(Model,
+                    new UsbHostInput(value, Model, true),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    ushort.MinValue, ushort.MaxValue, 0, GuitarAxisType.Slider, true),
+                DjAxisType djAxisType => new DjAxis(Model,
+                    new UsbHostInput(value, Model, true),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    ushort.MinValue, ushort.MaxValue, 0, djAxisType, true),
+                DjInputType djInputType => new DjButton(Model,
+                    new UsbHostInput(value, Model, true),
+                    Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
+                    djInputType, false),
+                _ => null
+            };
+            if (output != null)
+            {
+                Outputs.Add(output);
+            }
+        }
+    }
+
     public void CreateDefaults()
     {
         Outputs.Clear();
-        //TODO this   
+        var valid = ControllerEnumConverter.GetTypes((Model.DeviceType, Model.RhythmType)).ToHashSet();
+        if (Model.DeviceType == DeviceControllerType.Turntable)
+        {
+            valid.UnionWith(Enum.GetValues<DjInputType>().Cast<object>());
+        }
+
+        LoadMatchingFromDict(valid, Mappings);
+        switch (Model)
+        {
+            case {DeviceType: DeviceControllerType.Drum, RhythmType: RhythmType.GuitarHero}:
+                LoadMatchingFromDict(valid, MappingsDrumGh);
+                break;
+            case {DeviceType: DeviceControllerType.Drum, RhythmType: RhythmType.RockBand}:
+                LoadMatchingFromDict(valid, MappingsDrumRb);
+                break;
+        }
     }
 
     public override void UpdateBindings()
     {
-        //TODO this
+        CreateDefaults();
     }
 
     private readonly ObservableAsPropertyHelper<int> _usbHostDm;
     private readonly ObservableAsPropertyHelper<int> _usbHostDp;
+
     public int UsbHostDm
     {
         get => _usbHostDm.Value;
         set => Model.UsbHostDm = value;
     }
-    
+
     public int UsbHostDp
     {
         get => _usbHostDp.Value;

@@ -364,25 +364,27 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public int UsbHostDm
     {
-        get => _usbHostDm?.Pin ?? 0;
+        get => _usbHostDm.Pin;
         set
         {
-            _usbHostDm!.Pin = value;
-            _usbHostDp!.Pin = value - 1;
+            _usbHostDm.Pin = value;
+            _usbHostDp.Pin = value - 1;
             this.RaisePropertyChanged();
             this.RaisePropertyChanged(nameof(UsbHostDp));
+            UpdateErrors();
         }
     }
 
     public int UsbHostDp
     {
-        get => _usbHostDp?.Pin ?? 0;
+        get => _usbHostDp.Pin;
         set
         {
-            _usbHostDp!.Pin = value;
-            _usbHostDm!.Pin = value + 1;
+            _usbHostDp.Pin = value;
+            _usbHostDm.Pin = value + 1;
             this.RaisePropertyChanged();
             this.RaisePropertyChanged(nameof(UsbHostDm));
+            UpdateErrors();
         }
     }
 
@@ -1019,7 +1021,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public PinConfig[] UsbHostPinConfigs()
     {
-        return UsbHostEnabled ? new PinConfig[] {_usbHostDm!, _usbHostDp!} : Array.Empty<PinConfig>();
+        return UsbHostEnabled ? new PinConfig[] {_usbHostDm, _usbHostDp} : Array.Empty<PinConfig>();
     }
 
     private byte GetEmulationType()

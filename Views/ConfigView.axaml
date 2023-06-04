@@ -2230,6 +2230,7 @@
                                                         <Binding Path="IsPs2" />
                                                         <Binding Path="IsGh5" />
                                                         <Binding Path="IsWt" />
+                                                        <Binding Path="IsUsb" />
                                                     </MultiBinding>
                                                 </MultiBinding>
                                             </StackPanel.IsVisible>
@@ -2262,6 +2263,11 @@
                                                       IsVisible="{Binding IsGh5}"
                                                       SelectedItem="{Binding Gh5NeckInputType}"
                                                       ItemsSource="{Binding Gh5NeckInputTypes}"
+                                                      ItemTemplate="{StaticResource ImageWithTextTemplate}" />
+                                            <ComboBox VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsWt}"
+                                                      SelectedItem="{Binding GhWtInputType}"
+                                                      ItemsSource="{Binding GhWtInputTypes}"
                                                       ItemTemplate="{StaticResource ImageWithTextTemplate}" />
                                             <ComboBox VerticalAlignment="Center"
                                                       IsVisible="{Binding IsWt}"

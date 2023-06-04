@@ -12,7 +12,7 @@ public class Ps3Axis : OutputAxis
 {
     public Ps3Axis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
-        int deadZone, Ps3AxisType type) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone, true, false)
+        int deadZone, Ps3AxisType type, bool childOfCombined=false) : base(model, input, ledOn, ledOff, ledIndices, min, max, deadZone, true, childOfCombined)
     {
         Type = type;
         UpdateDetails();

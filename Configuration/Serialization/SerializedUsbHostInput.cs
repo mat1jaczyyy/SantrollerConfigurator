@@ -19,6 +19,6 @@ public class SerializedUsbHostInput : SerializedInput
 
     public override Input Generate(ConfigViewModel model)
     {
-        return new UsbHostInput(model, Type, Combined);
+        return new UsbHostInput(Type, model, Combined);
     }
 }
