@@ -61,6 +61,7 @@ public class InputImageConverter : IMultiValueConverter
             InputType.UsbHostInput => "Combined/Usb",
             DpadType type => (type.ToString().StartsWith("Ps2") ? "PS2/DPad" : "Wii/ClassicDPad") +
                              type.ToString()[3..],
+            UsbHostInputType => "Combined/Usb",
             Key => "Keyboard",
             MouseAxis => "Mouse",
             MouseButton => "Mouse",

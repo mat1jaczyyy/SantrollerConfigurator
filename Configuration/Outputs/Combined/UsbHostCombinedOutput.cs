@@ -184,7 +184,7 @@ public class UsbHostCombinedOutput : CombinedOutput
                     new UsbHostInput(value, Model, true),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
                     ushort.MinValue, ushort.MaxValue, 0,
-                    ps3AxisType),
+                    ps3AxisType, true),
                 GuitarAxisType guitarAxisType and not GuitarAxisType.Slider => new GuitarAxis(Model,
                     new UsbHostInput(value, Model, true),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
