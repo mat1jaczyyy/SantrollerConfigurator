@@ -120,7 +120,7 @@ public class UsbHostCombinedOutput : CombinedOutput
     [Reactive] public string UsbHostInfo { get; set; } = "";
 
     [Reactive] public int ConnectedDevices { get; set; }
-    
+
     // Since DM and DP need to be next to eachother, you cannot use pins at the far ends
     public List<int> AvailablePinsDm => Model.AvailablePins.Skip(1).ToList();
     public List<int> AvailablePinsDp => Model.AvailablePins.SkipLast(1).ToList();
@@ -158,48 +158,39 @@ public class UsbHostCombinedOutput : CombinedOutput
                 continue;
             }
 
+            var input = new UsbHostInput(value, Model, true);
+            int min = input.IsUint ? ushort.MinValue : short.MinValue;
+            int max = input.IsUint ? ushort.MaxValue : short.MaxValue;
             Output? output = key switch
             {
                 StandardAxisType standardAxisType => new ControllerAxis(Model,
-                    new UsbHostInput(value, Model, true),
-                    Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0,
-                    standardAxisType, true),
+                    input, Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    min, max, 0, standardAxisType, true),
                 StandardButtonType standardButtonType => new ControllerButton(Model,
-                    new UsbHostInput(value, Model, true),
-                    Colors.Black,
+                    input, Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
                     standardButtonType, true),
                 InstrumentButtonType standardButtonType => new GuitarButton(Model,
-                    new UsbHostInput(value, Model, true),
-                    Colors.Black,
+                    input, Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,
                     standardButtonType, true),
                 DrumAxisType drumAxisType => new DrumAxis(Model,
-                    new UsbHostInput(value, Model, true),
-                    Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0,
-                    1000, 10, drumAxisType, true),
+                    input, Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    min, max, 0, 1000, 10, drumAxisType, true),
                 Ps3AxisType ps3AxisType => new Ps3Axis(Model,
-                    new UsbHostInput(value, Model, true),
-                    Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0,
-                    ps3AxisType, true),
+                    input, Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    min, max, 0, ps3AxisType, true),
                 GuitarAxisType guitarAxisType and not GuitarAxisType.Slider => new GuitarAxis(Model,
-                    new UsbHostInput(value, Model, true),
-                    Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0, guitarAxisType, true),
+                    input, Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    min, max, 0, guitarAxisType, true),
                 GuitarAxisType.Slider => new GuitarAxis(Model,
-                    new UsbHostInput(value, Model, true),
-                    Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0, GuitarAxisType.Slider, true),
+                    input, Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    min, max, 0, GuitarAxisType.Slider, true),
                 DjAxisType djAxisType => new DjAxis(Model,
-                    new UsbHostInput(value, Model, true),
-                    Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0, djAxisType, true),
+                    input, Colors.Black, Colors.Black, Array.Empty<byte>(),
+                    min, max, 0, djAxisType, true),
                 DjInputType djInputType => new DjButton(Model,
-                    new UsbHostInput(value, Model, true),
-                    Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
+                    input, Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
                     djInputType, false),
                 _ => null
             };

@@ -29,7 +29,7 @@ public class UsbHostInput : Input
     public override bool IsUint => Input is not (UsbHostInputType.LeftStickX or UsbHostInputType.LeftStickY
         or UsbHostInputType.RightStickX or UsbHostInputType.RightStickY or UsbHostInputType.Crossfader
         or UsbHostInputType.LeftTableVelocity or UsbHostInputType.RightTableVelocity
-        or UsbHostInputType.EffectsKnob);
+        or UsbHostInputType.EffectsKnob or UsbHostInputType.Tilt);
 
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
     public override IList<PinConfig> PinConfigs => Model.UsbHostPinConfigs();
@@ -63,7 +63,13 @@ public class UsbHostInput : Input
 
     public override string Generate()
     {
-        return Output.GetReportField(Input, "usb_host_data").Replace("->", ".");
+        var ret = Output.GetReportField(Input, "usb_host_data").Replace("->", ".");
+        if (ByteBased.Contains(Input))
+        {
+            ret = "(" + ret + " << 8)";
+        }
+
+        return ret;
     }
 
     public override SerializedInput Serialise()
@@ -117,7 +123,32 @@ public class UsbHostInput : Input
         return string.Join("\n", bindings.Select(binding => binding.Item2));
     }
 
-    
+    private static readonly HashSet<UsbHostInputType> ByteBased = new ()
+    {
+        UsbHostInputType.PressureDpadUp,
+        UsbHostInputType.PressureDpadRight,
+        UsbHostInputType.PressureDpadLeft,
+        UsbHostInputType.PressureDpadDown,
+        UsbHostInputType.PressureL1,
+        UsbHostInputType.PressureR1,
+        UsbHostInputType.PressureTriangle,
+        UsbHostInputType.PressureCircle,
+        UsbHostInputType.PressureCross,
+        UsbHostInputType.PressureSquare,
+        UsbHostInputType.RedVelocity,
+        UsbHostInputType.YellowVelocity,
+        UsbHostInputType.BlueVelocity,
+        UsbHostInputType.GreenVelocity,
+        UsbHostInputType.OrangeVelocity,
+        UsbHostInputType.BlueCymbalVelocity,
+        UsbHostInputType.YellowCymbalVelocity,
+        UsbHostInputType.GreenCymbalVelocity,
+        UsbHostInputType.KickVelocity,
+        UsbHostInputType.Whammy,
+        UsbHostInputType.Pickup,
+        UsbHostInputType.Slider,
+    };
+
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct UsbHostInputs
@@ -165,7 +196,7 @@ public class UsbHostInput : Input
         private readonly byte kickVelocity;
         private readonly byte whammy;
         private readonly byte pickup;
-        private readonly byte tilt;
+        private readonly short tilt;
         private readonly byte slider;
         private readonly short leftTableVelocity;
         private readonly short rightTableVelocity;
@@ -178,7 +209,7 @@ public class UsbHostInput : Input
 
         public int RawValue(UsbHostInputType inputType)
         {
-            return inputType switch
+            var val = inputType switch
             {
                 UsbHostInputType.LeftTrigger => leftTrigger,
                 UsbHostInputType.RightTrigger => rightTrigger,
@@ -186,29 +217,29 @@ public class UsbHostInput : Input
                 UsbHostInputType.LeftStickY => leftStickY,
                 UsbHostInputType.RightStickX => rightStickX,
                 UsbHostInputType.RightStickY => rightStickY,
-                UsbHostInputType.PressureDpadUp => pressureDpadUp << 8,
-                UsbHostInputType.PressureDpadRight => pressureDpadRight << 8,
-                UsbHostInputType.PressureDpadLeft => pressureDpadLeft << 8,
-                UsbHostInputType.PressureDpadDown => pressureDpadDown << 8,
-                UsbHostInputType.PressureL1 => pressureL1 << 8,
-                UsbHostInputType.PressureR1 => pressureR1 << 8,
-                UsbHostInputType.PressureTriangle => pressureTriangle << 8,
-                UsbHostInputType.PressureCircle => pressureCircle << 8,
-                UsbHostInputType.PressureCross => pressureCross << 8,
-                UsbHostInputType.PressureSquare => pressureSquare << 8,
-                UsbHostInputType.RedVelocity => redVelocity << 8,
-                UsbHostInputType.YellowVelocity => yellowVelocity << 8,
-                UsbHostInputType.BlueVelocity => blueVelocity << 8,
-                UsbHostInputType.GreenVelocity => greenVelocity << 8,
-                UsbHostInputType.OrangeVelocity => orangeVelocity << 8,
-                UsbHostInputType.BlueCymbalVelocity => blueCymbalVelocity << 8,
-                UsbHostInputType.YellowCymbalVelocity => yellowCymbalVelocity << 8,
-                UsbHostInputType.GreenCymbalVelocity => greenCymbalVelocity << 8,
-                UsbHostInputType.KickVelocity => kickVelocity << 8,
-                UsbHostInputType.Whammy => whammy << 8,
-                UsbHostInputType.Tilt => tilt << 8,
-                UsbHostInputType.Pickup => pickup << 8,
-                UsbHostInputType.Slider => slider << 8,
+                UsbHostInputType.PressureDpadUp => pressureDpadUp,
+                UsbHostInputType.PressureDpadRight => pressureDpadRight,
+                UsbHostInputType.PressureDpadLeft => pressureDpadLeft,
+                UsbHostInputType.PressureDpadDown => pressureDpadDown,
+                UsbHostInputType.PressureL1 => pressureL1,
+                UsbHostInputType.PressureR1 => pressureR1,
+                UsbHostInputType.PressureTriangle => pressureTriangle,
+                UsbHostInputType.PressureCircle => pressureCircle,
+                UsbHostInputType.PressureCross => pressureCross,
+                UsbHostInputType.PressureSquare => pressureSquare,
+                UsbHostInputType.RedVelocity => redVelocity,
+                UsbHostInputType.YellowVelocity => yellowVelocity,
+                UsbHostInputType.BlueVelocity => blueVelocity,
+                UsbHostInputType.GreenVelocity => greenVelocity,
+                UsbHostInputType.OrangeVelocity => orangeVelocity,
+                UsbHostInputType.BlueCymbalVelocity => blueCymbalVelocity,
+                UsbHostInputType.YellowCymbalVelocity => yellowCymbalVelocity,
+                UsbHostInputType.GreenCymbalVelocity => greenCymbalVelocity,
+                UsbHostInputType.KickVelocity => kickVelocity,
+                UsbHostInputType.Whammy => whammy,
+                UsbHostInputType.Tilt => tilt,
+                UsbHostInputType.Pickup => pickup,
+                UsbHostInputType.Slider => slider,
                 UsbHostInputType.LeftTableVelocity => leftTableVelocity,
                 UsbHostInputType.RightTableVelocity => rightTableVelocity,
                 UsbHostInputType.EffectsKnob => effectsKnob,
@@ -219,6 +250,11 @@ public class UsbHostInput : Input
                 UsbHostInputType.Gyro => gyro,
                 _ => ButtonPressed(inputType) ? 1 : 0
             };
+            if (ByteBased.Contains(inputType))
+            {
+                val <<= 8;
+            }
+            return val;
         }
     }
 }
