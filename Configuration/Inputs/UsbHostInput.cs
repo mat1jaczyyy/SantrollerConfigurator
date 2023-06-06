@@ -164,8 +164,8 @@ public class UsbHostInput : Input
         private readonly byte greenCymbalVelocity;
         private readonly byte kickVelocity;
         private readonly byte whammy;
-        private readonly byte tilt;
         private readonly byte pickup;
+        private readonly byte tilt;
         private readonly byte slider;
         private readonly short leftTableVelocity;
         private readonly short rightTableVelocity;
