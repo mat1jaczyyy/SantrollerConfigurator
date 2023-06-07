@@ -467,7 +467,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 var items = currentAxisStandard.Where(s => s.Type == standard).ToList();
                 Outputs.RemoveMany(items);
                 Outputs.AddRange(items.Select(item => new DjAxis(Model, item.Input,
-                    item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
+                    item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Max,
                     dj, true)));
             }
         }

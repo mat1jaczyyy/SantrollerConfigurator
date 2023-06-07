@@ -11,14 +11,12 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 public class SerializedDjAxis : SerializedOutput
 {
     public SerializedDjAxis(SerializedInput input, DjAxisType type, Color ledOn, Color ledOff, byte[] ledIndex,
-        int min, int max, int deadzone, bool childOfCombined)
+        int multiplier, bool childOfCombined)
     {
         Input = input;
         LedOn = ledOn.ToUInt32();
         LedOff = ledOff.ToUInt32();
-        Min = min;
-        Max = max;
-        Deadzone = deadzone;
+        Multiplier = multiplier;
         Type = type;
         LedIndex = ledIndex;
         ChildOfCombined = childOfCombined;
@@ -28,16 +26,14 @@ public class SerializedDjAxis : SerializedOutput
     [ProtoMember(2)] public uint LedOn { get; }
     [ProtoMember(3)] public uint LedOff { get; }
     [ProtoMember(4)] public byte[] LedIndex { get; }
-    [ProtoMember(5)] public int Min { get; }
-    [ProtoMember(6)] public int Max { get; }
-    [ProtoMember(7)] public int Deadzone { get; }
+    [ProtoMember(5)] public int Multiplier { get; }
     [ProtoMember(8)] public bool ChildOfCombined { get; }
     [ProtoMember(10)] public DjAxisType Type { get; }
 
     public override Output Generate(ConfigViewModel model)
     {
         var combined = new DjAxis(model, Input.Generate(model), Color.FromUInt32(LedOn),
-            Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
+            Color.FromUInt32(LedOff), LedIndex, Multiplier,
             Type, ChildOfCombined);
         model.Bindings.Add(combined);
         return combined;

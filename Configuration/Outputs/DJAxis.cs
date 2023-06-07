@@ -5,18 +5,30 @@ using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class DjAxis : OutputAxis
 {
-    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
-        int deadZone, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max,
-        deadZone,
+    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int multiplier, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, -multiplier, multiplier,
+        0,
         false, childOfCombined)
     {
+        Multiplier = multiplier;
         Type = type;
         UpdateDetails();
+    }
+
+    public int Multiplier
+    {
+        get => (int) (1f / (Max - Min) * ushort.MaxValue);
+        set
+        {
+            Max = (int) (ushort.MaxValue / (value * 2f));
+            Min = -Max;
+            this.RaisePropertyChanged();
+        }
     }
 
     public DjAxisType Type { get; }
@@ -55,6 +67,8 @@ public class DjAxis : OutputAxis
 
     public bool IsVelocity => Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity;
 
+    public bool SupportsMinMax => !IsDigitalToAnalog && !IsVelocity;
+
     public bool IsFader => Type is DjAxisType.Crossfader;
 
     public override bool ShouldFlip(ConfigField mode)
@@ -74,7 +88,7 @@ public class DjAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDjAxis(Input!.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone,
+        return new SerializedDjAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Multiplier,
             ChildOfCombined);
     }
 

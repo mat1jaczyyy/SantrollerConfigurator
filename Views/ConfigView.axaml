@@ -923,12 +923,12 @@
                                 <Label VerticalAlignment="Center" Width="300">
                                     Multiplier
                                 </Label>
-                                <Slider Value="{Binding Max}"
+                                <Slider Value="{Binding Multiplier}"
                                         Minimum="1"
-                                        Maximum="8192"
+                                        Maximum="10"
                                         IsSnapToTickEnabled="True"
                                         TickFrequency="1" Width="240" />
-                                <NumericUpDown Value="{Binding Max}" Minimum="1"
+                                <NumericUpDown Value="{Binding Multiplier}" Minimum="1"
                                                Maximum="8192" Width="150" Height="30" Margin="10 0 0 0 " />
                             </StackPanel>
                         </StackPanel>
@@ -1022,7 +1022,7 @@
                         </StackPanel>
                     </Panel>
 
-                    <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
+                    <StackPanel IsVisible="{Binding SupportsMinMax}" Orientation="Horizontal" Height="50">
                         <Label VerticalAlignment="Center" Width="300">
                             Calibrate
                         </Label>
@@ -1032,7 +1032,7 @@
                         </Button>
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
+                    <StackPanel IsVisible="{Binding SupportsMinMax}" Orientation="Horizontal" Height="50">
                         <Label VerticalAlignment="Center" Width="300">
                             Min
                         </Label>
@@ -1043,7 +1043,7 @@
                         </Slider>
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
+                    <StackPanel IsVisible="{Binding SupportsMinMax}" Orientation="Horizontal" Height="50">
                         <Label VerticalAlignment="Center" Width="300">
                             Max
                         </Label>
@@ -1054,7 +1054,7 @@
                         </Slider>
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
+                    <StackPanel IsVisible="{Binding SupportsMinMax}" Orientation="Horizontal" Height="50">
                         <Label VerticalAlignment="Center" Width="300">
                             Deadzone
                         </Label>

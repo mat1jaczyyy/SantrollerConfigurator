@@ -188,7 +188,7 @@ public class UsbHostCombinedOutput : CombinedOutput
                     min, max, 0, GuitarAxisType.Slider, true),
                 DjAxisType djAxisType => new DjAxis(Model,
                     input, Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    min, max, 0, djAxisType, true),
+                    1, djAxisType, true),
                 DjInputType djInputType => new DjButton(Model,
                     input, Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
                     djInputType, false),

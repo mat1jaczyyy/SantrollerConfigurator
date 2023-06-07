@@ -60,10 +60,10 @@ public class DjCombinedOutput : CombinedTwiOutput
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 5, button, true)));
         Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, combined: true),
             Colors.Black,
-            Colors.Black, Array.Empty<byte>(), 0, 16, 0, DjAxisType.LeftTableVelocity, true));
+            Colors.Black, Array.Empty<byte>(), 1, DjAxisType.LeftTableVelocity, true));
         Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.RightTurntable, Model, combined: true),
             Colors.Black,
-            Colors.Black, Array.Empty<byte>(), 0, 16, 0, DjAxisType.RightTableVelocity, true));
+            Colors.Black, Array.Empty<byte>(), 1, DjAxisType.RightTableVelocity, true));
     }
 
     public override void UpdateBindings()

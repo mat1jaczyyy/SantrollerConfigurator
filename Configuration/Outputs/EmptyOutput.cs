@@ -173,7 +173,7 @@ public class EmptyOutput : Output
                 DjAxisType djAxisType => new DjAxis(Model,
                     new DirectInput(-1, DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    ushort.MinValue, ushort.MaxValue, 0, djAxisType, false),
+                    1, djAxisType, false),
                 DjInputType djInputType => new DjButton(Model,
                     new DirectInput(-1, DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(), 10,

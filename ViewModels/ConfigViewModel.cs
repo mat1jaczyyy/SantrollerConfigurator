@@ -660,8 +660,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     if (axisType is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity) continue;
                     Bindings.Add(new DjAxis(this,
                         new DirectInput(-1, DevicePinMode.Analog, this),
-                        Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, axisType, false));
+                        Colors.Black, Colors.Black, Array.Empty<byte>(), 100, axisType, false));
                     break;
             }
     }
