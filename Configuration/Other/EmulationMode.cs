@@ -66,7 +66,7 @@ public class EmulationMode : Output
             EmulationModeType.Xbox360 => "XBOX360",
             EmulationModeType.XboxOne => "XBOXONE",
             EmulationModeType.Wii => "WII_RB",
-            EmulationModeType.Ps3 => "PS3",
+            EmulationModeType.Ps3 => "REAL_PS3",
             EmulationModeType.Ps4Or5 => "PS4",
             EmulationModeType.Switch => "SWITCH",
             _ => throw new ArgumentOutOfRangeException()
