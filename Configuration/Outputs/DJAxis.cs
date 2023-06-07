@@ -11,7 +11,16 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class DjAxis : OutputAxis
 {
-    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int multiplier, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, -multiplier, multiplier,
+    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max, int deadZone, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max,
+        deadZone,
+        false, childOfCombined)
+    {
+        Multiplier = 0;
+        Type = type;
+        UpdateDetails();
+    }
+    
+    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int multiplier, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, 0, 0,
         0,
         false, childOfCombined)
     {
@@ -25,6 +34,7 @@ public class DjAxis : OutputAxis
         get => (int) (1f / (Max - Min) * ushort.MaxValue);
         set
         {
+            if (!IsVelocity) return;
             Max = (int) (ushort.MaxValue / (value * 2f));
             Min = -Max;
             this.RaisePropertyChanged();
@@ -67,7 +77,7 @@ public class DjAxis : OutputAxis
 
     public bool IsVelocity => Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity;
 
-    public bool SupportsMinMax => !IsDigitalToAnalog && !IsVelocity;
+    public bool SupportsMinMax => !IsDigitalToAnalog && !IsVelocity && Type is not DjAxisType.EffectsKnob;
 
     public bool IsFader => Type is DjAxisType.Crossfader;
 
@@ -88,7 +98,13 @@ public class DjAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        return new SerializedDjAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Multiplier,
+        if (IsVelocity)
+        {
+            return new SerializedDjAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Multiplier,
+                ChildOfCombined);
+        }
+
+        return new SerializedDjAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max, DeadZone,
             ChildOfCombined);
     }
 
@@ -144,6 +160,6 @@ public class DjAxis : OutputAxis
 
     protected override bool SupportsCalibration()
     {
-        return IsVelocity;
+        return Type is DjAxisType.Crossfader;
     }
 }
