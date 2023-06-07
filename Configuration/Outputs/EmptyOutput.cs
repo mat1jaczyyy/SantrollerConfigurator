@@ -41,11 +41,11 @@ public class EmptyOutput : Output
             .Select(x => Model.GetSimpleEmulationType() is EmulationType.KeyboardMouse)
             .ToProperty(this, x => x.IsKeyboard);
 
-        _combinedTypes = this.WhenAnyValue(vm => vm.Model.UsbHostEnabled, vm => vm.Model.DeviceType,
+        _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType,
                 vm => vm.Model.RhythmType)
-            .Select(tuple => ControllerEnumConverter.GetTypes((tuple.Item2, tuple.Item3)).Where(s2 =>
-                ((model.IsPico || s2 is not (SimpleType.WtNeckSimple or SimpleType.Bluetooth)) && tuple.Item1) ||
-                s2 is not SimpleType.UsbHost)).ToProperty(this, x => x.CombinedTypes);
+            .Select(tuple => ControllerEnumConverter.GetTypes((tuple.Item1, tuple.Item2)).Where(s2 =>
+                model.IsPico || s2 is not (SimpleType.WtNeckSimple or SimpleType.Bluetooth or SimpleType.UsbHost)))
+            .ToProperty(this, x => x.CombinedTypes);
     }
 
     // ReSharper disable once UnassignedGetOnlyAutoProperty
@@ -204,7 +204,7 @@ public class EmptyOutput : Output
             if (output is CombinedOutput combinedOutput)
             {
                 combinedOutput.SetOutputsOrDefaults(Array.Empty<Output>());
-            } 
+            }
         }
 
         _ = Dispatcher.UIThread.InvokeAsync(() =>
