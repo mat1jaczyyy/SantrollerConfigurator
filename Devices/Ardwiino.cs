@@ -455,6 +455,33 @@ public class Ardwiino : ConfigurableUsbDevice
                 break;
         }
 
+        switch (config.all.main.inputType)
+        {
+            case (int) InputControllerType.Wii:
+            {
+                var wii = new WiiCombinedOutput(model, sda, scl);
+                model.Bindings.Add(wii);
+                wii.SetOutputsOrDefaults(Array.Empty<Output>());
+                if (config.all.main.mapNunchukAccelToRightJoy != 0)
+                    foreach (var output in wii.Outputs.Items.Where(output => output is
+                             {
+                                 Input: WiiInput
+                                 {
+                                     Input: WiiInputType.NunchukRotationRoll or WiiInputType.NunchukRotationPitch
+                                 }
+                             }))
+                        output.Enabled = false;
+
+                bindings.Add(wii);
+                break;
+            }
+            case (int) InputControllerType.Ps2:
+                var ps2 = new Ps2CombinedOutput(model, miso, mosi, sck, att, ack);
+                model.Bindings.Add(ps2);
+                ps2.SetOutputsOrDefaults(Array.Empty<Output>());
+                bindings.Add(ps2);
+                break;
+        }
 
         if (config.all.main.inputType == (int) InputControllerType.Direct)
         {
@@ -525,11 +552,13 @@ public class Ardwiino : ConfigurableUsbDevice
                         min += short.MaxValue;
                         max += short.MaxValue;
                     }
+
                     if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
                         (ControllerAxisType) axis == XboxWhammy)
                     {
-                        bindings.Add(new GuitarAxis(model, new DirectInput(pin.pin, DevicePinMode.Analog, model), on, off,
-                                ledIndex, min, max, axisDeadzone, GuitarAxisType.Whammy, false));
+                        bindings.Add(new GuitarAxis(model, new DirectInput(pin.pin, DevicePinMode.Analog, model), on,
+                            off,
+                            ledIndex, min, max, axisDeadzone, GuitarAxisType.Whammy, false));
                     }
                     else
                     {
@@ -610,34 +639,6 @@ public class Ardwiino : ConfigurableUsbDevice
                         0, GuitarAxisType.Tilt, false));
                 }
             }
-
-            switch (config.all.main.inputType)
-            {
-                case (int) InputControllerType.Wii:
-                {
-                    var wii = new WiiCombinedOutput(model, sda, scl);
-                    model.Bindings.Add(wii);
-                    wii.SetOutputsOrDefaults(Array.Empty<Output>());
-                    if (config.all.main.mapNunchukAccelToRightJoy != 0)
-                        foreach (var output in wii.Outputs.Items.Where(output => output is
-                                 {
-                                     Input: WiiInput
-                                     {
-                                         Input: WiiInputType.NunchukRotationRoll or WiiInputType.NunchukRotationPitch
-                                     }
-                                 }))
-                            output.Enabled = false;
-
-                    bindings.Add(wii);
-                    break;
-                }
-                case (int) InputControllerType.Ps2:
-                    var ps2 = new Ps2CombinedOutput(model, miso, mosi, sck, att, ack);
-                    model.Bindings.Add(ps2);
-                    ps2.SetOutputsOrDefaults(Array.Empty<Output>());
-                    bindings.Add(ps2);
-                    break;
-            }
         }
 
         if (config.all.main.mapLeftJoystickToDPad > 0)
@@ -689,13 +690,15 @@ public class Ardwiino : ConfigurableUsbDevice
             model.Apa102Sck = 6;
             model.LedCount = ledIndexes.Values.Max();
         }
+
         model.CombinedStrumDebounce = config.debounce.combinedStrum != 0;
         model.XInputOnWindows = xinputOnWindows;
         model.MouseMovementType = MouseMovementType.Relative;
         model.Bindings.Clear();
         model.Bindings.AddRange(bindings);
         model.UpdateBindings();
-        model.Main.Write(model, false);
+        model.UpdateErrors();
+        model.Main.Write(model, !model.HasError);
         return true;
     }
 

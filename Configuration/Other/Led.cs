@@ -575,7 +575,7 @@ public class Led : Output
         switch (Command)
         {
             case LedCommandType.DjEuphoria:
-                return $@"if (rumble_left != rumble_right)) {{
+                return $@"if (rumble_left != rumble_right) {{
                 {between}
             }}";
             case LedCommandType.Combo:
