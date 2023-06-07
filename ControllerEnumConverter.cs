@@ -321,6 +321,10 @@ public class ControllerEnumConverter : IMultiValueConverter
                     types.Remove(axis.Type);
                     if (!types2.Contains(axis.Type)) extra.Add(binding);
                     break;
+                case DjAxis axis:
+                    types.Remove(axis.Type);
+                    if (!types2.Contains(axis.Type)) extra.Add(binding);
+                    break;
             }
 
         return (extra, types);
