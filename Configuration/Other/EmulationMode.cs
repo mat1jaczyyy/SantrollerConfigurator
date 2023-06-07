@@ -93,7 +93,7 @@ public class EmulationMode : Output
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
         return mode != ConfigField.Detection ? "" : $@"
-            if (debounce[{debounceIndex}]) {{
+            if ({Input.Generate()}) {{
                 set_console_type({GetDefinition()});
             }}";
     }
