@@ -164,7 +164,7 @@ public class GuitarAxis : OutputAxis
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
                 return $@"if ({Input.Generate()}) {{
                                   if (consoleType == PS3 || consoleType == REAL_PS3) {{
-                                     report->tilt = 0x280;
+                                     report->tilt = 0x180;
                                   }} else {{
                                      report->tilt_pc = 255;
                                   }}
