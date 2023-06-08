@@ -56,12 +56,12 @@ public class DjCombinedOutput : CombinedTwiOutput
 
         Outputs.AddRange(DjInputTypes.Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable))
             .Select(button => new DjButton(Model,
-                new DjInput(button, Model, combined: true),
+                new DjInput(button, Model, true, combined: true),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 5, button, true)));
-        Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, combined: true),
+        Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.LeftTurntable, Model, true, combined: true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), 1, DjAxisType.LeftTableVelocity, true));
-        Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.RightTurntable, Model, combined: true),
+        Outputs.Add(new DjAxis(Model, new DjInput(DjInputType.RightTurntable, Model, true, combined: true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), 1, DjAxisType.RightTableVelocity, true));
     }

@@ -668,6 +668,15 @@
                                   ItemTemplate="{StaticResource PinToStringTemplate}"
                                   Width="200" />
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsAnalog}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Turntable Smoothing
+                        </Label>
+                        <ToggleSwitch IsChecked="{Binding Smoothing}" OnContent="Enabled"
+                                      OffContent="Disabled" />
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             

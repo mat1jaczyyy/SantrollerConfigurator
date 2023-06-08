@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
@@ -14,10 +16,11 @@ public class DjInput : TwiInput
     public static readonly string DjTwiType = "dj";
     public static readonly int DjTwiFreq = 150000;
 
-    public DjInput(DjInputType input, ConfigViewModel model, int sda = -1,
+    public DjInput(DjInputType input, ConfigViewModel model, bool smoothing, int sda = -1,
         int scl = -1, bool combined = false) : base(
         DjTwiType, DjTwiFreq, sda, scl, model)
     {
+        Smoothing = smoothing;
         Combined = combined;
         BindableTwi = !combined && Model.Microcontroller.TwiAssignable;
         Input = input;
@@ -25,6 +28,8 @@ public class DjInput : TwiInput
     }
 
     public bool Combined { get; }
+    [Reactive]
+    public bool Smoothing { get; set; }
 
     public bool BindableTwi { get; }
 
@@ -104,13 +109,23 @@ public class DjInput : TwiInput
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        return base.RequiredDefines().Concat(new[] {"INPUT_DJ_TURNTABLE"}).ToList();
+        var list = new List<string>(base.RequiredDefines()) {"INPUT_DJ_TURNTABLE"};
+        if (Smoothing && Input is DjInputType.LeftTurntable)
+        {
+            list.Add("INPUT_DJ_TURNTABLE_SMOOTHING_LEFT");
+        }
+        if (Smoothing && Input is DjInputType.RightTurntable)
+        {
+            list.Add("INPUT_DJ_TURNTABLE_SMOOTHING_RIGHT");
+        }
+
+        return list;
     }
 
     public override SerializedInput Serialise()
     {
         if (Combined) return new SerializedDjInputCombined(Input);
 
-        return new SerializedDjInput(Sda, Scl, Input);
+        return new SerializedDjInput(Sda, Scl, Input, Smoothing);
     }
 }

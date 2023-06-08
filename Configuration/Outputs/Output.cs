@@ -464,11 +464,11 @@ public abstract partial class Output : ReactiveObject
                 break;
             case InputType.TurntableInput when Input.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;
-                input = new DjInput(djInputType.Value, Model);
+                input = new DjInput(djInputType.Value, Model, true);
                 break;
             case InputType.TurntableInput when Input.InnermostInput() is DjInput dj:
                 djInputType ??= dj.Input;
-                input = new DjInput(djInputType.Value, Model, dj.Sda, dj.Scl);
+                input = new DjInput(djInputType.Value, Model, dj.Smoothing, dj.Sda, dj.Scl);
                 break;
             case InputType.Gh5NeckInput when Input.InnermostInput() is not Gh5NeckInput:
                 gh5NeckInputType ??= Gh5NeckInputType.Green;
