@@ -40,9 +40,9 @@ public class DjInput : TwiInput
         switch (Input)
         {
             case DjInputType.LeftTurntable:
-                return "((int8_t)dj_left[2])";
+                return "(dj_turntable_left)";
             case DjInputType.RightTurntable:
-                return "((int8_t)dj_right[2])";
+                return "(dj_turntable_right)";
             case DjInputType.LeftBlue:
             case DjInputType.LeftGreen:
             case DjInputType.LeftRed:
