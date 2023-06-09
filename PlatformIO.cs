@@ -143,6 +143,33 @@ public class PlatformIo
         await _portProcess.WaitForExitAsync();
         return output != "" ? PlatformIoPort.FromJson(output) : null;
     }
+    
+    public BehaviorSubject<PlatformIoState> RunAvrdudeErase(IConfigurableDevice device, string progressMessage,
+        double progressStartingPercentage, double progressEndingPercentage)
+    {
+        var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude",
+            "avrdude.conf");
+        return RunPlatformIo("avrdude",
+            new[]
+            {
+                "pkg", "exec", "avrdude", "-c",
+                $"avrdude -p atmega32u4 -C \"{configFile}\" -P {device.GetUploadPortAsync().Result!} -c avr109 -e"
+            }, progressMessage, progressStartingPercentage, progressEndingPercentage, device);
+    }
+
+    public BehaviorSubject<PlatformIoState> RunAvrdudeDfuErase(Dfu device, Board board)
+    {
+        var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude",
+            "avrdude.conf");
+        var firmware = Path.Combine(AssetUtils.GetAppDataFolder(), "default_firmwares",
+            board.Environment + "_usb_" + device.GetRestoreSuffix() + ".hex");
+        return RunPlatformIo("avrdude",
+            new[]
+            {
+                "pkg", "exec", "avrdude", "-c",
+                $"avrdude -F -C \"{configFile}\"' -p {device.GetRestoreProcessor()} -c flip1 -U flash:w:{firmware}:i"
+            }, "", 0, 100, device);
+    }
 
     public BehaviorSubject<PlatformIoState> RunPlatformIo(string environment, string[] command,
         string progressMessage,
@@ -205,14 +232,7 @@ public class PlatformIo
                         if (device.Is32U4())
                         {
                             sections += 1;
-                            var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages",
-                                "tool-avrdude", "avrdude.conf");
-                            var subject = RunPlatformIo("avrdude",
-                                new[]
-                                {
-                                    "pkg", "exec", "avrdude", "-c",
-                                    $"avrdude -p atmega32u4 -C \"{configFile}\" -P {port} -c avr109 -e"
-                                }, "Erasing device", 0, percentageStep / sections, device);
+                            var subject = RunAvrdudeErase(device,  "Erasing device", 0, percentageStep / sections);
                             subject.Subscribe(s => platformIoOutput.OnNext(s));
                             await subject;
                             currentProgress += percentageStep / sections;

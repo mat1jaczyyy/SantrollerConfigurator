@@ -75,14 +75,7 @@ public class RestoreViewModel : ReactiveObject, IRoutableViewModel
             Main.Message = "Programming";
             Main.Progress = 50;
             // Write back a default firmware
-            var firmware = Path.Combine(AssetUtils.GetAppDataFolder(), "default_firmwares",
-                _santroller.Board.Environment + "_usb_" + dfu.GetRestoreSuffix() + ".hex");
-            _ = Main.Pio.RunPlatformIo("avrdude",
-                new[]
-                {
-                    "pkg", "exec", "avrdude", "-c",
-                    $"avrdude -F -C \"{configFile}\"' -p {dfu.GetRestoreProcessor()} -c flip1 -U flash:w:{firmware}:i"
-                }, "", 0, 100, device).Subscribe(s => { }, s => { }, () =>
+            _ = Main.Pio.RunAvrdudeDfuErase(dfu, _santroller.Board).Subscribe(s => { }, s => { }, () =>
             {
                 Main.Message = "Exiting Programming mode";
                 Main.Progress = 90;
@@ -94,12 +87,7 @@ public class RestoreViewModel : ReactiveObject, IRoutableViewModel
             Main.Message = "Programming";
             Main.Progress = 50;
             // Erase the device so it stays in bootloader mode, the ide can just program that
-            _ = Main.Pio.RunPlatformIo("avrdude",
-                new[]
-                {
-                    "pkg", "exec", "avrdude", "-c",
-                    $"avrdude -p atmega32u4 -C \"{configFile}\" -P {device.GetUploadPortAsync().Result!} -c avr109 -e"
-                }, "", 0, 100, device).Subscribe(s => { }, s => { }, () => { Main.Complete(100); });
+            _ = Main.Pio.RunAvrdudeErase(device, "", 0, 100).Subscribe(s => { }, s => { }, () => { Main.Complete(100); });
         }
         else if (!_santroller.IsPico() && _santroller.Board.HasUsbmcu && device is Arduino)
         {
