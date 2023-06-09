@@ -143,38 +143,40 @@ public class PlatformIo
         await _portProcess.WaitForExitAsync();
         return output != "" ? PlatformIoPort.FromJson(output) : null;
     }
-    
+
     public BehaviorSubject<PlatformIoState> RunAvrdudeErase(IConfigurableDevice device, string progressMessage,
         double progressStartingPercentage, double progressEndingPercentage)
     {
-        var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude",
-            "avrdude.conf");
-        return RunPlatformIo("avrdude",
+        if (device is Dfu dfu)
+        {
+            return RunPlatformIo("arduino_uno_usb",
+                new[]
+                {
+                    "run", "-t", $"{dfu.Board.Environment}_{dfu.GetRestoreSuffix()}_clean"
+                }, "", progressStartingPercentage, progressEndingPercentage, device, true);
+        }
+
+        return RunPlatformIo("sparkfun_promicro_16",
             new[]
             {
-                "pkg", "exec", "avrdude", "-c",
-                $"avrdude -p atmega32u4 -C \"{configFile}\" -P {device.GetUploadPortAsync().Result!} -c avr109 -e"
-            }, progressMessage, progressStartingPercentage, progressEndingPercentage, device);
+                "run", "-t", "micro_clean",
+            }, progressMessage, progressStartingPercentage, progressEndingPercentage, device, true);
     }
 
-    public BehaviorSubject<PlatformIoState> RunAvrdudeDfuErase(Dfu device, Board board)
+    public BehaviorSubject<PlatformIoState> RunAvrdudeErase(Dfu dfu, string progressMessage,
+        double progressStartingPercentage, double progressEndingPercentage, Board board)
     {
-        var configFile = Path.Combine(AssetUtils.GetAppDataFolder(), "platformio", "packages", "tool-avrdude",
-            "avrdude.conf");
-        var firmware = Path.Combine(AssetUtils.GetAppDataFolder(), "default_firmwares",
-            board.Environment + "_usb_" + device.GetRestoreSuffix() + ".hex");
-        return RunPlatformIo("avrdude",
+        return RunPlatformIo("arduino_uno_usb",
             new[]
             {
-                "pkg", "exec", "avrdude", "-c",
-                $"avrdude -F -C \"{configFile}\"' -p {device.GetRestoreProcessor()} -c flip1 -U flash:w:{firmware}:i"
-            }, "", 0, 100, device);
+                "run", "-t", $"{board.Environment}_{dfu.GetRestoreSuffix()}_clean"
+            }, progressMessage, progressStartingPercentage, progressEndingPercentage, dfu, true);
     }
 
     public BehaviorSubject<PlatformIoState> RunPlatformIo(string environment, string[] command,
         string progressMessage,
         double progressStartingPercentage, double progressEndingPercentage,
-        IConfigurableDevice? device)
+        IConfigurableDevice? device, bool erase = false)
     {
         var platformIoOutput =
             new BehaviorSubject<PlatformIoState>(new PlatformIoState(progressStartingPercentage, progressMessage,
@@ -192,10 +194,22 @@ public class PlatformIo
             args.Insert(0, _pythonExecutable);
             args.Insert(1, "-m");
             args.Insert(2, "platformio");
+            args.Add("--environment");
+            args.Add(environment);
             var sections = 5;
             var isUsb = false;
-            var avrdude = environment == "avrdude";
-            if (!avrdude)
+            if (erase && device != null)
+            {
+                Trace.WriteLine("Detecting port please wait");
+                var port = await device.GetUploadPortAsync().ConfigureAwait(false);
+                Console.WriteLine(port);
+                if (port != null)
+                {
+                    args.Add("--upload-port");
+                    args.Add(port);
+                }
+            }
+            else
             {
                 if (device is Arduino) sections = 10;
                 if (environment.EndsWith("_usb"))
@@ -210,11 +224,8 @@ public class PlatformIo
                     }
 
                     sections = 11;
-                    
                 }
 
-                args.Add("--environment");
-                args.Add(environment);
                 if (uploading && !isUsb)
                 {
                     if (environment.Contains("pico"))
@@ -232,7 +243,7 @@ public class PlatformIo
                         if (device.Is32U4())
                         {
                             sections += 1;
-                            var subject = RunAvrdudeErase(device,  "Erasing device", 0, percentageStep / sections);
+                            var subject = RunAvrdudeErase(device, "Erasing device", 0, percentageStep / sections);
                             subject.Subscribe(s => platformIoOutput.OnNext(s));
                             await subject;
                             currentProgress += percentageStep / sections;
@@ -247,6 +258,7 @@ public class PlatformIo
                     }
                 }
             }
+
             await _semaphore.WaitAsync();
             if (_currentProcess is {HasExited: false}) _currentProcess.Kill(true);
 
@@ -268,6 +280,8 @@ public class PlatformIo
 
             var state = 0;
             _currentProcess.Start();
+            Console.WriteLine("Starting process " + environment);
+            Console.WriteLine(_currentProcess.StartInfo.Arguments);
             Trace.WriteLine("Starting process " + environment);
             Trace.WriteLine(_currentProcess.StartInfo.Arguments);
 

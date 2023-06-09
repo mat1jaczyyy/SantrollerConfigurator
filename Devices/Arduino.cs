@@ -215,7 +215,7 @@ public class Arduino : IConfigurableDevice
 
     public bool Is32U4()
     {
-        return Board.Atmega32U4Boards.Contains(Board);
+        return Board.Is32U4();
     }
 
     public void Disconnect()

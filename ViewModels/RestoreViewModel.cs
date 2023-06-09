@@ -75,7 +75,7 @@ public class RestoreViewModel : ReactiveObject, IRoutableViewModel
             Main.Message = "Programming";
             Main.Progress = 50;
             // Write back a default firmware
-            _ = Main.Pio.RunAvrdudeDfuErase(dfu, _santroller.Board).Subscribe(s => { }, s => { }, () =>
+            _ = Main.Pio.RunAvrdudeErase(dfu, "", 0, 100, _santroller.Board).Subscribe(s => { }, s => { }, () =>
             {
                 Main.Message = "Exiting Programming mode";
                 Main.Progress = 90;
