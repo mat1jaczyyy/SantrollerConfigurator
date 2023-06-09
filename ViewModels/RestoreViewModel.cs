@@ -81,7 +81,7 @@ public class RestoreViewModel : ReactiveObject, IRoutableViewModel
                 new[]
                 {
                     "pkg", "exec", "avrdude", "-c",
-                    $"avrdude -F -C {configFile} -p {dfu.GetRestoreProcessor()} -c flip1 -U flash:w:{firmware}:i"
+                    $"avrdude -F -C '{configFile}' -p {dfu.GetRestoreProcessor()} -c flip1 -U flash:w:{firmware}:i"
                 }, "", 0, 100, device).Subscribe(s => { }, s => { }, () =>
             {
                 Main.Message = "Exiting Programming mode";
@@ -98,7 +98,7 @@ public class RestoreViewModel : ReactiveObject, IRoutableViewModel
                 new[]
                 {
                     "pkg", "exec", "avrdude", "-c",
-                    $"avrdude -p atmega32u4 -C {configFile} -P {device.GetUploadPortAsync().Result!} -c avr109 -e"
+                    $"avrdude -p atmega32u4 -C '{configFile}' -P {device.GetUploadPortAsync().Result!} -c avr109 -e"
                 }, "", 0, 100, device).Subscribe(s => { }, s => { }, () => { Main.Complete(100); });
         }
         else if (!_santroller.IsPico() && _santroller.Board.HasUsbmcu && device is Arduino)

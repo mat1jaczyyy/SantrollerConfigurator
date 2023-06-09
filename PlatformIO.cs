@@ -211,7 +211,7 @@ public class PlatformIo
                                 new[]
                                 {
                                     "pkg", "exec", "avrdude", "-c",
-                                    $"avrdude -p atmega32u4 -C {configFile} -P {port} -c avr109 -e"
+                                    $"avrdude -p atmega32u4 -C '{configFile}' -P {port} -c avr109 -e"
                                 }, "Erasing device", 0, percentageStep / sections, device);
                             subject.Subscribe(s => platformIoOutput.OnNext(s));
                             await subject;
