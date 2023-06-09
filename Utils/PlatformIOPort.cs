@@ -16,7 +16,6 @@ public partial class PlatformIoPort
     [JsonPropertyName("hwid")] public string Hwid { get; set; } = "";
 
 
-    [JsonPropertyName("vid")]
     public uint Vid
     {
         get
@@ -27,7 +26,6 @@ public partial class PlatformIoPort
     }
 
 
-    [JsonPropertyName("pid")]
     public uint Pid
     {
         get

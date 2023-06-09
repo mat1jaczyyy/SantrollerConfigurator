@@ -345,6 +345,7 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         {
             foreach (var port in ports)
             {
+                if (!port.Hwid.StartsWith("USB")) continue;
                 if (existingPorts.Contains(port.Port)) continue;
                 _currentPorts.Add(port.Port);
                 var arduino = new Arduino(Pio, port);
