@@ -211,7 +211,7 @@ public class PlatformIo
                                 new[]
                                 {
                                     "pkg", "exec", "avrdude", "-c",
-                                    $"avrdude -p atmega32u4 -C '{configFile}' -P {port} -c avr109 -e"
+                                    $"avrdude -p atmega32u4 -C \"{configFile}\" -P {port} -c avr109 -e"
                                 }, "Erasing device", 0, percentageStep / sections, device);
                             subject.Subscribe(s => platformIoOutput.OnNext(s));
                             await subject;
@@ -227,7 +227,6 @@ public class PlatformIo
                     }
                 }
             }
-
             await _semaphore.WaitAsync();
             if (_currentProcess is {HasExited: false}) _currentProcess.Kill(true);
 
@@ -250,7 +249,7 @@ public class PlatformIo
             var state = 0;
             _currentProcess.Start();
             Console.WriteLine("Starting process " + environment);
-            Console.WriteLine(string.Join(", ", args));
+            Console.WriteLine(_currentProcess.StartInfo.Arguments);
 
             // process.BeginOutputReadLine();
             // process.BeginErrorReadLine();
@@ -259,6 +258,7 @@ public class PlatformIo
             // In detect mode, the pro micro also goes through two separate programming stages.
             var main = device?.HasDfuMode() == false && !(device is Arduino arduino && arduino.Is32U4());
             while (!_currentProcess.HasExited)
+            {
                 if (state == 0)
                 {
                     var line = await _currentProcess.StandardOutput.ReadLineAsync().ConfigureAwait(false);
@@ -396,6 +396,7 @@ public class PlatformIo
                         }
                     }
                 }
+            }
 
             await _currentProcess.WaitForExitAsync();
 
