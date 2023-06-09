@@ -227,7 +227,7 @@ public class PlatformIo
 
                     if (device != null)
                     {
-                        Console.WriteLine("Detecting port please wait");
+                        Trace.WriteLine("Detecting port please wait");
                         var port = await device.GetUploadPortAsync().ConfigureAwait(false);
                         if (device.Is32U4())
                         {
@@ -268,8 +268,8 @@ public class PlatformIo
 
             var state = 0;
             _currentProcess.Start();
-            Console.WriteLine("Starting process " + environment);
-            Console.WriteLine(_currentProcess.StartInfo.Arguments);
+            Trace.WriteLine("Starting process " + environment);
+            Trace.WriteLine(_currentProcess.StartInfo.Arguments);
 
             // process.BeginOutputReadLine();
             // process.BeginErrorReadLine();
