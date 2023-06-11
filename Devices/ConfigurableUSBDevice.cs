@@ -18,6 +18,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     protected readonly string Serial;
     protected readonly Version Version;
     private TaskCompletionSource<string?>? _bootloaderPath;
+    private string? _lastBootloaderPath;
 
     protected ConfigurableUsbDevice(UsbDevice device, string path, string product, string serial, ushort version)
     {
@@ -52,6 +53,10 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         if (Board.Is32U4() && device is Arduino arduino2 && arduino2.Board.Is32U4())
         {
             _bootloaderPath?.TrySetResult(arduino2.GetSerialPort());
+            if (arduino2.Is32U4Bootloader)
+            {
+                _lastBootloaderPath = arduino2.GetSerialPort();
+            }
         }
         else if (device is PicoDevice pico && Board.IsPico())
         {
@@ -69,6 +74,10 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
     public async Task<string?> GetUploadPortAsync()
     {
         if (!Board.ArdwiinoName.Contains("pico") && !Board.HasUsbmcu && !Is32U4()) return null;
+        if (_lastBootloaderPath != null)
+        {
+            return _lastBootloaderPath;
+        }
         _bootloaderPath = new TaskCompletionSource<string?>();
         Bootloader();
         return await _bootloaderPath.Task;

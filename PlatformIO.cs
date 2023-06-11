@@ -238,8 +238,7 @@ public class PlatformIo
 
                     if (device != null)
                     {
-                        Trace.WriteLine("Detecting port please wait");
-                        var port = await device.GetUploadPortAsync().ConfigureAwait(false);
+                        var port = "";
                         if (device.Is32U4())
                         {
                             sections += 1;
@@ -248,7 +247,8 @@ public class PlatformIo
                             await subject;
                             currentProgress += percentageStep / sections;
                         }
-
+                        Trace.WriteLine("Detecting port please wait");
+                        port = await device.GetUploadPortAsync().ConfigureAwait(false);
                         Console.WriteLine(port);
                         if (port != null)
                         {
