@@ -1273,7 +1273,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             });
         if (mode == ConfigField.Shared && LedType is not LedType.None)
         {
-            // Handle leds, including when multiple leds are assigned to a single output.
+            // Handle leds, including when multiple leds are assigned to a single output. 
             foreach (var (led, relatedOutputs) in debouncesRelatedToLed)
             {
                 var analog = "";
