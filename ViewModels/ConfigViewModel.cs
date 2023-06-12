@@ -150,7 +150,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (!device.LoadConfiguration(this))
         {
             SetDefaults();
-            if (Device.HasDfuMode()) ShowUnoDialog = true;
         }
 
         if (Main is {IsUno: false, IsMega: false}) return;
@@ -222,8 +221,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ShowIssueDialog { get; } =
         new();
 
-    public Interaction<Arduino, ShowUnoShortWindowViewModel?> ShowUnoShortDialog { get; } = new();
-
     public Interaction<(string yesText, string noText, string text), AreYouSureWindowViewModel>
         ShowYesNoDialog { get; } = new();
 
@@ -244,9 +241,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public IEnumerable<DeviceControllerRhythmType> DeviceControllerRhythmTypes =>
         Enum.GetValues<DeviceControllerRhythmType>();
-
-    public IEnumerable<RfPowerLevel> RfPowerLevels => Enum.GetValues<RfPowerLevel>();
-    public IEnumerable<RfDataRate> RfDataRates => Enum.GetValues<RfDataRate>();
 
     public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
     public IEnumerable<ModeType> ModeTypes => Enum.GetValues<ModeType>();
@@ -504,18 +498,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         .Where(s => s.Value is SpiPinType.Sck)
         .Select(s => s.Key).ToList();
 
-    public List<int> AvailableRfMosiPins => Microcontroller.SpiPins(RfRxOutput.SpiType)
-        .Where(s => s.Value is SpiPinType.Mosi)
-        .Select(s => s.Key).ToList();
-
-    public List<int> AvailableRfMisoPins => Microcontroller.SpiPins(RfRxOutput.SpiType)
-        .Where(s => s.Value is SpiPinType.Miso)
-        .Select(s => s.Key).ToList();
-
-    public List<int> AvailableRfSckPins => Microcontroller.SpiPins(RfRxOutput.SpiType)
-        .Where(s => s.Value is SpiPinType.Sck)
-        .Select(s => s.Key).ToList();
-
     public List<int> AvailablePins => Microcontroller.GetAllPins(false);
 
     // Since DM and DP need to be next to eachother, you cannot use pins at the far ends
@@ -539,19 +521,19 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.RaiseAndSetIfChanged(ref _emulationType, emulationType, nameof(EmulationType));
         if (_rfSpiConfig == null && IsRf)
         {
-            var pins = Microcontroller.SpiPins(RfRxOutput.SpiType);
+            var pins = Microcontroller.SpiPins(CombinedRfRxOutput.SpiType);
             var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
             var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
             var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-            _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true, true,
+            _rfSpiConfig = Microcontroller.AssignSpiPins(this, CombinedRfRxOutput.SpiType, true, mosi, miso, sck, true, true,
                 true,
                 4000000);
             this.RaisePropertyChanged(nameof(RfMiso));
             this.RaisePropertyChanged(nameof(RfMosi));
             this.RaisePropertyChanged(nameof(RfSck));
             var first = Microcontroller.GetAllPins(false).First();
-            _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
-            _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
+            _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
+            _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
         }
     }
 
@@ -579,7 +561,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
         if (Bindings.Items.Any(s =>
-                s is WiiCombinedOutput or Ps2CombinedOutput or RfRxOutput or UsbHostCombinedOutput)) return;
+                s is WiiCombinedOutput or Ps2CombinedOutput or CombinedRfRxOutput or UsbHostCombinedOutput)) return;
 
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
@@ -684,19 +666,19 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             _emulationType = EmulationType.RfController;
             if (_rfSpiConfig == null)
             {
-                var pins = Microcontroller.SpiPins(RfRxOutput.SpiType);
+                var pins = Microcontroller.SpiPins(CombinedRfRxOutput.SpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, CombinedRfRxOutput.SpiType, true, mosi, miso, sck, true,
                     true,
                     true,
                     4000000);
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
                 this.RaisePropertyChanged(nameof(RfSck));
-                _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", -1, DevicePinMode.PullUp);
-                _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", -1, DevicePinMode.Output);
+                _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_ce", -1, DevicePinMode.PullUp);
+                _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_csn", -1, DevicePinMode.Output);
             }
         }
 
@@ -729,7 +711,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Bindings.Add(ps2Output);
                 break;
             case DeviceInputType.Rf:
-                var rfOutput = new RfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One)
+                var rfOutput = new CombinedRfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One)
                 {
                     Expanded = true
                 };
@@ -760,7 +742,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             if (_rfSpiConfig == null)
             {
-                var pins = Microcontroller.SpiPins(RfRxOutput.SpiType);
+                var pins = Microcontroller.SpiPins(CombinedRfRxOutput.SpiType);
                 var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
                 var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
                 var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
@@ -771,12 +753,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     sck = -1;
                 }
 
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, RfRxOutput.SpiType, true, mosi, miso, sck, true,
+                _rfSpiConfig = Microcontroller.AssignSpiPins(this, CombinedRfRxOutput.SpiType, true, mosi, miso, sck, true,
                     true,
                     true,
                     4000000);
-                _rfCe = new DirectPinConfig(this, RfRxOutput.SpiType + "_ce", -1, DevicePinMode.PullUp);
-                _rfCsn = new DirectPinConfig(this, RfRxOutput.SpiType + "_csn", -1, DevicePinMode.Output);
+                _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_ce", -1, DevicePinMode.PullUp);
+                _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_csn", -1, DevicePinMode.Output);
 
                 this.RaisePropertyChanged(nameof(RfMiso));
                 this.RaisePropertyChanged(nameof(RfMosi));
@@ -784,12 +766,18 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 this.RaisePropertyChanged(nameof(RfCe));
                 this.RaisePropertyChanged(nameof(RfCsn));
             }
+
+            if (!Bindings.Items.Any(s => s is RfTransmitter))
+            {
+                Bindings.Insert(0, new RfTransmitter(this));
+            }
         }
         else
         {
             _rfSpiConfig = null;
             _rfCe = null;
             _rfCsn = null;
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is RfTransmitter));
         }
 
         // If going from say bluetooth controller to standard controller, the pin bindings can stay
@@ -819,6 +807,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _emulationType = emulationType;
         this.RaisePropertyChanged(nameof(EmulationType));
         ClearOutputs();
+        if (emulationType is EmulationType.RfController or EmulationType.RfKeyboardMouse)
+        {
+            Bindings.Insert(0, new RfTransmitter(this));
+        }
 
         if (GetSimpleEmulationType() is EmulationType.KeyboardMouse) return;
 
@@ -1391,10 +1383,25 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (UsbHostEnabled && type != UsbHostPinTypeDm && type != UsbHostPinTypeDp)
             pins["USB Host"] = new List<int> {UsbHostDm, UsbHostDp};
 
-        if (IsRf && !type.StartsWith(RfRxOutput.SpiType))
+        if (IsRf && !type.StartsWith(CombinedRfRxOutput.SpiType))
             pins["RF"] = new List<int> {RfMiso, RfMosi, RfCe, RfSck, RfCsn};
 
         return pins;
+    }
+
+    public IEnumerable<PinConfig> GetRfPinConfigsToCheck()
+    {
+        if (!IsRf)
+        {
+            return Array.Empty<PinConfig>();
+        }
+
+        if (BindableSpi)
+        {
+            return new PinConfig[] {_rfSpiConfig!, _rfCsn!, _rfCe!};
+        }
+
+        return new PinConfig[] {_rfCsn!, _rfCe!};
     }
 
     public void UpdateErrors()
@@ -1404,23 +1411,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             output.UpdateErrors();
             if (!string.IsNullOrEmpty(output.ErrorText)) foundError = true;
-        }
-
-        if (IsRf && Microcontroller.SpiAssignable)
-        {
-            var error = _rfSpiConfig!.ErrorText;
-            var csnError = _rfCsn!.ErrorText;
-            var ceError = _rfCe!.ErrorText;
-            if (error != null || csnError != null || ceError != null)
-            {
-                foundError = true;
-            }
-
-            RfErrorText = error ?? csnError ?? ceError;
-        }
-        else
-        {
-            RfErrorText = "";
         }
 
         if (IsApa102 && Microcontroller.SpiAssignable)
@@ -1491,7 +1481,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             RfModuleDetected = rfRaw[1] != 0;
         }
 
-        if (IsBluetooth && btRaw.Any()) Connected = btRaw[0] != 0;
+        if (IsBluetooth && btRaw.Any())
+        {
+            Connected = btRaw[0] != 0;
+        }
     }
 
     public TwiConfig? GetTwiForType(string twiType)

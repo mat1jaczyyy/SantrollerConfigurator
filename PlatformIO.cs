@@ -247,6 +247,7 @@ public class PlatformIo
                             await subject;
                             currentProgress += percentageStep / sections;
                         }
+
                         Trace.WriteLine("Detecting port please wait");
                         port = await device.GetUploadPortAsync().ConfigureAwait(false);
                         Console.WriteLine(port);
@@ -322,8 +323,17 @@ public class PlatformIo
                         }
 
                         if (line.StartsWith("Detecting microcontroller type"))
+                        {
                             if (device is Santroller)
+                            {
                                 device.Bootloader();
+                            }
+                            else
+                            {
+                                platformIoOutput.OnNext(new PlatformIoState(currentProgress,
+                                    $"{progressMessage} - Looking for device in DFU mode", null));
+                            }
+                        }
 
                         if (line.StartsWith("Looking for upload port..."))
                         {

@@ -64,10 +64,6 @@
         <PackageReference Include="System.Text.Json" Version="8.0.0-preview.5.23254.7" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Update="Views\UnoShortWindow.axaml.cs">
-            <DependentUpon>UnoShortWindow.axaml</DependentUpon>
-            <SubType>Code</SubType>
-        </Compile>
         <Compile Update="Views\RaiseIssueWindow.axaml.cs">
             <DependentUpon>RaiseIssueWindow.axaml</DependentUpon>
             <SubType>Code</SubType>

@@ -45,7 +45,6 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
             TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerMoved += (sender, args) => ViewModel!.OnMouseEvent(args.GetCurrentPoint(GetValue(VisualParentProperty)).Position);
             TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerPressed += (sender, args) => ViewModel!.OnMouseEvent(args.GetCurrentPoint(GetValue(VisualParentProperty)).Properties.PointerUpdateKind);
             TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerWheelChanged += (sender, args) => ViewModel!.OnMouseEvent(args);
-            if (ViewModel!.ShowUnoDialog && ViewModel!.Device is Arduino arduino) DoShowUnoDialog(arduino);
         });
         AvaloniaXamlLoader.Load(this);
     }
@@ -74,17 +73,6 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
         if (!file.Any()) return;
         await using var stream = await file.First().OpenReadAsync();
         Serializer.Deserialize<SerializedConfiguration>(stream).LoadConfiguration(obj.Input);
-    }
-
-    private void DoShowUnoDialog(Arduino device)
-    {
-        var model = new ShowUnoShortWindowViewModel(device);
-        var dialog = new UnoShortWindow
-        {
-            DataContext = model
-        };
-
-        dialog.ShowDialog<ShowUnoShortWindowViewModel?>((Window) VisualRoot!);
     }
 
     private async Task DoShowDialogAsync(

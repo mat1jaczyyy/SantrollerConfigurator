@@ -150,6 +150,12 @@
                     <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False" VerticalAlignment="Center">Right Turntable Found</CheckBox>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type other:RfTransmitter}">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding $parent[views:ConfigView].Model.RfModuleDetected}" IsEnabled="False" VerticalAlignment="Center">nRF24L01+ Found</CheckBox>
+                    <CheckBox IsChecked="{Binding $parent[views:ConfigView].Model.Connected}" IsEnabled="False" VerticalAlignment="Center">Connected</CheckBox>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type combined:UsbHostCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="{Binding ConnectedDevices}" VerticalAlignment="Center" />
@@ -161,7 +167,7 @@
                     <CheckBox IsChecked="{Binding Detected}" VerticalAlignment="Center" IsEnabled="False">Detected</CheckBox>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type output:RfRxOutput}">
+            <DataTemplate DataType="{x:Type combined:CombinedRfRxOutput}">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox IsChecked="{Binding RfModuleDetected}" VerticalAlignment="Center" IsEnabled="False">nRF24L01+ Found</CheckBox>
                     <CheckBox IsChecked="{Binding Connected}" VerticalAlignment="Center" IsEnabled="False">Connected to Transmitter</CheckBox>
@@ -373,6 +379,118 @@
                         <ComboBox HorizontalAlignment="Stretch"
                                   SelectedItem="{Binding UsbHostDp}"
                                   ItemsSource="{Binding AvailablePinsDp}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type other:RfTransmitter}">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            RF Channel
+                        </Label>
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding $parent[views:ConfigView].Model.RfChannel}"
+                                       Minimum="0"
+                                       Maximum="125" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            RF Device ID
+                        </Label>
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding $parent[views:ConfigView].Model.RfId}"
+                                       Minimum="0"
+                                       Maximum="5" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            RF Power Level
+                        </Label>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  SelectedItem="{Binding $parent[views:ConfigView].Model.PowerLevel}"
+                                  ItemsSource="{Binding RfPowerLevels}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            RF Data Rate
+                        </Label>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  SelectedItem="{Binding $parent[views:ConfigView].Model.DataRate}"
+                                  ItemsSource="{Binding RfDataRates}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            MOSI Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding $parent[views:ConfigView].Model.RfMosi}"
+                                  ItemsSource="{Binding AvailableRfMosiPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            MOSI Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding $parent[views:ConfigView].Model.RfMosi}"
+                                  ItemsSource="{Binding AvailableRfMosiPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            MISO Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding $parent[views:ConfigView].Model.RfMiso}"
+                                  ItemsSource="{Binding AvailableRfMisoPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            SCK Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding $parent[views:ConfigView].Model.RfSck}"
+                                  ItemsSource="{Binding AvailableRfSckPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Chip Select Not (CSN) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding $parent[views:ConfigView].Model.RfCsn}"
+                                  ItemsSource="{Binding AvailablePins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Chip Enable (CE) Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding $parent[views:ConfigView].Model.RfCe}"
+                                  ItemsSource="{Binding AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                     </StackPanel>
                 </StackPanel>
@@ -1732,7 +1850,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type output:RfRxOutput}">
+            <DataTemplate DataType="{x:Type combined:CombinedRfRxOutput}">
                 <StackPanel>
                     <StackPanel
                         IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">

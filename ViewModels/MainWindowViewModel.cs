@@ -145,7 +145,8 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
 
     private static Func<DeviceInputType, bool> CreateFilter(IConfigurableDevice? s)
     {
-        return type => (type != DeviceInputType.Rf || s?.IsGeneric() != true) && (type is not DeviceInputType.Usb || s is PicoDevice);
+        return type => (type != DeviceInputType.Rf || s?.IsGeneric() != true) &&
+                       (type is not DeviceInputType.Usb || s is PicoDevice);
     }
 
     public void Begin()
@@ -306,7 +307,11 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     private void UpdateProgress(PlatformIo.PlatformIoState state)
     {
         if (!Working) return;
-        ProgressbarColor = state.Message.Contains("Please unplug your device") ? "#FFd7cb00" : "#FF0078D7";
+        ProgressbarColor =
+            state.Message.Contains("Please unplug your device") ||
+            state.Message.Contains("Looking for device in DFU mode")
+                ? "#FFd7cb00"
+                : "#FF0078D7";
         Progress = state.Percentage;
         Message = state.Message;
     }

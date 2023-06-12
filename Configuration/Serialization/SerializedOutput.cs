@@ -28,6 +28,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoInclude(120, typeof(SerializedCombinedUsbHostOutput))]
 [ProtoInclude(121, typeof(SerializedBluetoothOutput))]
 [ProtoInclude(122, typeof(SerializedCombinedUsbHostOutput))]
+[ProtoInclude(123, typeof(SerializedRfTransmitter))]
 [ProtoContract]
 public abstract class SerializedOutput
 {
