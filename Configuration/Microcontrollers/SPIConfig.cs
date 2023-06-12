@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
@@ -73,6 +74,11 @@ public abstract class SpiConfig : PinConfig
 
     public override string Generate()
     {
+        // For RF, RF24 initialises pins
+        if (Type == CombinedRfRxOutput.SpiType)
+        {
+            return "";
+        }
         // On apa102, miso isn't used.
         var miso = IncludesMiso ? $"#define {Definition}_MISO {_miso}" : "";
         return $@"

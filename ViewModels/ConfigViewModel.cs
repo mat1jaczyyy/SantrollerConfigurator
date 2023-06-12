@@ -532,8 +532,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             this.RaisePropertyChanged(nameof(RfMosi));
             this.RaisePropertyChanged(nameof(RfSck));
             var first = Microcontroller.GetAllPins(false).First();
-            _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_ce", first, DevicePinMode.PullUp);
-            _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_csn", first, DevicePinMode.Output);
+            // CE and CSN pins are initialised by RF24
+            _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_ce", first, DevicePinMode.Skip);
+            _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_csn", first, DevicePinMode.Skip);
         }
     }
 
