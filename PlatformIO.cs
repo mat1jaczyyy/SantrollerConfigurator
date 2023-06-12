@@ -149,14 +149,14 @@ public class PlatformIo
     {
         if (device is Dfu dfu)
         {
-            return RunPlatformIo("arduino_uno_usb",
+            return RunPlatformIo("microdetect",
                 new[]
                 {
                     "run", "-t", $"{dfu.Board.Environment}_{dfu.GetRestoreSuffix()}_clean"
                 }, "", progressStartingPercentage, progressEndingPercentage, device, true);
         }
 
-        return RunPlatformIo("sparkfun_promicro_16",
+        return RunPlatformIo("microdetect",
             new[]
             {
                 "run", "-t", "micro_clean",

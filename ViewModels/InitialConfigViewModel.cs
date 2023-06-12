@@ -27,6 +27,7 @@ public class InitialConfigViewModel : ReactiveObject, IRoutableViewModel
         );
         DfuImage = GetImage();
         if (Model.Device is not Arduino arduino) return;
+        if (!arduino.HasDfuMode()) return;
         HasDfuImage = true;
         arduino.DfuDetected.Subscribe(s => HasDfuImage = false);
     }
