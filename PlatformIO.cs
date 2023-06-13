@@ -155,7 +155,6 @@ public class PlatformIo
                     "run", "-t", $"{dfu.Board.Environment}_{dfu.GetRestoreSuffix()}_clean"
                 }, "", progressStartingPercentage, progressEndingPercentage, device, true);
         }
-
         return RunPlatformIo("microdetect",
             new[]
             {
