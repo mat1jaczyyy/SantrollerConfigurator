@@ -147,10 +147,19 @@ public class PlatformIo
     public BehaviorSubject<PlatformIoState> RunAvrdudeErase(IConfigurableDevice device, string progressMessage,
         double progressStartingPercentage, double progressEndingPercentage)
     {
+        if (device is Arduino {Is32U4Bootloader: true} or Santroller or Ardwiino)
+        {
+            return RunPlatformIo("microdetect",
+                new[]
+                {
+                    "run", "-t", "micro_clean",
+                }, progressMessage, progressStartingPercentage, progressEndingPercentage, device, true);
+        }
+
         return RunPlatformIo("microdetect",
             new[]
             {
-                "run", "-t", "micro_clean",
+                "run", "-t", "micro_clean_jump",
             }, progressMessage, progressStartingPercentage, progressEndingPercentage, device, true);
     }
 
@@ -191,13 +200,21 @@ public class PlatformIo
             var isUsb = false;
             if (erase && device != null)
             {
-                Trace.WriteLine("Detecting port please wait");
-                var port = await device.GetUploadPortAsync().ConfigureAwait(false);
-                Console.WriteLine(port);
-                if (port != null)
+                if (device is Arduino arduino2)
                 {
                     args.Add("--upload-port");
-                    args.Add(port);
+                    args.Add(arduino2.GetSerialPort());
+                }
+                else
+                {
+                    Trace.WriteLine("Detecting port please wait");
+                    var port = await device.GetUploadPortAsync().ConfigureAwait(false);
+                    Console.WriteLine(port);
+                    if (port != null)
+                    {
+                        args.Add("--upload-port");
+                        args.Add(port);
+                    }
                 }
             }
             else

@@ -168,7 +168,7 @@ public class Arduino : IConfigurableDevice
 
     public Task<string?> GetUploadPortAsync()
     {
-        if (IsPico() || (Is32U4() && !Is32U4Bootloader))
+        if (IsPico())
         {
             _arduino32U4Path = new TaskCompletionSource<string?>();
             Bootloader();
@@ -188,11 +188,9 @@ public class Arduino : IConfigurableDevice
     {
         switch (device)
         {
-            case Arduino arduino when Is32U4() && _arduino32U4Path != null && arduino.Is32U4():
+            case Arduino arduino when Is32U4() && arduino.Is32U4():
                 Console.WriteLine("Found device with port: " + arduino.GetSerialPort());
                 _port = arduino.GetSerialPort();
-                _arduino32U4Path.TrySetResult(arduino.GetSerialPort());
-                _arduino32U4Path = null;
                 Board = arduino.Board;
                 Is32U4Bootloader = true;
                 break;
