@@ -52,10 +52,9 @@ being added:
       you are using APA102s then any led can be bound to any effect, but you can also bind effects to a digital output.
     - It is now also possible to bind multiple things to a single LED, and pick the LED off colour as well, which allows
       for all sorts of crazy things
-- Overhaul of RF
-    - It will work on the pi pico, and you can connect multiple transmitters to a single receiver, if for example you
-      want to build a separate wireless pedal and wireless drum kit.
+- RF support is being removed
+    - There are just too many dodgy NRF modules out there, and supporting this is not something I can easily do. I
+      require things like ACKs and a lot of the knock-off NRF modules don't implement them correctly.
 - Bluetooth support (on the pi pico w)
     - You can build a bluetooth transmitter that will just work on computers
-    - I would like to also add support for bluetooth receivers for console support, but there are some issues with the
-      pi pico w bluetooth chip that will need to be worked around first.
+    - You can also build a bluetooth receiver and connect it to a transmitter, for console support
