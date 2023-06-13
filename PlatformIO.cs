@@ -147,14 +147,6 @@ public class PlatformIo
     public BehaviorSubject<PlatformIoState> RunAvrdudeErase(IConfigurableDevice device, string progressMessage,
         double progressStartingPercentage, double progressEndingPercentage)
     {
-        if (device is Dfu dfu)
-        {
-            return RunPlatformIo("microdetect",
-                new[]
-                {
-                    "run", "-t", $"{dfu.Board.Environment}_{dfu.GetRestoreSuffix()}_clean"
-                }, "", progressStartingPercentage, progressEndingPercentage, device, true);
-        }
         return RunPlatformIo("microdetect",
             new[]
             {
