@@ -196,7 +196,7 @@ public abstract partial class OutputAxis : Output
         this.RaisePropertyChanged(nameof(CalibrationText));
     }
 
-    private int Calculate(
+    protected virtual int Calculate(
         (bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType
             deviceControllerType) values)
     {

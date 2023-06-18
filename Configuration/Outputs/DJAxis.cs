@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -31,14 +32,25 @@ public class DjAxis : OutputAxis
 
     public int Multiplier
     {
-        get => (int) (1f / (Max - Min) * ushort.MaxValue);
+        get => Max;
         set
         {
             if (!IsVelocity) return;
-            Max = (int) (ushort.MaxValue / (value * 2f));
-            Min = -Max;
+            Max = value;
             this.RaisePropertyChanged();
         }
+    }
+ 
+    protected override int Calculate(
+        (bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType deviceControllerType)
+            values)
+    {
+        if (Type is not (DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity))
+        {
+            return base.Calculate(values);
+        }
+
+        return values.value * values.max;
     }
 
     public DjAxisType Type { get; }
@@ -124,10 +136,17 @@ public class DjAxis : OutputAxis
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
         var gen = GenerateAssignment(mode, accelerometer, false, false);
+        // This NEEDS to be 128 for dj hero
         if (Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity)
         {
-            gen = $"({Input.Generate()} * {Max})";
-            gen = mode == ConfigField.Xbox360 ? gen : $"{gen} + {sbyte.MaxValue}";
+            if (mode is ConfigField.Ps3)
+            {
+                gen = $"(({Input.Generate()} * {Max}) + 128)";
+            }
+            else
+            {
+                gen = $"({Input.Generate()} * {Max})";
+            }
         }
 
         return $"{GenerateOutput(mode)} = {gen};";
