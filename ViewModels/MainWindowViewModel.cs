@@ -272,6 +272,7 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         var output = new StringBuilder();
         var behaviorSubject =
             new BehaviorSubject<PlatformIo.PlatformIoState>(new PlatformIo.PlatformIoState(0, "", null));
+        
         state.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
             {
                 behaviorSubject.OnNext(s);
