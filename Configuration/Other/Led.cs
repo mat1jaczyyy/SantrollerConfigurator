@@ -495,8 +495,8 @@ public class Led : Output
         {
             on = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, true) + ";";
             off = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, false) + ";";
-            between = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, "rumble_left");
-            starPowerBetween = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, "last_star_power");
+            between = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, "rumble_left") + ";";
+            starPowerBetween = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, "last_star_power") + ";";
         }
 
         foreach (var index in LedIndices)
