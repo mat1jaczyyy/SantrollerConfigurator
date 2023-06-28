@@ -15,7 +15,9 @@ public abstract class Microcontroller
     public abstract bool SpiAssignable { get; }
     public abstract List<int> PwmPins { get; }
     public abstract string GenerateDigitalRead(int pin, bool pullUp);
+
     public abstract string GenerateDigitalWrite(int pin, bool val);
+
     public abstract string GenerateAnalogWrite(int pin, string val);
 
     public abstract int GetChannel(int pin, bool reconfigurePin);
@@ -44,7 +46,8 @@ public abstract class Microcontroller
         return ret;
     }
 
-    public abstract SpiConfig AssignSpiPins(ConfigViewModel model, string type, bool includesMiso, int mosi, int miso, int sck, bool cpol,
+    public abstract SpiConfig AssignSpiPins(ConfigViewModel model, string type, bool includesMiso, int mosi, int miso,
+        int sck, bool cpol,
         bool cpha,
         bool msbfirst,
         uint clock);

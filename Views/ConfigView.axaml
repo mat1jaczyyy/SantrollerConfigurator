@@ -152,8 +152,14 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type other:RfTransmitter}">
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox IsChecked="{Binding $parent[views:ConfigView].Model.RfModuleDetected}" IsEnabled="False" VerticalAlignment="Center">nRF24L01+ Found</CheckBox>
-                    <CheckBox IsChecked="{Binding $parent[views:ConfigView].Model.Connected}" IsEnabled="False" VerticalAlignment="Center">Connected</CheckBox>
+                    <CheckBox IsChecked="{Binding $parent[views:ConfigView].Model.RfModuleDetected}" IsEnabled="False"
+                              VerticalAlignment="Center">
+                        nRF24L01+ Found
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding $parent[views:ConfigView].Model.Connected}" IsEnabled="False"
+                              VerticalAlignment="Center">
+                        Connected
+                    </CheckBox>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:UsbHostCombinedOutput}">
@@ -391,7 +397,8 @@
                                Width="300">
                             RF Channel
                         </Label>
-                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding $parent[views:ConfigView].Model.RfChannel}"
+                        <NumericUpDown FormatString="{}{0:#,0}"
+                                       Value="{Binding $parent[views:ConfigView].Model.RfChannel}"
                                        Minimum="0"
                                        Maximum="125" HorizontalAlignment="Stretch" />
                     </StackPanel>
@@ -719,17 +726,33 @@
                         <ToggleSwitch IsChecked="{Binding OutputEnabled}" OnContent="Enabled"
                                       OffContent="Disabled" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" IsVisible="{Binding OutputEnabled}">
-                        <Label VerticalAlignment="Center"
-                               VerticalContentAlignment="Center"
-                               Width="300">
-                            Digital Output Pin
-                        </Label>
-                        <ComboBox VerticalAlignment="Center"
-                                  SelectedItem="{Binding Pin}"
-                                  ItemTemplate="{StaticResource PinToStringTemplate}"
-                                  ItemsSource="{Binding AvailablePins}" />
+                    <StackPanel IsVisible="{Binding UsesPwm}">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding OutputEnabled}">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                Analog Output Pin
+                            </Label>
+                            <ComboBox VerticalAlignment="Center"
+                                      SelectedItem="{Binding Pin}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}"
+                                      ItemsSource="{Binding AvailablePwmPins}" />
+                        </StackPanel>
                     </StackPanel>
+                    <StackPanel IsVisible="{Binding !UsesPwm}">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding OutputEnabled}">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                Digital Output Pin
+                            </Label>
+                            <ComboBox VerticalAlignment="Center"
+                                      SelectedItem="{Binding Pin}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}"
+                                      ItemsSource="{Binding AvailablePins}" />
+                        </StackPanel>
+                    </StackPanel>
+
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type other:Rumble}">
@@ -797,7 +820,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            
+
             <DataTemplate DataType="{x:Type inputs:UsbHostInput}">
                 <StackPanel Orientation="Vertical" IsVisible="{Binding !Combined}">
                     <StackPanel Orientation="Horizontal">
@@ -1712,7 +1735,7 @@
                                 <Binding Path="!IsDj" />
                                 <Binding Path="!IsPs2" />
                                 <Binding Path="!IsUsb" />
-                                
+
                             </MultiBinding>
                         </ContentControl.IsVisible>
                     </ContentControl>

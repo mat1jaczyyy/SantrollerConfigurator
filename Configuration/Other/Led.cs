@@ -77,6 +77,7 @@ public enum GuitarHeroDrum
     OrangeCymbal,
     GreenPad
 }
+
 public enum Turntable
 {
     ScratchLeft,
@@ -216,7 +217,10 @@ public class Led : Output
         RumbleCommands = rumbleCommands;
         _ledsRequireColours = this.WhenAnyValue(x => x.Command).Select(s => s is not LedCommandType.Ps4LightBar)
             .ToProperty(this, x => x.LedsRequireColours);
-
+        this.WhenAnyValue(x => x.Command)
+            .Select(commandType => commandType is LedCommandType.DjEuphoria
+                or LedCommandType.StarPowerActive
+                or LedCommandType.StarPowerInactive).ToPropertyEx(this, x => x.UsesPwm);
         this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType)
             .Select(s => s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.Guitar)
             .ToPropertyEx(this, x => x.FiveFretMode);
@@ -263,6 +267,7 @@ public class Led : Output
 
     public override bool LedsRequireColours =>
         _ledsRequireColours.Value; // ReSharper disable UnassignedGetOnlyAutoProperty
+
     [ObservableAsProperty] public bool FiveFretMode { get; }
     [ObservableAsProperty] public bool SixFretMode { get; }
     [ObservableAsProperty] public bool GuitarHeroDrumsMode { get; }
@@ -304,6 +309,7 @@ public class Led : Output
     }
 
     public List<int> AvailablePins => Model.Microcontroller.GetAllPins(false);
+    public List<int> AvailablePwmPins => Model.Microcontroller.PwmPins;
 
     public DirectPinConfig? PinConfig { get; private set; }
 
@@ -326,10 +332,16 @@ public class Led : Output
         set
         {
             this.RaiseAndSetIfChanged(ref _command, value);
+            if (UsesPwm && !AvailablePwmPins.Contains(_pin))
+            {
+                _pin = -1;
+            }
+
             UpdateDetails();
         }
     }
 
+    [ObservableAsProperty] public bool UsesPwm { get; }
     [Reactive] public int Player { get; set; }
     [Reactive] public StageKitStrobeSpeed StrobeSpeed { get; set; }
     [Reactive] public int StageKitLed { get; set; }
@@ -477,14 +489,16 @@ public class Led : Output
             or ConfigField.KeyboardLed or ConfigField.LightBarLed or ConfigField.OffLed)) return "";
         var on = "";
         var off = "";
+        var between = "";
+        var starPowerBetween = "";
         if (PinConfig != null)
         {
             on = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, true) + ";";
             off = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, false) + ";";
+            between = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, "rumble_left");
+            starPowerBetween = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, "last_star_power");
         }
 
-        var between = "";
-        var starPowerBetween = "";
         foreach (var index in LedIndices)
         {
             on += $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, index)}";
@@ -530,42 +544,24 @@ public class Led : Output
                     }} else if (last_strobe && last_strobe - millis() > 10) {{
                         {off}
                     }}";
-            case LedCommandType.StarPowerActive when
-                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.StrobeLed:
-                return $@"if (star_power_active && last_star_power) {{
-                             {starPowerBetween}
+            case LedCommandType.StarPowerInactive when mode == ConfigField.RumbleLed:
+                return $@"if (rumble_right == {RumbleCommand.SantrollerStarPowerActive} && !rumble_left) {{
+                               star_power_active = false;
+                               {starPowerBetween}
+                          }}
+                          if (!star_power_active && rumble_right == {RumbleCommand.SantrollerStarPowerGauge}) {{
+                               last_star_power = rumble_left;
+                               {starPowerBetween}
                           }}";
-            case LedCommandType.StarPowerInactive when
-                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.StrobeLed:
-                return $@"if (!star_power_active && last_star_power) {{
-                            {starPowerBetween}
+            case LedCommandType.StarPowerActive when mode == ConfigField.RumbleLed:
+                return $@"if (rumble_right == {RumbleCommand.SantrollerStarPowerActive} && rumble_left) {{
+                               star_power_active = true;
+                               {starPowerBetween}
+                          }}
+                          if (star_power_active && rumble_right == {RumbleCommand.SantrollerStarPowerGauge}) {{
+                               last_star_power = rumble_left;
+                               {starPowerBetween}
                           }}";
-            case LedCommandType.StarPowerInactive or LedCommandType.StarPowerActive when
-                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.RumbleLed:
-                return
-                    $@"if (rumble_right == {RumbleCommand.SantrollerStarPowerGauge} && rumble_left != {RumbleCommand.SantrollerStarPowerGauge}) {{
-                           if (rumble_left) {{
-                              last_star_power = rumble_left;
-                           }} else {{
-                              {off}
-                           }}
-                      }}";
-            case LedCommandType.StarPowerInactive when
-                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.RumbleLed:
-                return $@"if (rumble_right == {RumbleCommand.SantrollerStarPowerActive}) {{
-                           if (rumble_left && !star_power_active) {{
-                                {off}
-                                star_power_active = true;
-                           }}
-                      }}";
-            case LedCommandType.StarPowerActive when
-                StageKitCommand is StageKitCommand.Strobe && mode == ConfigField.RumbleLed:
-                return $@"if (rumble_right == {RumbleCommand.SantrollerStarPowerActive}) {{
-                           if (!rumble_left && star_power_active) {{
-                                {off}
-                                star_power_active = false;
-                           }}
-                      }}";
         }
 
         if (mode is ConfigField.OffLed && Command is LedCommandType.StageKitLed) return off;
@@ -597,7 +593,7 @@ public class Led : Output
                     DeviceControllerType.Turntable => (int) Turntable,
                     _ => 0
                 };
-                
+
                 return $@"if (rumble_right == {(int) (RumbleCommand.SantrollerInputSpecific + santrollerCmd)}) {{
                     if (rumble_left == 1) {{
                         {on}

@@ -43,7 +43,7 @@ public abstract class AvrController : Microcontroller
     {
         if (val) return $"PORT{GetPort(pin)} |= {1 << GetIndex(pin)}";
 
-        return $"PORT{GetPort(pin)} &= {~(1 << GetIndex(pin))}";
+        return $"PORT{GetPort(pin)} &= ~{(1 << GetIndex(pin))}";
     }
 
     public abstract int GetIndex(int pin);
