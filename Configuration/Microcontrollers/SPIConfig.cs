@@ -33,7 +33,6 @@ public abstract class SpiConfig : PinConfig
     }
 
     public override string Type { get; }
-    protected abstract bool Reassignable { get; }
     
     public bool IncludesMiso { get; }
 

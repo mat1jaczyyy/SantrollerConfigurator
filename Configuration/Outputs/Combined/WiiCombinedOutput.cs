@@ -466,7 +466,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             {
                 var items = currentAxisStandard.Where(s => s.Type == standard).ToList();
                 Outputs.RemoveMany(items);
-                if (dj is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity)
+                if (dj is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity or DjAxisType.EffectsKnob)
                 {
                     Outputs.AddRange(items.Select(item => new DjAxis(Model, item.Input,
                         item.LedOn, item.LedOff, item.LedIndices.ToArray(), 1,

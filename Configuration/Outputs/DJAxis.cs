@@ -35,8 +35,19 @@ public class DjAxis : OutputAxis
         get => Max;
         set
         {
-            if (!IsVelocity) return;
+            if (!IsVelocity && !IsEffectsKnob) return;
             Max = value;
+            this.RaisePropertyChanged();
+        }
+    }
+    
+    public bool Invert
+    {
+        get => Max == -1;
+        set
+        {
+            if (!IsEffectsKnob) return;
+            Max = value ? -1: 1;
             this.RaisePropertyChanged();
         }
     }
@@ -45,7 +56,7 @@ public class DjAxis : OutputAxis
         (bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType deviceControllerType)
             values)
     {
-        if (Type is not (DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity))
+        if (Type is not (DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity or DjAxisType.EffectsKnob))
         {
             return base.Calculate(values);
         }
@@ -89,9 +100,10 @@ public class DjAxis : OutputAxis
 
     public bool IsVelocity => Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity;
 
-    public bool SupportsMinMax => !IsDigitalToAnalog && !IsVelocity && Type is not DjAxisType.EffectsKnob;
+    public bool SupportsMinMax => !IsDigitalToAnalog && !IsVelocity && !IsEffectsKnob;
 
     public bool IsFader => Type is DjAxisType.Crossfader;
+    public bool IsEffectsKnob => Type is DjAxisType.EffectsKnob;
 
     public override bool ShouldFlip(ConfigField mode)
     {
@@ -110,7 +122,7 @@ public class DjAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        if (IsVelocity)
+        if (IsVelocity || IsEffectsKnob)
         {
             return new SerializedDjAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Multiplier,
                 ChildOfCombined);
@@ -135,19 +147,15 @@ public class DjAxis : OutputAxis
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
-        var gen = GenerateAssignment(mode, accelerometer, false, false);
-        // This NEEDS to be 128 for dj hero
-        if (Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity)
+        
+        var gen = Type switch
         {
-            if (mode is ConfigField.Ps3)
-            {
-                gen = $"(({Input.Generate()} * {Max}) + 128)";
-            }
-            else
-            {
-                gen = $"({Input.Generate()} * {Max})";
-            }
-        }
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}) + 128)",
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity => $"({Input.Generate()} * {Max})",
+            DjAxisType.Crossfader when mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}) + 512)",
+            DjAxisType.Crossfader => $"({Input.Generate()} * {Max})",
+            _ => GenerateAssignment(mode, accelerometer, false, false)
+        };
 
         return $"{GenerateOutput(mode)} = {gen};";
     }

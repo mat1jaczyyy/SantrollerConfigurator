@@ -1041,6 +1041,42 @@
             <DataTemplate DataType="{x:Type output:DjAxis}">
                 <StackPanel Orientation="Vertical">
                     <Panel>
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Center" IsVisible="{Binding IsEffectsKnob}">
+                            <StackPanel Orientation="Horizontal">
+                                <Label VerticalAlignment="Center" Width="300">
+                                    Current Value
+                                </Label>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal"
+                                                Width="{Binding FullProgressWidth, Mode=OneTime}">
+                                        <ProgressBar CornerRadius="0 3 3 0"
+                                                     Value="{Binding ValueLower}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                     Height="30"
+                                                     Width="{Binding HalfProgressWidth, Mode=OneTime}">
+                                            <ProgressBar.RenderTransform>
+                                                <ScaleTransform ScaleX="-1" />
+                                            </ProgressBar.RenderTransform>
+                                        </ProgressBar>
+                                        <ProgressBar CornerRadius="0 3 3 0"
+                                                     Value="{Binding ValueUpper}"
+                                                     IsIndeterminate="False" Minimum="0" Maximum="32768"
+                                                     Height="30"
+                                                     Width="{Binding HalfProgressWidth, Mode=OneTime}" />
+                                    </StackPanel>
+                                    <Label VerticalAlignment="Center" HorizontalContentAlignment="Center"
+                                           Content="{Binding Value}" />
+                                </Grid>
+
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Height="50">
+                                <Label VerticalAlignment="Center" Width="300">
+                                    Invert
+                                </Label>
+                                
+                                <ToggleSwitch IsChecked="{Binding Invert}" />
+                            </StackPanel>
+                        </StackPanel>
                         <StackPanel Orientation="Vertical" VerticalAlignment="Center" IsVisible="{Binding IsVelocity}">
                             <StackPanel Orientation="Horizontal">
                                 <Label VerticalAlignment="Center" Width="300">

@@ -548,14 +548,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             Deque = false;
         }
 
-        if (_deviceControllerType == DeviceControllerType.Turntable)
-            if (!Bindings.Items.Any(s => s is DjCombinedOutput))
-            {
-                var dj = new DjCombinedOutput(this);
-                dj.SetOutputsOrDefaults(Array.Empty<Output>());
-                Bindings.Add(dj);
-            }
-
         var (extra, types) =
             ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
         Bindings.RemoveMany(extra);
@@ -564,6 +556,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (Bindings.Items.Any(s =>
                 s is WiiCombinedOutput or Ps2CombinedOutput or CombinedRfRxOutput or UsbHostCombinedOutput)) return;
 
+
+        if (_deviceControllerType == DeviceControllerType.Turntable)
+            if (!Bindings.Items.Any(s => s is DjCombinedOutput))
+            {
+                var dj = new DjCombinedOutput(this);
+                dj.SetOutputsOrDefaults(Array.Empty<Output>());
+                Bindings.Add(dj);
+            }
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
 
@@ -638,6 +638,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         new DirectInput(-1, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, 64, 10, axisType, false));
+                    break;
+                case DjAxisType.EffectsKnob:
+                    Bindings.Add(new DjAxis(this,
+                        new DirectInput(-1, DevicePinMode.Analog, this),
+                        Colors.Black, Colors.Black, Array.Empty<byte>(), 1, DjAxisType.EffectsKnob,
+                        false));
                     break;
                 case DjAxisType axisType:
                     if (axisType is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity) continue;
