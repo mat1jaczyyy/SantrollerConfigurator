@@ -52,9 +52,11 @@ public class DirectInput : InputWithPin
 
     public override string Generate()
     {
+        var invert = PinMode == DevicePinMode.PullUp;
+        if (Inverted) invert = !invert;
         return IsAnalog
             ? Model.Microcontroller.GenerateAnalogRead(PinConfig.Pin, Model)
-            : Model.Microcontroller.GenerateDigitalRead(PinConfig.Pin, PinConfig.PinMode is DevicePinMode.PullUp);
+            : Model.Microcontroller.GenerateDigitalRead(PinConfig.Pin, invert);
     }
 
     public override string GenerateAll(List<Tuple<Input, string>> bindings,
