@@ -40,6 +40,7 @@ public class DjAxis : OutputAxis
             this.RaisePropertyChanged();
         }
     }
+    
  
     protected override int Calculate(
         (bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType deviceControllerType)
