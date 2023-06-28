@@ -35,7 +35,7 @@ public class DjAxis : OutputAxis
         get => Max;
         set
         {
-            if (!IsVelocity && !IsEffectsKnob) return;
+            if (!IsVelocity) return;
             Max = value;
             this.RaisePropertyChanged();
         }
@@ -61,6 +61,10 @@ public class DjAxis : OutputAxis
             return base.Calculate(values);
         }
 
+        if (Input.IsUint)
+        {
+            return (values.value - short.MaxValue) * values.max;
+        }
         return values.value * values.max;
     }
 
@@ -150,10 +154,14 @@ public class DjAxis : OutputAxis
         
         var gen = Type switch
         {
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint && mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}))",
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint => $"({Input.Generate()} * {Max}) - {short.MaxValue}",
             DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}) + 128)",
             DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity => $"({Input.Generate()} * {Max})",
-            DjAxisType.Crossfader when mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}) + 512)",
-            DjAxisType.Crossfader => $"({Input.Generate()} * {Max})",
+            DjAxisType.EffectsKnob when Input.IsUint && mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}) >> 8)",
+            DjAxisType.EffectsKnob when Input.IsUint => $"({Input.Generate()} * {Max}) - {short.MaxValue}",
+            DjAxisType.EffectsKnob when mode is ConfigField.Ps3 => $"((({Input.Generate()} * {Max}) >> 7) + 512)",
+            DjAxisType.EffectsKnob => $"({Input.Generate()} * {Max})",
             _ => GenerateAssignment(mode, accelerometer, false, false)
         };
 
