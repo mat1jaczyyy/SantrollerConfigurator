@@ -277,7 +277,6 @@ public class Santroller : IConfigurableDevice
                     sizeof(ushort)));
                 _analogRaw[devicePin.Pin] = val;
             }
-
             var ps2Raw = await ReadDataAsync(0, (byte) Commands.CommandReadPs2, 9);
             var wiiRaw = await ReadDataAsync(0, (byte) Commands.CommandReadWii, 8);
             var djLeftRaw = await ReadDataAsync(0, (byte) Commands.CommandReadDjLeft, 3);
