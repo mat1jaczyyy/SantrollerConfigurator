@@ -7,21 +7,21 @@ public enum DjInputType
     [Description("Left Turntable Spin")] LeftTurntable,
     [Description("Right Turntable Spin")] RightTurntable,
 
-    [Description("Right Turntable Green Fret")]
+    [Description("Left Turntable Green Fret")]
     LeftGreen,
 
-    [Description("Right Turntable Red Fret")]
+    [Description("Left Turntable Red Fret")]
     LeftRed,
 
-    [Description("Right Turntable Blue Fret")]
+    [Description("Left Turntable Blue Fret")]
     LeftBlue,
 
-    [Description("Left Turntable Green Fret")]
+    [Description("Right Turntable Green Fret")]
     RightGreen,
 
-    [Description("Left Turntable Red Fret")]
+    [Description("Right Turntable Red Fret")]
     RightRed,
 
-    [Description("Left Turntable Blue Fret")]
+    [Description("Right Turntable Blue Fret")]
     RightBlue
 }
