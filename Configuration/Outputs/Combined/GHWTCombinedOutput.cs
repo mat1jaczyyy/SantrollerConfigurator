@@ -42,10 +42,10 @@ public class GhwtCombinedOutput : CombinedOutput
         int pinS2 = -1) : base(model)
     {
         Outputs.Clear();
-        _pin = new DirectPinConfig(model, GhWtTapInput.GhWtAnalogPinType, pin, DevicePinMode.PullUp);
-        _pinConfigS0 = new DirectPinConfig(model, GhWtTapInput.GhWtS0PinType, pinS0, DevicePinMode.Output);
-        _pinConfigS1 = new DirectPinConfig(model, GhWtTapInput.GhWtS1PinType, pinS1, DevicePinMode.Output);
-        _pinConfigS2 = new DirectPinConfig(model, GhWtTapInput.GhWtS2PinType, pinS2, DevicePinMode.Output);
+        _pin = Model.GetPinForType(GhWtTapInput.GhWtAnalogPinType, pin, DevicePinMode.PullUp);
+        _pinConfigS0 = Model.GetPinForType(GhWtTapInput.GhWtS0PinType, pinS0, DevicePinMode.Output);
+        _pinConfigS1 = Model.GetPinForType(GhWtTapInput.GhWtS1PinType, pinS1, DevicePinMode.Output);
+        _pinConfigS2 = Model.GetPinForType(GhWtTapInput.GhWtS2PinType, pinS2, DevicePinMode.Output);
         this.WhenAnyValue(x => x._pin.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
         this.WhenAnyValue(x => x._pinConfigS0.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS0)));
         this.WhenAnyValue(x => x._pinConfigS1.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS1)));

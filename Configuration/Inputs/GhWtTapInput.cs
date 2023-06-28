@@ -31,10 +31,10 @@ public class GhWtTapInput : Input
         Combined = combined;
         Input = input;
         IsAnalog = input is GhWtInputType.TapBar;
-        PinConfigAnalog = new DirectPinConfig(model, GhWtAnalogPinType, pinInput, DevicePinMode.PullUp);
-        PinConfigS0 = new DirectPinConfig(model, GhWtS0PinType, pinS0, DevicePinMode.Output);
-        PinConfigS1 = new DirectPinConfig(model, GhWtS1PinType, pinS1, DevicePinMode.Output);
-        PinConfigS2 = new DirectPinConfig(model, GhWtS2PinType, pinS2, DevicePinMode.Output);
+        PinConfigAnalog = Model.GetPinForType(GhWtAnalogPinType, pinInput, DevicePinMode.PullUp);
+        PinConfigS0 = Model.GetPinForType(GhWtS0PinType, pinS0, DevicePinMode.Output);
+        PinConfigS1 = Model.GetPinForType(GhWtS1PinType, pinS1, DevicePinMode.Output);
+        PinConfigS2 = Model.GetPinForType(GhWtS2PinType, pinS2, DevicePinMode.Output);
         this.WhenAnyValue(x => x.PinConfigAnalog.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Pin)));
         this.WhenAnyValue(x => x.PinConfigS0.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS0)));
         this.WhenAnyValue(x => x.PinConfigS1.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS1)));

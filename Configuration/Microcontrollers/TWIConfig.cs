@@ -19,7 +19,6 @@ public abstract class TwiConfig : PinConfig
         _clock = clock;
     }
 
-    protected abstract bool Reassignable { get; }
 
     public override string Type { get; }
 

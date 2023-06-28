@@ -91,8 +91,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         Ps2Input.Ps2SpiFreq, Ps2Input.Ps2SpiCpol, Ps2Input.Ps2SpiCpha, Ps2Input.Ps2SpiMsbFirst, "PS2", miso, mosi, sck)
     {
         Outputs.Clear();
-        _ackConfig = new DirectPinConfig(model, Ps2Input.Ps2AckType, ack, DevicePinMode.Floating);
-        _attConfig = new DirectPinConfig(model, Ps2Input.Ps2AttType, att, DevicePinMode.Output);
+        _ackConfig = Model.GetPinForType(Ps2Input.Ps2AckType, ack, DevicePinMode.Floating);
+        _attConfig = Model.GetPinForType(Ps2Input.Ps2AttType, att, DevicePinMode.Output);
         this.WhenAnyValue(x => x._attConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Att)));
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
 

@@ -2030,7 +2030,7 @@
                                   Width="200" />
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
@@ -2043,7 +2043,7 @@
                                   Width="200" />
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">

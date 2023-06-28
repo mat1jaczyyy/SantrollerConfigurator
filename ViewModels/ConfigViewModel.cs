@@ -533,8 +533,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             this.RaisePropertyChanged(nameof(RfSck));
             var first = Microcontroller.GetAllPins(false).First();
             // CE and CSN pins are initialised by RF24
-            _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_ce", first, DevicePinMode.Skip);
-            _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_csn", first, DevicePinMode.Skip);
+            _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiCeType, first, DevicePinMode.Skip);
+            _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiCsnType, first, DevicePinMode.Skip);
         }
     }
 
@@ -1500,6 +1500,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         return Bindings.Items.Select(binding => binding.GetPinConfigs())
             .Select(configs => configs.OfType<SpiConfig>().FirstOrDefault(s => s.Type == spiType))
             .FirstOrDefault(found => found != null);
+    }
+    public DirectPinConfig GetPinForType(string pinType, int fallbackPin, DevicePinMode fallbackMode)
+    {
+        return Bindings.Items.Select(binding => binding.GetPinConfigs())
+            .Select(configs => configs.OfType<DirectPinConfig>().FirstOrDefault(s => s.Type == pinType))
+            .FirstOrDefault(found => found != null) ?? new DirectPinConfig(this,pinType, fallbackPin, fallbackMode);
     }
 
     public void MoveUp(Output output)
