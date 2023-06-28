@@ -6,7 +6,6 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Conversions;
 
@@ -14,15 +13,13 @@ public class DigitalToAnalog : Input
 {
     private readonly bool _trigger;
 
-    public DigitalToAnalog(Input child, bool inverted, int on, bool trigger, ConfigViewModel model) : base(model)
+    public DigitalToAnalog(Input child, int on, bool trigger, ConfigViewModel model) : base(model)
     {
         _trigger = trigger;
         Child = child;
         On = on;
         Tilt = false;
-        Inverted = inverted;
-        this.WhenAnyValue(x => x.Child.RawValue, x => x.Inverted)
-            .Subscribe(s => RawValue = s.Item2 ? (s.Item1 > 0 ? 0 : On) : s.Item1 > 0 ? On : 0);
+        this.WhenAnyValue(x => x.Child.RawValue).Subscribe(s => RawValue = s > 0 ? On : 0);
         if (trigger)
         {
             Minimum = ushort.MinValue;
@@ -37,15 +34,13 @@ public class DigitalToAnalog : Input
         IsAnalog = Child.IsAnalog;
     }
 
-    public DigitalToAnalog(Input child, bool inverted, ConfigViewModel model) : base(model)
+    public DigitalToAnalog(Input child, ConfigViewModel model) : base(model)
     {
         _trigger = false;
         Child = child;
         On = 32767;
         Tilt = true;
-        Inverted = inverted;
-        this.WhenAnyValue(x => x.Child.RawValue, x => x.Inverted)
-            .Subscribe(s => RawValue = s.Item2 ? (s.Item1 > 0 ? 0 : On) : s.Item1 > 0 ? On : 0);
+        this.WhenAnyValue(x => x.Child.RawValue).Subscribe(s => RawValue = s > 0 ? On : 0);
 
         Minimum = short.MinValue;
         Maximum = short.MaxValue;
@@ -55,8 +50,6 @@ public class DigitalToAnalog : Input
     public Input Child { get; }
     public int On { get; set; }
     public bool Tilt { get; }
-    [Reactive] 
-    public bool Inverted { get; set; }
     public int Minimum { get; }
     public int Maximum { get; }
 
@@ -74,7 +67,7 @@ public class DigitalToAnalog : Input
 
     public override SerializedInput Serialise()
     {
-        return new SerializedDigitalToAnalog(Child.Serialise(), On, Inverted, _trigger, Tilt);
+        return new SerializedDigitalToAnalog(Child.Serialise(), On, _trigger, Tilt);
     }
 
     public override Input InnermostInput()

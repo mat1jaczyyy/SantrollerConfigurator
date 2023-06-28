@@ -141,10 +141,10 @@ public class Pico : Microcontroller
         return $"adc({pin - PinA0})";
     }
 
-    public override string GenerateDigitalRead(int pin, bool pullUp)
+    public override string GenerateDigitalRead(int pin, bool invert)
     {
         // Invert on pullup
-        return pullUp ? $"(sio_hw->gpio_in & (1 << {pin})) == 0" : $"sio_hw->gpio_in & (1 << {pin})";
+        return invert ? $"(sio_hw->gpio_in & (1 << {pin})) == 0" : $"sio_hw->gpio_in & (1 << {pin})";
     }
 
     public override string GenerateDigitalWrite(int pin, bool val)

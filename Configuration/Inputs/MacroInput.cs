@@ -114,8 +114,8 @@ public class MacroInput : Input
         switch (inputType)
         {
             case Types.InputType.AnalogPinInput:
-                input = new DirectInput(-1, DevicePinMode.Analog, Model);
-                inputOther = new DirectInput(-1, DevicePinMode.Analog, Model);
+                input = new DirectInput(-1, false, DevicePinMode.Analog, Model);
+                inputOther = new DirectInput(-1, false, DevicePinMode.Analog, Model);
                 inputOther = new AnalogToDigital(inputOther, inputOther.IsUint ? AnalogToDigitalType.Trigger : AnalogToDigitalType.JoyLow,
                     input.IsUint ? ushort.MaxValue / 2 : short.MaxValue / 2, Model);
                 break;
@@ -126,8 +126,8 @@ public class MacroInput : Input
                     input.IsUint ? ushort.MaxValue / 2 : short.MaxValue / 2, Model);
                 break;
             case Types.InputType.DigitalPinInput:
-                input = new DirectInput(-1, DevicePinMode.PullUp, Model);
-                inputOther = new DirectInput(-1, DevicePinMode.PullUp, Model);
+                input = new DirectInput(-1, false, DevicePinMode.PullUp, Model);
+                inputOther = new DirectInput(-1, false, DevicePinMode.PullUp, Model);
                 break;
             case Types.InputType.TurntableInput when child.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;

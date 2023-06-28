@@ -17,7 +17,7 @@ public class MultiplexerInput : DirectInput
 
     public MultiplexerInput(int pin, int channel, int s0, int s1, int s2, int s3, MultiplexerType multiplexerType,
         ConfigViewModel model) : base(
-        pin, DevicePinMode.Analog, model)
+        pin, false, DevicePinMode.Analog, model)
     {
         Channel = channel;
         MultiplexerType = multiplexerType;

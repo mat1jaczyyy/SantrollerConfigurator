@@ -536,7 +536,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     config.all.main.tiltType == 2)
                 {
                     bindings.Add(new GuitarAxis(model,
-                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), false, model),  on,
+                        new DigitalToAnalog(new DirectInput(pin.pin, false, DevicePinMode.PullUp, model), model),  on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
                         0, GuitarAxisType.Tilt, false));
                 }
@@ -556,14 +556,14 @@ public class Ardwiino : ConfigurableUsbDevice
                     if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
                         (ControllerAxisType) axis == XboxWhammy)
                     {
-                        bindings.Add(new GuitarAxis(model, new DirectInput(pin.pin, DevicePinMode.Analog, model), on,
+                        bindings.Add(new GuitarAxis(model, new DirectInput(pin.pin, false, DevicePinMode.Analog, model), on,
                             off,
                             ledIndex, min, max, axisDeadzone, GuitarAxisType.Whammy, false));
                     }
                     else
                     {
                         bindings.Add(new ControllerAxis(model,
-                            new DirectInput(pin.pin, DevicePinMode.Analog, model), on, off,
+                            new DirectInput(pin.pin, false, DevicePinMode.Analog, model), on, off,
                             ledIndex, min, max, axisDeadzone, genAxis, false));
                     }
                 }
@@ -599,7 +599,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         break;
                 }
 
-                bindings.Add(new ControllerButton(model, new DirectInput(pin, pinMode, model), on, off,
+                bindings.Add(new ControllerButton(model, new DirectInput(pin, false, pinMode, model), on, off,
                     ledIndex, debounce, genButton, false));
             }
 
@@ -610,8 +610,8 @@ public class Ardwiino : ConfigurableUsbDevice
                 if (start != NotUsed && select != NotUsed)
                 {
                     bindings.Add(new ControllerButton(model,
-                        new MacroInput(new DirectInput(start, DevicePinMode.PullUp, model),
-                            new DirectInput(select, DevicePinMode.PullUp, model), model), Colors.Black, Colors.Black,
+                        new MacroInput(new DirectInput(start, false, DevicePinMode.PullUp, model),
+                            new DirectInput(select, false, DevicePinMode.PullUp, model), model), Colors.Black, Colors.Black,
                         new byte[] { },
                         config.debounce.buttons, StandardButtonType.Guide, false));
                 }
@@ -634,7 +634,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         ledIndex = new[] {index};
 
                     bindings.Add(new GuitarAxis(model,
-                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), false, model), on,
+                        new DigitalToAnalog(new DirectInput(pin.pin, false, DevicePinMode.PullUp, model), model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
                         0, GuitarAxisType.Tilt, false));
                 }

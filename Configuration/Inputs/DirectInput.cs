@@ -5,14 +5,16 @@ using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public class DirectInput : InputWithPin
 {
-    public DirectInput(int pin, DevicePinMode pinMode, ConfigViewModel model) : base(
+    public DirectInput(int pin, bool invert, DevicePinMode pinMode, ConfigViewModel model) : base(
         model, new DirectPinConfig(model, Guid.NewGuid().ToString(), pin, pinMode))
     {
+        Inverted = invert;
         IsAnalog = PinConfig.PinMode == DevicePinMode.Analog;
     }
 
@@ -20,6 +22,8 @@ public class DirectInput : InputWithPin
     public IEnumerable<DevicePinMode> DevicePinModes => GetPinModes();
 
     public override bool IsUint => true;
+
+    [Reactive] public bool Inverted { get; set; }
 
     public override InputType? InputType => IsAnalog ? Types.InputType.AnalogPinInput : Types.InputType.DigitalPinInput;
 
@@ -43,7 +47,7 @@ public class DirectInput : InputWithPin
 
     public override SerializedInput Serialise()
     {
-        return new SerializedDirectInput(PinConfig.Pin, PinConfig.PinMode);
+        return new SerializedDirectInput(PinConfig.Pin, Inverted, PinConfig.PinMode);
     }
 
     public override string Generate()
@@ -71,8 +75,21 @@ public class DirectInput : InputWithPin
         byte[] wiiControllerType, byte[] usbHostInputsRaw, byte[] usbHostRaw)
     {
         if (IsAnalog)
+        {
             RawValue = analogRaw.GetValueOrDefault(Pin, 0);
+        }
         else
-            RawValue = (digitalRaw.GetValueOrDefault(Pin, true) ? PinMode == DevicePinMode.PullUp : PinMode == DevicePinMode.PullDown) ? 1 : 0;
+        {
+            // Pullups mean low is a logical high, which is inherently an invert
+            var invert = PinMode == DevicePinMode.PullUp;
+            if (Inverted) invert = !invert;
+            RawValue = digitalRaw.GetValueOrDefault(Pin, invert) switch
+            {
+                true when invert => 0,
+                false when invert => 1,
+                true => 1,
+                false => 0
+            };
+        }
     }
 }

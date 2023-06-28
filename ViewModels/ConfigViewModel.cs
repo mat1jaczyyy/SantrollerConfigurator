@@ -605,17 +605,17 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 case StandardButtonType buttonType:
                     Bindings.Add(new ControllerButton(this,
-                        new DirectInput(-1, DevicePinMode.PullUp, this),
+                        new DirectInput(-1, false, DevicePinMode.PullUp, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType, false));
                     break;
                 case InstrumentButtonType buttonType:
                     Bindings.Add(new GuitarButton(this,
-                        new DirectInput(-1, DevicePinMode.PullUp, this),
+                        new DirectInput(-1, false, DevicePinMode.PullUp, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), 1, buttonType, false));
                     break;
                 case StandardAxisType axisType:
                     Bindings.Add(new ControllerAxis(this,
-                        new DirectInput(-1, DevicePinMode.Analog, this),
+                        new DirectInput(-1, false, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, axisType, false));
                     break;
@@ -629,26 +629,26 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     break;
                 case GuitarAxisType axisType:
                     Bindings.Add(new GuitarAxis(this, new DirectInput(-1,
-                            DevicePinMode.Analog, this),
+                            false, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, axisType, false));
                     break;
                 case DrumAxisType axisType:
                     Bindings.Add(new DrumAxis(this,
-                        new DirectInput(-1, DevicePinMode.Analog, this),
+                        new DirectInput(-1, false, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
                         0, 64, 10, axisType, false));
                     break;
                 case DjAxisType.EffectsKnob:
                     Bindings.Add(new DjAxis(this,
-                        new DirectInput(-1, DevicePinMode.Analog, this),
+                        new DirectInput(-1, false, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), 1, DjAxisType.EffectsKnob,
                         false));
                     break;
                 case DjAxisType axisType:
                     if (axisType is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity) continue;
                     Bindings.Add(new DjAxis(this,
-                        new DirectInput(-1, DevicePinMode.Analog, this),
+                        new DirectInput(-1, false, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, axisType,
                         false));
                     break;
@@ -826,7 +826,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             if (!ControllerEnumConverter.GetAxisText(_deviceControllerType, type).Any()) continue;
             var isTrigger = type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
             Bindings.Add(new ControllerAxis(this,
-                new DirectInput(-1, DevicePinMode.Analog, this),
+                new DirectInput(-1, false, DevicePinMode.Analog, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), isTrigger ? ushort.MinValue : short.MinValue,
                 isTrigger ? ushort.MaxValue : short.MaxValue, 0,
                 type, false));
@@ -836,7 +836,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             if (!ControllerEnumConverter.GetButtonText(_deviceControllerType, type).Any()) continue;
             Bindings.Add(new ControllerButton(this,
-                new DirectInput(-1, DevicePinMode.PullUp, this),
+                new DirectInput(-1, false, DevicePinMode.PullUp, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type, false));
         }
 
@@ -1147,7 +1147,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (IsController)
             Bindings.Add(new EmptyOutput(this));
         else if (IsKeyboard)
-            Bindings.Add(new KeyboardButton(this, new DirectInput(0, DevicePinMode.PullUp, this),
+            Bindings.Add(new KeyboardButton(this, new DirectInput(0, false, DevicePinMode.PullUp, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 1, Key.Space));
 
         UpdateErrors();

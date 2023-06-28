@@ -450,17 +450,17 @@ public abstract partial class Output : ReactiveObject
                 input = new UsbHostInput(usbInputType.Value, Model);
                 break;
             case InputType.AnalogPinInput:
-                input = new DirectInput(-1, DevicePinMode.Analog, Model);
+                input = new DirectInput(-1, false, DevicePinMode.Analog, Model);
                 break;
             case InputType.MultiplexerInput:
                 input = new MultiplexerInput(-1, 0, -1, -1, -1, -1, MultiplexerType.EightChannel, Model);
                 break;
             case InputType.MacroInput:
-                input = new MacroInput(new DirectInput(-1, DevicePinMode.PullUp, Model),
-                    new DirectInput(-1, DevicePinMode.PullUp, Model), Model);
+                input = new MacroInput(new DirectInput(-1, false,DevicePinMode.PullUp, Model),
+                    new DirectInput(-1, false,DevicePinMode.PullUp, Model), Model);
                 break;
             case InputType.DigitalPinInput:
-                input = new DirectInput(-1, DevicePinMode.PullUp, Model);
+                input = new DirectInput(-1, false,DevicePinMode.PullUp, Model);
                 break;
             case InputType.TurntableInput when Input.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;
@@ -530,17 +530,15 @@ public abstract partial class Output : ReactiveObject
                 Input = new AnalogToDigital(input, oldType, oldThreshold, Model);
                 break;
             case false when this is GuitarAxis {Type: GuitarAxisType.Tilt}:
-                Input = new DigitalToAnalog(input, false, Model);
+                Input = new DigitalToAnalog(input, Model);
                 break;
             case false when this is OutputAxis axis:
                 var oldOn = 0;
-                var oldInverted = false;
                 if (Input is DigitalToAnalog dta)
                 {
                     oldOn = dta.On;
-                    oldInverted = dta.Inverted;
                 }
-                Input = new DigitalToAnalog(input, oldInverted ,oldOn, axis.Trigger, Model);
+                Input = new DigitalToAnalog(input, oldOn, axis.Trigger, Model);
                 break;
         }
 

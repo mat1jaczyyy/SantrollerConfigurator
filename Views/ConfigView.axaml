@@ -1036,6 +1036,15 @@
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                         <Button Command="{Binding DetectPinCommand}" Content="{Binding PinConfigText}" />
                     </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Invert
+                        </Label>
+                        <ToggleSwitch IsChecked="{Binding Inverted}"  />
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:DjAxis}">
@@ -1711,14 +1720,6 @@
                         <NumericUpDown Value="{Binding On}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}"
                                        VerticalAlignment="Center"
                                        Width="200" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center"
-                               VerticalContentAlignment="Center"
-                               Width="300">
-                            Invert
-                        </Label>
-                        <ToggleSwitch IsChecked="{Binding Inverted}"  />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>

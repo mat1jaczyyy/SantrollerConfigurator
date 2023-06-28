@@ -31,10 +31,10 @@ public abstract class AvrController : Microcontroller
     protected abstract char[] PortNames { get; }
     protected abstract Dictionary<(char, int), int> PinByMask { get; }
 
-    public override string GenerateDigitalRead(int pin, bool pullUp)
+    public override string GenerateDigitalRead(int pin, bool invert)
     {
         // Invert on pullup
-        if (pullUp) return $"(PIN{GetPort(pin)} & (1 << {GetIndex(pin)})) == 0";
+        if (invert) return $"(PIN{GetPort(pin)} & (1 << {GetIndex(pin)})) == 0";
 
         return $"PIN{GetPort(pin)} & ({1 << GetIndex(pin)})";
     }

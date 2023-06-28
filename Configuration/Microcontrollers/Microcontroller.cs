@@ -14,7 +14,7 @@ public abstract class Microcontroller
     public abstract bool TwiAssignable { get; }
     public abstract bool SpiAssignable { get; }
     public abstract List<int> PwmPins { get; }
-    public abstract string GenerateDigitalRead(int pin, bool pullUp);
+    public abstract string GenerateDigitalRead(int pin, bool invert);
 
     public abstract string GenerateDigitalWrite(int pin, bool val);
 
