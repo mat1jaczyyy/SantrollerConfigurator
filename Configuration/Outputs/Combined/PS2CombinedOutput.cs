@@ -197,7 +197,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             new DigitalToAnalog(
                 new Ps2Input(Ps2InputType.GuitarTilt, Model, Miso, Mosi, Sck, Att, Ack,
                     true),
-                Model), Colors.Black,
+                false, Model), Colors.Black,
             Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
             0, StandardAxisType.RightStickY, true));
         foreach (var pair in Axis)

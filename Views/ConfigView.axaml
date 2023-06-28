@@ -1712,6 +1712,14 @@
                                        VerticalAlignment="Center"
                                        Width="200" />
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Invert
+                        </Label>
+                        <ToggleSwitch IsChecked="{Binding Inverted}"  />
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:MacroInput}">

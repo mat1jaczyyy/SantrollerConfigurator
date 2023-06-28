@@ -536,7 +536,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     config.all.main.tiltType == 2)
                 {
                     bindings.Add(new GuitarAxis(model,
-                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), model), on,
+                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), false, model),  on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
                         0, GuitarAxisType.Tilt, false));
                 }
@@ -634,7 +634,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         ledIndex = new[] {index};
 
                     bindings.Add(new GuitarAxis(model,
-                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), model), on,
+                        new DigitalToAnalog(new DirectInput(pin.pin, DevicePinMode.PullUp, model), false, model), on,
                         off, ledIndex, ushort.MinValue, ushort.MaxValue,
                         0, GuitarAxisType.Tilt, false));
                 }

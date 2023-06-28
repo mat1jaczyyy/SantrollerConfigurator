@@ -530,12 +530,17 @@ public abstract partial class Output : ReactiveObject
                 Input = new AnalogToDigital(input, oldType, oldThreshold, Model);
                 break;
             case false when this is GuitarAxis {Type: GuitarAxisType.Tilt}:
-                Input = new DigitalToAnalog(input, Model);
+                Input = new DigitalToAnalog(input, false, Model);
                 break;
             case false when this is OutputAxis axis:
                 var oldOn = 0;
-                if (Input is DigitalToAnalog dta) oldOn = dta.On;
-                Input = new DigitalToAnalog(input, oldOn, axis.Trigger, Model);
+                var oldInverted = false;
+                if (Input is DigitalToAnalog dta)
+                {
+                    oldOn = dta.On;
+                    oldInverted = dta.Inverted;
+                }
+                Input = new DigitalToAnalog(input, oldInverted ,oldOn, axis.Trigger, Model);
                 break;
         }
 

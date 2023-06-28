@@ -265,7 +265,7 @@ public class Ps2Input : SpiInput
     public static string GeneratePs2Pressures(List<Input> bindings)
     {
         var retDs2 = "#define PRESSURES_DS2 0b11";
-        var ds2Axis = bindings.Where(s => s is Ps2Input).Cast<Ps2Input>().Select(s => s.Input).ToHashSet();
+        var ds2Axis = bindings.OfType<Ps2Input>().Select(s => s.Input).ToHashSet();
         var found = false;
         for (var i = 0; i < Dualshock2Order.Count; i++)
         {
@@ -440,7 +440,7 @@ public class Ps2Input : SpiInput
                 }
             }
 
-        var i = 0;
+        var i = 5;
         var retDs2 = "";
         foreach (var binding in Dualshock2Order)
             if (ds2Axis.TryGetValue(binding, out var axi))
