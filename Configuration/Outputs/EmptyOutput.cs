@@ -120,7 +120,7 @@ public class EmptyOutput : Output
                     SimpleType.Ps2InputSimple => new Ps2CombinedOutput(Model),
                     SimpleType.WtNeckSimple => new GhwtCombinedOutput(Model),
                     SimpleType.DjTurntableSimple => new DjCombinedOutput(Model),
-                    SimpleType.Led => new Led(Model, !Model.IsApa102, -1,
+                    SimpleType.Led => new Led(Model, !Model.IsApa102, false, -1,
                         Colors.Black, Colors.Black,
                         Array.Empty<byte>(),
                         Enum.GetValues<LedCommandType>().Where(Led.FilterLeds((Model.DeviceType, Model.EmulationType,

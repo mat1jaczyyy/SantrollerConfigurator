@@ -203,7 +203,7 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {
                     new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
                         StandardButtonType.Y),
-                    "Y Button"
+                    "Y Button / Euphoria Button"
                 },
                 {
                     new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,

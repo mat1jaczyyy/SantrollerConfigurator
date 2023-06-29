@@ -311,7 +311,7 @@ public class Santroller : ConfigurableUsbDevice
                         // Which would then be expecting a zero for a active pin and a 1 for a inactive pin.
                         microcontroller.PinsFromPortMask(port, mask, (byte) ~(pins ^ tickedPorts[port]), outPins);
                         _picking = false;
-                        return outPins.First(s => s.Value).Key;
+                        return outPins.First(s => !s.Value).Key;
                     }
 
                 tickedPorts[port] = pins;

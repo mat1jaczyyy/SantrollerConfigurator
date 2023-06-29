@@ -596,6 +596,14 @@
                         <ToggleSwitch IsChecked="{Binding OutputEnabled}" OnContent="Enabled"
                                       OffContent="Disabled" />
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding OutputEnabled}">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Invert
+                        </Label>
+                        <ToggleSwitch IsChecked="{Binding Inverted}"  />
+                    </StackPanel>
                     <StackPanel IsVisible="{Binding UsesPwm}">
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding OutputEnabled}">
                             <Label VerticalAlignment="Center"

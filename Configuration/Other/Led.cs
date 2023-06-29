@@ -145,7 +145,7 @@ public class Led : Output
 
     private int _pin;
 
-    public Led(ConfigViewModel model, bool outputEnabled, int pin, Color ledOn,
+    public Led(ConfigViewModel model, bool outputEnabled, bool inverted, int pin, Color ledOn,
         Color ledOff, byte[] ledIndices, LedCommandType command, int param, int param2) : base(model,
         new FixedInput(model, 0),
         ledOn, ledOff,
@@ -207,6 +207,7 @@ public class Led : Output
 
         Pin = pin;
         OutputEnabled = outputEnabled;
+        Inverted = inverted;
         Command = command;
         _rumbleCommands.AddRange(Enum.GetValues<LedCommandType>());
         _rumbleCommands.Connect()
@@ -341,6 +342,8 @@ public class Led : Output
         }
     }
 
+    [Reactive] public bool Inverted { get; set; }
+
     [ObservableAsProperty] public bool UsesPwm { get; }
     [Reactive] public int Player { get; set; }
     [Reactive] public StageKitStrobeSpeed StrobeSpeed { get; set; }
@@ -473,7 +476,7 @@ public class Led : Output
                 break;
         }
 
-        return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command, param1, param2, OutputEnabled, Pin);
+        return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command, param1, param2, OutputEnabled, Inverted, Pin);
     }
 
     public override object GetOutputType()
@@ -493,10 +496,12 @@ public class Led : Output
         var starPowerBetween = "";
         if (PinConfig != null)
         {
-            on = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, true) + ";";
-            off = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, false) + ";";
-            between = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, "rumble_left") + ";";
-            starPowerBetween = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, "last_star_power") + ";";
+            on = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, !Inverted) + ";";
+            off = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, Inverted) + ";";
+            between =
+                Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, (Inverted ? "(255-" : "(") + "rumble_left)") +
+                ";";
+            starPowerBetween = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, (Inverted ? "(255-" : "(") +"last_star_power)") + ";";
         }
 
         foreach (var index in LedIndices)

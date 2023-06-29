@@ -11,7 +11,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 public class SerializedLed : SerializedOutput
 {
     public SerializedLed(Color ledOn, Color ledOff, byte[] ledIndex, LedCommandType type, int param1, int param2,
-        bool outputEnabled, int pin)
+        bool outputEnabled, bool inverted, int pin)
     {
         LedOn = ledOn.ToUInt32();
         LedOff = ledOff.ToUInt32();
@@ -21,6 +21,7 @@ public class SerializedLed : SerializedOutput
         Pin = pin;
         Param1 = param1;
         Param2 = param2;
+        Inverted = inverted;
     }
 
     [ProtoMember(1)] public uint LedOn { get; }
@@ -31,10 +32,11 @@ public class SerializedLed : SerializedOutput
     [ProtoMember(6)] public int Pin { get; }
     [ProtoMember(7)] public int Param1 { get; }
     [ProtoMember(8)] public int Param2 { get; }
+    [ProtoMember(9)] public bool Inverted { get; }
 
     public override Output Generate(ConfigViewModel model)
     {
-        var combined = new Led(model, OutputEnabled, Pin, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff),
+        var combined = new Led(model, OutputEnabled, Inverted, Pin, Color.FromUInt32(LedOn), Color.FromUInt32(LedOff),
             LedIndex, Type, Param1, Param2);
         model.Bindings.Add(combined);
         return combined;

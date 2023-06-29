@@ -152,23 +152,26 @@ public class DjAxis : OutputAxis
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
         var multiplier = Multiplier;
-        // make x int
-        // table velocity ps3 = uint8_t (128 + x >> 8)
-        // table velocity xb360 = int16_t (x)
-        // Effects knob ps3 = uint16_t (512 + x >> 6)
-        // Effects knob xb360 = int16_t (x)
+        // PS3 needs uint, xb360 needs int
+        // So convert to the right method for that console, and then shift for ps3
         var generated = $"({Input.Generate()} * {multiplier})";
+        var generatedPs3 = generated;
         if (InputIsUint)
         {
             generated = $"({generated} - INT16_MAX)";
         }
-        // TODO: do this better
+        else
+        {
+            generatedPs3 = $"({generated} + INT16_MAX)";
+        }
+
         var gen = Type switch
         {
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3
-                => $"(({generated} >> 8) + 128)",
             DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity
-                => $"(({Input.Generate()} * {multiplier}))",
+                => $"({Input.Generate()} * {multiplier})",
+            DjAxisType.EffectsKnob when mode is ConfigField.Ps3
+                => $"(({generatedPs3} >> 6))",
+            DjAxisType.EffectsKnob => generated,
             _ => GenerateAssignment(mode, accelerometer, false, false)
         };
 
