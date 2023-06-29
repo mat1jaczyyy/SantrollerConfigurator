@@ -94,13 +94,13 @@ public class GuitarButton : OutputButton
                 or InstrumentButtonType.SoloOrange or InstrumentButtonType.SoloRed
                 or InstrumentButtonType.SoloYellow && mode is not ConfigField.Shared)
             extra = "report->solo=true;";
-        // For RF and bluetooth, we shove in a XB1 style version too, so that that can be used at the other end.
+        // For bluetooth, we shove in a XB1 style version too, so that that can be used at the other end.
         var ret = "";
         switch (mode)
         {
             case ConfigField.Ps3:
-                // For rf and bluetooth, we shove the xb1 bits into some unused bytes of the report
-                ret += $@"if (rf_or_bluetooth) {{
+                // For bluetooth, we shove the xb1 bits into some unused bytes of the report
+                ret += $@"if (bluetooth) {{
                     {base.Generate(ConfigField.XboxOne, debounceIndex, "", combinedExtra, combinedDebounce, macros)}
                 }}";
                 break;

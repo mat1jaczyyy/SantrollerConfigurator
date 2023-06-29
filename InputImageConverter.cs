@@ -41,7 +41,6 @@ public class InputImageConverter : IMultiValueConverter
                 SimpleType.DjTurntableSimple => "DJ",
                 SimpleType.UsbHost => "Usb",
                 SimpleType.Bluetooth => "Bluetooth",
-                SimpleType.RfSimple => "Rf",
                 SimpleType.Led => "Led",
                 SimpleType.Rumble => "Rumble",
                 SimpleType.ConsoleMode => "Console",
@@ -57,7 +56,6 @@ public class InputImageConverter : IMultiValueConverter
             InputType.TurntableInput => "Combined/DJ",
             InputType.WtNeckInput => "Combined/GHWT",
             InputType.Gh5NeckInput => "Combined/GH5",
-            InputType.RfInput => "Combined/Rf",
             InputType.UsbHostInput => "Combined/Usb",
             DpadType type => (type.ToString().StartsWith("Ps2") ? "PS2/DPad" : "Wii/ClassicDPad") +
                              type.ToString()[3..],

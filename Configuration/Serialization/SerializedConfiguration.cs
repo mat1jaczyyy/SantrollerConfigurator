@@ -25,14 +25,6 @@ public class SerializedConfiguration
         MouseMovementType = model.MouseMovementType;
         WtSensitivity = model.WtSensitivity;
         UsbHostDp = model.UsbHostDp;
-        PowerLevel = model.PowerLevel;
-        RfMiso = model.RfMiso;
-        RfMosi = model.RfMosi;
-        RfSck = model.RfSck;
-        RfCe = model.RfCe;
-        RfCsn = model.RfCsn;
-        RfChannel = model.RfChannel;
-        RfDeviceId = model.RfId;
         Mode = model.Mode;
         Debounce = model.Debounce;
         StrumDebounce = model.StrumDebounce;
@@ -53,14 +45,6 @@ public class SerializedConfiguration
     [ProtoMember(11)] public MouseMovementType MouseMovementType { get; }
     [ProtoMember(12)] public byte WtSensitivity { get; }
     [ProtoMember(14)] public int UsbHostDp { get; }
-    [ProtoMember(15)] public RfPowerLevel PowerLevel { get; }
-    [ProtoMember(16)] public int RfMosi { get; }
-    [ProtoMember(17)] public int RfMiso { get; }
-    [ProtoMember(18)] public int RfSck { get; }
-    [ProtoMember(19)] public int RfCe { get; }
-    [ProtoMember(20)] public int RfCsn { get; }
-    [ProtoMember(21)] public byte RfChannel { get; }
-    [ProtoMember(22)] public byte RfDeviceId { get; }
     [ProtoMember(23)] public ModeType Mode { get; }
     [ProtoMember(24)] public int Debounce { get; }
     [ProtoMember(25)] public int StrumDebounce { get; }
@@ -91,18 +75,6 @@ public class SerializedConfiguration
         model.WtSensitivity = WtSensitivity;
         model.MouseMovementType = MouseMovementType;
         model.CombinedStrumDebounce = CombinedStrumDebounce;
-
-        if (model.IsRf)
-        {
-            model.PowerLevel = PowerLevel;
-            model.RfChannel = RfChannel;
-            model.RfId = RfDeviceId;
-            model.RfMiso = RfMiso;
-            model.RfMosi = RfMosi;
-            model.RfSck = RfSck;
-            model.RfCe = RfCe;
-            model.RfCsn = RfCsn;
-        }
 
         if (!model.IsApa102) return;
         model.Apa102Mosi = Apa102Mosi;

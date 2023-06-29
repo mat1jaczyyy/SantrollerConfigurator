@@ -53,12 +53,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private LedType _ledType;
 
-    private DirectPinConfig? _rfCe;
-
-    private DirectPinConfig? _rfCsn;
-
-    private SpiConfig? _rfSpiConfig;
-
     private RhythmType _rhythmType;
 
     private readonly DirectPinConfig? _unoRx;
@@ -103,9 +97,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .ToPropertyEx(this, x => x.IsStandardMode);
         this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Core)
             .ToPropertyEx(this, x => x.IsRetailMode);
-        this.WhenAnyValue(x => x.EmulationType)
-            .Select(x => x is EmulationType.RfController or EmulationType.RfKeyboardMouse)
-            .ToPropertyEx(this, x => x.IsRf);
         this.WhenAnyValue(x => x.EmulationType)
             .Select(x => x is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
             .ToPropertyEx(this, x => x.IsBluetooth);
@@ -245,14 +236,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
     public IEnumerable<ModeType> ModeTypes => Enum.GetValues<ModeType>();
 
-    // Mini only supports RF
     // Only Pico supports bluetooth
     public IEnumerable<EmulationType> EmulationTypes => Enum.GetValues<EmulationType>()
         .Where(type =>
-            (Device.IsMini() && type is EmulationType.RfController or EmulationType.RfKeyboardMouse) ||
             Device.IsPico() ||
-            (!Device.IsMini() && !Device.IsPico() &&
-             type is not (EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)));
+            type is not (EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse));
 
     public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
 
@@ -317,42 +305,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => _apa102SpiConfig!.Sck = value;
     }
 
-    public int RfMosi
-    {
-        get => _rfSpiConfig?.Mosi ?? 0;
-        set => _rfSpiConfig!.Mosi = value;
-    }
-
-    public int RfMiso
-    {
-        get => _rfSpiConfig?.Miso ?? 0;
-        set => _rfSpiConfig!.Miso = value;
-    }
-
-    public int RfSck
-    {
-        get => _rfSpiConfig?.Sck ?? 0;
-        set => _rfSpiConfig!.Sck = value;
-    }
-
-    public int RfCe
-    {
-        get => _rfCe?.Pin ?? 0;
-        set => _rfCe!.Pin = value;
-    }
-
-    public int RfCsn
-    {
-        get => _rfCsn?.Pin ?? 0;
-        set => _rfCsn!.Pin = value;
-    }
-
-    [Reactive] public RfPowerLevel PowerLevel { get; set; }
-
-    [Reactive] public RfDataRate DataRate { get; set; }
-
-    [Reactive] public bool RfModuleDetected { get; set; }
-
     [Reactive] public bool Connected { get; set; }
 
 
@@ -385,11 +337,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public byte LedCount { get; set; }
 
     [Reactive] public byte WtSensitivity { get; set; }
-
-
-    [Reactive] public byte RfId { get; set; }
-
-    [Reactive] public byte RfChannel { get; set; }
 
 
     [Reactive] public bool HasError { get; set; }
@@ -479,7 +426,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [ObservableAsProperty] public bool IsController { get; }
     [ObservableAsProperty] public bool IsKeyboard { get; }
     [ObservableAsProperty] public bool IsApa102 { get; }
-    [ObservableAsProperty] public bool IsRf { get; }
     [ObservableAsProperty] public bool IsBluetooth { get; }
 
     [ObservableAsProperty] public string? WriteToolTip { get; }
@@ -505,7 +451,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public List<int> AvailablePinsDp => AvailablePins.SkipLast(1).ToList();
 
     public IEnumerable<PinConfig> PinConfigs =>
-        new PinConfig?[] {_apa102SpiConfig, _rfSpiConfig, _usbHostDm, _usbHostDp, _unoRx, _unoTx}.Where(s => s != null)
+        new PinConfig?[] {_apa102SpiConfig, _usbHostDm, _usbHostDp, _unoRx, _unoTx}.Where(s => s != null)
             .Cast<PinConfig>();
 
     public string UrlPathSegment { get; } = Guid.NewGuid().ToString()[..5];
@@ -519,23 +465,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.RaiseAndSetIfChanged(ref _deviceControllerType, type, nameof(DeviceType));
         this.RaiseAndSetIfChanged(ref _rhythmType, rhythmType, nameof(RhythmType));
         this.RaiseAndSetIfChanged(ref _emulationType, emulationType, nameof(EmulationType));
-        if (_rfSpiConfig == null && IsRf)
-        {
-            var pins = Microcontroller.SpiPins(CombinedRfRxOutput.SpiType);
-            var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
-            var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
-            var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-            _rfSpiConfig = Microcontroller.AssignSpiPins(this, CombinedRfRxOutput.SpiType, true, mosi, miso, sck, true, true,
-                true,
-                4000000);
-            this.RaisePropertyChanged(nameof(RfMiso));
-            this.RaisePropertyChanged(nameof(RfMosi));
-            this.RaisePropertyChanged(nameof(RfSck));
-            var first = Microcontroller.GetAllPins(false).First();
-            // CE and CSN pins are initialised by RF24
-            _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiCeType, first, DevicePinMode.Skip);
-            _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiCsnType, first, DevicePinMode.Skip);
-        }
     }
 
     public void UpdateBindings()
@@ -554,7 +483,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
         if (Bindings.Items.Any(s =>
-                s is WiiCombinedOutput or Ps2CombinedOutput or CombinedRfRxOutput or UsbHostCombinedOutput)) return;
+                s is WiiCombinedOutput or Ps2CombinedOutput or UsbHostCombinedOutput)) return;
 
 
         if (_deviceControllerType == DeviceControllerType.Turntable)
@@ -668,26 +597,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         PollRate = 0;
         StrumDebounce = 0;
         Debounce = 10;
-        if (Device.IsMini())
-        {
-            _emulationType = EmulationType.RfController;
-            if (_rfSpiConfig == null)
-            {
-                var pins = Microcontroller.SpiPins(CombinedRfRxOutput.SpiType);
-                var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
-                var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
-                var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, CombinedRfRxOutput.SpiType, true, mosi, miso, sck, true,
-                    true,
-                    true,
-                    4000000);
-                this.RaisePropertyChanged(nameof(RfMiso));
-                this.RaisePropertyChanged(nameof(RfMosi));
-                this.RaisePropertyChanged(nameof(RfSck));
-                _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_ce", -1, DevicePinMode.PullUp);
-                _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_csn", -1, DevicePinMode.Output);
-            }
-        }
 
         _rhythmType = RhythmType.GuitarHero;
         this.RaisePropertyChanged(nameof(DeviceType));
@@ -717,13 +626,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 ps2Output.SetOutputsOrDefaults(Array.Empty<Output>());
                 Bindings.Add(ps2Output);
                 break;
-            case DeviceInputType.Rf:
-                var rfOutput = new CombinedRfRxOutput(this, 0, 1, RfPowerLevel.Min, RfDataRate.One)
-                {
-                    Expanded = true
-                };
-                Bindings.Add(rfOutput);
-                break;
             case DeviceInputType.Usb:
                 var usbOutput = new UsbHostCombinedOutput(this)
                 {
@@ -745,48 +647,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
     {
-        if (emulationType is EmulationType.RfController or EmulationType.RfKeyboardMouse)
-        {
-            if (_rfSpiConfig == null)
-            {
-                var pins = Microcontroller.SpiPins(CombinedRfRxOutput.SpiType);
-                var mosi = pins.First(pair => pair.Value is SpiPinType.Mosi).Key;
-                var miso = pins.First(pair => pair.Value is SpiPinType.Miso).Key;
-                var sck = pins.First(pair => pair.Value is SpiPinType.Sck).Key;
-                if (Microcontroller.SpiAssignable)
-                {
-                    mosi = -1;
-                    miso = -1;
-                    sck = -1;
-                }
-
-                _rfSpiConfig = Microcontroller.AssignSpiPins(this, CombinedRfRxOutput.SpiType, true, mosi, miso, sck, true,
-                    true,
-                    true,
-                    4000000);
-                _rfCe = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_ce", -1, DevicePinMode.PullUp);
-                _rfCsn = new DirectPinConfig(this, CombinedRfRxOutput.SpiType + "_csn", -1, DevicePinMode.Output);
-
-                this.RaisePropertyChanged(nameof(RfMiso));
-                this.RaisePropertyChanged(nameof(RfMosi));
-                this.RaisePropertyChanged(nameof(RfSck));
-                this.RaisePropertyChanged(nameof(RfCe));
-                this.RaisePropertyChanged(nameof(RfCsn));
-            }
-
-            if (!Bindings.Items.Any(s => s is RfTransmitter))
-            {
-                Bindings.Insert(0, new RfTransmitter(this));
-            }
-        }
-        else
-        {
-            _rfSpiConfig = null;
-            _rfCe = null;
-            _rfCsn = null;
-            Bindings.RemoveMany(Bindings.Items.Where(s => s is RfTransmitter));
-        }
-
         // If going from say bluetooth controller to standard controller, the pin bindings can stay
         if (GetSimpleEmulationTypeFor(EmulationType) == GetSimpleEmulationTypeFor(emulationType))
         {
@@ -814,10 +674,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _emulationType = emulationType;
         this.RaisePropertyChanged(nameof(EmulationType));
         ClearOutputs();
-        if (emulationType is EmulationType.RfController or EmulationType.RfKeyboardMouse)
-        {
-            Bindings.Insert(0, new RfTransmitter(this));
-        }
 
         if (GetSimpleEmulationType() is EmulationType.KeyboardMouse) return;
 
@@ -913,23 +769,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 lines.Add($"#define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}");
 
                 lines.Add($"#define TICK_LED {GenerateLedTick()}");
-            }
-
-            if (IsRf)
-            {
-                lines.Add($"#define RF_DEVICE_ID {RfId}");
-                lines.Add($"#define RF_CHANNEL {RfChannel}");
-                lines.Add("#define RF_TX");
-                lines.Add($"#define RADIO_CE {_rfCe!.Pin}");
-                lines.Add($"#define RADIO_CSN {_rfCsn!.Pin}");
-                lines.Add($"#define RF_POWER_LEVEL {(byte) PowerLevel}");
-                lines.Add($"#define RF_DATA_RATE {(byte) DataRate}");
-                if (BindableSpi)
-                {
-                    lines.Add($"#define RADIO_MOSI {_rfSpiConfig!.Mosi}");
-                    lines.Add($"#define RADIO_MISO {_rfSpiConfig!.Miso}");
-                    lines.Add($"#define RADIO_SCK {_rfSpiConfig!.Sck}");
-                }
             }
 
             lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
@@ -1034,11 +873,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             case EmulationType.Bluetooth:
             case EmulationType.Controller:
-            case EmulationType.RfController:
                 return EmulationType.Controller;
             case EmulationType.KeyboardMouse:
             case EmulationType.BluetoothKeyboardMouse:
-            case EmulationType.RfKeyboardMouse:
                 return EmulationType.KeyboardMouse;
             default:
                 return EmulationType;
@@ -1390,25 +1227,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (UsbHostEnabled && type != UsbHostPinTypeDm && type != UsbHostPinTypeDp)
             pins["USB Host"] = new List<int> {UsbHostDm, UsbHostDp};
 
-        if (IsRf && !type.StartsWith(CombinedRfRxOutput.SpiType))
-            pins["RF"] = new List<int> {RfMiso, RfMosi, RfCe, RfSck, RfCsn};
-
         return pins;
-    }
-
-    public IEnumerable<PinConfig> GetRfPinConfigsToCheck()
-    {
-        if (!IsRf)
-        {
-            return Array.Empty<PinConfig>();
-        }
-
-        if (BindableSpi)
-        {
-            return new PinConfig[] {_rfSpiConfig!, _rfCsn!, _rfCe!};
-        }
-
-        return new PinConfig[] {_rfCsn!, _rfCe!};
     }
 
     public void UpdateErrors()
@@ -1480,14 +1299,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 .Subscribe(s => Main.GoBack.Execute(new Unit()));
     }
 
-    public void Update(byte[] rfRaw, byte[] btRaw)
+    public void Update(byte[] btRaw)
     {
-        if (IsRf && rfRaw.Any())
-        {
-            Connected = rfRaw[0] != 0;
-            RfModuleDetected = rfRaw[1] != 0;
-        }
-
         if (IsBluetooth && btRaw.Any())
         {
             Connected = btRaw[0] != 0;

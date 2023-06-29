@@ -60,7 +60,7 @@ public partial class BluetoothOutput : CombinedOutput
         public override bool IsUint => false;
         public override IList<DevicePin> Pins => new List<DevicePin>();
         public override IList<PinConfig> PinConfigs => new List<PinConfig>();
-        public override InputType? InputType => Types.InputType.RfInput;
+        public override InputType? InputType => Types.InputType.BluetoothInput;
 
         public override string Title => "Bluetooth";
 
@@ -134,10 +134,10 @@ public partial class BluetoothOutput : CombinedOutput
     public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
         byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw, byte[] usbHostInputsRaw)
+        byte[] wiiControllerType, byte[] usbHostRaw, byte[] bluetoothRaw, byte[] usbHostInputsRaw)
     {
         base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
-            ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
+            ps2ControllerType, wiiControllerType, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
         if (!bluetoothRaw.Any()) return;
         Connected = bluetoothRaw[0] != 0;
     }

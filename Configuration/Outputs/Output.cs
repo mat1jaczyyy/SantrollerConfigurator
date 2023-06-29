@@ -235,7 +235,7 @@ public abstract partial class Output : ReactiveObject
             (this is not GuitarAxis {Type: GuitarAxisType.Slider} ||
              s is InputType.Gh5NeckInput or InputType.WtNeckInput) &&
             (s is not InputType.MultiplexerInput || Model.IsPico) &&
-            (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.RfInput &&
+            (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.BluetoothInput &&
             s is not InputType.UsbHostInput || Model.IsPico);
 
     private object GetChildOutputType()
@@ -606,7 +606,7 @@ public abstract partial class Output : ReactiveObject
     public virtual void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
         byte[] wiiRaw, byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType, byte[] rfRaw, byte[] usbHostRaw, byte[] bluetoothRaw, byte[] usbHostInputsRaw)
+        byte[] wiiControllerType, byte[] usbHostRaw, byte[] bluetoothRaw, byte[] usbHostInputsRaw)
     {
         if (Enabled)
             Input.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
@@ -617,7 +617,7 @@ public abstract partial class Output : ReactiveObject
             if (output != this)
                 output.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                     ghWtRaw,
-                    ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
+                    ps2ControllerType, wiiControllerType, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
     }
 
     public void UpdateErrors()

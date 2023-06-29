@@ -7,11 +7,6 @@ public enum EmulationType
     Controller,
     [Description("Keyboard + Mouse")] KeyboardMouse,
 
-    [Description("RF Controller Transmitter")]
-    RfController,
-
-    [Description("RF Keyboard + Mouse Transmitter")]
-    RfKeyboardMouse,
     [Description("Bluetooth Controller")] Bluetooth,
 
     [Description("Bluetooth Keyboard + Mouse")]

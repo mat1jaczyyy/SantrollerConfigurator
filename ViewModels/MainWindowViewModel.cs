@@ -118,7 +118,7 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         this.WhenAnyValue(x => x.SelectedDevice)
             .Select(s => s is not Santroller)
             .ToPropertyEx(this, s => s.NewDeviceOrArdwiino);
-        // Make sure that the selected device input type is reset so that we don't end up doing something invalid like using RF on a generic serial device
+        // Make sure that the selected device input type is reset so that we don't end up doing something invalid
         this.WhenAnyValue(s => s.SelectedDevice).Subscribe(s =>
         {
             DeviceInputType = DeviceInputType.Direct;
@@ -145,8 +145,7 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
 
     private static Func<DeviceInputType, bool> CreateFilter(IConfigurableDevice? s)
     {
-        return type => (type != DeviceInputType.Rf || s?.IsGeneric() != true) &&
-                       (type is not DeviceInputType.Usb || s is PicoDevice);
+        return type => type is not DeviceInputType.Usb || s is PicoDevice;
     }
 
     public void Begin()

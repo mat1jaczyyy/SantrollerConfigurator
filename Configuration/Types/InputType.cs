@@ -13,7 +13,7 @@ public enum InputType
     WtNeckInput,
     [Description("GH5 Neck Input")] Gh5NeckInput,
     MacroInput,
-    RfInput,
     [Description("USB Host Input")]
-    UsbHostInput
+    UsbHostInput,
+    BluetoothInput
 }

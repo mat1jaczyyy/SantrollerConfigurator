@@ -152,27 +152,23 @@ public class DjAxis : OutputAxis
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
         var multiplier = Multiplier;
-        if (IsEffectsKnob)
+        // make x int
+        // table velocity ps3 = uint8_t (128 + x >> 8)
+        // table velocity xb360 = int16_t (x)
+        // Effects knob ps3 = uint16_t (512 + x >> 6)
+        // Effects knob xb360 = int16_t (x)
+        var generated = $"({Input.Generate()} * {multiplier})";
+        if (InputIsUint)
         {
-            multiplier = Invert ? -1 : 1;
+            generated = $"({generated} - INT16_MAX)";
         }
-
         // TODO: do this better
         var gen = Type switch
         {
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint && mode is ConfigField.Ps3
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3
+                => $"(({generated} >> 8) + 128)",
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity
                 => $"(({Input.Generate()} * {multiplier}))",
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint =>
-                $"({Input.Generate()} * {multiplier}) - {short.MaxValue}",
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3 =>
-                $"(({Input.Generate()} * {multiplier}) + 128)",
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity => $"({Input.Generate()} * {multiplier})",
-            DjAxisType.EffectsKnob when Input.IsUint && mode is ConfigField.Ps3 =>
-                $"(({Input.Generate()} * {multiplier}) >> 8)",
-            DjAxisType.EffectsKnob when Input.IsUint => $"({Input.Generate()} * {multiplier}) - {short.MaxValue}",
-            DjAxisType.EffectsKnob when mode is ConfigField.Ps3 =>
-                $"((({Input.Generate()} * {multiplier}) >> 7) + 512)",
-            DjAxisType.EffectsKnob => $"({Input.Generate()} * {multiplier})",
             _ => GenerateAssignment(mode, accelerometer, false, false)
         };
 

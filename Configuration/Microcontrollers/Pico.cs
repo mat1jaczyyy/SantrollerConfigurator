@@ -184,9 +184,6 @@ public class Pico : Microcontroller
 
     public override List<KeyValuePair<int, SpiPinType>> SpiPins(string type)
     {
-        // On the pico, RF only supports Spi0
-        if (type == CombinedRfRxOutput.SpiType) return SpiTypesByPin.Where(pin => SpiIndexByPin[pin.Key] == 0).ToList();
-
         return SpiTypesByPin.ToList();
     }
 

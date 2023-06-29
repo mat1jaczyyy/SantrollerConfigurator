@@ -265,15 +265,15 @@ public partial class DrumAxis : OutputAxis
         }
 
 
-        var rfExtra = "";
+        var btExtra = "";
         // If someone has mapped digital inputs to the drums, then we can shortcut a bunch of the tests, and just need to use the calculated value from above
         if (Input is DigitalToAnalog dta2)
         {
-            // For bluetooth and RF, stuff the cymbal data into some unused bytes for rf reasons
+            // For bluetooth, stuff the cymbal data into some unused bytes
             if (mode == ConfigField.Ps3 &&
                 Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
-                rfExtra = $@"
-                if (rf_or_bluetooth) {{
+                btExtra = $@"
+                if (bluetooth) {{
                     {GenerateOutput(ConfigField.XboxOne)} = {dta2.On >> 8};
                 }}  
             ";
@@ -283,7 +283,7 @@ public partial class DrumAxis : OutputAxis
                 if ({Input.Generate()}) {{
                     {reset}
                     {GenerateOutput(mode)} = {dtaVal};
-                    {rfExtra}
+                    {btExtra}
                 }}
                 if ({ifStatement}) {{
                     {outputButtons}
@@ -291,11 +291,11 @@ public partial class DrumAxis : OutputAxis
             }}";
         }
 
-        // For bluetooth and RF, stuff the cymbal data into some unused bytes for rf reasons
+        // For bluetooth, stuff the cymbal data into some unused bytes
         if (mode == ConfigField.Ps3 &&
             Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
-            rfExtra = $@"
-                if (rf_or_bluetooth) {{
+            btExtra = $@"
+                if (bluetooth) {{
                     {GenerateOutput(ConfigField.XboxOne)} = val_real >> 8;
                 }}  
             ";
@@ -310,7 +310,7 @@ public partial class DrumAxis : OutputAxis
                     {reset}
                 }}
                 {GenerateOutput(mode)} = {assignedVal};
-                {rfExtra}
+                {btExtra}
             }}
             if ({ifStatement}) {{
                 {outputButtons}

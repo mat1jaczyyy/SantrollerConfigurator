@@ -21,14 +21,12 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 [ProtoInclude(113, typeof(SerializedGuitarAxis))]
 [ProtoInclude(114, typeof(SerializedDjAxis))]
 [ProtoInclude(115, typeof(SerializedRbButton))]
-[ProtoInclude(116, typeof(SerializedRfOutput))]
 [ProtoInclude(117, typeof(SerializedLed))]
 [ProtoInclude(118, typeof(SerializedEmulationMode))]
 [ProtoInclude(119, typeof(SerializedJoystickToDpad))]
 [ProtoInclude(120, typeof(SerializedCombinedUsbHostOutput))]
 [ProtoInclude(121, typeof(SerializedBluetoothOutput))]
 [ProtoInclude(122, typeof(SerializedCombinedUsbHostOutput))]
-[ProtoInclude(123, typeof(SerializedRfTransmitter))]
 [ProtoContract]
 public abstract class SerializedOutput
 {

@@ -286,7 +286,6 @@ public class Santroller : IConfigurableDevice
             var ghWtRaw = await ReadDataAsync(0, (byte) Commands.CommandReadGhWt, sizeof(int));
             var ps2ControllerType = await ReadDataAsync(0, (byte) Commands.CommandGetExtensionPs2, 1);
             var wiiControllerType = await ReadDataAsync(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
-            var rfRaw = await ReadDataAsync(0, (byte) Commands.CommandReadRf, 2);
             var usbHostRaw = Array.Empty<byte>();
             var usbHostInputsRaw = Array.Empty<byte>();
             if (_model.UsbHostEnabled)
@@ -299,11 +298,11 @@ public class Santroller : IConfigurableDevice
             if (IsPico()) bluetoothRaw = await ReadDataAsync(0, (byte) Commands.CommandGetBtState, 1);
 
 
-            _model.Update(rfRaw, bluetoothRaw);
+            _model.Update(bluetoothRaw);
             foreach (var output in _model.Bindings.Items)
                 output.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                     djRightRaw, gh5Raw,
-                    ghWtRaw, ps2ControllerType, wiiControllerType, rfRaw, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
+                    ghWtRaw, ps2ControllerType, wiiControllerType, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
         }
         catch (Exception ex)
         {

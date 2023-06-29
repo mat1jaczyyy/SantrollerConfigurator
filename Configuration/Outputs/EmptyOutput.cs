@@ -130,7 +130,6 @@ public class EmptyOutput : Output
                     SimpleType.ConsoleMode => new EmulationMode(Model,
                         new DirectInput(-1, false, DevicePinMode.PullUp, Model),
                         EmulationModeType.XboxOne),
-                    SimpleType.RfSimple => new CombinedRfRxOutput(Model, 1, 1, RfPowerLevel.Min, RfDataRate.One),
                     SimpleType.UsbHost => new UsbHostCombinedOutput(Model),
                     SimpleType.Bluetooth => new BluetoothOutput(Model, ""),
                     _ => null

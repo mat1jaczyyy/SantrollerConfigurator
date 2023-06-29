@@ -18,7 +18,6 @@ public enum SimpleType
 
     [Description("USB Host Inputs")] UsbHost,
     [Description("Bluetooth Inputs")] Bluetooth,
-    [Description("RF Inputs")] RfSimple,
     [Description("LED Binding")] Led,
     [Description("Rumble Binding")] Rumble,
     [Description("Console Mode Binding")] ConsoleMode
