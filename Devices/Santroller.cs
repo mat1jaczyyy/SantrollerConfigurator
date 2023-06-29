@@ -19,7 +19,7 @@ using ProtoBuf;
 
 namespace GuitarConfigurator.NetCore.Devices;
 
-public class Santroller : IConfigurableDevice
+public class Santroller : ConfigurableUsbDevice
 {
     public enum Commands
     {
@@ -62,16 +62,12 @@ public class Santroller : IConfigurableDevice
     private Microcontroller _microcontroller;
     private ConfigViewModel? _model;
     private bool _picking;
-    private readonly PlatformIoPort? _platformIoPort;
-    private SerialPort? _serialPort;
     private readonly DispatcherTimer _timer;
-    private readonly SantrollerUsbDevice? _usbDevice;
 
-    public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort version)
+    public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort version)  : base(
+        device, path, product, serial, version)
     {
-        _usbDevice = new SantrollerUsbDevice(device, path, product, serial, version);
         _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
-        Serial = "";
         _microcontroller = new Pico(Board.Generic);
         if (device is IUsbDevice usbDevice) usbDevice.ClaimInterface(2);
 
@@ -79,166 +75,51 @@ public class Santroller : IConfigurableDevice
         if (Board.Name == Board.Generic.Name)
         {
             InvalidDevice = true;
-            return;
-        }
-
-        _usbDevice.SetBoard(Board);
-    }
-
-    public Santroller(PlatformIo pio, PlatformIoPort port)
-    {
-        _platformIoPort = port;
-        _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), DispatcherPriority.Background, Tick);
-        Serial = "";
-        Valid = false;
-        _microcontroller = new Pico(Board.Generic);
-        try
-        {
-            _serialPort = new SerialPort(_platformIoPort.Port, 57600, Parity.None, 8, StopBits.One);
-            _serialPort.RtsEnable = true;
-            _serialPort.DtrEnable = true;
-            // Unfortunately, we do need a pretty hefty timeout, as the pro minis bootloader takes a bit
-            _serialPort.ReadTimeout = 6000;
-            _serialPort.WriteTimeout = 100;
-            _serialPort.Open();
-            // Santroller devices announce themselves over serial to make it easier to detect them.
-            // Sometimes, there will be an extra null byte at the start of transmission, so we need to strip that out
-            var line = _serialPort.ReadLine().Replace("\0", "").Trim();
-            if (line != "Santroller") return;
-
-            Load();
-            Valid = true;
-        }
-        catch (TimeoutException)
-        {
-        }
-        catch (UnauthorizedAccessException)
-        {
-        }
-        catch (IOException)
-        {
         }
     }
-
-    internal Board Board { get; set; }
-    public bool Valid { get; }
-
-    public string Serial { get; private set; }
 
     private bool InvalidDevice { get; }
 
-    public bool MigrationSupported => true;
+    public override bool MigrationSupported => true;
 
-    public bool IsSameDevice(PlatformIoPort port)
+    public override void Bootloader()
     {
-        return _platformIoPort == port;
+        if (Board.HasUsbmcu)
+            WriteData(0, (byte) Santroller.Commands.CommandJumpBootloaderUnoUsbThenSerial, Array.Empty<byte>());
+        else
+            WriteData(0, (byte) Santroller.Commands.CommandJumpBootloader, Array.Empty<byte>());
+
+        Device.Close();
+    }
+    public override void BootloaderUsb()
+    {
+        WriteData(0, (byte) Santroller.Commands.CommandJumpBootloaderUno, Array.Empty<byte>());
+        Device.Close();
     }
 
-    public bool IsSameDevice(string serialOrPath)
-    {
-        return _usbDevice?.IsSameDevice(serialOrPath) == true;
-    }
-
-    public void Bootloader()
-    {
-        _serialPort?.Close();
-        _usbDevice?.Bootloader();
-    }
-
-    public void BootloaderUsb()
-    {
-        _serialPort?.Close();
-        if (!Board.HasUsbmcu) return;
-        _usbDevice?.BootloaderUsb();
-    }
-
-    public bool LoadConfiguration(ConfigViewModel model)
+    public override bool LoadConfiguration(ConfigViewModel model)
     {
         _ = LoadConfigurationAsync(model);
         return true;
     }
 
-    public Task<string?> GetUploadPortAsync()
-    {
-        if (_platformIoPort == null)
-            return _usbDevice != null ? _usbDevice.GetUploadPortAsync() : Task.FromResult<string?>(null);
-        _serialPort?.Close();
-        return Task.FromResult((string?) _platformIoPort.Port);
-    }
 
-    public bool IsAvr()
-    {
-        return Board.IsAvr();
-    }
-
-    public bool IsGeneric()
-    {
-        return Board.IsGeneric();
-    }
-
-    public bool IsMini()
-    {
-        return Board.IsMini();
-    }
-
-    public bool IsEsp32()
-    {
-        return Board.IsEsp32();
-    }
-
-    public bool Is32U4()
-    {
-        return Board.Is32U4();
-    }
-
-    public void Reconnect()
-    {
-        if (!IsMini() || _platformIoPort is null) return;
-        _serialPort = new SerialPort(_platformIoPort.Port, 57600, Parity.None, 8, StopBits.One);
-        _serialPort.RtsEnable = true;
-        _serialPort.DtrEnable = true;
-        // Unfortunately, we do need a pretty hefty timeout, as the pro minis bootloader takes a bit
-        _serialPort.ReadTimeout = 6000;
-        _serialPort.WriteTimeout = 100;
-        _serialPort.Open();
-        // Santroller devices announce themselves over serial to make it easier to detect them.
-        // Sometimes, there will be an extra null byte at the start of transmission, so we need to strip that out
-        var line = _serialPort.ReadLine().Replace("\0", "").Trim();
-        if (line != "Santroller") return;
-
-        Load();
-    }
-
-    public void DeviceAdded(IConfigurableDevice device)
-    {
-        _usbDevice?.DeviceAdded(device);
-    }
-
-    public void Revert()
+    public override void Revert()
     {
         Bootloader();
     }
 
-    public bool HasDfuMode()
-    {
-        return Board.HasUsbmcu;
-    }
-
-    public bool IsPico()
-    {
-        return Board.IsPico();
-    }
 
 
-    public Microcontroller GetMicrocontroller(ConfigViewModel model)
+    public override Microcontroller GetMicrocontroller(ConfigViewModel model)
     {
         return _microcontroller;
     }
 
-    private async void Tick(object? sender, EventArgs e)
+    private void Tick(object? sender, EventArgs e)
     {
         if (_model == null) return;
-        if (!IsOpen())
+        if (!Device.IsOpen)
         {
             _timer.Stop();
             return;
@@ -262,7 +143,7 @@ public class Santroller : IConfigurableDevice
             foreach (var (port, mask) in ports)
             {
                 var wValue = (ushort) (port | (mask << 8));
-                var data = await ReadDataAsync(wValue, (byte) Commands.CommandReadDigital, sizeof(byte));
+                var data = ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte));
                 if (data.Length == 0) return;
 
                 var pins = data[0];
@@ -273,29 +154,29 @@ public class Santroller : IConfigurableDevice
             {
                 var mask = _model.Microcontroller.GetAnalogMask(devicePin);
                 var wValue = (ushort) (_model.Microcontroller.GetChannel(devicePin.Pin, false) | (mask << 8));
-                var val = BitConverter.ToUInt16(await ReadDataAsync(wValue, (byte) Commands.CommandReadAnalog,
+                var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
                     sizeof(ushort)));
                 _analogRaw[devicePin.Pin] = val;
             }
 
-            var ps2Raw = await ReadDataAsync(0, (byte) Commands.CommandReadPs2, 9);
-            var wiiRaw = await ReadDataAsync(0, (byte) Commands.CommandReadWii, 8);
-            var djLeftRaw = await ReadDataAsync(0, (byte) Commands.CommandReadDjLeft, 3);
-            var djRightRaw = await ReadDataAsync(0, (byte) Commands.CommandReadDjRight, 3);
-            var gh5Raw = await ReadDataAsync(0, (byte) Commands.CommandReadGh5, 2);
-            var ghWtRaw = await ReadDataAsync(0, (byte) Commands.CommandReadGhWt, sizeof(int));
-            var ps2ControllerType = await ReadDataAsync(0, (byte) Commands.CommandGetExtensionPs2, 1);
-            var wiiControllerType = await ReadDataAsync(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
+            var ps2Raw = ReadData(0, (byte) Commands.CommandReadPs2, 9);
+            var wiiRaw = ReadData(0, (byte) Commands.CommandReadWii, 8);
+            var djLeftRaw = ReadData(0, (byte) Commands.CommandReadDjLeft, 3);
+            var djRightRaw = ReadData(0, (byte) Commands.CommandReadDjRight, 3);
+            var gh5Raw = ReadData(0, (byte) Commands.CommandReadGh5, 2);
+            var ghWtRaw = ReadData(0, (byte) Commands.CommandReadGhWt, sizeof(int));
+            var ps2ControllerType = ReadData(0, (byte) Commands.CommandGetExtensionPs2, 1);
+            var wiiControllerType = ReadData(0, (byte) Commands.CommandGetExtensionWii, sizeof(short));
             var usbHostRaw = Array.Empty<byte>();
             var usbHostInputsRaw = Array.Empty<byte>();
             if (_model.UsbHostEnabled)
             {
-                usbHostRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHost, 24);
-                usbHostInputsRaw = await ReadDataAsync(0, (byte) Commands.CommandReadUsbHostInputs, 100);
+                usbHostRaw = ReadData(0, (byte) Commands.CommandReadUsbHost, 24);
+                usbHostInputsRaw = ReadData(0, (byte) Commands.CommandReadUsbHostInputs, 100);
             }
 
             var bluetoothRaw = Array.Empty<byte>();
-            if (IsPico()) bluetoothRaw = await ReadDataAsync(0, (byte) Commands.CommandGetBtState, 1);
+            if (IsPico()) bluetoothRaw = ReadData(0, (byte) Commands.CommandGetBtState, 1);
 
 
             _model.Update(bluetoothRaw);
@@ -309,61 +190,6 @@ public class Santroller : IConfigurableDevice
             Console.WriteLine(ex);
         }
     }
-
-
-    private byte[] ReadData(ushort wValue, byte bRequest, ushort size = 128)
-    {
-        if (_usbDevice != null) return _usbDevice.ReadData(wValue, bRequest, size);
-
-        if (_serialPort == null) return Array.Empty<byte>();
-        _serialPort.Write(new[] {(byte) 0x1f, bRequest, (byte) (wValue & 0xFF), (byte) ((wValue << 8) & 0xFF)}, 0,
-            4);
-        var size2 = _serialPort.ReadByte();
-        if (size2 > size) return Array.Empty<byte>();
-        var buffer = new byte[size2];
-        var read = 0;
-        while (read < buffer.Length) read += _serialPort.Read(buffer, read, buffer.Length - read);
-
-        return buffer;
-    }
-
-    private async Task<byte[]> ReadDataAsync(ushort wValue, byte bRequest, ushort size = 128)
-    {
-        if (_usbDevice != null) return _usbDevice.ReadData(wValue, bRequest, size);
-
-        if (_serialPort == null) return Array.Empty<byte>();
-        _serialPort.Write(new[] {(byte) 0x1f, bRequest, (byte) (wValue & 0xFF), (byte) ((wValue << 8) & 0xFF)}, 0,
-            4);
-        var size2 = _serialPort.ReadByte();
-        if (size2 > size) return Array.Empty<byte>();
-        var buffer = new byte[size2];
-        using var memoryStream = new MemoryStream();
-        var readBytes = 0;
-        while (readBytes < size2)
-        {
-            var bytesRead = await _serialPort.BaseStream.ReadAsync(buffer, readBytes, buffer.Length - readBytes);
-            memoryStream.Write(buffer, 0, bytesRead);
-            readBytes += bytesRead;
-        }
-
-        return buffer;
-    }
-
-
-    private void WriteData(ushort wValue, byte bRequest, byte[] buffer)
-    {
-        if (_usbDevice != null)
-        {
-            _usbDevice.WriteData(wValue, bRequest, buffer);
-        }
-        else if (_serialPort != null)
-        {
-            _serialPort.Write(new[] {(byte) 0x1e, bRequest}, 0, 1);
-            _serialPort.Write(new[] {(byte) buffer.Length}, 0, 1);
-            _serialPort.Write(buffer, 0, buffer.Length);
-        }
-    }
-
     private void Load()
     {
         var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("\0", "")
@@ -377,20 +203,13 @@ public class Santroller : IConfigurableDevice
         _microcontroller = m;
     }
 
-    private bool IsOpen()
-    {
-        if (_usbDevice != null) return _usbDevice.IsOpen();
-
-        return _serialPort is {IsOpen: true};
-    }
-
     private async Task LoadConfigurationAsync(ConfigViewModel model)
     {
         ushort start = 0;
         var data = new List<byte>();
         while (true)
         {
-            var chunk = await ReadDataAsync(start, (byte) Commands.CommandReadConfig, 64);
+            var chunk = ReadData(start, (byte) Commands.CommandReadConfig, 64);
             if (!chunk.Any()) break;
             data.AddRange(chunk);
             start += 64;
@@ -453,7 +272,7 @@ public class Santroller : IConfigurableDevice
                     var devicePin = new DevicePin(pin, DevicePinMode.PullUp);
                     var mask = microcontroller.GetAnalogMask(devicePin);
                     var wValue = (ushort) (microcontroller.GetChannel(pin, true) | (mask << 8));
-                    var val = BitConverter.ToUInt16(await ReadDataAsync(wValue, (byte) Commands.CommandReadAnalog,
+                    var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
                         sizeof(ushort)));
                     if (analogVals.TryGetValue(pin, out var analogVal))
                     {
@@ -481,7 +300,7 @@ public class Santroller : IConfigurableDevice
             foreach (var (port, mask) in ports)
             {
                 var wValue = (ushort) (port | (mask << 8));
-                var pins = (byte) ((await ReadDataAsync(wValue, (byte) Commands.CommandReadDigital, sizeof(byte)))[0] &
+                var pins = (byte) ((ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte)))[0] &
                                    mask);
                 if (tickedPorts.ContainsKey(port))
                     if (tickedPorts[port] != pins)
@@ -512,12 +331,6 @@ public class Santroller : IConfigurableDevice
         if (_deviceControllerType != null) ret += $" - {_deviceControllerType}";
 
         return ret;
-    }
-
-
-    public string GetSerialPort()
-    {
-        return _platformIoPort?.Port ?? "";
     }
 
     public void ClearLed(byte led)
@@ -551,11 +364,10 @@ public class Santroller : IConfigurableDevice
         return !IsPico() ? "" : Encoding.Default.GetString(ReadData(0, (byte) Commands.CommandGetBtAddress));
     }
 
-    public void Disconnect()
+    public override void Disconnect()
     {
-        if (_serialPort?.IsOpen == true) _serialPort.Close();
         _timer.Stop();
         
-        _usbDevice?.Disconnect();
+        base.Disconnect();
     }
 }

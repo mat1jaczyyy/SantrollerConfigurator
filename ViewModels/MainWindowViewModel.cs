@@ -355,33 +355,13 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
                 _currentPorts.Add(port.Port);
                 var arduino = new Arduino(Pio, port);
                 await Task.Delay(1000);
-                if (arduino.Board.IsGeneric())
-                {
-                    // If a device is generic, then we have no real way of detecting it and must send a detection packet to work out what it is 
-                    var santroller = new Santroller(Pio, port);
-                    if (santroller.Valid)
-                    {
-                        AvailableDevices.Add(santroller);
-                    }
-                    else
-                    {
-                        santroller.Disconnect();
-                        AvailableDevices.Add(arduino);
-                    }
-                }
-                else
-                {
-                    AvailableDevices.Add(arduino);
-                }
+                AvailableDevices.Add(arduino);
             }
 
             var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
             _currentPorts.RemoveMany(_currentPorts.Where(port => !currentSerialPorts.Contains(port)));
             AvailableDevices.RemoveMany(AvailableDevices.Items.Where(device =>
                 device is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())));
-            AvailableDevices.RemoveMany(AvailableDevices.Items.Where(device =>
-                device is Santroller santroller && santroller.GetSerialPort().Any() &&
-                !currentSerialPorts.Contains(santroller.GetSerialPort())));
         }
 
         ReadyToConfigure = null != SelectedDevice && Installed;

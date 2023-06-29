@@ -12,11 +12,11 @@ namespace GuitarConfigurator.NetCore.Devices;
 
 public abstract class ConfigurableUsbDevice : IConfigurableDevice
 {
-    protected readonly UsbDevice Device;
-    protected readonly string Path;
-    protected readonly string Product;
-    protected readonly string Serial;
-    protected readonly Version Version;
+    public readonly UsbDevice Device;
+    public readonly string Path;
+    public readonly string Product;
+    public readonly string Serial;
+    public readonly Version Version;
     private TaskCompletionSource<string?>? _bootloaderPath;
     private string? _lastBootloaderPath;
 
@@ -29,7 +29,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         Version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, version & 0xf);
     }
 
-    protected Board Board { get; set; }
+    public Board Board { get; set; }
 
     public IConfigurableDevice? BootloaderDevice { get; private set; }
 
@@ -119,7 +119,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         return Board.Is32U4();
     }
 
-    public void Disconnect()
+    public virtual void Disconnect()
     {
         if (Device.IsOpen)
         {
