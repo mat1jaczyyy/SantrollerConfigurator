@@ -7,12 +7,14 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class DjAxis : OutputAxis
 {
-    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max, int deadZone, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max,
+    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
+        int deadZone, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max,
         deadZone,
         false, childOfCombined)
     {
@@ -20,52 +22,44 @@ public class DjAxis : OutputAxis
         Type = type;
         UpdateDetails();
     }
-    
-    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int multiplier, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, 0, 0,
+
+    public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int multiplier,
+        DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, 0, 0,
         0,
         false, childOfCombined)
     {
-        Multiplier = multiplier;
+        if (type == DjAxisType.Crossfader)
+        {
+            Invert = multiplier == -1;
+        }
+        else
+        {
+            Multiplier = multiplier;
+        }
+
         Type = type;
         UpdateDetails();
     }
 
-    public int Multiplier
-    {
-        get => Max;
-        set
-        {
-            if (!IsVelocity) return;
-            Max = value;
-            this.RaisePropertyChanged();
-        }
-    }
-    
-    public bool Invert
-    {
-        get => Max == -1;
-        set
-        {
-            if (!IsEffectsKnob) return;
-            Max = value ? -1: 1;
-            this.RaisePropertyChanged();
-        }
-    }
- 
+    [Reactive] public int Multiplier { get; set; }
+
+    [Reactive] public bool Invert { get; set; }
+
     protected override int Calculate(
-        (bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType deviceControllerType)
+        (bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType
+            deviceControllerType)
             values)
     {
-        if (Type is not (DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity or DjAxisType.EffectsKnob))
+        return Type switch
         {
-            return base.Calculate(values);
-        }
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint => (values.value -
+                short.MaxValue) * Multiplier,
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity => values.value * Multiplier,
 
-        if (Input.IsUint)
-        {
-            return (values.value - short.MaxValue) * values.max;
-        }
-        return values.value * values.max;
+            DjAxisType.EffectsKnob when Input.IsUint => (values.value - short.MaxValue) * (Invert ? -1 : 1),
+            DjAxisType.EffectsKnob => values.value * (Invert ? -1 : 1),
+            _ => base.Calculate(values)
+        };
     }
 
     public DjAxisType Type { get; }
@@ -126,9 +120,15 @@ public class DjAxis : OutputAxis
 
     public override SerializedOutput Serialize()
     {
-        if (IsVelocity || IsEffectsKnob)
+        if (IsVelocity)
         {
             return new SerializedDjAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Multiplier,
+                ChildOfCombined);
+        }
+
+        if (IsEffectsKnob)
+        {
+            return new SerializedDjAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Invert ? -1 : 1,
                 ChildOfCombined);
         }
 
@@ -151,17 +151,28 @@ public class DjAxis : OutputAxis
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
+        var multiplier = Multiplier;
+        if (IsEffectsKnob)
+        {
+            multiplier = Invert ? -1 : 1;
+        }
+
         // TODO: do this better
         var gen = Type switch
         {
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint && mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}))",
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint => $"({Input.Generate()} * {Max}) - {short.MaxValue}",
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}) + 128)",
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity => $"({Input.Generate()} * {Max})",
-            DjAxisType.EffectsKnob when Input.IsUint && mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}) >> 8)",
-            DjAxisType.EffectsKnob when Input.IsUint => $"({Input.Generate()} * {Max}) - {short.MaxValue}",
-            DjAxisType.EffectsKnob when mode is ConfigField.Ps3 => $"((({Input.Generate()} * {Max}) >> 7) + 512)",
-            DjAxisType.EffectsKnob => $"({Input.Generate()} * {Max})",
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint && mode is ConfigField.Ps3
+                => $"(({Input.Generate()} * {multiplier}))",
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint =>
+                $"({Input.Generate()} * {multiplier}) - {short.MaxValue}",
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3 =>
+                $"(({Input.Generate()} * {multiplier}) + 128)",
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity => $"({Input.Generate()} * {multiplier})",
+            DjAxisType.EffectsKnob when Input.IsUint && mode is ConfigField.Ps3 =>
+                $"(({Input.Generate()} * {multiplier}) >> 8)",
+            DjAxisType.EffectsKnob when Input.IsUint => $"({Input.Generate()} * {multiplier}) - {short.MaxValue}",
+            DjAxisType.EffectsKnob when mode is ConfigField.Ps3 =>
+                $"((({Input.Generate()} * {multiplier}) >> 7) + 512)",
+            DjAxisType.EffectsKnob => $"({Input.Generate()} * {multiplier})",
             _ => GenerateAssignment(mode, accelerometer, false, false)
         };
 
