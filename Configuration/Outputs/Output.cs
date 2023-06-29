@@ -106,7 +106,7 @@ public abstract partial class Output : ReactiveObject
         this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
             .Select(x => GetName(x.Item1, x.Item2))
             .ToPropertyEx(this, x => x.LocalisedName);
-        this.WhenAnyValue(x => x.Input!.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
+        this.WhenAnyValue(x => x.Input.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
             .ToPropertyEx(this, x => x.ValueRaw);
         this.WhenAnyValue(x => x.ValueRaw, x => x.Input, x => x.IsCombined)
             .Select(s => s.Item3 || s.Item2.IsAnalog ? 1 : (s.Item1 == 0 ? 0 : 0.35) + 0.65)

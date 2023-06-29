@@ -50,7 +50,7 @@ public class SerializedDjAxis : SerializedOutput
     public override Output Generate(ConfigViewModel model)
     {
         DjAxis combined;
-        if (Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity)
+        if (Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity or DjAxisType.EffectsKnob)
         {
             combined = new DjAxis(model, Input.Generate(model), Color.FromUInt32(LedOn),
                 Color.FromUInt32(LedOff), LedIndex, DeadzoneOrMultiplier,

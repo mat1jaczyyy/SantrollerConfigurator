@@ -151,7 +151,7 @@ public class DjAxis : OutputAxis
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
-        
+        // TODO: do this better
         var gen = Type switch
         {
             DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when Input.IsUint && mode is ConfigField.Ps3 => $"(({Input.Generate()} * {Max}))",

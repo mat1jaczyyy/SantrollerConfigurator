@@ -97,7 +97,7 @@ public abstract class AvrController : Microcontroller
         for (var i = 0; i < 8; i++)
         {
             if ((mask & (1 << i)) == 0) continue;
-            digitalRaw[PinByMask[(portChar, i)]] = (pins & (1 << i)) == 0;
+            digitalRaw[PinByMask[(portChar, i)]] = (pins & (1 << i)) != 0;
         }
     }
 

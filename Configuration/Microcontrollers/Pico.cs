@@ -251,7 +251,7 @@ public class Pico : Microcontroller
     {
         for (var i = 0; i < 8; i++)
             if ((mask & (1 << i)) != 0)
-                digitalRaw[port * 8 + i] = (pins & (1 << i)) == 0;
+                digitalRaw[port * 8 + i] = (pins & (1 << i)) != 0;
     }
 
     public override int GetAnalogMask(DevicePin devicePin)
