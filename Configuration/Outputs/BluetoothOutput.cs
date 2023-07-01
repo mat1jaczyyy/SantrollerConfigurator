@@ -70,7 +70,7 @@ public partial class BluetoothOutput : CombinedOutput
             {
                 "BLUETOOTH_RX"
             };
-            if (BluetoothOutput.MacAddress != NoDeviceText) ret.Add("BT_ADDR=" + BluetoothOutput.MacAddress);
+            if (BluetoothOutput.MacAddress != NoDeviceText) ret.Add("BT_ADDR " + BluetoothOutput.MacAddress);
 
             return ret;
         }

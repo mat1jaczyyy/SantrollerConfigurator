@@ -158,8 +158,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public ReadOnlyObservableCollection<Output> Outputs { get; }
 
-    public bool ShowUnoDialog { get; }
-
     public bool SupportsReset { get; }
 
     private readonly ObservableAsPropertyHelper<DeviceControllerRhythmType> _deviceControllerRhythmType;
