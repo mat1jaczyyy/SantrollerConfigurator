@@ -103,7 +103,7 @@ public partial class BluetoothOutput : CombinedOutput
     [ObservableAsProperty] public bool Scanning { get; }
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
-    [Reactive] public int ScanTimer { get; set; }
+    [Reactive] public int ScanTimer { get; set; } = 11;
 
     [Reactive] public string MacAddress { get; set; }
 
