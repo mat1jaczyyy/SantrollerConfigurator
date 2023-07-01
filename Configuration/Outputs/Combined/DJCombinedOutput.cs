@@ -7,6 +7,7 @@ using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
@@ -25,8 +26,13 @@ public class DjCombinedOutput : CombinedTwiOutput
             .Subscribe();
         AnalogOutputs = analogOutputs;
         DigitalOutputs = digitalOutputs;
+        this.WhenAnyValue(x => x.Model.DjPollRate).Subscribe(_ => this.RaisePropertyChanged(nameof(PollRate)));
     }
-
+    public int PollRate
+    {
+        get => Model.DjPollRate;
+        set => Model.DjPollRate = value;
+    }
     [Reactive] public bool DetectedLeft { get; set; }
 
     [Reactive] public bool DetectedRight { get; set; }

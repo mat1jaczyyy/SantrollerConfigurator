@@ -292,7 +292,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public int StrumDebounce { get; set; }
 
     [Reactive] public int PollRate { get; set; }
-
+    [Reactive] public int DjPollRate { get; set; }
     public int Apa102Mosi
     {
         get => _apa102SpiConfig?.Mosi ?? 0;
@@ -597,6 +597,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         PollRate = 0;
         StrumDebounce = 0;
         Debounce = 10;
+        DjPollRate = 4;
 
         _rhythmType = RhythmType.GuitarHero;
         this.RaisePropertyChanged(nameof(DeviceType));
@@ -634,6 +635,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 usbOutput.SetOutputsOrDefaults(Array.Empty<Output>());
                 Bindings.Add(usbOutput);
                 break;
+            case DeviceInputType.Bluetooth:
+                var bluetoothOutput = new BluetoothOutput(this, "")
+                {
+                    Expanded = true
+                };
+                bluetoothOutput.SetOutputsOrDefaults(Array.Empty<Output>());
+                Bindings.Add(bluetoothOutput);
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -641,8 +650,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         UpdateBindings();
         UpdateErrors();
-        // Write the full config
-        Main.Write(this, false);
+        // Write the full config, bluetooth has zero config so we can actually properly write it
+        Main.Write(this, Main.DeviceInputType is DeviceInputType.Bluetooth);
     }
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)

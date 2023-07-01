@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
-using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Inputs;
@@ -25,11 +24,17 @@ public class DjInput : TwiInput
         BindableTwi = !combined && Model.Microcontroller.TwiAssignable;
         Input = input;
         IsAnalog = Input <= DjInputType.RightTurntable;
+        this.WhenAnyValue(x => x.Model.DjPollRate).Subscribe(_ => this.RaisePropertyChanged(nameof(PollRate)));
+    }
+
+    public int PollRate
+    {
+        get => Model.DjPollRate;
+        set => Model.DjPollRate = value;
     }
 
     public bool Combined { get; }
-    [Reactive]
-    public bool Smoothing { get; set; }
+    [Reactive] public bool Smoothing { get; set; }
 
     public bool BindableTwi { get; }
 
@@ -91,7 +96,8 @@ public class DjInput : TwiInput
     public override string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-        if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps4))
+        if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360
+            or ConfigField.Ps4))
             return "";
         var left = string.Join(";",
             bindings.Where(binding => (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
@@ -114,10 +120,13 @@ public class DjInput : TwiInput
         {
             list.Add("INPUT_DJ_TURNTABLE_SMOOTHING_LEFT");
         }
+
         if (Smoothing && Input is DjInputType.RightTurntable)
         {
             list.Add("INPUT_DJ_TURNTABLE_SMOOTHING_RIGHT");
         }
+
+        list.Add($"INPUT_DJ_TURNTABLE_POLL_RATE {Model.DjPollRate * 1000}");
 
         return list;
     }

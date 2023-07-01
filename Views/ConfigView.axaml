@@ -139,7 +139,7 @@
                               SelectedItem="{Binding AnalogToDigitalType}"
                               ItemTemplate="{StaticResource EnumToStringTemplate}"
                               ItemsSource="{Binding AnalogToDigitalTypes}" />
-                    <NumericUpDown Value="{Binding Threshold}" VerticalAlignment="Center" />
+                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Threshold}" VerticalAlignment="Center" />
                     <ContentControl Content="{Binding Child}"
                                     ContentTemplate="{StaticResource OutputHeaderTemplates}" />
                 </StackPanel>
@@ -150,7 +150,7 @@
                     <CheckBox IsChecked="{Binding DetectedRight}" IsEnabled="False" VerticalAlignment="Center">Right Turntable Found</CheckBox>
                 </StackPanel>
             </DataTemplate>
-            
+
             <DataTemplate DataType="{x:Type combined:UsbHostCombinedOutput}">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="{Binding ConnectedDevices}" VerticalAlignment="Center" />
@@ -602,7 +602,7 @@
                                Width="300">
                             Invert
                         </Label>
-                        <ToggleSwitch IsChecked="{Binding Inverted}"  />
+                        <ToggleSwitch IsChecked="{Binding Inverted}" />
                     </StackPanel>
                     <StackPanel IsVisible="{Binding UsesPwm}">
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding OutputEnabled}">
@@ -661,40 +661,52 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:DjInput}">
-                <StackPanel Orientation="Vertical"
-                            IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
-                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
-                        <Label VerticalAlignment="Center"
-                               VerticalContentAlignment="Center"
-                               Width="300">
-                            SCL Pin
-                        </Label>
-                        <ComboBox VerticalAlignment="Center"
-                                  SelectedItem="{Binding Scl}"
-                                  ItemsSource="{Binding AvailableSclPins}"
-                                  ItemTemplate="{StaticResource PinToStringTemplate}"
-                                  Width="200" />
-                    </StackPanel>
-                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
-                        <Label VerticalAlignment="Center"
-                               VerticalContentAlignment="Center"
-                               Width="300">
-                            SDA Pin
-                        </Label>
-                        <ComboBox VerticalAlignment="Center"
-                                  SelectedItem="{Binding Sda}"
-                                  ItemsSource="{Binding AvailableSdaPins}"
-                                  ItemTemplate="{StaticResource PinToStringTemplate}"
-                                  Width="200" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsAnalog}">
-                        <Label VerticalAlignment="Center"
-                               VerticalContentAlignment="Center"
-                               Width="300">
-                            Turntable Smoothing
-                        </Label>
-                        <ToggleSwitch IsChecked="{Binding Smoothing}" OnContent="Enabled"
-                                      OffContent="Disabled" />
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Vertical"
+                                IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                        <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                SCL Pin
+                            </Label>
+                            <ComboBox VerticalAlignment="Center"
+                                      SelectedItem="{Binding Scl}"
+                                      ItemsSource="{Binding AvailableSclPins}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}"
+                                      Width="200" />
+                        </StackPanel>
+                        <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                SDA Pin
+                            </Label>
+                            <ComboBox VerticalAlignment="Center"
+                                      SelectedItem="{Binding Sda}"
+                                      ItemsSource="{Binding AvailableSdaPins}"
+                                      ItemTemplate="{StaticResource PinToStringTemplate}"
+                                      Width="200" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding IsAnalog}">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                Turntable Smoothing
+                            </Label>
+                            <ToggleSwitch IsChecked="{Binding Smoothing}" OnContent="Enabled"
+                                          OffContent="Disabled" />
+                        </StackPanel>
+                        
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !Combined}">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                Turntable Poll Rate
+                            </Label>
+                            <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding PollRate}" Minimum="1"
+                                           Maximum="10" Width="200" Height="30" />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -811,7 +823,7 @@
                         <Label VerticalAlignment="Center" Width="300">
                             Threshold
                         </Label>
-                        <NumericUpDown Value="{Binding Threshold}" Minimum="1"
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Threshold}" Minimum="1"
                                        Maximum="32767" Width="200" Height="30" />
                     </StackPanel>
                 </StackPanel>
@@ -914,21 +926,22 @@
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                         <Button Command="{Binding DetectPinCommand}" Content="{Binding PinConfigText}" />
                     </StackPanel>
-                    
+
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
                             Invert
                         </Label>
-                        <ToggleSwitch IsChecked="{Binding Inverted}"  />
+                        <ToggleSwitch IsChecked="{Binding Inverted}" />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:DjAxis}">
                 <StackPanel Orientation="Vertical">
                     <Panel>
-                        <StackPanel Orientation="Vertical" VerticalAlignment="Center" IsVisible="{Binding IsEffectsKnob}">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Center"
+                                    IsVisible="{Binding IsEffectsKnob}">
                             <StackPanel Orientation="Horizontal">
                                 <Label VerticalAlignment="Center" Width="300">
                                     Current Value
@@ -960,7 +973,7 @@
                                 <Label VerticalAlignment="Center" Width="300">
                                     Invert
                                 </Label>
-                                
+
                                 <ToggleSwitch IsChecked="{Binding Invert}" />
                             </StackPanel>
                         </StackPanel>
@@ -1001,7 +1014,7 @@
                                         Maximum="10"
                                         IsSnapToTickEnabled="True"
                                         TickFrequency="1" Width="240" />
-                                <NumericUpDown Value="{Binding Multiplier}" Minimum="1"
+                                <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Multiplier}" Minimum="1"
                                                Maximum="10" Width="150" Height="30" Margin="10 0 0 0 " />
                             </StackPanel>
                         </StackPanel>
@@ -1595,7 +1608,7 @@
                                Width="300">
                             Value
                         </Label>
-                        <NumericUpDown Value="{Binding On}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}"
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding On}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}"
                                        VerticalAlignment="Center"
                                        Width="200" />
                     </StackPanel>
@@ -1702,6 +1715,46 @@
                                     ContentTemplate="{StaticResource OutputTemplates}" />
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
+                <StackPanel>
+                <StackPanel
+                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            SCL Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Scl}"
+                                  ItemsSource="{Binding AvailableSclPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            SDA Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Sda}"
+                                  ItemsSource="{Binding AvailableSdaPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center"
+                           VerticalContentAlignment="Center"
+                           Width="300">
+                        Turntable Poll Rate
+                    </Label>
+                    <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding PollRate}" Minimum="1"
+                                   Maximum="10" Width="200" Height="30" />
+                </StackPanel>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type combined:CombinedTwiOutput}">
                 <StackPanel
                     IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
@@ -1739,7 +1792,7 @@
                                Width="300">
                             Slider Bar Sensitivity
                         </Label>
-                        <NumericUpDown Value="{Binding Sensitivity}" Maximum="50" VerticalAlignment="Center"
+                        <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Sensitivity}" Maximum="50" VerticalAlignment="Center"
                                        Width="200" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal"
@@ -1796,7 +1849,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            
+
             <DataTemplate DataType="{x:Type output:BluetoothOutput}">
                 <StackPanel
                     IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
