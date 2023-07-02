@@ -158,7 +158,6 @@ public partial class BluetoothOutput : CombinedOutput
         if (Model.Device is not Santroller santroller) return;
 
         ScanTimer--;
-
         var addresses = santroller.GetBtScanResults();
         var deviceCount = addresses.Length / BtAddressLength;
         var addressesAsStrings = new List<string>();
