@@ -481,10 +481,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
         if (Bindings.Items.Any(s =>
-                s is WiiCombinedOutput or Ps2CombinedOutput or UsbHostCombinedOutput)) return;
+                s is WiiCombinedOutput or Ps2CombinedOutput or UsbHostCombinedOutput or BluetoothOutput)) return;
 
 
-        if (_deviceControllerType == DeviceControllerType.Turntable)
+        if (_deviceControllerType == DeviceControllerType.Turntable)  
             if (!Bindings.Items.Any(s => s is DjCombinedOutput))
             {
                 var dj = new DjCombinedOutput(this);

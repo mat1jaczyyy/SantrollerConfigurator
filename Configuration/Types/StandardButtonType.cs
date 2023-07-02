@@ -4,8 +4,8 @@ public enum StandardButtonType
 {
     A,
     B,
-    X,
     Y,
+    X,
     LeftShoulder,
     RightShoulder,
     DpadUp,

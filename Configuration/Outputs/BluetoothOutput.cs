@@ -44,7 +44,8 @@ public partial class BluetoothOutput : CombinedOutput
             LocalAddress = "Write config to retrieve address";
     }
 
-    public string LocalAddress { get; }
+    [Reactive]
+    public string LocalAddress { get; private set; }
 
     public AvaloniaList<string> Addresses { get; } = new();
 
@@ -70,7 +71,7 @@ public partial class BluetoothOutput : CombinedOutput
             {
                 "BLUETOOTH_RX"
             };
-            if (BluetoothOutput.MacAddress != NoDeviceText) ret.Add("BT_ADDR " + BluetoothOutput.MacAddress);
+            if (BluetoothOutput.MacAddress != NoDeviceText) ret.Add($"BT_ADDR \"{BluetoothOutput.MacAddress}\"");
 
             return ret;
         }
@@ -138,6 +139,8 @@ public partial class BluetoothOutput : CombinedOutput
     {
         base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
+        if (LocalAddress == "Write config to retrieve address" && Model.Device is Santroller santroller)
+            LocalAddress = santroller.GetBluetoothAddress();
         if (!bluetoothRaw.Any()) return;
         Connected = bluetoothRaw[0] != 0;
     }
