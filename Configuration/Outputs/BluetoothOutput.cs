@@ -167,7 +167,6 @@ public partial class BluetoothOutput : CombinedOutput
         for (var i = 0; i < deviceCount; i++)
             addressesAsStrings.Add(
                 Encoding.Default.GetString(addresses[(i * BtAddressLength)..((i + 1) * BtAddressLength)]).Replace("\0",""));
-        
         if (deviceCount != 0)
         {
             var setNew = addressesAsStrings.ToHashSet();
