@@ -65,8 +65,7 @@ public class RestoreViewModel : ReactiveObject, IRoutableViewModel
             Main.Message = "Programming";
             Main.Progress = 50;
             // Copy blank firmware back to device
-            var firmware = Path.Combine(AssetUtils.GetAppDataFolder(), "default_firmwares",
-                _santroller.Board.Environment + ".uf2");
+            var firmware = Path.Combine(AssetUtils.GetAppDataFolder(), "default_firmwares", "pico.uf2");
             File.Copy(firmware, Path.Combine(device.GetUploadPortAsync().Result!, "firmware.uf2"));
             Main.Complete(100);
         }
