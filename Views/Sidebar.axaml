@@ -227,7 +227,7 @@
                     </Button>
                     <Button Command="{Binding BindAllCommand}" HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center" Margin="20 5 20 0">
-                        Bind All
+                        Configure all inputs
                     </Button>
                 </StackPanel>
 
