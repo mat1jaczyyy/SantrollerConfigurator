@@ -304,7 +304,7 @@ public class Ps2Input : SpiInput
         var jogcon = realType is Ps2ControllerType.JogCon;
         var guncon = realType is Ps2ControllerType.GunCon;
         // TODO: perhaps for this, we just swap to a version that polls all PS2 inputs when updating the gui, instead of this.
-        // TODO: otherwise, this is actually useless, what we need is the last written config not the current one
+        // TODO: otherwise, this is actually useless, what we need is the last written config not the current one 
         // var ds2 = realType is Ps2ControllerType.Dualshock2;
         // if (ds2 && Dualshock2Order.Contains(Input))
         // {
