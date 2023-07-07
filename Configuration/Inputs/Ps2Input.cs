@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -422,6 +423,11 @@ public class Ps2Input : SpiInput
                     types.Add(Ps2ControllerType.Dualshock);
                     types.Add(Ps2ControllerType.Dualshock2);
                     types.Add(Ps2ControllerType.FlightStick);
+                }
+                // Only do this binding on controllers without analog pressures
+                if (input.Input is Ps2InputType.L2 or Ps2InputType.R2 && binding.Item1 is DigitalToAnalog)
+                {
+                    types.Remove(Ps2ControllerType.Dualshock2);
                 }
 
                 if (GuitarButtons.Contains(input.Input)) types.Add(Ps2ControllerType.Guitar);

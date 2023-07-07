@@ -200,6 +200,14 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                 Model), Colors.Black,
             Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
             0, StandardAxisType.RightStickY, true));
+        Outputs.Add(new ControllerAxis(Model,
+            new DigitalToAnalog(new Ps2Input(Ps2InputType.L2, Model, Miso, Mosi, Sck, Att, Ack, true), ushort.MaxValue, true, Model),
+            Colors.Black,
+            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, StandardAxisType.LeftTrigger, true));
+        Outputs.Add(new ControllerAxis(Model,
+            new DigitalToAnalog(new Ps2Input(Ps2InputType.R2, Model, Miso, Mosi, Sck, Att, Ack, true), ushort.MaxValue, true, Model),
+            Colors.Black,
+            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, StandardAxisType.RightTrigger, true));
         foreach (var pair in Axis)
             if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
                 pair.Key is Ps2InputType.GuitarWhammy)
