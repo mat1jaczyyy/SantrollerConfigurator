@@ -34,7 +34,7 @@ public class SerializedPs3Axis : SerializedOutput
 
     [ProtoMember(7)] public Ps3AxisType Type { get; }
 
-    [ProtoMember(8)] public bool ChildOfCombined { get; }
+    [ProtoMember(9)] public bool ChildOfCombined { get; }
 
     public override Output Generate(ConfigViewModel model)
     {
