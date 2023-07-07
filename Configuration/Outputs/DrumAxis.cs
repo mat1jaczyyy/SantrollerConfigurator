@@ -153,7 +153,17 @@ public partial class DrumAxis : OutputAxis
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
         if (mode == ConfigField.Shared)
+        {
+            if (Input is WiiInput)
+            {
+                return new ControllerButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), (byte) Debounce, StandardButtonType.A,
+                        false)
+                    .Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
+            }
             return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
+        }
+        
+
         if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
         var debounce = Debounce;
@@ -163,11 +173,21 @@ public partial class DrumAxis : OutputAxis
             // If we aren't using queue based inputs, then we want ms based inputs, not ones based on 0.1ms
             debounce /= 10;
         }
+
         debounce += 1;
 
         var ifStatement = $"debounce[{debounceIndex}]";
-        
+        var input = Input;
         var reset = $"debounce[{debounceIndex}]={debounce};";
+        if (Input is WiiInput wii)
+        {
+            // Wii inputs provide their own digital signals, so don't generate one ourselves.
+            reset = "";
+            // For wii stuff, generate the debounce based on the digital signal from the controller
+            var type = wii.Input;
+            var typeAxis = Enum.Parse<WiiInputType>($"{type}Pressure");
+            input = new WiiInput(typeAxis, Model);
+        }
         var outputButtons = "";
         switch (mode)
         {
@@ -186,6 +206,7 @@ public partial class DrumAxis : OutputAxis
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
         }
+
         if (Model.RhythmType == RhythmType.RockBand && Type is DrumAxisType.Kick or DrumAxisType.Kick2)
         {
             return $@"if ({ifStatement}) {{
@@ -221,7 +242,7 @@ public partial class DrumAxis : OutputAxis
 
         // If someone specified a digital input, then we need to take the value they have specified and convert it to the target consoles expected output
         var dtaVal = 0;
-        if (Input is DigitalToAnalog dta) dtaVal = dta.On;
+        if (input is DigitalToAnalog dta) dtaVal = dta.On;
 
         var assignedVal = "val_real";
         // Xbox one uses 4 bit velocities
@@ -267,7 +288,7 @@ public partial class DrumAxis : OutputAxis
 
         var btExtra = "";
         // If someone has mapped digital inputs to the drums, then we can shortcut a bunch of the tests, and just need to use the calculated value from above
-        if (Input is DigitalToAnalog dta2)
+        if (input is DigitalToAnalog dta2)
         {
             // For bluetooth, stuff the cymbal data into some unused bytes
             if (mode == ConfigField.Ps3 &&
@@ -280,7 +301,7 @@ public partial class DrumAxis : OutputAxis
 
             return $@"
             {{
-                if ({Input.Generate()}) {{
+                if ({input.Generate()}) {{
                     {reset}
                     {GenerateOutput(mode)} = {dtaVal};
                     {btExtra}
@@ -299,16 +320,22 @@ public partial class DrumAxis : OutputAxis
                     {GenerateOutput(ConfigField.XboxOne)} = val_real >> 8;
                 }}  
             ";
-        var generated = Input.IsUint ? Input.Generate() : $"(({Input.Generate()}) + INT16_MAX)";
+        if (reset.Any())
+        {
+            reset = $@"
+                if (val_real > {Threshold}) {{
+                    {reset}
+                }}";
+        }
+
+        var generated = input.IsUint ? input.Generate() : $"(({input.Generate()}) + INT16_MAX)";
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
         {{
             uint16_t val_real = {generated};
             if (val_real) {{
-                if (val_real > {Threshold}) {{
-                    {reset}
-                }}
+                {reset}
                 {GenerateOutput(mode)} = {assignedVal};
                 {btExtra}
             }}
@@ -354,7 +381,7 @@ public partial class DrumAxis : OutputAxis
 
     protected override bool SupportsCalibration()
     {
-        return true;
+        return Input is not WiiInput;
     }
 
     public override SerializedOutput Serialize()

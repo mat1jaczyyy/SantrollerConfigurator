@@ -62,7 +62,9 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.DrumYellow, StandardButtonType.Y},
         {WiiInputType.DrumBlue, StandardButtonType.X},
         {WiiInputType.DrumOrange, StandardButtonType.LeftShoulder},
-        {WiiInputType.DrumKickPedal, StandardButtonType.RightShoulder}
+        {WiiInputType.DrumKickPedal, StandardButtonType.RightShoulder},
+        {WiiInputType.DrumMinus, StandardButtonType.Back},
+        {WiiInputType.DrumPlus, StandardButtonType.Start},
     };
 
 
@@ -162,22 +164,22 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     private static readonly Dictionary<WiiInputType, DrumAxisType> DrumAxisGh = new()
     {
-        {WiiInputType.DrumGreenPressure, DrumAxisType.Green},
-        {WiiInputType.DrumRedPressure, DrumAxisType.Red},
-        {WiiInputType.DrumYellowPressure, DrumAxisType.Red},
-        {WiiInputType.DrumBluePressure, DrumAxisType.Blue},
-        {WiiInputType.DrumOrangePressure, DrumAxisType.Orange},
+        {WiiInputType.DrumGreen, DrumAxisType.Green},
+        {WiiInputType.DrumRed, DrumAxisType.Red},
+        {WiiInputType.DrumYellow, DrumAxisType.Red},
+        {WiiInputType.DrumBlue, DrumAxisType.Blue},
+        {WiiInputType.DrumOrange, DrumAxisType.Orange},
         {WiiInputType.DrumKickPedal, DrumAxisType.Kick}
         // {WiiInputType.DrumHiHatPedal, DrumAxisType.Kick2},
     };
 
     private static readonly Dictionary<WiiInputType, DrumAxisType> DrumAxisRb = new()
     {
-        {WiiInputType.DrumGreenPressure, DrumAxisType.Green},
-        {WiiInputType.DrumRedPressure, DrumAxisType.Red},
-        {WiiInputType.DrumYellowPressure, DrumAxisType.Red},
-        {WiiInputType.DrumBluePressure, DrumAxisType.Blue},
-        {WiiInputType.DrumOrangePressure, DrumAxisType.Green},
+        {WiiInputType.DrumGreen, DrumAxisType.Green},
+        {WiiInputType.DrumRed, DrumAxisType.Red},
+        {WiiInputType.DrumYellow, DrumAxisType.Red},
+        {WiiInputType.DrumBlue, DrumAxisType.Blue},
+        {WiiInputType.DrumOrange, DrumAxisType.Green},
         {WiiInputType.DrumKickPedal, DrumAxisType.Kick}
         // {WiiInputType.DrumHiHatPedal, DrumAxisType.Kick2},
     };
@@ -370,19 +372,19 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 // We already have drum inputs mapped, but need to handle swapping between GH and RB 
                 var first = (Outputs.Items.First(s => s.Input is WiiInput
                 {
-                    Input: WiiInputType.DrumOrangePressure
+                    Input: WiiInputType.DrumOrange
                 }) as DrumAxis)!;
                 Outputs.Remove(first);
                 // Rb maps orange to green, while gh maps orange to orange
                 if (Model.RhythmType == RhythmType.GuitarHero)
                     Outputs.Add(new DrumAxis(Model,
-                        new WiiInput(WiiInputType.DrumOrangePressure, Model, Sda, Scl, true),
+                        new WiiInput(WiiInputType.DrumOrange, Model, Sda, Scl, true),
                         first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64,
                         10,
                         DrumAxisType.Orange, true));
                 else
                     Outputs.Add(new DrumAxis(Model,
-                        new WiiInput(WiiInputType.DrumOrangePressure, Model, Sda, Scl, true),
+                        new WiiInput(WiiInputType.DrumOrange, Model, Sda, Scl, true),
                         first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64,
                         10,
                         DrumAxisType.Green, true));

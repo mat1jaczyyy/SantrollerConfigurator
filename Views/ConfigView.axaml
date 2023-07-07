@@ -1302,6 +1302,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:DrumAxis}">
                 <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsWii}">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
                         <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
@@ -1391,6 +1392,7 @@
                                 Maximum="{Binding SliderMax, Mode=OneTime}" Value="{Binding DeadZone}">
                         </Slider>
                     </StackPanel>
+                </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputAxis}">

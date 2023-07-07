@@ -46,6 +46,41 @@ public class ControllerEnumConverter : IMultiValueConverter
             new()
             {
                 {
+                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Drum,
+                        StandardButtonType.DpadUp),
+                    "D-pad Up"
+                },
+                {
+                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Drum,
+                        StandardButtonType.DpadDown),
+                    "D-pad Down"
+                },
+                {
+                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Drum,
+                        StandardButtonType.DpadLeft),
+                    "D-pad Left"
+                },
+                {
+                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Drum,
+                        StandardButtonType.DpadRight),
+                    "D-pad Right"
+                },
+                {
+                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Drum,
+                        StandardButtonType.Start),
+                    "Start Button"
+                },
+                {
+                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Drum,
+                        StandardButtonType.Guide),
+                    "Home Button"
+                },
+                {
+                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Drum,
+                        StandardButtonType.Back),
+                    "Select Button"
+                },
+                {
                     new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Guitar,
                         StandardButtonType.DpadLeft),
                     "D-pad Left"
@@ -284,8 +319,7 @@ public class ControllerEnumConverter : IMultiValueConverter
         if (deviceControllerType is DeviceControllerType.ArcadePad or DeviceControllerType.ArcadeStick or DeviceControllerType.FlightStick)
             deviceControllerType = DeviceControllerType.Gamepad;
         // Turntable mappings hide extra buttons like bumpers and stick click
-        if (deviceControllerType is DeviceControllerType.DancePad  or DeviceControllerType.Drum
-            or DeviceControllerType.StageKit)
+        if (deviceControllerType is DeviceControllerType.DancePad or DeviceControllerType.StageKit)
             deviceControllerType = DeviceControllerType.Turntable;
         return ButtonLabels.GetValueOrDefault(
             new Tuple<DeviceControllerType, StandardButtonType>(deviceControllerType, button), "");
@@ -353,7 +387,7 @@ public class ControllerEnumConverter : IMultiValueConverter
         if (deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar or DeviceControllerType.Turntable or DeviceControllerType.DancePad or DeviceControllerType.Drum or DeviceControllerType.StageKit))
             deviceControllerType = DeviceControllerType.Gamepad;
         // Though a good chunk need a reduced set of standard bindings
-        if (deviceControllerType is DeviceControllerType.DancePad or DeviceControllerType.Drum or DeviceControllerType.StageKit)
+        if (deviceControllerType is DeviceControllerType.DancePad or DeviceControllerType.StageKit)
             deviceControllerType = DeviceControllerType.Turntable;
         return Enum.GetValues<SimpleType>().Cast<object>()
             .Concat(otherBindings)
