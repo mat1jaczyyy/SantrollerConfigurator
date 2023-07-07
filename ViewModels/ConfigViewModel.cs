@@ -291,6 +291,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     [Reactive] public int PollRate { get; set; }
     [Reactive] public int DjPollRate { get; set; }
+    [Reactive] public bool DjDual { get; set; }
     public int Apa102Mosi
     {
         get => _apa102SpiConfig?.Mosi ?? 0;

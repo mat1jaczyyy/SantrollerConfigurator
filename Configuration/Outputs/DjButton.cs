@@ -12,6 +12,13 @@ public class DjButton : OutputButton
 {
     public readonly DjInputType Type;
 
+    public Dictionary<DjInputType, DjInputType> DualTypes = new()
+    {
+        {DjInputType.RightGreen, DjInputType.LeftGreen},
+        {DjInputType.RightRed, DjInputType.LeftRed},
+        {DjInputType.RightBlue, DjInputType.LeftBlue},
+    };
+
     public DjButton(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, byte debounce,
         DjInputType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, debounce,
         childOfCombined)
@@ -24,12 +31,14 @@ public class DjButton : OutputButton
     public override string LedOffLabel => "Released LED Colour";
 
     public override bool IsKeyboard => false;
-
-
     public override bool IsStrum => false;
 
     public override string GenerateOutput(ConfigField mode)
     {
+        if (Model.DjDual && DualTypes.TryGetValue(Type, out var type))
+        {
+            return GetReportField(type);
+        }
         return GetReportField(Type);
     }
 

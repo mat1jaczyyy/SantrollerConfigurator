@@ -694,7 +694,16 @@
                                    Width="300">
                                 Turntable Smoothing
                             </Label>
-                            <ToggleSwitch IsChecked="{Binding Smoothing}" OnContent="Enabled"
+                            <ToggleSwitch IsEnabled="{Binding !Dual}" IsChecked="{Binding Smoothing}" OnContent="Enabled"
+                                          OffContent="Disabled" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding IsAnalog}">
+                            <Label VerticalAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="300">
+                                Dual Turntable Smoothing
+                            </Label>
+                            <ToggleSwitch IsChecked="{Binding Dual}" OnContent="Enabled"
                                           OffContent="Disabled" />
                         </StackPanel>
 

@@ -32,6 +32,7 @@ public class SerializedConfiguration
         CombinedStrumDebounce = model.CombinedStrumDebounce;
         QueueBasedInputs = model.Deque;
         DjPollRate = model.DjPollRate;
+        DjDual = model.DjDual;
     }
 
     [ProtoMember(1)] public LedType LedType { get; }
@@ -53,6 +54,7 @@ public class SerializedConfiguration
     [ProtoMember(27)] public bool CombinedStrumDebounce { get; }
     [ProtoMember(28)] public bool QueueBasedInputs { get; }
     [ProtoMember(29)] public int DjPollRate { get; }
+    [ProtoMember(30)] public bool DjDual { get; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
@@ -65,10 +67,10 @@ public class SerializedConfiguration
         model.StrumDebounce = StrumDebounce;
         model.Deque = QueueBasedInputs;
         model.DjPollRate = DjPollRate;
+        model.DjDual = DjDual;
         if (DjPollRate == 0)
         {
             model.DjPollRate = 1;
-            Console.Write(model.DjPollRate);
         }
         if (Bindings != null)
         {

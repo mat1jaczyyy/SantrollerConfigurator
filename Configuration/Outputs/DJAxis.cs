@@ -11,7 +11,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
-public class DjAxis : OutputAxis
+public partial class DjAxis : OutputAxis
 {
     public DjAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
         int deadZone, DjAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min, max,
@@ -151,13 +151,12 @@ public class DjAxis : OutputAxis
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
-        var multiplier = Multiplier;
         // PS3 needs uint, xb360 needs int
         // So convert to the right method for that console, and then shift for ps3
-        var generated = $"({Input.Generate()} * {multiplier})";
+        var generated = $"{Input.Generate()}";
         var generatedPs3 = generated;
-        var generatedTable = generated;
-        var generatedTablePs3 = generated;
+        var generatedTable = $"({generated} * {-Multiplier << 8})";
+        var generatedTablePs3 = $"({generated} * {Multiplier})";
         
         if (InputIsUint)
         {
