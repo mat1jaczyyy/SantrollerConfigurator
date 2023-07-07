@@ -65,7 +65,7 @@ public class InputImageConverter : IMultiValueConverter
             MouseButton => "Mouse",
             DjAxisType type => "dj/" + type,
             DjInputType type => "dj/" + type,
-            Ps2InputType type => "PS2/" + type,
+            Ps2InputType type => "PS2/" + type.ToString().Replace("Dualshock2",""),
             WiiInputType type => "Wii/" + type,
             DrumAxisType type => rhythmType + "/" + type,
             GuitarAxisType type => rhythmType + "/" + type,
@@ -110,7 +110,7 @@ public class InputImageConverter : IMultiValueConverter
                 DeviceControllerType.Turntable => $"DJ/{type}",
                 _ => null
             },
-            Ps3AxisType type => "PS3/PS3_" + type,
+            Ps3AxisType type => "PS2/" + type.ToString().Replace("Pressure",""),
             _ => null
         };
         if (path == null) return null;

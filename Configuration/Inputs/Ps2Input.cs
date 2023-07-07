@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DynamicData.Kernel;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -304,21 +305,19 @@ public class Ps2Input : SpiInput
         var negcon = realType is Ps2ControllerType.NegCon;
         var jogcon = realType is Ps2ControllerType.JogCon;
         var guncon = realType is Ps2ControllerType.GunCon;
-        // TODO: perhaps for this, we just swap to a version that polls all PS2 inputs when updating the gui, instead of this.
-        // TODO: otherwise, this is actually useless, what we need is the last written config not the current one 
-        // var ds2 = realType is Ps2ControllerType.Dualshock2;
-        // if (ds2 && Dualshock2Order.Contains(Input))
-        // {
-        //     var inputs = modelBindings.SelectMany(s => s.Outputs.Items).Select(s => s.Input).OfType<Ps2Input>()
-        //         .Select(s => s.Input).ToHashSet();
-        //     var i = Dualshock2Order.Intersect(inputs).Select((s, idx) => (s, idx))
-        //         .FirstOrOptional(s => s.s == Input);
-        //     if (i.HasValue)
-        //     {
-        //         RawValue = ps2Data[i.Value.idx] << 8;
-        //         return;
-        //     }
-        // }
+        var ds2 = realType is Ps2ControllerType.Dualshock2;
+        if (ds2 && Dualshock2Order.Contains(Input))
+        {
+            var inputs = Model.Bindings.Items.SelectMany(s => s.Outputs.Items).Select(s => s.Input).OfType<Ps2Input>()
+                .Select(s => s.Input).ToHashSet();
+            var i = Dualshock2Order.Intersect(inputs).Select((s, idx) => (s, idx))
+                .FirstOrOptional(s => s.s == Input);
+            if (i.HasValue)
+            {
+                RawValue = ps2Data[i.Value.idx] << 8;
+                return;
+            }
+        }
 
         RawValue = Input switch
         {
