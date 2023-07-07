@@ -152,7 +152,6 @@ public class GuitarAxis : OutputAxis
             // Xb1 is RB only, so no slider
             case ConfigField.XboxOne when Type == GuitarAxisType.Slider:
                 return "";
-
             // PS3 GH and GHL expects tilt on the tilt axis
             // On pc, we use a standard axis because that works better in games like clone hero
             case ConfigField.Ps3
