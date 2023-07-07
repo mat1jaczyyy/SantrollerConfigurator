@@ -291,7 +291,7 @@ public partial class DrumAxis : OutputAxis
         if (input is DigitalToAnalog dta2)
         {
             // For bluetooth, stuff the cymbal data into some unused bytes
-            if (mode == ConfigField.Ps3 &&
+            if (Model.UsingBluetooth() && mode == ConfigField.Ps3 &&
                 Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
                 btExtra = $@"
                 if (bluetooth) {{
@@ -313,7 +313,7 @@ public partial class DrumAxis : OutputAxis
         }
 
         // For bluetooth, stuff the cymbal data into some unused bytes
-        if (mode == ConfigField.Ps3 &&
+        if (Model.UsingBluetooth() && mode == ConfigField.Ps3 &&
             Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
             btExtra = $@"
                 if (bluetooth) {{

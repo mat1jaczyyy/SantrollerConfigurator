@@ -98,7 +98,7 @@ public class GuitarButton : OutputButton
         var ret = "";
         switch (mode)
         {
-            case ConfigField.Ps3:
+            case ConfigField.Ps3 when Model.UsingBluetooth():
                 // For bluetooth, we shove the xb1 bits into some unused bytes of the report
                 ret += $@"if (bluetooth) {{
                     {base.Generate(ConfigField.XboxOne, debounceIndex, "", combinedExtra, combinedDebounce, macros)}

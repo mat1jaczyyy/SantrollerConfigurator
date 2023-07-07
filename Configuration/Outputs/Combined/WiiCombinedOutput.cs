@@ -166,7 +166,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         {WiiInputType.DrumGreen, DrumAxisType.Green},
         {WiiInputType.DrumRed, DrumAxisType.Red},
-        {WiiInputType.DrumYellow, DrumAxisType.Red},
+        {WiiInputType.DrumYellow, DrumAxisType.Yellow},
         {WiiInputType.DrumBlue, DrumAxisType.Blue},
         {WiiInputType.DrumOrange, DrumAxisType.Orange},
         {WiiInputType.DrumKickPedal, DrumAxisType.Kick}
@@ -177,7 +177,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
     {
         {WiiInputType.DrumGreen, DrumAxisType.Green},
         {WiiInputType.DrumRed, DrumAxisType.Red},
-        {WiiInputType.DrumYellow, DrumAxisType.Red},
+        {WiiInputType.DrumYellow, DrumAxisType.Yellow},
         {WiiInputType.DrumBlue, DrumAxisType.Blue},
         {WiiInputType.DrumOrange, DrumAxisType.Green},
         {WiiInputType.DrumKickPedal, DrumAxisType.Kick}

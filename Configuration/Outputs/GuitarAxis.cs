@@ -75,6 +75,7 @@ public class GuitarAxis : OutputAxis
         {
             ret = "Current Frets: ";
         }
+
         if ((info & BarButton.Green) != 0) ret += "Green ";
         if ((info & BarButton.Red) != 0) ret += "Red ";
         if ((info & BarButton.Yellow) != 0) ret += "Yellow ";
@@ -152,6 +153,7 @@ public class GuitarAxis : OutputAxis
             // Xb1 is RB only, so no slider
             case ConfigField.XboxOne when Type == GuitarAxisType.Slider:
                 return "";
+
             // PS3 GH and GHL expects tilt on the tilt axis
             // On pc, we use a standard axis because that works better in games like clone hero
             case ConfigField.Ps3
@@ -161,13 +163,20 @@ public class GuitarAxis : OutputAxis
                          RhythmType: RhythmType.GuitarHero
                      } &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
-                return $@"if ({Input.Generate()}) {{
-                                  if (consoleType == PS3 || consoleType == REAL_PS3) {{
-                                     report->tilt = 0x180;
+                if (Model.UsingBluetooth())
+                {
+                    return $@"if ({Input.Generate()}) {{
+                                  if (bluetooth) {{
+                                     report->tilt_bluetooth = 255;
                                   }} else {{
-                                     report->tilt_pc = 255;
+                                     report->tilt = 0x180;
                                   }}
                               }}";
+                }
+
+                return $@"if ({Input.Generate()}) {{
+                            report->tilt = 0x180;
+                          }}";
             case ConfigField.Ps3
                 when Model is
                      {
@@ -175,32 +184,51 @@ public class GuitarAxis : OutputAxis
                          RhythmType: RhythmType.GuitarHero
                      } &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
-                return $@"if (consoleType == PS3 || consoleType == REAL_PS3) {{
-                         {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
+                if (Model.UsingBluetooth())
+                {
+                    return $@"if (bluetooth) {{
+                         report->tilt_bluetooth = {GenerateAssignment(mode, false, false, false)};
                       }} else {{
-                         report->tilt_pc = {GenerateAssignment(mode, false, false, false)};
+                         {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
                       }}";
+                }
+
+                return $@"if ({Input.Generate()}) {{
+                            {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
+                          }}";
             case ConfigField.Ps3
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
                 // PS3 rb uses a digital bit, so just map the bit right across and skip the analog conversion
+                if (Model.UsingBluetooth())
+                {
+                    return $@"if (bluetooth) {{
+                         report->tilt_bluetooth = 255;
+                      }} else {{
+                         report->tilt = true;
+                      }}";
+                }
+
                 return $@"if ({Input.Generate()}) {{
-                                  if (consoleType == PS3 || consoleType == REAL_PS3) {{
-                                     report->tilt = true;
-                                  }} else {{
-                                     report->tilt_pc = 0;
-                                  }}
-                              }}";
+                            report->tilt = true;
+                          }}";
             case ConfigField.Ps3
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 // PS3 RB expects tilt as a digital bit, so map that here
                 // On pc, we use a standard axis because that works better in games like clone hero
-                return $@"if (consoleType == PS3 || consoleType == REAL_PS3) {{
-                         {GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)} == 0xFF;
+                if (Model.UsingBluetooth())
+                {
+                    return $@"if (bluetooth) {{
+                         report->tilt_bluetooth = {GenerateAssignment(mode, false, false, false)};
                       }} else {{
-                         report->tilt_pc = {GenerateAssignment(mode, false, false, false)};
+                         {GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)} == 0xFF;
                       }}";
+                }
+
+                return $@"if ({Input.Generate()}) {{
+                            {GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, false)} == 0xFF;
+                          }}";
             // Xbox 360 Pickup Selector is actually on one of the triggers.
             case ConfigField.Xbox360
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
