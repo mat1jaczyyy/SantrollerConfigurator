@@ -32,7 +32,7 @@
         <CFBundleShortVersionString>1.0.0</CFBundleShortVersionString>
         <CFBundlePackageType>APPL</CFBundlePackageType>
         <CFBundleSignature>sanc</CFBundleSignature>
-        <CFBundleExecutable>AppName</CFBundleExecutable>
+        <CFBundleExecutable>SantrollerConfigurator</CFBundleExecutable>
         <CFBundleIconFile>Resources/icon.icns</CFBundleIconFile> <!-- Will be copied from output directory -->
         <NSPrincipalClass>NSApplication</NSPrincipalClass>
         <NSHighResolutionCapable>true</NSHighResolutionCapable>
