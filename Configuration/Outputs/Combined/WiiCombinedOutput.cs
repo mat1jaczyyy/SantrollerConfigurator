@@ -370,10 +370,10 @@ public class WiiCombinedOutput : CombinedTwiOutput
             else
             {
                 // We already have drum inputs mapped, but need to handle swapping between GH and RB 
-                var first = (Outputs.Items.First(s => s.Input is WiiInput
+                var first = Outputs.Items.OfType<DrumAxis>().First(s => s.Input is WiiInput
                 {
                     Input: WiiInputType.DrumOrange
-                }) as DrumAxis)!;
+                });
                 Outputs.Remove(first);
                 // Rb maps orange to green, while gh maps orange to orange
                 if (Model.RhythmType == RhythmType.GuitarHero)
