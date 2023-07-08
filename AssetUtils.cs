@@ -75,6 +75,10 @@ public class AssetUtils
     public static string GetAppDataFolder()
     {
         var folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            folder = "/Users/Shared/Library/Application Support";
+        }
         var path = Path.Combine(folder, "SantrollerConfigurator");
 
         return path;
