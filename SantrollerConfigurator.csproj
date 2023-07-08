@@ -49,7 +49,7 @@
         <Content Include="Resources\icon.icns">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <Content Include="libusb-1.0.dylib">
+        <Content Include="libusb-1.0.dylib" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
