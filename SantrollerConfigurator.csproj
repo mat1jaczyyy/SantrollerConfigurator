@@ -29,12 +29,18 @@
         <CFBundleDisplayName>SantrollerConfigurator</CFBundleDisplayName>
         <CFBundleIdentifier>net.tangentmc</CFBundleIdentifier>
         <CFBundleVersion>1.0.0</CFBundleVersion>
+        <CFBundleShortVersionString>1.0.0</CFBundleShortVersionString>
         <CFBundlePackageType>APPL</CFBundlePackageType>
         <CFBundleSignature>sanc</CFBundleSignature>
         <CFBundleExecutable>AppName</CFBundleExecutable>
         <CFBundleIconFile>Resources/icon.icns</CFBundleIconFile> <!-- Will be copied from output directory -->
         <NSPrincipalClass>NSApplication</NSPrincipalClass>
         <NSHighResolutionCapable>true</NSHighResolutionCapable>
+        <Company>TangentMC</Company>
+        <Copyright>Copyright © 2023</Copyright>
+        <AssemblyVersion>1.0.0.1</AssemblyVersion>
+        <FileVersion>1.0.0.1</FileVersion>
+        <Version>1.0.0.1</Version>
     </PropertyGroup>
     <ItemGroup>
         <TrimmableAssembly Include="Avalonia.DesignerSupport" />
