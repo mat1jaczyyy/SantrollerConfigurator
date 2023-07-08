@@ -153,7 +153,7 @@ public partial class DjAxis : OutputAxis
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
         // PS3 needs uint, xb360 needs int
         // So convert to the right method for that console, and then shift for ps3
-        var generated = $"{Input.Generate()}";
+        var generated = $"({Input.Generate()})";
         var generatedPs3 = generated;
         var generatedTable = $"({generated} * {-Multiplier << 8})";
         var generatedTablePs3 = $"({generated} * {Multiplier})";

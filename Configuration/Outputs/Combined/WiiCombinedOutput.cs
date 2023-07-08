@@ -250,6 +250,11 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 pair.Value, true);
             if (pair.Key == WiiInputType.GuitarTapAll)
             {
+                if (Model.DeviceType != DeviceControllerType.Guitar)
+                {
+                    continue;
+                }
+
                 output.Enabled = false;
             }
 
@@ -315,13 +320,14 @@ public class WiiCombinedOutput : CombinedTwiOutput
         }
 
         if (tapFrets == null) return outputs;
-        foreach (var pair in Tap)
+        if (Model.DeviceType == DeviceControllerType.Guitar)
         {
-            outputs.Add(new ControllerButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
-                Colors.Black,
-                Colors.Black, Array.Empty<byte>(), 5, pair.Value, true));
-            outputs.Remove(tapFrets);
+            outputs.AddRange(Tap.Select(pair => new ControllerButton(Model,
+                new WiiInput(pair.Key, Model, Sda, Scl, true),
+                Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value, true)));
         }
+
+        outputs.Remove(tapFrets);
 
         return outputs;
     }
@@ -396,6 +402,30 @@ public class WiiCombinedOutput : CombinedTwiOutput
             Outputs.RemoveMany(Outputs.Items.Where(s => s is DrumAxis));
         }
 
+        var tapFrets =
+            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
+
+        if (Model.DeviceType == DeviceControllerType.Guitar)
+        {
+            if (tapFrets == null)
+            {
+                Outputs.Add(new ControllerButton(Model, new WiiInput(WiiInputType.GuitarTapAll, Model, Sda, Scl, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 10,
+                    StandardButtonType.A, true)
+                {
+                    Enabled = false
+                });
+            }
+        }
+        else if (Model.DeviceType != DeviceControllerType.Guitar)
+        {
+            if (tapFrets != null)
+            {
+                Outputs.Remove(tapFrets);
+            }
+        }
+
         // Map the Whammy axis to right stick x on anything that isnt a guitar, and whammy on a guitar
         if (Model.DeviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar)
         {
@@ -449,12 +479,10 @@ public class WiiCombinedOutput : CombinedTwiOutput
         InstrumentButtonTypeExtensions.ConvertBindings(Outputs, Model, true);
 
         // Map all DJ Hero axis and buttons
-        var currentAxisDj = Outputs.Items.OfType<DjAxis>();
-        var currentAxisStandard = Outputs.Items.OfType<ControllerAxis>().ToList();
-        var currentButtonDj = Outputs.Items.OfType<DjButton>();
-        var currentButtonStandard = Outputs.Items.OfType<ControllerButton>().ToList();
         if (Model.DeviceType is DeviceControllerType.Turntable)
         {
+            var currentAxisStandard = Outputs.Items.OfType<ControllerAxis>().ToList();
+            var currentButtonStandard = Outputs.Items.OfType<ControllerButton>().ToList();
             foreach (var (djInputType, wiiInputType) in DjToWiiButton)
             {
                 var items = currentButtonStandard.Where(s => s.Input is WiiInput wii && wii.Input == wiiInputType)
@@ -484,6 +512,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
         }
         else
         {
+            var currentAxisDj = Outputs.Items.OfType<DjAxis>();
+            var currentButtonDj = Outputs.Items.OfType<DjButton>();
             foreach (var djButton in currentButtonDj)
             {
                 Outputs.Remove(djButton);
