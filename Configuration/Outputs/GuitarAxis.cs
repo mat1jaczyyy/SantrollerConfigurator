@@ -23,7 +23,14 @@ public class GuitarAxis : OutputAxis
         {PickupSelectorType.Echo, 0xD0},
         {PickupSelectorType.None, 0xFF},
     };
-
+    public static readonly Dictionary<PickupSelectorType, int> PickupSelectorRangesXB1 = new()
+    {
+        {PickupSelectorType.Chorus, 0x0},
+        {PickupSelectorType.WahWah, 0x10},
+        {PickupSelectorType.Flanger, 0x20},
+        {PickupSelectorType.Echo, 0x30},
+        {PickupSelectorType.None, 0x40},
+    };
     public GuitarAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff,
         byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type, bool childOfCombined) : base(model,
         input, ledOn,
@@ -271,6 +278,17 @@ public class GuitarAxis : OutputAxis
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
                 return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)};";
+            // Xbox One pickup selector ranges from 0 - 64, so we need to map it correctly.
+            case ConfigField.XboxOne
+                when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
+                     Type == GuitarAxisType.Pickup && Input is DigitalToAnalog:
+                return $@"if ({Input.Generate()}) {{
+                                  {GenerateOutput(mode)} = {PickupSelectorRangesXB1[GetPickupSelectorValue(analogOn)]};
+                              }}";
+            case ConfigField.XboxOne
+                when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
+                     Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
+                return $"{GenerateOutput(mode)} = (((({GenerateAssignment(mode, false, true, false)}) >> 10) + 1) & 0xF0);";
             default:
                 if (Input is DigitalToAnalog)
                     return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
