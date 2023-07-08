@@ -46,6 +46,11 @@
         <TrimmableAssembly Include="Avalonia.DesignerSupport" />
     </ItemGroup>
     <ItemGroup>
+        <Content Include="Resources\icon.icns">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
         <AvaloniaResource Include="Assets\dfu.tar.xz" />
         <AvaloniaResource Include="Assets\firmware.tar.xz" />
