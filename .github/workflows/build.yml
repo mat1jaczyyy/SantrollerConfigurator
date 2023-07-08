@@ -33,6 +33,8 @@ jobs:
           mkdir out_stage
           mkdir out
           cp -r bin/Release/net7.0/osx-x64/publish/SantrollerConfigurator.app out_stage
+          mkdir out_stage/SantrollerConfigurator.app/Frameworks
+          cp Lib/libusb-1.0.dylib out_stage/SantrollerConfigurator.app/Frameworks
           cp Resources/* out_stage
           cd out_stage
           appdmg appdmg.json ../out/SantrollerConfigurator-macOS.dmg
