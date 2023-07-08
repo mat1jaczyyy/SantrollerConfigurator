@@ -19,7 +19,7 @@ public class Rumble : Output
     private RumbleMotorType _rumbleMotorType;
 
     public Rumble(ConfigViewModel model, int pin, RumbleMotorType rumbleMotorType) : base(model,
-        new FixedInput(model, 0), Colors.Black, Colors.Black, new byte[] { }, false)
+        new FixedInput(model, 0, false), Colors.Black, Colors.Black, new byte[] { }, false)
     {
         Pin = pin;
         RumbleMotorType = rumbleMotorType;

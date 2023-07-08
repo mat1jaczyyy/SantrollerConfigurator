@@ -14,7 +14,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Other;
 
 public class JoystickToDpadInput : FixedInput
 {
-    public JoystickToDpadInput(ConfigViewModel model) : base(model, 0)
+    public JoystickToDpadInput(ConfigViewModel model) : base(model, 0, false)
     {
     }
 

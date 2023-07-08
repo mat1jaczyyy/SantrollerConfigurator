@@ -224,7 +224,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:GuitarAxis}">
                 <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
-                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" IsVisible="{Binding !IsSlider}">
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" IsVisible="{Binding !HasNamedAxis}">
                         <Grid>
                             <StackPanel Orientation="Horizontal" IsVisible="{Binding Trigger}">
                                 <ProgressBar Value="{Binding Value}"
@@ -253,8 +253,8 @@
                                    Content="{Binding Value}" Width="{Binding FullProgressWidth, Mode=OneTime}" />
                         </Grid>
                     </StackPanel>
-                    <TextBlock IsVisible="{Binding IsSlider}" VerticalAlignment="Center" HorizontalAlignment="Center"
-                               Text="{Binding SliderInfo}" />
+                    <TextBlock IsVisible="{Binding HasNamedAxis}" VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding NamedAxisInfo}" />
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type output:OutputAxis}">
@@ -1167,17 +1167,17 @@
                         <StackPanel.IsVisible>
                             <MultiBinding Converter="{x:Static BoolConverters.And}">
                                 <Binding Path="ChildOfCombined" />
-                                <Binding Path="IsSlider" />
+                                <Binding Path="HasNamedAxis" />
                             </MultiBinding>
                         </StackPanel.IsVisible>
                         <Label VerticalAlignment="Center" Width="300">
                             Current Frets
                         </Label>
                         <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
-                                   Text="{Binding SliderInfo}">
+                                   Text="{Binding NamedAxisInfo}">
                         </TextBlock>
                     </StackPanel>
-                    <StackPanel IsVisible="{Binding !IsSlider}">
+                    <StackPanel IsVisible="{Binding !HasNamedAxis}">
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsDigitalToAnalog}">
                             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
@@ -1552,6 +1552,52 @@
                 </StackPanel>
             </DataTemplate>
 
+            <DataTemplate DataType="{x:Type inputs:ConstantInput}">
+               <StackPanel>
+                   <StackPanel Orientation="Horizontal" IsVisible="{Binding Normal}">
+                       <Label VerticalAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Width="300">
+                           Value
+                       </Label>
+                       <NumericUpDown FormatString="{}{0:#,0}" Value="{Binding Value}" Minimum="{Binding Min}"
+                                      Maximum="{Binding Max}"
+                                      VerticalAlignment="Center"
+                                      Width="200" />
+                   </StackPanel>
+                   <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
+                       <Label VerticalAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Width="300">
+                           Value
+                       </Label>
+                       <ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding ValueBool}" OnContent="On" OffContent="Off" />
+                   </StackPanel>
+                   <StackPanel Orientation="Horizontal" IsVisible="{Binding RbPickup}">
+                       <Label VerticalAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Width="300">
+                           Value
+                       </Label>
+                       <ComboBox VerticalAlignment="Center"
+                                 SelectedItem="{Binding PickupSelectorType}"
+                                 ItemsSource="{Binding PickupSelectorTypes}"
+                                 ItemTemplate="{StaticResource EnumToStringTemplate}" />
+                   </StackPanel>
+                   <StackPanel Orientation="Horizontal"  IsVisible="{Binding TapBar}">
+                       <Label VerticalAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Width="300">
+                           Value
+                       </Label>
+                       <CheckBox IsChecked="{Binding Green}" VerticalAlignment="Center">Green</CheckBox>
+                       <CheckBox IsChecked="{Binding Red}" VerticalAlignment="Center">Red</CheckBox>
+                       <CheckBox IsChecked="{Binding Yellow}" VerticalAlignment="Center">Yellow</CheckBox>
+                       <CheckBox IsChecked="{Binding Blue}" VerticalAlignment="Center">Blue</CheckBox>
+                       <CheckBox IsChecked="{Binding Orange}" VerticalAlignment="Center">Orange</CheckBox>
+                   </StackPanel>
+               </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type conversions:AnalogToDigital}">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">

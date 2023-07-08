@@ -5,22 +5,24 @@ using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Inputs;
 
 public class FixedInput : Input
 {
-    public FixedInput(ConfigViewModel model, int value) : base(model)
+    public FixedInput(ConfigViewModel model, int value, bool analog) : base(model)
     {
         Value = value;
-        IsAnalog = true;
+        IsAnalog = analog;
     }
 
-    private int Value { get; }
+    [Reactive] public int Value { get; set; }
+
     public override bool IsUint => true;
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
     public override IList<PinConfig> PinConfigs => Array.Empty<PinConfig>();
-    public override InputType? InputType => null;
+    public override InputType? InputType => Types.InputType.ConstantInput;
     public override string Title => "Fixed";
 
     public override IReadOnlyList<string> RequiredDefines()

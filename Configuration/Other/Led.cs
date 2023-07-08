@@ -147,7 +147,7 @@ public class Led : Output
 
     public Led(ConfigViewModel model, bool outputEnabled, bool inverted, int pin, Color ledOn,
         Color ledOff, byte[] ledIndices, LedCommandType command, int param, int param2) : base(model,
-        new FixedInput(model, 0),
+        new FixedInput(model, 0, false),
         ledOn, ledOff,
         ledIndices, false)
     {

@@ -31,7 +31,7 @@ public class EmptyOutput : Output
 
     private MouseButtonType? _mouseButtonType;
 
-    public EmptyOutput(ConfigViewModel model) : base(model, new FixedInput(model, 0), Colors.Black, Colors.Black,
+    public EmptyOutput(ConfigViewModel model) : base(model, new FixedInput(model, 0, false), Colors.Black, Colors.Black,
         Array.Empty<byte>(), false)
     {
         this.WhenAnyValue(x => x.Model.EmulationType)
@@ -194,14 +194,14 @@ public class EmptyOutput : Output
 
             EmulationType.KeyboardMouse => this switch
             {
-                {MouseAxisType: not null} => new MouseAxis(Model, new FixedInput(Model, 0), Colors.Black, Colors.Black,
+                {MouseAxisType: not null} => new MouseAxis(Model, new FixedInput(Model, 0, false), Colors.Black, Colors.Black,
                     Array.Empty<byte>(), 1, 0, 0,
                     MouseAxisType.Value),
-                {MouseButtonType: not null} => new MouseButton(Model, new FixedInput(Model, 0), Colors.Black,
+                {MouseButtonType: not null} => new MouseButton(Model, new FixedInput(Model, 0, false), Colors.Black,
                     Colors.Black,
                     Array.Empty<byte>(), 5,
                     MouseButtonType.Value),
-                {Key: not null} => new KeyboardButton(Model, new FixedInput(Model, 0), Colors.Black, Colors.Black,
+                {Key: not null} => new KeyboardButton(Model, new FixedInput(Model, 0, false), Colors.Black, Colors.Black,
                     Array.Empty<byte>(), 5,
                     Key.Value),
                 _ => null

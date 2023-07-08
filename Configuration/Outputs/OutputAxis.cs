@@ -31,7 +31,7 @@ public abstract partial class OutputAxis : Output
 
     protected OutputAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices,
         int min, int max,
-        int deadZone, bool trigger, bool childOfCombined) : base(model, new FixedInput(model, 0), ledOn, ledOff,
+        int deadZone, bool trigger, bool childOfCombined) : base(model, new FixedInput(model, 0, false), ledOn, ledOff,
         ledIndices, childOfCombined)
     {
         Input = input;

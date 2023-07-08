@@ -48,6 +48,8 @@ public class Gh5NeckInput : TwiInput
         {0xE5, BarButton.Green | BarButton.Red | BarButton.Yellow},
         {0xE6, BarButton.Red | BarButton.Yellow}
     };
+    
+    public static readonly Dictionary<BarButton, int> Gh5MappingsReversed = Gh5Mappings.ToDictionary(x => x.Value, x => x.Key);
 
     private static readonly List<Gh5NeckInputType> Tap = new()
     {

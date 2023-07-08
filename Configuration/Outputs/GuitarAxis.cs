@@ -15,6 +15,15 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public class GuitarAxis : OutputAxis
 {
+    public static readonly Dictionary<PickupSelectorType, int> PickupSelectorRanges = new()
+    {
+        {PickupSelectorType.Chorus, 0x40},
+        {PickupSelectorType.WahWah, 0x70},
+        {PickupSelectorType.Flanger, 0xA0},
+        {PickupSelectorType.Echo, 0xD0},
+        {PickupSelectorType.None, 0xFF},
+    };
+
     public GuitarAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff,
         byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type, bool childOfCombined) : base(model,
         input, ledOn,
@@ -22,16 +31,16 @@ public class GuitarAxis : OutputAxis
     {
         Type = type;
         UpdateDetails();
-        this.WhenAnyValue(x => x.Value).Select(GetSliderInfo).ToPropertyEx(this, x => x.SliderInfo);
+        this.WhenAnyValue(x => x.Value).Select(GetNamedAxisInfo).ToPropertyEx(this, x => x.NamedAxisInfo);
     }
 
 
     // ReSharper disable once UnassignedGetOnlyAutoProperty
-    [ObservableAsProperty] public string SliderInfo { get; } = "";
+    [ObservableAsProperty] public string NamedAxisInfo { get; } = "";
 
     public GuitarAxisType Type { get; }
 
-    public bool IsSlider => Type is GuitarAxisType.Slider;
+    public bool HasNamedAxis => Type is GuitarAxisType.Slider or GuitarAxisType.Pickup;
 
     public override bool IsKeyboard => false;
 
@@ -65,8 +74,27 @@ public class GuitarAxis : OutputAxis
         }
     }
 
-    private string GetSliderInfo(int val)
+    public static PickupSelectorType GetPickupSelectorValue(int val)
     {
+        foreach (var (type, range) in PickupSelectorRanges)
+        {
+            if (val < range << 8)
+            {
+                return type;
+            }
+        }
+
+        return PickupSelectorType.None;
+    }
+
+    private string GetNamedAxisInfo(int val)
+    {
+        if (Type is GuitarAxisType.Pickup)
+        {
+            val += short.MaxValue + 1;
+            return EnumToStringConverter.Convert(GetPickupSelectorValue(val));
+        }
+
         if (Type is not GuitarAxisType.Slider || !Gh5NeckInput.Gh5Mappings.ContainsKey(val))
             return ChildOfCombined ? "None" : "Current Frets: None";
         var info = Gh5NeckInput.Gh5Mappings[val];
@@ -76,11 +104,11 @@ public class GuitarAxis : OutputAxis
             ret = "Current Frets: ";
         }
 
-        if ((info & BarButton.Green) != 0) ret += "Green ";
-        if ((info & BarButton.Red) != 0) ret += "Red ";
-        if ((info & BarButton.Yellow) != 0) ret += "Yellow ";
-        if ((info & BarButton.Blue) != 0) ret += "Blue ";
-        if ((info & BarButton.Orange) != 0) ret += "Orange";
+        if (info.HasFlag(BarButton.Green)) ret += "Green ";
+        if (info.HasFlag(BarButton.Red)) ret += "Red ";
+        if (info.HasFlag(BarButton.Yellow)) ret += "Yellow ";
+        if (info.HasFlag(BarButton.Blue)) ret += "Blue ";
+        if (info.HasFlag(BarButton.Orange)) ret += "Orange";
         return ret.Trim();
     }
 

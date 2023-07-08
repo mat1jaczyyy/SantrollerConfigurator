@@ -15,5 +15,7 @@ public enum InputType
     MacroInput,
     [Description("USB Host Input")]
     UsbHostInput,
-    BluetoothInput
+    BluetoothInput,
+    [Description("Constant Input")]
+    ConstantInput
 }

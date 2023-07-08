@@ -233,10 +233,11 @@ public abstract partial class Output : ReactiveObject
     public IEnumerable<InputType> InputTypes =>
         Enum.GetValues<InputType>().Where(s =>
             (this is not GuitarAxis {Type: GuitarAxisType.Slider} ||
-             s is InputType.Gh5NeckInput or InputType.WtNeckInput) &&
+             s is InputType.Gh5NeckInput or InputType.WtNeckInput or InputType.ConstantInput) &&
             (s is not InputType.MultiplexerInput || Model.IsPico) &&
-            (s is not InputType.MacroInput || this is OutputButton) && s is not InputType.BluetoothInput &&
-            s is not InputType.UsbHostInput || Model.IsPico);
+            (s is not InputType.MacroInput || this is OutputButton) 
+            && s is not InputType.BluetoothInput &&
+            (s is not InputType.UsbHostInput || Model.IsPico));
 
     private object GetChildOutputType()
     {
@@ -249,7 +250,7 @@ public abstract partial class Output : ReactiveObject
         if (Input.InnermostInput() is Gh5NeckInput gh5) return gh5.Input;
 
         if (Input.InnermostInput() is GhWtTapInput wt) return wt.Input;
-        
+
         if (Input.InnermostInput() is UsbHostInput usb) return usb.Input;
 
         return GetOutputType();
@@ -428,6 +429,7 @@ public abstract partial class Output : ReactiveObject
                     KeyOrMouse = Math.Abs(diff.X) > Math.Abs(diff.Y) ? MouseAxisType.X : MouseAxisType.Y;
                     break;
                 }
+
                 break;
         }
 
@@ -441,6 +443,16 @@ public abstract partial class Output : ReactiveObject
         Input input;
         switch (inputType)
         {
+            case InputType.ConstantInput when Input.InnermostInput() is not FixedInput && this is OutputAxis axis:
+                input = new ConstantInput(Model, 0, true, axis.Min, axis.Max,
+                    axis is GuitarAxis {Type: GuitarAxisType.Slider}, axis is GuitarAxis {Type: GuitarAxisType.Pickup});
+                break;
+            case InputType.ConstantInput when Input.InnermostInput() is not FixedInput:
+                input = new ConstantInput(Model, 0, false, 0, 1, false, false);
+                break;
+            case InputType.ConstantInput:
+                input = Input.InnermostInput();
+                break;
             case InputType.UsbHostInput when Input.InnermostInput() is not UsbHostInput:
                 usbInputType ??= UsbHostInputType.A;
                 input = new UsbHostInput(usbInputType.Value, Model);
@@ -456,11 +468,11 @@ public abstract partial class Output : ReactiveObject
                 input = new MultiplexerInput(-1, 0, -1, -1, -1, -1, MultiplexerType.EightChannel, Model);
                 break;
             case InputType.MacroInput:
-                input = new MacroInput(new DirectInput(-1, false,DevicePinMode.PullUp, Model),
-                    new DirectInput(-1, false,DevicePinMode.PullUp, Model), Model);
+                input = new MacroInput(new DirectInput(-1, false, DevicePinMode.PullUp, Model),
+                    new DirectInput(-1, false, DevicePinMode.PullUp, Model), Model);
                 break;
             case InputType.DigitalPinInput:
-                input = new DirectInput(-1, false,DevicePinMode.PullUp, Model);
+                input = new DirectInput(-1, false, DevicePinMode.PullUp, Model);
                 break;
             case InputType.TurntableInput when Input.InnermostInput() is not DjInput:
                 djInputType ??= DjInputType.LeftGreen;
@@ -538,6 +550,7 @@ public abstract partial class Output : ReactiveObject
                 {
                     oldOn = dta.On;
                 }
+
                 Input = new DigitalToAnalog(input, oldOn, axis.Trigger, Model);
                 break;
         }
@@ -565,6 +578,7 @@ public abstract partial class Output : ReactiveObject
         this.RaisePropertyChanged(nameof(GhWtInputType));
         this.RaisePropertyChanged(nameof(Gh5NeckInputType));
         this.RaisePropertyChanged(nameof(DjInputType));
+        UpdateErrors();
     }
 
 
