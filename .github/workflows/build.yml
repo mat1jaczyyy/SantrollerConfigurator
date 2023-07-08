@@ -36,7 +36,7 @@ jobs:
           cp Resources/* out_stage
           cd out_stage
           find "SantrollerConfigurator.app/Contents/MacOS" | while read fname; do
-            if [[ -f $fname ]] && [ "$fname" != "SantrollerConfigurator" ]; then
+            if [[ -f $fname ]] && [ "$fname" != "SantrollerConfigurator.app/Contents/MacOS/SantrollerConfigurator" ]; then
             echo "[INFO] Signing $fname"
             codesign --force --timestamp --entitlements "entitlements.xml" --sign "guitar-configurator" "$fname"
             fi
