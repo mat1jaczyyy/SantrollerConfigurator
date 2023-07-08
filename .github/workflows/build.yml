@@ -35,7 +35,7 @@ jobs:
           cp -r bin/Release/net7.0/osx-x64/publish/SantrollerConfigurator.app out_stage
           cp Resources/* out_stage
           cd out_stage
-          find "SantrollerConfigurator.app/Contents/MacOS/" | while read fname; do
+          find "SantrollerConfigurator.app/Contents/MacOS" | while read fname; do
             if [[ -f $fname ]]; then
             echo "[INFO] Signing $fname"
             codesign --force --timestamp --entitlements "entitlements.xml" --sign "guitar-configurator" "$fname"
