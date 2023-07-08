@@ -33,7 +33,7 @@ jobs:
           codesign --entitlements Resources/entitlements.xml -s "guitar-configurator" "bin/Release/net7.0/osx-x64/publish/SantrollerConfigurator.app" --deep
           mkdir out_stage
           mkdir out
-          cp bin/Release/net7.0/osx-x64/publish/SantrollerConfigurator.app out_stage
+          cp -r bin/Release/net7.0/osx-x64/publish/SantrollerConfigurator.app out_stage
           cp Resources/* out_stage
           cd out_stage
           appdmg appdmg.json ../out/SantrollerConfigurator-macOS.dmg
