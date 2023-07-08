@@ -35,8 +35,15 @@ jobs:
           cp -r bin/Release/net7.0/osx-x64/publish/SantrollerConfigurator.app out_stage
           cp Resources/* out_stage
           cd out_stage
+          find "SantrollerConfigurator.app/Contents/MacOS/" | while read fname; do
+            if [[ -f $fname ]]; then
+            echo "[INFO] Signing $fname"
+            codesign --force --timestamp --entitlements "entitlements.xml" --sign "guitar-configurator" "$fname"
+            fi
+          done
+          codesign --force --timestamp --options=runtime --entitlements "entitlements.xml" --sign "guitar-configurator" "SantrollerConfigurator.app"
           appdmg appdmg.json ../out/SantrollerConfigurator-macOS.dmg
-          codesign --entitlements entitlements.xml -s "guitar-configurator" "../out/SantrollerConfigurator-macOS.dmg" --deep
+          codesign --entitlements entitlements.xml --options=runtime -s "guitar-configurator" "../out/SantrollerConfigurator-macOS.dmg" --deep
       - uses: actions/upload-artifact@v1
         with:
           name: mac
