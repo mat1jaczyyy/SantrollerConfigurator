@@ -25,6 +25,16 @@
         <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
         <LangVersion>latestmajor</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <CFBundleName>SantrollerConfigurator</CFBundleName> <!-- Also defines .app file name -->
+        <CFBundleDisplayName>SantrollerConfigurator</CFBundleDisplayName>
+        <CFBundleIdentifier>net.tangentmc</CFBundleIdentifier>
+        <CFBundleVersion>1.0.0</CFBundleVersion>
+        <CFBundlePackageType>APPL</CFBundlePackageType>
+        <CFBundleSignature>sanc</CFBundleSignature>
+        <CFBundleExecutable>AppName</CFBundleExecutable>
+        <CFBundleIconFile>Resources/icon.icns</CFBundleIconFile> <!-- Will be copied from output directory -->
+        <NSPrincipalClass>NSApplication</NSPrincipalClass>
+        <NSHighResolutionCapable>true</NSHighResolutionCapable>
     </PropertyGroup>
     <ItemGroup>
         <TrimmableAssembly Include="Avalonia.DesignerSupport" />
@@ -36,8 +46,12 @@
         <AvaloniaResource Include="Assets\platformio.tar.xz" />
         <AvaloniaResource Include="Assets\firmware.version" />
         <AvaloniaResource Include="Assets\platformio.version" />
+        <AvaloniaResource Include="Resources\icon.icns" />
+        <AvaloniaResource Include="Resources\icon.ico" />
+        <AvaloniaResource Include="Resources\icon.png" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Dotnet.Bundle" Version="*" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
         <PackageReference Include="Microsoft.Net.ILLink.Tasks" Version="8.0.100-1.23067.1" />
         <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.0.0-rc1.1" />
