@@ -36,14 +36,15 @@ jobs:
           cp Resources/* out_stage
           cd out_stage
           find "SantrollerConfigurator.app/Contents/MacOS" | while read fname; do
-            if [[ -f $fname ]]; then
+            if [[ -f $fname ]] && [ "$fname" != "SantrollerConfigurator" ]; then
             echo "[INFO] Signing $fname"
             codesign --force --timestamp --entitlements "entitlements.xml" --sign "guitar-configurator" "$fname"
             fi
           done
+          codesign --force --timestamp --entitlements "entitlements.xml" --sign "guitar-configurator" "SantrollerConfigurator.app/Contents/MacOS/SantrollerConfigurator"
           codesign --force --timestamp --options=runtime --entitlements "entitlements.xml" --sign "guitar-configurator" "SantrollerConfigurator.app"
           appdmg appdmg.json ../out/SantrollerConfigurator-macOS.dmg
-          codesign --entitlements entitlements.xml --options=runtime -s "guitar-configurator" "../out/SantrollerConfigurator-macOS.dmg" --deep
+          codesign --entitlements entitlements.xml --options=runtime -s "guitar-configurator" "../out/SantrollerConfigurator-macOS.dmg"
       - uses: actions/upload-artifact@v1
         with:
           name: mac
