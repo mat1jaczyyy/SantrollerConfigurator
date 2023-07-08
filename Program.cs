@@ -15,6 +15,7 @@ public static class Program
         var tr1 = new TextWriterTraceListener(Console.Out);
         Trace.Listeners.Add(tr1);
 #endif
+        Console.WriteLine(AssetUtils.GetAppDataFolder());
         Directory.CreateDirectory(AssetUtils.GetAppDataFolder());
         var tr2 = new TextWriterTraceListener(File.CreateText(Path.Combine(AssetUtils.GetAppDataFolder(),
             "build.log")));
