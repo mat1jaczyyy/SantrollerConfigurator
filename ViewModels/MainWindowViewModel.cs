@@ -221,6 +221,7 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     }
 
 
+    [Reactive] public bool HasChanges { get; set; }
     [Reactive] public bool Working { get; set; }
 
     [Reactive] public bool Installed { get; set; }
@@ -438,5 +439,24 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     public void Dispose()
     {
         _manager.Dispose();
+    }
+
+    public void SetDifference(bool difference)
+    {
+        // TODO: somehow highlight the write button when haschanges is true
+        HasChanges = difference;
+        if (!Working)
+        {
+            if (!difference)
+            {
+                ProgressbarColor = "#FF0078D7";
+                Complete(100);
+            }
+            else
+            {
+                ProgressbarColor = "#FFd7cb00";
+                Message = "You have unsaved changes, click `Save Configuration` to save them";
+            }
+        }
     }
 }

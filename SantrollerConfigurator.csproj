@@ -62,6 +62,7 @@
         <AvaloniaResource Include="Assets\platformio.version" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="AnyDiff" Version="1.0.88" />
         <PackageReference Include="Avalonia.Metal" Version="11.0.999-cibuild0037039-beta" />
         <PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />

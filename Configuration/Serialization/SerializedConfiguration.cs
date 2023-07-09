@@ -13,6 +13,11 @@ public class SerializedConfiguration
 {
     public SerializedConfiguration(ConfigViewModel model)
     {
+        Update(model);
+    }
+
+    public void Update(ConfigViewModel model)
+    {
         Bindings = model.Bindings.Items.Select(s => s.Serialize()).ToList();
         LedType = model.LedType;
         DeviceType = model.DeviceType;
@@ -35,26 +40,26 @@ public class SerializedConfiguration
         DjDual = model.DjDual;
     }
 
-    [ProtoMember(1)] public LedType LedType { get; }
-    [ProtoMember(2)] public bool XInputOnWindows { get; }
-    [ProtoMember(4)] public DeviceControllerType DeviceType { get; }
-    [ProtoMember(5)] public EmulationType EmulationType { get; }
-    [ProtoMember(6)] public RhythmType RhythmType { get; }
-    [ProtoMember(7)] public List<SerializedOutput>? Bindings { get; }
-    [ProtoMember(8)] public int Apa102Mosi { get; }
-    [ProtoMember(9)] public int Apa102Sck { get; }
-    [ProtoMember(10)] public byte LedCount { get; }
-    [ProtoMember(11)] public MouseMovementType MouseMovementType { get; }
-    [ProtoMember(12)] public byte WtSensitivity { get; }
-    [ProtoMember(14)] public int UsbHostDp { get; }
-    [ProtoMember(23)] public ModeType Mode { get; }
-    [ProtoMember(24)] public int Debounce { get; }
-    [ProtoMember(25)] public int StrumDebounce { get; }
-    [ProtoMember(26)] public int PollRate { get; }
-    [ProtoMember(27)] public bool CombinedStrumDebounce { get; }
-    [ProtoMember(28)] public bool QueueBasedInputs { get; }
-    [ProtoMember(29)] public int DjPollRate { get; }
-    [ProtoMember(30)] public bool DjDual { get; }
+    [ProtoMember(1)] public LedType LedType { get; private set; }
+    [ProtoMember(2)] public bool XInputOnWindows { get;private set; }
+    [ProtoMember(4)] public DeviceControllerType DeviceType { get;private set; }
+    [ProtoMember(5)] public EmulationType EmulationType { get;private set; }
+    [ProtoMember(6)] public RhythmType RhythmType { get;private set; }
+    [ProtoMember(7)] public List<SerializedOutput>? Bindings { get;private set; }
+    [ProtoMember(8)] public int Apa102Mosi { get; private set;}
+    [ProtoMember(9)] public int Apa102Sck { get;private set; }
+    [ProtoMember(10)] public byte LedCount { get; private set;}
+    [ProtoMember(11)] public MouseMovementType MouseMovementType { get; private set;}
+    [ProtoMember(12)] public byte WtSensitivity { get; private set;}
+    [ProtoMember(14)] public int UsbHostDp { get;private set; }
+    [ProtoMember(23)] public ModeType Mode { get; private set;}
+    [ProtoMember(24)] public int Debounce { get;private set; }
+    [ProtoMember(25)] public int StrumDebounce { get;private set; }
+    [ProtoMember(26)] public int PollRate { get; private set;}
+    [ProtoMember(27)] public bool CombinedStrumDebounce { get;private set; }
+    [ProtoMember(28)] public bool QueueBasedInputs { get;private set; }
+    [ProtoMember(29)] public int DjPollRate { get;private set; }
+    [ProtoMember(30)] public bool DjDual { get; private set;}
 
     public void LoadConfiguration(ConfigViewModel model)
     {

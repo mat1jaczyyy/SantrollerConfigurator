@@ -7,6 +7,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AnyDiff.Extensions;
 using Avalonia.Threading;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -61,6 +62,8 @@ public class Santroller : ConfigurableUsbDevice
     private DeviceControllerType? _deviceControllerType;
     private Microcontroller _microcontroller;
     private ConfigViewModel? _model;
+    private SerializedConfiguration? _lastConfig;
+    private SerializedConfiguration? _currentConfig;
     private bool _picking;
     private readonly DispatcherTimer _timer;
 
@@ -119,6 +122,7 @@ public class Santroller : ConfigurableUsbDevice
     private void Tick(object? sender, EventArgs e)
     {
         if (_model == null) return;
+        Diff();
         if (!Device.IsOpen)
         {
             _timer.Stop();
@@ -219,7 +223,9 @@ public class Santroller : ConfigurableUsbDevice
         await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
         try
         {
-            Serializer.Deserialize<SerializedConfiguration>(decompressor).LoadConfiguration(model);
+            _lastConfig = Serializer.Deserialize<SerializedConfiguration>(decompressor);
+            _lastConfig.LoadConfiguration(model);
+            _currentConfig = new SerializedConfiguration(model);
         }
         catch (Exception ex)
         {
@@ -230,6 +236,13 @@ public class Santroller : ConfigurableUsbDevice
 
         _model = model;
         _timer.Start();
+    }
+
+    public void Diff()
+    {
+        if (_model == null || _currentConfig == null) return;
+        _currentConfig.Update(_model);
+        _model.Main.SetDifference(AnyDiff.AnyDiff.Diff(_lastConfig, _currentConfig).Any());
     }
 
     public void StartTicking(ConfigViewModel model)

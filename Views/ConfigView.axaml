@@ -2173,7 +2173,8 @@
                         </ToggleButton>
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                        <Button Content="Write Configuration" Command="{Binding WriteConfigCommand}" />
+                        <Button Content="Save Configuration" Command="{Binding WriteConfigCommand}" IsVisible="{Binding !Main.HasChanges}" />
+                        <Button Content="Save Configuration" Background="#FFd7cb00" Foreground="Black" Command="{Binding WriteConfigCommand}" IsVisible="{Binding Main.HasChanges}" />
                         <Button IsVisible="{Binding SupportsReset}" Content="Revert device to Arduino"
                                 Command="{Binding ResetCommand}" />
                         <Button Content="Configure another device" Command="{Binding GoBackCommand}" />
