@@ -543,7 +543,6 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
 
     public void SetDifference(bool difference)
     {
-        // TODO: somehow highlight the write button when haschanges is true
         HasChanges = difference;
         if (!Working)
         {

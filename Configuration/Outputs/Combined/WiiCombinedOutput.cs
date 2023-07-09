@@ -45,7 +45,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.GuitarYellow, StandardButtonType.Y},
         {WiiInputType.GuitarBlue, StandardButtonType.X},
         {WiiInputType.GuitarOrange, StandardButtonType.LeftShoulder},
-        {WiiInputType.GuitarTapAll, StandardButtonType.A},
         {WiiInputType.GuitarStrumDown, StandardButtonType.DpadDown},
         {WiiInputType.GuitarStrumUp, StandardButtonType.DpadUp},
         {WiiInputType.GuitarMinus, StandardButtonType.Back},
@@ -248,16 +247,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), 10,
                 pair.Value, true);
-            if (pair.Key == WiiInputType.GuitarTapAll)
-            {
-                if (Model.DeviceType != DeviceControllerType.Guitar)
-                {
-                    continue;
-                }
-
-                output.Enabled = false;
-            }
-
             Outputs.Add(output);
         }
 
@@ -305,9 +294,9 @@ public class WiiCombinedOutput : CombinedTwiOutput
         }
 
         var tapAnalog =
-            outputs.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapBar}});
+            outputs.FirstOrDefault(s => s is {Input: WiiInput {Input: WiiInputType.GuitarTapBar}});
         var tapFrets =
-            outputs.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
+            outputs.FirstOrDefault(s => s is {Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
         if (tapAnalog == null && tapFrets == null) return outputs;
         // Map Tap bar to Upper frets on RB guitars
         if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar &&
@@ -318,7 +307,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
             outputs.Remove(tapAnalog);
         }
-
         if (tapFrets == null) return outputs;
         if (Model.DeviceType == DeviceControllerType.Guitar)
         {

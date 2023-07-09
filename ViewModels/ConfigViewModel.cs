@@ -80,8 +80,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ResetCommand = ReactiveCommand.CreateFromTask(ResetAsync,
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected)
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true}));
-        GoBackCommand = ReactiveCommand.CreateFromObservable<Unit, IRoutableViewModel?>(Main.GoBack.Execute,
-            this.WhenAnyValue(x => x.Main.Working).Select(s => !s));
 
         SaveConfigCommand = ReactiveCommand.CreateFromObservable(() => SaveConfig.Handle(this));
 
@@ -255,8 +253,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public ICommand LoadConfigCommand { get; }
     public ICommand ResetCommand { get; }
 
-    public ICommand GoBackCommand { get; }
-
     public string LocalAddress { get; }
 
     [Reactive] public MouseMovementType MouseMovementType { get; set; }
@@ -292,6 +288,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public int PollRate { get; set; }
     [Reactive] public int DjPollRate { get; set; }
     [Reactive] public bool DjDual { get; set; }
+
     public int Apa102Mosi
     {
         get => _apa102SpiConfig?.Mosi ?? 0;
@@ -485,13 +482,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 s is WiiCombinedOutput or Ps2CombinedOutput or UsbHostCombinedOutput or BluetoothOutput)) return;
 
 
-        if (_deviceControllerType == DeviceControllerType.Turntable)  
+        if (_deviceControllerType == DeviceControllerType.Turntable)
             if (!Bindings.Items.Any(s => s is DjCombinedOutput))
             {
                 var dj = new DjCombinedOutput(this);
                 dj.SetOutputsOrDefaults(Array.Empty<Output>());
                 Bindings.Add(dj);
             }
+
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
 
@@ -877,9 +875,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
             else
             {
-                ret += Microcontroller.GenerateDigitalWrite(led.Pin, true) + ";"; 
+                ret += Microcontroller.GenerateDigitalWrite(led.Pin, true) + ";";
             }
         }
+
         return ret;
     }
 
@@ -1313,6 +1312,22 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         });
     }
 
+    public bool GoBackCanExecute()
+    {
+        return !Main.Working;
+    }
+
+    [RelayCommand(CanExecute = nameof(GoBackCanExecute))]
+    public void GoBack()
+    {
+        if (Device is Santroller santroller)
+        {
+            santroller.Disconnect();
+        }
+        Main.SetDifference(false);
+        Main.GoBack.Execute();
+    }
+
     public bool UsingBluetooth()
     {
         return IsBluetooth || Bindings.Items.Any(s => s is BluetoothOutput);
@@ -1346,11 +1361,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Select(configs => configs.OfType<SpiConfig>().FirstOrDefault(s => s.Type == spiType))
             .FirstOrDefault(found => found != null);
     }
+
     public DirectPinConfig GetPinForType(string pinType, int fallbackPin, DevicePinMode fallbackMode)
     {
         return Bindings.Items.Select(binding => binding.GetPinConfigs())
             .Select(configs => configs.OfType<DirectPinConfig>().FirstOrDefault(s => s.Type == pinType))
-            .FirstOrDefault(found => found != null) ?? new DirectPinConfig(this,pinType, fallbackPin, fallbackMode);
+            .FirstOrDefault(found => found != null) ?? new DirectPinConfig(this, pinType, fallbackPin, fallbackMode);
     }
 
     public void MoveUp(Output output)
