@@ -37,6 +37,12 @@
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock FontSize="30" HorizontalAlignment="Center"
                            Text="Welcome to the Santroller Configuration Tool!" Margin="0 0 0 20" />
+                <StackPanel IsVisible="{Binding Main.HasUpdate}" HorizontalAlignment="Center" Orientation="Horizontal"
+                            Margin="0 0 0 20">
+                    <Label Content="{Binding Main.UpdateMessage}" VerticalAlignment="Center"
+                           VerticalContentAlignment="Center" />
+                    <Button Command="{Binding Main.OpenReleasesPageCommand}" Content="Update" />
+                </StackPanel>
                 <TextBlock IsVisible="{Binding !Main.MigrationSupported}"
                            Text="The firmware on this device is too old, it's configuration will be erased when upgrading." />
                 <Label IsVisible="{Binding Main.IsGeneric}" VerticalAlignment="Center"

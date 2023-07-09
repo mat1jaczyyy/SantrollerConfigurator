@@ -38,9 +38,9 @@
         <NSHighResolutionCapable>true</NSHighResolutionCapable>
         <Company>TangentMC</Company>
         <Copyright>Copyright © 2023</Copyright>
-        <AssemblyVersion>1.0.0.1</AssemblyVersion>
-        <FileVersion>1.0.0.1</FileVersion>
-        <Version>1.0.0.1</Version>
+        <RepositoryUrl>https://github.com/sanjay900/guitar-configurator</RepositoryUrl>
+        <SourceControlInformationFeatureSupported>true</SourceControlInformationFeatureSupported>
+        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
     <ItemGroup>
         <TrimmableAssembly Include="Avalonia.DesignerSupport" />
@@ -89,6 +89,9 @@
         <PackageReference Include="System.IO.Ports" Version="8.0.0-preview.7.23357.4" />
         <PackageReference Include="SemanticVersioning" Version="2.0.2" />
         <PackageReference Include="System.Text.Json" Version="8.0.0-preview.7.23357.4" />
+        <PackageReference Include="GitVersion.MsBuild" Version="5.6.10*">
+            <PrivateAssets>All</PrivateAssets>
+        </PackageReference>
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Views\RaiseIssueWindow.axaml.cs">
@@ -142,4 +145,5 @@
     <Target Name="ZipOutputPath" BeforeTargets="ResolveReferences">
         <Builder Parameter1="$(TargetDir)" Parameter2="$(MSBuildProjectDirectory)" />
     </Target>
+
 </Project>

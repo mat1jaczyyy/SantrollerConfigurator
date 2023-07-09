@@ -4,14 +4,18 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
+using CommunityToolkit.Mvvm.Input;
 using DynamicData;
 using GuitarConfigurator.NetCore.Devices;
 using Nefarius.Utilities.DeviceManagement.Drivers;
@@ -20,11 +24,12 @@ using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.ViewModels;
 
-public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
+public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
 {
-    private static readonly string UdevFile = "99-santroller.rules";
-    private static readonly string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
-
+    private const string UpToDate = "Up to date";
+    private const string UdevFile = "99-santroller.rules";
+    private const string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
+    private static readonly Regex VersionRegex = new("v\\d+\\.\\d+\\.\\d+$");
     private readonly List<string> _currentDrives = new();
     private readonly HashSet<string> _currentDrivesTemp = new();
     private readonly List<string> _currentPorts = new();
@@ -37,6 +42,7 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
 
     public MainWindowViewModel()
     {
+        UpdateMessage = CheckForUpdates();
         Message = "Connected";
         GoBack = ReactiveCommand.CreateFromObservable(() =>
             Router.NavigateAndReset.Execute(Router.NavigationStack.First()));
@@ -148,6 +154,66 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         return type => type is not (DeviceInputType.Usb or DeviceInputType.Bluetooth) || s is PicoDevice;
     }
 
+    private string CheckForUpdates()
+    {
+        try
+        {
+            using var client = new HttpClient();
+            client.BaseAddress = new Uri("https://github.com");
+            var response = client.GetAsync($"sanjay900/guitar-configurator/info/refs?service=git-upload-pack").Result;
+            response.EnsureSuccessStatusCode();
+            var res = response.Content.ReadAsStringAsync().Result.Split("\n")[2..^1];
+            var latestTagVer = new Version(GitVersionInformation.SemVer);
+            var isPreRelease = int.Parse(GitVersionInformation.CommitsSinceVersionSource) != 0;
+            var preReleaseTag = "";
+            bool preReleaseOutdated = false;
+            foreach (var re in res)
+            {
+                var split = re.Split(" ");
+                var tagHash = split[0][4..];
+                var tag = split[1];
+                if (!tag.StartsWith("refs/tags/"))
+                {
+                    continue;
+                }
+
+                tag = tag.Replace("refs/tags/", "");
+                if (isPreRelease && tag == "preview" && !tagHash.StartsWith(GitVersionInformation.Sha))
+                {
+                    preReleaseTag = tagHash[..5];
+                }
+                if (!VersionRegex.Match(tag).Success)
+                {
+                    continue;
+                }
+
+                tag = tag.Replace("v", "");
+
+                if (new Version(tag) > latestTagVer)
+                {
+                    latestTagVer = new Version(tag);
+                }
+            }
+
+            if (isPreRelease)
+            {
+                if (preReleaseOutdated)
+                {
+                    return "New Prerelease: "+preReleaseTag;
+                }
+            } else if (latestTagVer != new Version(GitVersionInformation.SemVer))
+            {
+                return "New Version: "+latestTagVer;
+            }
+        }
+        catch (Exception ex)
+        {
+            return "Unable to check for updates: "+ex.Message;
+        }
+
+        return UpToDate;
+    }
+
     public void Begin()
     {
         _timer.Elapsed += DevicePoller_Tick;
@@ -233,6 +299,10 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     [Reactive] public double Progress { get; set; }
 
     [Reactive] public string Message { get; set; }
+    
+    public string UpdateMessage { get; }
+
+    public bool HasUpdate => UpdateMessage != UpToDate;
 
     public PlatformIo Pio { get; } = new();
 
@@ -290,6 +360,24 @@ public class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
             });
 
         return state.OnErrorResumeNext(Observable.Return(behaviorSubject.Value));
+    }
+
+    [RelayCommand]
+    public void OpenReleasesPage()
+    {
+        var url = "https://github.com/sanjay900/guitar-configurator/releases";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            Process.Start("xdg-open", url);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            Process.Start("open", url);
+        }
     }
 
     public void Complete(int total)
