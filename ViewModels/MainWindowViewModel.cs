@@ -21,6 +21,9 @@ using GuitarConfigurator.NetCore.Devices;
 using Nefarius.Utilities.DeviceManagement.Drivers;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+#if Windows
+using Microsoft.Win32;
+#endif
 
 namespace GuitarConfigurator.NetCore.ViewModels;
 
@@ -182,6 +185,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
                 {
                     preReleaseTag = tagHash[..5];
                 }
+
                 if (!VersionRegex.Match(tag).Success)
                 {
                     continue;
@@ -199,16 +203,17 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
             {
                 if (preReleaseOutdated)
                 {
-                    return "New Prerelease: "+preReleaseTag;
+                    return "New Prerelease: " + preReleaseTag;
                 }
-            } else if (latestTagVer != new Version(GitVersionInformation.SemVer))
+            }
+            else if (latestTagVer != new Version(GitVersionInformation.SemVer))
             {
-                return "New Version: "+latestTagVer;
+                return "New Version: " + latestTagVer;
             }
         }
         catch (Exception ex)
         {
-            return "Unable to check for updates: "+ex.Message;
+            return "Unable to check for updates: " + ex.Message;
         }
 
         return UpToDate;
@@ -219,6 +224,11 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         _timer.Elapsed += DevicePoller_Tick;
         _timer.AutoReset = false;
         StartWorking();
+#if Windows
+        RegistryKey key = Registry.CurrentUser.OpenSubKey(@"System\CurrentControlSet\Control\MediaProperties\PrivateProperties\Joystick\OEM\VID_1209&PID_2882", true);
+        key.DeleteSubKey("OEMName");
+        key.Close();
+#endif
         Pio.InitialisePlatformIo().Subscribe(UpdateProgress, ex =>
         {
             Complete(100);
@@ -299,7 +309,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     [Reactive] public double Progress { get; set; }
 
     [Reactive] public string Message { get; set; }
-    
+
     public string UpdateMessage { get; }
 
     public bool HasUpdate => UpdateMessage != UpToDate;
@@ -342,7 +352,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         var output = new StringBuilder();
         var behaviorSubject =
             new BehaviorSubject<PlatformIo.PlatformIoState>(new PlatformIo.PlatformIoState(0, "", null));
-        
+
         state.ObserveOn(RxApp.MainThreadScheduler).Subscribe(s =>
             {
                 behaviorSubject.OnNext(s);
@@ -368,7 +378,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         var url = "https://github.com/sanjay900/guitar-configurator/releases";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(url) {UseShellExecute = true});
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
