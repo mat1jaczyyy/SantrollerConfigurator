@@ -11,7 +11,7 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 public class RestoreViewModel : ReactiveObject, IRoutableViewModel
 {
     private readonly Santroller _santroller;
-    private bool _done = false;
+    private bool _done;
 
     public RestoreViewModel(MainWindowViewModel screen, Santroller device)
     {
