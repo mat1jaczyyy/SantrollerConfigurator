@@ -227,7 +227,9 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
 #if Windows
         RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"System\CurrentControlSet\Control\MediaProperties\PrivateProperties\Joystick\OEM\VID_1209&PID_2882", true);
         if (key != null) {
-            key.DeleteValue("OEMName");
+            if (key.GetValue("OEMName") != null) {
+                key.DeleteValue("OEMName");
+            }
             key.Close();
         }
 #endif
