@@ -1294,6 +1294,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 {
                     if (santrollerold.Serial == santroller.Serial)
                     {
+                        santrollerold.Disconnect();
                         Main.Complete(100);
                         Device = device;
                         santroller.StartTicking(this);
