@@ -11,6 +11,7 @@ namespace GuitarConfigurator.NetCore.ViewModels;
 public class RestoreViewModel : ReactiveObject, IRoutableViewModel
 {
     private readonly Santroller _santroller;
+    private bool _done = false;
 
     public RestoreViewModel(MainWindowViewModel screen, Santroller device)
     {
@@ -62,12 +63,14 @@ public class RestoreViewModel : ReactiveObject, IRoutableViewModel
             "avrdude.conf");
         if (_santroller.IsPico() && device is PicoDevice)
         {
+            if (_done) return;
             Main.Message = "Programming";
             Main.Progress = 50;
             // Copy blank firmware back to device
             var firmware = Path.Combine(AssetUtils.GetAppDataFolder(), "default_firmwares", "pico.uf2");
             File.Copy(firmware, Path.Combine(device.GetUploadPortAsync().Result!, "firmware.uf2"));
             Main.Complete(100);
+            _done = true;
         }
         else if (_santroller.HasDfuMode() && device is Dfu dfu)
         {
