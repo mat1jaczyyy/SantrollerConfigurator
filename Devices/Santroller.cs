@@ -123,7 +123,7 @@ public class Santroller : ConfigurableUsbDevice
     {
         if (_model == null) return;
         Diff();
-        if (!Device.IsOpen)
+        if (!Device.IsOpen || _model.Main.Working)
         {
             _timer.Stop();
             return;
@@ -382,5 +382,10 @@ public class Santroller : ConfigurableUsbDevice
         _timer.Stop();
         
         base.Disconnect();
+    }
+
+    public void StopTicking()
+    {
+        _timer.Stop();
     }
 }

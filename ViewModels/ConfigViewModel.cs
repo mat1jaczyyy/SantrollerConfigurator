@@ -80,6 +80,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         ResetCommand = ReactiveCommand.CreateFromTask(ResetAsync,
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected)
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true}));
+        GoBackCommand = ReactiveCommand.Create(GoBack, this.WhenAnyValue(x => x.Main.Working).Select(s => !s));
 
         SaveConfigCommand = ReactiveCommand.CreateFromObservable(() => SaveConfig.Handle(this));
 
@@ -252,6 +253,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public ICommand SaveConfigCommand { get; }
     public ICommand LoadConfigCommand { get; }
     public ICommand ResetCommand { get; }
+    public ICommand GoBackCommand { get; }
 
     public string LocalAddress { get; }
 
@@ -1294,7 +1296,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 {
                     if (santrollerold.Serial == santroller.Serial)
                     {
-                        santrollerold.Disconnect();
+                        santrollerold.StopTicking();
                         Main.Complete(100);
                         Device = device;
                         santroller.StartTicking(this);
@@ -1313,17 +1315,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         });
     }
 
-    public bool GoBackCanExecute()
-    {
-        return !Main.Working;
-    }
-
-    [RelayCommand(CanExecute = nameof(GoBackCanExecute))]
     public void GoBack()
     {
         if (Device is Santroller santroller)
         {
-            santroller.Disconnect();
+            santroller.StopTicking();
         }
         Main.SetDifference(false);
         Main.GoBack.Execute();
