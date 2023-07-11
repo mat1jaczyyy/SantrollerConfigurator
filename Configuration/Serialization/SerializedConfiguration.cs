@@ -18,6 +18,7 @@ public class SerializedConfiguration
 
     public void Update(ConfigViewModel model)
     {
+        if (model.HasError) return;
         Bindings = model.Bindings.Items.Select(s => s.Serialize()).ToList();
         LedType = model.LedType;
         DeviceType = model.DeviceType;

@@ -316,6 +316,7 @@ public class Santroller : ConfigurableUsbDevice
                 var pins = (byte) ((ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte)))[0] &
                                    mask);
                 if (tickedPorts.ContainsKey(port))
+                {
                     if (tickedPorts[port] != pins)
                     {
                         Dictionary<int, bool> outPins = new();
@@ -326,6 +327,7 @@ public class Santroller : ConfigurableUsbDevice
                         _picking = false;
                         return outPins.First(s => !s.Value).Key;
                     }
+                }
 
                 tickedPorts[port] = pins;
             }
