@@ -11,7 +11,6 @@ using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.Main;
 using LibUsbDotNet.WinUsb;
-using Nefarius.Utilities.DeviceManagement.Exceptions;
 using Nefarius.Utilities.DeviceManagement.Extensions;
 using Nefarius.Utilities.DeviceManagement.PnP;
 using ReactiveUI;
@@ -72,37 +71,33 @@ public class ConfigurableUsbDeviceManager
                     }
                     foreach (var child in children)
                     {
-                        try {
-                            var childDevice = PnPDevice
-                                .GetDeviceByInstanceId(child, DeviceLocationFlags.Phantom)
-                                .ToUsbPnPDevice();
-                            var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
+                        var childDevice = PnPDevice
+                            .GetDeviceByInstanceId(child, DeviceLocationFlags.Phantom)
+                            .ToUsbPnPDevice();
+                        var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
 
-                            WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
-                            if (dev != null)
+                        WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
+                        if (dev != null)
+                        {
+                            var product = dev.Info.ProductString;
+                            var revision = (ushort)dev.Info.Descriptor.BcdDevice;
+                            switch (product)
                             {
-                                var product = dev.Info.ProductString;
-                                var revision = (ushort)dev.Info.Descriptor.BcdDevice;
-                                switch (product)
-                                {
-                                    case "Santroller" when _model is { Programming: true, IsPico: false }:
-                                        return;
-                                    case "Santroller":
-                                        _model.AvailableDevices.Add(new Santroller(_model.Pio, child, dev, product, serial,
-                                            revision));
-                                        break;
-                                    case "Ardwiino" when _model.Programming:
-                                    case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
-                                        return;
-                                    case "Ardwiino":
-                                        _model.AvailableDevices.Add(new Ardwiino(_model.Pio, child, dev, product, serial,
-                                            revision));
-                                        break;
-                                }
+                                case "Santroller" when _model is { Programming: true, IsPico: false }:
+                                    return;
+                                case "Santroller":
+                                    _model.AvailableDevices.Add(new Santroller(_model.Pio, child, dev, product, serial,
+                                        revision));
+                                    break;
+                                case "Ardwiino" when _model.Programming:
+                                case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
+                                    return;
+                                case "Ardwiino":
+                                    _model.AvailableDevices.Add(new Ardwiino(_model.Pio, child, dev, product, serial,
+                                        revision));
+                                    break;
                             }
-                        } catch (UsbPnPDeviceConversionException _) {
-                        
-                        }      
+                        }
                     }
                 }
             }
