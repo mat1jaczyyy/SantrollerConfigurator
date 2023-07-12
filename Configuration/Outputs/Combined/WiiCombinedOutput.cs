@@ -339,7 +339,6 @@ public class WiiCombinedOutput : CombinedTwiOutput
             ControllerFound = false;
             return;
         }
-
         ControllerFound = true;
 
         var type = BitConverter.ToUInt16(wiiControllerType);
