@@ -100,7 +100,9 @@ public class ConfigurableUsbDeviceManager
                                         break;
                                 }
                             }
-                        } catch (UsbPnPDeviceConversionException _) {}      
+                        } catch (UsbPnPDeviceConversionException _) {
+                        
+                        }      
                     }
                 }
             }
