@@ -11,6 +11,7 @@ using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.Main;
 using LibUsbDotNet.WinUsb;
+using Nefarius.Utilities.DeviceManagement.Exceptions;
 using Nefarius.Utilities.DeviceManagement.Extensions;
 using Nefarius.Utilities.DeviceManagement.PnP;
 using ReactiveUI;
@@ -71,9 +72,18 @@ public class ConfigurableUsbDeviceManager
                     }
                     foreach (var child in children)
                     {
-                        var childDevice = PnPDevice
-                            .GetDeviceByInstanceId(child, DeviceLocationFlags.Phantom)
-                            .ToUsbPnPDevice();
+                        UsbPnPDevice childDevice;
+                        try
+                        {
+                            childDevice = PnPDevice
+                                .GetDeviceByInstanceId(child, DeviceLocationFlags.Phantom)
+                                .ToUsbPnPDevice();
+                        }
+                        catch (UsbPnPDeviceConversionException _)
+                        {
+                            continue;
+                        }
+
                         var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
 
                         WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
