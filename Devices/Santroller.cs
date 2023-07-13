@@ -306,6 +306,11 @@ public class Santroller : ConfigurableUsbDevice
         var allPins = microcontroller.GetAllPins(false).Except(importantPins)
             .Select(s => new DevicePin(s, DevicePinMode.PullUp));
         var ports = microcontroller.GetPortsForTicking(allPins);
+        foreach (var (port, mask) in ports)
+        {
+            var wValue = (ushort) (port | (mask << 8));
+            ReadData(wValue, (byte) Commands.CommandReadDigital, sizeof(byte));
+        }
 
         Dictionary<int, byte> tickedPorts = new();
         while (_picking)
