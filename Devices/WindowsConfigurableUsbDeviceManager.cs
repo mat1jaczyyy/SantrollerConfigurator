@@ -72,41 +72,40 @@ public class ConfigurableUsbDeviceManager
                     }
                     foreach (var child in children)
                     {
-                        UsbPnPDevice childDevice;
                         try
                         {
-                            childDevice = PnPDevice
+                            UsbPnPDevice childDevice = PnPDevice
                                 .GetDeviceByInstanceId(child, DeviceLocationFlags.Phantom)
                                 .ToUsbPnPDevice();
+
+                            var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
+
+                            WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
+                            if (dev != null)
+                            {
+                                var product = dev.Info.ProductString;
+                                var revision = (ushort)dev.Info.Descriptor.BcdDevice;
+                                switch (product)
+                                {
+                                    case "Santroller" when _model is { Programming: true, IsPico: false }:
+                                        return;
+                                    case "Santroller":
+                                        _model.AvailableDevices.Add(new Santroller(_model.Pio, child, dev, product, serial,
+                                            revision));
+                                        break;
+                                    case "Ardwiino" when _model.Programming:
+                                    case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
+                                        return;
+                                    case "Ardwiino":
+                                        _model.AvailableDevices.Add(new Ardwiino(_model.Pio, child, dev, product, serial,
+                                            revision));
+                                        break;
+                                }
+                            }
                         }
                         catch (UsbPnPDeviceConversionException _)
                         {
                             continue;
-                        }
-
-                        var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
-
-                        WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
-                        if (dev != null)
-                        {
-                            var product = dev.Info.ProductString;
-                            var revision = (ushort)dev.Info.Descriptor.BcdDevice;
-                            switch (product)
-                            {
-                                case "Santroller" when _model is { Programming: true, IsPico: false }:
-                                    return;
-                                case "Santroller":
-                                    _model.AvailableDevices.Add(new Santroller(_model.Pio, child, dev, product, serial,
-                                        revision));
-                                    break;
-                                case "Ardwiino" when _model.Programming:
-                                case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
-                                    return;
-                                case "Ardwiino":
-                                    _model.AvailableDevices.Add(new Ardwiino(_model.Pio, child, dev, product, serial,
-                                        revision));
-                                    break;
-                            }
                         }
                     }
                 }
