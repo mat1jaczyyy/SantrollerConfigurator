@@ -1333,8 +1333,15 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public void RemoveDevice(IConfigurableDevice device)
     {
         if (!Main.Working && device == Device)
+        {
+            if (Device is Santroller santroller)
+            {
+                santroller.StopTicking();
+            }
+            Main.SetDifference(false);
             ShowUnpluggedDialog.Handle(("", "", "")).ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(s => Main.GoBack.Execute(new Unit()));
+        }
     }
 
     public void Update(byte[] btRaw)
