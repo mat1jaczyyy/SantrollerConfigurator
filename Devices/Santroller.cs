@@ -278,6 +278,13 @@ public class Santroller : ConfigurableUsbDevice
         {
             var pins = microcontroller.AnalogPins.Except(importantPins).ToList();
             var analogVals = new Dictionary<int, int>();
+            foreach (var pin in pins)
+            {
+                var devicePin = new DevicePin(pin, DevicePinMode.PullUp);
+                var mask = microcontroller.GetAnalogMask(devicePin);
+                var wValue = (ushort) (microcontroller.GetChannel(pin, true) | (mask << 8));
+                ReadData(wValue, (byte) Commands.CommandReadAnalog, sizeof(ushort));
+            }
             while (_picking)
             {
                 foreach (var pin in pins)
