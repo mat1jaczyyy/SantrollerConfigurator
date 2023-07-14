@@ -76,6 +76,7 @@ public partial class DrumAxis : OutputAxis
         {DrumAxisType.Red, "report->redVelocity"},
         {DrumAxisType.Yellow, "report->yellowVelocity"},
         {DrumAxisType.Blue, "report->blueVelocity"},
+        // Map orange to green for rb
         {DrumAxisType.Orange, "report->greenVelocity"},
         {DrumAxisType.GreenCymbal, "report->greenCymbalVelocity"},
         {DrumAxisType.YellowCymbal, "report->yellowCymbalVelocity"},
