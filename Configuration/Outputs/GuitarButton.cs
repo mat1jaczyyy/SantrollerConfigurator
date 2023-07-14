@@ -79,7 +79,7 @@ public class GuitarButton : OutputButton
         // GHL Guitars map strum up and strum down to dpad up and down, and also the stick
         if (Model.DeviceType is DeviceControllerType.LiveGuitar &&
             Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp &&
-            mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne)
+            mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360)
             return base.Generate(mode, debounceIndex,
                 $"report->strumBar={(Type is InstrumentButtonType.StrumDown ? "0xFF" : "0x00")};", combinedExtra,
                 combinedDebounce, macros);
