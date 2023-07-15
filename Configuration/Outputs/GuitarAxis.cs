@@ -22,7 +22,7 @@ public class GuitarAxis : OutputAxis
         {PickupSelectorType.Echo, 0xD0},
         {PickupSelectorType.None, 0xFF},
     };
-    public static readonly Dictionary<PickupSelectorType, int> PickupSelectorRangesXB1 = new()
+    public static readonly Dictionary<PickupSelectorType, int> PickupSelectorRangesXb1 = new()
     {
         {PickupSelectorType.Chorus, 0x0},
         {PickupSelectorType.WahWah, 0x10},
@@ -190,11 +190,11 @@ public class GuitarAxis : OutputAxis
             case ConfigField.XboxOne when Type == GuitarAxisType.Slider:
                 return "";
 
-            // PS3 GH and GHL expects tilt on the tilt axis
+            // PS3 GH expects tilt on the tilt axis
             case ConfigField.Ps3
                 when Model is
                      {
-                         DeviceType: DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar,
+                         DeviceType: DeviceControllerType.Guitar,
                          RhythmType: RhythmType.GuitarHero
                      } &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
@@ -206,12 +206,37 @@ public class GuitarAxis : OutputAxis
             case ConfigField.Ps3
                 when Model is
                      {
+                         DeviceType: DeviceControllerType.Guitar,
+                         RhythmType: RhythmType.GuitarHero
+                     } &&
+                     Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
+                return $@"if ({Input.Generate()}) {{
+                            {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
+                          }}";
+            // PS3 GHL expects tilt on accelerometer AND right stick x
+            case ConfigField.Ps3
+                when Model is
+                     {
+                         DeviceType: DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar,
+                         RhythmType: RhythmType.GuitarHero
+                     } &&
+                     Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
+            {
+                return $@"if ({Input.Generate()}) {{
+                            report->tilt = 0x180;
+                            report->tilt2 = 0xFF;
+                          }}";
+            }
+            case ConfigField.Ps3
+                when Model is
+                     {
                          DeviceType: DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar,
                          RhythmType: RhythmType.GuitarHero
                      } &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 return $@"if ({Input.Generate()}) {{
                             {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
+                            report->tilt2 = {GenerateAssignment(mode, false, false, false)};
                           }}";
             case ConfigField.Ps3
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
@@ -252,7 +277,7 @@ public class GuitarAxis : OutputAxis
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
                      Type == GuitarAxisType.Pickup && Input is DigitalToAnalog:
                 return $@"if ({Input.Generate()}) {{
-                                  {GenerateOutput(mode)} = {PickupSelectorRangesXB1[GetPickupSelectorValue(analogOn)]};
+                                  {GenerateOutput(mode)} = {PickupSelectorRangesXb1[GetPickupSelectorValue(analogOn)]};
                               }}";
             case ConfigField.XboxOne
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
