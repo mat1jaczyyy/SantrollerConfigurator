@@ -236,7 +236,14 @@ public class GuitarAxis : OutputAxis
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 return $@"if ({Input.Generate()}) {{
                             {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
-                            report->tilt2 = {GenerateAssignment(mode, false, false, false)};
+                            uint8_t tilt_test = {GenerateAssignment(mode, false, false, false)};
+                            // GHL expects right stick x to go to 0xFF or 0x00 to signify tilt being active
+                            if (tilt_test > 0xF0) {{
+                                report->tilt2 = 0xFF;
+                            }}
+                            if (tilt_test < 0x10) {{
+                                report->tilt2 = 0x00;
+                            }}
                           }}";
             case ConfigField.Ps3
                 when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
