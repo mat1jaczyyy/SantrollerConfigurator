@@ -709,6 +709,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void Generate(PlatformIo pio, bool generate)
     {
+        if (Device is Santroller santroller)
+        {
+            santroller.StopScan();
+            santroller.StopTicking();
+        }
         var outputs = Bindings.Items.SelectMany(binding => binding.Outputs.Items).ToList();
         var inputs = outputs.Select(binding => binding.Input.InnermostInput()).ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
@@ -1296,8 +1301,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 {
                     if (santrollerold.Serial == santroller.Serial)
                     {
-                        santrollerold.StopTicking();
                         Main.Complete(100);
+                        Main.SetDifference(false);
                         Device = device;
                         santroller.StartTicking(this);
                     }
@@ -1308,6 +1313,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     Device = device;
                     Microcontroller = device.GetMicrocontroller(this);
                     santroller.StartTicking(this);
+                    Main.SetDifference(false);
                 }
             }
 
