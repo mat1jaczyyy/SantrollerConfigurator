@@ -234,10 +234,11 @@ public class GuitarAxis : OutputAxis
                          RhythmType: RhythmType.GuitarHero
                      } &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
+                
+                // GHL expects right stick x to go to 0xFF or 0x00 to signify tilt being active
                 return $@"if ({Input.Generate()}) {{
                             {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
                             uint8_t tilt_test = {GenerateAssignment(mode, false, false, false)};
-                            // GHL expects right stick x to go to 0xFF or 0x00 to signify tilt being active
                             if (tilt_test > 0xF0) {{
                                 report->tilt2 = 0xFF;
                             }}
