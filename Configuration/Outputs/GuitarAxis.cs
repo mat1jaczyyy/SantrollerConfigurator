@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -146,8 +145,7 @@ public class GuitarAxis : OutputAxis
     {
         if (mode == ConfigField.Shared)
             return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
-        // Don't do anything analog on XB1, since that gets handled by PS4
-        if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360)) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne)) return "";
         // The below is a mess... but essentially we have to handle converting the input to its respective output depending on console
         // We have to do some hyper specific stuff for digital to analog here too so its easiest to capture its value once
         var analogOn = 0;
@@ -160,6 +158,8 @@ public class GuitarAxis : OutputAxis
 
         switch (mode)
         {
+            case ConfigField.XboxOne when Model.DeviceType is DeviceControllerType.LiveGuitar:
+                return "";
             case ConfigField.Xbox360 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
                 // x360 slider is actually a int16_t BUT there is a mechanism to convert the uint8 value to its uint16_t version
                 if (analogOn > 0x80)

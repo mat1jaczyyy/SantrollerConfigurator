@@ -6,7 +6,6 @@ using System.Reflection;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using DynamicData;
-using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Devices;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

@@ -1,6 +1,5 @@
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 

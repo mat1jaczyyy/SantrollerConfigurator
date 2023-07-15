@@ -1321,6 +1321,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             santroller.StopTicking();
         }
+
         Main.SetDifference(false);
         Main.GoBack.Execute();
     }
@@ -1332,12 +1333,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void RemoveDevice(IConfigurableDevice device)
     {
-        if (!Main.Working && device == Device)
+        if (!Main.Working && device == Device && Device is Santroller old && ( device.IsSameDevice(old.Serial) ||  device.IsSameDevice(old.Path)))
         {
-            if (Device is Santroller santroller)
-            {
-                santroller.StopTicking();
-            }
+            old.StopTicking();
             Main.SetDifference(false);
             ShowUnpluggedDialog.Handle(("", "", "")).ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(s => Main.GoBack.Execute(new Unit()));
