@@ -21,7 +21,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
 public partial class BluetoothOutput : CombinedOutput
 {
-    private const int BtAddressLength = 18;
     private const string NoDeviceText = "No device found";
 
     private readonly DispatcherTimer _timer = new();
@@ -44,8 +43,7 @@ public partial class BluetoothOutput : CombinedOutput
             LocalAddress = "Write config to retrieve address";
     }
 
-    [Reactive]
-    public string LocalAddress { get; private set; }
+    [Reactive] public string LocalAddress { get; private set; }
 
     public AvaloniaList<string> Addresses { get; } = new();
 
@@ -162,18 +160,10 @@ public partial class BluetoothOutput : CombinedOutput
 
         ScanTimer--;
         var addresses = santroller.GetBtScanResults();
-        var deviceCount = addresses.Length / BtAddressLength;
-        var addressesAsStrings = new List<string>();
-        for (var i = 0; i < deviceCount; i++)
-        {
-            var addr = Encoding.Default.GetString(addresses[(i * BtAddressLength)..((i + 1) * BtAddressLength)])
-                .Replace("\0", "");
-            addressesAsStrings.Add(addr);
-        }
 
-        if (deviceCount != 0)
+        if (addresses.Count != 0)
         {
-            var setNew = addressesAsStrings.ToHashSet();
+            var setNew = addresses.ToHashSet();
             var setOld = Addresses.ToHashSet();
             var wasUnset = MacAddress == NoDeviceText;
             if (!wasUnset) setNew.Add(MacAddress);
@@ -196,7 +186,6 @@ public partial class BluetoothOutput : CombinedOutput
 
     public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
     {
-        
     }
 
     public override string Generate(ConfigField mode, int debounceIndex, string extra,

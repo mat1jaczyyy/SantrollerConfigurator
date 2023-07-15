@@ -1339,7 +1339,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void RemoveDevice(IConfigurableDevice device)
     {
-        if (!Main.Working && device == Device && Device is Santroller old && ( device.IsSameDevice(old.Serial) ||  device.IsSameDevice(old.Path)))
+        if (!Main.Working && Device is Santroller old && ( device.IsSameDevice(old.Serial) ||  device.IsSameDevice(old.Path)))
         {
             old.StopTicking();
             Main.SetDifference(false);

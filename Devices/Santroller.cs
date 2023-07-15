@@ -20,6 +20,7 @@ namespace GuitarConfigurator.NetCore.Devices;
 
 public class Santroller : ConfigurableUsbDevice
 {
+    private const int BtAddressLength = 18;
     public enum Commands
     {
         CommandReboot = 0x30,
@@ -78,6 +79,11 @@ public class Santroller : ConfigurableUsbDevice
         {
             InvalidDevice = true;
         }
+    }
+
+    private string GetString(byte[] str)
+    {
+        return Encoding.UTF8.GetString(str).Replace("\0", "");
     }
 
     private bool InvalidDevice { get; }
@@ -195,12 +201,11 @@ public class Santroller : ConfigurableUsbDevice
     }
     private void Load()
     {
-        var fCpuStr = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("\0", "")
-            .Replace("L", "").Trim();
+        var fCpuStr = GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("L", "").Trim();
         if (!fCpuStr.Any()) return;
 
         var fCpu = uint.Parse(fCpuStr);
-        var board = Encoding.UTF8.GetString(ReadData(0, (byte) Commands.CommandReadBoard, 32)).Replace("\0", "");
+        var board = GetString(ReadData(0, (byte) Commands.CommandReadBoard, 32));
         var m = Board.FindMicrocontroller(Board.FindBoard(board, fCpu));
         Board = m.Board;
         _microcontroller = m;
@@ -381,14 +386,21 @@ public class Santroller : ConfigurableUsbDevice
         WriteData(0, (byte) Commands.CommandStopBtScan, Array.Empty<byte>());
     }
 
-    public byte[] GetBtScanResults()
+    public IReadOnlyList<string> GetBtScanResults()
     {
-        return !IsPico() ? Array.Empty<byte>() : ReadData(0, (byte) Commands.CommandGetBtDevices);
+        if (!IsPico()) return Array.Empty<string>();
+        var data = ReadData(0, (byte) Commands.CommandGetBtDevices);
+        var addressesAsStrings = new List<string>();
+        for (var i = 0; i < data.Length; i += BtAddressLength)
+        {
+            addressesAsStrings.Add(GetString(data[i..(i + BtAddressLength)]));
+        }
+        return addressesAsStrings;
     }
 
     public string GetBluetoothAddress()
     {
-        return !IsPico() ? "" : Encoding.Default.GetString(ReadData(0, (byte) Commands.CommandGetBtAddress));
+        return !IsPico() ? "" : GetString(ReadData(0, (byte) Commands.CommandGetBtAddress));
     }
 
     public override void Disconnect()
