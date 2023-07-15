@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AnyDiff;
 using Avalonia.Threading;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -63,6 +64,7 @@ public class Santroller : ConfigurableUsbDevice
     private SerializedConfiguration? _currentConfig;
     private bool _picking;
     private readonly DispatcherTimer _timer;
+    private DiffProvider _diffProvider = new();
 
     public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort version)  : base(
         device, path, product, serial, version)
@@ -222,6 +224,7 @@ public class Santroller : ConfigurableUsbDevice
         {
             _lastConfig = Serializer.Deserialize<SerializedConfiguration>(decompressor);
             _lastConfig.LoadConfiguration(model);
+            _lastConfig = new SerializedConfiguration(model);
             _currentConfig = new SerializedConfiguration(model);
         }
         catch (Exception ex)
@@ -239,7 +242,7 @@ public class Santroller : ConfigurableUsbDevice
     {
         if (_model == null || _currentConfig == null) return;
         _currentConfig.Update(_model);
-        _model.Main.SetDifference(AnyDiff.AnyDiff.Diff(_lastConfig, _currentConfig).Any());
+        _model.Main.SetDifference(_diffProvider.ComputeDiff(_lastConfig, _currentConfig).Any());
     }
 
     public void StartTicking(ConfigViewModel model)

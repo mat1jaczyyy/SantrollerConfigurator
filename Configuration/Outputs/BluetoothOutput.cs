@@ -165,8 +165,12 @@ public partial class BluetoothOutput : CombinedOutput
         var deviceCount = addresses.Length / BtAddressLength;
         var addressesAsStrings = new List<string>();
         for (var i = 0; i < deviceCount; i++)
-            addressesAsStrings.Add(
-                Encoding.Default.GetString(addresses[(i * BtAddressLength)..((i + 1) * BtAddressLength)]).Replace("\0",""));
+        {
+            var addr = Encoding.Default.GetString(addresses[(i * BtAddressLength)..((i + 1) * BtAddressLength)])
+                .Replace("\0", "");
+            addressesAsStrings.Add(addr);
+        }
+
         if (deviceCount != 0)
         {
             var setNew = addressesAsStrings.ToHashSet();
@@ -177,10 +181,11 @@ public partial class BluetoothOutput : CombinedOutput
             Addresses.Add(setNew.Except(setOld));
             if (wasUnset) MacAddress = Addresses.First();
         }
-        else if (MacAddress == NoDeviceText)
+        else if (MacAddress == NoDeviceText || string.IsNullOrWhiteSpace(MacAddress))
         {
             Addresses.Clear();
             Addresses.Add(NoDeviceText);
+            MacAddress = NoDeviceText;
         }
 
         if (ScanTimer != 0) return;
