@@ -1304,7 +1304,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         Main.Complete(100);
                         Main.SetDifference(false);
                         Device = device;
-                        santroller.StartTicking(this);
+                        santroller.LoadConfiguration(this);
                     }
                 }
                 else
@@ -1312,8 +1312,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     Main.Complete(100);
                     Device = device;
                     Microcontroller = device.GetMicrocontroller(this);
-                    santroller.StartTicking(this);
                     Main.SetDifference(false);
+                    santroller.LoadConfiguration(this);
                 }
             }
 
