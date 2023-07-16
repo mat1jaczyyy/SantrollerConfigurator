@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿#if !DEBUG
+using System;
+#endif
+using System.Diagnostics;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls;

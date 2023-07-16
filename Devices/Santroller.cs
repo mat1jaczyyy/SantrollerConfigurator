@@ -247,6 +247,7 @@ public class Santroller : ConfigurableUsbDevice
     {
         if (_model == null || _currentConfig == null) return;
         _currentConfig.Update(_model);
+        // TODO: we could also just serialise both configs and check for differences that way? would probably use less memory
         _model.Main.SetDifference(_diffProvider.ComputeDiff(_lastConfig, _currentConfig).Any());
     }
 
