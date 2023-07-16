@@ -279,7 +279,6 @@ public partial class DrumAxis : OutputAxis
             }
         }
 
-
         var btExtra = "";
         // If someone has mapped digital inputs to the drums, then we can shortcut a bunch of the tests, and just need to use the calculated value from above
         if (input is DigitalToAnalog dta2)
