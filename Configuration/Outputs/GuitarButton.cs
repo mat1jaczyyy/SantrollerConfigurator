@@ -94,7 +94,7 @@ public class GuitarButton : OutputButton
                 or InstrumentButtonType.SoloOrange or InstrumentButtonType.SoloRed
                 or InstrumentButtonType.SoloYellow && mode is not ConfigField.Shared)
             extra = "report->solo=true;";
-        // For bluetooth, we shove in a XB1 style version too, so that that can be used at the other end.
+        // For bluetooth, we shove in a XB1 style version too, so that that can be used at the other end. 
         var ret = "";
         switch (mode)
         {
