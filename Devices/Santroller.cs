@@ -303,7 +303,7 @@ public class Santroller : ConfigurableUsbDevice
                         sizeof(ushort)));
                     if (analogVals.TryGetValue(pin, out var analogVal))
                     {
-                        if (Math.Abs(analogVal - val) <= 2000) continue;
+                        if (Math.Abs(analogVal - val) <= 3000) continue;
                         _picking = false;
                         return pin;
                     }
