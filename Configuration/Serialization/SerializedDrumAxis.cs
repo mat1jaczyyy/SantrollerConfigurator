@@ -11,7 +11,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 public class SerializedDrumAxis : SerializedOutput
 {
     public SerializedDrumAxis(SerializedInput input, DrumAxisType type, Color ledOn, Color ledOff, byte[] ledIndex,
-        int min, int max, int deadzone, int threshold, int debounce, bool childOfCombined)
+        int min, int max, int deadzone, int debounce, bool childOfCombined)
     {
         Input = input;
         LedOn = ledOn.ToUInt32();
@@ -21,7 +21,6 @@ public class SerializedDrumAxis : SerializedOutput
         Deadzone = deadzone;
         Type = type;
         LedIndex = ledIndex;
-        Threshold = threshold;
         Debounce = debounce;
         ChildOfCombined = childOfCombined;
     }
@@ -33,7 +32,6 @@ public class SerializedDrumAxis : SerializedOutput
     [ProtoMember(5)] public int Min { get; }
     [ProtoMember(6)] public int Max { get; }
     [ProtoMember(7)] public int Deadzone { get; }
-    [ProtoMember(8)] public int Threshold { get; }
     [ProtoMember(9)] public int Debounce { get; }
     [ProtoMember(10)] public DrumAxisType Type { get; }
     [ProtoMember(11)] public bool ChildOfCombined { get; }
@@ -42,7 +40,7 @@ public class SerializedDrumAxis : SerializedOutput
     {
         var combined = new DrumAxis(model, Input.Generate(model), Color.FromUInt32(LedOn),
             Color.FromUInt32(LedOff), LedIndex, Min, Max, Deadzone,
-            Threshold, Debounce, Type, ChildOfCombined);
+            Debounce, Type, ChildOfCombined);
         model.Bindings.Add(combined);
         return combined;
     }

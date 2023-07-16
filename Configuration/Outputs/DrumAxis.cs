@@ -86,20 +86,14 @@ public partial class DrumAxis : OutputAxis
         {DrumAxisType.Kick2, "report->kickVelocity"}
     };
 
-    private bool _calibrating;
-
     public DrumAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
-        int deadZone, int threshold, int debounce, DrumAxisType type, bool childOfCombined) : base(model, input, ledOn,
+        int deadZone, int debounce, DrumAxisType type, bool childOfCombined) : base(model, input, ledOn,
         ledOff, ledIndices,
         min, max, deadZone, true, childOfCombined)
     {
         Type = type;
-        Threshold = threshold;
         Debounce = debounce;
         UpdateDetails();
-        this
-            .WhenAnyValue(x => x.Threshold)
-            .Select(ComputeDrumMargin).ToPropertyEx(this, x => x.ComputedDrumMargin);
     }
 
     public DrumAxisType Type { get; }
@@ -111,13 +105,11 @@ public partial class DrumAxis : OutputAxis
 
     public override bool IsKeyboard => false;
 
-    [Reactive] public int Threshold { get; set; }
-
     [Reactive] public int Debounce { get; set; }
     [ObservableAsProperty] public Thickness ComputedDrumMargin { get; }
 
 
-    public override string? CalibrationText => _calibrating ? "Hit the drum" : null;
+    public override string? CalibrationText => null;
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {
@@ -133,7 +125,7 @@ public partial class DrumAxis : OutputAxis
     private Thickness ComputeDrumMargin(int threshold)
     {
         var val = (float) threshold / ushort.MaxValue * ProgressWidth;
-        return new Thickness(val - 5, 0, val + 5, 0);
+        return new Thickness(val - 5, 0, val - 5, 0);
     }
 
 
@@ -275,13 +267,13 @@ public partial class DrumAxis : OutputAxis
                 case DrumAxisType.Green:
                 case DrumAxisType.Yellow:
                 case DrumAxisType.YellowCymbal:
-                    assignedVal = "-(0x7fff - (val >> 1))";
+                    assignedVal = "-(0x7fff - (val_real >> 1))";
                     dtaVal = -(0x7fff - (dtaVal >> 1));
                     break;
                 case DrumAxisType.Red:
                 case DrumAxisType.Blue:
                 case DrumAxisType.BlueCymbal:
-                    assignedVal = "(0x7fff - (val >> 1))";
+                    assignedVal = "(0x7fff - (val_real >> 1))";
                     dtaVal = 0x7fff - (dtaVal >> 1);
                     break;
             }
@@ -325,17 +317,16 @@ public partial class DrumAxis : OutputAxis
         if (reset.Any())
         {
             reset = $@"
-                if (val_real > {Threshold}) {{
+                if (val_real > {Min}) {{
                     {reset}
                 }}";
         }
 
-        var generated = input.IsUint ? input.Generate() : $"(({input.Generate()}) + INT16_MAX)";
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
         {{
-            uint16_t val_real = {generated};
+            uint16_t val_real = {GenerateAssignment(mode, false, false, false)};
             if (val_real) {{
                 {reset}
                 {GenerateOutput(mode)} = {assignedVal};
@@ -347,24 +338,6 @@ public partial class DrumAxis : OutputAxis
         }}";
     }
 
-    [RelayCommand]
-    private void CalibrateDrums()
-    {
-        _calibrating = !_calibrating;
-        this.RaisePropertyChanged(nameof(CalibrationText));
-    }
-
-    public override void ApplyCalibration(int rawValue)
-    {
-        if (!Input.IsUint) rawValue += short.MaxValue;
-        if (_calibrating) Threshold = Math.Max(rawValue, Threshold);
-    }
-
-    [RelayCommand]
-    public void ResetThreshold()
-    {
-        Threshold = 0;
-    }
 
     protected override string MinCalibrationText()
     {
@@ -383,12 +356,12 @@ public partial class DrumAxis : OutputAxis
 
     protected override bool SupportsCalibration()
     {
-        return Input is not WiiInput;
+        return false;
     }
 
     public override SerializedOutput Serialize()
     {
         return new SerializedDrumAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
-            DeadZone, Threshold, Debounce, ChildOfCombined);
+            DeadZone, Debounce, ChildOfCombined);
     }
 }

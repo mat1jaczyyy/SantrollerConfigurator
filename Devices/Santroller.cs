@@ -93,15 +93,15 @@ public class Santroller : ConfigurableUsbDevice
     public override void Bootloader()
     {
         if (Board.HasUsbmcu)
-            WriteData(0, (byte) Santroller.Commands.CommandJumpBootloaderUnoUsbThenSerial, Array.Empty<byte>());
+            WriteData(0, (byte) Commands.CommandJumpBootloaderUnoUsbThenSerial, Array.Empty<byte>());
         else
-            WriteData(0, (byte) Santroller.Commands.CommandJumpBootloader, Array.Empty<byte>());
+            WriteData(0, (byte) Commands.CommandJumpBootloader, Array.Empty<byte>());
 
         Device.Close();
     }
     public override void BootloaderUsb()
     {
-        WriteData(0, (byte) Santroller.Commands.CommandJumpBootloaderUno, Array.Empty<byte>());
+        WriteData(0, (byte) Commands.CommandJumpBootloaderUno, Array.Empty<byte>());
         Device.Close();
     }
 
@@ -238,6 +238,7 @@ public class Santroller : ConfigurableUsbDevice
         }
 
         _deviceControllerType = model.DeviceType;
+        Console.WriteLine(model.DeviceType);
 
         _model = model;
         _timer.Start();

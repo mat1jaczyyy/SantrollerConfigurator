@@ -565,7 +565,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     Bindings.Add(new DrumAxis(this,
                         new DirectInput(-1, false, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, 64, 10, axisType, false));
+                        0, 10, axisType, false));
                     break;
                 case DjAxisType.EffectsKnob:
                     Bindings.Add(new DjAxis(this,

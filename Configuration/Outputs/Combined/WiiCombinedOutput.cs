@@ -358,7 +358,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 foreach (var pair in Model.RhythmType == RhythmType.GuitarHero ? DrumAxisGh : DrumAxisRb)
                     Outputs.Add(new DrumAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                         Colors.Black,
-                        Colors.Black, Array.Empty<byte>(), -30000, 30000, 10, 64, 10, pair.Value, true));
+                        Colors.Black, Array.Empty<byte>(), -30000, 30000, 10, 10, pair.Value, true));
             }
             else
             {
@@ -372,13 +372,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 if (Model.RhythmType == RhythmType.GuitarHero)
                     Outputs.Add(new DrumAxis(Model,
                         new WiiInput(WiiInputType.DrumOrange, Model, Sda, Scl, true),
-                        first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64,
+                        first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone,
                         10,
                         DrumAxisType.Orange, true));
                 else
                     Outputs.Add(new DrumAxis(Model,
                         new WiiInput(WiiInputType.DrumOrange, Model, Sda, Scl, true),
-                        first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone, 64,
+                        first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone,
                         10,
                         DrumAxisType.Green, true));
             }

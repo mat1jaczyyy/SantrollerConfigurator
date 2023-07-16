@@ -50,10 +50,10 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
     public void DeviceAdded(IConfigurableDevice device)
     {
-        if (Board.Is32U4() && device is Arduino arduino2 && arduino2.Board.Is32U4())
+        if (Board.Is32U4() && device is Arduino arduino2 && (arduino2.Board.Is32U4() || arduino2.Board.IsGeneric()))
         {
             _bootloaderPath?.TrySetResult(arduino2.GetSerialPort());
-            if (arduino2.Is32U4Bootloader)
+            if (arduino2.Is32U4Bootloader || arduino2.Board.IsGeneric())
             {
                 _lastBootloaderPath = arduino2.GetSerialPort();
             }

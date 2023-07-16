@@ -176,7 +176,7 @@ public class UsbHostCombinedOutput : CombinedOutput
                     standardButtonType, true),
                 DrumAxisType drumAxisType => new DrumAxis(Model,
                     input, Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    min, max, 0, 1000, 10, drumAxisType, true),
+                    min, max, 0, 10, drumAxisType, true),
                 Ps3AxisType ps3AxisType => new Ps3Axis(Model,
                     input, Colors.Black, Colors.Black, Array.Empty<byte>(),
                     min, max, 0, ps3AxisType, true),
