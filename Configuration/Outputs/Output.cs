@@ -543,7 +543,7 @@ public abstract partial class Output : ReactiveObject
                 Input = new DigitalToAnalog(input, Model);
                 break;
             case false when this is OutputAxis axis:
-                var oldOn = 0;
+                int oldOn = axis.Trigger ? ushort.MaxValue : short.MaxValue;
                 if (Input is DigitalToAnalog dta)
                 {
                     oldOn = dta.On;

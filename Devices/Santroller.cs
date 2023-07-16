@@ -6,7 +6,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AnyDiff;
 using Avalonia.Threading;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -65,7 +64,6 @@ public class Santroller : ConfigurableUsbDevice
     private SerializedConfiguration? _currentConfig;
     private bool _picking;
     private readonly DispatcherTimer _timer;
-    private DiffProvider _diffProvider = new();
 
     public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort version)  : base(
         device, path, product, serial, version)
@@ -238,7 +236,6 @@ public class Santroller : ConfigurableUsbDevice
         }
 
         _deviceControllerType = model.DeviceType;
-        Console.WriteLine(model.DeviceType);
 
         _model = model;
         _timer.Start();
@@ -247,9 +244,12 @@ public class Santroller : ConfigurableUsbDevice
     public void Diff()
     {
         if (_model == null || _currentConfig == null) return;
-        _currentConfig.Update(_model);
-        // TODO: we could also just serialise both configs and check for differences that way? would probably use less memory
-        _model.Main.SetDifference(_diffProvider.ComputeDiff(_lastConfig, _currentConfig).Any());
+        _currentConfig.Update(_model, false);
+        using var outputStream = new MemoryStream();
+        using var outputStream2 = new MemoryStream();
+        Serializer.Serialize(outputStream, _currentConfig);
+        Serializer.Serialize(outputStream2, _lastConfig);
+        _model.Main.SetDifference(!outputStream.ToArray().SequenceEqual(outputStream2.ToArray()));
     }
 
     public void StartTicking(ConfigViewModel model)
