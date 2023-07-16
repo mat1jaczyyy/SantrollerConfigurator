@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DynamicData;
@@ -10,7 +11,7 @@ public abstract class AvrController : Microcontroller
     public enum AvrPinMode
     {
         Input,
-        InputPulldown,
+        InputPullup,
         Output
     }
 
@@ -157,7 +158,7 @@ public abstract class AvrController : Microcontroller
             var currentDdr = ddrByPort.GetValueOrDefault(port, 0);
             switch (force)
             {
-                case AvrPinMode.InputPulldown:
+                case AvrPinMode.InputPullup:
                     currentPort |= 1 << idx;
                     break;
                 case AvrPinMode.Output:
