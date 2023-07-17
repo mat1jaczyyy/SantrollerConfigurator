@@ -1124,9 +1124,8 @@
                             Calibrate
                         </Label>
                         <Button Command="{Binding CalibrateCommand}"
-                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
-                            Calibrate
-                        </Button>
+                                HorizontalContentAlignment="Center" VerticalAlignment="Center" Width="100" Content="{Binding CalibrationButtonText}"/>
+                        <Label VerticalAlignment="Center" Content="{Binding CalibrationStatus}"/>
                     </StackPanel>
 
                     <StackPanel IsVisible="{Binding SupportsMinMax}" Orientation="Horizontal" Height="50">
@@ -1270,9 +1269,8 @@
                                 Calibrate
                             </Label>
                             <Button Command="{Binding CalibrateCommand}"
-                                    HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
-                                Calibrate
-                            </Button>
+                                    HorizontalContentAlignment="Center" VerticalAlignment="Center" Width="100" Content="{Binding CalibrationButtonText}"/>
+                            <Label VerticalAlignment="Center" Content="{Binding CalibrationStatus}"/>
                         </StackPanel>
 
                         <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
@@ -1489,9 +1487,8 @@
                             Calibrate
                         </Label>
                         <Button Command="{Binding CalibrateCommand}"
-                                HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Width="100">
-                            Calibrate
-                        </Button>
+                                HorizontalContentAlignment="Center" VerticalAlignment="Center" Width="100" Content="{Binding CalibrationButtonText}"/>
+                        <Label VerticalAlignment="Center" Content="{Binding CalibrationStatus}"/>
                     </StackPanel>
 
                     <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">

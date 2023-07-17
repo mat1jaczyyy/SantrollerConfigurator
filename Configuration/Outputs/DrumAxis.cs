@@ -106,10 +106,6 @@ public partial class DrumAxis : OutputAxis
     public override bool IsKeyboard => false;
 
     [Reactive] public int Debounce { get; set; }
-    [ObservableAsProperty] public Thickness ComputedDrumMargin { get; }
-
-
-    public override string? CalibrationText => null;
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
     {

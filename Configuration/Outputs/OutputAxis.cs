@@ -82,9 +82,10 @@ public abstract partial class OutputAxis : Output
     [ObservableAsProperty] public Thickness ComputedDeadZoneMargin { get; }
     [ObservableAsProperty] public Thickness CalibrationMinMaxMargin { get; }
 
-    
     public int SliderMax => InputIsUint ? ushort.MaxValue : short.MaxValue;
+
     public int SliderMin => InputIsUint ? ushort.MinValue : short.MinValue;
+
     // ReSharper enable UnassignedGetOnlyAutoProperty
     [Reactive] public int Min { get; set; }
 
@@ -97,7 +98,9 @@ public abstract partial class OutputAxis : Output
     public override bool IsCombined => false;
     public override bool IsStrum => false;
 
-    public virtual string? CalibrationText => GetCalibrationText();
+    public string CalibrationButtonText => GetCalibrationButtonText();
+    public string? CalibrationText => GetCalibrationText();
+    public string? CalibrationStatus => GetCalibrationStatus();
 
     private Thickness ComputeDeadZoneMargin((int min, int max, bool trigger, bool inputIsUint, int deadZone) s)
     {
@@ -117,6 +120,7 @@ public abstract partial class OutputAxis : Output
             min = mid - s.deadZone;
             max = mid + s.deadZone;
         }
+
         if (!s.inputIsUint)
         {
             min += short.MaxValue;
@@ -176,7 +180,6 @@ public abstract partial class OutputAxis : Output
                 {
                     // For non triggers, deadzone starts in the middle and grows in both directions
                     DeadZone = Math.Abs((max + min) / 2 - rawValue);
-                    
                 }
 
                 break;
@@ -190,10 +193,12 @@ public abstract partial class OutputAxis : Output
 
         _calibrationState++;
         if (_calibrationState == OutputAxisCalibrationState.Last) _calibrationState = OutputAxisCalibrationState.None;
-
+    
         ApplyCalibration(ValueRaw);
 
+        this.RaisePropertyChanged(nameof(CalibrationButtonText));
         this.RaisePropertyChanged(nameof(CalibrationText));
+        this.RaisePropertyChanged(nameof(CalibrationStatus));
     }
 
     protected virtual int Calculate(
@@ -230,7 +235,6 @@ public abstract partial class OutputAxis : Output
                 if (val < min) return 0;
                 if (val > max) val = max;
             }
-
         }
         else
         {
@@ -293,6 +297,22 @@ public abstract partial class OutputAxis : Output
         };
     }
 
+    private string GetCalibrationButtonText()
+    {
+        return _calibrationState == OutputAxisCalibrationState.None ? "Calibrate" : "Next";
+    }
+    
+    private string? GetCalibrationStatus()
+    {
+        return _calibrationState switch
+        {
+            OutputAxisCalibrationState.Min => "Step 1/3",
+            OutputAxisCalibrationState.Max => "Step 2/3",
+            OutputAxisCalibrationState.DeadZone => "Step 3/3",
+            _ => null
+        };
+    }
+
     public string GenerateAssignment(ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
     {
         if (Input is FixedInput or DigitalToAnalog) return Input.Generate();
@@ -351,7 +371,7 @@ public abstract partial class OutputAxis : Output
             default:
                 return "";
         }
-        
+
         var min = Min;
         var max = Max;
         var inverted = Min > Max;
@@ -469,8 +489,12 @@ public abstract partial class OutputAxis : Output
             default:
                 return "";
         }
+
         // On the PS3, we need to convert triggers from analog to digital
-        if (mode is ConfigField.Ps3 or ConfigField.Ps4 && this is ControllerAxis {Type: StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger})
+        if (mode is ConfigField.Ps3 or ConfigField.Ps4 && this is ControllerAxis
+            {
+                Type: StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger
+            })
         {
             var trigger = this is ControllerAxis {Type: StandardAxisType.LeftTrigger} ? "l2" : "r2";
             return $@"if ({Input.Generate()}) {{
@@ -480,6 +504,7 @@ public abstract partial class OutputAxis : Output
                         }}
                    }}";
         }
+
         return $"if ({Input.Generate()}) {{{output} = {val};}}";
     }
 
