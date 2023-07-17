@@ -576,7 +576,7 @@ public abstract partial class Output : ReactiveObject
         this.RaisePropertyChanged(nameof(GhWtInputType));
         this.RaisePropertyChanged(nameof(Gh5NeckInputType));
         this.RaisePropertyChanged(nameof(DjInputType));
-        UpdateErrors();
+        Model.UpdateErrors();
     }
 
 

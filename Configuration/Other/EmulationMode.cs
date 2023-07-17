@@ -91,7 +91,9 @@ public class EmulationMode : Output
         string combinedExtra,
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
-        return mode != ConfigField.Detection ? "" : $@"
+        return mode != ConfigField.Detection
+            ? ""
+            : $@"
             if ({Input.Generate()}) {{
                 set_console_type({GetDefinition()});
             }}";
