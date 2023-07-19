@@ -193,12 +193,12 @@ public class ControllerEnumConverter : IMultiValueConverter
                 {
                     new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
                         StandardButtonType.LeftShoulder),
-                    "Left Bumper"
+                    "Left Trigger"
                 },
                 {
                     new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
                         StandardButtonType.RightShoulder),
-                    "Right Bumper"
+                    "Right Trigger"
                 },
                 {
                     new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
