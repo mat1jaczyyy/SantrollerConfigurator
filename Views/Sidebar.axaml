@@ -196,15 +196,15 @@
                         <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="APA102 CI / SCK Pin"
                                    TextAlignment="Center" />
                         <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                                  SelectedItem="{Binding Apa102Mosi}"
-                                  ItemsSource="{Binding AvailableApaMosiPins}"
+                                  SelectedItem="{Binding Apa102Sck}"
+                                  ItemsSource="{Binding AvailableApaSckPins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                         <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0"
                                    Text="APA102 DI / MOSI Pin"
                                    TextAlignment="Center" />
                         <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                                  SelectedItem="{Binding Apa102Sck}"
-                                  ItemsSource="{Binding AvailableApaSckPins}"
+                                  SelectedItem="{Binding Apa102Mosi}"
+                                  ItemsSource="{Binding AvailableApaMosiPins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
 
                         <Label Foreground="Red"
