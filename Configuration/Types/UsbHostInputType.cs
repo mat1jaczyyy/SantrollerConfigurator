@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum UsbHostInputType
@@ -42,16 +44,16 @@ public enum UsbHostInputType
     LeftStickY,
     RightStickX,
     RightStickY,
-    PressureDPadUp,
-    PressureDPadRight,
-    PressureDPadLeft,
-    PressureDPadDown,
-    PressureL1,
-    PressureR1,
-    PressureTriangle,
-    PressureCircle,
-    PressureCross,
-    PressureSquare,
+    [Description("Dpad Up Pressure")] PressureDPadUp,
+    [Description("Dpad Right Pressure")] PressureDPadRight,
+    [Description("Dpad Left Pressure")] PressureDPadLeft,
+    [Description("Dpad Down Pressure")] PressureDPadDown,
+    [Description("L1 Pressure")] PressureL1,
+    [Description("R1 Pressure")] PressureR1,
+    [Description("Triangle Pressure")] PressureTriangle,
+    [Description("Circle Pressure")] PressureCircle,
+    [Description("Cross Pressure")] PressureCross,
+    [Description("Square Pressure")] PressureSquare,
     RedVelocity,
     YellowVelocity,
     BlueVelocity,
