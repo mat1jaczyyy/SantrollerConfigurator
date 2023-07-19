@@ -18,22 +18,34 @@ public enum UsbHostInputType
     [Description("Right Stick Click")] RightThumbClick,
     [Description("Home Button")] Guide,
     [Description("Left Stick Click")] Capture,
+
+    [Description("Left Turntable Blue Fret")]
     LeftBlue = 15,
+
+    [Description("Left Turntable Red Fret")]
     LeftRed,
+
+    [Description("Left Turntable Green Fret")]
     LeftGreen,
+
+    [Description("Right Turntable Blue Fret")]
     RightBlue,
+
+    [Description("Right Turntable Red Fret")]
     RightRed,
+
+    [Description("Right Turntable Green Fret")]
     RightGreen,
-    SoloGreen = 22,
-    SoloRed,
-    SoloYellow,
-    SoloBlue,
-    SoloOrange,
-    Green,
-    Red,
-    Yellow,
-    Blue,
-    Orange,
+    [Description("Solo Green Fret")] SoloGreen = 22,
+    [Description("Solo Red Fret")] SoloRed,
+    [Description("Solo Yellow Fret")] SoloYellow,
+    [Description("Solo Blue Fret")] SoloBlue,
+    [Description("Solo Orange Fret")] SoloOrange,
+    [Description("Green Fret")] Green,
+    [Description("Red Fret")] Red,
+    [Description("Yellow Fret")] Yellow,
+    [Description("Blue Fret")] Blue,
+    [Description("Orange Fret")] Orange,
     [Description("D-pad Up")] DpadUp = 35,
     [Description("D-pad Down")] DpadDown,
     [Description("D-pad Left")] DpadLeft,
@@ -67,8 +79,8 @@ public enum UsbHostInputType
     Tilt,
     Pickup,
     Slider,
-    LeftTableVelocity,
-    RightTableVelocity,
+    [Description("Left Turntable Spin")] LeftTableVelocity,
+    [Description("Right Turntable Spin")] RightTableVelocity,
     EffectsKnob,
     Crossfader,
     AccelX,
