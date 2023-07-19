@@ -72,7 +72,7 @@ public class GuitarButton : OutputButton
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
         if (mode is not (ConfigField.Shared or ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.Universal
-            or ConfigField.XboxOne)) return "";
+            or ConfigField.XboxOne)) return ""; 
         // If combined debounce is on, then additionally generate extra logic to ignore this input if the opposite debounce flag is active
         if (combinedDebounce.Any() && Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp)
             combinedExtra = string.Join(" && ", combinedDebounce.Where(s => s != debounceIndex).Select(x => $"!debounce[{x}]"));
