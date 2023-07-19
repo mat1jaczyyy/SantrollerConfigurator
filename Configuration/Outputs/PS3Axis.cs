@@ -66,7 +66,7 @@ public class Ps3Axis : OutputAxis
         string combinedExtra,
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
-        return mode is not (ConfigField.Ps3 or ConfigField.Shared)
+        return mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.Universal)
             ? ""
             : base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
     }

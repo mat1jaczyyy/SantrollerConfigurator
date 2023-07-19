@@ -145,7 +145,7 @@ public partial class DjAxis : OutputAxis
     {
         if (mode == ConfigField.Shared)
             return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
-        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Universal)) return "";
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
         var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;

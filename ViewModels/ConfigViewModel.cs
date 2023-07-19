@@ -755,6 +755,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
             lines.Add($"#define TICK_PS3 {GenerateTick(ConfigField.Ps3)}");
 
+            lines.Add($"#define TICK_PC {GenerateTick(ConfigField.Universal)}");
+
             lines.Add($"#define TICK_PS4 {GenerateTick(ConfigField.Ps4)}");
 
             lines.Add($"#define TICK_XINPUT {GenerateTick(ConfigField.Xbox360)}");

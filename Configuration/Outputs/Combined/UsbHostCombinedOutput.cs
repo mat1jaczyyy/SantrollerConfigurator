@@ -218,7 +218,6 @@ public class UsbHostCombinedOutput : CombinedOutput
         {
             valid.UnionWith(Enum.GetValues<DjInputType>().Cast<object>());
         }
-
         LoadMatchingFromDict(valid, Mappings);
         switch (Model)
         {

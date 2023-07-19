@@ -69,6 +69,19 @@ public partial class DrumAxis : OutputAxis
         {DrumAxisType.Kick, "report->kickVelocity"},
         {DrumAxisType.Kick2, "report->kickVelocity"}
     };
+    private static readonly Dictionary<DrumAxisType, string> UniversalAxisMappings = new()
+    {
+        {DrumAxisType.Green, "report->greenVelocity"},
+        {DrumAxisType.Red, "report->redVelocity"},
+        {DrumAxisType.Yellow, "report->yellowVelocity"},
+        {DrumAxisType.Blue, "report->blueVelocity"},
+        {DrumAxisType.Orange, "report->orangeVelocity"},
+        {DrumAxisType.GreenCymbal, "report->greenCymbalVelocity"},
+        {DrumAxisType.YellowCymbal, "report->yellowCymbalVelocity"},
+        {DrumAxisType.BlueCymbal, "report->blueCymbalVelocity"},
+        {DrumAxisType.Kick, "report->kickVelocity"},
+        {DrumAxisType.Kick2, "report->kickVelocity"}
+    };
 
     private static readonly Dictionary<DrumAxisType, string> AxisMappingsXb1 = new()
     {
@@ -82,8 +95,6 @@ public partial class DrumAxis : OutputAxis
         {DrumAxisType.GreenCymbal, "report->greenCymbalVelocity"},
         {DrumAxisType.YellowCymbal, "report->yellowCymbalVelocity"},
         {DrumAxisType.BlueCymbal, "report->blueCymbalVelocity"},
-        {DrumAxisType.Kick, "report->kickVelocity"},
-        {DrumAxisType.Kick2, "report->kickVelocity"}
     };
 
     public DrumAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min, int max,
@@ -127,9 +138,12 @@ public partial class DrumAxis : OutputAxis
 
     public override string GenerateOutput(ConfigField mode)
     {
-        if (mode == ConfigField.XboxOne) return AxisMappingsXb1.TryGetValue(Type, out var value) ? value : "";
-
-        return AxisMappings.TryGetValue(Type, out var mapping) ? mapping : "";
+        return mode switch
+        {
+            ConfigField.Universal => UniversalAxisMappings.TryGetValue(Type, out var value) ? value : "",
+            ConfigField.XboxOne => AxisMappingsXb1.TryGetValue(Type, out var value) ? value : "",
+            _ => AxisMappings.TryGetValue(Type, out var mapping) ? mapping : ""
+        };
     }
 
     public override bool ShouldFlip(ConfigField mode)
@@ -154,7 +168,7 @@ public partial class DrumAxis : OutputAxis
         }
         
 
-        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360)) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Universal)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
         var debounce = Debounce;
         if (!Model.IsAdvancedMode) debounce = (byte) Model.Debounce;
@@ -163,7 +177,7 @@ public partial class DrumAxis : OutputAxis
             // If we aren't using queue based inputs, then we want ms based inputs, not ones based on 0.1ms
             debounce /= 10;
         }
-
+        
         debounce += 1;
 
         var ifStatement = $"debounce[{debounceIndex}]";
@@ -190,6 +204,7 @@ public partial class DrumAxis : OutputAxis
                     outputButtons += $"\n{GetReportField(value1)} = true;";
                 break;
             case ConfigField.Ps3:
+            case ConfigField.Universal:
                 if (ButtonsPs3.TryGetValue(Type, out var value2))
                     outputButtons += $"\n{GetReportField(value2)} = true;";
                 break;
@@ -224,12 +239,17 @@ public partial class DrumAxis : OutputAxis
                 case DrumAxisType.Red:
                 case DrumAxisType.Yellow:
                 case DrumAxisType.Blue:
-
                     outputButtons += $"\n{GetReportField("padFlag")} = true;";
 
                     break;
             }
 
+        if (outputButtons.Any())
+        {
+            outputButtons = @$"if ({ifStatement}) {{
+                {outputButtons}
+            }}";
+        }
         // If someone specified a digital input, then we need to take the value they have specified and convert it to the target consoles expected output
         var dtaVal = 0;
         if (input is DigitalToAnalog dta) dtaVal = dta.On;
@@ -275,40 +295,19 @@ public partial class DrumAxis : OutputAxis
             }
         }
 
-        var btExtra = "";
         // If someone has mapped digital inputs to the drums, then we can shortcut a bunch of the tests, and just need to use the calculated value from above
-        if (input is DigitalToAnalog dta2)
+        if (input is DigitalToAnalog)
         {
-            // For bluetooth, stuff the cymbal data into some unused bytes
-            if (Model.UsingBluetooth() && mode == ConfigField.Ps3 &&
-                Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
-                btExtra = $@"
-                if (bluetooth) {{
-                    {GenerateOutput(ConfigField.XboxOne)} = {dta2.On >> 8};
-                }}  
-            ";
-
             return $@"
             {{
                 if ({input.Generate()}) {{
                     {reset}
                     {GenerateOutput(mode)} = {dtaVal};
-                    {btExtra}
                 }}
-                if ({ifStatement}) {{
-                    {outputButtons}
-                }}
+                {outputButtons}
             }}";
         }
 
-        // For bluetooth, stuff the cymbal data into some unused bytes
-        if (Model.UsingBluetooth() && mode == ConfigField.Ps3 &&
-            Type is DrumAxisType.BlueCymbal or DrumAxisType.GreenCymbal or DrumAxisType.YellowCymbal)
-            btExtra = $@"
-                if (bluetooth) {{
-                    {GenerateOutput(ConfigField.XboxOne)} = val_real >> 8;
-                }}  
-            ";
         if (reset.Any())
         {
             reset = $@"
@@ -325,11 +324,8 @@ public partial class DrumAxis : OutputAxis
             if (val_real) {{
                 {reset}
                 {GenerateOutput(mode)} = {assignedVal};
-                {btExtra}
             }}
-            if ({ifStatement}) {{
-                {outputButtons}
-            }}
+            {outputButtons}
         }}";
     }
 

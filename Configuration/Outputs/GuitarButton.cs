@@ -71,7 +71,7 @@ public class GuitarButton : OutputButton
         string combinedExtra,
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
-        if (mode is not (ConfigField.Shared or ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360
+        if (mode is not (ConfigField.Shared or ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.Universal
             or ConfigField.XboxOne)) return "";
         // If combined debounce is on, then additionally generate extra logic to ignore this input if the opposite debounce flag is active
         if (combinedDebounce.Any() && Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp)
@@ -99,11 +99,8 @@ public class GuitarButton : OutputButton
         var ret = "";
         switch (mode)
         {
-            case ConfigField.Ps3 when Model.UsingBluetooth():
-                // For bluetooth, we shove the xb1 bits into some unused bytes of the report
-                ret += $@"if (bluetooth) {{
-                    {base.Generate(ConfigField.XboxOne, debounceIndex, "", combinedExtra, combinedDebounce, macros)}
-                }}";
+            case ConfigField.Universal:
+                ret += base.Generate(ConfigField.XboxOne, debounceIndex, "", combinedExtra, combinedDebounce, macros);
                 break;
             // XB1 also needs to set the normal face buttons, which can conveniently be done using the PS3 format
             // Also sets solo flag too

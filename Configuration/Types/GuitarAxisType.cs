@@ -20,6 +20,13 @@ public static class GuitarAxisTypeMethods
             GuitarAxisType.Pickup, GuitarAxisType.Tilt, GuitarAxisType.Whammy
         };
     }
+    public static IEnumerable<GuitarAxisType> GhlTypes()
+    {
+        return new[]
+        {
+            GuitarAxisType.Tilt, GuitarAxisType.Whammy
+        };
+    }
 
     public static IEnumerable<GuitarAxisType> GhTypes()
     {
@@ -31,7 +38,11 @@ public static class GuitarAxisTypeMethods
 
     public static IEnumerable<GuitarAxisType> GetTypeFor(DeviceControllerType deviceControllerType, RhythmType type)
     {
-        return deviceControllerType == DeviceControllerType.LiveGuitar || type == RhythmType.GuitarHero
+        if (deviceControllerType == DeviceControllerType.LiveGuitar)
+        {
+            return GhlTypes();
+        }
+        return type == RhythmType.GuitarHero
             ? GhTypes()
             : RbTypes();
     }
@@ -39,7 +50,11 @@ public static class GuitarAxisTypeMethods
     public static IEnumerable<GuitarAxisType> GetInvalidTypesFor(DeviceControllerType deviceControllerType,
         RhythmType type)
     {
-        return deviceControllerType == DeviceControllerType.LiveGuitar || type == RhythmType.GuitarHero
+        if (deviceControllerType == DeviceControllerType.LiveGuitar)
+        {
+            return RbTypes().Concat(GhTypes());
+        }
+        return type == RhythmType.GuitarHero
             ? RbTypes()
             : GhTypes();
     }
