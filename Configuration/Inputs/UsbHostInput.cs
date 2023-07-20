@@ -38,7 +38,7 @@ public class UsbHostInput : Input
 
     // Since DM and DP need to be next to eachother, you cannot use pins at the far ends
     public List<int> AvailablePinsDm => Model.AvailablePins.Skip(1).ToList();
-    public List<int> AvailablePinsDp => Model.AvailablePins.SkipLast(1).ToList();
+    public List<int> AvailablePinsDp => Model.AvailablePins.Where(s => AvailablePinsDm.Contains(s + 1)).ToList();
     private readonly ObservableAsPropertyHelper<int> _usbHostDm;
     private readonly ObservableAsPropertyHelper<int> _usbHostDp;
 

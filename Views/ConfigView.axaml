@@ -353,22 +353,23 @@
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
-                            D- (White) Pin
+                            D+ (Green) Pin
                         </Label>
                         <ComboBox HorizontalAlignment="Stretch"
-                                  SelectedItem="{Binding UsbHostDm}"
-                                  ItemsSource="{Binding AvailablePinsDm}"
+                                  SelectedItem="{Binding UsbHostDp}"
+                                  ItemsSource="{Binding AvailablePinsDp}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
-                            D+ (Green) Pin
+                            D- (White) Pin
                         </Label>
                         <ComboBox HorizontalAlignment="Stretch"
-                                  SelectedItem="{Binding UsbHostDp}"
-                                  ItemsSource="{Binding AvailablePinsDp}"
+                                  IsEnabled="False"
+                                  SelectedItem="{Binding UsbHostDm}"
+                                  ItemsSource="{Binding AvailablePinsDm}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                     </StackPanel>
                 </StackPanel>
