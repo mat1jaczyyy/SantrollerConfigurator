@@ -7,7 +7,7 @@ public enum UsbHostInputType
     [Description("X Button")] X,
     [Description("A Button")] A,
     [Description("B Button")] B,
-    [Description("T Button")] Y,
+    [Description("Y Button")] Y,
     [Description("Left Bumper")] LeftShoulder,
     [Description("Right Bumper")] RightShoulder,
     [Description("Kick Pedal 1")] Kick1,
