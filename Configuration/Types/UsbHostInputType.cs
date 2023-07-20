@@ -18,7 +18,7 @@ public enum UsbHostInputType
     [Description("Right Stick Click")] RightThumbClick,
     [Description("Home Button")] Guide,
     [Description("Capture Button")] Capture,
-
+    
     [Description("Left Turntable Blue Fret")]
     LeftBlue = 15,
 
@@ -36,6 +36,7 @@ public enum UsbHostInputType
 
     [Description("Right Turntable Green Fret")]
     RightGreen,
+    
     [Description("Solo Green Fret")] SoloGreen = 22,
     [Description("Solo Red Fret")] SoloRed,
     [Description("Solo Yellow Fret")] SoloYellow,
