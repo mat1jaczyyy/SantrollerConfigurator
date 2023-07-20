@@ -433,7 +433,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [ObservableAsProperty] public bool UsbHostEnabled { get; }
 
     // ReSharper enable UnassignedGetOnlyAutoProperty
-
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
         .Where(s => s.Value is SpiPinType.Mosi)
         .Select(s => s.Key).ToList();
