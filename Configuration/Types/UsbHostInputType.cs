@@ -43,7 +43,7 @@ public enum UsbHostInputType
     [Description("Blue Fret")] Blue,
     [Description("Orange Fret")] Orange,
     
-    [Description("D-pad Up")] DpadUp = 35,
+    [Description("D-pad Up")] DpadUp = 36,
     [Description("D-pad Down")] DpadDown,
     [Description("D-pad Left")] DpadLeft,
     [Description("D-pad Right")] DpadRight,
