@@ -841,6 +841,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             lines.Add($"#define TICK_SHARED");
             lines.Add($"#define TICK_DETECTION");
 
+            lines.Add($"#define TICK_PC");
             lines.Add($"#define TICK_PS3");
 
             lines.Add($"#define TICK_PS4");
