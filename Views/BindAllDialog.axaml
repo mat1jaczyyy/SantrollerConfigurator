@@ -13,6 +13,7 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="Santroller Configurator"
         Background="Transparent"
+        SystemDecorations="BorderOnly"
         Width="800"
         Height="600"
         MinWidth="800"
