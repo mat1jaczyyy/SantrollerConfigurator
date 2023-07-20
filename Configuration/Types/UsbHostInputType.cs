@@ -24,14 +24,13 @@ public enum UsbHostInputType
     [Description("Home Button")] Guide,
     [Description("Capture Button")] Capture,
     
-    [Description("Left Turntable Blue Fret")] LeftBlue = 15,
+    [Description("Left Turntable Blue Fret")] LeftBlue,
     [Description("Left Turntable Red Fret")] LeftRed,
     [Description("Left Turntable Green Fret")] LeftGreen,
     [Description("Right Turntable Blue Fret")] RightBlue,
     [Description("Right Turntable Red Fret")] RightRed,
     [Description("Right Turntable Green Fret")] RightGreen,
-    
-    [Description("Solo Green Fret")] SoloGreen = 22,
+    [Description("Solo Green Fret")] SoloGreen,
     [Description("Solo Red Fret")] SoloRed,
     [Description("Solo Yellow Fret")] SoloYellow,
     [Description("Solo Blue Fret")] SoloBlue,
@@ -42,8 +41,7 @@ public enum UsbHostInputType
     [Description("Yellow Fret")] Yellow,
     [Description("Blue Fret")] Blue,
     [Description("Orange Fret")] Orange,
-    
-    [Description("D-pad Up")] DpadUp = 36,
+    [Description("D-pad Up")] DpadUp,
     [Description("D-pad Down")] DpadDown,
     [Description("D-pad Left")] DpadLeft,
     [Description("D-pad Right")] DpadRight,
