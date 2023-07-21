@@ -485,12 +485,18 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
 
         if (_deviceControllerType == DeviceControllerType.Turntable)
+        {
             if (!Bindings.Items.Any(s => s is DjCombinedOutput))
             {
                 var dj = new DjCombinedOutput(this);
                 dj.SetOutputsOrDefaults(Array.Empty<Output>());
                 Bindings.Add(dj);
             }
+        }
+        else
+        {
+            Bindings.RemoveMany(Bindings.Items.Where(s => s is DjCombinedOutput));
+        }
 
         if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));

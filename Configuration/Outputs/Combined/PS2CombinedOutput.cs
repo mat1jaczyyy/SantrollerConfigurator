@@ -70,10 +70,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public static readonly Dictionary<Ps2InputType, Ps3AxisType> Ps3Axis = new()
     {
-        {Ps2InputType.Dualshock2UpButton, Ps3AxisType.PressureDPadUp},
-        {Ps2InputType.Dualshock2RightButton, Ps3AxisType.PressureDPadRight},
-        {Ps2InputType.Dualshock2LeftButton, Ps3AxisType.PressureDPadLeft},
-        {Ps2InputType.Dualshock2DownButton, Ps3AxisType.PressureDPadDown},
+        {Ps2InputType.Dualshock2UpButton, Ps3AxisType.PressureDpadUp},
+        {Ps2InputType.Dualshock2RightButton, Ps3AxisType.PressureDpadRight},
+        {Ps2InputType.Dualshock2LeftButton, Ps3AxisType.PressureDpadLeft},
+        {Ps2InputType.Dualshock2DownButton, Ps3AxisType.PressureDpadDown},
         {Ps2InputType.Dualshock2L1, Ps3AxisType.PressureL1},
         {Ps2InputType.Dualshock2R1, Ps3AxisType.PressureR1},
         {Ps2InputType.Dualshock2Triangle, Ps3AxisType.PressureTriangle},

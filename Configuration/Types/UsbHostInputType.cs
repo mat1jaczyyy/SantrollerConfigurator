@@ -18,8 +18,8 @@ public enum UsbHostInputType
     [Description("Back Button")] Back,
     [Description("Start Button")] Start,
     
-    [Description("Left Stick Click")] LeftThumbClick,
-    [Description("Right Stick Click")] RightThumbClick,
+    [Description("Left Stick Click")] LeftStickClick,
+    [Description("Right Stick Click")] RightStickClick,
     
     [Description("Home Button")] Guide,
     [Description("Capture Button")] Capture,
@@ -54,10 +54,10 @@ public enum UsbHostInputType
     [Description("Right Joystick X Axis")] RightStickX,
     [Description("Right Joystick Y Axis")] RightStickY,
     
-    [Description("Dpad Up Pressure")] PressureDPadUp,
-    [Description("Dpad Right Pressure")] PressureDPadRight,
-    [Description("Dpad Left Pressure")] PressureDPadLeft,
-    [Description("Dpad Down Pressure")] PressureDPadDown,
+    [Description("Dpad Up Pressure")] PressureDpadUp,
+    [Description("Dpad Right Pressure")] PressureDpadRight,
+    [Description("Dpad Left Pressure")] PressureDpadLeft,
+    [Description("Dpad Down Pressure")] PressureDpadDown,
     [Description("L1 Pressure")] PressureL1,
     [Description("R1 Pressure")] PressureR1,
     [Description("Triangle Pressure")] PressureTriangle,

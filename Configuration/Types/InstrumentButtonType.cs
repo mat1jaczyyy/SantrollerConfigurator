@@ -195,9 +195,12 @@ public static class InstrumentButtonTypeExtensions
                 {
                     if (output is not GuitarButton guitarButton) continue;
                     outputs.Remove(output);
-                    outputs.Add(new ControllerButton(model, output.Input, output.LedOn, output.LedOff,
-                        output.LedIndices.ToArray(), guitarButton.Debounce, GuitarToStandard[guitarButton.Type],
-                        combined));
+                    if (GuitarToStandard.TryGetValue(guitarButton.Type, out var value))
+                    {
+                        outputs.Add(new ControllerButton(model, output.Input, output.LedOn, output.LedOff,
+                            output.LedIndices.ToArray(), guitarButton.Debounce, value,
+                            combined));
+                    }
                 }
 
                 break;

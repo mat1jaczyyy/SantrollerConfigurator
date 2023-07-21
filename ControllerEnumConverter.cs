@@ -107,16 +107,6 @@ public class ControllerEnumConverter : IMultiValueConverter
                 },
                 {
                     new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.LiveGuitar,
-                        StandardButtonType.DpadUp),
-                    "D-pad Up"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.LiveGuitar,
-                        StandardButtonType.DpadDown),
-                    "D-pad Down"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.LiveGuitar,
                         StandardButtonType.DpadLeft),
                     "D-pad Left"
                 },
