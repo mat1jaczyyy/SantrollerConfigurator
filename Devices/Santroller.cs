@@ -20,6 +20,7 @@ namespace GuitarConfigurator.NetCore.Devices;
 public class Santroller : ConfigurableUsbDevice
 {
     private const int BtAddressLength = 18;
+
     public enum Commands
     {
         CommandReboot = 0x30,
@@ -60,12 +61,13 @@ public class Santroller : ConfigurableUsbDevice
     private DeviceControllerType? _deviceControllerType;
     private Microcontroller _microcontroller;
     private ConfigViewModel? _model;
-    private SerializedConfiguration? _lastConfig;
+    private byte[] _lastConfig;
     private SerializedConfiguration? _currentConfig;
     private bool _picking;
     private readonly DispatcherTimer _timer;
 
-    public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort version)  : base(
+    public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial,
+        ushort version) : base(
         device, path, product, serial, version)
     {
         _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
@@ -97,6 +99,7 @@ public class Santroller : ConfigurableUsbDevice
 
         Device.Close();
     }
+
     public override void BootloaderUsb()
     {
         WriteData(0, (byte) Commands.CommandJumpBootloaderUno, Array.Empty<byte>());
@@ -114,7 +117,6 @@ public class Santroller : ConfigurableUsbDevice
     {
         Bootloader();
     }
-
 
 
     public override Microcontroller GetMicrocontroller(ConfigViewModel model)
@@ -159,7 +161,6 @@ public class Santroller : ConfigurableUsbDevice
 
             foreach (var devicePin in analog)
             {
-            
                 var mask = _model.Microcontroller.GetAnalogMask(devicePin);
                 var wValue = (ushort) (_model.Microcontroller.GetChannel(devicePin.Pin, false) | (mask << 8));
                 var val = BitConverter.ToUInt16(ReadData(wValue, (byte) Commands.CommandReadAnalog,
@@ -198,6 +199,7 @@ public class Santroller : ConfigurableUsbDevice
             Console.WriteLine(ex);
         }
     }
+
     private void Load()
     {
         var fCpuStr = GetString(ReadData(0, (byte) Commands.CommandReadFCpu, 32)).Replace("L", "").Trim();
@@ -209,6 +211,7 @@ public class Santroller : ConfigurableUsbDevice
         Board = m.Board;
         _microcontroller = m;
     }
+
 
     private async Task LoadConfigurationAsync(ConfigViewModel model)
     {
@@ -226,9 +229,12 @@ public class Santroller : ConfigurableUsbDevice
         await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
         try
         {
-            _lastConfig = Serializer.Deserialize<SerializedConfiguration>(decompressor);
-            _lastConfig.LoadConfiguration(model);
-            _lastConfig = new SerializedConfiguration(model);
+            var lastConfig = Serializer.Deserialize<SerializedConfiguration>(decompressor);
+            lastConfig.LoadConfiguration(model);
+            lastConfig = new SerializedConfiguration(model);
+            using var outputStream = new MemoryStream();
+            Serializer.Serialize(outputStream, lastConfig);
+            _lastConfig = outputStream.ToArray();
             _currentConfig = new SerializedConfiguration(model);
         }
         catch (Exception ex)
@@ -246,11 +252,9 @@ public class Santroller : ConfigurableUsbDevice
     {
         if (_model == null || _currentConfig == null) return;
         _currentConfig.Update(_model, false);
-        using var outputStream = new MemoryStream();
-        using var outputStream2 = new MemoryStream();
+        using var outputStream = new MemoryStream(_lastConfig.Length);
         Serializer.Serialize(outputStream, _currentConfig);
-        Serializer.Serialize(outputStream2, _lastConfig);
-        _model.Main.SetDifference(!outputStream.ToArray().SequenceEqual(outputStream2.ToArray()));
+        _model.Main.SetDifference(!outputStream.GetBuffer().AsSpan().SequenceEqual(_lastConfig.AsSpan()));
     }
 
     public void StartTicking(ConfigViewModel model)
@@ -293,6 +297,7 @@ public class Santroller : ConfigurableUsbDevice
                 var wValue = (ushort) (microcontroller.GetChannel(pin, true) | (mask << 8));
                 ReadData(wValue, (byte) Commands.CommandReadAnalog, sizeof(ushort));
             }
+
             while (_picking)
             {
                 foreach (var pin in pins)
@@ -398,6 +403,7 @@ public class Santroller : ConfigurableUsbDevice
         {
             addressesAsStrings.Add(GetString(data[i..(i + BtAddressLength)]));
         }
+
         return addressesAsStrings;
     }
 
@@ -409,7 +415,7 @@ public class Santroller : ConfigurableUsbDevice
     public override void Disconnect()
     {
         _timer.Stop();
-        
+
         base.Disconnect();
     }
 
