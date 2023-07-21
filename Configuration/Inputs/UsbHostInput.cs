@@ -77,14 +77,16 @@ public class UsbHostInput : Input
         return new SerializedUsbHostInput(Input, Combined);
     }
 
-    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
-        byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
-        byte[] usbHostInputsRaw, byte[] usbHostRaw)
+    public override void Update(Dictionary<int, int> analogRaw, Dictionary<int, bool> digitalRaw,
+        ReadOnlySpan<byte> ps2Raw,
+        ReadOnlySpan<byte> wiiRaw, ReadOnlySpan<byte> djLeftRaw,
+        ReadOnlySpan<byte> djRightRaw, ReadOnlySpan<byte> gh5Raw, ReadOnlySpan<byte> ghWtRaw,
+        ReadOnlySpan<byte> ps2ControllerType, ReadOnlySpan<byte> wiiControllerType,
+        ReadOnlySpan<byte> usbHostInputsRaw, ReadOnlySpan<byte> usbHostRaw)
     {
         var buffer = "";
         // When combined, the combined output renders this, so we don't need to calculate it
-        if (!Combined && usbHostRaw.Any())
+        if (!Combined && !usbHostRaw.IsEmpty)
         {
             for (var i = 0; i < usbHostRaw.Length; i += 3)
             {

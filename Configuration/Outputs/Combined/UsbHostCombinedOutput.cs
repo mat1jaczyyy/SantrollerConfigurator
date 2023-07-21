@@ -252,14 +252,16 @@ public class UsbHostCombinedOutput : CombinedOutput
 
 
     public override void Update(Dictionary<int, int> analogRaw,
-        Dictionary<int, bool> digitalRaw, byte[] ps2Raw, byte[] wiiRaw,
-        byte[] djLeftRaw, byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType,
-        byte[] wiiControllerType, byte[] usbHostRaw, byte[] bluetoothRaw, byte[] usbHostInputsRaw)
+        Dictionary<int, bool> digitalRaw, ReadOnlySpan<byte> ps2Raw, ReadOnlySpan<byte> wiiRaw,
+        ReadOnlySpan<byte> djLeftRaw, ReadOnlySpan<byte> djRightRaw, ReadOnlySpan<byte> gh5Raw,
+        ReadOnlySpan<byte> ghWtRaw, ReadOnlySpan<byte> ps2ControllerType,
+        ReadOnlySpan<byte> wiiControllerType, ReadOnlySpan<byte> usbHostRaw, ReadOnlySpan<byte> bluetoothRaw,
+        ReadOnlySpan<byte> usbHostInputsRaw)
     {
         base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
         var buffer = "";
-        if (!usbHostRaw.Any()) return;
+        if (usbHostRaw.IsEmpty) return;
         for (var i = 0; i < usbHostRaw.Length; i += 3)
         {
             var consoleType = (ConsoleType) usbHostRaw[i];

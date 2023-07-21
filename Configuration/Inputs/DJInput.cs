@@ -74,27 +74,28 @@ public partial class DjInput : TwiInput
     }
 
     public override void Update(Dictionary<int, int> analogRaw,
-        Dictionary<int, bool> digitalRaw, byte[] ps2Raw,
-        byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
-        byte[] usbHostInputsRaw, byte[] usbHostRaw)
+        Dictionary<int, bool> digitalRaw, ReadOnlySpan<byte> ps2Raw,
+        ReadOnlySpan<byte> wiiRaw, ReadOnlySpan<byte> djLeftRaw,
+        ReadOnlySpan<byte> djRightRaw, ReadOnlySpan<byte> gh5Raw, ReadOnlySpan<byte> ghWtRaw,
+        ReadOnlySpan<byte> ps2ControllerType, ReadOnlySpan<byte> wiiControllerType,
+        ReadOnlySpan<byte> usbHostInputsRaw, ReadOnlySpan<byte> usbHostRaw)
     {
         switch (Input)
         {
-            case DjInputType.LeftTurntable when djLeftRaw.Any():
+            case DjInputType.LeftTurntable when !djLeftRaw.IsEmpty:
                 RawValue = (sbyte) djLeftRaw[2];
                 break;
-            case DjInputType.RightTurntable when djRightRaw.Any():
+            case DjInputType.RightTurntable when !djRightRaw.IsEmpty:
                 RawValue = (sbyte) djRightRaw[2];
                 break;
-            case DjInputType.LeftBlue when djLeftRaw.Any():
-            case DjInputType.LeftGreen when djLeftRaw.Any():
-            case DjInputType.LeftRed when djLeftRaw.Any():
+            case DjInputType.LeftBlue when !djLeftRaw.IsEmpty:
+            case DjInputType.LeftGreen when !djLeftRaw.IsEmpty:
+            case DjInputType.LeftRed when !djLeftRaw.IsEmpty:
                 RawValue = (djLeftRaw[0] & (1 << ((byte) Input - (byte) DjInputType.LeftGreen + 4))) != 0 ? 1 : 0;
                 break;
-            case DjInputType.RightGreen when djRightRaw.Any():
-            case DjInputType.RightRed when djRightRaw.Any():
-            case DjInputType.RightBlue when djRightRaw.Any():
+            case DjInputType.RightGreen when !djRightRaw.IsEmpty:
+            case DjInputType.RightRed when !djRightRaw.IsEmpty:
+            case DjInputType.RightBlue when !djRightRaw.IsEmpty:
                 RawValue = (djRightRaw[0] & (1 << ((byte) Input - (byte) DjInputType.RightGreen + 4))) != 0 ? 1 : 0;
                 break;
         }

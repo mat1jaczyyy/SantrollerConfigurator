@@ -61,7 +61,7 @@ public class Santroller : ConfigurableUsbDevice
     private DeviceControllerType? _deviceControllerType;
     private Microcontroller _microcontroller;
     private ConfigViewModel? _model;
-    private byte[] _lastConfig;
+    private byte[]? _lastConfig;
     private SerializedConfiguration? _currentConfig;
     private bool _picking;
     private readonly DispatcherTimer _timer;
@@ -250,7 +250,7 @@ public class Santroller : ConfigurableUsbDevice
 
     public void Diff()
     {
-        if (_model == null || _currentConfig == null) return;
+        if (_model == null || _currentConfig == null || _lastConfig == null) return;
         _currentConfig.Update(_model, false);
         using var outputStream = new MemoryStream(_lastConfig.Length);
         Serializer.Serialize(outputStream, _currentConfig);

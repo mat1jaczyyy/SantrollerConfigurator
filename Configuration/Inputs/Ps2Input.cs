@@ -287,12 +287,13 @@ public class Ps2Input : SpiInput
     }
 
     public override void Update(Dictionary<int, int> analogRaw,
-        Dictionary<int, bool> digitalRaw, byte[] ps2Data,
-        byte[] wiiRaw, byte[] djLeftRaw,
-        byte[] djRightRaw, byte[] gh5Raw, byte[] ghWtRaw, byte[] ps2ControllerType, byte[] wiiControllerType,
-        byte[] usbHostInputsRaw, byte[] usbHostRaw)
+        Dictionary<int, bool> digitalRaw, ReadOnlySpan<byte> ps2Data,
+        ReadOnlySpan<byte> wiiRaw, ReadOnlySpan<byte> djLeftRaw,
+        ReadOnlySpan<byte> djRightRaw, ReadOnlySpan<byte> gh5Raw, ReadOnlySpan<byte> ghWtRaw,
+        ReadOnlySpan<byte> ps2ControllerType, ReadOnlySpan<byte> wiiControllerType,
+        ReadOnlySpan<byte> usbHostInputsRaw, ReadOnlySpan<byte> usbHostRaw)
     {
-        if (!ps2ControllerType.Any() || !ps2Data.Any()) return;
+        if (ps2ControllerType.IsEmpty || ps2Data.IsEmpty) return;
         var type = ps2ControllerType[0];
         if (!Enum.IsDefined(typeof(Ps2ControllerType), type)) return;
         var realType = (Ps2ControllerType) type;
