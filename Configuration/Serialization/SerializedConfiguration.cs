@@ -82,6 +82,7 @@ public class SerializedConfiguration
             var generated = Bindings.Select(s => s.Generate(model)).ToList();
             model.Bindings.Clear();
             model.Bindings.AddRange(generated);
+            model.UpdateErrors();
         }
         if (model.UsbHostEnabled) model.UsbHostDp = UsbHostDp;
 
@@ -95,6 +96,5 @@ public class SerializedConfiguration
         model.Apa102Mosi = Apa102Mosi;
         model.Apa102Sck = Apa102Sck;
         
-        model.UpdateErrors();
     }
 }
