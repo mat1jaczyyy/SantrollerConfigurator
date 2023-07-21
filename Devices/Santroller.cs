@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -7,8 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -62,9 +65,12 @@ public class Santroller : ConfigurableUsbDevice
     private Microcontroller _microcontroller;
     private ConfigViewModel? _model;
     private byte[]? _lastConfig;
+    private byte[]? _currentConfigData;
     private SerializedConfiguration? _currentConfig;
     private bool _picking;
     private readonly DispatcherTimer _timer;
+    private ReadOnlyObservableCollection<Output>? _bindings;
+
 
     public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial,
         ushort version) : base(
@@ -126,7 +132,7 @@ public class Santroller : ConfigurableUsbDevice
 
     private void Tick(object? sender, EventArgs e)
     {
-        if (_model == null) return;
+        if (_model == null || _bindings == null) return;
         Diff();
         if (!Device.IsOpen || _model.Main.Working)
         {
@@ -189,7 +195,7 @@ public class Santroller : ConfigurableUsbDevice
 
 
             _model.Update(bluetoothRaw);
-            foreach (var output in _model.Bindings.Items)
+            foreach (var output in _bindings)
                 output.Update(_analogRaw, _digitalRaw, ps2Raw, wiiRaw, djLeftRaw,
                     djRightRaw, gh5Raw,
                     ghWtRaw, ps2ControllerType, wiiControllerType, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
@@ -236,6 +242,7 @@ public class Santroller : ConfigurableUsbDevice
             Serializer.Serialize(outputStream, lastConfig);
             _lastConfig = outputStream.ToArray();
             _currentConfig = new SerializedConfiguration(model);
+            _currentConfigData = new byte[_lastConfig.Length];
         }
         catch (Exception ex)
         {
@@ -245,21 +252,34 @@ public class Santroller : ConfigurableUsbDevice
         _deviceControllerType = model.DeviceType;
 
         _model = model;
+        model.Bindings.Connect().Bind(out var bindings).Subscribe();
+        _bindings = bindings;
         _timer.Start();
     }
 
-    public void Diff()
+    private void Diff()
     {
-        if (_model == null || _currentConfig == null || _lastConfig == null) return;
-        _currentConfig.Update(_model, false);
-        using var outputStream = new MemoryStream(_lastConfig.Length);
-        Serializer.Serialize(outputStream, _currentConfig);
-        _model.Main.SetDifference(!outputStream.GetBuffer().AsSpan().SequenceEqual(_lastConfig.AsSpan()));
+        if (_model == null || _currentConfig == null || _lastConfig == null || _currentConfigData == null || _bindings == null) return;
+        _currentConfig.Update(_model, _bindings, false);
+        using var outputStream = new MemoryStream(_currentConfigData);
+        try
+        {
+            Serializer.Serialize(outputStream, _currentConfig);
+            _model.Main.SetDifference(!_currentConfigData.AsSpan().SequenceEqual(_lastConfig.AsSpan()));
+        }
+        catch (Exception)
+        {
+            _model.Main.SetDifference(true);
+        }
+
     }
 
     public void StartTicking(ConfigViewModel model)
     {
         _model = model;
+        
+        model.Bindings.Connect().Bind(out var allOutputs).Subscribe();
+        _bindings = allOutputs;
         _timer.Start();
     }
 

@@ -127,7 +127,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
             .Select(s => s is not Santroller)
             .ToPropertyEx(this, s => s.NewDeviceOrArdwiino);
         // Make sure that the selected device input type is reset so that we don't end up doing something invalid
-        this.WhenAnyValue(s => s.SelectedDevice).Subscribe(s =>
+        this.WhenAnyValue(s => s.SelectedDevice).Subscribe(_ =>
         {
             DeviceInputType = DeviceInputType.Direct;
             this.RaisePropertyChanged(nameof(DeviceInputType));
@@ -300,10 +300,10 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     }
 
 
+
+    private bool Installed { get; set; }
     [Reactive] public bool HasChanges { get; set; }
     [Reactive] public bool Working { get; set; }
-
-    [Reactive] public bool Installed { get; set; }
 
     [Reactive] public string ProgressbarColor { get; set; }
 
@@ -339,7 +339,6 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
 
         if (config.Microcontroller.Board.HasUsbmcu) environment += "_usb";
 
-        ;
         var state = Observable.Return(new PlatformIo.PlatformIoState(0, "", null));
         var endingPercentage = 90;
         if (config.Device.IsMini()) endingPercentage = 100;
@@ -364,7 +363,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
             }, _ =>
             {
                 ProgressbarColor = "red";
-                config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(s => Programming = false);
+                config.ShowIssueDialog.Handle((output.ToString(), config)).Subscribe(_ => Programming = false);
             },
             () =>
             {

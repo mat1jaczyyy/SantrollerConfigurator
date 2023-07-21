@@ -123,6 +123,8 @@ public abstract partial class Output : ReactiveObject
         Outputs.Add(this);
         AnalogOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
         DigitalOutputs = new ReadOnlyObservableCollection<Output>(new ObservableCollection<Output>());
+        Outputs.Connect().Bind(out var allOutputs).Subscribe();
+        AllOutputs = allOutputs;
         _configured = true;
     }
 
@@ -293,6 +295,7 @@ public abstract partial class Output : ReactiveObject
 
     public ReadOnlyObservableCollection<Output> AnalogOutputs { get; protected set; }
     public ReadOnlyObservableCollection<Output> DigitalOutputs { get; protected set; }
+    private ReadOnlyObservableCollection<Output> AllOutputs { get; set; }
 
     public abstract bool IsKeyboard { get; }
     public bool IsLed => this is Led;
@@ -610,8 +613,8 @@ public abstract partial class Output : ReactiveObject
 
     public List<PinConfig> GetPinConfigs()
     {
-        return Outputs.Items
-            .SelectMany(s => s.Outputs.Items).SelectMany(s => s.Input.Inputs()).SelectMany(s => s.PinConfigs)
+        return AllOutputs
+            .SelectMany(s => s.AllOutputs).SelectMany(s => s.Input.Inputs()).SelectMany(s => s.PinConfigs)
             .Concat(GetOwnPinConfigs()).Distinct().ToList();
     }
 
@@ -627,7 +630,7 @@ public abstract partial class Output : ReactiveObject
                 ghWtRaw,
                 ps2ControllerType, wiiControllerType, usbHostInputsRaw, usbHostRaw);
 
-        foreach (var output in Outputs.Items)
+        foreach (var output in AllOutputs)
             if (output != this)
                 output.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw,
                     ghWtRaw,
