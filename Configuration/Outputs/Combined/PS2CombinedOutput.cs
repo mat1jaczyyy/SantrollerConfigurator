@@ -194,20 +194,17 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.LeftShoulder, true));
 
         Outputs.Add(new ControllerAxis(Model,
-            new DigitalToAnalog(
-                new Ps2Input(Ps2InputType.GuitarTilt, Model, Miso, Mosi, Sck, Att, Ack,
-                    true),
-                Model), Colors.Black,
-            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-            0, StandardAxisType.RightStickY, true));
-        Outputs.Add(new ControllerAxis(Model,
-            new DigitalToAnalog(new Ps2Input(Ps2InputType.L2, Model, Miso, Mosi, Sck, Att, Ack, true), ushort.MaxValue, true, Model),
+            new DigitalToAnalog(new Ps2Input(Ps2InputType.L2, Model, Miso, Mosi, Sck, Att, Ack, true), ushort.MaxValue,
+                true, Model),
             Colors.Black,
-            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, StandardAxisType.LeftTrigger, true));
+            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, StandardAxisType.LeftTrigger,
+            true));
         Outputs.Add(new ControllerAxis(Model,
-            new DigitalToAnalog(new Ps2Input(Ps2InputType.R2, Model, Miso, Mosi, Sck, Att, Ack, true), ushort.MaxValue, true, Model),
+            new DigitalToAnalog(new Ps2Input(Ps2InputType.R2, Model, Miso, Mosi, Sck, Att, Ack, true), ushort.MaxValue,
+                true, Model),
             Colors.Black,
-            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, StandardAxisType.RightTrigger, true));
+            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, StandardAxisType.RightTrigger,
+            true));
         foreach (var pair in Axis)
             if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
                 pair.Key is Ps2InputType.GuitarWhammy)
@@ -270,14 +267,34 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                     item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
                     GuitarAxisType.Whammy, true)));
             }
+
+            if (!Outputs.Items.Any(s => s.Input.InnermostInput() is Ps2Input {Input: Ps2InputType.GuitarTilt}))
+            {
+                Outputs.Add(new GuitarAxis(Model,
+                    new DigitalToAnalog(
+                        new Ps2Input(Ps2InputType.GuitarTilt, Model, Miso, Mosi, Sck, Att, Ack,
+                            true),
+                        Model), Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
+                    0, GuitarAxisType.Tilt, true));
+            }
         }
-        else if (Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))
+        else
         {
-            var items = Outputs.Items.Where(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}).ToList();
-            Outputs.RemoveMany(items);
-            Outputs.AddRange(items.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input, item.LedOn,
-                item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
-                StandardAxisType.RightStickX, true)));
+            if (Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))
+            {
+                var items = Outputs.Items.Where(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}).ToList();
+                Outputs.RemoveMany(items);
+                Outputs.AddRange(items.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input,
+                    item.LedOn,
+                    item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
+                    StandardAxisType.RightStickX, true)));
+            }
+
+            Outputs.RemoveMany(Outputs.Items.Where(s => s.Input.InnermostInput() is Ps2Input
+            {
+                Input: Ps2InputType.GuitarTilt
+            }));
         }
 
         InstrumentButtonTypeExtensions.ConvertBindings(Outputs, Model, true);

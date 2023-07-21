@@ -651,6 +651,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
         // Write the full config, bluetooth has zero config so we can actually properly write it
         Main.Write(this, Main.DeviceInputType is DeviceInputType.Bluetooth);
+        UpdateErrors();
     }
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
@@ -1272,6 +1273,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             output.UpdateErrors();
             if (!string.IsNullOrEmpty(output.ErrorText)) foundError = true;
+            Console.WriteLine(output);
         }
 
         if (IsApa102 && Microcontroller.SpiAssignable)

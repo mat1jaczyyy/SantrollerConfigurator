@@ -94,5 +94,7 @@ public class SerializedConfiguration
         if (!model.IsApa102) return;
         model.Apa102Mosi = Apa102Mosi;
         model.Apa102Sck = Apa102Sck;
+        
+        model.UpdateErrors();
     }
 }
