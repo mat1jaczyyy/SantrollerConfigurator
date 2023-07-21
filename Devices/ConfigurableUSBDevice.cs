@@ -78,6 +78,7 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
         {
             return _lastBootloaderPath;
         }
+
         _bootloaderPath = new TaskCompletionSource<string?>();
         Bootloader();
         return await _bootloaderPath.Task;
@@ -150,12 +151,13 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 
         if (!Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length))
         {
-            string firstError = UsbDevice.LastErrorString;
+            var firstError = UsbDevice.LastErrorString;
             if (!Device.ControlTransfer(ref sp, buffer, buffer.Length, out length))
             {
                 Trace.TraceError($"Failed to read data from device: {UsbDevice.LastErrorString}");
                 return Array.Empty<byte>();
             }
+
             Trace.TraceWarning($"Failed to read data from device (retry succeeded): {firstError}");
         }
 
@@ -175,15 +177,14 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
             wValue,
             2,
             buffer.Length);
-        if (!Device.ControlTransfer(ref sp, buffer, buffer.Length, out var length))
+        if (Device.ControlTransfer(ref sp, buffer, buffer.Length, out _)) return;
+        var firstError = UsbDevice.LastErrorString;
+        if (!Device.ControlTransfer(ref sp, buffer, buffer.Length, out _))
         {
-            string firstError = UsbDevice.LastErrorString;
-            if (!Device.ControlTransfer(ref sp, buffer, buffer.Length, out length))
-            {
-                Trace.TraceError($"Failed to write data to device: {UsbDevice.LastErrorString}");
-                return;
-            }
-            Trace.TraceWarning($"Failed to write data to device (retry succeeded): {firstError}");
+            Trace.TraceError($"Failed to write data to device: {UsbDevice.LastErrorString}");
+            return;
         }
+
+        Trace.TraceWarning($"Failed to write data to device (retry succeeded): {firstError}");
     }
 }

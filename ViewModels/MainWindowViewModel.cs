@@ -32,9 +32,9 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     private const string UdevFile = "99-santroller.rules";
     private const string UdevPath = $"/etc/udev/rules.d/{UdevFile}";
     private static readonly Regex VersionRegex = new("v\\d+\\.\\d+\\.\\d+$");
-    private readonly List<string> _currentDrives = new();
+    private readonly HashSet<string> _currentDrives = new();
     private readonly HashSet<string> _currentDrivesTemp = new();
-    private readonly List<string> _currentPorts = new();
+    private readonly HashSet<string> _currentPorts = new();
 
     private readonly Timer _timer = new();
 
@@ -444,7 +444,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         // We removed all valid devices above, so anything left in currentDrivesSet is no longer valid
         AvailableDevices.RemoveMany(AvailableDevices.Items.Where(x =>
             x is PicoDevice pico && _currentDrivesTemp.Contains(pico.GetPath())));
-        _currentDrives.RemoveMany(_currentDrivesTemp);
+        _currentDrives.ExceptWith(_currentDrivesTemp);
 
         var existingPorts = _currentPorts.ToHashSet();
         var ports = await Pio.GetPortsAsync();
@@ -461,7 +461,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
             }
 
             var currentSerialPorts = ports.Select(port => port.Port).ToHashSet();
-            _currentPorts.RemoveMany(_currentPorts.Where(port => !currentSerialPorts.Contains(port)));
+            _currentPorts.RemoveWhere(port => !currentSerialPorts.Contains(port));
             AvailableDevices.RemoveMany(AvailableDevices.Items.Where(device =>
                 device is Arduino arduino && !currentSerialPorts.Contains(arduino.GetSerialPort())));
         }
