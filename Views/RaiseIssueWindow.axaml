@@ -15,6 +15,7 @@
         MinWidth="800"
         MinHeight="600"
         SystemDecorations="BorderOnly"
+        CanResize="False"
         x:CompileBindings="True"
         x:DataType="viewModels:RaiseIssueWindowViewModel"
         ExtendClientAreaToDecorationsHint="True">

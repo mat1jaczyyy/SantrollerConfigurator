@@ -16,6 +16,7 @@
         MinHeight="600"
         x:CompileBindings="True"
         SystemDecorations="BorderOnly"
+        CanResize="False"
         x:DataType="viewModels:AreYouSureWindowViewModel"
         ExtendClientAreaToDecorationsHint="True">
     <Panel>
