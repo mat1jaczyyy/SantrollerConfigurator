@@ -39,8 +39,7 @@
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                         <Binding />
-                        <Binding Path="$parent[views:SidebarView].Model.DeviceType" />
-                        <Binding Path="$parent[views:SidebarView].Model.RhythmType" />
+                        <Binding Path="$parent[views:SidebarView].Model.DeviceControllerType" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
@@ -93,7 +92,7 @@
                     <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Controller Type"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                              SelectedItem="{Binding DeviceControllerRhythmType}"
+                              SelectedItem="{Binding DeviceControllerType}"
                               ItemTemplate="{StaticResource EnumToStringTemplate}"
                               ItemsSource="{Binding DeviceControllerRhythmTypes}" />
                 </StackPanel>

@@ -22,7 +22,7 @@ public enum Ps2ControllerType : byte
     JogCon,
     [Description("Mouse")]
     Mouse,
-    [Description("Plugged in ontroller")]
+    [Description("Plugged in controller")]
     Selected,
     [Description("All Inputs")]
     All

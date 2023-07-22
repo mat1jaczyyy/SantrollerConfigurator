@@ -9,16 +9,16 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum InstrumentButtonType
 {
-    [Description("Solo Green Fret")] SoloGreen,
-    [Description("Solo Red Fret")] SoloRed,
-    [Description("Solo Yellow Fret")] SoloYellow,
-    [Description("Solo Blue Fret")] SoloBlue,
-    [Description("Solo Orange Fret")] SoloOrange,
     [Description("Green Fret")] Green,
     [Description("Red Fret")] Red,
     [Description("Yellow Fret")] Yellow,
     [Description("Blue Fret")] Blue,
     [Description("Orange Fret")] Orange,
+    [Description("Solo Green Fret")] SoloGreen,
+    [Description("Solo Red Fret")] SoloRed,
+    [Description("Solo Yellow Fret")] SoloYellow,
+    [Description("Solo Blue Fret")] SoloBlue,
+    [Description("Solo Orange Fret")] SoloOrange,
     Black1,
     Black2,
     Black3,
@@ -130,13 +130,12 @@ public static class InstrumentButtonTypeExtensions
         InstrumentButtonType.StrumUp
     };
 
-    public static IEnumerable<InstrumentButtonType> GetButtons(DeviceControllerType deviceControllerType,
-        RhythmType type)
+    public static IEnumerable<InstrumentButtonType> GetButtons(DeviceControllerType deviceControllerType)
     {
         return deviceControllerType switch
         {
-            DeviceControllerType.Guitar when type is RhythmType.GuitarHero => GuitarButtons,
-            DeviceControllerType.Guitar when type is RhythmType.RockBand => RbButtons,
+            DeviceControllerType.GuitarHeroGuitar => GuitarButtons,
+            DeviceControllerType.RockBandGuitar => RbButtons,
             DeviceControllerType.LiveGuitar => GhlButtons,
             _ => Enumerable.Empty<InstrumentButtonType>()
         };
@@ -144,9 +143,10 @@ public static class InstrumentButtonTypeExtensions
 
     public static void ConvertBindings(SourceList<Output> outputs, ConfigViewModel model, bool combined)
     {
-        switch (model.DeviceType)
+        switch (model.DeviceControllerType)
         {
-            case DeviceControllerType.Guitar:
+            case DeviceControllerType.GuitarHeroGuitar:
+            case DeviceControllerType.RockBandGuitar:
             {
                 foreach (var output in outputs.Items)
                 {

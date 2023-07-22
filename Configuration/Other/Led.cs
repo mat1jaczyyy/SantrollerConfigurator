@@ -164,18 +164,18 @@ public class Led : Output
         switch (command)
         {
             case LedCommandType.InputReactive:
-                switch (model.DeviceType)
+                switch (model.DeviceControllerType)
                 {
-                    case DeviceControllerType.Guitar:
+                    case DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.RockBandGuitar:
                         FiveFretGuitar = (FiveFretGuitar) param;
                         break;
                     case DeviceControllerType.LiveGuitar:
                         SixFretGuitar = (SixFretGuitar) param;
                         break;
-                    case DeviceControllerType.Drum when Model.RhythmType is RhythmType.GuitarHero:
+                    case DeviceControllerType.GuitarHeroDrums:
                         GuitarHeroDrum = (GuitarHeroDrum) param;
                         break;
-                    case DeviceControllerType.Drum when Model.RhythmType is RhythmType.RockBand:
+                    case DeviceControllerType.RockBandDrums:
                         RockBandDrum = (RockBandDrum) param;
                         break;
                     case DeviceControllerType.Turntable:
@@ -211,7 +211,7 @@ public class Led : Output
         Command = command;
         _rumbleCommands.AddRange(Enum.GetValues<LedCommandType>());
         _rumbleCommands.Connect()
-            .Filter(this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.EmulationType, x => x.Model.RhythmType,
+            .Filter(this.WhenAnyValue(x => x.Model.DeviceControllerType, x => x.Model.EmulationType,
                 x => x.Model.IsApa102).Select(FilterLeds))
             .Bind(out var rumbleCommands)
             .Subscribe();
@@ -222,27 +222,25 @@ public class Led : Output
             .Select(commandType => commandType is LedCommandType.DjEuphoria
                 or LedCommandType.StarPowerActive
                 or LedCommandType.StarPowerInactive).ToPropertyEx(this, x => x.UsesPwm);
-        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType)
-            .Select(s => s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.Guitar)
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceControllerType)
+            .Select(s => s.Item1 is LedCommandType.InputReactive && s.Item2.Is5FretGuitar())
             .ToPropertyEx(this, x => x.FiveFretMode);
 
-        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType)
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceControllerType)
             .Select(s => s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.LiveGuitar)
             .ToPropertyEx(this, x => x.SixFretMode);
 
-        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType, x => x.Model.RhythmType)
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceControllerType)
             .Select(s =>
-                s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.Drum &&
-                s.Item3 is RhythmType.GuitarHero)
+                s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.GuitarHeroDrums)
             .ToPropertyEx(this, x => x.GuitarHeroDrumsMode);
 
-        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType, x => x.Model.RhythmType)
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceControllerType)
             .Select(s =>
-                s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.Drum &&
-                s.Item3 is RhythmType.RockBand)
+                s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.RockBandDrums)
             .ToPropertyEx(this, x => x.RockBandDrumsMode);
 
-        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceType)
+        this.WhenAnyValue(x => x.Command, x => x.Model.DeviceControllerType)
             .Select(s => s.Item1 is LedCommandType.InputReactive && s.Item2 is DeviceControllerType.Turntable)
             .ToPropertyEx(this, x => x.TurntableMode);
 
@@ -388,7 +386,7 @@ public class Led : Output
     public override bool IsKeyboard => false;
     public virtual bool IsController => false;
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return "Led Command - " + EnumToStringConverter.Convert(Command);
     }
@@ -407,7 +405,7 @@ public class Led : Output
     }
 
     public static Func<LedCommandType, bool> FilterLeds(
-        (DeviceControllerType controllerType, EmulationType emulationType, RhythmType rhythmType, bool isApa102) type)
+        (DeviceControllerType controllerType, EmulationType emulationType, bool isApa102) type)
     {
         return command =>
         {
@@ -421,7 +419,9 @@ public class Led : Output
                     LedCommandType.Auth or LedCommandType.Player => true,
                     LedCommandType.Combo or LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive
                         or LedCommandType.InputReactive or LedCommandType.StageKitLed when
-                        type.controllerType is DeviceControllerType.Drum or DeviceControllerType.Guitar
+                        type.controllerType is DeviceControllerType.RockBandDrums
+                            or DeviceControllerType.GuitarHeroDrums or DeviceControllerType.RockBandGuitar
+                            or DeviceControllerType.RockBandGuitar
                             or DeviceControllerType.LiveGuitar or DeviceControllerType.Turntable
                             or DeviceControllerType.StageKit => true,
                     LedCommandType.DjEuphoria when type.controllerType is DeviceControllerType.Turntable => true,
@@ -439,18 +439,19 @@ public class Led : Output
         switch (Command)
         {
             case LedCommandType.InputReactive:
-                switch (Model.DeviceType)
+                switch (Model.DeviceControllerType)
                 {
-                    case DeviceControllerType.Guitar:
+                    case DeviceControllerType.GuitarHeroGuitar:
+                    case DeviceControllerType.RockBandGuitar:
                         param1 = (int) FiveFretGuitar;
                         break;
                     case DeviceControllerType.LiveGuitar:
                         param1 = (int) SixFretGuitar;
                         break;
-                    case DeviceControllerType.Drum when Model.RhythmType is RhythmType.GuitarHero:
+                    case DeviceControllerType.GuitarHeroDrums:
                         param1 = (int) GuitarHeroDrum;
                         break;
-                    case DeviceControllerType.Drum when Model.RhythmType is RhythmType.RockBand:
+                    case DeviceControllerType.RockBandDrums:
                         param1 = (int) RockBandDrum;
                         break;
                     case DeviceControllerType.Turntable:
@@ -476,7 +477,8 @@ public class Led : Output
                 break;
         }
 
-        return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command, param1, param2, OutputEnabled, Inverted, Pin);
+        return new SerializedLed(LedOn, LedOff, LedIndices.ToArray(), Command, param1, param2, OutputEnabled, Inverted,
+            Pin);
     }
 
     public override object GetOutputType()
@@ -501,7 +503,9 @@ public class Led : Output
             between =
                 Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, (Inverted ? "(255-" : "(") + "rumble_left)") +
                 ";";
-            starPowerBetween = Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, (Inverted ? "(255-" : "(") +"last_star_power)") + ";";
+            starPowerBetween =
+                Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin,
+                    (Inverted ? "(255-" : "(") + "last_star_power)") + ";";
         }
 
         foreach (var index in LedIndices)
@@ -589,12 +593,12 @@ public class Led : Output
                 }}";
             case LedCommandType.InputReactive:
             {
-                var santrollerCmd = Model.DeviceType switch
+                var santrollerCmd = Model.DeviceControllerType switch
                 {
-                    DeviceControllerType.Guitar => (int) FiveFretGuitar,
+                    DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.RockBandGuitar => (int) FiveFretGuitar,
                     DeviceControllerType.LiveGuitar => (int) SixFretGuitar,
-                    DeviceControllerType.Drum when Model.RhythmType is RhythmType.GuitarHero => (int) GuitarHeroDrum,
-                    DeviceControllerType.Drum when Model.RhythmType is RhythmType.RockBand => (int) RockBandDrum,
+                    DeviceControllerType.GuitarHeroDrums => (int) GuitarHeroDrum,
+                    DeviceControllerType.RockBandDrums=> (int) RockBandDrum,
                     DeviceControllerType.Turntable => (int) Turntable,
                     _ => 0
                 };

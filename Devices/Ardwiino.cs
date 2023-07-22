@@ -333,7 +333,6 @@ public class Ardwiino : ConfigurableUsbDevice
         var ledType = LedType.None;
         DeviceControllerType deviceType;
         var emulationType = EmulationType.Controller;
-        var rhythmType = RhythmType.GuitarHero;
         if (config.all.main.fretLEDMode == 2) ledType = LedType.Apa102Bgr;
 
         if ((config.all.main.subType >= (int) SubType.KeyboardGamepad &&
@@ -359,79 +358,48 @@ public class Ardwiino : ConfigurableUsbDevice
                 break;
         }
 
-        switch ((SubType) config.all.main.subType)
+        deviceType = (SubType) config.all.main.subType switch
         {
-            case SubType.XinputTurntable:
-            case SubType.Ps3Turntable:
-                deviceType = DeviceControllerType.Turntable;
-                break;
-            case SubType.XinputGamepad:
-            case SubType.Ps3Gamepad:
-            case SubType.SwitchGamepad:
-            case SubType.MidiGamepad:
-            case SubType.KeyboardGamepad:
-                deviceType = DeviceControllerType.Gamepad;
-                break;
-            case SubType.XinputArcadePad:
-                deviceType = DeviceControllerType.ArcadePad;
-                break;
-            case SubType.XinputWheel:
-                deviceType = DeviceControllerType.Gamepad;
-                break;
-            case SubType.XinputArcadeStick:
-                deviceType = DeviceControllerType.ArcadeStick;
-                break;
-            case SubType.XinputFlightStick:
-                deviceType = DeviceControllerType.FlightStick;
-                break;
-            case SubType.XinputDancePad:
-                deviceType = DeviceControllerType.DancePad;
-                break;
-            case SubType.WiiLiveGuitar:
-            case SubType.Ps3LiveGuitar:
-            case SubType.MidiLiveGuitar:
-            case SubType.XinputLiveGuitar:
-            case SubType.KeyboardLiveGuitar:
-                deviceType = DeviceControllerType.LiveGuitar;
-                rhythmType = RhythmType.GuitarHero;
-                break;
-            case SubType.Ps3RockBandDrums:
-            case SubType.WiiRockBandDrums:
-            case SubType.MidiRockBandDrums:
-            case SubType.XinputRockBandDrums:
-            case SubType.KeyboardRockBandDrums:
-                deviceType = DeviceControllerType.Drum;
-                rhythmType = RhythmType.RockBand;
-                break;
-            case SubType.Ps3GuitarHeroDrums:
-            case SubType.MidiGuitarHeroDrums:
-            case SubType.XinputGuitarHeroDrums:
-            case SubType.KeyboardGuitarHeroDrums:
-                deviceType = DeviceControllerType.Drum;
-                rhythmType = RhythmType.GuitarHero;
-                break;
-            case SubType.Ps3RockBandGuitar:
-            case SubType.WiiRockBandGuitar:
-            case SubType.MidiRockBandGuitar:
-            case SubType.XinputRockBandGuitar:
-            case SubType.KeyboardRockBandGuitar:
-                deviceType = DeviceControllerType.Guitar;
-                rhythmType = RhythmType.RockBand;
-                break;
-            case SubType.Ps3GuitarHeroGuitar:
-            case SubType.MidiGuitarHeroGuitar:
-            case SubType.XinputGuitarHeroGuitar:
-            case SubType.KeyboardGuitarHeroGuitar:
-                deviceType = DeviceControllerType.Guitar;
-                rhythmType = RhythmType.GuitarHero;
-                break;
-            default:
-                deviceType = DeviceControllerType.Gamepad;
-                break;
-        }
+            SubType.XinputTurntable => DeviceControllerType.Turntable,
+            SubType.Ps3Turntable => DeviceControllerType.Turntable,
+            SubType.XinputGamepad => DeviceControllerType.Gamepad,
+            SubType.Ps3Gamepad => DeviceControllerType.Gamepad,
+            SubType.SwitchGamepad => DeviceControllerType.Gamepad,
+            SubType.MidiGamepad => DeviceControllerType.Gamepad,
+            SubType.KeyboardGamepad => DeviceControllerType.Gamepad,
+            SubType.XinputArcadePad => DeviceControllerType.Gamepad,
+            SubType.XinputWheel => DeviceControllerType.Gamepad,
+            SubType.XinputArcadeStick => DeviceControllerType.Gamepad,
+            SubType.XinputFlightStick => DeviceControllerType.Gamepad,
+            SubType.XinputDancePad => DeviceControllerType.DancePad,
+            SubType.WiiLiveGuitar => DeviceControllerType.LiveGuitar,
+            SubType.Ps3LiveGuitar => DeviceControllerType.LiveGuitar,
+            SubType.MidiLiveGuitar => DeviceControllerType.LiveGuitar,
+            SubType.XinputLiveGuitar => DeviceControllerType.LiveGuitar,
+            SubType.KeyboardLiveGuitar => DeviceControllerType.LiveGuitar,
+            SubType.Ps3RockBandDrums => DeviceControllerType.RockBandDrums,
+            SubType.WiiRockBandDrums => DeviceControllerType.RockBandDrums,
+            SubType.MidiRockBandDrums => DeviceControllerType.RockBandDrums,
+            SubType.XinputRockBandDrums => DeviceControllerType.RockBandDrums,
+            SubType.KeyboardRockBandDrums => DeviceControllerType.RockBandDrums,
+            SubType.Ps3GuitarHeroDrums => DeviceControllerType.GuitarHeroDrums,
+            SubType.MidiGuitarHeroDrums => DeviceControllerType.GuitarHeroDrums,
+            SubType.XinputGuitarHeroDrums => DeviceControllerType.GuitarHeroDrums,
+            SubType.KeyboardGuitarHeroDrums => DeviceControllerType.GuitarHeroDrums,
+            SubType.Ps3RockBandGuitar => DeviceControllerType.RockBandGuitar,
+            SubType.WiiRockBandGuitar => DeviceControllerType.RockBandGuitar,
+            SubType.MidiRockBandGuitar => DeviceControllerType.RockBandGuitar,
+            SubType.XinputRockBandGuitar => DeviceControllerType.RockBandGuitar,
+            SubType.KeyboardRockBandGuitar => DeviceControllerType.RockBandGuitar,
+            SubType.Ps3GuitarHeroGuitar => DeviceControllerType.GuitarHeroGuitar,
+            SubType.MidiGuitarHeroGuitar => DeviceControllerType.GuitarHeroGuitar,
+            SubType.XinputGuitarHeroGuitar => DeviceControllerType.GuitarHeroGuitar,
+            SubType.KeyboardGuitarHeroGuitar => DeviceControllerType.GuitarHeroGuitar,
+            _ => DeviceControllerType.Gamepad
+        };
 
         model.LedType = ledType;
-        model.SetDeviceTypeAndRhythmTypeWithoutUpdating(deviceType, rhythmType, emulationType);
+        model.SetDeviceTypeAndRhythmTypeWithoutUpdating(deviceType, emulationType);
         model.Debounce = config.debounce.buttons;
         model.StrumDebounce = config.debounce.strum;
         var sda = 18;
@@ -485,7 +453,7 @@ public class Ardwiino : ConfigurableUsbDevice
 
         if (config.all.main.inputType == (int) InputControllerType.Direct)
         {
-            if (deviceType == DeviceControllerType.Guitar)
+            if (deviceType.Is5FretGuitar())
             {
                 if (config.neck.gh5Neck != 0 || config.neck.gh5NeckBar != 0)
                 {
@@ -520,7 +488,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 var genAxis = AxisToStandard[(ControllerAxisType) axis];
                 var scale = config.axisScale.axis[axis];
                 var isTrigger = axis is (int) ControllerAxisType.XboxLt or (int) ControllerAxisType.XboxRt ||
-                                (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
+                                (deviceType.IsGuitar() &&
                                  ((ControllerAxisType) axis ==
                                      XboxWhammy || (ControllerAxisType) axis == XboxTilt));
 
@@ -531,7 +499,7 @@ public class Ardwiino : ConfigurableUsbDevice
                 if (ledIndexes.ContainsKey(axis + XboxBtnCount)) ledIndex = new[] {ledIndexes[axis + XboxBtnCount]};
 
                 var off = Color.FromRgb(0, 0, 0);
-                if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
+                if (deviceType.IsGuitar() &&
                     (ControllerAxisType) axis == XboxTilt &&
                     config.all.main.tiltType == 2)
                 {
@@ -553,7 +521,7 @@ public class Ardwiino : ConfigurableUsbDevice
                         max += short.MaxValue;
                     }
 
-                    if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
+                    if (deviceType.IsGuitar() &&
                         (ControllerAxisType) axis == XboxWhammy)
                     {
                         bindings.Add(new GuitarAxis(model, new DirectInput(pin.pin, false, DevicePinMode.Analog, model), on,
@@ -583,14 +551,14 @@ public class Ardwiino : ConfigurableUsbDevice
                 var off = Color.FromRgb(0, 0, 0);
                 var genButton = ButtonToStandard[(ControllerButtons) button];
                 var pinMode = DevicePinMode.PullUp;
-                if (config.all.main.fretLEDMode == 1 && deviceType == DeviceControllerType.Guitar &&
+                if (config.all.main.fretLEDMode == 1 && deviceType.IsGuitar() &&
                     _frets.Contains(genButton))
                     pinMode = DevicePinMode.Floating;
 
                 var debounce = config.debounce.buttons;
                 switch (deviceType)
                 {
-                    case DeviceControllerType.Guitar when
+                    case DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.RockBandGuitar or DeviceControllerType.LiveGuitar when
                         genButton is StandardButtonType.DpadUp or StandardButtonType.DpadDown:
                         debounce = config.debounce.strum;
                         break;
@@ -619,7 +587,7 @@ public class Ardwiino : ConfigurableUsbDevice
         }
         else if (config.all.main.tiltType == 2)
         {
-            if (deviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar)
+            if (deviceType.IsGuitar())
             {
                 var pin = config.all.pins.axis![(int) XboxTilt];
                 if (pin.pin != NotUsed)

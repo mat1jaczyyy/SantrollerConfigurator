@@ -12,5 +12,6 @@ public enum XInputSubType
     Drums = 8,
     StageKit = 9,
     ArcadePad = 19,
-    Turntable = 23
+    Turntable = 23,
+    GuitarHeroLive = 25
 }

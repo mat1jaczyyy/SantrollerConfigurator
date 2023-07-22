@@ -46,7 +46,7 @@ public class DjCombinedOutput : CombinedTwiOutput
             CreateDefaults();
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return "DJ Turntable Inputs";
     }

@@ -119,7 +119,7 @@ public partial class DrumAxis : OutputAxis
 
     [Reactive] public int Debounce { get; set; }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return EnumToStringConverter.Convert(Type);
     }
@@ -218,14 +218,14 @@ public partial class DrumAxis : OutputAxis
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
         }
 
-        if (Model.RhythmType == RhythmType.RockBand && Type is DrumAxisType.Kick or DrumAxisType.Kick2)
+        if (Model.DeviceControllerType.IsRb() && Type is DrumAxisType.Kick or DrumAxisType.Kick2)
         {
             return $@"if ({ifStatement}) {{
                 {outputButtons}
             }}";
         }
 
-        if (Model.RhythmType == RhythmType.RockBand && mode != ConfigField.XboxOne && mode != ConfigField.Universal)
+        if (Model.DeviceControllerType.IsRb() && mode != ConfigField.XboxOne && mode != ConfigField.Universal)
             switch (Type)
             {
                 case DrumAxisType.YellowCymbal:
@@ -276,7 +276,7 @@ public partial class DrumAxis : OutputAxis
             // Xbox 360 GH use uint8_t velocities
             default:
             {
-                if (Model.RhythmType == RhythmType.GuitarHero)
+                if (Model.DeviceControllerType.IsGh())
                 {
                     assignedVal = "val_real >> 8";
                     dtaVal >>= 8;

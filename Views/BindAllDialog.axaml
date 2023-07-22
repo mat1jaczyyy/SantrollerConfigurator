@@ -66,15 +66,13 @@
                             <Image.Source>
                                 <MultiBinding Converter="{StaticResource InputImageConverter }">
                                     <Binding Path="Output" />
-                                    <Binding Path="Model.DeviceType" />
-                                    <Binding Path="Model.RhythmType" />
+                                    <Binding Path="Model.DeviceControllerType" />
                                 </MultiBinding>
                             </Image.Source>
                             <ToolTip.Tip>
                                 <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                                     <Binding Path="Output.OutputType" />
-                                    <Binding Path="Model.DeviceType" />
-                                    <Binding Path="Model.RhythmType" />
+                                    <Binding Path="Model.DeviceControllerType" />
                                 </MultiBinding>
                             </ToolTip.Tip>
                         </Image>

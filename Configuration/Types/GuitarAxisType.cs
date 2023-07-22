@@ -36,40 +36,37 @@ public static class GuitarAxisTypeMethods
         };
     }
 
-    public static IEnumerable<GuitarAxisType> GetTypeFor(DeviceControllerType deviceControllerType, RhythmType type)
+    public static IEnumerable<GuitarAxisType> GetTypeFor(DeviceControllerType deviceControllerType)
     {
         if (deviceControllerType == DeviceControllerType.LiveGuitar)
         {
             return GhlTypes();
         }
-        return type == RhythmType.GuitarHero
+        return deviceControllerType.IsGh()
             ? GhTypes()
             : RbTypes();
     }
 
-    public static IEnumerable<GuitarAxisType> GetInvalidTypesFor(DeviceControllerType deviceControllerType,
-        RhythmType type)
+    public static IEnumerable<GuitarAxisType> GetInvalidTypesFor(DeviceControllerType deviceControllerType)
     {
         if (deviceControllerType == DeviceControllerType.LiveGuitar)
         {
             return RbTypes().Concat(GhTypes());
         }
-        return type == RhythmType.GuitarHero
+        return deviceControllerType.IsGh()
             ? RbTypes()
             : GhTypes();
     }
 
-    public static IEnumerable<GuitarAxisType> GetDifferenceFor(RhythmType rhythmType,
-        DeviceControllerType deviceControllerType)
+    public static IEnumerable<GuitarAxisType> GetDifferenceFor(DeviceControllerType deviceControllerType)
     {
-        return GetInvalidTypesFor(deviceControllerType, rhythmType)
-            .Except(GetTypeFor(deviceControllerType, rhythmType));
+        return GetInvalidTypesFor(deviceControllerType)
+            .Except(GetTypeFor(deviceControllerType));
     }
 
-    public static IEnumerable<GuitarAxisType> GetDifferenceInverseFor(RhythmType rhythmType,
-        DeviceControllerType deviceControllerType)
+    public static IEnumerable<GuitarAxisType> GetDifferenceInverseFor(DeviceControllerType deviceControllerType)
     {
-        return GetTypeFor(deviceControllerType, rhythmType)
-            .Except(GetInvalidTypesFor(deviceControllerType, rhythmType));
+        return GetTypeFor(deviceControllerType)
+            .Except(GetInvalidTypesFor(deviceControllerType));
     }
 }

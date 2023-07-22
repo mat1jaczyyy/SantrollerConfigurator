@@ -45,8 +45,7 @@
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                         <Binding />
-                        <Binding Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceType" />
-                        <Binding Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).RhythmType" />
+                        <Binding Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceControllerType" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
@@ -61,9 +60,7 @@
                         <MultiBinding Converter="{StaticResource InputImageConverter }">
                             <Binding />
                             <Binding
-                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceType" />
-                            <Binding
-                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).RhythmType" />
+                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceControllerType" />
                         </MultiBinding>
                     </Image.Source>
                 </Image>
@@ -71,8 +68,7 @@
                     <Label.Content>
                         <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                             <Binding />
-                            <Binding Path="$parent[views:ConfigView].Model.DeviceType" />
-                            <Binding Path="$parent[views:ConfigView].Model.RhythmType" />
+                            <Binding Path="$parent[views:ConfigView].Model.DeviceControllerType" />
                         </MultiBinding>
                     </Label.Content>
                 </Label>
@@ -85,9 +81,7 @@
                         <MultiBinding Converter="{StaticResource InputImageConverter }">
                             <Binding />
                             <Binding
-                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceType" />
-                            <Binding
-                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).RhythmType" />
+                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceControllerType" />
                         </MultiBinding>
                     </Image.Source>
                 </Image>
@@ -100,15 +94,13 @@
                     <Image.Source>
                         <MultiBinding Converter="{StaticResource InputImageConverter }">
                             <Binding Path="OutputType" />
-                            <Binding Path="$parent[views:ConfigView].Model.DeviceType" />
-                            <Binding Path="$parent[views:ConfigView].Model.RhythmType" />
+                            <Binding Path="$parent[views:ConfigView].Model.DeviceControllerType" />
                         </MultiBinding>
                     </Image.Source>
                     <ToolTip.Tip>
                         <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                             <Binding Path="OutputType" />
-                            <Binding Path="$parent[views:ConfigView].Model.DeviceType" />
-                            <Binding Path="$parent[views:ConfigView].Model.RhythmType" />
+                            <Binding Path="$parent[views:ConfigView].Model.DeviceControllerType" />
                         </MultiBinding>
                     </ToolTip.Tip>
                 </Image>

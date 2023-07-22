@@ -95,14 +95,13 @@ public abstract partial class Output : ReactiveObject
         this.WhenAnyValue(x => x.Input)
             .Select(x => x.InnermostInput() is GhWtTapInput && this is not GuitarAxis)
             .ToPropertyEx(this, x => x.IsWt);
-        this.WhenAnyValue(x => x.Input.Title, x => x.Model.DeviceType, x => x.Model.RhythmType,
-                x => x.ShouldUpdateDetails)
-            .Select(x => $"{x.Item1} ({GetName(x.Item2, x.Item3)})")
+        this.WhenAnyValue(x => x.Input.Title, x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails)
+            .Select(x => $"{x.Item1} ({GetName(x.Item2)})")
             .ToPropertyEx(this, x => x.Title);
         this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToPropertyEx(this, x => x.AreLedsEnabled);
-        this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails)
-            .Select(x => GetName(x.Item1, x.Item2))
+        this.WhenAnyValue(x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails)
+            .Select(x => GetName(x.Item1))
             .ToPropertyEx(this, x => x.LocalisedName);
         this.WhenAnyValue(x => x.Input.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
             .ToPropertyEx(this, x => x.ValueRaw);
@@ -112,9 +111,9 @@ public abstract partial class Output : ReactiveObject
         this.WhenAnyValue(x => x.Enabled)
             .Select(s => s ? 1 : 0.5)
             .ToPropertyEx(this, s => s.CombinedOpacity);
-        this.WhenAnyValue(x => x.Model.DeviceType, x => x.Model.RhythmType, x => x.ShouldUpdateDetails,
+        this.WhenAnyValue(x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails,
                 x => x.ChildOfCombined)
-            .Select(x => x.Item4 ? GetChildOutputType() : GetOutputType())
+            .Select(x => x.Item3 ? GetChildOutputType() : GetOutputType())
             .ToPropertyEx(this, x => x.OutputType);
         this.WhenAnyValue(x => x.Enabled)
             .Select(enabled => enabled ? Brush.Parse("#99000000") : Brush.Parse("#33000000"))
@@ -377,7 +376,7 @@ public abstract partial class Output : ReactiveObject
         Model.RemoveOutput(this);
     }
 
-    public abstract string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType);
+    public abstract string GetName(DeviceControllerType deviceControllerType);
 
     public abstract object GetOutputType();
 
@@ -591,7 +590,7 @@ public abstract partial class Output : ReactiveObject
 
     public virtual IEnumerable<Output> ValidOutputs()
     {
-        var (extra, _) = ControllerEnumConverter.FilterValidOutputs(Model.DeviceType, Model.RhythmType, Outputs.Items);
+        var (extra, _) = ControllerEnumConverter.FilterValidOutputs(Model.DeviceControllerType, Outputs.Items);
         return Outputs.Items.Except(extra).Where(output => output.Enabled);
     }
 

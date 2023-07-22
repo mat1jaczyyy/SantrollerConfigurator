@@ -68,7 +68,7 @@ public class ControllerAxis : OutputAxis
 
     public override bool IsKeyboard => false;
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return ControllerEnumConverter.GetAxisText(deviceControllerType,
             Type);

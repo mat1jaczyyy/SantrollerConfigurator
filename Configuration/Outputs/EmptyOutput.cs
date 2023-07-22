@@ -41,9 +41,8 @@ public class EmptyOutput : Output
             .Select(x => Model.GetSimpleEmulationType() is EmulationType.KeyboardMouse)
             .ToProperty(this, x => x.IsKeyboard);
 
-        _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceType,
-                vm => vm.Model.RhythmType)
-            .Select(tuple => ControllerEnumConverter.GetTypes((tuple.Item1, tuple.Item2)).Where(s2 =>
+        _combinedTypes = this.WhenAnyValue(vm => vm.Model.DeviceControllerType)
+            .Select(type => ControllerEnumConverter.GetTypes(type).Where(s2 =>
                 model.IsPico || s2 is not (SimpleType.WtNeckSimple or SimpleType.Bluetooth or SimpleType.UsbHost)))
             .ToProperty(this, x => x.CombinedTypes);
     }
@@ -123,8 +122,9 @@ public class EmptyOutput : Output
                     SimpleType.Led => new Led(Model, !Model.IsApa102, false, -1,
                         Colors.Black, Colors.Black,
                         Array.Empty<byte>(),
-                        Enum.GetValues<LedCommandType>().Where(Led.FilterLeds((Model.DeviceType, Model.EmulationType,
-                            Model.RhythmType, Model.IsApa102))).First(), 0, 0),
+                        Enum.GetValues<LedCommandType>().Where(Led.FilterLeds((Model.DeviceControllerType,
+                            Model.EmulationType,
+                            Model.IsApa102))).First(), 0, 0),
                     SimpleType.Rumble => new Rumble(Model, -1,
                         RumbleMotorType.Left),
                     SimpleType.ConsoleMode => new EmulationMode(Model,
@@ -171,7 +171,7 @@ public class EmptyOutput : Output
                 DjAxisType.LeftTableVelocity => new DjAxis(Model,
                     new DirectInput(-1, false, DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    1, DjAxisType.LeftTableVelocity , false),
+                    1, DjAxisType.LeftTableVelocity, false),
                 DjAxisType.RightTableVelocity => new DjAxis(Model,
                     new DirectInput(-1, false, DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
@@ -193,14 +193,16 @@ public class EmptyOutput : Output
 
             EmulationType.KeyboardMouse => this switch
             {
-                {MouseAxisType: not null} => new MouseAxis(Model, new FixedInput(Model, 0, false), Colors.Black, Colors.Black,
+                {MouseAxisType: not null} => new MouseAxis(Model, new FixedInput(Model, 0, false), Colors.Black,
+                    Colors.Black,
                     Array.Empty<byte>(), 1, 0, 0,
                     MouseAxisType.Value),
                 {MouseButtonType: not null} => new MouseButton(Model, new FixedInput(Model, 0, false), Colors.Black,
                     Colors.Black,
                     Array.Empty<byte>(), 5,
                     MouseButtonType.Value),
-                {Key: not null} => new KeyboardButton(Model, new FixedInput(Model, 0, false), Colors.Black, Colors.Black,
+                {Key: not null} => new KeyboardButton(Model, new FixedInput(Model, 0, false), Colors.Black,
+                    Colors.Black,
                     Array.Empty<byte>(), 5,
                     Key.Value),
                 _ => null
@@ -233,7 +235,7 @@ public class EmptyOutput : Output
         throw new IncompleteConfigurationException(ErrorText);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return "";
     }

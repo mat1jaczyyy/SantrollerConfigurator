@@ -19,13 +19,12 @@ public class InputImageConverter : IMultiValueConverter
 
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (values[0] == null || values[1] == null || values[2] == null)
+        if (values[0] == null || values[1] == null)
             return null;
 
-        if (values[1] is not DeviceControllerType || values[2] is not RhythmType) return null;
+        if (values[1] is not DeviceControllerType) return null;
         var deviceControllerType = (DeviceControllerType) values[1]!;
-        var rhythmType = (RhythmType) values[2]!;
-        var name = values[0]!.GetType().Name + values[0] + rhythmType + deviceControllerType;
+        var name = values[0]!.GetType().Name + values[0] + deviceControllerType;
         if (Icons.TryGetValue(name, out var image)) return image;
 
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
@@ -68,9 +67,9 @@ public class InputImageConverter : IMultiValueConverter
             DjInputType type => "DJ/" + type.ToString().Replace("Left","").Replace("Right",""),
             Ps2InputType type => "PS2/" + type.ToString().Replace("Dualshock2",""),
             WiiInputType type => "Wii/" + type,
-            DrumAxisType type => rhythmType + "/Drum/" + type,
-            GuitarAxisType type => rhythmType + "/" + type,
-            InstrumentButtonType type => rhythmType + "/" + type,
+            DrumAxisType type => deviceControllerType + "/" + type,
+            GuitarAxisType type => deviceControllerType + "/" + type,
+            InstrumentButtonType type => deviceControllerType + "/" + type,
             Gh5NeckInputType type => "GuitarHero/" + type,
             GhWtInputType type => "GuitarHero/" + type,
             EmulationModeType type => type switch
@@ -86,36 +85,25 @@ public class InputImageConverter : IMultiValueConverter
             StandardButtonType type => deviceControllerType switch
             {
                 DeviceControllerType.Gamepad => $"Xbox360/{type}",
-                DeviceControllerType.ArcadeStick => $"Xbox360/{type}",
-                DeviceControllerType.FlightStick => $"Xbox360/{type}",
                 DeviceControllerType.DancePad => $"Xbox360/{type}",
-                DeviceControllerType.ArcadePad => $"Xbox360/{type}",
                 DeviceControllerType.StageKit => $"Xbox360/{type}",
-                DeviceControllerType.Guitar => $"{rhythmType}/{type}",
-                DeviceControllerType.Drum => $"{rhythmType}/{type}",
-                DeviceControllerType.LiveGuitar => $"GuitarHero/{type}",
+                DeviceControllerType.LiveGuitar => $"LiveGuitar/{type}",
                 DeviceControllerType.Turntable => $"Xbox360/{type}",
-                _ => null
+                _ => $"{deviceControllerType}/{type}"
             },
             StandardAxisType type => deviceControllerType switch
             {
                 DeviceControllerType.Gamepad => $"Xbox360/{type}",
-                DeviceControllerType.ArcadeStick => $"Xbox360/{type}",
-                DeviceControllerType.FlightStick => $"Xbox360/{type}",
                 DeviceControllerType.DancePad => $"Xbox360/{type}",
-                DeviceControllerType.ArcadePad => $"Xbox360/{type}",
                 DeviceControllerType.StageKit => $"Xbox360/{type}",
-                DeviceControllerType.Guitar => $"{rhythmType}/{type}",
-                DeviceControllerType.Drum => $"{rhythmType}/Drum/{type}",
-                DeviceControllerType.LiveGuitar => $"GuitarHero/{type}",
+                DeviceControllerType.LiveGuitar => $"LiveGuitar/{type}",
                 DeviceControllerType.Turntable => $"Xbox360/{type}",
-                _ => null
+                _ => $"{deviceControllerType}/{type}"
             },
             Ps3AxisType type => "PS2/" + type.ToString().Replace("Pressure",""),
             _ => null
         };
         if (path == null) return null;
-
         try
         {
             var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{path}.png"));

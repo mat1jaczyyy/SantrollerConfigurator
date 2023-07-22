@@ -160,7 +160,7 @@ public class KeyboardButton : OutputButton
     {
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return Keys.TryGetValue(Key, out var key) ? key : "";
     }

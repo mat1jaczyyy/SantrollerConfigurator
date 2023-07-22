@@ -106,7 +106,7 @@ public class MouseAxis : OutputAxis
         }
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return EnumToStringConverter.Convert(Type);
     }

@@ -35,7 +35,7 @@ public class MouseButton : OutputButton
         return GetReportField(Type);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return EnumToStringConverter.Convert(Type);
     }

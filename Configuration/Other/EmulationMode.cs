@@ -24,7 +24,7 @@ public class EmulationMode : Output
         Type = type;
         _emulationModes.AddRange(Enum.GetValues<EmulationModeType>());
         _emulationModes.Connect()
-            .Filter(this.WhenAnyValue(x => x.Model.RhythmType, x => x.Model.DeviceType).Select(CreateFilter))
+            .Filter(this.WhenAnyValue(x => x.Model.DeviceControllerType).Select(CreateFilter))
             .Bind(out var modes)
             .Subscribe();
         EmulationModes = modes;
@@ -50,12 +50,10 @@ public class EmulationMode : Output
     public override string LedOnLabel => "";
     public override string LedOffLabel => "";
 
-    private static Func<EmulationModeType, bool> CreateFilter(
-        (RhythmType rhythmType, DeviceControllerType deviceControllerType) tuple)
+    private static Func<EmulationModeType, bool> CreateFilter(DeviceControllerType deviceControllerType)
     {
-        return mode => mode != EmulationModeType.Wii ||
-                       (tuple.deviceControllerType is DeviceControllerType.Drum or DeviceControllerType.Guitar &&
-                        tuple.rhythmType == RhythmType.RockBand);
+        return mode => mode != EmulationModeType.Wii || deviceControllerType is DeviceControllerType.RockBandDrums
+            or DeviceControllerType.RockBandGuitar;
     }
 
     private string GetDefinition()
@@ -77,7 +75,7 @@ public class EmulationMode : Output
         return new SerializedEmulationMode(Type, Input.Serialise());
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return EnumToStringConverter.Convert(Type) + " Console Mode Binding";
     }

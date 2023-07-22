@@ -120,10 +120,9 @@ public class JoystickToDpad : Output
         return new SerializedJoystickToDpad(Threshold, Wii);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
-        return deviceControllerType is DeviceControllerType.Gamepad or DeviceControllerType.ArcadePad
-            or DeviceControllerType.ArcadeStick or DeviceControllerType.FlightStick
+        return deviceControllerType is DeviceControllerType.Gamepad
             ? "Map Left joystick to Dpad"
             : "Map Joystick to Dpad";
     }

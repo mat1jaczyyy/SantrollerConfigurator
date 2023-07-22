@@ -27,7 +27,7 @@ OS Platform: {os.Platform}
 OS Service Pack: {os.ServicePack}
 OS VersionString: {os.VersionString}
 
-Device Type: {_model.DeviceType}
+Device Type: {_model.DeviceControllerType}
 Emulation Type: {_model.EmulationType}
 Led Type: {_model.LedType}
 
@@ -52,7 +52,7 @@ OS Platform: {os.Platform}
 OS Service Pack: {os.ServicePack}
 OS VersionString: {os.VersionString}
 
-Device Type: {_model.DeviceType}
+Device Type: {_model.DeviceControllerType}
 Emulation Type: {_model.EmulationType}
 Led Type: {_model.LedType}
 

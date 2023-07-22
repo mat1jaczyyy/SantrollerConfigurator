@@ -72,7 +72,7 @@ public class DjButton : OutputButton
         return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return EnumToStringConverter.Convert(Type);
     }

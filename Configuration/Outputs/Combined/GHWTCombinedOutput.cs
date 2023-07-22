@@ -105,7 +105,7 @@ public class GhwtCombinedOutput : CombinedOutput
             CreateDefaults();
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return "GHWT Slider Inputs";
     }
@@ -139,8 +139,7 @@ public class GhwtCombinedOutput : CombinedOutput
         if (tapAnalog == null && tapFrets == null) return Outputs.Items;
         var outputs = new List<Output>(Outputs.Items);
         // Map Tap bar to Upper frets on RB guitars
-        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar &&
-            Model.RhythmType is RhythmType.RockBand)
+        if (tapAnalog != null && Model.DeviceControllerType is DeviceControllerType.RockBandGuitar)
         {
             outputs.AddRange(TapRb.Select(pair => new GuitarButton(Model,
                 new GhWtTapInput(pair.Key, Model, Pin, PinS0, PinS1, PinS2, true), Colors.Black, Colors.Black,
@@ -170,7 +169,7 @@ public class GhwtCombinedOutput : CombinedOutput
     {
         var axisController = Outputs.Items.FirstOrDefault(s => s is ControllerAxis);
         var axisGuitar = Outputs.Items.FirstOrDefault(s => s is GuitarAxis);
-        if (Model.DeviceType is DeviceControllerType.Guitar)
+        if (Model.DeviceControllerType.Is5FretGuitar())
         {
             if (axisController == null) return;
             Outputs.Remove(axisController);

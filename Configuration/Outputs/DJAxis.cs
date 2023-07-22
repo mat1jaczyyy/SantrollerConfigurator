@@ -45,8 +45,7 @@ public partial class DjAxis : OutputAxis
 
     protected override int Calculate(
         (bool enabled, int value, int min, int max, int deadZone, bool trigger, DeviceControllerType
-            deviceControllerType)
-            values)
+            deviceControllerType) values)
     {
         return Type switch
         {
@@ -106,7 +105,7 @@ public partial class DjAxis : OutputAxis
         return false;
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return EnumToStringConverter.Convert(Type);
     }

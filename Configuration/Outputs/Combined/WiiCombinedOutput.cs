@@ -252,7 +252,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             wiiInput.WiiControllerType == controllerType;
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return "Wii Extension Inputs";
     }
@@ -318,8 +318,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             Outputs.Items.FirstOrDefault(s => s is {Enabled:true, Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
         if (tapAnalog == null && tapFrets == null) return outputs;
         // Map Tap bar to Upper frets on RB guitars
-        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar &&
-            Model.RhythmType is RhythmType.RockBand)
+        if (tapAnalog != null && Model.DeviceControllerType is DeviceControllerType.RockBandGuitar)
         {
             outputs.AddRange(TapRb.Select(pair => new GuitarButton(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 5, pair.Value, true)));
@@ -327,7 +326,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             outputs.Remove(tapAnalog);
         }
         if (tapFrets == null) return outputs;
-        if (Model.DeviceType == DeviceControllerType.Guitar)
+        if (Model.DeviceControllerType.Is5FretGuitar())
         {
             outputs.AddRange(Tap.Select(pair => new ControllerButton(Model,
                 new WiiInput(pair.Key, Model, Sda, Scl, true),
@@ -370,12 +369,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
     public override void UpdateBindings()
     {
         // Drum Specific mappings
-        if (Model.DeviceType == DeviceControllerType.Drum)
+        if (Model.DeviceControllerType.IsDrum())
         {
+            var isGh = Model.DeviceControllerType is DeviceControllerType.GuitarHeroDrums;
             // Drum Inputs to Drum Axis
             if (!Outputs.Items.Any(s => s is DrumAxis))
             {
-                foreach (var pair in Model.RhythmType == RhythmType.GuitarHero ? DrumAxisGh : DrumAxisRb)
+                foreach (var pair in isGh ? DrumAxisGh : DrumAxisRb)
                     Outputs.Add(new DrumAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                         Colors.Black,
                         Colors.Black, Array.Empty<byte>(), -30000, 30000, 10, 10, pair.Value, true));
@@ -389,7 +389,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 });
                 Outputs.Remove(first);
                 // Rb maps orange to green, while gh maps orange to orange
-                if (Model.RhythmType == RhythmType.GuitarHero)
+                if (isGh)
                     Outputs.Add(new DrumAxis(Model,
                         new WiiInput(WiiInputType.DrumOrange, Model, Sda, Scl, true),
                         first.LedOn, first.LedOff, first.LedIndices.ToArray(), first.Min, first.Max, first.DeadZone,
@@ -412,7 +412,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         var tapFrets =
             Outputs.Items.FirstOrDefault(s => s is {Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
 
-        if (Model.DeviceType == DeviceControllerType.Guitar)
+        if (Model.DeviceControllerType.Is5FretGuitar())
         {
             if (tapFrets == null)
             {
@@ -425,7 +425,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 });
             }
         }
-        else if (Model.DeviceType != DeviceControllerType.Guitar)
+        else
         {
             if (tapFrets != null)
             {
@@ -434,7 +434,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         }
 
         // Map the Whammy axis to right stick x on anything that isnt a guitar, and whammy on a guitar
-        if (Model.DeviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar)
+        if (Model.DeviceControllerType.IsGuitar())
         {
             if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))
             {
@@ -459,7 +459,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         }
 
         // Map Slider on guitars to Slider, and to RightStickY on anything else
-        if (Model.DeviceType is DeviceControllerType.Guitar)
+        if (Model.DeviceControllerType.Is5FretGuitar())
         {
             if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Slider}))
             {
@@ -486,7 +486,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         InstrumentButtonTypeExtensions.ConvertBindings(Outputs, Model, true);
 
         // Map all DJ Hero axis and buttons
-        if (Model.DeviceType is DeviceControllerType.Turntable)
+        if (Model.DeviceControllerType is DeviceControllerType.Turntable)
         {
             var currentAxisStandard = Outputs.Items.OfType<ControllerAxis>().ToList();
             var currentButtonStandard = Outputs.Items.OfType<ControllerButton>().ToList();

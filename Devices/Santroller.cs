@@ -249,7 +249,7 @@ public class Santroller : ConfigurableUsbDevice
             Trace.TraceError(ex.StackTrace);
         }
 
-        _deviceControllerType = model.DeviceType;
+        _deviceControllerType = model.DeviceControllerType;
 
         _model = model;
         model.Bindings.Connect().Bind(out var bindings).Subscribe();

@@ -25,7 +25,7 @@ public class BindAllWindowViewModel : ReactiveObject
         Output = output;
         Input = input;
         IsAnalog = input.IsAnalog;
-        LocalisedName = output.GetName(model.DeviceType, model.RhythmType);
+        LocalisedName = output.GetName(model.DeviceControllerType);
 
         ContinueCommand = ReactiveCommand.CreateFromObservable(() => Close(true));
         AbortCommand = ReactiveCommand.CreateFromObservable(() => Close(false));

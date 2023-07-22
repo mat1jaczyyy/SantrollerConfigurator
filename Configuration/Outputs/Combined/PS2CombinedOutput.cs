@@ -99,13 +99,15 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         Outputs.Connect().Filter(x => x is OutputAxis)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, x => x.SelectedType).Select(CreateFilter))
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, x => x.SelectedType)
+                .Select(CreateFilter))
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, x => x.SelectedType).Select(CreateFilter))
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, x => x.SelectedType)
+                .Select(CreateFilter))
             .Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;
@@ -151,12 +153,14 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             CreateDefaults();
     }
 
-    private static Func<Output, bool> CreateFilter((bool controllerFound, Ps2ControllerType detectedType, Ps2ControllerType selectedType) tuple)
+    private static Func<Output, bool> CreateFilter(
+        (bool controllerFound, Ps2ControllerType detectedType, Ps2ControllerType selectedType) tuple)
     {
         if (tuple.selectedType == Ps2ControllerType.All)
         {
             return _ => true;
         }
+
         var controllerType = tuple.selectedType;
         if (controllerType == Ps2ControllerType.Selected)
         {
@@ -166,12 +170,13 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                 return _ => true;
             }
         }
+
         return output => output is JoystickToDpad ||
                          (output.Input.InnermostInput() is Ps2Input ps2Input &&
                           ps2Input.SupportsType(controllerType));
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return "PS2 Controller Inputs";
     }
@@ -273,7 +278,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public override void UpdateBindings()
     {
-        if (Model.DeviceType == DeviceControllerType.Guitar)
+        if (Model.DeviceControllerType.IsGuitar())
         {
             if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))
             {
@@ -315,9 +320,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
         InstrumentButtonTypeExtensions.ConvertBindings(Outputs, Model, true);
 
-        switch (Model.DeviceType)
+        switch (Model.DeviceControllerType)
         {
-            case DeviceControllerType.Guitar:
+            case DeviceControllerType.GuitarHeroGuitar:
+            case DeviceControllerType.RockBandGuitar:
             {
                 foreach (var output in Outputs.Items)
                 {
@@ -378,7 +384,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             }
         }
 
-        if (Model.DeviceType == DeviceControllerType.Gamepad)
+        if (Model.DeviceControllerType == DeviceControllerType.Gamepad)
         {
             if (Outputs.Items.Any(s => s is Ps3Axis)) return;
             foreach (var pair in Ps3Axis)

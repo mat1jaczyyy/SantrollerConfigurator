@@ -52,7 +52,7 @@ public abstract partial class OutputAxis : Output
 
         this
             .WhenAnyValue(x => x.Enabled, x => x.ValueRaw, x => x.Min, x => x.Max, x => x.DeadZone, x => x.Trigger,
-                x => x.Model.DeviceType).Select(Calculate).ToPropertyEx(this, x => x.Value);
+                x => x.Model.DeviceControllerType).Select(Calculate).ToPropertyEx(this, x => x.Value);
         this.WhenAnyValue(x => x.Value).Select(s => s < 0 ? -s : 0).ToPropertyEx(this, x => x.ValueLower);
         this.WhenAnyValue(x => x.Value).Select(s => s > 0 ? s : 0).ToPropertyEx(this, x => x.ValueUpper);
         this

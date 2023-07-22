@@ -39,7 +39,7 @@ public abstract class Microcontroller
         var output = string.Join(" - ",
             outputs.Where(o =>
                     o.GetPinConfigs().Except(selectedConfig).Any(s => s.Pins.Contains(possiblePin)))
-                .Select(s => s.GetName(model.DeviceType, model.RhythmType)).Concat(apa102).Concat(unoMega));
+                .Select(s => s.GetName(model.DeviceControllerType)).Concat(apa102).Concat(unoMega));
         var ret = GetPinForMicrocontroller(possiblePin, twi, spi);
         if (!string.IsNullOrEmpty(output) && addText) return "* " + ret + " - " + output;
 

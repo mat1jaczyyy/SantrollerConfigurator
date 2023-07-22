@@ -88,30 +88,25 @@ public class UsbHostInput : Input
         // When combined, the combined output renders this, so we don't need to calculate it
         if (!Combined && !usbHostRaw.IsEmpty)
         {
-            for (var i = 0; i < usbHostRaw.Length; i += 3)
+            for (var i = 0; i < usbHostRaw.Length; i += 2)
             {
                 var consoleType = (ConsoleType) usbHostRaw[i];
                 string subType;
-                var rhythmType = "";
                 if (consoleType == ConsoleType.Xbox360)
                 {
                     var xInputSubType = (XInputSubType) usbHostRaw[i + 1];
                     subType = EnumToStringConverter.Convert(xInputSubType);
-                    if (xInputSubType is XInputSubType.Drums or XInputSubType.Guitar or XInputSubType.GuitarAlternate)
-                        rhythmType = " " + EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
                 }
                 else
                 {
                     var deviceType = (DeviceControllerType) usbHostRaw[i + 1];
                     subType = EnumToStringConverter.Convert(deviceType);
-                    if (deviceType is DeviceControllerType.Drum or DeviceControllerType.Guitar)
-                        rhythmType = " " + EnumToStringConverter.Convert((RhythmType) usbHostRaw[i + 2]);
                 }
 
-                buffer += $"{consoleType} {rhythmType} {subType}\n";
+                buffer += $"{consoleType} {subType}\n";
             }
 
-            ConnectedDevices = usbHostRaw.Length / 3;
+            ConnectedDevices = usbHostRaw.Length / 2;
 
             UsbHostInfo = buffer.Trim();
         }

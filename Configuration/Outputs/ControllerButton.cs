@@ -28,7 +28,7 @@ public class ControllerButton : OutputButton
     public override string LedOnLabel => "Pressed LED Colour";
     public override string LedOffLabel => "Released LED Colour";
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return ControllerEnumConverter.GetButtonText(deviceControllerType, Type);
     }

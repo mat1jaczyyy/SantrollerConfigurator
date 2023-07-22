@@ -57,7 +57,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
             CreateDefaults();
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return "GH5 Slider Inputs";
     }
@@ -89,8 +89,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         var outputs = new List<Output>(Outputs.Items.Where(s => s.Enabled));
 
         // Map Tap bar to Upper frets on RB guitars
-        if (tapAnalog != null && Model.DeviceType is DeviceControllerType.Guitar &&
-            Model.RhythmType is RhythmType.RockBand)
+        if (tapAnalog != null && Model.DeviceControllerType is DeviceControllerType.RockBandGuitar)
         {
             outputs.AddRange(TapsRb.Select(pair => new GuitarButton(Model,
                 new Gh5NeckInput(pair.Key, Model, Sda, Scl, true), Colors.Black, Colors.Black, Array.Empty<byte>(), 5,
@@ -132,7 +131,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         var axisController = Outputs.Items.FirstOrDefault(s => s is ControllerAxis);
         var axisGuitar = Outputs.Items.FirstOrDefault(s => s is GuitarAxis);
         var tapAll = Outputs.Items.FirstOrDefault(s => s is OutputButton);
-        if (Model.DeviceType is DeviceControllerType.Guitar)
+        if (Model.DeviceControllerType.Is5FretGuitar())
         {
             if (tapAll == null)
             {

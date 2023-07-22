@@ -47,13 +47,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     private SpiConfig? _apa102SpiConfig;
 
-    private DeviceControllerType _deviceControllerType;
-
     private EmulationType _emulationType;
 
     private LedType _ledType;
-
-    private RhythmType _rhythmType;
 
     private readonly DirectPinConfig? _unoRx;
     private readonly DirectPinConfig? _unoTx;
@@ -99,13 +95,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         this.WhenAnyValue(x => x.EmulationType)
             .Select(x => x is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
             .ToPropertyEx(this, x => x.IsBluetooth);
-        this.WhenAnyValue(x => x.DeviceType)
-            .Select(x => x is DeviceControllerType.Drum or DeviceControllerType.Guitar)
-            .ToPropertyEx(this, x => x.IsRhythm);
-        this.WhenAnyValue(x => x.DeviceType)
-            .Select(x => x is DeviceControllerType.LiveGuitar or DeviceControllerType.Guitar)
+        this.WhenAnyValue(x => x.DeviceControllerType)
+            .Select(x => x is DeviceControllerType.LiveGuitar or DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.RockBandGuitar)
             .ToPropertyEx(this, x => x.IsGuitar);
-        this.WhenAnyValue(x => x.DeviceType)
+        this.WhenAnyValue(x => x.DeviceControllerType)
             .Select(x => x is DeviceControllerType.StageKit)
             .ToPropertyEx(this, x => x.IsStageKit);
         _strumDebounceDisplay = this.WhenAnyValue(x => x.StrumDebounce)
@@ -114,9 +107,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         _debounceDisplay = this.WhenAnyValue(x => x.Debounce)
             .Select(x => x / 10.0f)
             .ToProperty(this, x => x.DebounceDisplay);
-        _deviceControllerRhythmType = this.WhenAnyValue(x => x.DeviceType, x => x.RhythmType)
-            .Select(DeviceControllerRhythmTypeExtensions.FromDeviceRhythm)
-            .ToProperty(this, x => x.DeviceControllerRhythmType);
         this.WhenAnyValue(x => x.EmulationType)
             .Select(x => GetSimpleEmulationTypeFor(x) is EmulationType.Controller)
             .ToPropertyEx(this, x => x.IsController);
@@ -159,21 +149,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public bool SupportsReset { get; }
 
-    private readonly ObservableAsPropertyHelper<DeviceControllerRhythmType> _deviceControllerRhythmType;
 
     private readonly ObservableAsPropertyHelper<float> _debounceDisplay;
     private readonly ObservableAsPropertyHelper<float> _strumDebounceDisplay;
-
-    public DeviceControllerRhythmType DeviceControllerRhythmType
-    {
-        get => _deviceControllerRhythmType.Value;
-        set
-        {
-            var (device, rhythm) = value.ToDeviceRhythm();
-            DeviceType = device;
-            RhythmType = rhythm;
-        }
-    }
+    private DeviceControllerType _deviceControllerType;
 
     public float DebounceDisplay
     {
@@ -227,10 +206,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public MainWindowViewModel Main { get; }
 
-    public IEnumerable<DeviceControllerRhythmType> DeviceControllerRhythmTypes =>
-        Enum.GetValues<DeviceControllerRhythmType>();
+    public IEnumerable<DeviceControllerType> DeviceControllerRhythmTypes =>
+        Enum.GetValues<DeviceControllerType>();
 
-    public IEnumerable<RhythmType> RhythmTypes => Enum.GetValues<RhythmType>();
     public IEnumerable<ModeType> ModeTypes => Enum.GetValues<ModeType>();
 
     // Only Pico supports bluetooth
@@ -352,7 +330,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             {
                 _apa102SpiConfig = Microcontroller.AssignSpiPins(this, Apa102SpiType, false, -1, -1, -1, true, true,
                     true,
-                    Math.Min(Microcontroller.Board.CpuFreq / 2, 12000000))!;
+                    Math.Min(Microcontroller.Board.CpuFreq / 2, 12000000));
                 this.RaisePropertyChanged(nameof(Apa102Mosi));
                 this.RaisePropertyChanged(nameof(Apa102Sck));
                 UpdateErrors();
@@ -365,7 +343,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public bool XInputOnWindows { get; set; }
 
 
-    public DeviceControllerType DeviceType
+    public DeviceControllerType DeviceControllerType
     {
         get => _deviceControllerType;
         set
@@ -375,22 +353,12 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
     }
 
+
     public EmulationType EmulationType
     {
         get => _emulationType;
         set => _ = SetDefaultBindingsAsync(value);
     }
-
-    public RhythmType RhythmType
-    {
-        get => _rhythmType;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _rhythmType, value);
-            UpdateBindings();
-        }
-    }
-
     public Microcontroller Microcontroller { get; private set; }
 
     public SourceList<Output> Bindings { get; } = new();
@@ -412,13 +380,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                             break;
                     }
             });
-        ;
     } // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public bool IsStandardMode { get; }
     [ObservableAsProperty] public bool IsAdvancedMode { get; }
     [ObservableAsProperty] public bool IsRetailMode { get; }
-
-    [ObservableAsProperty] public bool IsRhythm { get; }
     [ObservableAsProperty] public bool IsGuitar { get; }
     [ObservableAsProperty] public bool IsStageKit { get; }
     [ObservableAsProperty] public bool IsController { get; }
@@ -433,6 +398,17 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [ObservableAsProperty] public bool UsbHostEnabled { get; }
 
     // ReSharper enable UnassignedGetOnlyAutoProperty
+
+    private static readonly Dictionary<object, int> TypeOrder =
+        Enum.GetValues<InstrumentButtonType>().Cast<object>()
+            .Concat(Enum.GetValues<DjInputType>().Cast<object>())
+            .Concat(Enum.GetValues<StandardButtonType>().Cast<object>())
+            .Concat(Enum.GetValues<DrumAxisType>().Cast<object>())
+            .Concat(Enum.GetValues<GuitarAxisType>().Cast<object>())
+            .Concat(Enum.GetValues<DjAxisType>().Cast<object>())
+            .Concat(Enum.GetValues<Ps3AxisType>().Cast<object>())
+            .Concat(Enum.GetValues<StandardAxisType>().Cast<object>()).Select((s, index) => new { s, index })
+            .ToDictionary(x => x.s, x => x.index);
 
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
         .Where(s => s.Value is SpiPinType.Mosi)
@@ -457,11 +433,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public IScreen HostScreen { get; }
     public bool IsPico => Device.IsPico();
 
-    public void SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceControllerType type, RhythmType rhythmType,
-        EmulationType emulationType)
+    public void SetDeviceTypeAndRhythmTypeWithoutUpdating(DeviceControllerType type, EmulationType emulationType)
     {
-        this.RaiseAndSetIfChanged(ref _deviceControllerType, type, nameof(DeviceType));
-        this.RaiseAndSetIfChanged(ref _rhythmType, rhythmType, nameof(RhythmType));
+        this.RaiseAndSetIfChanged(ref _deviceControllerType, type, nameof(DeviceControllerType));
         this.RaiseAndSetIfChanged(ref _emulationType, emulationType, nameof(EmulationType));
     }
 
@@ -469,14 +443,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         foreach (var binding in Bindings.Items) binding.UpdateBindings();
         InstrumentButtonTypeExtensions.ConvertBindings(Bindings, this, false);
-        if (!(IsRhythm && IsController)) _rhythmType = RhythmType.GuitarHero;
         if (!IsGuitar)
         {
             Deque = false;
         }
 
         var (extra, types) =
-            ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, _rhythmType, Bindings.Items);
+            ControllerEnumConverter.FilterValidOutputs(_deviceControllerType, Bindings.Items);
         Bindings.RemoveMany(extra);
 
         // If the user has a ps2 or wii combined output mapped, they don't need the default bindings
@@ -498,7 +471,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             Bindings.RemoveMany(Bindings.Items.Where(s => s is DjCombinedOutput));
         }
 
-        if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.Drum))
+        if (!_deviceControllerType.Is5FretGuitar() && _deviceControllerType.IsDrum())
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
 
         if (_deviceControllerType is DeviceControllerType.Turntable)
@@ -507,9 +480,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 Type: EmulationModeType.Ps4Or5 or EmulationModeType.XboxOne
             }));
 
-        if (_deviceControllerType == DeviceControllerType.Drum)
+        if (_deviceControllerType.IsDrum())
         {
-            IEnumerable<DrumAxisType> difference = DrumAxisTypeMethods.GetDifferenceFor(_rhythmType).ToHashSet();
+            IEnumerable<DrumAxisType> difference = DrumAxisTypeMethods.GetDifferenceFor(_deviceControllerType).ToHashSet();
             Bindings.RemoveMany(Bindings.Items.Where(s => s is DrumAxis axis && difference.Contains(axis.Type)));
         }
         else
@@ -517,10 +490,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             Bindings.RemoveMany(Bindings.Items.Where(s => s is DrumAxis));
         }
 
-        if (_deviceControllerType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar)
+        if (_deviceControllerType.IsGuitar())
         {
             IEnumerable<GuitarAxisType> difference = GuitarAxisTypeMethods
-                .GetDifferenceFor(_rhythmType, _deviceControllerType).ToHashSet();
+                .GetDifferenceFor(_deviceControllerType).ToHashSet();
             Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarAxis axis && difference.Contains(axis.Type)));
         }
         else
@@ -528,10 +501,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarAxis));
         }
 
-        if (_deviceControllerType is not DeviceControllerType.Guitar && _rhythmType is not RhythmType.RockBand)
+        if (_deviceControllerType is not DeviceControllerType.RockBandGuitar)
             Bindings.RemoveMany(Bindings.Items.Where(s => s is EmulationMode {Type: EmulationModeType.Wii}));
 
-        if (_deviceControllerType is not (DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar))
+        if (!_deviceControllerType.IsGuitar())
             Bindings.RemoveMany(Bindings.Items.Where(s => s is GuitarButton));
 
         foreach (var type in types)
@@ -587,6 +560,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         false));
                     break;
             }
+        
+        Bindings.Edit(s =>
+        {
+            var sorted = s.OrderBy(s2 => TypeOrder.GetValueOrDefault(s2.GetOutputType())).ToList();
+            s.Clear();
+            s.AddRange(sorted);
+        });
     }
 
     public void SetDefaults()
@@ -604,10 +584,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Debounce = 10;
         DjPollRate = 4;
 
-        _rhythmType = RhythmType.GuitarHero;
-        this.RaisePropertyChanged(nameof(DeviceType));
+        this.RaisePropertyChanged(nameof(DeviceControllerType));
         this.RaisePropertyChanged(nameof(EmulationType));
-        this.RaisePropertyChanged(nameof(RhythmType));
         XInputOnWindows = true;
         MouseMovementType = MouseMovementType.Relative;
 
@@ -720,6 +698,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             santroller.StopScan();
             santroller.StopTicking();
         }
+
         var outputs = Bindings.Items.SelectMany(binding => binding.Outputs.Items).ToList();
         var inputs = outputs.Select(binding => binding.Input.InnermostInput()).ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
@@ -744,9 +723,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             $"#define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}");
         lines.Add($"#define ARDWIINO_BOARD \"{Microcontroller.Board.ArdwiinoName}\"");
         lines.Add($"#define CONSOLE_TYPE {GetEmulationType()}");
-        lines.Add($"#define DEVICE_TYPE {(byte) DeviceType}");
+        lines.Add($"#define DEVICE_TYPE {(byte) DeviceControllerType}");
         lines.Add($"#define POLL_RATE {PollRate}");
-        lines.Add($"#define RHYTHM_TYPE {(byte) RhythmType}");
 
         // Actually write the config as configured
         if (generate)
@@ -996,7 +974,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [RelayCommand]
     public async Task ResetWithConfirmationAsync()
     {
-        var yesNo = await ShowYesNoDialog.Handle(("Reset", "Cancel",
+        var yesNo = await ShowYesNoDialog.Handle(("Load Defaults", "Cancel",
             "The following action will clear all your inputs, are you sure you want to do this?")).ToTask();
         if (!yesNo.Response) return;
 
@@ -1049,8 +1027,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var outputs = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).ToList();
         var outputsByType = outputs
             .GroupBy(s => s.Input.InnermostInput().GetType()).ToList();
-        var combined = DeviceType is DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar &&
-                       CombinedStrumDebounce;
+        var combined = DeviceControllerType.IsGuitar() && CombinedStrumDebounce;
         Dictionary<string, int> debounces = new();
         var strumIndices = new List<int>();
 
@@ -1344,12 +1321,13 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void RemoveDevice(IConfigurableDevice device)
     {
-        if (!Main.Working && Device is Santroller old && ( device.IsSameDevice(old.Serial) ||  device.IsSameDevice(old.Path)))
+        if (!Main.Working && Device is Santroller old &&
+            (device.IsSameDevice(old.Serial) || device.IsSameDevice(old.Path)))
         {
             old.StopTicking();
             Main.SetDifference(false);
             ShowUnpluggedDialog.Handle(("", "", "")).ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(s => Main.GoBack.Execute(new Unit()));
+                .Subscribe(_ => Main.GoBack.Execute(new Unit()));
         }
     }
 

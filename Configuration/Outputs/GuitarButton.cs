@@ -59,7 +59,7 @@ public class GuitarButton : OutputButton
     }
 
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return EnumToStringConverter.Convert(Type);
     }
@@ -81,14 +81,14 @@ public class GuitarButton : OutputButton
             combinedExtra = string.Join(" && ",
                 combinedDebounce.Where(s => s != debounceIndex).Select(x => $"!debounce[{x}]"));
         // GHL Guitars map strum up and strum down to dpad up and down, and also the stick
-        if (Model.DeviceType is DeviceControllerType.LiveGuitar &&
+        if (Model.DeviceControllerType is DeviceControllerType.LiveGuitar &&
             Type is InstrumentButtonType.StrumDown or InstrumentButtonType.StrumUp &&
             mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360)
             return base.Generate(mode, debounceIndex,
                 $"report->strumBar={(Type is InstrumentButtonType.StrumDown ? "0xFF" : "0x00")};", combinedExtra,
                 combinedDebounce, macros);
 
-        if (Model is not {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand})
+        if (Model is not {DeviceControllerType: DeviceControllerType.RockBandGuitar})
             return base.Generate(mode, debounceIndex, "", combinedExtra, combinedDebounce, macros);
 
         //This stuff is only relevant for rock band guitars

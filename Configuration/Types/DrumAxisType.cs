@@ -42,23 +42,23 @@ public static class DrumAxisTypeMethods
         };
     }
 
-    public static IEnumerable<DrumAxisType> GetTypeFor(RhythmType type)
+    public static IEnumerable<DrumAxisType> GetTypeFor(DeviceControllerType type)
     {
-        return type == RhythmType.GuitarHero ? GhTypes() : RbTypes();
+        return type.IsGh() ? GhTypes() : RbTypes();
     }
 
-    public static IEnumerable<DrumAxisType> GetInvalidTypesFor(RhythmType type)
+    public static IEnumerable<DrumAxisType> GetInvalidTypesFor(DeviceControllerType type)
     {
-        return type == RhythmType.GuitarHero ? RbTypes() : GhTypes();
+        return type.IsGh() ? RbTypes() : GhTypes();
     }
 
-    public static IEnumerable<DrumAxisType> GetDifferenceFor(RhythmType rhythmType)
+    public static IEnumerable<DrumAxisType> GetDifferenceFor(DeviceControllerType type)
     {
-        return GetInvalidTypesFor(rhythmType).Except(GetTypeFor(rhythmType));
+        return GetInvalidTypesFor(type).Except(GetTypeFor(type));
     }
 
-    public static IEnumerable<DrumAxisType> GetDifferenceInverseFor(RhythmType rhythmType)
+    public static IEnumerable<DrumAxisType> GetDifferenceInverseFor(DeviceControllerType type)
     {
-        return GetTypeFor(rhythmType).Except(GetInvalidTypesFor(rhythmType));
+        return GetTypeFor(type).Except(GetInvalidTypesFor(type));
     }
 }

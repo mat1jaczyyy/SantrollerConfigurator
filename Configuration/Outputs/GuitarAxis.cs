@@ -158,7 +158,7 @@ public class GuitarAxis : OutputAxis
 
         switch (mode)
         {
-            case ConfigField.XboxOne when Model.DeviceType is DeviceControllerType.LiveGuitar:
+            case ConfigField.XboxOne when Model.DeviceControllerType is DeviceControllerType.LiveGuitar:
                 return "";
             case ConfigField.Xbox360 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
                 // x360 slider is actually a int16_t BUT there is a mechanism to convert the uint8 value to its uint16_t version
@@ -194,8 +194,7 @@ public class GuitarAxis : OutputAxis
             case ConfigField.Ps3
                 when Model is
                      {
-                         DeviceType: DeviceControllerType.Guitar,
-                         RhythmType: RhythmType.GuitarHero
+                         DeviceControllerType: DeviceControllerType.GuitarHeroGuitar
                      } &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
             {
@@ -206,8 +205,7 @@ public class GuitarAxis : OutputAxis
             case ConfigField.Ps3
                 when Model is
                      {
-                         DeviceType: DeviceControllerType.Guitar,
-                         RhythmType: RhythmType.GuitarHero
+                         DeviceControllerType: DeviceControllerType.GuitarHeroGuitar
                      } &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 return $@"if ({Input.Generate()}) {{
@@ -217,8 +215,7 @@ public class GuitarAxis : OutputAxis
             case ConfigField.Ps3
                 when Model is
                      {
-                         DeviceType: DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar,
-                         RhythmType: RhythmType.GuitarHero
+                         DeviceControllerType: DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.LiveGuitar
                      } &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
             {
@@ -230,8 +227,7 @@ public class GuitarAxis : OutputAxis
             case ConfigField.Ps3
                 when Model is
                      {
-                         DeviceType: DeviceControllerType.Guitar or DeviceControllerType.LiveGuitar,
-                         RhythmType: RhythmType.GuitarHero
+                         DeviceControllerType: DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.LiveGuitar
                      } &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 
@@ -247,7 +243,7 @@ public class GuitarAxis : OutputAxis
                             }}
                           }}";
             case ConfigField.Ps3
-                when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
+                when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
                 // PS3 rb uses a digital bit, so just map the bit right across and skip the analog conversion
                 return $@"if ({Input.Generate()}) {{
@@ -257,7 +253,7 @@ public class GuitarAxis : OutputAxis
                             report->tiltDigital = true;
                           }}";
             case ConfigField.Ps3
-                when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
+                when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 // PS3 RB expects tilt as a digital bit, so map that here. Still map a ps3 variant of the tilt though
                 return $@"if ({Input.Generate()}) {{
@@ -268,7 +264,7 @@ public class GuitarAxis : OutputAxis
                           }}";
             // Xbox 360 Pickup Selector is actually on one of the triggers.
             case ConfigField.Xbox360
-                when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
+                when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is DigitalToAnalog:
                 // Was int16_t (axis), needs to become uint8_t (trigger)
                 var val = analogOn;
@@ -277,18 +273,18 @@ public class GuitarAxis : OutputAxis
                                   {GenerateOutput(mode)} = {val};
                               }}";
             case ConfigField.Xbox360
-                when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
+                when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
                 return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)};";
             // Xbox One pickup selector ranges from 0 - 64, so we need to map it correctly.
             case ConfigField.XboxOne
-                when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
+                when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is DigitalToAnalog:
                 return $@"if ({Input.Generate()}) {{
                                   {GenerateOutput(mode)} = {PickupSelectorRangesXb1[GetPickupSelectorValue(analogOn)]};
                               }}";
             case ConfigField.XboxOne
-                when Model is {DeviceType: DeviceControllerType.Guitar, RhythmType: RhythmType.RockBand} &&
+                when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
                 return $"{GenerateOutput(mode)} = (((({GenerateAssignment(mode, false, true, false)}) >> 10) + 1) & 0xF0);";
             default:
@@ -299,7 +295,7 @@ public class GuitarAxis : OutputAxis
         }
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)
+    public override string GetName(DeviceControllerType deviceControllerType)
     {
         return EnumToStringConverter.Convert(Type);
     }
