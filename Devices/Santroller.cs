@@ -61,7 +61,7 @@ public class Santroller : ConfigurableUsbDevice
     private readonly Dictionary<byte, TimeSpan> _ledTimers = new();
     private readonly Stopwatch _sw = Stopwatch.StartNew();
 
-    private DeviceControllerType? _deviceControllerType;
+    private DeviceControllerType _deviceControllerType;
     private Microcontroller _microcontroller;
     private ConfigViewModel? _model;
     private byte[]? _lastConfig;
@@ -78,6 +78,7 @@ public class Santroller : ConfigurableUsbDevice
     {
         _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
         _microcontroller = new Pico(Board.Generic);
+        _deviceControllerType = (DeviceControllerType)(version >> 8);
         if (device is IUsbDevice usbDevice) usbDevice.ClaimInterface(2);
 
         Load();
@@ -388,7 +389,7 @@ public class Santroller : ConfigurableUsbDevice
         if (InvalidDevice) return "Santroller - please disconnect and reconnect in PC mode";
 
         var ret = $"Santroller - {Board.Name}";
-        if (_deviceControllerType != null) ret += $" - {_deviceControllerType}";
+        ret += $" - {EnumToStringConverter.Convert(_deviceControllerType)}";
 
         return ret;
     }
