@@ -5,7 +5,7 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum DeviceControllerType
 {
-    Gamepad,
+    Gamepad = 1,
     DancePad,
     [Description("Guitar Hero Guitar")]
     GuitarHeroGuitar,
