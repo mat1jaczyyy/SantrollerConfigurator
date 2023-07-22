@@ -18,8 +18,8 @@ public enum UsbHostInputType
     [Description("Back Button")] Back,
     [Description("Start Button")] Start,
     
-    [Description("Left Stick Click")] LeftStickClick,
-    [Description("Right Stick Click")] RightStickClick,
+    [Description("Left Stick Click")] LeftThumbClick,
+    [Description("Right Stick Click")] RightThumbClick,
     
     [Description("Home Button")] Guide,
     [Description("Capture Button")] Capture,
