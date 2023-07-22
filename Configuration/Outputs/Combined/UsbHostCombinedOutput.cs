@@ -261,7 +261,12 @@ public class UsbHostCombinedOutput : CombinedOutput
         base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
         var buffer = "";
-        if (usbHostRaw.IsEmpty) return;
+        if (usbHostRaw.IsEmpty)
+        {
+            UsbHostInfo = "";
+            ConnectedDevices = 0;
+            return;
+        };
         for (var i = 0; i < usbHostRaw.Length; i += 2)
         {
             var consoleType = (ConsoleType) usbHostRaw[i];
