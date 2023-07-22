@@ -20,6 +20,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 {
     public static readonly Dictionary<Ps2InputType, StandardButtonType> Buttons = new()
     {
+        {Ps2InputType.MouseLeft, StandardButtonType.A},
+        {Ps2InputType.MouseRight, StandardButtonType.B},
         {Ps2InputType.Cross, StandardButtonType.A},
         {Ps2InputType.Circle, StandardButtonType.B},
         {Ps2InputType.Square, StandardButtonType.X},
@@ -30,10 +32,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {Ps2InputType.R3, StandardButtonType.RightThumbClick},
         {Ps2InputType.Select, StandardButtonType.Back},
         {Ps2InputType.Start, StandardButtonType.Start},
-        {Ps2InputType.DPadDown, StandardButtonType.DpadDown},
-        {Ps2InputType.DPadUp, StandardButtonType.DpadUp},
-        {Ps2InputType.DPadLeft, StandardButtonType.DpadLeft},
-        {Ps2InputType.DPadRight, StandardButtonType.DpadRight},
+        {Ps2InputType.DpadDown, StandardButtonType.DpadDown},
+        {Ps2InputType.DpadUp, StandardButtonType.DpadUp},
+        {Ps2InputType.DpadLeft, StandardButtonType.DpadLeft},
+        {Ps2InputType.DpadRight, StandardButtonType.DpadRight},
         {Ps2InputType.GuitarGreen, StandardButtonType.A},
         {Ps2InputType.GuitarRed, StandardButtonType.B},
         {Ps2InputType.GuitarYellow, StandardButtonType.Y},
@@ -63,8 +65,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {Ps2InputType.JogConWheel, StandardAxisType.LeftStickX},
         {Ps2InputType.MouseX, StandardAxisType.LeftStickX},
         {Ps2InputType.MouseY, StandardAxisType.LeftStickY},
-        {Ps2InputType.GunconHSync, StandardAxisType.LeftStickX},
-        {Ps2InputType.GunconVSync, StandardAxisType.LeftStickY},
+        {Ps2InputType.GunConHSync, StandardAxisType.LeftStickX},
+        {Ps2InputType.GunConVSync, StandardAxisType.LeftStickY},
         {Ps2InputType.NegConL, StandardAxisType.LeftTrigger}
     };
 
@@ -81,8 +83,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         {Ps2InputType.Dualshock2Cross, Ps3AxisType.PressureCross},
         {Ps2InputType.Dualshock2Square, Ps3AxisType.PressureSquare}
     };
-
-
+    
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
 

@@ -5,10 +5,10 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 public enum Ps2InputType
 {
     [Description("GunCon - Horizontal Sync")]
-    GunconHSync,
+    GunConHSync,
 
     [Description("GunCon - Vertical Sync")]
-    GunconVSync,
+    GunConVSync,
     [Description("Mouse - X Axis")] MouseX,
     [Description("Mouse - Y Axis")] MouseY,
     [Description("NegCon - Twist Axis")] NegConTwist,
@@ -71,6 +71,8 @@ public enum Ps2InputType
 
     [Description("DualShock 2 - R2 Pressure")]
     Dualshock2R2,
+    [Description("Mouse - Left Button")] MouseLeft,
+    [Description("Mouse - Right Button")] MouseRight,
     [Description("NegCon - A Button")] NegConA,
     [Description("NegCon - B Button")] NegConB,
     [Description("NegCon - Start Button")] NegConStart,
@@ -95,10 +97,10 @@ public enum Ps2InputType
 
     [Description("Gamepad - Start Button")]
     Start,
-    [Description("Gamepad - D-Pad Up")] DPadUp,
-    [Description("Gamepad - D-Pad Right")] DPadRight,
-    [Description("Gamepad - D-Pad Down")] DPadDown,
-    [Description("Gamepad - D-Pad Left")] DPadLeft,
+    [Description("Gamepad - D-Pad Up")] DpadUp,
+    [Description("Gamepad - D-Pad Right")] DpadRight,
+    [Description("Gamepad - D-Pad Down")] DpadDown,
+    [Description("Gamepad - D-Pad Left")] DpadLeft,
     [Description("Gamepad - L2 Button")] L2,
     [Description("Gamepad - R2 Button")] R2,
     [Description("Gamepad - L1 Button")] L1,
