@@ -26,7 +26,8 @@ public enum InstrumentButtonType
     White2,
     White3,
     [Description("Strum Up")] StrumUp,
-    [Description("Strum Down")] StrumDown
+    [Description("Strum Down")] StrumDown,
+    [Description("Slider To Frets")] SliderToFrets
 }
 
 public static class InstrumentButtonTypeExtensions

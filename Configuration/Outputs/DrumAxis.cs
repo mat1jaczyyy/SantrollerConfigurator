@@ -55,6 +55,7 @@ public partial class DrumAxis : OutputAxis
         {DrumAxisType.Orange, StandardButtonType.RightShoulder},
         {DrumAxisType.Kick2, StandardButtonType.RightShoulder}
     };
+    
 
     private static readonly Dictionary<DrumAxisType, string> AxisMappings = new()
     {
@@ -204,9 +205,14 @@ public partial class DrumAxis : OutputAxis
                     outputButtons += $"\n{GetReportField(value1)} = true;";
                 break;
             case ConfigField.Ps3:
-            case ConfigField.Universal:
                 if (ButtonsPs3.TryGetValue(Type, out var value2))
                     outputButtons += $"\n{GetReportField(value2)} = true;";
+                break;
+            case ConfigField.Universal:
+                if (ButtonsPs3.TryGetValue(Type, out var value3))
+                    outputButtons += $"\n{GetReportField(value3)} = true;";
+                if (Type is not (DrumAxisType.Kick or DrumAxisType.Kick2))
+                    outputButtons += $"\n{GetReportField(Type)} = true;";
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
@@ -219,7 +225,7 @@ public partial class DrumAxis : OutputAxis
             }}";
         }
 
-        if (Model.RhythmType == RhythmType.RockBand && mode != ConfigField.XboxOne)
+        if (Model.RhythmType == RhythmType.RockBand && mode != ConfigField.XboxOne && mode != ConfigField.Universal)
             switch (Type)
             {
                 case DrumAxisType.YellowCymbal:
@@ -255,43 +261,49 @@ public partial class DrumAxis : OutputAxis
         if (input is DigitalToAnalog dta) dtaVal = dta.On;
 
         var assignedVal = "val_real";
-        // Xbox one uses 4 bit velocities
-        if (mode == ConfigField.XboxOne)
+        switch (mode)
         {
-            assignedVal = "val_real >> 12";
-            dtaVal >>= 12;
-        }
-        // PS3 uses 8 bit velocities
-        else if (mode == ConfigField.Ps3)
-        {
-            assignedVal = "val_real >> 8";
-            dtaVal >>= 8;
-        }
-        // Xbox 360 GH use uint8_t velocities
-        else if (Model.RhythmType == RhythmType.GuitarHero)
-        {
-            assignedVal = "val_real >> 8";
-            dtaVal >>= 8;
-        }
-        // And then 360 RB use inverted int16_t values, though the first bit is specified based on the type
-        else
-        {
-            switch (Type)
+            // Xbox one uses 4 bit velocities
+            case ConfigField.XboxOne:
+                assignedVal = "val_real >> 12";
+                dtaVal >>= 12;
+                break;
+            // PS3 and PC HID uses 8 bit velocities
+            case ConfigField.Ps3 or ConfigField.Universal:
+                assignedVal = "val_real >> 8";
+                dtaVal >>= 8;
+                break;
+            // Xbox 360 GH use uint8_t velocities
+            default:
             {
-                // Stuff mapped to the y axis is inverted
-                case DrumAxisType.GreenCymbal:
-                case DrumAxisType.Green:
-                case DrumAxisType.Yellow:
-                case DrumAxisType.YellowCymbal:
-                    assignedVal = "-(0x7fff - (val_real >> 1))";
-                    dtaVal = -(0x7fff - (dtaVal >> 1));
-                    break;
-                case DrumAxisType.Red:
-                case DrumAxisType.Blue:
-                case DrumAxisType.BlueCymbal:
-                    assignedVal = "(0x7fff - (val_real >> 1))";
-                    dtaVal = 0x7fff - (dtaVal >> 1);
-                    break;
+                if (Model.RhythmType == RhythmType.GuitarHero)
+                {
+                    assignedVal = "val_real >> 8";
+                    dtaVal >>= 8;
+                }
+                // And then 360 RB use inverted int16_t values, though the first bit is specified based on the type
+                else
+                {
+                    switch (Type)
+                    {
+                        // Stuff mapped to the y axis is inverted
+                        case DrumAxisType.GreenCymbal:
+                        case DrumAxisType.Green:
+                        case DrumAxisType.Yellow:
+                        case DrumAxisType.YellowCymbal:
+                            assignedVal = "-(0x7fff - (val_real >> 1))";
+                            dtaVal = -(0x7fff - (dtaVal >> 1));
+                            break;
+                        case DrumAxisType.Red:
+                        case DrumAxisType.Blue:
+                        case DrumAxisType.BlueCymbal:
+                            assignedVal = "(0x7fff - (val_real >> 1))";
+                            dtaVal = 0x7fff - (dtaVal >> 1);
+                            break;
+                    }
+                }
+
+                break;
             }
         }
 
