@@ -266,7 +266,7 @@ public class UsbHostCombinedOutput : CombinedOutput
             UsbHostInfo = "";
             ConnectedDevices = 0;
             return;
-        };
+        }
         for (var i = 0; i < usbHostRaw.Length; i += 2)
         {
             var consoleType = (ConsoleType) usbHostRaw[i];
