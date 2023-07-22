@@ -33,11 +33,19 @@ public class GuitarButton : OutputButton
     {
         // PS3 and 360 just set the standard buttons, and rely on the solo flag
         // XB1 however has things broken out
+        // For the universal report, we only put standard frets on nav, not solo
         var requiresFaceButtons = mode is not (ConfigField.XboxOne or ConfigField.Universal);
         return Type switch
         {
             InstrumentButtonType.StrumUp => GetReportField(StandardButtonType.DpadUp),
             InstrumentButtonType.StrumDown => GetReportField(StandardButtonType.DpadDown),
+            
+            InstrumentButtonType.Green when mode is ConfigField.Universal => GetReportField(StandardButtonType.A),
+            InstrumentButtonType.Red when mode is ConfigField.Universal => GetReportField(StandardButtonType.B),
+            InstrumentButtonType.Yellow when mode is ConfigField.Universal => GetReportField(StandardButtonType.Y),
+            InstrumentButtonType.Blue when mode is ConfigField.Universal => GetReportField(StandardButtonType.X),
+            InstrumentButtonType.Orange when mode is ConfigField.Universal => GetReportField(StandardButtonType.LeftShoulder),
+            
             InstrumentButtonType.SoloGreen or InstrumentButtonType.Green when requiresFaceButtons =>
                 GetReportField(StandardButtonType.A),
             InstrumentButtonType.SoloRed or InstrumentButtonType.Red when requiresFaceButtons =>
@@ -48,6 +56,7 @@ public class GuitarButton : OutputButton
                 GetReportField(StandardButtonType.X),
             InstrumentButtonType.SoloOrange or InstrumentButtonType.Orange when requiresFaceButtons =>
                 GetReportField(StandardButtonType.LeftShoulder),
+            
             InstrumentButtonType.Black1 => GetReportField(StandardButtonType.A),
             InstrumentButtonType.Black2 => GetReportField(StandardButtonType.B),
             InstrumentButtonType.White1 => GetReportField(StandardButtonType.X),
@@ -97,8 +106,8 @@ public class GuitarButton : OutputButton
                 or InstrumentButtonType.SoloOrange or InstrumentButtonType.SoloRed
                 or InstrumentButtonType.SoloYellow && mode is not (ConfigField.Shared or ConfigField.Universal))
             extra = "report->solo=true;";
-        // XB1 and PC Hid also needs to set the normal face buttons, which can conveniently be done using the PS3 format
-        if (mode is ConfigField.XboxOne or ConfigField.Universal && Type is not (InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown))
+        // XB1 also needs to set the normal face buttons, which can conveniently be done using the PS3 format
+        if (mode is ConfigField.XboxOne && Type is not (InstrumentButtonType.StrumUp or InstrumentButtonType.StrumDown))
             extra += $"{GenerateOutput(ConfigField.Ps3)}=true;";
 
 
