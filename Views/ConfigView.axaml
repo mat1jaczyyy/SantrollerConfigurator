@@ -1807,6 +1807,47 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
+                <StackPanel
+                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            SCL Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Scl}"
+                                  ItemsSource="{Binding AvailableSclPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            SDA Pin
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding Sda}"
+                                  ItemsSource="{Binding AvailableSdaPins}"
+                                  ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            Input Filter
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding SelectedType}"
+                                  ItemsSource="{Binding WiiControllerTypes}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type combined:CombinedTwiOutput}">
                 <StackPanel
                     IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
@@ -1986,6 +2027,18 @@
                                   SelectedItem="{Binding Att}"
                                   ItemsSource="{Binding AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}"
+                                  Width="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Width="300">
+                            PS2 Controller Input Filter
+                        </Label>
+                        <ComboBox VerticalAlignment="Center"
+                                  SelectedItem="{Binding SelectedType}"
+                                  ItemsSource="{Binding Ps2ControllerTypes}"
+                                  ItemTemplate="{StaticResource EnumToStringTemplate}"
                                   Width="200" />
                     </StackPanel>
                 </StackPanel>

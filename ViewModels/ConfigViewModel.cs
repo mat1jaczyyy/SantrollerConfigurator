@@ -748,8 +748,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         lines.Add($"#define POLL_RATE {PollRate}");
         lines.Add($"#define RHYTHM_TYPE {(byte) RhythmType}");
 
-        lines.Add(Ps2Input.GeneratePs2Pressures(inputs));
-
         // Actually write the config as configured
         if (generate)
         {
@@ -820,8 +818,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 lines.Add(
                     $"#define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
             }
-
-            lines.Add(Ps2Input.GeneratePs2Pressures(inputs));
 
             // Sort by pin index, and then map to adc number and turn into an array
             var analogPins = directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin)

@@ -198,13 +198,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
         Outputs.Connect().Filter(x => x is OutputAxis)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, X => X.SelectedType).Select(CreateFilter))
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, X => X.SelectedType).Select(CreateFilter))
             .Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;
@@ -215,7 +215,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
     [ObservableAsProperty] public bool IsGuitar { get; }
 
     [Reactive] public WiiControllerType DetectedType { get; set; }
-
+    [Reactive] public WiiControllerType SelectedType { get; set; } = WiiControllerType.Selected;
+    public IEnumerable<WiiControllerType> WiiControllerTypes => Enum.GetValues<WiiControllerType>().Where(s => s is not (WiiControllerType.ClassicControllerPro or WiiControllerType.MotionPlus));
     [Reactive] public bool ControllerFound { get; set; }
 
     public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
@@ -227,10 +228,28 @@ public class WiiCombinedOutput : CombinedTwiOutput
             CreateDefaults();
     }
 
-    private static Func<Output, bool> CreateFilter((bool controllerFound, WiiControllerType controllerType) tuple)
+    private static Func<Output, bool> CreateFilter((bool controllerFound, WiiControllerType currentType, WiiControllerType selectedType) tuple)
     {
-        return output => !tuple.controllerFound || output is JoystickToDpad || output.Input is WiiInput wiiInput &&
-            wiiInput.WiiControllerType == tuple.controllerType;
+        if (tuple.selectedType == WiiControllerType.All)
+        {
+            return _ => true;
+        }
+        var controllerType = tuple.selectedType;
+        if (controllerType == WiiControllerType.Selected)
+        {
+            controllerType = tuple.currentType;
+            if (!tuple.controllerFound)
+            {
+                return _ => true;
+            }
+
+            if (controllerType is WiiControllerType.ClassicControllerPro)
+            {
+                controllerType = WiiControllerType.ClassicController;
+            }
+        }
+        return output => output is JoystickToDpad || output.Input is WiiInput wiiInput &&
+            wiiInput.WiiControllerType == controllerType;
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)

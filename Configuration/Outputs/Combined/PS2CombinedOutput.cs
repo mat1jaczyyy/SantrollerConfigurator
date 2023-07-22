@@ -99,13 +99,13 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         Outputs.Connect().Filter(x => x is OutputAxis)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, x => x.SelectedType).Select(CreateFilter))
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType).Select(CreateFilter))
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, x => x.SelectedType).Select(CreateFilter))
             .Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;
@@ -127,6 +127,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     public List<int> AvailablePins => Model.Microcontroller.GetAllPins(false);
 
     [Reactive] public Ps2ControllerType DetectedType { get; set; }
+    [Reactive] public Ps2ControllerType SelectedType { get; set; } = Ps2ControllerType.Selected;
+    public IEnumerable<Ps2ControllerType> Ps2ControllerTypes => Enum.GetValues<Ps2ControllerType>();
 
     [Reactive] public bool ControllerFound { get; set; }
 
@@ -149,11 +151,24 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             CreateDefaults();
     }
 
-    private static Func<Output, bool> CreateFilter((bool controllerFound, Ps2ControllerType controllerType) tuple)
+    private static Func<Output, bool> CreateFilter((bool controllerFound, Ps2ControllerType detectedType, Ps2ControllerType selectedType) tuple)
     {
-        return output => !tuple.controllerFound || output is JoystickToDpad ||
+        if (tuple.selectedType == Ps2ControllerType.All)
+        {
+            return _ => true;
+        }
+        var controllerType = tuple.selectedType;
+        if (controllerType == Ps2ControllerType.Selected)
+        {
+            controllerType = tuple.detectedType;
+            if (!tuple.controllerFound)
+            {
+                return _ => true;
+            }
+        }
+        return output => output is JoystickToDpad ||
                          (output.Input.InnermostInput() is Ps2Input ps2Input &&
-                          ps2Input.SupportsType(tuple.controllerType));
+                          ps2Input.SupportsType(controllerType));
     }
 
     public override string GetName(DeviceControllerType deviceControllerType, RhythmType? rhythmType)

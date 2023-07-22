@@ -41,22 +41,6 @@ public class Ps2Input : SpiInput
         Ps2InputType.Dualshock2R2
     };
 
-    public static readonly List<Ps2InputType> Dualshock2AnalogButtons = new()
-    {
-        Ps2InputType.Dualshock2RightButton,
-        Ps2InputType.Dualshock2LeftButton,
-        Ps2InputType.Dualshock2UpButton,
-        Ps2InputType.Dualshock2DownButton,
-        Ps2InputType.Dualshock2Triangle,
-        Ps2InputType.Dualshock2Circle,
-        Ps2InputType.Dualshock2Cross,
-        Ps2InputType.Dualshock2Square,
-        Ps2InputType.Dualshock2L1,
-        Ps2InputType.Dualshock2R1,
-        Ps2InputType.Dualshock2L2,
-        Ps2InputType.Dualshock2R2
-    };
-
     public static readonly List<Ps2InputType> GuitarButtons = new()
     {
         Ps2InputType.GuitarGreen,
@@ -121,18 +105,18 @@ public class Ps2Input : SpiInput
         {Ps2InputType.GunconVSync, "(ps2Data[8] << 8) | ps2Data[7]"},
         {Ps2InputType.JogConWheel, "(ps2Data[6] << 8) | ps2Data[5]"},
         {Ps2InputType.GuitarWhammy, "-(ps2Data[8] - 127) << 9"},
-        {Ps2InputType.Dualshock2RightButton, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2LeftButton, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2UpButton, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2DownButton, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2Triangle, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2Circle, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2Cross, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2Square, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2L1, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2R1, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2L2, "ps2Data[generated]"},
-        {Ps2InputType.Dualshock2R2, "ps2Data[generated]"},
+        {Ps2InputType.Dualshock2RightButton, "ps2Data[9]"},
+        {Ps2InputType.Dualshock2LeftButton, "ps2Data[10]"},
+        {Ps2InputType.Dualshock2UpButton, "ps2Data[11]"},
+        {Ps2InputType.Dualshock2DownButton, "ps2Data[12]"},
+        {Ps2InputType.Dualshock2Triangle, "ps2Data[13]"},
+        {Ps2InputType.Dualshock2Circle, "ps2Data[14]"},
+        {Ps2InputType.Dualshock2Cross, "ps2Data[15]"},
+        {Ps2InputType.Dualshock2Square, "ps2Data[16]"},
+        {Ps2InputType.Dualshock2L1, "ps2Data[17]"},
+        {Ps2InputType.Dualshock2R1, "ps2Data[18]"},
+        {Ps2InputType.Dualshock2L2, "ps2Data[19]"},
+        {Ps2InputType.Dualshock2R2, "ps2Data[20]"},
         {Ps2InputType.GuitarGreen, "(~ps2Data[4]) & (1 << 1)"},
         {Ps2InputType.GuitarRed, "(~ps2Data[4]) & (1 << 5)"},
         {Ps2InputType.GuitarYellow, "(~ps2Data[4]) & (1 << 4)"},
@@ -264,28 +248,6 @@ public class Ps2Input : SpiInput
         return new SerializedPs2Input(Miso, Mosi, Sck, Att, Ack, Input);
     }
 
-    public static string GeneratePs2Pressures(List<Input> bindings)
-    {
-        var retDs2 = "#define PRESSURES_DS2 0b11";
-        var ds2Axis = bindings.OfType<Ps2Input>().Select(s => s.Input).ToHashSet();
-        var found = false;
-        for (var i = 0; i < Dualshock2Order.Count; i++)
-        {
-            found = true;
-            var binding = Dualshock2Order[i];
-            if (ds2Axis.Contains(binding))
-                retDs2 += "1";
-            else
-                retDs2 += "0";
-
-            if ((i + 3) % 8 == 0 && i != Dualshock2Order.Count) retDs2 += ", 0b";
-        }
-
-        if (!found) return "";
-
-        return retDs2;
-    }
-
     public override void Update(Dictionary<int, int> analogRaw,
         Dictionary<int, bool> digitalRaw, ReadOnlySpan<byte> ps2Data,
         ReadOnlySpan<byte> wiiRaw, ReadOnlySpan<byte> djLeftRaw,
@@ -307,21 +269,21 @@ public class Ps2Input : SpiInput
         var jogcon = realType is Ps2ControllerType.JogCon;
         var guncon = realType is Ps2ControllerType.GunCon;
         var ds2 = realType is Ps2ControllerType.Dualshock2;
-        if (ds2 && Dualshock2Order.Contains(Input))
-        {
-            var inputs = Model.Bindings.Items.SelectMany(s => s.Outputs.Items).Select(s => s.Input).OfType<Ps2Input>()
-                .Select(s => s.Input).ToHashSet();
-            var i = Dualshock2Order.Intersect(inputs).Select((s, idx) => (s, idx))
-                .FirstOrOptional(s => s.s == Input);
-            if (i.HasValue)
-            {
-                RawValue = ps2Data[i.Value.idx] << 8;
-                return;
-            }
-        }
 
         RawValue = Input switch
         {
+            Ps2InputType.Dualshock2RightButton when ds2 => ps2Data[9] << 8,
+            Ps2InputType.Dualshock2LeftButton when ds2 => ps2Data[10] << 8,
+            Ps2InputType.Dualshock2UpButton when ds2 => ps2Data[11] << 8,
+            Ps2InputType.Dualshock2DownButton when ds2 => ps2Data[12] << 8,
+            Ps2InputType.Dualshock2Triangle when ds2 => ps2Data[13] << 8,
+            Ps2InputType.Dualshock2Circle when ds2 => ps2Data[14] << 8,
+            Ps2InputType.Dualshock2Cross when ds2 => ps2Data[15] << 8,
+            Ps2InputType.Dualshock2Square when ds2 => ps2Data[16] << 8,
+            Ps2InputType.Dualshock2L1 when ds2 => ps2Data[17] << 8,
+            Ps2InputType.Dualshock2R1 when ds2 => ps2Data[18] << 8,
+            Ps2InputType.Dualshock2L2 when ds2 => ps2Data[19] << 8,
+            Ps2InputType.Dualshock2R2 when ds2 => ps2Data[20] << 8,
             Ps2InputType.MouseX when mouse => (ps2Data[5] - 128) << 8,
             Ps2InputType.MouseY when mouse => -(ps2Data[6] - 127) << 8,
             Ps2InputType.LeftX when basicAxis => (ps2Data[7] - 128) << 8,
@@ -387,6 +349,9 @@ public class Ps2Input : SpiInput
             types.Add(Ps2ControllerType.Dualshock);
             types.Add(Ps2ControllerType.Dualshock2);
             types.Add(Ps2ControllerType.FlightStick);
+            types.Add(Ps2ControllerType.GunCon);
+            types.Add(Ps2ControllerType.NegCon);
+            types.Add(Ps2ControllerType.JogCon);
         }
 
         if (GuitarButtons.Contains(Input)) types.Add(Ps2ControllerType.Guitar);
@@ -424,6 +389,7 @@ public class Ps2Input : SpiInput
                     types.Add(Ps2ControllerType.Dualshock2);
                     types.Add(Ps2ControllerType.FlightStick);
                 }
+
                 // Only do this binding on controllers without analog pressures
                 if (input.Input is Ps2InputType.L2 or Ps2InputType.R2 && binding.Item1 is DigitalToAnalog)
                 {
