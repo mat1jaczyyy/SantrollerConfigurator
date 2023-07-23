@@ -260,6 +260,7 @@ public class UsbHostCombinedOutput : CombinedOutput
     {
         base.Update(analogRaw, digitalRaw, ps2Raw, wiiRaw, djLeftRaw, djRightRaw, gh5Raw, ghWtRaw,
             ps2ControllerType, wiiControllerType, usbHostRaw, bluetoothRaw, usbHostInputsRaw);
+        
         var buffer = "";
         if (usbHostRaw.IsEmpty)
         {

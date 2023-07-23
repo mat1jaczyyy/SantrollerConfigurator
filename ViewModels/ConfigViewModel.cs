@@ -1279,24 +1279,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             Trace.Flush();
             if (device is Santroller santroller)
             {
-                if (Device is Santroller santrollerold)
-                {
-                    if (santrollerold.Serial == santroller.Serial)
-                    {
-                        Main.Complete(100);
-                        Main.SetDifference(false);
-                        Device = device;
-                        santroller.LoadConfiguration(this);
-                    }
-                }
-                else
-                {
-                    Main.Complete(100);
-                    Device = device;
-                    Microcontroller = device.GetMicrocontroller(this);
-                    Main.SetDifference(false);
-                    santroller.LoadConfiguration(this);
-                }
+                Main.Complete(100);
+                Device = device;
+                Microcontroller = device.GetMicrocontroller(this);
+                Main.SetDifference(false);
+                santroller.LoadConfiguration(this);
             }
 
             Device.DeviceAdded(device);
