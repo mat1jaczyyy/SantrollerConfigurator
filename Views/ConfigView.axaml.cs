@@ -113,11 +113,11 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
     }
 
     private async Task DoShowBindAllDialogAsync(
-        InteractionContext<(ConfigViewModel model, Output output, DirectInput input),
+        InteractionContext<(ConfigViewModel model, Output output),
             BindAllWindowViewModel> interaction)
     {
         var model = new BindAllWindowViewModel(interaction.Input.model,
-            interaction.Input.output, interaction.Input.input);
+            interaction.Input.output);
         var dialog = new BindAllWindow
         {
             DataContext = model

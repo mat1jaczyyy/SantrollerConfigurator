@@ -198,7 +198,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public Interaction<ConfigViewModel, Unit> SaveConfig { get; } = new();
     public Interaction<ConfigViewModel, Unit> LoadConfig { get; } = new();
 
-    public Interaction<(ConfigViewModel model, Output output, DirectInput input),
+    public Interaction<(ConfigViewModel model, Output output),
             BindAllWindowViewModel>
         ShowBindAllDialog { get; } = new();
 
@@ -923,8 +923,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         foreach (var binding in Bindings.Items)
         {
-            if (binding.Input.InnermostInput() is not DirectInput direct) continue;
-            var response = await ShowBindAllDialog.Handle((this, binding, direct)).ToTask();
+            if (binding.Input.InnermostInput() is not DirectInput) continue;
+            var response = await ShowBindAllDialog.Handle((this, binding)).ToTask();
             if (!response.Response) return;
         }
     }

@@ -18,13 +18,12 @@ public class BindAllWindowViewModel : ReactiveObject
 
     private volatile bool _picking = true;
 
-    public BindAllWindowViewModel(ConfigViewModel model, Output output,
-        DirectInput input)
+    public BindAllWindowViewModel(ConfigViewModel model, Output output)
     {
         Model = model;
         Output = output;
-        Input = input;
-        IsAnalog = input.IsAnalog;
+        Input = (output.Input.InnermostInput() as DirectInput)!;
+        IsAnalog = Input.IsAnalog;
         LocalisedName = output.GetName(model.DeviceControllerType);
 
         ContinueCommand = ReactiveCommand.CreateFromObservable(() => Close(true));
@@ -45,7 +44,12 @@ public class BindAllWindowViewModel : ReactiveObject
         {
             while (_picking)
             {
-                input.Pin = await santroller.DetectPinAsync(IsAnalog, input.Pin, Model.Microcontroller);
+                var pin = await santroller.DetectPinAsync(IsAnalog, Input.Pin, Model.Microcontroller);
+                if (!_picking)
+                {
+                    return;
+                }
+                Input.Pin = pin;
                 await Task.Delay(100);
             }
         });
