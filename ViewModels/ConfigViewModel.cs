@@ -1222,7 +1222,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         foreach (var binding in Bindings.Items)
         {
             var configs = binding.GetPinConfigs();
-            //Exclude digital or analog pins (which use a guid containing a -
+            //Exclude digital or analog pins (which use a guid containing a -)
             if (configs.Any(s => s.Type == type || (type.Contains("-") && s.Type.Contains("-")))) continue;
             if (!pins.ContainsKey(binding.LocalisedName)) pins[binding.LocalisedName] = new List<int>();
 
