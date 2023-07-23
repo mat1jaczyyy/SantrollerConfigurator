@@ -532,7 +532,7 @@ public class Ardwiino : ConfigurableUsbDevice
                     {
                         bindings.Add(new ControllerAxis(model,
                             new DirectInput(pin.pin, false, DevicePinMode.Analog, model), on, off,
-                            ledIndex, min, max, axisDeadzone, genAxis, false));
+                            ledIndex, min, max, axisDeadzone, ushort.MaxValue, genAxis, false));
                     }
                 }
             }

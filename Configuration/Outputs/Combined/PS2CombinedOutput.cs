@@ -218,13 +218,13 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             new DigitalToAnalog(new Ps2Input(Ps2InputType.L2, Model, Miso, Mosi, Sck, Att, Ack, true), ushort.MaxValue,
                 true, Model),
             Colors.Black,
-            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, StandardAxisType.LeftTrigger,
+            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, ushort.MaxValue, StandardAxisType.LeftTrigger,
             true));
         Outputs.Add(new ControllerAxis(Model,
             new DigitalToAnalog(new Ps2Input(Ps2InputType.R2, Model, Miso, Mosi, Sck, Att, Ack, true), ushort.MaxValue,
                 true, Model),
             Colors.Black,
-            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, StandardAxisType.RightTrigger,
+            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, ushort.MaxValue, StandardAxisType.RightTrigger,
             true));
         foreach (var pair in Axis)
             if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
@@ -232,12 +232,12 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                 Outputs.Add(new ControllerAxis(Model,
                     new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
                     Colors.Black,
-                    Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, pair.Value, true));
+                    Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, ushort.MaxValue, pair.Value, true));
             else
                 Outputs.Add(new ControllerAxis(Model,
                     new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
                     Colors.Black,
-                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value, true));
+                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, ushort.MaxValue, pair.Value, true));
 
         Outputs.Add(new JoystickToDpad(Model, short.MaxValue / 2, false));
         UpdateBindings();
@@ -310,7 +310,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                 Outputs.AddRange(items.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input,
                     item.LedOn,
                     item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
-                    StandardAxisType.RightStickX, true)));
+                    ushort.MaxValue, StandardAxisType.RightStickX, true)));
             }
 
             Outputs.RemoveMany(Outputs.Items.Where(s => s.Input.InnermostInput() is Ps2Input

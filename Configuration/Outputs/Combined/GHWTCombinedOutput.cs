@@ -188,7 +188,7 @@ public class GhwtCombinedOutput : CombinedOutput
                     true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                StandardAxisType.LeftStickX, true));
+                ushort.MaxValue, StandardAxisType.LeftStickX, true));
         }
     }
 

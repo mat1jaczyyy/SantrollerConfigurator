@@ -4,6 +4,7 @@ using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
 
@@ -12,14 +13,16 @@ public class ControllerAxis : OutputAxis
 
     public ControllerAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff, byte[] ledIndices, int min,
         int max,
-        int deadZone, StandardAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min,
+        int deadZone, int threshold, StandardAxisType type, bool childOfCombined) : base(model, input, ledOn, ledOff, ledIndices, min,
         max,
         deadZone, IsTrigger(type), childOfCombined)
     {
         Type = type;
+        Threshold = threshold;
         UpdateDetails();
     }
 
+    [Reactive] public int Threshold { get; set; }
     public StandardAxisType Type { get; }
 
     public override bool IsCombined => false;
@@ -141,7 +144,7 @@ public class ControllerAxis : OutputAxis
     public override SerializedOutput Serialize()
     {
         return new SerializedControllerAxis(Input.Serialise(), Type, LedOn, LedOff, LedIndices.ToArray(), Min, Max,
-            DeadZone, ChildOfCombined);
+            DeadZone,Threshold, ChildOfCombined);
     }
 
     public override void UpdateBindings()

@@ -198,13 +198,15 @@ public class WiiCombinedOutput : CombinedTwiOutput
         Outputs.Connect().Filter(x => x is OutputAxis)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, X => X.SelectedType).Select(CreateFilter))
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, X => X.SelectedType)
+                .Select(CreateFilter))
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
-            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, X => X.SelectedType).Select(CreateFilter))
+            .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, X => X.SelectedType)
+                .Select(CreateFilter))
             .Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;
@@ -216,7 +218,10 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     [Reactive] public WiiControllerType DetectedType { get; set; }
     [Reactive] public WiiControllerType SelectedType { get; set; } = WiiControllerType.Selected;
-    public IEnumerable<WiiControllerType> WiiControllerTypes => Enum.GetValues<WiiControllerType>().Where(s => s is not (WiiControllerType.ClassicControllerPro or WiiControllerType.MotionPlus));
+
+    public IEnumerable<WiiControllerType> WiiControllerTypes => Enum.GetValues<WiiControllerType>()
+        .Where(s => s is not (WiiControllerType.ClassicControllerPro or WiiControllerType.MotionPlus));
+
     [Reactive] public bool ControllerFound { get; set; }
 
     public override void SetOutputsOrDefaults(IReadOnlyCollection<Output> outputs)
@@ -228,12 +233,14 @@ public class WiiCombinedOutput : CombinedTwiOutput
             CreateDefaults();
     }
 
-    private static Func<Output, bool> CreateFilter((bool controllerFound, WiiControllerType currentType, WiiControllerType selectedType) tuple)
+    private static Func<Output, bool> CreateFilter(
+        (bool controllerFound, WiiControllerType currentType, WiiControllerType selectedType) tuple)
     {
         if (tuple.selectedType == WiiControllerType.All)
         {
             return _ => true;
         }
+
         var controllerType = tuple.selectedType;
         if (controllerType == WiiControllerType.Selected)
         {
@@ -248,6 +255,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 controllerType = WiiControllerType.ClassicController;
             }
         }
+
         return output => output is JoystickToDpad || output.Input is WiiInput wiiInput &&
             wiiInput.WiiControllerType == controllerType;
     }
@@ -275,13 +283,13 @@ public class WiiCombinedOutput : CombinedTwiOutput
             {
                 Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                     Colors.Black,
-                    Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 8000, pair.Value, true));
+                    Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 8000, ushort.MaxValue, pair.Value, true));
             }
             else
             {
                 Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                     Colors.Black,
-                    Colors.Black, Array.Empty<byte>(), -30000, 30000, 4000, pair.Value, true));
+                    Colors.Black, Array.Empty<byte>(), -30000, 30000, 4000, ushort.MaxValue, pair.Value, true));
             }
         }
 
@@ -289,11 +297,12 @@ public class WiiCombinedOutput : CombinedTwiOutput
             new WiiInput(WiiInputType.GuitarTapBar, Model, Sda, Scl, true),
             Colors.Black,
             Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-            StandardAxisType.RightStickY, true));
+            ushort.MaxValue,StandardAxisType.RightStickY, true));
         foreach (var pair in AxisAcceleration)
             Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
                 Colors.Black,
-                Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, pair.Value, true));
+                Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, ushort.MaxValue, pair.Value,
+                true));
         var dpad = new JoystickToDpad(Model, short.MaxValue / 2, true)
         {
             Enabled = false
@@ -313,9 +322,9 @@ public class WiiCombinedOutput : CombinedTwiOutput
         }
 
         var tapAnalog =
-            Outputs.Items.FirstOrDefault(s => s is {Enabled:true, Input: WiiInput {Input: WiiInputType.GuitarTapBar}});
+            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapBar}});
         var tapFrets =
-            Outputs.Items.FirstOrDefault(s => s is {Enabled:true, Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
+            Outputs.Items.FirstOrDefault(s => s is {Enabled: true, Input: WiiInput {Input: WiiInputType.GuitarTapAll}});
         if (tapAnalog == null && tapFrets == null) return outputs;
         // Map Tap bar to Upper frets on RB guitars
         if (tapAnalog != null && Model.DeviceControllerType is DeviceControllerType.RockBandGuitar)
@@ -325,6 +334,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
             outputs.Remove(tapAnalog);
         }
+
         if (tapFrets == null) return outputs;
         if (Model.DeviceControllerType.Is5FretGuitar())
         {
@@ -358,6 +368,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             ControllerFound = false;
             return;
         }
+
         ControllerFound = true;
 
         var type = BitConverter.ToUInt16(wiiControllerType);
@@ -454,7 +465,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 Outputs.AddRange(items2.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input,
                     item.LedOn,
                     item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
-                    StandardAxisType.RightStickX, true)));
+                    ushort.MaxValue,StandardAxisType.RightStickX, true)));
             }
         }
 
@@ -479,7 +490,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 Outputs.AddRange(items2.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input,
                     item.LedOn,
                     item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
-                    StandardAxisType.RightStickY, true)));
+                    ushort.MaxValue,StandardAxisType.RightStickY, true)));
             }
         }
 
@@ -534,7 +545,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 Outputs.Remove(djAxis);
                 Outputs.Add(new ControllerAxis(Model, djAxis.Input,
                     djAxis.LedOn, djAxis.LedOff, djAxis.LedIndices.ToArray(), djAxis.Min, djAxis.Max, djAxis.DeadZone,
-                    DjToStandard[djAxis.Type], true));
+                    ushort.MaxValue,DjToStandard[djAxis.Type], true));
             }
         }
     }

@@ -524,7 +524,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     Bindings.Add(new ControllerAxis(this,
                         new DirectInput(-1, false, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, axisType, false));
+                        0, ushort.MaxValue,axisType, false));
                     break;
                 case GuitarAxisType.Slider:
                     Bindings.Add(new GuitarAxis(this, new GhWtTapInput(GhWtInputType.TapAll, this,
@@ -677,7 +677,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 new DirectInput(-1, false, DevicePinMode.Analog, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), isTrigger ? ushort.MinValue : short.MinValue,
                 isTrigger ? ushort.MaxValue : short.MaxValue, 0,
-                type, false));
+                ushort.MaxValue,type, false));
         }
 
         foreach (var type in Enum.GetValues<StandardButtonType>())

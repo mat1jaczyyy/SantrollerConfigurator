@@ -165,7 +165,7 @@ public class UsbHostCombinedOutput : CombinedOutput
             {
                 StandardAxisType standardAxisType => new ControllerAxis(Model,
                     input, Colors.Black, Colors.Black, Array.Empty<byte>(),
-                    min, max, 0, standardAxisType, true),
+                    min, max, 0, ushort.MaxValue, standardAxisType, true),
                 StandardButtonType standardButtonType => new ControllerButton(Model,
                     input, Colors.Black,
                     Colors.Black, Array.Empty<byte>(), 5,

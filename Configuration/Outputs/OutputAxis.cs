@@ -193,7 +193,7 @@ public abstract partial class OutputAxis : Output
 
         _calibrationState++;
         if (_calibrationState == OutputAxisCalibrationState.Last) _calibrationState = OutputAxisCalibrationState.None;
-    
+
         ApplyCalibration(ValueRaw);
 
         this.RaisePropertyChanged(nameof(CalibrationButtonText));
@@ -301,7 +301,7 @@ public abstract partial class OutputAxis : Output
     {
         return _calibrationState == OutputAxisCalibrationState.None ? "Calibrate" : "Next";
     }
-    
+
     private string? GetCalibrationStatus()
     {
         return _calibrationState switch
@@ -461,7 +461,22 @@ public abstract partial class OutputAxis : Output
         if (!output.Any()) return "";
 
         if (Input is not DigitalToAnalog dta)
-            return $"{output} = {GenerateAssignment(mode, false, false, false)};";
+        {
+            var extraTrigger = "";
+            if (this is ControllerAxis axis)
+            {
+                if (mode is ConfigField.Ps3 or ConfigField.Ps4 && axis.Type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger)
+                {
+                    var trigger = axis.Type == StandardAxisType.LeftTrigger ? "l2" : "r2";
+                    extraTrigger = $@"
+                        if ({Input.Generate()} > {axis.Threshold}) {{
+                            report->{trigger} = true;
+                        }}";
+                }
+            }
+
+            return $"{output} = {GenerateAssignment(mode, false, false, false)};{extraTrigger}";
+        }
 
         // Digital to Analog stores values based on uint16_t for trigger, and int16_t for sticks
         var val = dta.On;
@@ -499,9 +514,7 @@ public abstract partial class OutputAxis : Output
             var trigger = this is ControllerAxis {Type: StandardAxisType.LeftTrigger} ? "l2" : "r2";
             return $@"if ({Input.Generate()}) {{
                         {output} = {val};
-                        if ({output} > 200) {{
-                            report->{trigger} = true;
-                        }}
+                        report->{trigger} = true;
                    }}";
         }
 

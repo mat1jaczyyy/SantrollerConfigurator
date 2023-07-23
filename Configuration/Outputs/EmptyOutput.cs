@@ -138,7 +138,7 @@ public class EmptyOutput : Output
                     new DirectInput(-1, false, DevicePinMode.Analog, Model),
                     Colors.Black, Colors.Black, Array.Empty<byte>(),
                     ushort.MinValue, ushort.MaxValue, 0,
-                    standardAxisType, false),
+                    ushort.MaxValue, standardAxisType, false),
                 StandardButtonType standardButtonType => new ControllerButton(Model,
                     new DirectInput(-1, false, DevicePinMode.PullUp, Model),
                     Colors.Black,

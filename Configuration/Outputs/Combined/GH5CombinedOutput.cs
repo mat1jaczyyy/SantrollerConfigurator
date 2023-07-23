@@ -73,7 +73,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         Outputs.Add(new ControllerAxis(Model,
             new Gh5NeckInput(Gh5NeckInputType.TapBar, Model, combined: true),
             Colors.Black,
-            Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, StandardAxisType.RightStickY, true));
+            Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, ushort.MaxValue,StandardAxisType.RightStickY, true));
         UpdateBindings();
     }
 
@@ -162,7 +162,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
                     true),
                 Colors.Black,
                 Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,
-                StandardAxisType.LeftStickX, true));
+                ushort.MaxValue, StandardAxisType.LeftStickX, true));
         }
     }
 }
