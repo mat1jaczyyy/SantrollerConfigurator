@@ -163,6 +163,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _strumDebounceDisplay.Value;
         set => StrumDebounce = (int) (value * 10);
     }
+    
+    [Reactive] public bool SwapSwitchFaceButtons { get; set; }
 
     [Reactive] public bool CombinedStrumDebounce { get; set; }
     [Reactive] public string? RfErrorText { get; set; }
@@ -581,6 +583,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         StrumDebounce = 0;
         Debounce = 10;
         DjPollRate = 4;
+        SwapSwitchFaceButtons = true;
 
         this.RaisePropertyChanged(nameof(DeviceControllerType));
         this.RaisePropertyChanged(nameof(EmulationType));
@@ -723,6 +726,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         lines.Add($"#define CONSOLE_TYPE {GetEmulationType()}");
         lines.Add($"#define DEVICE_TYPE {(byte) DeviceControllerType}");
         lines.Add($"#define POLL_RATE {PollRate}");
+        lines.Add($"#define SWAP_SWITCH_FACE_BUTTONS {SwapSwitchFaceButtons.ToString().ToLower()}");
 
         // Actually write the config as configured
         if (generate)
@@ -815,6 +819,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             // Write an empty config - the config at this point is likely invalid and won't compile
             lines.Add($"#define USB_HOST_STACK false");
             lines.Add($"#define USB_HOST_DP_PIN 0");
+            lines.Add($"#define SWAP_SWITCH_FACE_BUTTONS {SwapSwitchFaceButtons.ToString().ToLower()}");
 
             lines.Add($"#define TICK_SHARED");
             lines.Add($"#define TICK_DETECTION");

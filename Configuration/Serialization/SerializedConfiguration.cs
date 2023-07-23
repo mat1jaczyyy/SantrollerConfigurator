@@ -39,6 +39,7 @@ public class SerializedConfiguration
         QueueBasedInputs = model.Deque;
         DjPollRate = model.DjPollRate;
         DjDual = model.DjDual;
+        SwapSwitchFaceButtons = model.SwapSwitchFaceButtons;
     }
 
     [ProtoMember(1)] public LedType LedType { get; private set; }
@@ -60,6 +61,7 @@ public class SerializedConfiguration
     [ProtoMember(28)] public bool QueueBasedInputs { get; private set; }
     [ProtoMember(29)] public int DjPollRate { get; private set; }
     [ProtoMember(30)] public bool DjDual { get; private set; }
+    [ProtoMember(31)] public bool SwapSwitchFaceButtons { get; private set; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
@@ -73,6 +75,7 @@ public class SerializedConfiguration
         model.Deque = QueueBasedInputs;
         model.DjPollRate = DjPollRate;
         model.DjDual = DjDual;
+        model.SwapSwitchFaceButtons = SwapSwitchFaceButtons;
         if (DjPollRate == 0)
         {
             model.DjPollRate = 1;

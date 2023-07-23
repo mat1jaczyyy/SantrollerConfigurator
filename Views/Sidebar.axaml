@@ -212,6 +212,14 @@
                                HorizontalAlignment="Stretch" Margin="40 5 40 0" HorizontalContentAlignment="Center"
                                IsVisible="{Binding Apa102ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}" />
                     </StackPanel>
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Swap Switch Face Buttons"
+                                   TextAlignment="Center" />
+                        <ToggleSwitch HorizontalAlignment="Center" Margin="20 5 20 0"
+                                      HorizontalContentAlignment="Center" IsChecked="{Binding SwapSwitchFaceButtons}"
+                                      OnContent="Enabled"
+                                      OffContent="Disabled" />
+                    </StackPanel>
                     <Button Command="{Binding AddOutputCommand}" HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center" Margin="20 5 20 0">
                         Add Binding
