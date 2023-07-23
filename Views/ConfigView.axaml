@@ -45,7 +45,8 @@
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                         <Binding />
-                        <Binding Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceControllerType" />
+                        <Binding
+                            Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceControllerType" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
@@ -731,22 +732,23 @@
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
-                            D- (White) Pin
+                            D+ (Green) Pin
                         </Label>
                         <ComboBox HorizontalAlignment="Stretch"
-                                  SelectedItem="{Binding UsbHostDm}"
-                                  ItemsSource="{Binding AvailablePinsDm}"
+                                  SelectedItem="{Binding UsbHostDp}"
+                                  ItemsSource="{Binding AvailablePinsDp}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                     </StackPanel>
                     <StackPanel IsVisible="{Binding !Combined}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300">
-                            D+ (Green) Pin
+                            D- (White) Pin
                         </Label>
                         <ComboBox HorizontalAlignment="Stretch"
-                                  SelectedItem="{Binding UsbHostDp}"
-                                  ItemsSource="{Binding AvailablePinsDp}"
+                                  IsEnabled="False"
+                                  SelectedItem="{Binding UsbHostDm}"
+                                  ItemsSource="{Binding AvailablePinsDm}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                     </StackPanel>
                 </StackPanel>
@@ -1117,8 +1119,9 @@
                             Calibrate
                         </Label>
                         <Button Command="{Binding CalibrateCommand}"
-                                HorizontalContentAlignment="Center" VerticalAlignment="Center" Width="100" Content="{Binding CalibrationButtonText}"/>
-                        <Label VerticalAlignment="Center" Content="{Binding CalibrationStatus}"/>
+                                HorizontalContentAlignment="Center" VerticalAlignment="Center" Width="100"
+                                Content="{Binding CalibrationButtonText}" />
+                        <Label VerticalAlignment="Center" Content="{Binding CalibrationStatus}" />
                     </StackPanel>
 
                     <StackPanel IsVisible="{Binding SupportsMinMax}" Orientation="Horizontal" Height="50">
@@ -1262,8 +1265,9 @@
                                 Calibrate
                             </Label>
                             <Button Command="{Binding CalibrateCommand}"
-                                    HorizontalContentAlignment="Center" VerticalAlignment="Center" Width="100" Content="{Binding CalibrationButtonText}"/>
-                            <Label VerticalAlignment="Center" Content="{Binding CalibrationStatus}"/>
+                                    HorizontalContentAlignment="Center" VerticalAlignment="Center" Width="100"
+                                    Content="{Binding CalibrationButtonText}" />
+                            <Label VerticalAlignment="Center" Content="{Binding CalibrationStatus}" />
                         </StackPanel>
 
                         <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">
@@ -1311,7 +1315,7 @@
                                     <Label VerticalAlignment="Center" Width="300">
                                         Value
                                     </Label>
-                                     <Grid>
+                                    <Grid>
                                         <Rectangle Margin="{Binding CalibrationMinMaxMargin}"
                                                    HorizontalAlignment="Stretch"
                                                    Fill="Green" Height="30" />
@@ -1627,8 +1631,9 @@
                             Calibrate
                         </Label>
                         <Button Command="{Binding CalibrateCommand}"
-                                HorizontalContentAlignment="Center" VerticalAlignment="Center" Width="100" Content="{Binding CalibrationButtonText}"/>
-                        <Label VerticalAlignment="Center" Content="{Binding CalibrationStatus}"/>
+                                HorizontalContentAlignment="Center" VerticalAlignment="Center" Width="100"
+                                Content="{Binding CalibrationButtonText}" />
+                        <Label VerticalAlignment="Center" Content="{Binding CalibrationStatus}" />
                     </StackPanel>
 
                     <StackPanel IsVisible="{Binding !IsDigitalToAnalog}" Orientation="Horizontal" Height="50">

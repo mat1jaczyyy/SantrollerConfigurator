@@ -121,8 +121,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Bind(out var outputs)
             .Subscribe();
         Outputs = outputs;
-        Bindings.Connect().Filter(x => x is UsbHostCombinedOutput || x.Input.InputType is InputType.UsbHostInput).Any()
-            .ToPropertyEx(this, x => x.UsbHostEnabled);
         SupportsReset = !device.IsMini() && !device.IsEsp32();
 
         _usbHostDm = new DirectPinConfig(this, UsbHostPinTypeDm, -1, DevicePinMode.Skip);
@@ -395,7 +393,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     [ObservableAsProperty] public string? PollRateLabel { get; }
 
-    [ObservableAsProperty] public bool UsbHostEnabled { get; }
+    public bool UsbHostEnabled => Bindings.Items.Any(x => x is UsbHostCombinedOutput || x.Outputs.Items.Any(x2 => x2.Input.InnermostInput().InputType is InputType.UsbHostInput));
 
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
