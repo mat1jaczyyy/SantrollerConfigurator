@@ -82,6 +82,12 @@ public class UsbHostCombinedOutput : CombinedOutput
         {InstrumentButtonType.SoloOrange, UsbHostInputType.SoloOrange},
         {InstrumentButtonType.StrumUp, UsbHostInputType.DpadUp},
         {InstrumentButtonType.StrumDown, UsbHostInputType.DpadDown},
+        {InstrumentButtonType.Black1, UsbHostInputType.A},
+        {InstrumentButtonType.Black2, UsbHostInputType.B},
+        {InstrumentButtonType.Black3, UsbHostInputType.Y},
+        {InstrumentButtonType.White1, UsbHostInputType.X},
+        {InstrumentButtonType.White2, UsbHostInputType.LeftShoulder},
+        {InstrumentButtonType.White3, UsbHostInputType.RightShoulder},
         {DjInputType.LeftBlue, UsbHostInputType.LeftBlue},
         {DjInputType.LeftRed, UsbHostInputType.LeftRed},
         {DjInputType.LeftGreen, UsbHostInputType.LeftGreen},
@@ -200,7 +206,7 @@ public class UsbHostCombinedOutput : CombinedOutput
                     min, max, 0, djAxisType, true),
                 DjInputType djInputType => new DjButton(Model,
                     input, Colors.Black, Colors.Black, Array.Empty<byte>(), 10,
-                    djInputType, false),
+                    djInputType, true),
                 _ => null
             };
             if (output != null)
