@@ -85,7 +85,7 @@ public class ControllerEnumConverter : IMultiValueConverter
 
     public static string Convert(Enum value, DeviceControllerType deviceType, LegendType legendType, bool swapSwitchFaceButtons)
     {
-        if (!swapSwitchFaceButtons)
+        if (legendType == LegendType.Switch && !swapSwitchFaceButtons)
         {
             value = value switch
             {
