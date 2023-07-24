@@ -75,16 +75,16 @@ public class JoystickToDpad : Output
         {
 
             _outputs.Add(new ControllerButton(model,
-                new AnalogToDigital(new Ps2Input(Ps2InputType.LeftX, model), AnalogToDigitalType.JoyLow, Threshold,
+                new AnalogToDigital(new Ps2Input(Ps2InputType.LeftStickX, model), AnalogToDigitalType.JoyLow, Threshold,
                     model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadLeft, true));
             _outputs.Add(new ControllerButton(model,
-                new AnalogToDigital(new Ps2Input(Ps2InputType.LeftX, model), AnalogToDigitalType.JoyHigh, Threshold,
+                new AnalogToDigital(new Ps2Input(Ps2InputType.LeftStickX, model), AnalogToDigitalType.JoyHigh, Threshold,
                     model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadRight, true));
             _outputs.Add(new ControllerButton(model,
-                new AnalogToDigital(new Ps2Input(Ps2InputType.LeftY, model), AnalogToDigitalType.JoyHigh, Threshold,
+                new AnalogToDigital(new Ps2Input(Ps2InputType.LeftStickY, model), AnalogToDigitalType.JoyHigh, Threshold,
                     model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadUp, true));
             _outputs.Add(new ControllerButton(model,
-                new AnalogToDigital(new Ps2Input(Ps2InputType.LeftY, model), AnalogToDigitalType.JoyLow, Threshold,
+                new AnalogToDigital(new Ps2Input(Ps2InputType.LeftStickY, model), AnalogToDigitalType.JoyLow, Threshold,
                     model), Colors.Black, Colors.Black, Array.Empty<byte>(), 10, StandardButtonType.DpadDown, true));
         }
 
@@ -120,7 +120,8 @@ public class JoystickToDpad : Output
         return new SerializedJoystickToDpad(Threshold, Wii);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return deviceControllerType is DeviceControllerType.Gamepad
             ? "Map Left joystick to Dpad"

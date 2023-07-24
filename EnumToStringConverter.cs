@@ -11,6 +11,7 @@ namespace GuitarConfigurator.NetCore;
 
 public class EnumToStringConverter : IValueConverter
 {
+    
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return value == null ? null : Convert(value);

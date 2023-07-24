@@ -220,6 +220,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public IEnumerable<LedType> LedTypes => Enum.GetValues<LedType>();
 
     public IEnumerable<MouseMovementType> MouseMovementTypes => Enum.GetValues<MouseMovementType>();
+    public IEnumerable<LegendType> LegendTypes => Enum.GetValues<LegendType>();
 
     //TODO: actually read and write this as part of the config
     public bool KvEnabled { get; set; } = false;
@@ -342,6 +343,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     [Reactive] public bool XInputOnWindows { get; set; }
 
+    [Reactive] public LegendType LegendType { get; set; } = LegendType.Xbox;
+    
 
     public DeviceControllerType DeviceControllerType
     {
@@ -672,7 +675,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         foreach (var type in Enum.GetValues<StandardAxisType>())
         {
-            if (!ControllerEnumConverter.GetAxisText(_deviceControllerType, type).Any()) continue;
+            if (!ControllerEnumConverter.Convert(type, _deviceControllerType, LegendType, SwapSwitchFaceButtons).Any()) continue;
             var isTrigger = type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
             Bindings.Add(new ControllerAxis(this,
                 new DirectInput(-1, false, DevicePinMode.Analog, this),
@@ -683,7 +686,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         foreach (var type in Enum.GetValues<StandardButtonType>())
         {
-            if (!ControllerEnumConverter.GetButtonText(_deviceControllerType, type).Any()) continue;
+            if (!ControllerEnumConverter.Convert(type, _deviceControllerType, LegendType, SwapSwitchFaceButtons).Any()) continue;
             Bindings.Add(new ControllerButton(this,
                 new DirectInput(-1, false, DevicePinMode.PullUp, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type, false));

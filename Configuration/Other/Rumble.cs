@@ -63,7 +63,8 @@ public class Rumble : Output
     public override bool IsKeyboard => false;
     public virtual bool IsController => false;
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return "Rumble Motor - " + EnumToStringConverter.Convert(RumbleMotorType);
     }

@@ -75,7 +75,8 @@ public class EmulationMode : Output
         return new SerializedEmulationMode(Type, Input.Serialise());
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return EnumToStringConverter.Convert(Type) + " Console Mode Binding";
     }

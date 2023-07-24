@@ -40,6 +40,8 @@
                     <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                         <Binding />
                         <Binding Path="$parent[views:SidebarView].Model.DeviceControllerType" />
+                        <Binding Path="$parent[views:SidebarView].Model.LegendType" />
+                        <Binding Path="$parent[views:SidebarView].Model.SwapSwitchFaceButtons" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
@@ -87,6 +89,14 @@
                               SelectedItem="{Binding MouseMovementType}"
                               ItemTemplate="{StaticResource EnumToStringTemplate}"
                               ItemsSource="{Binding MouseMovementTypes}" />
+                </StackPanel>
+                <StackPanel IsVisible="{Binding IsController}">
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Controller View Type"
+                               TextAlignment="Center" />
+                    <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
+                              SelectedItem="{Binding LegendType}"
+                              ItemTemplate="{StaticResource EnumToStringTemplate}"
+                              ItemsSource="{Binding LegendTypes}" />
                 </StackPanel>
                 <StackPanel IsVisible="{Binding IsController}">
                     <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Controller Type"

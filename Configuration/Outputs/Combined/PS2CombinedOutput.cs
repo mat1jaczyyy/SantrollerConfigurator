@@ -54,10 +54,10 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public static readonly Dictionary<Ps2InputType, StandardAxisType> Axis = new()
     {
-        {Ps2InputType.LeftX, StandardAxisType.LeftStickX},
-        {Ps2InputType.LeftY, StandardAxisType.LeftStickY},
-        {Ps2InputType.RightX, StandardAxisType.RightStickX},
-        {Ps2InputType.RightY, StandardAxisType.RightStickY},
+        {Ps2InputType.LeftStickX, StandardAxisType.LeftStickX},
+        {Ps2InputType.LeftStickY, StandardAxisType.LeftStickY},
+        {Ps2InputType.RightStickX, StandardAxisType.RightStickX},
+        {Ps2InputType.RightStickY, StandardAxisType.RightStickY},
         {Ps2InputType.Dualshock2L2, StandardAxisType.LeftTrigger},
         {Ps2InputType.Dualshock2R2, StandardAxisType.RightTrigger},
         {Ps2InputType.GuitarWhammy, StandardAxisType.RightStickX},
@@ -177,7 +177,8 @@ public class Ps2CombinedOutput : CombinedSpiOutput
                           ps2Input.SupportsType(controllerType));
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return "PS2 Controller Inputs";
     }

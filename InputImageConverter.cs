@@ -17,14 +17,39 @@ public class InputImageConverter : IMultiValueConverter
 {
     private static readonly Dictionary<object, Bitmap> Icons = new();
 
+    private string GetPath(object type, LegendType legendType, bool swapSwitchFaceButtons)
+    {
+        switch (legendType)
+        {
+            case LegendType.Xbox:
+                return $"Xbox360/{type}";
+            case LegendType.PlayStation:
+                return $"PS2/{type}";
+            case LegendType.Switch:
+                if (!swapSwitchFaceButtons)
+                {
+                    type = type switch
+                    {
+                        StandardButtonType.X => StandardButtonType.Y,
+                        StandardButtonType.Y => StandardButtonType.X,
+                        StandardButtonType.A => StandardButtonType.B,
+                        StandardButtonType.B => StandardButtonType.A,
+                        _ => type
+                    };
+                }
+
+                return $"Switch/Switch{type}";
+        }
+
+        return "";
+    }
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (values[0] == null || values[1] == null)
-            return null;
-
-        if (values[1] is not DeviceControllerType) return null;
-        var deviceControllerType = (DeviceControllerType) values[1]!;
-        var name = values[0]!.GetType().Name + values[0] + deviceControllerType;
+        if (values[0] is not Enum) return null;
+        if (values[1] is not DeviceControllerType deviceControllerType) return null;
+        if (values[2] is not LegendType legendType) return null;
+        if (values[3] is not bool swapSwitchFaceButtons) return null;
+        var name = values[0]!.GetType().Name + values[0] + deviceControllerType + legendType + swapSwitchFaceButtons;
         if (Icons.TryGetValue(name, out var image)) return image;
 
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
@@ -82,24 +107,8 @@ public class InputImageConverter : IMultiValueConverter
                 EmulationModeType.Switch => "Combined/Switch",
                 _ => throw new ArgumentOutOfRangeException()
             },
-            StandardButtonType type => deviceControllerType switch
-            {
-                DeviceControllerType.Gamepad => $"Xbox360/{type}",
-                DeviceControllerType.DancePad => $"Xbox360/{type}",
-                DeviceControllerType.StageKit => $"Xbox360/{type}",
-                DeviceControllerType.LiveGuitar => $"LiveGuitar/{type}",
-                DeviceControllerType.Turntable => $"Xbox360/{type}",
-                _ => $"{deviceControllerType}/{type}"
-            },
-            StandardAxisType type => deviceControllerType switch
-            {
-                DeviceControllerType.Gamepad => $"Xbox360/{type}",
-                DeviceControllerType.DancePad => $"Xbox360/{type}",
-                DeviceControllerType.StageKit => $"Xbox360/{type}",
-                DeviceControllerType.LiveGuitar => $"LiveGuitar/{type}",
-                DeviceControllerType.Turntable => $"Xbox360/{type}",
-                _ => $"{deviceControllerType}/{type}"
-            },
+            StandardButtonType type => GetPath(type, legendType, swapSwitchFaceButtons),
+            StandardAxisType type => GetPath(type, legendType, swapSwitchFaceButtons),
             Ps3AxisType type => "PS2/" + type.ToString().Replace("Pressure",""),
             _ => null
         };

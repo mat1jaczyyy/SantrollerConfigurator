@@ -47,6 +47,10 @@
                         <Binding />
                         <Binding
                             Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceControllerType" />
+                        <Binding
+                            Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).LegendType" />
+                        <Binding
+                            Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).SwapSwitchFaceButtons" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
@@ -62,6 +66,10 @@
                             <Binding />
                             <Binding
                                 Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceControllerType" />
+                            <Binding
+                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).LegendType" />
+                            <Binding
+                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).SwapSwitchFaceButtons" />
                         </MultiBinding>
                     </Image.Source>
                 </Image>
@@ -70,6 +78,8 @@
                         <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                             <Binding />
                             <Binding Path="$parent[views:ConfigView].Model.DeviceControllerType" />
+                            <Binding Path="$parent[views:ConfigView].Model.LegendType" />
+                            <Binding Path="$parent[views:ConfigView].Model.SwapSwitchFaceButtons" />
                         </MultiBinding>
                     </Label.Content>
                 </Label>
@@ -83,6 +93,10 @@
                             <Binding />
                             <Binding
                                 Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).DeviceControllerType" />
+                            <Binding
+                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).LegendType" />
+                            <Binding
+                                Path="$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).SwapSwitchFaceButtons" />
                         </MultiBinding>
                     </Image.Source>
                 </Image>
@@ -96,12 +110,16 @@
                         <MultiBinding Converter="{StaticResource InputImageConverter }">
                             <Binding Path="OutputType" />
                             <Binding Path="$parent[views:ConfigView].Model.DeviceControllerType" />
+                            <Binding Path="$parent[views:ConfigView].Model.LegendType" />
+                            <Binding Path="$parent[views:ConfigView].Model.SwapSwitchFaceButtons" />
                         </MultiBinding>
                     </Image.Source>
                     <ToolTip.Tip>
                         <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                             <Binding Path="OutputType" />
                             <Binding Path="$parent[views:ConfigView].Model.DeviceControllerType" />
+                            <Binding Path="$parent[views:ConfigView].Model.LegendType" />
+                            <Binding Path="$parent[views:ConfigView].Model.SwapSwitchFaceButtons" />
                         </MultiBinding>
                     </ToolTip.Tip>
                 </Image>

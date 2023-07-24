@@ -260,7 +260,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
             wiiInput.WiiControllerType == controllerType;
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return "Wii Extension Inputs";
     }

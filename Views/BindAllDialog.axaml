@@ -67,12 +67,16 @@
                                 <MultiBinding Converter="{StaticResource InputImageConverter }">
                                     <Binding Path="Output" />
                                     <Binding Path="Model.DeviceControllerType" />
+                                    <Binding Path="Model.LegendType" />
+                                    <Binding Path="Model.SwapSwitchFaceButtons" />
                                 </MultiBinding>
                             </Image.Source>
                             <ToolTip.Tip>
                                 <MultiBinding Converter="{StaticResource ControllerEnumConverter }">
                                     <Binding Path="Output.OutputType" />
                                     <Binding Path="Model.DeviceControllerType" />
+                                    <Binding Path="Model.LegendType" />
+                                    <Binding Path="Model.SwapSwitchFaceButtons" />
                                 </MultiBinding>
                             </ToolTip.Tip>
                         </Image>

@@ -121,7 +121,8 @@ public partial class BluetoothOutput : CombinedOutput
         return new SerializedBluetoothOutput(MacAddress);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return "Bluetooth Input";
     }

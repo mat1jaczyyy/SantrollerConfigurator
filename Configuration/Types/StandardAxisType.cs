@@ -1,11 +1,19 @@
+using System.ComponentModel;
+
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum StandardAxisType
 {
-    LeftTrigger,
-    RightTrigger,
+    [Description("Left Joystick X Axis")]
     LeftStickX,
+    [Description("Left Joystick Y Axis")]
     LeftStickY,
+    [Description("Right Joystick X Axis")]
     RightStickX,
-    RightStickY
+    [Description("Right Joystick Y Axis")]
+    RightStickY,
+    [Description("Left Trigger Axis")]
+    LeftTrigger,
+    [Description("Right Trigger Axis")]
+    RightTrigger
 }

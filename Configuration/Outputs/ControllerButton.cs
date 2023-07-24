@@ -28,9 +28,10 @@ public class ControllerButton : OutputButton
     public override string LedOnLabel => "Pressed LED Colour";
     public override string LedOffLabel => "Released LED Colour";
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
-        return ControllerEnumConverter.GetButtonText(deviceControllerType, Type);
+        return ControllerEnumConverter.Convert(Type, deviceControllerType, legendType, swapSwitchFaceButtons);
     }
 
     public override object GetOutputType()

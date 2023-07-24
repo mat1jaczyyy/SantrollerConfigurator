@@ -119,7 +119,8 @@ public partial class DrumAxis : OutputAxis
 
     [Reactive] public int Debounce { get; set; }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return EnumToStringConverter.Convert(Type);
     }

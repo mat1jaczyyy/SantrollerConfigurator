@@ -105,7 +105,8 @@ public class GhwtCombinedOutput : CombinedOutput
             CreateDefaults();
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return "GHWT Slider Inputs";
     }

@@ -95,13 +95,13 @@ public abstract partial class Output : ReactiveObject
         this.WhenAnyValue(x => x.Input)
             .Select(x => x.InnermostInput() is GhWtTapInput && this is not GuitarAxis)
             .ToPropertyEx(this, x => x.IsWt);
-        this.WhenAnyValue(x => x.Input.Title, x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails)
-            .Select(x => $"{x.Item1} ({GetName(x.Item2)})")
+        this.WhenAnyValue(x => x.Input.Title, x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails, x => x.Model.LegendType, x => x.Model.SwapSwitchFaceButtons)
+            .Select(x => $"{x.Item1} ({GetName(x.Item2, x.Item4, x.Item5)})")
             .ToPropertyEx(this, x => x.Title);
         this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToPropertyEx(this, x => x.AreLedsEnabled);
-        this.WhenAnyValue(x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails)
-            .Select(x => GetName(x.Item1))
+        this.WhenAnyValue(x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails, x => x.Model.LegendType, x => x.Model.SwapSwitchFaceButtons)
+            .Select(x => GetName(x.Item1, x.Item3, x.Item4))
             .ToPropertyEx(this, x => x.LocalisedName);
         this.WhenAnyValue(x => x.Input.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
             .ToPropertyEx(this, x => x.ValueRaw);
@@ -376,7 +376,8 @@ public abstract partial class Output : ReactiveObject
         Model.RemoveOutput(this);
     }
 
-    public abstract string GetName(DeviceControllerType deviceControllerType);
+    public abstract string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons);
 
     public abstract object GetOutputType();
 

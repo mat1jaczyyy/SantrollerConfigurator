@@ -26,7 +26,8 @@ public class Ps3Axis : OutputAxis
     public override string LedOnLabel => "Pressed LED Colour";
     public override string LedOffLabel => "Released LED Colour";
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return EnumToStringConverter.Convert(Type);
     }

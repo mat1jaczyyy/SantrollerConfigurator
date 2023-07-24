@@ -12,366 +12,129 @@ namespace GuitarConfigurator.NetCore;
 
 public class ControllerEnumConverter : IMultiValueConverter
 {
-    private static readonly Dictionary<StandardAxisType, string> AxisLabelsStandard =
-        new()
-        {
-            {
-                StandardAxisType.LeftStickX,
-                "Left Joystick X Axis"
-            },
-            {
-                StandardAxisType.LeftStickY,
-                "Left Joystick Y Axis"
-            },
-            {
-                StandardAxisType.RightStickX,
-                "Right Joystick X Axis"
-            },
-            {
-                StandardAxisType.RightStickY,
-                "Right Joystick Y Axis"
-            },
-            {
-                StandardAxisType.LeftTrigger,
-                "Left Trigger Axis"
-            },
-            {
-                StandardAxisType.RightTrigger,
-                "Right Trigger Axis"
-            }
-        };
+    private static readonly List<StandardButtonType> SupportedButtonsGuitar = new()
+    {
+        StandardButtonType.DpadLeft,
+        StandardButtonType.DpadRight,
+        StandardButtonType.Start,
+        StandardButtonType.Back,
+        StandardButtonType.Guide
+    };
 
-    private static readonly Dictionary<Tuple<DeviceControllerType, StandardButtonType>, string>
-        ButtonLabels =
+    private static readonly List<StandardButtonType> SupportedButtonsDrums = new()
+    {
+        StandardButtonType.DpadUp,
+        StandardButtonType.DpadDown,
+        StandardButtonType.DpadLeft,
+        StandardButtonType.DpadRight,
+        StandardButtonType.Start,
+        StandardButtonType.Back,
+        StandardButtonType.Guide
+    };
+
+    private static readonly List<StandardButtonType> SupportedButtonsNonGamepad = new()
+    {
+        StandardButtonType.A,
+        StandardButtonType.B,
+        StandardButtonType.X,
+        StandardButtonType.Y,
+        StandardButtonType.DpadUp,
+        StandardButtonType.DpadDown,
+        StandardButtonType.DpadLeft,
+        StandardButtonType.DpadRight,
+        StandardButtonType.Start,
+        StandardButtonType.Back,
+        StandardButtonType.Guide
+    };
+
+    private static readonly Dictionary<StandardButtonType, string> PlaystationLabels = new()
+    {
+        {StandardButtonType.A, "Cross Button"},
+        {StandardButtonType.B, "Circle Button"},
+        {StandardButtonType.X, "Square Button"},
+        {StandardButtonType.Y, "Triangle Button"},
+        {StandardButtonType.Guide, "PlayStation Button"}
+    };
+    private static readonly Dictionary<StandardButtonType, string> XboxLabels = new()
+    {
+        {StandardButtonType.Guide, "Guide Button"},
+        {StandardButtonType.Back, "Back Button"},
+    };
+
+    private static readonly Dictionary<(DeviceControllerType, StandardButtonType), string>
+        CustomButtonLabels =
             new()
             {
                 {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandDrums,
-                        StandardButtonType.DpadUp),
-                    "D-pad Up"
+                    (DeviceControllerType.LiveGuitar, StandardButtonType.Start),
+                    "/ Hero Power Button"
                 },
                 {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandDrums,
-                        StandardButtonType.DpadDown),
-                    "D-pad Down"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandDrums,
-                        StandardButtonType.DpadLeft),
-                    "D-pad Left"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandDrums,
-                        StandardButtonType.DpadRight),
-                    "D-pad Right"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandDrums,
-                        StandardButtonType.Start),
-                    "Start Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandDrums,
-                        StandardButtonType.Guide),
-                    "Home Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandDrums,
-                        StandardButtonType.Back),
-                    "Select Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroDrums,
-                        StandardButtonType.DpadUp),
-                    "D-pad Up"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroDrums,
-                        StandardButtonType.DpadDown),
-                    "D-pad Down"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroDrums,
-                        StandardButtonType.DpadLeft),
-                    "D-pad Left"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroDrums,
-                        StandardButtonType.DpadRight),
-                    "D-pad Right"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroDrums,
-                        StandardButtonType.Start),
-                    "Start Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroDrums,
-                        StandardButtonType.Guide),
-                    "Home Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroDrums,
-                        StandardButtonType.Back),
-                    "Select Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroGuitar,
-                        StandardButtonType.DpadLeft),
-                    "D-pad Left"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroGuitar,
-                        StandardButtonType.DpadRight),
-                    "D-pad Right"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroGuitar,
-                        StandardButtonType.Start),
-                    "Start Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroGuitar,
-                        StandardButtonType.Back),
-                    "Select Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.GuitarHeroGuitar,
-                        StandardButtonType.Guide),
-                    "Home Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandGuitar,
-                        StandardButtonType.DpadLeft),
-                    "D-pad Left"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandGuitar,
-                        StandardButtonType.DpadRight),
-                    "D-pad Right"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandGuitar,
-                        StandardButtonType.Start),
-                    "Start Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandGuitar,
-                        StandardButtonType.Back),
-                    "Select Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.RockBandGuitar,
-                        StandardButtonType.Guide),
-                    "Home Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.LiveGuitar,
-                        StandardButtonType.DpadLeft),
-                    "D-pad Left"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.LiveGuitar,
-                        StandardButtonType.DpadRight),
-                    "D-pad Right"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.LiveGuitar,
-                        StandardButtonType.Start),
-                    "Start / Hero Power Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.LiveGuitar,
-                        StandardButtonType.LeftThumbClick),
+                    (DeviceControllerType.LiveGuitar, StandardButtonType.LeftThumbClick),
                     "GHTV Button"
                 },
                 {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.LiveGuitar,
-                        StandardButtonType.Guide),
-                    "Home Button"
+                    (DeviceControllerType.LiveGuitar, StandardButtonType.Back),
+                    "/ Pause Button"
                 },
                 {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.LiveGuitar,
-                        StandardButtonType.Back),
-                    "Select / Pause Button"
+                    (DeviceControllerType.Turntable, StandardButtonType.Y),
+                    "/ Euphoria Button"
                 },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.A),
-                    "A Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.B),
-                    "B Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.X),
-                    "X Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.Y),
-                    "Y Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.LeftThumbClick),
-                    "Left Stick Click"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.RightThumbClick),
-                    "Right Stick Click"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.Start),
-                    "Start Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.Back),
-                    "Select Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.Guide),
-                    "Home Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.LeftShoulder),
-                    "Left Bumper"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.RightShoulder),
-                    "Right Bumper"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.DpadUp),
-                    "D-pad Up"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.DpadDown),
-                    "D-pad Down"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.DpadLeft),
-                    "D-pad Left"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Gamepad,
-                        StandardButtonType.DpadRight),
-                    "D-pad Right"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.A),
-                    "A Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.B),
-                    "B Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.X),
-                    "X Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.Y),
-                    "Y Button / Euphoria Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.Start),
-                    "Start Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.Back),
-                    "Select Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.Guide),
-                    "Home Button"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.DpadUp),
-                    "D-pad Up"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.DpadDown),
-                    "D-pad Down"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.DpadLeft),
-                    "D-pad Left"
-                },
-                {
-                    new Tuple<DeviceControllerType, StandardButtonType>(DeviceControllerType.Turntable,
-                        StandardButtonType.DpadRight),
-                    "D-pad Right"
-                }
             };
 
-    public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+    public static string Convert(Enum value, DeviceControllerType deviceType, LegendType legendType, bool swapSwitchFaceButtons)
     {
-        if (values[0] == null || values[1] == null)
-            return null;
-
-        if (values[0] is not Enum) return null;
-
-        if (values[1] is not DeviceControllerType) return null;
-
-        var deviceControllerRhythmType = (DeviceControllerType) values[1]!;
-        switch (values[0])
+        if (!swapSwitchFaceButtons)
         {
-            case StandardAxisType axis:
-                return GetAxisText(deviceControllerRhythmType, axis);
-            case StandardButtonType button:
-                return GetButtonText(deviceControllerRhythmType, button);
+            value = value switch
+            {
+                StandardButtonType.X => StandardButtonType.Y,
+                StandardButtonType.Y => StandardButtonType.X,
+                StandardButtonType.A => StandardButtonType.B,
+                StandardButtonType.B => StandardButtonType.A,
+                _ => value
+            };
         }
 
         // Maybe we just change out all this nice description stuff for something else
-        var valueType = values[0]!.GetType();
-        var fieldInfo = valueType.GetField(values[0]!.ToString()!, BindingFlags.Static | BindingFlags.Public)!;
+        var valueType = value.GetType();
+        var fieldInfo = valueType.GetField(value.ToString()!, BindingFlags.Static | BindingFlags.Public)!;
         var attributes = (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
-        return attributes.Length > 0 ? attributes[0].Description : fieldInfo.Name;
+        var ret = attributes.Length > 0 ? attributes[0].Description : fieldInfo.Name;
+        if (value is StandardButtonType button)
+        {
+            
+            if (legendType == LegendType.PlayStation && PlaystationLabels.TryGetValue(button, out var label))
+            {
+                ret = label;
+            }
+            if (legendType == LegendType.Xbox && XboxLabels.TryGetValue(button, out label))
+            {
+                ret = label;
+            }
+
+            if (CustomButtonLabels.TryGetValue((deviceType, button), out label))
+            {
+                if (label.StartsWith("/"))
+                {
+                    ret += " "+ label;
+                }
+                else
+                {
+                    ret = label;
+                }
+            }
+        }
+
+        return ret;
     }
 
-    public static string GetAxisText(DeviceControllerType deviceControllerType,
-        StandardAxisType axis)
+    public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        // All the instruments handle their own axis'
-        return deviceControllerType is DeviceControllerType.DancePad 
-            or DeviceControllerType.Gamepad
-            ? AxisLabelsStandard[axis]
-            : "";
-    }
-
-    public static string GetButtonText(DeviceControllerType deviceControllerType,
-        StandardButtonType button)
-    {
-        // Turntable mappings hide extra buttons like bumpers and stick click
-        if (deviceControllerType is DeviceControllerType.DancePad or DeviceControllerType.StageKit)
-            deviceControllerType = DeviceControllerType.Turntable;
-        return ButtonLabels.GetValueOrDefault(
-            new Tuple<DeviceControllerType, StandardButtonType>(deviceControllerType, button),
-            "");
+        if (values[0] is not Enum e || values[1] is not DeviceControllerType t || values[2] is not LegendType l || values[4] is not bool swapSwitchFaceButtons) return null;
+        return Convert(e, t, l, swapSwitchFaceButtons);
     }
 
     public static (List<Output>, List<object>) FilterValidOutputs(DeviceControllerType controllerType,
@@ -413,6 +176,32 @@ public class ControllerEnumConverter : IMultiValueConverter
         return (extra, types);
     }
 
+    public static bool ButtonValid(StandardButtonType button, DeviceControllerType deviceControllerType)
+    {
+        if (CustomButtonLabels.ContainsKey((deviceControllerType, button)))
+        {
+            return true;
+        }
+        switch (deviceControllerType)
+        {
+            case DeviceControllerType.Gamepad:
+                return true;
+            case DeviceControllerType.Turntable:
+            case DeviceControllerType.DancePad:
+            case DeviceControllerType.StageKit:
+                return SupportedButtonsNonGamepad.Contains(button);
+            case DeviceControllerType.LiveGuitar:
+            case DeviceControllerType.GuitarHeroGuitar:
+            case DeviceControllerType.RockBandGuitar:
+                return SupportedButtonsGuitar.Contains(button);
+            case DeviceControllerType.GuitarHeroDrums:
+            case DeviceControllerType.RockBandDrums:
+                return SupportedButtonsDrums.Contains(button);
+            default:
+                return true;
+        }
+    }
+
     public static IEnumerable<object> GetTypes(DeviceControllerType deviceType)
     {
         var otherBindings = deviceType switch
@@ -420,7 +209,7 @@ public class ControllerEnumConverter : IMultiValueConverter
             DeviceControllerType.GuitarHeroDrums or DeviceControllerType.RockBandDrums =>
                 DrumAxisTypeMethods.GetTypeFor(deviceType).Cast<object>(),
             DeviceControllerType.Gamepad => Enum.GetValues<Ps3AxisType>().Cast<object>()
-                .Concat(AxisLabelsStandard.Keys.Cast<object>()),
+                .Concat(Enum.GetValues<StandardAxisType>().Cast<object>()),
             DeviceControllerType.Turntable => Enum.GetValues<DjInputType>()
                 .Where(s => s is not (DjInputType.LeftTurntable or DjInputType.RightTurntable))
                 .Cast<object>()
@@ -430,23 +219,12 @@ public class ControllerEnumConverter : IMultiValueConverter
                     .GetTypeFor(deviceType)
                     .Cast<object>()
                     .Concat(InstrumentButtonTypeExtensions.GetButtons(deviceType).Cast<object>()),
-            _ => AxisLabelsStandard.Keys.Cast<object>()
+            _ => Enum.GetValues<StandardAxisType>().Cast<object>()
         };
-        // Most devices, except for the Guitars actually use standard button bindings, and then may have additional special buttons which are handled above.
-        if (deviceType is not (DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.RockBandGuitar
-            or DeviceControllerType.LiveGuitar or DeviceControllerType.Turntable
-            or DeviceControllerType.DancePad or DeviceControllerType.GuitarHeroDrums
-            or DeviceControllerType.RockBandDrums or DeviceControllerType.StageKit))
-            deviceType = DeviceControllerType.Gamepad;
-        // Though a good chunk need a reduced set of standard bindings
-        if (deviceType is DeviceControllerType.DancePad or DeviceControllerType.StageKit)
-            deviceType = DeviceControllerType.Turntable;
         return Enum.GetValues<SimpleType>().Cast<object>()
             .Concat(otherBindings)
             .Concat(Enum.GetValues<StandardButtonType>()
-                .Where(type =>
-                    ButtonLabels.ContainsKey(
-                        new Tuple<DeviceControllerType, StandardButtonType>(deviceType, type)))
+                .Where(type => ButtonValid(type, deviceType))
                 .Cast<object>());
     }
 }

@@ -25,16 +25,16 @@ public enum Ps2InputType
     [Description("Guitar - Whammy Axis")] GuitarWhammy,
 
     [Description("Gamepad - Left Stick X")]
-    LeftX,
+    LeftStickX,
 
     [Description("Gamepad - Left Stick Y")]
-    LeftY,
+    LeftStickY,
 
     [Description("Gamepad - Right Stick X")]
-    RightX,
+    RightStickX,
 
     [Description("Gamepad - Right Stick Y")]
-    RightY,
+    RightStickY,
 
     [Description("DualShock 2 - L1 Pressure")]
     Dualshock2L1,

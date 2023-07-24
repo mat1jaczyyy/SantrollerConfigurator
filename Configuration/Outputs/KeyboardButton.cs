@@ -160,7 +160,8 @@ public class KeyboardButton : OutputButton
     {
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return Keys.TryGetValue(Key, out var key) ? key : "";
     }

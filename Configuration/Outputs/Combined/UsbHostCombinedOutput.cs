@@ -136,7 +136,8 @@ public class UsbHostCombinedOutput : CombinedOutput
         return new SerializedCombinedUsbHostOutput(Outputs.Items.ToList());
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return "Usb Host Inputs";
     }

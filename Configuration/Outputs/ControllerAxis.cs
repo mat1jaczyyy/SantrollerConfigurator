@@ -71,10 +71,10 @@ public class ControllerAxis : OutputAxis
 
     public override bool IsKeyboard => false;
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
-        return ControllerEnumConverter.GetAxisText(deviceControllerType,
-            Type);
+        return ControllerEnumConverter.Convert(Type, deviceControllerType, legendType, swapSwitchFaceButtons);
     }
 
     public override object GetOutputType()

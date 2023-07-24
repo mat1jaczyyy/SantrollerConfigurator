@@ -35,7 +35,8 @@ public class MouseButton : OutputButton
         return GetReportField(Type);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return EnumToStringConverter.Convert(Type);
     }

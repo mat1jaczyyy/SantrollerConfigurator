@@ -235,7 +235,8 @@ public class EmptyOutput : Output
         throw new IncompleteConfigurationException(ErrorText);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return "";
     }

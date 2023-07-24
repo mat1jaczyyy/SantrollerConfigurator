@@ -24,7 +24,7 @@ public class BindAllWindowViewModel : ReactiveObject
         Output = output;
         Input = (output.Input.InnermostInput() as DirectInput)!;
         IsAnalog = Input.IsAnalog;
-        LocalisedName = output.GetName(model.DeviceControllerType);
+        LocalisedName = output.GetName(model.DeviceControllerType, model.LegendType, model.SwapSwitchFaceButtons);
 
         ContinueCommand = ReactiveCommand.CreateFromObservable(() => Close(true));
         AbortCommand = ReactiveCommand.CreateFromObservable(() => Close(false));

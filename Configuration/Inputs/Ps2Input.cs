@@ -23,10 +23,10 @@ public class Ps2Input : SpiInput
 
     public static readonly List<Ps2InputType> Dualshock2Order = new()
     {
-        Ps2InputType.RightX,
-        Ps2InputType.RightY,
-        Ps2InputType.LeftX,
-        Ps2InputType.LeftY,
+        Ps2InputType.RightStickX,
+        Ps2InputType.RightStickY,
+        Ps2InputType.LeftStickX,
+        Ps2InputType.LeftStickY,
         Ps2InputType.Dualshock2RightButton,
         Ps2InputType.Dualshock2LeftButton,
         Ps2InputType.Dualshock2UpButton,
@@ -77,25 +77,25 @@ public class Ps2Input : SpiInput
 
     private static readonly List<Ps2InputType> IntInputs = new()
     {
-        Ps2InputType.LeftX,
-        Ps2InputType.LeftY,
+        Ps2InputType.LeftStickX,
+        Ps2InputType.LeftStickY,
         Ps2InputType.MouseX,
         Ps2InputType.MouseY,
-        Ps2InputType.RightX,
-        Ps2InputType.RightY,
+        Ps2InputType.RightStickX,
+        Ps2InputType.RightStickY,
         Ps2InputType.NegConTwist
     };
 
     private static readonly Dictionary<Ps2InputType, string> Mappings = new()
     {
-        {Ps2InputType.LeftX, "(ps2Data[7] - 128) << 8"},
-        {Ps2InputType.LeftY, "-(ps2Data[8] - 127) << 8"},
+        {Ps2InputType.LeftStickX, "(ps2Data[7] - 128) << 8"},
+        {Ps2InputType.LeftStickY, "-(ps2Data[8] - 127) << 8"},
         {Ps2InputType.MouseLeft, "(~ps2Data[3]) & (1 << 3)"},
         {Ps2InputType.MouseRight, "(~ps2Data[3]) & (1 << 2)"}, 
         {Ps2InputType.MouseX, "(ps2Data[5] - 128) << 8"},
         {Ps2InputType.MouseY, "-(ps2Data[6] - 127) << 8"},
-        {Ps2InputType.RightX, "(ps2Data[5] - 128) << 8"},
-        {Ps2InputType.RightY, "-(ps2Data[6] - 127) << 8"},
+        {Ps2InputType.RightStickX, "(ps2Data[5] - 128) << 8"},
+        {Ps2InputType.RightStickY, "-(ps2Data[6] - 127) << 8"},
         {Ps2InputType.NegConTwist, "(ps2Data[5] - 128) << 8"},
         {Ps2InputType.NegConI, "ps2Data[6]"},
         {Ps2InputType.NegConIi, "ps2Data[7]"},
@@ -165,10 +165,10 @@ public class Ps2Input : SpiInput
 
     private static readonly IReadOnlyList<Ps2InputType> Dualshock = new[]
     {
-        Ps2InputType.LeftX,
-        Ps2InputType.LeftY,
-        Ps2InputType.RightX,
-        Ps2InputType.RightY
+        Ps2InputType.LeftStickX,
+        Ps2InputType.LeftStickY,
+        Ps2InputType.RightStickX,
+        Ps2InputType.RightStickY
     };
 
     private static readonly Dictionary<Ps2ControllerType, string> CType = new()
@@ -295,10 +295,10 @@ public class Ps2Input : SpiInput
             Ps2InputType.MouseRight when mouse => ~ps2Data[3] & (1 << 2),
             Ps2InputType.MouseX when mouse => (ps2Data[4] - 128) << 8,
             Ps2InputType.MouseY when mouse => -(ps2Data[5] - 127) << 8,
-            Ps2InputType.LeftX when basicAxis => (ps2Data[7] - 128) << 8,
-            Ps2InputType.LeftY when basicAxis => -(ps2Data[8] - 127) << 8,
-            Ps2InputType.RightX when basicAxis => (ps2Data[5] - 128) << 8,
-            Ps2InputType.RightY when basicAxis => -(ps2Data[6] - 127) << 8,
+            Ps2InputType.LeftStickX when basicAxis => (ps2Data[7] - 128) << 8,
+            Ps2InputType.LeftStickY when basicAxis => -(ps2Data[8] - 127) << 8,
+            Ps2InputType.RightStickX when basicAxis => (ps2Data[5] - 128) << 8,
+            Ps2InputType.RightStickY when basicAxis => -(ps2Data[6] - 127) << 8,
             Ps2InputType.NegConTwist when negcon => (ps2Data[5] - 128) << 8,
             Ps2InputType.NegConI when negcon => ps2Data[6],
             Ps2InputType.NegConIi when negcon => ps2Data[7],

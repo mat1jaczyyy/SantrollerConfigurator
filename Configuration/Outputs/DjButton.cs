@@ -72,7 +72,8 @@ public class DjButton : OutputButton
         return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
     }
 
-    public override string GetName(DeviceControllerType deviceControllerType)
+    public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
+        bool swapSwitchFaceButtons)
     {
         return EnumToStringConverter.Convert(Type);
     }
