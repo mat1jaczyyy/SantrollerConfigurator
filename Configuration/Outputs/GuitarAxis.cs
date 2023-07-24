@@ -22,6 +22,7 @@ public class GuitarAxis : OutputAxis
         {PickupSelectorType.Echo, 0xD0},
         {PickupSelectorType.None, 0xFF},
     };
+
     public static readonly Dictionary<PickupSelectorType, int> PickupSelectorRangesXb1 = new()
     {
         {PickupSelectorType.Chorus, 0x0},
@@ -30,6 +31,7 @@ public class GuitarAxis : OutputAxis
         {PickupSelectorType.Echo, 0x30},
         {PickupSelectorType.None, 0x40},
     };
+
     public GuitarAxis(ConfigViewModel model, Input input, Color ledOn, Color ledOff,
         byte[] ledIndices, int min, int max, int deadZone, GuitarAxisType type, bool childOfCombined) : base(model,
         input, ledOn,
@@ -145,7 +147,8 @@ public class GuitarAxis : OutputAxis
     {
         if (mode == ConfigField.Shared)
             return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
-        if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne or ConfigField.Universal)) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne
+            or ConfigField.Universal)) return "";
         // The below is a mess... but essentially we have to handle converting the input to its respective output depending on console
         // We have to do some hyper specific stuff for digital to analog here too so its easiest to capture its value once
         var analogOn = 0;
@@ -160,6 +163,13 @@ public class GuitarAxis : OutputAxis
         {
             case ConfigField.XboxOne when Model.DeviceControllerType is DeviceControllerType.LiveGuitar:
                 return "";
+            case ConfigField.XboxOne when Type is GuitarAxisType.Tilt && Input is DigitalToAnalog:
+                return $@"if ({Input.Generate()}) {{
+                                  {GenerateOutput(mode)} = {analogOn};
+                          }}";
+            case ConfigField.XboxOne when Type is GuitarAxisType.Tilt :
+                // XB1 tilt is 
+                return $"{GenerateOutput(mode)} = {GenerateAssignment(ConfigField.Ps3, false, false, false)};";
             case ConfigField.Xbox360 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
                 // x360 slider is actually a int16_t BUT there is a mechanism to convert the uint8 value to its uint16_t version
                 if (analogOn > 0x80)
@@ -230,7 +240,7 @@ public class GuitarAxis : OutputAxis
                          DeviceControllerType: DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.LiveGuitar
                      } &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
-                
+
                 // GHL expects right stick x to go to 0xFF or 0x00 to signify tilt being active
                 return $@"if ({Input.Generate()}) {{
                             {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
@@ -286,7 +296,8 @@ public class GuitarAxis : OutputAxis
             case ConfigField.XboxOne
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
-                return $"{GenerateOutput(mode)} = (((({GenerateAssignment(mode, false, true, false)}) >> 10) + 1) & 0xF0);";
+                return
+                    $"{GenerateOutput(mode)} = (((({GenerateAssignment(mode, false, true, false)}) >> 10) + 1) & 0xF0);";
             default:
                 if (Input is DigitalToAnalog)
                     return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
