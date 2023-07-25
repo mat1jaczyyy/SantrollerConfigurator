@@ -551,7 +551,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         }
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return SimpleType.WiiInputSimple;
     }

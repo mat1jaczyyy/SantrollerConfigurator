@@ -241,9 +241,9 @@ public class EmptyOutput : Output
         return "";
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
-        return "Empty";
+        return EmptyType.Empty;
     }
 
 

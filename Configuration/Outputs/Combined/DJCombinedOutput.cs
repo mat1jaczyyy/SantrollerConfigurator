@@ -52,7 +52,7 @@ public class DjCombinedOutput : CombinedTwiOutput
         return "DJ Turntable Inputs";
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return SimpleType.DjTurntableSimple;
     }

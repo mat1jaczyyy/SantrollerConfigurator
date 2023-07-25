@@ -75,7 +75,7 @@ public class GuitarButton : OutputButton
         return EnumToStringConverter.Convert(Type);
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return Type;
     }

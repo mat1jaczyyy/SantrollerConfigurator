@@ -482,7 +482,7 @@ public class Led : Output
             Pin);
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return Command;
     }

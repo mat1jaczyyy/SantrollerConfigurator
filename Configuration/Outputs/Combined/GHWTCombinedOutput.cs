@@ -111,7 +111,7 @@ public class GhwtCombinedOutput : CombinedOutput
         return "GHWT Slider Inputs";
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return SimpleType.WtNeckSimple;
     }

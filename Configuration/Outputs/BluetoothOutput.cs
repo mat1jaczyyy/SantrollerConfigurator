@@ -127,7 +127,7 @@ public partial class BluetoothOutput : CombinedOutput
         return "Bluetooth Input";
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return SimpleType.Bluetooth;
     }

@@ -128,7 +128,7 @@ public class JoystickToDpad : Output
             : "Map Joystick to Dpad";
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         if (!Up && !Down && !Left && !Right) return Wii ? DpadType.Wii : DpadType.Ps2;
 

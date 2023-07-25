@@ -74,10 +74,10 @@ public enum WiiInputType
     [Description("Turntable - Right Spin")]
     DjTurntableRight,
 
-    [Description("Turntable - Crossfade Slider")]
+    [Description("Turntable - Crossfader")]
     DjCrossfadeSlider,
 
-    [Description("Turntable - Effects Dial")]
+    [Description("Turntable - Effects Knob")]
     DjEffectDial,
 
     [Description("Turntable - Joystick X Axis")]

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -136,7 +137,7 @@ public class GuitarAxis : OutputAxis
         return GetReportField(Type);
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return Type;
     }

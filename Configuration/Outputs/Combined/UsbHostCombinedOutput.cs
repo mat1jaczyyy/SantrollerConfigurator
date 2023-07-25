@@ -142,7 +142,7 @@ public class UsbHostCombinedOutput : CombinedOutput
         return "Usb Host Inputs";
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return SimpleType.UsbHost;
     }

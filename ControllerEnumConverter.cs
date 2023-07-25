@@ -133,7 +133,7 @@ public class ControllerEnumConverter : IMultiValueConverter
 
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (values[0] is not Enum e || values[1] is not DeviceControllerType t || values[2] is not LegendType l || values[4] is not bool swapSwitchFaceButtons) return null;
+        if (values[0] is not Enum e || values[1] is not DeviceControllerType t || values[2] is not LegendType l || values[3] is not bool swapSwitchFaceButtons) {return null;}
         return Convert(e, t, l, swapSwitchFaceButtons);
     }
 

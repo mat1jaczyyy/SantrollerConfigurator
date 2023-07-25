@@ -81,7 +81,7 @@ public class EmulationMode : Output
         return EnumToStringConverter.Convert(Type) + " Console Mode Binding";
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return Type;
     }

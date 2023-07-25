@@ -379,7 +379,7 @@ public abstract partial class Output : ReactiveObject
     public abstract string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
         bool swapSwitchFaceButtons);
 
-    public abstract object GetOutputType();
+    public abstract Enum GetOutputType();
 
     public static string GetReportField(object type, string field = "report")
     {

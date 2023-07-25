@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
@@ -111,7 +112,7 @@ public partial class DjAxis : OutputAxis
         return EnumToStringConverter.Convert(Type);
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return Type;
     }

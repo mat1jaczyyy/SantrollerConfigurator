@@ -183,7 +183,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         return "PS2 Controller Inputs";
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return SimpleType.Ps2InputSimple;
     }

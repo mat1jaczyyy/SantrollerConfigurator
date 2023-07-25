@@ -63,7 +63,7 @@ public class Gh5CombinedOutput : CombinedTwiOutput
         return "GH5 Slider Inputs";
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return SimpleType.Gh5NeckSimple;
     }

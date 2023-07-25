@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
@@ -34,7 +35,7 @@ public class ControllerButton : OutputButton
         return ControllerEnumConverter.Convert(Type, deviceControllerType, legendType, swapSwitchFaceButtons);
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return Type;
     }

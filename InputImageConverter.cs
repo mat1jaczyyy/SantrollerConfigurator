@@ -55,7 +55,7 @@ public class InputImageConverter : IMultiValueConverter
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
         var path = values[0] switch
         {
-            "Empty" => "Generic",
+            EmptyType.Empty => "Generic",
             SimpleType type => "Combined/" + type switch
             {
                 SimpleType.WiiInputSimple => "Wii",
@@ -112,7 +112,6 @@ public class InputImageConverter : IMultiValueConverter
             Ps3AxisType type => "PS2/" + type.ToString().Replace("Pressure",""),
             _ => null
         };
-        if (path == null) return null;
         try
         {
             var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{path}.png"));

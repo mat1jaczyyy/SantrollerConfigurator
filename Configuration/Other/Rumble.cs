@@ -87,7 +87,7 @@ public class Rumble : Output
         return new SerializedRumble(RumbleMotorType, Pin);
     }
 
-    public override object GetOutputType()
+    public override Enum GetOutputType()
     {
         return RumbleMotorType;
     }
