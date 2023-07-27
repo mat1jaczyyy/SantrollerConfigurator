@@ -324,10 +324,10 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     // Required by the IScreen interface.
     public RoutingState Router { get; } = new();
 
-    internal IObservable<PlatformIo.PlatformIoState> Write(ConfigViewModel config, bool generate)
+    internal IObservable<PlatformIo.PlatformIoState> Write(ConfigViewModel config)
     {
         StartWorking();
-        config.Generate(Pio, generate);
+        config.Generate(Pio);
         var environment = config.Microcontroller.Board.Environment;
         if (config.UsingBluetooth() && config.IsPico) environment = "picow";
 

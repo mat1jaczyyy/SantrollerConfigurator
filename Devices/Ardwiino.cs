@@ -666,7 +666,7 @@ public class Ardwiino : ConfigurableUsbDevice
         model.Bindings.AddRange(bindings);
         model.UpdateBindings();
         model.UpdateErrors();
-        model.Main.Write(model, !model.HasError);
+        model.Main.Write(model);
         return true;
     }
 

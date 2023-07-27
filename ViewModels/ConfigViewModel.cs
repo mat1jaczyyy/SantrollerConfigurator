@@ -70,7 +70,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         Microcontroller = device.GetMicrocontroller(this);
         BindAllCommand = ReactiveCommand.CreateFromTask(BindAllAsync);
 
-        WriteConfigCommand = ReactiveCommand.CreateFromObservable(() => Main.Write(this, true),
+        WriteConfigCommand = ReactiveCommand.CreateFromObservable(() => Main.Write(this),
             this.WhenAnyValue(x => x.Main.Working, x => x.Main.Connected, x => x.HasError)
                 .ObserveOn(RxApp.MainThreadScheduler).Select(x => x is {Item1: false, Item2: true, Item3: false}));
         ResetCommand = ReactiveCommand.CreateFromTask(ResetAsync,
@@ -638,7 +638,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateBindings();
         UpdateErrors();
         // Write the full config, bluetooth has zero config so we can actually properly write it
-        Main.Write(this, Main.DeviceInputType is DeviceInputType.Bluetooth);
+        Main.Write(this);
     }
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
@@ -695,7 +695,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    public void Generate(PlatformIo pio, bool generate)
+    public void Generate(PlatformIo pio)
     {
         if (Device is Santroller santroller)
         {
@@ -732,7 +732,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         lines.Add($"#define SWAP_SWITCH_FACE_BUTTONS {(!SwapSwitchFaceButtons).ToString().ToLower()}");
 
         // Actually write the config as configured
-        if (generate)
+        if (!HasError)
         {
             lines.Add($"#define USB_HOST_STACK {UsbHostEnabled.ToString().ToLower()}");
             lines.Add($"#define USB_HOST_DP_PIN {UsbHostDp}");
