@@ -7,6 +7,7 @@ public enum ConfigField
     Xbox360,
     XboxOne,
     Ps3,
+    Ps3WithoutCapture,
     Ps4,
     Consumer,
     Keyboard,

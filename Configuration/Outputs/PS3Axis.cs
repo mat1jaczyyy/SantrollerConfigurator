@@ -40,7 +40,7 @@ public class Ps3Axis : OutputAxis
 
     public override string GenerateOutput(ConfigField mode)
     {
-        return mode is ConfigField.Ps3 or ConfigField.Ps4 ? GetReportField(Type) : "";
+        return mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 ? GetReportField(Type) : "";
     }
 
     public override bool ShouldFlip(ConfigField mode)
@@ -68,7 +68,7 @@ public class Ps3Axis : OutputAxis
         string combinedExtra,
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
-        return mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.Universal)
+        return mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps3WithoutCapture or ConfigField.Shared or ConfigField.Universal)
             ? ""
             : base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
     }

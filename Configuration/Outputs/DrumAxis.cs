@@ -170,7 +170,7 @@ public partial class DrumAxis : OutputAxis
         }
         
 
-        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Universal)) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Universal)) return "";
         if (string.IsNullOrEmpty(GenerateOutput(mode))) return "";
         var debounce = Debounce;
         if (!Model.IsAdvancedMode) debounce = (byte) Model.Debounce;
@@ -205,7 +205,7 @@ public partial class DrumAxis : OutputAxis
                 if (ButtonsXboxOne.TryGetValue(Type, out var value1))
                     outputButtons += $"\n{GetReportField(value1)} = true;";
                 break;
-            case ConfigField.Ps3:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture:
                 if (ButtonsPs3.TryGetValue(Type, out var value2))
                     outputButtons += $"\n{GetReportField(value2)} = true;";
                 break;
@@ -270,7 +270,7 @@ public partial class DrumAxis : OutputAxis
                 dtaVal >>= 12;
                 break;
             // PS3 and PC HID uses 8 bit velocities
-            case ConfigField.Ps3 or ConfigField.Universal:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Universal:
                 assignedVal = "val_real >> 8";
                 dtaVal >>= 8;
                 break;

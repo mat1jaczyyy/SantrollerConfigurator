@@ -46,7 +46,7 @@ public class ControllerButton : OutputButton
         {
             return "";
         }
-        return mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared or ConfigField.XboxOne
+        return mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Shared or ConfigField.XboxOne
             or ConfigField.Xbox360 or ConfigField.Universal
             ? GetReportField(Type)
             : "";

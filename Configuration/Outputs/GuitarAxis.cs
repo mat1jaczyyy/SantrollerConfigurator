@@ -148,7 +148,7 @@ public class GuitarAxis : OutputAxis
     {
         if (mode == ConfigField.Shared)
             return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
-        if (mode is not (ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Xbox360 or ConfigField.XboxOne
             or ConfigField.Universal)) return "";
         // The below is a mess... but essentially we have to handle converting the input to its respective output depending on console
         // We have to do some hyper specific stuff for digital to analog here too so its easiest to capture its value once
@@ -169,7 +169,7 @@ public class GuitarAxis : OutputAxis
                                   {GenerateOutput(mode)} = {analogOn};
                           }}";
             case ConfigField.XboxOne when Type is GuitarAxisType.Tilt :
-                // XB1 tilt is 
+                // XB1 tilt is similar enough to ps3 that we can just use it
                 return $"{GenerateOutput(mode)} = {GenerateAssignment(ConfigField.Ps3, false, false, false)};";
             case ConfigField.Xbox360 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
                 // x360 slider is actually a int16_t BUT there is a mechanism to convert the uint8 value to its uint16_t version
@@ -191,18 +191,18 @@ public class GuitarAxis : OutputAxis
                             {GenerateOutput(mode)} |= ({GenerateOutput(mode)}) << 8;
                         }}
                     ";
-            case ConfigField.Ps3 or ConfigField.Ps4 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
                 return $@"if ({Input.Generate()}) {{
                                   {GenerateOutput(mode)} = {analogOn & 0xFF};
                               }}";
-            case ConfigField.Ps3 or ConfigField.Ps4 when Type == GuitarAxisType.Slider && Input is not DigitalToAnalog:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 when Type == GuitarAxisType.Slider && Input is not DigitalToAnalog:
                 return $"{GenerateOutput(mode)} = {Input.Generate()} >> 8;";
             // Xb1 is RB only, so no slider
             case ConfigField.XboxOne when Type == GuitarAxisType.Slider:
                 return "";
 
             // PS3 GH expects tilt on the tilt axis
-            case ConfigField.Ps3
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is
                      {
                          DeviceControllerType: DeviceControllerType.GuitarHeroGuitar
@@ -213,7 +213,7 @@ public class GuitarAxis : OutputAxis
                             report->tilt = 0x180;
                           }}";
             }
-            case ConfigField.Ps3
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is
                      {
                          DeviceControllerType: DeviceControllerType.GuitarHeroGuitar
@@ -223,7 +223,7 @@ public class GuitarAxis : OutputAxis
                             {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
                           }}";
             // PS3 GHL expects tilt on accelerometer AND right stick x
-            case ConfigField.Ps3
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is
                      {
                          DeviceControllerType: DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.LiveGuitar
@@ -235,7 +235,7 @@ public class GuitarAxis : OutputAxis
                             report->tilt2 = 0xFF;
                           }}";
             }
-            case ConfigField.Ps3
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is
                      {
                          DeviceControllerType: DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.LiveGuitar
@@ -253,7 +253,7 @@ public class GuitarAxis : OutputAxis
                                 report->tilt2 = 0x00;
                             }}
                           }}";
-            case ConfigField.Ps3
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
                 // PS3 rb uses a digital bit, so just map the bit right across and skip the analog conversion
@@ -263,7 +263,7 @@ public class GuitarAxis : OutputAxis
                             }}
                             report->tiltDigital = true;
                           }}";
-            case ConfigField.Ps3
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 // PS3 RB expects tilt as a digital bit, so map that here. Still map a ps3 variant of the tilt though

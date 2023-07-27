@@ -350,20 +350,20 @@ public abstract partial class OutputAxis : Output
                 if (ShouldFlip(mode)) function = "-" + function;
                 break;
             // For LED stuff (Shared), we can use the standard handle_calibration_ps3 instead.
-            case ConfigField.Ps3 when forceAccel:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture when forceAccel:
                 intBased = true;
                 function = "handle_calibration_ps3_accel";
                 if (ShouldFlip(mode)) function = "1024 -" + function;
                 break;
-            case ConfigField.Ps3 or ConfigField.Shared or ConfigField.Universal when whammy:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Shared or ConfigField.Universal when whammy:
                 function = "handle_calibration_ps3_whammy";
                 if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
                 break;
-            case ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared or ConfigField.Universal when trigger:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Shared or ConfigField.Universal when trigger:
                 function = "handle_calibration_ps3_360_trigger";
                 if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
                 break;
-            case ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared or ConfigField.Universal:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Shared or ConfigField.Universal:
                 intBased = true;
                 function = "handle_calibration_ps3";
                 if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
@@ -465,7 +465,7 @@ public abstract partial class OutputAxis : Output
             var extraTrigger = "";
             if (this is ControllerAxis axis)
             {
-                if (mode is ConfigField.Ps3 or ConfigField.Ps4 && axis.Type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger)
+                if (mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 && axis.Type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger)
                 {
                     var trigger = axis.Type == StandardAxisType.LeftTrigger ? "l2" : "r2";
                     extraTrigger = $@"
@@ -490,11 +490,11 @@ public abstract partial class OutputAxis : Output
             case ConfigField.XboxOne:
                 break;
             // 360 triggers, and ps3 and ps4 triggers are uint8_t
-            case ConfigField.Xbox360 or ConfigField.Ps3 or ConfigField.Ps4 when Trigger:
+            case ConfigField.Xbox360 or ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 when Trigger:
                 val >>= 8;
                 break;
             // ps3 and ps4 axis are uint8_t, so we both need to shift and add 128
-            case ConfigField.Ps3 or ConfigField.Ps4 when !Trigger:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 when !Trigger:
                 val = (val >> 8) + 128;
                 break;
             // Mouse is always not a trigger, and is int8_t
@@ -506,7 +506,7 @@ public abstract partial class OutputAxis : Output
         }
 
         // On the PS3, we need to convert triggers from analog to digital
-        if (mode is ConfigField.Ps3 or ConfigField.Ps4 && this is ControllerAxis
+        if (mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 && this is ControllerAxis
             {
                 Type: StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger
             })

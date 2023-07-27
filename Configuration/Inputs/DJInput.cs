@@ -104,7 +104,7 @@ public partial class DjInput : TwiInput
     public override string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-        if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360
             or ConfigField.Ps4))
             return "";
         var left = string.Join(";",

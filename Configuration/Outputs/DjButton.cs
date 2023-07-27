@@ -47,7 +47,7 @@ public class DjButton : OutputButton
         string combinedExtra,
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
-        if (mode is not (ConfigField.Ps3 or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps4 or ConfigField.Universal))
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Ps4 or ConfigField.Universal))
             return "";
         if (mode is not ConfigField.Shared) {
             // Turntables also hit the standard buttons when you push each button

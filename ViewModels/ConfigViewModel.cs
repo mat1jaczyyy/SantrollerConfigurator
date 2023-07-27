@@ -741,6 +741,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             lines.Add($"#define TICK_DETECTION {GenerateTick(ConfigField.Detection)}");
 
             lines.Add($"#define TICK_PS3 {GenerateTick(ConfigField.Ps3)}");
+            lines.Add($"#define TICK_PS3_WITHOUT_CAPTURE {GenerateTick(ConfigField.Ps3WithoutCapture)}");
 
             lines.Add($"#define TICK_PC {GenerateTick(ConfigField.Universal)}");
 
@@ -829,6 +830,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
             lines.Add($"#define TICK_PC");
             lines.Add($"#define TICK_PS3");
+            lines.Add($"#define TICK_PS3_WITHOUT_CAPTURE");
 
             lines.Add($"#define TICK_PS4");
 

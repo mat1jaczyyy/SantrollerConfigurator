@@ -146,10 +146,10 @@ public partial class DjAxis : OutputAxis
     {
         if (mode == ConfigField.Shared)
             return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
-        if (mode is not (ConfigField.Ps3 or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Universal)) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Universal)) return "";
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
-        var accelerometer = mode == ConfigField.Ps3 && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
+        var accelerometer = mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
         // PS3 needs uint, xb360 needs int
         // So convert to the right method for that console, and then shift for ps3
         var generated = $"({Input.Generate()})";
@@ -170,11 +170,11 @@ public partial class DjAxis : OutputAxis
 
         var gen = Type switch
         {
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 => generatedTablePs3,
             DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity
                 => generatedTable,
-            DjAxisType.EffectsKnob when mode is ConfigField.Ps3
+            DjAxisType.EffectsKnob when mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 => $"(({generatedPs3} >> 6))",
             DjAxisType.EffectsKnob => generated,
             _ => GenerateAssignment(mode, accelerometer, false, false)
