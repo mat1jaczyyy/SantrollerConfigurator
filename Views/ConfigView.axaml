@@ -59,7 +59,7 @@
             <TextBlock Text="{Binding Converter={StaticResource EnumToStringConverter }}" />
         </DataTemplate>
         <DataTemplate x:Key="ImageWithTextTemplate" DataType="system:Object">
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Width="355">
                 <Image Width="25">
                     <Image.Source>
                         <MultiBinding Converter="{StaticResource InputImageConverter }">
@@ -86,7 +86,7 @@
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="ImageWithTextTemplateGeneric" DataType="system:Object">
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Width="355">
                 <Image Width="25">
                     <Image.Source>
                         <MultiBinding Converter="{StaticResource InputImageConverter }">
