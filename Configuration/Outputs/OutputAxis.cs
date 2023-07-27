@@ -355,6 +355,11 @@ public abstract partial class OutputAxis : Output
                 function = "handle_calibration_ps3_accel";
                 if (ShouldFlip(mode)) function = "1024 -" + function;
                 break;
+            // Don't use ps3 whammy hacks on PC, use a more normal whammy instead.
+            case ConfigField.Shared or ConfigField.Universal when whammy:
+                function = "handle_calibration_ps3_360_trigger";
+                if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
+                break;
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Shared or ConfigField.Universal when whammy:
                 function = "handle_calibration_ps3_whammy";
                 if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
