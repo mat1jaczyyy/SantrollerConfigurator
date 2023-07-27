@@ -66,7 +66,7 @@ public class ConfigurableUsbDeviceManager
                         case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
                             return;
                         case "Ardwiino":
-                            _model.AvailableDevices.Add(new Ardwiino(_model.Pio, e.Device.Name, dev, product, serial,
+                            _model.AvailableDevices.Add(new Ardwiino(e.Device.Name, dev, product, serial,
                                 revision));
                             break;
                         default:

@@ -121,7 +121,7 @@ public class Ardwiino : ConfigurableUsbDevice
         StandardButtonType.RightShoulder
     };
 
-    public Ardwiino(PlatformIo pio, string path, UsbDevice device, string product, string serial, ushort versionNumber)
+    public Ardwiino(string path, UsbDevice device, string product, string serial, ushort versionNumber)
         : base(device, path, product, serial, versionNumber)
     {
         if (Version < new Version(6, 0, 0))

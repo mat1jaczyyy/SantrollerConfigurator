@@ -9,7 +9,7 @@ public class PicoDevice : IConfigurableDevice
 {
     private readonly string _path;
 
-    public PicoDevice(PlatformIo pio, string path)
+    public PicoDevice(string path)
     {
         _path = path;
     }

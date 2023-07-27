@@ -430,7 +430,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
                 var uf2 = Path.Combine(drive.RootDirectory.FullName, "INFO_UF2.txt");
                 if (drive.IsReady)
                     if (File.Exists(uf2) && (await File.ReadAllTextAsync(uf2)).Contains("RPI-RP2"))
-                        AvailableDevices.Add(new PicoDevice(Pio, drive.RootDirectory.FullName));
+                        AvailableDevices.Add(new PicoDevice(drive.RootDirectory.FullName));
             }
             catch (IOException)
             {
@@ -454,7 +454,7 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
                 if (!port.Hwid.StartsWith("USB")) continue;
                 if (existingPorts.Contains(port.Port)) continue;
                 _currentPorts.Add(port.Port);
-                var arduino = new Arduino(Pio, port);
+                var arduino = new Arduino(port);
                 await Task.Delay(1000);
                 AvailableDevices.Add(arduino);
             }

@@ -18,7 +18,7 @@ public class Arduino : IConfigurableDevice
     // public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
     private string _port;
 
-    public Arduino(PlatformIo pio, PlatformIoPort port)
+    public Arduino(PlatformIoPort port)
     {
         DfuDetected = new Subject<bool>();
         _port = port.Port;
