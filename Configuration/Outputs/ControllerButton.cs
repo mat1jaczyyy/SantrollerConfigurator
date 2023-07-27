@@ -42,6 +42,10 @@ public class ControllerButton : OutputButton
 
     public override string GenerateOutput(ConfigField mode)
     {
+        if (mode is not ConfigField.Ps3 && Type is StandardButtonType.Capture)
+        {
+            return "";
+        }
         return mode is ConfigField.Ps3 or ConfigField.Ps4 or ConfigField.Shared or ConfigField.XboxOne
             or ConfigField.Xbox360 or ConfigField.Universal
             ? GetReportField(Type)
