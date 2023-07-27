@@ -731,7 +731,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         lines.Add($"#define POLL_RATE {PollRate}");
         lines.Add($"#define SWAP_SWITCH_FACE_BUTTONS {(!SwapSwitchFaceButtons).ToString().ToLower()}");
 
-        // Actually write the config as configured
+        // Actually write the config as configured 
         if (generate)
         {
             lines.Add($"#define USB_HOST_STACK {UsbHostEnabled.ToString().ToLower()}");
