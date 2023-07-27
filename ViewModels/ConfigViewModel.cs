@@ -821,6 +821,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         else
         {
             // Write an empty config - the config at this point is likely invalid and won't compile
+            
             lines.Add($"#define USB_HOST_STACK false");
             lines.Add($"#define USB_HOST_DP_PIN 0");
 
