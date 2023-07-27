@@ -823,7 +823,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             // Write an empty config - the config at this point is likely invalid and won't compile
             lines.Add($"#define USB_HOST_STACK false");
             lines.Add($"#define USB_HOST_DP_PIN 0");
-            lines.Add($"#define SWAP_SWITCH_FACE_BUTTONS {SwapSwitchFaceButtons.ToString().ToLower()}");
 
             lines.Add($"#define TICK_SHARED");
             lines.Add($"#define TICK_DETECTION");
