@@ -72,7 +72,7 @@ public class Santroller : ConfigurableUsbDevice
     private ReadOnlyObservableCollection<Output>? _bindings;
 
 
-    public Santroller(PlatformIo pio, string path, UsbDevice device, string product, string serial,
+    public Santroller(string path, UsbDevice device, string product, string serial,
         ushort version) : base(
         device, path, product, serial, version)
     {
@@ -408,11 +408,6 @@ public class Santroller : ConfigurableUsbDevice
     public void StartScan()
     {
         WriteData(0, (byte) Commands.CommandStartBtScan, Array.Empty<byte>());
-    }
-
-    public void StopScan()
-    {
-        WriteData(0, (byte) Commands.CommandStopBtScan, Array.Empty<byte>());
     }
 
     public IReadOnlyList<string> GetBtScanResults()

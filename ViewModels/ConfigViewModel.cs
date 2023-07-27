@@ -699,7 +699,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     {
         if (Device is Santroller santroller)
         {
-            santroller.StopScan();
             santroller.StopTicking();
         }
 

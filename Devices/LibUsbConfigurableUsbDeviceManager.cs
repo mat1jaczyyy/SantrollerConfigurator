@@ -59,7 +59,7 @@ public class ConfigurableUsbDeviceManager
                     switch (product)
                     {
                         case "Santroller":
-                            _model.AvailableDevices.Add(new Santroller(_model.Pio, e.Device.Name, dev, product, serial,
+                            _model.AvailableDevices.Add(new Santroller(e.Device.Name, dev, product, serial,
                                 revision));
                             break;
                         case "Ardwiino" when _model.Programming:
