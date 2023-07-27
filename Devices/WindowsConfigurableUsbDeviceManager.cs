@@ -90,14 +90,14 @@ public class ConfigurableUsbDeviceManager
                                     case "Santroller" when _model is { Programming: true, IsPico: false }:
                                         return;
                                     case "Santroller":
-                                        _model.AvailableDevices.Add(new Santroller(_model.Pio, child, dev, product, serial,
+                                        _model.AvailableDevices.Add(new Santroller(child, dev, product, serial,
                                             revision));
                                         break;
                                     case "Ardwiino" when _model.Programming:
                                     case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
                                         return;
                                     case "Ardwiino":
-                                        _model.AvailableDevices.Add(new Ardwiino(_model.Pio, child, dev, product, serial,
+                                        _model.AvailableDevices.Add(new Ardwiino(child, dev, product, serial,
                                             revision));
                                         break;
                                 }
