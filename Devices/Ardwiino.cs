@@ -18,6 +18,7 @@ namespace GuitarConfigurator.NetCore.Devices;
 
 public class Ardwiino : ConfigurableUsbDevice
 {
+    public static readonly Guid DeviceGuid = Guid.Parse("{DF59037D-7C92-4155-AC12-7D700A313D78}");
     public enum InputControllerType
     {
         None,
