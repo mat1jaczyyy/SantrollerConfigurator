@@ -60,7 +60,6 @@ public class Ardwiino : ConfigurableUsbDevice
     };
 
     public const ushort SerialArdwiinoRevision = 0x3122;
-    // public static readonly FilterDeviceDefinition ArdwiinoDeviceFilter = new(label: "Ardwiino", classGuid: Santroller.ControllerGUID);
 
     // On 6.0.0 and above READ_CONFIG is 59
     // On 7.0.3 and above READ_CONFIG is 60
@@ -111,8 +110,6 @@ public class Ardwiino : ConfigurableUsbDevice
             {ControllerButtons.XboxY, StandardButtonType.Y}
         };
 
-    private readonly uint _cpuFreq;
-
     private readonly bool _failed = false;
 
     private readonly List<StandardButtonType> _frets = new()
@@ -122,16 +119,16 @@ public class Ardwiino : ConfigurableUsbDevice
         StandardButtonType.RightShoulder
     };
 
-    public Ardwiino(string path, UsbDevice device, string product, string serial, ushort versionNumber)
-        : base(device, path, product, serial, versionNumber)
+    public Ardwiino(string path, UsbDevice device, string serial, ushort versionNumber)
+        : base(device, path, serial, versionNumber)
     {
         if (Version < new Version(6, 0, 0))
         {
             var buffer = ReadData(6, RequestHidGetReport);
-            _cpuFreq = uint.Parse(StructTools.RawDeserializeStr(buffer));
+            var cpuFreq = uint.Parse(StructTools.RawDeserializeStr(buffer));
             buffer = ReadData(7, RequestHidGetReport);
             var board = StructTools.RawDeserializeStr(buffer);
-            Board = Board.FindBoard(board, _cpuFreq);
+            Board = Board.FindBoard(board, cpuFreq);
             MigrationSupported = false;
             return;
         }
@@ -142,14 +139,14 @@ public class Ardwiino : ConfigurableUsbDevice
         if (Version < OldCpuInfoVersion)
         {
             var info = StructTools.RawDeserialize<CpuInfoOld>(data, 0);
-            _cpuFreq = info.cpu_freq;
-            Board = Board.FindBoard(info.board, _cpuFreq);
+            var cpuFreq = info.cpu_freq;
+            Board = Board.FindBoard(info.board, cpuFreq);
         }
         else
         {
             var info = StructTools.RawDeserialize<CpuInfo>(data, 0);
-            _cpuFreq = info.cpu_freq;
-            Board = Board.FindBoard(info.board, _cpuFreq);
+            var cpuFreq = info.cpu_freq;
+            Board = Board.FindBoard(info.board, cpuFreq);
         }
     }
 

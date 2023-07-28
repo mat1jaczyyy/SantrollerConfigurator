@@ -72,9 +72,9 @@ public class Santroller : ConfigurableUsbDevice
     private readonly DispatcherTimer _timer;
     private ReadOnlyObservableCollection<Output>? _bindings;
 
-    public Santroller(string path, UsbDevice device, string product, string serial,
+    public Santroller(string path, UsbDevice device, string serial,
         ushort version) : base(
-        device, path, product, serial, version)
+        device, path, serial, version)
     {
         _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
         _microcontroller = new Pico(Board.Generic);

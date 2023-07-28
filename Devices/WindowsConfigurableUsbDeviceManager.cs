@@ -18,8 +18,6 @@ public class ConfigurableUsbDeviceManager
 {
     private readonly DeviceNotificationListener _deviceNotificationListener = new();
     private MainWindowViewModel _model;
-    private const string RevisionString = "REV_";
-
 
     public ConfigurableUsbDeviceManager(MainWindowViewModel model)
     {
@@ -63,17 +61,15 @@ public class ConfigurableUsbDeviceManager
                 {
                     WinUsbDevice.Open(path, out var dev);
                     if (dev == null) return;
-                    var product = dev.Info.ProductString;
                     var revision = (ushort)dev.Info.Descriptor.BcdDevice;
-                    _model.AvailableDevices.Add(new Santroller(path, dev, product, serial, revision));
+                    _model.AvailableDevices.Add(new Santroller(path, dev, serial, revision));
                 }
                 else if (guid == Ardwiino.DeviceGuid)
                 {
                     WinUsbDevice.Open(path, out var dev);
                     if (dev == null) return;
-                    var product = dev.Info.ProductString;
                     var revision = (ushort)dev.Info.Descriptor.BcdDevice;
-                    _model.AvailableDevices.Add(new Ardwiino(path, dev, product, serial, revision));
+                    _model.AvailableDevices.Add(new Ardwiino(path, dev, serial, revision));
                 }
             }
             else

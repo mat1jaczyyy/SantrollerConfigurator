@@ -14,17 +14,15 @@ public abstract class ConfigurableUsbDevice : IConfigurableDevice
 {
     public readonly UsbDevice Device;
     public readonly string Path;
-    public readonly string Product;
     public readonly string Serial;
     public readonly Version Version;
     private TaskCompletionSource<string?>? _bootloaderPath;
     private string? _lastBootloaderPath;
 
-    protected ConfigurableUsbDevice(UsbDevice device, string path, string product, string serial, ushort version)
+    protected ConfigurableUsbDevice(UsbDevice device, string path, string serial, ushort version)
     {
         Device = device;
         Path = path;
-        Product = product;
         Serial = serial;
         Version = new Version((version >> 8) & 0xff, (version >> 4) & 0xf, version & 0xf);
     }
