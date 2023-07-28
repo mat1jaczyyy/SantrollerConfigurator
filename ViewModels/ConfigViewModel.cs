@@ -138,7 +138,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private static string GeneratePollRateLabel((bool dequeue, int rate) arg)
     {
         var rate = Math.Floor((1f / Math.Max(arg.rate, 1)) * 1000);
-        return arg.dequeue ? $"Dequeue Rate ({rate}+ fps required)" : $"Poll Rate (0 for unlimited) ({rate}hz)";
+        return arg.dequeue ? $"Dequeue Rate ({rate}+ fps required)" : $"Poll Rate (0 for fastest speed) ({rate}hz)";
     }
 
     public IConfigurableDevice Device { get; private set; }
