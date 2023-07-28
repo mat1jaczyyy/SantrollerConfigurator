@@ -12,10 +12,7 @@ namespace GuitarConfigurator.NetCore.Devices;
 public class Arduino : IConfigurableDevice
 {
     private readonly bool _generic;
-
     private TaskCompletionSource<string?>? _arduino32U4Path;
-
-    // public static readonly FilterDeviceDefinition ArduinoDeviceFilter = new FilterDeviceDefinition();
     private string _port;
 
     public Arduino(PlatformIoPort port)
