@@ -1,9 +1,7 @@
 #if Windows
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Reactive.Concurrency;
-using System.Threading.Tasks;
 using DynamicData;
 using GuitarConfigurator.NetCore.ViewModels;
 using LibUsbDotNet;
@@ -11,12 +9,11 @@ using LibUsbDotNet.DeviceNotify;
 using LibUsbDotNet.DeviceNotify.Info;
 using LibUsbDotNet.Main;
 using LibUsbDotNet.WinUsb;
-using Nefarius.Utilities.DeviceManagement.Exceptions;
-using Nefarius.Utilities.DeviceManagement.Extensions;
 using Nefarius.Utilities.DeviceManagement.PnP;
 using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Devices;
+
 public class ConfigurableUsbDeviceManager
 {
     private readonly DeviceNotificationListener _deviceNotificationListener = new();
@@ -33,26 +30,24 @@ public class ConfigurableUsbDeviceManager
     {
         _deviceNotificationListener.DeviceArrived += DeviceArrived;
         _deviceNotificationListener.DeviceRemoved += DeviceRemoved;
-
-        _deviceNotificationListener.StartListen(DeviceInterfaceIds.UsbDevice);
-        var instance = 0;
-        while (Devcon.FindByInterfaceGuid(DeviceInterfaceIds.UsbDevice, out var path,
-                   out var instanceId, instance++))
+        var guids = new[] { DeviceInterfaceIds.UsbDevice, Ardwiino.DeviceGuid, Santroller.DeviceGuid };
+        foreach (var guid in guids)
         {
-            DeviceNotify(EventType.DeviceArrival, path);
+            _deviceNotificationListener.StartListen(guid);
+            var instance = 0;
+            while (Devcon.FindByInterfaceGuid(guid, out var path,
+                       out var instanceId, instance++))
+            {
+                DeviceNotify(EventType.DeviceArrival, path, guid);
+            }
         }
     }
 
-    private async void DeviceNotify(EventType eventType, string path)
+    private async void DeviceNotify(EventType eventType, string path, Guid guid)
     {
-        await Task.Delay(1000);
         RxApp.MainThreadScheduler.Schedule(() =>
         {
             var ids = UsbSymbolicName.Parse(path);
-
-            var usbDevice = PnPDevice
-                .GetDeviceByInterfaceId(path, DeviceLocationFlags.Phantom)
-                .ToUsbPnPDevice();
             if (eventType == EventType.DeviceArrival)
             {
                 var vid = ids.Vid;
@@ -61,60 +56,33 @@ public class ConfigurableUsbDeviceManager
                 if (vid == Dfu.DfuVid && (pid == Dfu.DfuPid16U2 || pid == Dfu.DfuPid8U2))
                 {
                     _model.AvailableDevices.Add(
-                        new Dfu(new RegDeviceNotifyInfoEventArgs(new RegDeviceNotifyInfo(path, PnPDevice.GetInstanceIdFromInterfaceId(path), serial))));
+                        new Dfu(new RegDeviceNotifyInfoEventArgs(new RegDeviceNotifyInfo(path,
+                            PnPDevice.GetInstanceIdFromInterfaceId(path), serial))));
                 }
-                else if (Ardwiino.HardwareIds.Contains((vid, pid)))
+                else if (guid == Santroller.DeviceGuid)
                 {
-                    var children = usbDevice.GetProperty<string[]>(DevicePropertyKey.Device_Children);
-                    if (children == null)
-                    {
-                        return;
-                    }
-                    foreach (var child in children)
-                    {
-                        try
-                        {
-                            UsbPnPDevice childDevice = PnPDevice
-                                .GetDeviceByInstanceId(child, DeviceLocationFlags.Phantom)
-                                .ToUsbPnPDevice();
-
-                            var childPath = childDevice.GetProperty<string>(DevicePropertyKey.Device_PDOName);
-
-                            WinUsbDevice.Open("\\\\?\\Global\\GLOBALROOT" + childPath, out var dev);
-                            if (dev != null)
-                            {
-                                var product = dev.Info.ProductString;
-                                var revision = (ushort)dev.Info.Descriptor.BcdDevice;
-                                switch (product)
-                                {
-                                    case "Santroller" when _model is { Programming: true, IsPico: false }:
-                                        return;
-                                    case "Santroller":
-                                        _model.AvailableDevices.Add(new Santroller(child, dev, product, serial,
-                                            revision));
-                                        break;
-                                    case "Ardwiino" when _model.Programming:
-                                    case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
-                                        return;
-                                    case "Ardwiino":
-                                        _model.AvailableDevices.Add(new Ardwiino(child, dev, product, serial,
-                                            revision));
-                                        break;
-                                }
-                            }
-                        }
-                        catch (UsbPnPDeviceConversionException _)
-                        {
-                            continue;
-                        }
-                    }
+                    WinUsbDevice.Open(path, out var dev);
+                    if (dev == null) return;
+                    var product = dev.Info.ProductString;
+                    var revision = (ushort)dev.Info.Descriptor.BcdDevice;
+                    _model.AvailableDevices.Add(new Santroller(path, dev, product, serial, revision));
+                }
+                else if (guid == Ardwiino.DeviceGuid)
+                {
+                    WinUsbDevice.Open(path, out var dev);
+                    if (dev == null) return;
+                    var product = dev.Info.ProductString;
+                    var revision = (ushort)dev.Info.Descriptor.BcdDevice;
+                    _model.AvailableDevices.Add(new Ardwiino(path, dev, product, serial, revision));
                 }
             }
             else
             {
                 var serial = ids.SerialNumber;
                 _model.AvailableDevices.RemoveMany(
-                    _model.AvailableDevices.Items.Where(device => device.IsSameDevice(path) || device.IsSameDevice(serial) || device.IsSameDevice(PnPDevice.GetInstanceIdFromInterfaceId(path))));
+                    _model.AvailableDevices.Items.Where(device =>
+                        device.IsSameDevice(path) || device.IsSameDevice(serial) ||
+                        device.IsSameDevice(PnPDevice.GetInstanceIdFromInterfaceId(path))));
             }
         });
     }
@@ -162,12 +130,12 @@ public class ConfigurableUsbDeviceManager
 
     private void DeviceArrived(DeviceEventArgs args)
     {
-        DeviceNotify(EventType.DeviceArrival, args.SymLink);
+        DeviceNotify(EventType.DeviceArrival, args.SymLink, args.InterfaceGuid);
     }
 
     private void DeviceRemoved(DeviceEventArgs args)
     {
-        DeviceNotify(EventType.DeviceRemoveComplete, args.SymLink);
+        DeviceNotify(EventType.DeviceRemoveComplete, args.SymLink, args.InterfaceGuid);
     }
 
     public void Dispose()
