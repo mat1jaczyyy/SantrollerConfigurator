@@ -6,6 +6,7 @@
         xmlns:viewModels="clr-namespace:GuitarConfigurator.NetCore.ViewModels"
         xmlns:netCore="clr-namespace:GuitarConfigurator.NetCore"
         xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
+        xmlns:assets="clr-namespace:GuitarConfigurator.NetCore.Assets"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GuitarConfigurator.NetCore.Views.BindAllWindow"
         TransparencyLevelHint="AcrylicBlur"
@@ -83,11 +84,9 @@
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Input.Pin}"
                                   ItemsSource="{Binding Input.AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
-                        <Label IsVisible="{Binding IsAnalog}" Content="Move the axis you want to use" />
-                        <Label IsVisible="{Binding !IsAnalog}" Content="Press the button you want to use" />
-                        <Label>
-                            Raw Value
-                        </Label>
+                        <Label IsVisible="{Binding IsAnalog}" Content="{x:Static assets:Resources.DetectAxis}" />
+                        <Label IsVisible="{Binding !IsAnalog}" Content="{x:Static assets:Resources.DetectButton}" />
+                        <Label Content="{x:Static assets:Resources.RawValueLabel}"></Label>
                         <StackPanel Orientation="Horizontal">
                             <ProgressBar Opacity="0.6"
                                          Value="{Binding RawValue}"

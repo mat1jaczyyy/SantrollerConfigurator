@@ -25,7 +25,7 @@ namespace GuitarConfigurator.NetCore.Assets {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static System.Resources.ResourceManager ResourceManager {
+        public static System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.Equals(null, resourceMan)) {
                     System.Resources.ResourceManager temp = new System.Resources.ResourceManager("GuitarConfigurator.NetCore.Assets.Resources", typeof(Resources).Assembly);
@@ -36,7 +36,7 @@ namespace GuitarConfigurator.NetCore.Assets {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static System.Globalization.CultureInfo Culture {
+        public static System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -45,4617 +45,4635 @@ namespace GuitarConfigurator.NetCore.Assets {
             }
         }
         
-        internal static string ConsoleModeBindingTitle {
+        public static string ConsoleModeBindingTitle {
             get {
                 return ResourceManager.GetString("ConsoleModeBindingTitle", resourceCulture);
             }
         }
         
-        internal static string DetectAxis {
+        public static string DetectAxis {
             get {
                 return ResourceManager.GetString("DetectAxis", resourceCulture);
             }
         }
         
-        internal static string DetectButton {
+        public static string DetectButton {
             get {
                 return ResourceManager.GetString("DetectButton", resourceCulture);
             }
         }
         
-        internal static string FixedInputTitle {
+        public static string FixedInputTitle {
             get {
                 return ResourceManager.GetString("FixedInputTitle", resourceCulture);
             }
         }
         
-        internal static string FindPin {
+        public static string FindPin {
             get {
                 return ResourceManager.GetString("FindPin", resourceCulture);
             }
         }
         
-        internal static string DifferentSPIGroup {
+        public static string DifferentSPIGroup {
             get {
                 return ResourceManager.GetString("DifferentSPIGroup", resourceCulture);
             }
         }
         
-        internal static string SPIGroup {
+        public static string SPIGroup {
             get {
                 return ResourceManager.GetString("SPIGroup", resourceCulture);
             }
         }
         
-        internal static string DifferentI2CGroup {
+        public static string DifferentI2CGroup {
             get {
                 return ResourceManager.GetString("DifferentI2CGroup", resourceCulture);
             }
         }
         
-        internal static string I2CGroup {
+        public static string I2CGroup {
             get {
                 return ResourceManager.GetString("I2CGroup", resourceCulture);
             }
         }
         
-        internal static string ErrorPinConfigurationMissing {
+        public static string ErrorPinConfigurationMissing {
             get {
                 return ResourceManager.GetString("ErrorPinConfigurationMissing", resourceCulture);
             }
         }
         
-        internal static string JoystickToDpadTitle {
+        public static string JoystickToDpadTitle {
             get {
                 return ResourceManager.GetString("JoystickToDpadTitle", resourceCulture);
             }
         }
         
-        internal static string LeftJoystickToDpadTitle {
+        public static string LeftJoystickToDpadTitle {
             get {
                 return ResourceManager.GetString("LeftJoystickToDpadTitle", resourceCulture);
             }
         }
         
-        internal static string LEDColourActiveFog {
+        public static string LEDColourActiveFog {
             get {
                 return ResourceManager.GetString("LEDColourActiveFog", resourceCulture);
             }
         }
         
-        internal static string LedColour {
+        public static string LedColour {
             get {
                 return ResourceManager.GetString("LedColour", resourceCulture);
             }
         }
         
-        internal static string LedColourActiveStarPower {
+        public static string LedColourActiveStarPower {
             get {
                 return ResourceManager.GetString("LedColourActiveStarPower", resourceCulture);
             }
         }
         
-        internal static string LedColourActiveDjEuphoria {
+        public static string LedColourActiveDjEuphoria {
             get {
                 return ResourceManager.GetString("LedColourActiveDjEuphoria", resourceCulture);
             }
         }
         
-        internal static string LedColourActive {
+        public static string LedColourActive {
             get {
                 return ResourceManager.GetString("LedColourActive", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveFog {
+        public static string LedColourInactiveFog {
             get {
                 return ResourceManager.GetString("LedColourInactiveFog", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveStarPower {
+        public static string LedColourInactiveStarPower {
             get {
                 return ResourceManager.GetString("LedColourInactiveStarPower", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveDjEuphoria {
+        public static string LedColourInactiveDjEuphoria {
             get {
                 return ResourceManager.GetString("LedColourInactiveDjEuphoria", resourceCulture);
             }
         }
         
-        internal static string LedColourInactive {
+        public static string LedColourInactive {
             get {
                 return ResourceManager.GetString("LedColourInactive", resourceCulture);
             }
         }
         
-        internal static string LedCommandTitle {
+        public static string LedCommandTitle {
             get {
                 return ResourceManager.GetString("LedCommandTitle", resourceCulture);
             }
         }
         
-        internal static string RumbleCommandTitle {
+        public static string RumbleCommandTitle {
             get {
                 return ResourceManager.GetString("RumbleCommandTitle", resourceCulture);
             }
         }
         
-        internal static string DjCombinedTitle {
+        public static string DjCombinedTitle {
             get {
                 return ResourceManager.GetString("DjCombinedTitle", resourceCulture);
             }
         }
         
-        internal static string Gh5CombinedTitle {
+        public static string Gh5CombinedTitle {
             get {
                 return ResourceManager.GetString("Gh5CombinedTitle", resourceCulture);
             }
         }
         
-        internal static string GhwtCombinedTitle {
+        public static string GhwtCombinedTitle {
             get {
                 return ResourceManager.GetString("GhwtCombinedTitle", resourceCulture);
             }
         }
         
-        internal static string Ps2CombinedTitle {
+        public static string Ps2CombinedTitle {
             get {
                 return ResourceManager.GetString("Ps2CombinedTitle", resourceCulture);
             }
         }
         
-        internal static string UsbHostCombinedTitle {
+        public static string UsbHostCombinedTitle {
             get {
                 return ResourceManager.GetString("UsbHostCombinedTitle", resourceCulture);
             }
         }
         
-        internal static string WiiCombinedTitle {
+        public static string WiiCombinedTitle {
             get {
                 return ResourceManager.GetString("WiiCombinedTitle", resourceCulture);
             }
         }
         
-        internal static string BluetoothCombinedTitle {
+        public static string BluetoothCombinedTitle {
             get {
                 return ResourceManager.GetString("BluetoothCombinedTitle", resourceCulture);
             }
         }
         
-        internal static string BluetoothStartScan {
+        public static string BluetoothStartScan {
             get {
                 return ResourceManager.GetString("BluetoothStartScan", resourceCulture);
             }
         }
         
-        internal static string BluetoothScanning {
+        public static string BluetoothScanning {
             get {
                 return ResourceManager.GetString("BluetoothScanning", resourceCulture);
             }
         }
         
-        internal static string BluetoothWriteConfigMessage {
+        public static string BluetoothWriteConfigMessage {
             get {
                 return ResourceManager.GetString("BluetoothWriteConfigMessage", resourceCulture);
             }
         }
         
-        internal static string BluetoothTitle {
+        public static string BluetoothTitle {
             get {
                 return ResourceManager.GetString("BluetoothTitle", resourceCulture);
             }
         }
         
-        internal static string BluetoothNoDevice {
+        public static string BluetoothNoDevice {
             get {
                 return ResourceManager.GetString("BluetoothNoDevice", resourceCulture);
             }
         }
         
-        internal static string LedColourActiveAxisX {
+        public static string LedColourActiveAxisX {
             get {
                 return ResourceManager.GetString("LedColourActiveAxisX", resourceCulture);
             }
         }
         
-        internal static string LedColourActiveAxisY {
+        public static string LedColourActiveAxisY {
             get {
                 return ResourceManager.GetString("LedColourActiveAxisY", resourceCulture);
             }
         }
         
-        internal static string LedColourActiveAxisTrigger {
+        public static string LedColourActiveAxisTrigger {
             get {
                 return ResourceManager.GetString("LedColourActiveAxisTrigger", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveAxisX {
+        public static string LedColourInactiveAxisX {
             get {
                 return ResourceManager.GetString("LedColourInactiveAxisX", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveAxisY {
+        public static string LedColourInactiveAxisY {
             get {
                 return ResourceManager.GetString("LedColourInactiveAxisY", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveAxisTrigger {
+        public static string LedColourInactiveAxisTrigger {
             get {
                 return ResourceManager.GetString("LedColourInactiveAxisTrigger", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMinX {
+        public static string AxisCalibrationMinX {
             get {
                 return ResourceManager.GetString("AxisCalibrationMinX", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMinY {
+        public static string AxisCalibrationMinY {
             get {
                 return ResourceManager.GetString("AxisCalibrationMinY", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationTrigger {
+        public static string AxisCalibrationTrigger {
             get {
                 return ResourceManager.GetString("AxisCalibrationTrigger", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMaxX {
+        public static string AxisCalibrationMaxX {
             get {
                 return ResourceManager.GetString("AxisCalibrationMaxX", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMaxY {
+        public static string AxisCalibrationMaxY {
             get {
                 return ResourceManager.GetString("AxisCalibrationMaxY", resourceCulture);
             }
         }
         
-        internal static string AxisCalibraitonMaxTrigger {
+        public static string AxisCalibraitonMaxTrigger {
             get {
                 return ResourceManager.GetString("AxisCalibraitonMaxTrigger", resourceCulture);
             }
         }
         
-        internal static string LedColourActiveButtonColour {
+        public static string LedColourActiveButtonColour {
             get {
                 return ResourceManager.GetString("LedColourActiveButtonColour", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveButtonColour {
+        public static string LedColourInactiveButtonColour {
             get {
                 return ResourceManager.GetString("LedColourInactiveButtonColour", resourceCulture);
             }
         }
         
-        internal static string LedColourActiveDjVelocity {
+        public static string LedColourActiveDjVelocity {
             get {
                 return ResourceManager.GetString("LedColourActiveDjVelocity", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveDjVelocity {
+        public static string LedColourInactiveDjVelocity {
             get {
                 return ResourceManager.GetString("LedColourInactiveDjVelocity", resourceCulture);
             }
         }
         
-        internal static string AxisCalibraitonMinDjCrossfader {
+        public static string AxisCalibraitonMinDjCrossfader {
             get {
                 return ResourceManager.GetString("AxisCalibraitonMinDjCrossfader", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMinEffectsKnob {
+        public static string AxisCalibrationMinEffectsKnob {
             get {
                 return ResourceManager.GetString("AxisCalibrationMinEffectsKnob", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMinDjVelocityLeft {
+        public static string AxisCalibrationMinDjVelocityLeft {
             get {
                 return ResourceManager.GetString("AxisCalibrationMinDjVelocityLeft", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMinDjVelocityRight {
+        public static string AxisCalibrationMinDjVelocityRight {
             get {
                 return ResourceManager.GetString("AxisCalibrationMinDjVelocityRight", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMaxDjCrossfader {
+        public static string AxisCalibrationMaxDjCrossfader {
             get {
                 return ResourceManager.GetString("AxisCalibrationMaxDjCrossfader", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMaxDjEffectsKnob {
+        public static string AxisCalibrationMaxDjEffectsKnob {
             get {
                 return ResourceManager.GetString("AxisCalibrationMaxDjEffectsKnob", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMaxDjVelocityLeft {
+        public static string AxisCalibrationMaxDjVelocityLeft {
             get {
                 return ResourceManager.GetString("AxisCalibrationMaxDjVelocityLeft", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMaxDjVelocityRight {
+        public static string AxisCalibrationMaxDjVelocityRight {
             get {
                 return ResourceManager.GetString("AxisCalibrationMaxDjVelocityRight", resourceCulture);
             }
         }
         
-        internal static string ErrorInputUnbound {
+        public static string ErrorInputUnbound {
             get {
                 return ResourceManager.GetString("ErrorInputUnbound", resourceCulture);
             }
         }
         
-        internal static string LEDColourActiveTilt {
+        public static string LEDColourActiveTilt {
             get {
                 return ResourceManager.GetString("LEDColourActiveTilt", resourceCulture);
             }
         }
         
-        internal static string LEDColourActiveWhammy {
+        public static string LEDColourActiveWhammy {
             get {
                 return ResourceManager.GetString("LEDColourActiveWhammy", resourceCulture);
             }
         }
         
-        internal static string LEDColourActiveSlider {
+        public static string LEDColourActiveSlider {
             get {
                 return ResourceManager.GetString("LEDColourActiveSlider", resourceCulture);
             }
         }
         
-        internal static string LEDColourActivePickup {
+        public static string LEDColourActivePickup {
             get {
                 return ResourceManager.GetString("LEDColourActivePickup", resourceCulture);
             }
         }
         
-        internal static string LEDColourInctiveTilt {
+        public static string LEDColourInctiveTilt {
             get {
                 return ResourceManager.GetString("LEDColourInctiveTilt", resourceCulture);
             }
         }
         
-        internal static string LEDColourInctiveWhammy {
+        public static string LEDColourInctiveWhammy {
             get {
                 return ResourceManager.GetString("LEDColourInctiveWhammy", resourceCulture);
             }
         }
         
-        internal static string LEDColourInctivePickup {
+        public static string LEDColourInctivePickup {
             get {
                 return ResourceManager.GetString("LEDColourInctivePickup", resourceCulture);
             }
         }
         
-        internal static string LEDColourInctiveSlider {
+        public static string LEDColourInctiveSlider {
             get {
                 return ResourceManager.GetString("LEDColourInctiveSlider", resourceCulture);
             }
         }
         
-        internal static string TapBarCurrentFrets {
+        public static string TapBarCurrentFrets {
             get {
                 return ResourceManager.GetString("TapBarCurrentFrets", resourceCulture);
             }
         }
         
-        internal static string TapBarCurrentFretsNone {
+        public static string TapBarCurrentFretsNone {
             get {
                 return ResourceManager.GetString("TapBarCurrentFretsNone", resourceCulture);
             }
         }
         
-        internal static string TapBarCurrentFretsGreen {
+        public static string TapBarCurrentFretsGreen {
             get {
                 return ResourceManager.GetString("TapBarCurrentFretsGreen", resourceCulture);
             }
         }
         
-        internal static string TapBarCurrentFretsRed {
+        public static string TapBarCurrentFretsRed {
             get {
                 return ResourceManager.GetString("TapBarCurrentFretsRed", resourceCulture);
             }
         }
         
-        internal static string TapBarCurrentFretsYellow {
+        public static string TapBarCurrentFretsYellow {
             get {
                 return ResourceManager.GetString("TapBarCurrentFretsYellow", resourceCulture);
             }
         }
         
-        internal static string TapBarCurrentFretsBlue {
+        public static string TapBarCurrentFretsBlue {
             get {
                 return ResourceManager.GetString("TapBarCurrentFretsBlue", resourceCulture);
             }
         }
         
-        internal static string TapBarCurrentFretsOrange {
+        public static string TapBarCurrentFretsOrange {
             get {
                 return ResourceManager.GetString("TapBarCurrentFretsOrange", resourceCulture);
             }
         }
         
-        internal static string AxisMinCalibrationTilt {
+        public static string AxisMinCalibrationTilt {
             get {
                 return ResourceManager.GetString("AxisMinCalibrationTilt", resourceCulture);
             }
         }
         
-        internal static string AxisMinCalibrationWhammy {
+        public static string AxisMinCalibrationWhammy {
             get {
                 return ResourceManager.GetString("AxisMinCalibrationWhammy", resourceCulture);
             }
         }
         
-        internal static string AxisMaxCalibrationTilt {
+        public static string AxisMaxCalibrationTilt {
             get {
                 return ResourceManager.GetString("AxisMaxCalibrationTilt", resourceCulture);
             }
         }
         
-        internal static string AxisMaxCalibrationWhammy {
+        public static string AxisMaxCalibrationWhammy {
             get {
                 return ResourceManager.GetString("AxisMaxCalibrationWhammy", resourceCulture);
             }
         }
         
-        internal static string LedColourActiveMouseX {
+        public static string LedColourActiveMouseX {
             get {
                 return ResourceManager.GetString("LedColourActiveMouseX", resourceCulture);
             }
         }
         
-        internal static string LedColourActiveMouseY {
+        public static string LedColourActiveMouseY {
             get {
                 return ResourceManager.GetString("LedColourActiveMouseY", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveMouseX {
+        public static string LedColourInactiveMouseX {
             get {
                 return ResourceManager.GetString("LedColourInactiveMouseX", resourceCulture);
             }
         }
         
-        internal static string LedColourInactiveMouseY {
+        public static string LedColourInactiveMouseY {
             get {
                 return ResourceManager.GetString("LedColourInactiveMouseY", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMinMouseX {
+        public static string AxisCalibrationMinMouseX {
             get {
                 return ResourceManager.GetString("AxisCalibrationMinMouseX", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMinMouseY {
+        public static string AxisCalibrationMinMouseY {
             get {
                 return ResourceManager.GetString("AxisCalibrationMinMouseY", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMaxMouseX {
+        public static string AxisCalibrationMaxMouseX {
             get {
                 return ResourceManager.GetString("AxisCalibrationMaxMouseX", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMaxMouseY {
+        public static string AxisCalibrationMaxMouseY {
             get {
                 return ResourceManager.GetString("AxisCalibrationMaxMouseY", resourceCulture);
             }
         }
         
-        internal static string Assign {
+        public static string Assign {
             get {
                 return ResourceManager.GetString("Assign", resourceCulture);
             }
         }
         
-        internal static string AssignMouseKeyboard {
+        public static string AssignMouseKeyboard {
             get {
                 return ResourceManager.GetString("AssignMouseKeyboard", resourceCulture);
             }
         }
         
-        internal static string ErrorPinConflicting {
+        public static string ErrorPinConflicting {
             get {
                 return ResourceManager.GetString("ErrorPinConflicting", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationSetDeadzone {
+        public static string AxisCalibrationSetDeadzone {
             get {
                 return ResourceManager.GetString("AxisCalibrationSetDeadzone", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationCalibrate {
+        public static string AxisCalibrationCalibrate {
             get {
                 return ResourceManager.GetString("AxisCalibrationCalibrate", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationNext {
+        public static string AxisCalibrationNext {
             get {
                 return ResourceManager.GetString("AxisCalibrationNext", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMinStatus {
+        public static string AxisCalibrationMinStatus {
             get {
                 return ResourceManager.GetString("AxisCalibrationMinStatus", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationMaxStatus {
+        public static string AxisCalibrationMaxStatus {
             get {
                 return ResourceManager.GetString("AxisCalibrationMaxStatus", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationDeadzoneStatus {
+        public static string AxisCalibrationDeadzoneStatus {
             get {
                 return ResourceManager.GetString("AxisCalibrationDeadzoneStatus", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationButtonMin {
+        public static string AxisCalibrationButtonMin {
             get {
                 return ResourceManager.GetString("AxisCalibrationButtonMin", resourceCulture);
             }
         }
         
-        internal static string AxisCalibrationButtonMax {
+        public static string AxisCalibrationButtonMax {
             get {
                 return ResourceManager.GetString("AxisCalibrationButtonMax", resourceCulture);
             }
         }
         
-        internal static string ErrorArdwiinoReading {
+        public static string ErrorArdwiinoReading {
             get {
                 return ResourceManager.GetString("ErrorArdwiinoReading", resourceCulture);
             }
         }
         
-        internal static string ErrorNotPCMode {
+        public static string ErrorNotPCMode {
             get {
                 return ResourceManager.GetString("ErrorNotPCMode", resourceCulture);
             }
         }
         
-        internal static string KeyLeftCtrl {
+        public static string KeyLeftCtrl {
             get {
                 return ResourceManager.GetString("KeyLeftCtrl", resourceCulture);
             }
         }
         
-        internal static string KeyLeftAlt {
+        public static string KeyLeftAlt {
             get {
                 return ResourceManager.GetString("KeyLeftAlt", resourceCulture);
             }
         }
         
-        internal static string KeyLeftShift {
+        public static string KeyLeftShift {
             get {
                 return ResourceManager.GetString("KeyLeftShift", resourceCulture);
             }
         }
         
-        internal static string KeyLWin {
+        public static string KeyLWin {
             get {
                 return ResourceManager.GetString("KeyLWin", resourceCulture);
             }
         }
         
-        internal static string KeyRightCtrl {
+        public static string KeyRightCtrl {
             get {
                 return ResourceManager.GetString("KeyRightCtrl", resourceCulture);
             }
         }
         
-        internal static string KeyRightAlt {
+        public static string KeyRightAlt {
             get {
                 return ResourceManager.GetString("KeyRightAlt", resourceCulture);
             }
         }
         
-        internal static string KeyRightShift {
+        public static string KeyRightShift {
             get {
                 return ResourceManager.GetString("KeyRightShift", resourceCulture);
             }
         }
         
-        internal static string KeyRWin {
+        public static string KeyRWin {
             get {
                 return ResourceManager.GetString("KeyRWin", resourceCulture);
             }
         }
         
-        internal static string KeyA {
+        public static string KeyA {
             get {
                 return ResourceManager.GetString("KeyA", resourceCulture);
             }
         }
         
-        internal static string KeyB {
+        public static string KeyB {
             get {
                 return ResourceManager.GetString("KeyB", resourceCulture);
             }
         }
         
-        internal static string KeyC {
+        public static string KeyC {
             get {
                 return ResourceManager.GetString("KeyC", resourceCulture);
             }
         }
         
-        internal static string KeyD {
+        public static string KeyD {
             get {
                 return ResourceManager.GetString("KeyD", resourceCulture);
             }
         }
         
-        internal static string KeyE {
+        public static string KeyE {
             get {
                 return ResourceManager.GetString("KeyE", resourceCulture);
             }
         }
         
-        internal static string KeyF {
+        public static string KeyF {
             get {
                 return ResourceManager.GetString("KeyF", resourceCulture);
             }
         }
         
-        internal static string KeyG {
+        public static string KeyG {
             get {
                 return ResourceManager.GetString("KeyG", resourceCulture);
             }
         }
         
-        internal static string KeyH {
+        public static string KeyH {
             get {
                 return ResourceManager.GetString("KeyH", resourceCulture);
             }
         }
         
-        internal static string KeyI {
+        public static string KeyI {
             get {
                 return ResourceManager.GetString("KeyI", resourceCulture);
             }
         }
         
-        internal static string KeyJ {
+        public static string KeyJ {
             get {
                 return ResourceManager.GetString("KeyJ", resourceCulture);
             }
         }
         
-        internal static string KeyK {
+        public static string KeyK {
             get {
                 return ResourceManager.GetString("KeyK", resourceCulture);
             }
         }
         
-        internal static string KeyL {
+        public static string KeyL {
             get {
                 return ResourceManager.GetString("KeyL", resourceCulture);
             }
         }
         
-        internal static string KeyM {
+        public static string KeyM {
             get {
                 return ResourceManager.GetString("KeyM", resourceCulture);
             }
         }
         
-        internal static string KeyN {
+        public static string KeyN {
             get {
                 return ResourceManager.GetString("KeyN", resourceCulture);
             }
         }
         
-        internal static string KeyO {
+        public static string KeyO {
             get {
                 return ResourceManager.GetString("KeyO", resourceCulture);
             }
         }
         
-        internal static string KeyP {
+        public static string KeyP {
             get {
                 return ResourceManager.GetString("KeyP", resourceCulture);
             }
         }
         
-        internal static string KeyQ {
+        public static string KeyQ {
             get {
                 return ResourceManager.GetString("KeyQ", resourceCulture);
             }
         }
         
-        internal static string KeyR {
+        public static string KeyR {
             get {
                 return ResourceManager.GetString("KeyR", resourceCulture);
             }
         }
         
-        internal static string KeyS {
+        public static string KeyS {
             get {
                 return ResourceManager.GetString("KeyS", resourceCulture);
             }
         }
         
-        internal static string KeyT {
+        public static string KeyT {
             get {
                 return ResourceManager.GetString("KeyT", resourceCulture);
             }
         }
         
-        internal static string KeyU {
+        public static string KeyU {
             get {
                 return ResourceManager.GetString("KeyU", resourceCulture);
             }
         }
         
-        internal static string KeyV {
+        public static string KeyV {
             get {
                 return ResourceManager.GetString("KeyV", resourceCulture);
             }
         }
         
-        internal static string KeyW {
+        public static string KeyW {
             get {
                 return ResourceManager.GetString("KeyW", resourceCulture);
             }
         }
         
-        internal static string KeyX {
+        public static string KeyX {
             get {
                 return ResourceManager.GetString("KeyX", resourceCulture);
             }
         }
         
-        internal static string KeyY {
+        public static string KeyY {
             get {
                 return ResourceManager.GetString("KeyY", resourceCulture);
             }
         }
         
-        internal static string KeyZ {
+        public static string KeyZ {
             get {
                 return ResourceManager.GetString("KeyZ", resourceCulture);
             }
         }
         
-        internal static string KeyD0 {
+        public static string KeyD0 {
             get {
                 return ResourceManager.GetString("KeyD0", resourceCulture);
             }
         }
         
-        internal static string KeyD1 {
+        public static string KeyD1 {
             get {
                 return ResourceManager.GetString("KeyD1", resourceCulture);
             }
         }
         
-        internal static string KeyD2 {
+        public static string KeyD2 {
             get {
                 return ResourceManager.GetString("KeyD2", resourceCulture);
             }
         }
         
-        internal static string KeyD3 {
+        public static string KeyD3 {
             get {
                 return ResourceManager.GetString("KeyD3", resourceCulture);
             }
         }
         
-        internal static string KeyD4 {
+        public static string KeyD4 {
             get {
                 return ResourceManager.GetString("KeyD4", resourceCulture);
             }
         }
         
-        internal static string KeyD5 {
+        public static string KeyD5 {
             get {
                 return ResourceManager.GetString("KeyD5", resourceCulture);
             }
         }
         
-        internal static string KeyD6 {
+        public static string KeyD6 {
             get {
                 return ResourceManager.GetString("KeyD6", resourceCulture);
             }
         }
         
-        internal static string KeyD7 {
+        public static string KeyD7 {
             get {
                 return ResourceManager.GetString("KeyD7", resourceCulture);
             }
         }
         
-        internal static string KeyD8 {
+        public static string KeyD8 {
             get {
                 return ResourceManager.GetString("KeyD8", resourceCulture);
             }
         }
         
-        internal static string KeyD9 {
+        public static string KeyD9 {
             get {
                 return ResourceManager.GetString("KeyD9", resourceCulture);
             }
         }
         
-        internal static string KeyEnter {
+        public static string KeyEnter {
             get {
                 return ResourceManager.GetString("KeyEnter", resourceCulture);
             }
         }
         
-        internal static string KeyEscape {
+        public static string KeyEscape {
             get {
                 return ResourceManager.GetString("KeyEscape", resourceCulture);
             }
         }
         
-        internal static string KeyBack {
+        public static string KeyBack {
             get {
                 return ResourceManager.GetString("KeyBack", resourceCulture);
             }
         }
         
-        internal static string KeyTab {
+        public static string KeyTab {
             get {
                 return ResourceManager.GetString("KeyTab", resourceCulture);
             }
         }
         
-        internal static string KeySpace {
+        public static string KeySpace {
             get {
                 return ResourceManager.GetString("KeySpace", resourceCulture);
             }
         }
         
-        internal static string KeyOemMinus {
+        public static string KeyOemMinus {
             get {
                 return ResourceManager.GetString("KeyOemMinus", resourceCulture);
             }
         }
         
-        internal static string KeyOemPlus {
+        public static string KeyOemPlus {
             get {
                 return ResourceManager.GetString("KeyOemPlus", resourceCulture);
             }
         }
         
-        internal static string KeyOemOpenBrackets {
+        public static string KeyOemOpenBrackets {
             get {
                 return ResourceManager.GetString("KeyOemOpenBrackets", resourceCulture);
             }
         }
         
-        internal static string KeyOemCloseBrackets {
+        public static string KeyOemCloseBrackets {
             get {
                 return ResourceManager.GetString("KeyOemCloseBrackets", resourceCulture);
             }
         }
         
-        internal static string KeyOemPipe {
+        public static string KeyOemPipe {
             get {
                 return ResourceManager.GetString("KeyOemPipe", resourceCulture);
             }
         }
         
-        internal static string KeyOemSemicolon {
+        public static string KeyOemSemicolon {
             get {
                 return ResourceManager.GetString("KeyOemSemicolon", resourceCulture);
             }
         }
         
-        internal static string KeyOemQuotes {
+        public static string KeyOemQuotes {
             get {
                 return ResourceManager.GetString("KeyOemQuotes", resourceCulture);
             }
         }
         
-        internal static string KeyOemTilde {
+        public static string KeyOemTilde {
             get {
                 return ResourceManager.GetString("KeyOemTilde", resourceCulture);
             }
         }
         
-        internal static string KeyOemComma {
+        public static string KeyOemComma {
             get {
                 return ResourceManager.GetString("KeyOemComma", resourceCulture);
             }
         }
         
-        internal static string KeyOemPeriod {
+        public static string KeyOemPeriod {
             get {
                 return ResourceManager.GetString("KeyOemPeriod", resourceCulture);
             }
         }
         
-        internal static string KeyOemQuestion {
+        public static string KeyOemQuestion {
             get {
                 return ResourceManager.GetString("KeyOemQuestion", resourceCulture);
             }
         }
         
-        internal static string KeyCapsLock {
+        public static string KeyCapsLock {
             get {
                 return ResourceManager.GetString("KeyCapsLock", resourceCulture);
             }
         }
         
-        internal static string KeyF1 {
+        public static string KeyF1 {
             get {
                 return ResourceManager.GetString("KeyF1", resourceCulture);
             }
         }
         
-        internal static string KeyF2 {
+        public static string KeyF2 {
             get {
                 return ResourceManager.GetString("KeyF2", resourceCulture);
             }
         }
         
-        internal static string KeyF3 {
+        public static string KeyF3 {
             get {
                 return ResourceManager.GetString("KeyF3", resourceCulture);
             }
         }
         
-        internal static string KeyF4 {
+        public static string KeyF4 {
             get {
                 return ResourceManager.GetString("KeyF4", resourceCulture);
             }
         }
         
-        internal static string KeyF5 {
+        public static string KeyF5 {
             get {
                 return ResourceManager.GetString("KeyF5", resourceCulture);
             }
         }
         
-        internal static string KeyF6 {
+        public static string KeyF6 {
             get {
                 return ResourceManager.GetString("KeyF6", resourceCulture);
             }
         }
         
-        internal static string KeyF7 {
+        public static string KeyF7 {
             get {
                 return ResourceManager.GetString("KeyF7", resourceCulture);
             }
         }
         
-        internal static string KeyF8 {
+        public static string KeyF8 {
             get {
                 return ResourceManager.GetString("KeyF8", resourceCulture);
             }
         }
         
-        internal static string KeyF9 {
+        public static string KeyF9 {
             get {
                 return ResourceManager.GetString("KeyF9", resourceCulture);
             }
         }
         
-        internal static string KeyF10 {
+        public static string KeyF10 {
             get {
                 return ResourceManager.GetString("KeyF10", resourceCulture);
             }
         }
         
-        internal static string KeyF11 {
+        public static string KeyF11 {
             get {
                 return ResourceManager.GetString("KeyF11", resourceCulture);
             }
         }
         
-        internal static string KeyF12 {
+        public static string KeyF12 {
             get {
                 return ResourceManager.GetString("KeyF12", resourceCulture);
             }
         }
         
-        internal static string KeyF13 {
+        public static string KeyF13 {
             get {
                 return ResourceManager.GetString("KeyF13", resourceCulture);
             }
         }
         
-        internal static string KeyF14 {
+        public static string KeyF14 {
             get {
                 return ResourceManager.GetString("KeyF14", resourceCulture);
             }
         }
         
-        internal static string KeyF15 {
+        public static string KeyF15 {
             get {
                 return ResourceManager.GetString("KeyF15", resourceCulture);
             }
         }
         
-        internal static string KeyF16 {
+        public static string KeyF16 {
             get {
                 return ResourceManager.GetString("KeyF16", resourceCulture);
             }
         }
         
-        internal static string KeyF17 {
+        public static string KeyF17 {
             get {
                 return ResourceManager.GetString("KeyF17", resourceCulture);
             }
         }
         
-        internal static string KeyF18 {
+        public static string KeyF18 {
             get {
                 return ResourceManager.GetString("KeyF18", resourceCulture);
             }
         }
         
-        internal static string KeyF19 {
+        public static string KeyF19 {
             get {
                 return ResourceManager.GetString("KeyF19", resourceCulture);
             }
         }
         
-        internal static string KeyF20 {
+        public static string KeyF20 {
             get {
                 return ResourceManager.GetString("KeyF20", resourceCulture);
             }
         }
         
-        internal static string KeyF21 {
+        public static string KeyF21 {
             get {
                 return ResourceManager.GetString("KeyF21", resourceCulture);
             }
         }
         
-        internal static string KeyF22 {
+        public static string KeyF22 {
             get {
                 return ResourceManager.GetString("KeyF22", resourceCulture);
             }
         }
         
-        internal static string KeyF23 {
+        public static string KeyF23 {
             get {
                 return ResourceManager.GetString("KeyF23", resourceCulture);
             }
         }
         
-        internal static string KeyF24 {
+        public static string KeyF24 {
             get {
                 return ResourceManager.GetString("KeyF24", resourceCulture);
             }
         }
         
-        internal static string KeyPrintScreen {
+        public static string KeyPrintScreen {
             get {
                 return ResourceManager.GetString("KeyPrintScreen", resourceCulture);
             }
         }
         
-        internal static string KeyScroll {
+        public static string KeyScroll {
             get {
                 return ResourceManager.GetString("KeyScroll", resourceCulture);
             }
         }
         
-        internal static string KeyPause {
+        public static string KeyPause {
             get {
                 return ResourceManager.GetString("KeyPause", resourceCulture);
             }
         }
         
-        internal static string KeyInsert {
+        public static string KeyInsert {
             get {
                 return ResourceManager.GetString("KeyInsert", resourceCulture);
             }
         }
         
-        internal static string KeyHome {
+        public static string KeyHome {
             get {
                 return ResourceManager.GetString("KeyHome", resourceCulture);
             }
         }
         
-        internal static string KeyPageUp {
+        public static string KeyPageUp {
             get {
                 return ResourceManager.GetString("KeyPageUp", resourceCulture);
             }
         }
         
-        internal static string KeyPageDown {
+        public static string KeyPageDown {
             get {
                 return ResourceManager.GetString("KeyPageDown", resourceCulture);
             }
         }
         
-        internal static string KeyDelete {
+        public static string KeyDelete {
             get {
                 return ResourceManager.GetString("KeyDelete", resourceCulture);
             }
         }
         
-        internal static string KeyEnd {
+        public static string KeyEnd {
             get {
                 return ResourceManager.GetString("KeyEnd", resourceCulture);
             }
         }
         
-        internal static string KeyRight {
+        public static string KeyRight {
             get {
                 return ResourceManager.GetString("KeyRight", resourceCulture);
             }
         }
         
-        internal static string KeyLeft {
+        public static string KeyLeft {
             get {
                 return ResourceManager.GetString("KeyLeft", resourceCulture);
             }
         }
         
-        internal static string KeyUp {
+        public static string KeyUp {
             get {
                 return ResourceManager.GetString("KeyUp", resourceCulture);
             }
         }
         
-        internal static string KeyDown {
+        public static string KeyDown {
             get {
                 return ResourceManager.GetString("KeyDown", resourceCulture);
             }
         }
         
-        internal static string KeyNumLock {
+        public static string KeyNumLock {
             get {
                 return ResourceManager.GetString("KeyNumLock", resourceCulture);
             }
         }
         
-        internal static string KeyDivide {
+        public static string KeyDivide {
             get {
                 return ResourceManager.GetString("KeyDivide", resourceCulture);
             }
         }
         
-        internal static string KeyMultiply {
+        public static string KeyMultiply {
             get {
                 return ResourceManager.GetString("KeyMultiply", resourceCulture);
             }
         }
         
-        internal static string KeySubtract {
+        public static string KeySubtract {
             get {
                 return ResourceManager.GetString("KeySubtract", resourceCulture);
             }
         }
         
-        internal static string KeyAdd {
+        public static string KeyAdd {
             get {
                 return ResourceManager.GetString("KeyAdd", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad0 {
+        public static string KeyNumPad0 {
             get {
                 return ResourceManager.GetString("KeyNumPad0", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad1 {
+        public static string KeyNumPad1 {
             get {
                 return ResourceManager.GetString("KeyNumPad1", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad2 {
+        public static string KeyNumPad2 {
             get {
                 return ResourceManager.GetString("KeyNumPad2", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad3 {
+        public static string KeyNumPad3 {
             get {
                 return ResourceManager.GetString("KeyNumPad3", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad4 {
+        public static string KeyNumPad4 {
             get {
                 return ResourceManager.GetString("KeyNumPad4", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad5 {
+        public static string KeyNumPad5 {
             get {
                 return ResourceManager.GetString("KeyNumPad5", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad6 {
+        public static string KeyNumPad6 {
             get {
                 return ResourceManager.GetString("KeyNumPad6", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad7 {
+        public static string KeyNumPad7 {
             get {
                 return ResourceManager.GetString("KeyNumPad7", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad8 {
+        public static string KeyNumPad8 {
             get {
                 return ResourceManager.GetString("KeyNumPad8", resourceCulture);
             }
         }
         
-        internal static string KeyNumPad9 {
+        public static string KeyNumPad9 {
             get {
                 return ResourceManager.GetString("KeyNumPad9", resourceCulture);
             }
         }
         
-        internal static string KeyDecimal {
+        public static string KeyDecimal {
             get {
                 return ResourceManager.GetString("KeyDecimal", resourceCulture);
             }
         }
         
-        internal static string KeyMediaNextTrack {
+        public static string KeyMediaNextTrack {
             get {
                 return ResourceManager.GetString("KeyMediaNextTrack", resourceCulture);
             }
         }
         
-        internal static string KeyMediaPreviousTrack {
+        public static string KeyMediaPreviousTrack {
             get {
                 return ResourceManager.GetString("KeyMediaPreviousTrack", resourceCulture);
             }
         }
         
-        internal static string KeyMediaStop {
+        public static string KeyMediaStop {
             get {
                 return ResourceManager.GetString("KeyMediaStop", resourceCulture);
             }
         }
         
-        internal static string KeyVolumeMute {
+        public static string KeyVolumeMute {
             get {
                 return ResourceManager.GetString("KeyVolumeMute", resourceCulture);
             }
         }
         
-        internal static string KeyMediaPlayPause {
+        public static string KeyMediaPlayPause {
             get {
                 return ResourceManager.GetString("KeyMediaPlayPause", resourceCulture);
             }
         }
         
-        internal static string KeyVolumeUp {
+        public static string KeyVolumeUp {
             get {
                 return ResourceManager.GetString("KeyVolumeUp", resourceCulture);
             }
         }
         
-        internal static string KeyVolumeDown {
+        public static string KeyVolumeDown {
             get {
                 return ResourceManager.GetString("KeyVolumeDown", resourceCulture);
             }
         }
         
-        internal static string DeviceControllerTypeGamepad {
+        public static string DeviceControllerTypeGamepad {
             get {
                 return ResourceManager.GetString("DeviceControllerTypeGamepad", resourceCulture);
             }
         }
         
-        internal static string DeviceControllerTypeDancePad {
+        public static string DeviceControllerTypeDancePad {
             get {
                 return ResourceManager.GetString("DeviceControllerTypeDancePad", resourceCulture);
             }
         }
         
-        internal static string DeviceControllerTypeGuitarHeroGuitar {
+        public static string DeviceControllerTypeGuitarHeroGuitar {
             get {
                 return ResourceManager.GetString("DeviceControllerTypeGuitarHeroGuitar", resourceCulture);
             }
         }
         
-        internal static string DeviceControllerTypeRockBandGuitar {
+        public static string DeviceControllerTypeRockBandGuitar {
             get {
                 return ResourceManager.GetString("DeviceControllerTypeRockBandGuitar", resourceCulture);
             }
         }
         
-        internal static string DeviceControllerTypeGuitarHeroDrums {
+        public static string DeviceControllerTypeGuitarHeroDrums {
             get {
                 return ResourceManager.GetString("DeviceControllerTypeGuitarHeroDrums", resourceCulture);
             }
         }
         
-        internal static string DeviceControllerTypeRockBandDrums {
+        public static string DeviceControllerTypeRockBandDrums {
             get {
                 return ResourceManager.GetString("DeviceControllerTypeRockBandDrums", resourceCulture);
             }
         }
         
-        internal static string DeviceControllerTypeLiveGuitar {
+        public static string DeviceControllerTypeLiveGuitar {
             get {
                 return ResourceManager.GetString("DeviceControllerTypeLiveGuitar", resourceCulture);
             }
         }
         
-        internal static string DeviceControllerTypeTurntable {
+        public static string DeviceControllerTypeTurntable {
             get {
                 return ResourceManager.GetString("DeviceControllerTypeTurntable", resourceCulture);
             }
         }
         
-        internal static string DeviceControllerTypeStageKit {
+        public static string DeviceControllerTypeStageKit {
             get {
                 return ResourceManager.GetString("DeviceControllerTypeStageKit", resourceCulture);
             }
         }
         
-        internal static string TwiPinTypeSda {
+        public static string TwiPinTypeSda {
             get {
                 return ResourceManager.GetString("TwiPinTypeSda", resourceCulture);
             }
         }
         
-        internal static string TwiPinTypeScl {
+        public static string TwiPinTypeScl {
             get {
                 return ResourceManager.GetString("TwiPinTypeScl", resourceCulture);
             }
         }
         
-        internal static string SpiPinTypeCSn {
+        public static string SpiPinTypeCSn {
             get {
                 return ResourceManager.GetString("SpiPinTypeCSn", resourceCulture);
             }
         }
         
-        internal static string SpiPinTypeSck {
+        public static string SpiPinTypeSck {
             get {
                 return ResourceManager.GetString("SpiPinTypeSck", resourceCulture);
             }
         }
         
-        internal static string SpiPinTypeMosi {
+        public static string SpiPinTypeMosi {
             get {
                 return ResourceManager.GetString("SpiPinTypeMosi", resourceCulture);
             }
         }
         
-        internal static string SpiPinTypeMiso {
+        public static string SpiPinTypeMiso {
             get {
                 return ResourceManager.GetString("SpiPinTypeMiso", resourceCulture);
             }
         }
         
-        internal static string StandardAxisTypeLeftStickX {
+        public static string StandardAxisTypeLeftStickX {
             get {
                 return ResourceManager.GetString("StandardAxisTypeLeftStickX", resourceCulture);
             }
         }
         
-        internal static string StandardAxisTypeLeftStickY {
+        public static string StandardAxisTypeLeftStickY {
             get {
                 return ResourceManager.GetString("StandardAxisTypeLeftStickY", resourceCulture);
             }
         }
         
-        internal static string StandardAxisTypeRightStickX {
+        public static string StandardAxisTypeRightStickX {
             get {
                 return ResourceManager.GetString("StandardAxisTypeRightStickX", resourceCulture);
             }
         }
         
-        internal static string StandardAxisTypeRightStickY {
+        public static string StandardAxisTypeRightStickY {
             get {
                 return ResourceManager.GetString("StandardAxisTypeRightStickY", resourceCulture);
             }
         }
         
-        internal static string StandardAxisTypeLeftTrigger {
+        public static string StandardAxisTypeLeftTrigger {
             get {
                 return ResourceManager.GetString("StandardAxisTypeLeftTrigger", resourceCulture);
             }
         }
         
-        internal static string StandardAxisTypeRightTrigger {
+        public static string StandardAxisTypeRightTrigger {
             get {
                 return ResourceManager.GetString("StandardAxisTypeRightTrigger", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeA {
+        public static string StandardButtonTypeA {
             get {
                 return ResourceManager.GetString("StandardButtonTypeA", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeB {
+        public static string StandardButtonTypeB {
             get {
                 return ResourceManager.GetString("StandardButtonTypeB", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeX {
+        public static string StandardButtonTypeX {
             get {
                 return ResourceManager.GetString("StandardButtonTypeX", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeY {
+        public static string StandardButtonTypeY {
             get {
                 return ResourceManager.GetString("StandardButtonTypeY", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeLeftShoulder {
+        public static string StandardButtonTypeLeftShoulder {
             get {
                 return ResourceManager.GetString("StandardButtonTypeLeftShoulder", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeRightShoulder {
+        public static string StandardButtonTypeRightShoulder {
             get {
                 return ResourceManager.GetString("StandardButtonTypeRightShoulder", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeDpadUp {
+        public static string StandardButtonTypeDpadUp {
             get {
                 return ResourceManager.GetString("StandardButtonTypeDpadUp", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeDpadDown {
+        public static string StandardButtonTypeDpadDown {
             get {
                 return ResourceManager.GetString("StandardButtonTypeDpadDown", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeDpadLeft {
+        public static string StandardButtonTypeDpadLeft {
             get {
                 return ResourceManager.GetString("StandardButtonTypeDpadLeft", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeDpadRight {
+        public static string StandardButtonTypeDpadRight {
             get {
                 return ResourceManager.GetString("StandardButtonTypeDpadRight", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeStart {
+        public static string StandardButtonTypeStart {
             get {
                 return ResourceManager.GetString("StandardButtonTypeStart", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeBack {
+        public static string StandardButtonTypeBack {
             get {
                 return ResourceManager.GetString("StandardButtonTypeBack", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeGuide {
+        public static string StandardButtonTypeGuide {
             get {
                 return ResourceManager.GetString("StandardButtonTypeGuide", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeCapture {
+        public static string StandardButtonTypeCapture {
             get {
                 return ResourceManager.GetString("StandardButtonTypeCapture", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeLeftThumbClick {
+        public static string StandardButtonTypeLeftThumbClick {
             get {
                 return ResourceManager.GetString("StandardButtonTypeLeftThumbClick", resourceCulture);
             }
         }
         
-        internal static string StandardButtonTypeRightThumbClick {
+        public static string StandardButtonTypeRightThumbClick {
             get {
                 return ResourceManager.GetString("StandardButtonTypeRightThumbClick", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeX {
+        public static string UsbHostInputTypeX {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeX", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeA {
+        public static string UsbHostInputTypeA {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeA", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeB {
+        public static string UsbHostInputTypeB {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeB", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeY {
+        public static string UsbHostInputTypeY {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeY", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeLeftShoulder {
+        public static string UsbHostInputTypeLeftShoulder {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeLeftShoulder", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRightShoulder {
+        public static string UsbHostInputTypeRightShoulder {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRightShoulder", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeKick1 {
+        public static string UsbHostInputTypeKick1 {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeKick1", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeKick2 {
+        public static string UsbHostInputTypeKick2 {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeKick2", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeBack {
+        public static string UsbHostInputTypeBack {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeBack", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeStart {
+        public static string UsbHostInputTypeStart {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeStart", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeLeftThumbClick {
+        public static string UsbHostInputTypeLeftThumbClick {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeLeftThumbClick", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRightThumbClick {
+        public static string UsbHostInputTypeRightThumbClick {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRightThumbClick", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeGuide {
+        public static string UsbHostInputTypeGuide {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeGuide", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeCapture {
+        public static string UsbHostInputTypeCapture {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeCapture", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeLeftBlue {
+        public static string UsbHostInputTypeLeftBlue {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeLeftBlue", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeLeftRed {
+        public static string UsbHostInputTypeLeftRed {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeLeftRed", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeLeftGreen {
+        public static string UsbHostInputTypeLeftGreen {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeLeftGreen", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRightBlue {
+        public static string UsbHostInputTypeRightBlue {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRightBlue", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRightRed {
+        public static string UsbHostInputTypeRightRed {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRightRed", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRightGreen {
+        public static string UsbHostInputTypeRightGreen {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRightGreen", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeSoloGreen {
+        public static string UsbHostInputTypeSoloGreen {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeSoloGreen", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeSoloRed {
+        public static string UsbHostInputTypeSoloRed {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeSoloRed", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeSoloYellow {
+        public static string UsbHostInputTypeSoloYellow {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeSoloYellow", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeSoloBlue {
+        public static string UsbHostInputTypeSoloBlue {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeSoloBlue", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeSoloOrange {
+        public static string UsbHostInputTypeSoloOrange {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeSoloOrange", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeGreen {
+        public static string UsbHostInputTypeGreen {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeGreen", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRed {
+        public static string UsbHostInputTypeRed {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRed", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeYellow {
+        public static string UsbHostInputTypeYellow {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeYellow", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeBlue {
+        public static string UsbHostInputTypeBlue {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeBlue", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeOrange {
+        public static string UsbHostInputTypeOrange {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeOrange", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeDpadUp {
+        public static string UsbHostInputTypeDpadUp {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeDpadUp", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeDpadDown {
+        public static string UsbHostInputTypeDpadDown {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeDpadDown", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeDpadLeft {
+        public static string UsbHostInputTypeDpadLeft {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeDpadLeft", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeDpadRight {
+        public static string UsbHostInputTypeDpadRight {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeDpadRight", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeLeftTrigger {
+        public static string UsbHostInputTypeLeftTrigger {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeLeftTrigger", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRightTrigger {
+        public static string UsbHostInputTypeRightTrigger {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRightTrigger", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeLeftStickX {
+        public static string UsbHostInputTypeLeftStickX {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeLeftStickX", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeLeftStickY {
+        public static string UsbHostInputTypeLeftStickY {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeLeftStickY", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRightStickX {
+        public static string UsbHostInputTypeRightStickX {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRightStickX", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRightStickY {
+        public static string UsbHostInputTypeRightStickY {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRightStickY", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureDpadUp {
+        public static string UsbHostInputTypePressureDpadUp {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureDpadUp", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureDpadRight {
+        public static string UsbHostInputTypePressureDpadRight {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureDpadRight", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureDpadLeft {
+        public static string UsbHostInputTypePressureDpadLeft {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureDpadLeft", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureDpadDown {
+        public static string UsbHostInputTypePressureDpadDown {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureDpadDown", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureL1 {
+        public static string UsbHostInputTypePressureL1 {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureL1", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureR1 {
+        public static string UsbHostInputTypePressureR1 {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureR1", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureTriangle {
+        public static string UsbHostInputTypePressureTriangle {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureTriangle", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureCircle {
+        public static string UsbHostInputTypePressureCircle {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureCircle", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureCross {
+        public static string UsbHostInputTypePressureCross {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureCross", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePressureSquare {
+        public static string UsbHostInputTypePressureSquare {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePressureSquare", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRedVelocity {
+        public static string UsbHostInputTypeRedVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRedVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeYellowVelocity {
+        public static string UsbHostInputTypeYellowVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeYellowVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeBlueVelocity {
+        public static string UsbHostInputTypeBlueVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeBlueVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeGreenVelocity {
+        public static string UsbHostInputTypeGreenVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeGreenVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeOrangeVelocity {
+        public static string UsbHostInputTypeOrangeVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeOrangeVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeBlueCymbalVelocity {
+        public static string UsbHostInputTypeBlueCymbalVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeBlueCymbalVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeYellowCymbalVelocity {
+        public static string UsbHostInputTypeYellowCymbalVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeYellowCymbalVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeGreenCymbalVelocity {
+        public static string UsbHostInputTypeGreenCymbalVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeGreenCymbalVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeKickVelocity {
+        public static string UsbHostInputTypeKickVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeKickVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeWhammy {
+        public static string UsbHostInputTypeWhammy {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeWhammy", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeTilt {
+        public static string UsbHostInputTypeTilt {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeTilt", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypePickup {
+        public static string UsbHostInputTypePickup {
             get {
                 return ResourceManager.GetString("UsbHostInputTypePickup", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeSlider {
+        public static string UsbHostInputTypeSlider {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeSlider", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeLeftTableVelocity {
+        public static string UsbHostInputTypeLeftTableVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeLeftTableVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeRightTableVelocity {
+        public static string UsbHostInputTypeRightTableVelocity {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeRightTableVelocity", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeEffectsKnob {
+        public static string UsbHostInputTypeEffectsKnob {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeEffectsKnob", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeCrossfader {
+        public static string UsbHostInputTypeCrossfader {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeCrossfader", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeAccelX {
+        public static string UsbHostInputTypeAccelX {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeAccelX", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeAccelZ {
+        public static string UsbHostInputTypeAccelZ {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeAccelZ", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeAccelY {
+        public static string UsbHostInputTypeAccelY {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeAccelY", resourceCulture);
             }
         }
         
-        internal static string UsbHostInputTypeGyro {
+        public static string UsbHostInputTypeGyro {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeGyro", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeNunchuk {
+        public static string WiiControllerTypeNunchuk {
             get {
                 return ResourceManager.GetString("WiiControllerTypeNunchuk", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeClassicController {
+        public static string WiiControllerTypeClassicController {
             get {
                 return ResourceManager.GetString("WiiControllerTypeClassicController", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeClassicControllerPro {
+        public static string WiiControllerTypeClassicControllerPro {
             get {
                 return ResourceManager.GetString("WiiControllerTypeClassicControllerPro", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeUDraw {
+        public static string WiiControllerTypeUDraw {
             get {
                 return ResourceManager.GetString("WiiControllerTypeUDraw", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeDrawsome {
+        public static string WiiControllerTypeDrawsome {
             get {
                 return ResourceManager.GetString("WiiControllerTypeDrawsome", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeGuitar {
+        public static string WiiControllerTypeGuitar {
             get {
                 return ResourceManager.GetString("WiiControllerTypeGuitar", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeDrum {
+        public static string WiiControllerTypeDrum {
             get {
                 return ResourceManager.GetString("WiiControllerTypeDrum", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeDj {
+        public static string WiiControllerTypeDj {
             get {
                 return ResourceManager.GetString("WiiControllerTypeDj", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeTaiko {
+        public static string WiiControllerTypeTaiko {
             get {
                 return ResourceManager.GetString("WiiControllerTypeTaiko", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeMotionPlus {
+        public static string WiiControllerTypeMotionPlus {
             get {
                 return ResourceManager.GetString("WiiControllerTypeMotionPlus", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeSelected {
+        public static string WiiControllerTypeSelected {
             get {
                 return ResourceManager.GetString("WiiControllerTypeSelected", resourceCulture);
             }
         }
         
-        internal static string WiiControllerTypeAll {
+        public static string WiiControllerTypeAll {
             get {
                 return ResourceManager.GetString("WiiControllerTypeAll", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicLeftStickX {
+        public static string WiiInputTypeClassicLeftStickX {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicLeftStickX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicLeftStickY {
+        public static string WiiInputTypeClassicLeftStickY {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicLeftStickY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicRightStickX {
+        public static string WiiInputTypeClassicRightStickX {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicRightStickX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicRightStickY {
+        public static string WiiInputTypeClassicRightStickY {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicRightStickY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicLeftTrigger {
+        public static string WiiInputTypeClassicLeftTrigger {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicLeftTrigger", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicRightTrigger {
+        public static string WiiInputTypeClassicRightTrigger {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicRightTrigger", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumJoystickX {
+        public static string WiiInputTypeDrumJoystickX {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumJoystickX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumJoystickY {
+        public static string WiiInputTypeDrumJoystickY {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumJoystickY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumGreenPressure {
+        public static string WiiInputTypeDrumGreenPressure {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumGreenPressure", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumRedPressure {
+        public static string WiiInputTypeDrumRedPressure {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumRedPressure", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumYellowPressure {
+        public static string WiiInputTypeDrumYellowPressure {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumYellowPressure", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumBluePressure {
+        public static string WiiInputTypeDrumBluePressure {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumBluePressure", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumOrangePressure {
+        public static string WiiInputTypeDrumOrangePressure {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumOrangePressure", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumKickPedalPressure {
+        public static string WiiInputTypeDrumKickPedalPressure {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumKickPedalPressure", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarJoystickX {
+        public static string WiiInputTypeGuitarJoystickX {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarJoystickX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarJoystickY {
+        public static string WiiInputTypeGuitarJoystickY {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarJoystickY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarWhammy {
+        public static string WiiInputTypeGuitarWhammy {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarWhammy", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarTapBar {
+        public static string WiiInputTypeGuitarTapBar {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarTapBar", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeNunchukStickX {
+        public static string WiiInputTypeNunchukStickX {
             get {
                 return ResourceManager.GetString("WiiInputTypeNunchukStickX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeNunchukStickY {
+        public static string WiiInputTypeNunchukStickY {
             get {
                 return ResourceManager.GetString("WiiInputTypeNunchukStickY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeNunchukAccelerationX {
+        public static string WiiInputTypeNunchukAccelerationX {
             get {
                 return ResourceManager.GetString("WiiInputTypeNunchukAccelerationX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeNunchukAccelerationY {
+        public static string WiiInputTypeNunchukAccelerationY {
             get {
                 return ResourceManager.GetString("WiiInputTypeNunchukAccelerationY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeNunchukAccelerationZ {
+        public static string WiiInputTypeNunchukAccelerationZ {
             get {
                 return ResourceManager.GetString("WiiInputTypeNunchukAccelerationZ", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeNunchukRotationPitch {
+        public static string WiiInputTypeNunchukRotationPitch {
             get {
                 return ResourceManager.GetString("WiiInputTypeNunchukRotationPitch", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeNunchukRotationRoll {
+        public static string WiiInputTypeNunchukRotationRoll {
             get {
                 return ResourceManager.GetString("WiiInputTypeNunchukRotationRoll", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjTurntableLeft {
+        public static string WiiInputTypeDjTurntableLeft {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjTurntableLeft", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjTurntableRight {
+        public static string WiiInputTypeDjTurntableRight {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjTurntableRight", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjCrossfadeSlider {
+        public static string WiiInputTypeDjCrossfadeSlider {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjCrossfadeSlider", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjEffectDial {
+        public static string WiiInputTypeDjEffectDial {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjEffectDial", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjStickX {
+        public static string WiiInputTypeDjStickX {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjStickX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjStickY {
+        public static string WiiInputTypeDjStickY {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjStickY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeUDrawPenX {
+        public static string WiiInputTypeUDrawPenX {
             get {
                 return ResourceManager.GetString("WiiInputTypeUDrawPenX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeUDrawPenY {
+        public static string WiiInputTypeUDrawPenY {
             get {
                 return ResourceManager.GetString("WiiInputTypeUDrawPenY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeUDrawPenPressure {
+        public static string WiiInputTypeUDrawPenPressure {
             get {
                 return ResourceManager.GetString("WiiInputTypeUDrawPenPressure", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrawsomePenX {
+        public static string WiiInputTypeDrawsomePenX {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrawsomePenX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrawsomePenY {
+        public static string WiiInputTypeDrawsomePenY {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrawsomePenY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrawsomePenPressure {
+        public static string WiiInputTypeDrawsomePenPressure {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrawsomePenPressure", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarGreen {
+        public static string WiiInputTypeGuitarGreen {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarGreen", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarRed {
+        public static string WiiInputTypeGuitarRed {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarRed", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarYellow {
+        public static string WiiInputTypeGuitarYellow {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarYellow", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarBlue {
+        public static string WiiInputTypeGuitarBlue {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarBlue", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarOrange {
+        public static string WiiInputTypeGuitarOrange {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarOrange", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarTapAll {
+        public static string WiiInputTypeGuitarTapAll {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarTapAll", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarTapGreen {
+        public static string WiiInputTypeGuitarTapGreen {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarTapGreen", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarTapRed {
+        public static string WiiInputTypeGuitarTapRed {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarTapRed", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarTapYellow {
+        public static string WiiInputTypeGuitarTapYellow {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarTapYellow", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarTapBlue {
+        public static string WiiInputTypeGuitarTapBlue {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarTapBlue", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarTapOrange {
+        public static string WiiInputTypeGuitarTapOrange {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarTapOrange", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarMinus {
+        public static string WiiInputTypeGuitarMinus {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarMinus", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarPlus {
+        public static string WiiInputTypeGuitarPlus {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarPlus", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarStrumUp {
+        public static string WiiInputTypeGuitarStrumUp {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarStrumUp", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeGuitarStrumDown {
+        public static string WiiInputTypeGuitarStrumDown {
             get {
                 return ResourceManager.GetString("WiiInputTypeGuitarStrumDown", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumGreen {
+        public static string WiiInputTypeDrumGreen {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumGreen", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumRed {
+        public static string WiiInputTypeDrumRed {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumRed", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumYellow {
+        public static string WiiInputTypeDrumYellow {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumYellow", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumBlue {
+        public static string WiiInputTypeDrumBlue {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumBlue", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumOrange {
+        public static string WiiInputTypeDrumOrange {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumOrange", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumMinus {
+        public static string WiiInputTypeDrumMinus {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumMinus", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumPlus {
+        public static string WiiInputTypeDrumPlus {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumPlus", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDrumKickPedal {
+        public static string WiiInputTypeDrumKickPedal {
             get {
                 return ResourceManager.GetString("WiiInputTypeDrumKickPedal", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeNunchukC {
+        public static string WiiInputTypeNunchukC {
             get {
                 return ResourceManager.GetString("WiiInputTypeNunchukC", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeNunchukZ {
+        public static string WiiInputTypeNunchukZ {
             get {
                 return ResourceManager.GetString("WiiInputTypeNunchukZ", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeUDrawPenClick {
+        public static string WiiInputTypeUDrawPenClick {
             get {
                 return ResourceManager.GetString("WiiInputTypeUDrawPenClick", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeUDrawPenButton1 {
+        public static string WiiInputTypeUDrawPenButton1 {
             get {
                 return ResourceManager.GetString("WiiInputTypeUDrawPenButton1", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeUDrawPenButton2 {
+        public static string WiiInputTypeUDrawPenButton2 {
             get {
                 return ResourceManager.GetString("WiiInputTypeUDrawPenButton2", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeTaTaConLeftDrumRim {
+        public static string WiiInputTypeTaTaConLeftDrumRim {
             get {
                 return ResourceManager.GetString("WiiInputTypeTaTaConLeftDrumRim", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeTaTaConLeftDrumCenter {
+        public static string WiiInputTypeTaTaConLeftDrumCenter {
             get {
                 return ResourceManager.GetString("WiiInputTypeTaTaConLeftDrumCenter", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeTaTaConRightDrumRim {
+        public static string WiiInputTypeTaTaConRightDrumRim {
             get {
                 return ResourceManager.GetString("WiiInputTypeTaTaConRightDrumRim", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeTaTaConRightDrumCenter {
+        public static string WiiInputTypeTaTaConRightDrumCenter {
             get {
                 return ResourceManager.GetString("WiiInputTypeTaTaConRightDrumCenter", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjHeroEuphoria {
+        public static string WiiInputTypeDjHeroEuphoria {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjHeroEuphoria", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjHeroLeftGreen {
+        public static string WiiInputTypeDjHeroLeftGreen {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjHeroLeftGreen", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjHeroLeftRed {
+        public static string WiiInputTypeDjHeroLeftRed {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjHeroLeftRed", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjHeroLeftBlue {
+        public static string WiiInputTypeDjHeroLeftBlue {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjHeroLeftBlue", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjHeroRightGreen {
+        public static string WiiInputTypeDjHeroRightGreen {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjHeroRightGreen", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjHeroRightRed {
+        public static string WiiInputTypeDjHeroRightRed {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjHeroRightRed", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjHeroRightBlue {
+        public static string WiiInputTypeDjHeroRightBlue {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjHeroRightBlue", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjHeroMinus {
+        public static string WiiInputTypeDjHeroMinus {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjHeroMinus", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeDjHeroPlus {
+        public static string WiiInputTypeDjHeroPlus {
             get {
                 return ResourceManager.GetString("WiiInputTypeDjHeroPlus", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicA {
+        public static string WiiInputTypeClassicA {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicA", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicB {
+        public static string WiiInputTypeClassicB {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicB", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicX {
+        public static string WiiInputTypeClassicX {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicX", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicY {
+        public static string WiiInputTypeClassicY {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicY", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicDPadUp {
+        public static string WiiInputTypeClassicDPadUp {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicDPadUp", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicDPadDown {
+        public static string WiiInputTypeClassicDPadDown {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicDPadDown", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicDPadLeft {
+        public static string WiiInputTypeClassicDPadLeft {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicDPadLeft", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicDPadRight {
+        public static string WiiInputTypeClassicDPadRight {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicDPadRight", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicZl {
+        public static string WiiInputTypeClassicZl {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicZl", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicZr {
+        public static string WiiInputTypeClassicZr {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicZr", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicLt {
+        public static string WiiInputTypeClassicLt {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicLt", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicRt {
+        public static string WiiInputTypeClassicRt {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicRt", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicPlus {
+        public static string WiiInputTypeClassicPlus {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicPlus", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicMinus {
+        public static string WiiInputTypeClassicMinus {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicMinus", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeClassicHome {
+        public static string WiiInputTypeClassicHome {
             get {
                 return ResourceManager.GetString("WiiInputTypeClassicHome", resourceCulture);
             }
         }
         
-        internal static string WiiInputTypeJoystickToDpad {
+        public static string WiiInputTypeJoystickToDpad {
             get {
                 return ResourceManager.GetString("WiiInputTypeJoystickToDpad", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeGamepad {
+        public static string XInputSubTypeGamepad {
             get {
                 return ResourceManager.GetString("XInputSubTypeGamepad", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeWheel {
+        public static string XInputSubTypeWheel {
             get {
                 return ResourceManager.GetString("XInputSubTypeWheel", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeArcadeStick {
+        public static string XInputSubTypeArcadeStick {
             get {
                 return ResourceManager.GetString("XInputSubTypeArcadeStick", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeFlightStick {
+        public static string XInputSubTypeFlightStick {
             get {
                 return ResourceManager.GetString("XInputSubTypeFlightStick", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeDancePad {
+        public static string XInputSubTypeDancePad {
             get {
                 return ResourceManager.GetString("XInputSubTypeDancePad", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeGuitar {
+        public static string XInputSubTypeGuitar {
             get {
                 return ResourceManager.GetString("XInputSubTypeGuitar", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeGuitarAlternate {
+        public static string XInputSubTypeGuitarAlternate {
             get {
                 return ResourceManager.GetString("XInputSubTypeGuitarAlternate", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeDrums {
+        public static string XInputSubTypeDrums {
             get {
                 return ResourceManager.GetString("XInputSubTypeDrums", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeStageKit {
+        public static string XInputSubTypeStageKit {
             get {
                 return ResourceManager.GetString("XInputSubTypeStageKit", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeArcadePad {
+        public static string XInputSubTypeArcadePad {
             get {
                 return ResourceManager.GetString("XInputSubTypeArcadePad", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeTurntable {
+        public static string XInputSubTypeTurntable {
             get {
                 return ResourceManager.GetString("XInputSubTypeTurntable", resourceCulture);
             }
         }
         
-        internal static string XInputSubTypeGuitarHeroLive {
+        public static string XInputSubTypeGuitarHeroLive {
             get {
                 return ResourceManager.GetString("XInputSubTypeGuitarHeroLive", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeUniversal {
+        public static string ConsoleTypeUniversal {
             get {
                 return ResourceManager.GetString("ConsoleTypeUniversal", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeXbox360 {
+        public static string ConsoleTypeXbox360 {
             get {
                 return ResourceManager.GetString("ConsoleTypeXbox360", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypePs3 {
+        public static string ConsoleTypePs3 {
             get {
                 return ResourceManager.GetString("ConsoleTypePs3", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeWii {
+        public static string ConsoleTypeWii {
             get {
                 return ResourceManager.GetString("ConsoleTypeWii", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeSwitch {
+        public static string ConsoleTypeSwitch {
             get {
                 return ResourceManager.GetString("ConsoleTypeSwitch", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypePs4 {
+        public static string ConsoleTypePs4 {
             get {
                 return ResourceManager.GetString("ConsoleTypePs4", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeXboxOne {
+        public static string ConsoleTypeXboxOne {
             get {
                 return ResourceManager.GetString("ConsoleTypeXboxOne", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypePs32 {
+        public static string ConsoleTypePs32 {
             get {
                 return ResourceManager.GetString("ConsoleTypePs32", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeWindowsXb1 {
+        public static string ConsoleTypeWindowsXb1 {
             get {
                 return ResourceManager.GetString("ConsoleTypeWindowsXb1", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeWindows {
+        public static string ConsoleTypeWindows {
             get {
                 return ResourceManager.GetString("ConsoleTypeWindows", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeKeyboardMouse {
+        public static string ConsoleTypeKeyboardMouse {
             get {
                 return ResourceManager.GetString("ConsoleTypeKeyboardMouse", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeMidi {
+        public static string ConsoleTypeMidi {
             get {
                 return ResourceManager.GetString("ConsoleTypeMidi", resourceCulture);
             }
         }
         
-        internal static string ConsoleTypeUnknown {
+        public static string ConsoleTypeUnknown {
             get {
                 return ResourceManager.GetString("ConsoleTypeUnknown", resourceCulture);
             }
         }
         
-        internal static string DjAxisTypeEffectsKnob {
+        public static string DjAxisTypeEffectsKnob {
             get {
                 return ResourceManager.GetString("DjAxisTypeEffectsKnob", resourceCulture);
             }
         }
         
-        internal static string DjAxisTypeCrossfader {
+        public static string DjAxisTypeCrossfader {
             get {
                 return ResourceManager.GetString("DjAxisTypeCrossfader", resourceCulture);
             }
         }
         
-        internal static string DjAxisTypeLeftTableVelocity {
+        public static string DjAxisTypeLeftTableVelocity {
             get {
                 return ResourceManager.GetString("DjAxisTypeLeftTableVelocity", resourceCulture);
             }
         }
         
-        internal static string DjAxisTypeRightTableVelocity {
+        public static string DjAxisTypeRightTableVelocity {
             get {
                 return ResourceManager.GetString("DjAxisTypeRightTableVelocity", resourceCulture);
             }
         }
         
-        internal static string DjInputTypeLeftTurntable {
+        public static string DjInputTypeLeftTurntable {
             get {
                 return ResourceManager.GetString("DjInputTypeLeftTurntable", resourceCulture);
             }
         }
         
-        internal static string DjInputTypeRightTurntable {
+        public static string DjInputTypeRightTurntable {
             get {
                 return ResourceManager.GetString("DjInputTypeRightTurntable", resourceCulture);
             }
         }
         
-        internal static string DjInputTypeLeftGreen {
+        public static string DjInputTypeLeftGreen {
             get {
                 return ResourceManager.GetString("DjInputTypeLeftGreen", resourceCulture);
             }
         }
         
-        internal static string DjInputTypeLeftRed {
+        public static string DjInputTypeLeftRed {
             get {
                 return ResourceManager.GetString("DjInputTypeLeftRed", resourceCulture);
             }
         }
         
-        internal static string DjInputTypeLeftBlue {
+        public static string DjInputTypeLeftBlue {
             get {
                 return ResourceManager.GetString("DjInputTypeLeftBlue", resourceCulture);
             }
         }
         
-        internal static string DjInputTypeRightGreen {
+        public static string DjInputTypeRightGreen {
             get {
                 return ResourceManager.GetString("DjInputTypeRightGreen", resourceCulture);
             }
         }
         
-        internal static string DjInputTypeRightRed {
+        public static string DjInputTypeRightRed {
             get {
                 return ResourceManager.GetString("DjInputTypeRightRed", resourceCulture);
             }
         }
         
-        internal static string DjInputTypeRightBlue {
+        public static string DjInputTypeRightBlue {
             get {
                 return ResourceManager.GetString("DjInputTypeRightBlue", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeGreen {
+        public static string DrumAxisTypeGreen {
             get {
                 return ResourceManager.GetString("DrumAxisTypeGreen", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeRed {
+        public static string DrumAxisTypeRed {
             get {
                 return ResourceManager.GetString("DrumAxisTypeRed", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeYellow {
+        public static string DrumAxisTypeYellow {
             get {
                 return ResourceManager.GetString("DrumAxisTypeYellow", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeBlue {
+        public static string DrumAxisTypeBlue {
             get {
                 return ResourceManager.GetString("DrumAxisTypeBlue", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeOrange {
+        public static string DrumAxisTypeOrange {
             get {
                 return ResourceManager.GetString("DrumAxisTypeOrange", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeGreenCymbal {
+        public static string DrumAxisTypeGreenCymbal {
             get {
                 return ResourceManager.GetString("DrumAxisTypeGreenCymbal", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeYellowCymbal {
+        public static string DrumAxisTypeYellowCymbal {
             get {
                 return ResourceManager.GetString("DrumAxisTypeYellowCymbal", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeBlueCymbal {
+        public static string DrumAxisTypeBlueCymbal {
             get {
                 return ResourceManager.GetString("DrumAxisTypeBlueCymbal", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeKick {
+        public static string DrumAxisTypeKick {
             get {
                 return ResourceManager.GetString("DrumAxisTypeKick", resourceCulture);
             }
         }
         
-        internal static string DrumAxisTypeKick2 {
+        public static string DrumAxisTypeKick2 {
             get {
                 return ResourceManager.GetString("DrumAxisTypeKick2", resourceCulture);
             }
         }
         
-        internal static string EmptyTypeEmpty {
+        public static string EmptyTypeEmpty {
             get {
                 return ResourceManager.GetString("EmptyTypeEmpty", resourceCulture);
             }
         }
         
-        internal static string EmulationModeTypeXbox360 {
+        public static string EmulationModeTypeXbox360 {
             get {
                 return ResourceManager.GetString("EmulationModeTypeXbox360", resourceCulture);
             }
         }
         
-        internal static string EmulationModeTypeXboxOne {
+        public static string EmulationModeTypeXboxOne {
             get {
                 return ResourceManager.GetString("EmulationModeTypeXboxOne", resourceCulture);
             }
         }
         
-        internal static string EmulationModeTypeWii {
+        public static string EmulationModeTypeWii {
             get {
                 return ResourceManager.GetString("EmulationModeTypeWii", resourceCulture);
             }
         }
         
-        internal static string EmulationModeTypePs3 {
+        public static string EmulationModeTypePs3 {
             get {
                 return ResourceManager.GetString("EmulationModeTypePs3", resourceCulture);
             }
         }
         
-        internal static string EmulationModeTypePs4Or5 {
+        public static string EmulationModeTypePs4Or5 {
             get {
                 return ResourceManager.GetString("EmulationModeTypePs4Or5", resourceCulture);
             }
         }
         
-        internal static string EmulationModeTypeSwitch {
+        public static string EmulationModeTypeSwitch {
             get {
                 return ResourceManager.GetString("EmulationModeTypeSwitch", resourceCulture);
             }
         }
         
-        internal static string EmulationTypeController {
+        public static string EmulationTypeController {
             get {
                 return ResourceManager.GetString("EmulationTypeController", resourceCulture);
             }
         }
         
-        internal static string EmulationTypeKeyboardMouse {
+        public static string EmulationTypeKeyboardMouse {
             get {
                 return ResourceManager.GetString("EmulationTypeKeyboardMouse", resourceCulture);
             }
         }
         
-        internal static string EmulationTypeBluetooth {
+        public static string EmulationTypeBluetooth {
             get {
                 return ResourceManager.GetString("EmulationTypeBluetooth", resourceCulture);
             }
         }
         
-        internal static string EmulationTypeBluetoothKeyboardMouse {
+        public static string EmulationTypeBluetoothKeyboardMouse {
             get {
                 return ResourceManager.GetString("EmulationTypeBluetoothKeyboardMouse", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeGreen {
+        public static string Gh5NeckInputTypeGreen {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeGreen", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeRed {
+        public static string Gh5NeckInputTypeRed {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeRed", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeYellow {
+        public static string Gh5NeckInputTypeYellow {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeYellow", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeBlue {
+        public static string Gh5NeckInputTypeBlue {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeBlue", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeOrange {
+        public static string Gh5NeckInputTypeOrange {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeOrange", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeTapGreen {
+        public static string Gh5NeckInputTypeTapGreen {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeTapGreen", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeTapRed {
+        public static string Gh5NeckInputTypeTapRed {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeTapRed", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeTapYellow {
+        public static string Gh5NeckInputTypeTapYellow {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeTapYellow", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeTapBlue {
+        public static string Gh5NeckInputTypeTapBlue {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeTapBlue", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeTapOrange {
+        public static string Gh5NeckInputTypeTapOrange {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeTapOrange", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeTapAll {
+        public static string Gh5NeckInputTypeTapAll {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeTapAll", resourceCulture);
             }
         }
         
-        internal static string Gh5NeckInputTypeTapBar {
+        public static string Gh5NeckInputTypeTapBar {
             get {
                 return ResourceManager.GetString("Gh5NeckInputTypeTapBar", resourceCulture);
             }
         }
         
-        internal static string BarButtonGreen {
+        public static string BarButtonGreen {
             get {
                 return ResourceManager.GetString("BarButtonGreen", resourceCulture);
             }
         }
         
-        internal static string BarButtonRed {
+        public static string BarButtonRed {
             get {
                 return ResourceManager.GetString("BarButtonRed", resourceCulture);
             }
         }
         
-        internal static string BarButtonYellow {
+        public static string BarButtonYellow {
             get {
                 return ResourceManager.GetString("BarButtonYellow", resourceCulture);
             }
         }
         
-        internal static string BarButtonBlue {
+        public static string BarButtonBlue {
             get {
                 return ResourceManager.GetString("BarButtonBlue", resourceCulture);
             }
         }
         
-        internal static string BarButtonOrange {
+        public static string BarButtonOrange {
             get {
                 return ResourceManager.GetString("BarButtonOrange", resourceCulture);
             }
         }
         
-        internal static string GhWtInputTypeTapGreen {
+        public static string GhWtInputTypeTapGreen {
             get {
                 return ResourceManager.GetString("GhWtInputTypeTapGreen", resourceCulture);
             }
         }
         
-        internal static string GhWtInputTypeTapRed {
+        public static string GhWtInputTypeTapRed {
             get {
                 return ResourceManager.GetString("GhWtInputTypeTapRed", resourceCulture);
             }
         }
         
-        internal static string GhWtInputTypeTapYellow {
+        public static string GhWtInputTypeTapYellow {
             get {
                 return ResourceManager.GetString("GhWtInputTypeTapYellow", resourceCulture);
             }
         }
         
-        internal static string GhWtInputTypeTapBlue {
+        public static string GhWtInputTypeTapBlue {
             get {
                 return ResourceManager.GetString("GhWtInputTypeTapBlue", resourceCulture);
             }
         }
         
-        internal static string GhWtInputTypeTapOrange {
+        public static string GhWtInputTypeTapOrange {
             get {
                 return ResourceManager.GetString("GhWtInputTypeTapOrange", resourceCulture);
             }
         }
         
-        internal static string GhWtInputTypeTapAll {
+        public static string GhWtInputTypeTapAll {
             get {
                 return ResourceManager.GetString("GhWtInputTypeTapAll", resourceCulture);
             }
         }
         
-        internal static string GhWtInputTypeTapBar {
+        public static string GhWtInputTypeTapBar {
             get {
                 return ResourceManager.GetString("GhWtInputTypeTapBar", resourceCulture);
             }
         }
         
-        internal static string GuitarAxisTypeWhammy {
+        public static string GuitarAxisTypeWhammy {
             get {
                 return ResourceManager.GetString("GuitarAxisTypeWhammy", resourceCulture);
             }
         }
         
-        internal static string GuitarAxisTypePickup {
+        public static string GuitarAxisTypePickup {
             get {
                 return ResourceManager.GetString("GuitarAxisTypePickup", resourceCulture);
             }
         }
         
-        internal static string GuitarAxisTypeSlider {
+        public static string GuitarAxisTypeSlider {
             get {
                 return ResourceManager.GetString("GuitarAxisTypeSlider", resourceCulture);
             }
         }
         
-        internal static string GuitarAxisTypeTilt {
+        public static string GuitarAxisTypeTilt {
             get {
                 return ResourceManager.GetString("GuitarAxisTypeTilt", resourceCulture);
             }
         }
         
-        internal static string InputTypeAnalogPinInput {
+        public static string InputTypeAnalogPinInput {
             get {
                 return ResourceManager.GetString("InputTypeAnalogPinInput", resourceCulture);
             }
         }
         
-        internal static string InputTypeMultiplexerInput {
+        public static string InputTypeMultiplexerInput {
             get {
                 return ResourceManager.GetString("InputTypeMultiplexerInput", resourceCulture);
             }
         }
         
-        internal static string InputTypeDigitalPinInput {
+        public static string InputTypeDigitalPinInput {
             get {
                 return ResourceManager.GetString("InputTypeDigitalPinInput", resourceCulture);
             }
         }
         
-        internal static string InputTypeWiiInput {
+        public static string InputTypeWiiInput {
             get {
                 return ResourceManager.GetString("InputTypeWiiInput", resourceCulture);
             }
         }
         
-        internal static string InputTypePs2Input {
+        public static string InputTypePs2Input {
             get {
                 return ResourceManager.GetString("InputTypePs2Input", resourceCulture);
             }
         }
         
-        internal static string InputTypeTurntableInput {
+        public static string InputTypeTurntableInput {
             get {
                 return ResourceManager.GetString("InputTypeTurntableInput", resourceCulture);
             }
         }
         
-        internal static string InputTypeWtNeckInput {
+        public static string InputTypeWtNeckInput {
             get {
                 return ResourceManager.GetString("InputTypeWtNeckInput", resourceCulture);
             }
         }
         
-        internal static string InputTypeGh5NeckInput {
+        public static string InputTypeGh5NeckInput {
             get {
                 return ResourceManager.GetString("InputTypeGh5NeckInput", resourceCulture);
             }
         }
         
-        internal static string InputTypeMacroInput {
+        public static string InputTypeMacroInput {
             get {
                 return ResourceManager.GetString("InputTypeMacroInput", resourceCulture);
             }
         }
         
-        internal static string InputTypeUsbHostInput {
+        public static string InputTypeUsbHostInput {
             get {
                 return ResourceManager.GetString("InputTypeUsbHostInput", resourceCulture);
             }
         }
         
-        internal static string InputTypeBluetoothInput {
+        public static string InputTypeBluetoothInput {
             get {
                 return ResourceManager.GetString("InputTypeBluetoothInput", resourceCulture);
             }
         }
         
-        internal static string InputTypeConstantInput {
+        public static string InputTypeConstantInput {
             get {
                 return ResourceManager.GetString("InputTypeConstantInput", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeGreen {
+        public static string InstrumentButtonTypeGreen {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeGreen", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeRed {
+        public static string InstrumentButtonTypeRed {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeRed", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeYellow {
+        public static string InstrumentButtonTypeYellow {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeYellow", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeBlue {
+        public static string InstrumentButtonTypeBlue {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeBlue", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeOrange {
+        public static string InstrumentButtonTypeOrange {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeOrange", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeSoloGreen {
+        public static string InstrumentButtonTypeSoloGreen {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeSoloGreen", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeSoloRed {
+        public static string InstrumentButtonTypeSoloRed {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeSoloRed", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeSoloYellow {
+        public static string InstrumentButtonTypeSoloYellow {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeSoloYellow", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeSoloBlue {
+        public static string InstrumentButtonTypeSoloBlue {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeSoloBlue", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeSoloOrange {
+        public static string InstrumentButtonTypeSoloOrange {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeSoloOrange", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeBlack1 {
+        public static string InstrumentButtonTypeBlack1 {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeBlack1", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeBlack2 {
+        public static string InstrumentButtonTypeBlack2 {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeBlack2", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeBlack3 {
+        public static string InstrumentButtonTypeBlack3 {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeBlack3", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeWhite1 {
+        public static string InstrumentButtonTypeWhite1 {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeWhite1", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeWhite2 {
+        public static string InstrumentButtonTypeWhite2 {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeWhite2", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeWhite3 {
+        public static string InstrumentButtonTypeWhite3 {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeWhite3", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeStrumUp {
+        public static string InstrumentButtonTypeStrumUp {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeStrumUp", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeStrumDown {
+        public static string InstrumentButtonTypeStrumDown {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeStrumDown", resourceCulture);
             }
         }
         
-        internal static string InstrumentButtonTypeSliderToFrets {
+        public static string InstrumentButtonTypeSliderToFrets {
             get {
                 return ResourceManager.GetString("InstrumentButtonTypeSliderToFrets", resourceCulture);
             }
         }
         
-        internal static string LedTypeNone {
+        public static string LedTypeNone {
             get {
                 return ResourceManager.GetString("LedTypeNone", resourceCulture);
             }
         }
         
-        internal static string LedTypeApa102Rgb {
+        public static string LedTypeApa102Rgb {
             get {
                 return ResourceManager.GetString("LedTypeApa102Rgb", resourceCulture);
             }
         }
         
-        internal static string LedTypeApa102Rbg {
+        public static string LedTypeApa102Rbg {
             get {
                 return ResourceManager.GetString("LedTypeApa102Rbg", resourceCulture);
             }
         }
         
-        internal static string LedTypeApa102Grb {
+        public static string LedTypeApa102Grb {
             get {
                 return ResourceManager.GetString("LedTypeApa102Grb", resourceCulture);
             }
         }
         
-        internal static string LedTypeApa102Gbr {
+        public static string LedTypeApa102Gbr {
             get {
                 return ResourceManager.GetString("LedTypeApa102Gbr", resourceCulture);
             }
         }
         
-        internal static string LedTypeApa102Brg {
+        public static string LedTypeApa102Brg {
             get {
                 return ResourceManager.GetString("LedTypeApa102Brg", resourceCulture);
             }
         }
         
-        internal static string LedTypeApa102Bgr {
+        public static string LedTypeApa102Bgr {
             get {
                 return ResourceManager.GetString("LedTypeApa102Bgr", resourceCulture);
             }
         }
         
-        internal static string LegendTypeXbox {
+        public static string LegendTypeXbox {
             get {
                 return ResourceManager.GetString("LegendTypeXbox", resourceCulture);
             }
         }
         
-        internal static string LegendTypePlayStation {
+        public static string LegendTypePlayStation {
             get {
                 return ResourceManager.GetString("LegendTypePlayStation", resourceCulture);
             }
         }
         
-        internal static string LegendTypeSwitch {
+        public static string LegendTypeSwitch {
             get {
                 return ResourceManager.GetString("LegendTypeSwitch", resourceCulture);
             }
         }
         
-        internal static string MidiTypeNote {
+        public static string MidiTypeNote {
             get {
                 return ResourceManager.GetString("MidiTypeNote", resourceCulture);
             }
         }
         
-        internal static string MidiTypeControlChange {
+        public static string MidiTypeControlChange {
             get {
                 return ResourceManager.GetString("MidiTypeControlChange", resourceCulture);
             }
         }
         
-        internal static string MidiTypeProgramChange {
+        public static string MidiTypeProgramChange {
             get {
                 return ResourceManager.GetString("MidiTypeProgramChange", resourceCulture);
             }
         }
         
-        internal static string MidiTypeChannelPressure {
+        public static string MidiTypeChannelPressure {
             get {
                 return ResourceManager.GetString("MidiTypeChannelPressure", resourceCulture);
             }
         }
         
-        internal static string MidiTypePitchWheel {
+        public static string MidiTypePitchWheel {
             get {
                 return ResourceManager.GetString("MidiTypePitchWheel", resourceCulture);
             }
         }
         
-        internal static string ModeTypeStandard {
+        public static string ModeTypeStandard {
             get {
                 return ResourceManager.GetString("ModeTypeStandard", resourceCulture);
             }
         }
         
-        internal static string ModeTypeAdvanced {
+        public static string ModeTypeAdvanced {
             get {
                 return ResourceManager.GetString("ModeTypeAdvanced", resourceCulture);
             }
         }
         
-        internal static string ModeTypeCore {
+        public static string ModeTypeCore {
             get {
                 return ResourceManager.GetString("ModeTypeCore", resourceCulture);
             }
         }
         
-        internal static string MouseAxisTypeX {
+        public static string MouseAxisTypeX {
             get {
                 return ResourceManager.GetString("MouseAxisTypeX", resourceCulture);
             }
         }
         
-        internal static string MouseAxisTypeY {
+        public static string MouseAxisTypeY {
             get {
                 return ResourceManager.GetString("MouseAxisTypeY", resourceCulture);
             }
         }
         
-        internal static string MouseAxisTypeScrollY {
+        public static string MouseAxisTypeScrollY {
             get {
                 return ResourceManager.GetString("MouseAxisTypeScrollY", resourceCulture);
             }
         }
         
-        internal static string MouseAxisTypeScrollX {
+        public static string MouseAxisTypeScrollX {
             get {
                 return ResourceManager.GetString("MouseAxisTypeScrollX", resourceCulture);
             }
         }
         
-        internal static string MouseButtonTypeLeft {
+        public static string MouseButtonTypeLeft {
             get {
                 return ResourceManager.GetString("MouseButtonTypeLeft", resourceCulture);
             }
         }
         
-        internal static string MouseButtonTypeRight {
+        public static string MouseButtonTypeRight {
             get {
                 return ResourceManager.GetString("MouseButtonTypeRight", resourceCulture);
             }
         }
         
-        internal static string MouseButtonTypeMiddle {
+        public static string MouseButtonTypeMiddle {
             get {
                 return ResourceManager.GetString("MouseButtonTypeMiddle", resourceCulture);
             }
         }
         
-        internal static string MouseMovementTypeAbsolute {
+        public static string MouseMovementTypeAbsolute {
             get {
                 return ResourceManager.GetString("MouseMovementTypeAbsolute", resourceCulture);
             }
         }
         
-        internal static string MouseMovementTypeRelative {
+        public static string MouseMovementTypeRelative {
             get {
                 return ResourceManager.GetString("MouseMovementTypeRelative", resourceCulture);
             }
         }
         
-        internal static string MultiplexerTypeEightChannel {
+        public static string MultiplexerTypeEightChannel {
             get {
                 return ResourceManager.GetString("MultiplexerTypeEightChannel", resourceCulture);
             }
         }
         
-        internal static string MultiplexerTypeSixteenChannel {
+        public static string MultiplexerTypeSixteenChannel {
             get {
                 return ResourceManager.GetString("MultiplexerTypeSixteenChannel", resourceCulture);
             }
         }
         
-        internal static string PickupSelectorTypeChorus {
+        public static string PickupSelectorTypeChorus {
             get {
                 return ResourceManager.GetString("PickupSelectorTypeChorus", resourceCulture);
             }
         }
         
-        internal static string PickupSelectorTypeWahWah {
+        public static string PickupSelectorTypeWahWah {
             get {
                 return ResourceManager.GetString("PickupSelectorTypeWahWah", resourceCulture);
             }
         }
         
-        internal static string PickupSelectorTypeFlanger {
+        public static string PickupSelectorTypeFlanger {
             get {
                 return ResourceManager.GetString("PickupSelectorTypeFlanger", resourceCulture);
             }
         }
         
-        internal static string PickupSelectorTypeEcho {
+        public static string PickupSelectorTypeEcho {
             get {
                 return ResourceManager.GetString("PickupSelectorTypeEcho", resourceCulture);
             }
         }
         
-        internal static string PickupSelectorTypeNone {
+        public static string PickupSelectorTypeNone {
             get {
                 return ResourceManager.GetString("PickupSelectorTypeNone", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeDigital {
+        public static string Ps2ControllerTypeDigital {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeDigital", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeDualshock {
+        public static string Ps2ControllerTypeDualshock {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeDualshock", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeDualshock2 {
+        public static string Ps2ControllerTypeDualshock2 {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeDualshock2", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeGuitar {
+        public static string Ps2ControllerTypeGuitar {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeGuitar", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeFlightStick {
+        public static string Ps2ControllerTypeFlightStick {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeFlightStick", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeNegCon {
+        public static string Ps2ControllerTypeNegCon {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeNegCon", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeGunCon {
+        public static string Ps2ControllerTypeGunCon {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeGunCon", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeJogCon {
+        public static string Ps2ControllerTypeJogCon {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeJogCon", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeMouse {
+        public static string Ps2ControllerTypeMouse {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeMouse", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeSelected {
+        public static string Ps2ControllerTypeSelected {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeSelected", resourceCulture);
             }
         }
         
-        internal static string Ps2ControllerTypeAll {
+        public static string Ps2ControllerTypeAll {
             get {
                 return ResourceManager.GetString("Ps2ControllerTypeAll", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGunConHSync {
+        public static string Ps2InputTypeGunConHSync {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGunConHSync", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGunConVSync {
+        public static string Ps2InputTypeGunConVSync {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGunConVSync", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeMouseX {
+        public static string Ps2InputTypeMouseX {
             get {
                 return ResourceManager.GetString("Ps2InputTypeMouseX", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeMouseY {
+        public static string Ps2InputTypeMouseY {
             get {
                 return ResourceManager.GetString("Ps2InputTypeMouseY", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeNegConTwist {
+        public static string Ps2InputTypeNegConTwist {
             get {
                 return ResourceManager.GetString("Ps2InputTypeNegConTwist", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeNegConI {
+        public static string Ps2InputTypeNegConI {
             get {
                 return ResourceManager.GetString("Ps2InputTypeNegConI", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeNegConIi {
+        public static string Ps2InputTypeNegConIi {
             get {
                 return ResourceManager.GetString("Ps2InputTypeNegConIi", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeNegConL {
+        public static string Ps2InputTypeNegConL {
             get {
                 return ResourceManager.GetString("Ps2InputTypeNegConL", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeJogConWheel {
+        public static string Ps2InputTypeJogConWheel {
             get {
                 return ResourceManager.GetString("Ps2InputTypeJogConWheel", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarWhammy {
+        public static string Ps2InputTypeGuitarWhammy {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarWhammy", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeLeftStickX {
+        public static string Ps2InputTypeLeftStickX {
             get {
                 return ResourceManager.GetString("Ps2InputTypeLeftStickX", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeLeftStickY {
+        public static string Ps2InputTypeLeftStickY {
             get {
                 return ResourceManager.GetString("Ps2InputTypeLeftStickY", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeRightStickX {
+        public static string Ps2InputTypeRightStickX {
             get {
                 return ResourceManager.GetString("Ps2InputTypeRightStickX", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeRightStickY {
+        public static string Ps2InputTypeRightStickY {
             get {
                 return ResourceManager.GetString("Ps2InputTypeRightStickY", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2L1 {
+        public static string Ps2InputTypeDualshock2L1 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2L1", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2R1 {
+        public static string Ps2InputTypeDualshock2R1 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2R1", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2RightButton {
+        public static string Ps2InputTypeDualshock2RightButton {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2RightButton", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2LeftButton {
+        public static string Ps2InputTypeDualshock2LeftButton {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2LeftButton", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2UpButton {
+        public static string Ps2InputTypeDualshock2UpButton {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2UpButton", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2DownButton {
+        public static string Ps2InputTypeDualshock2DownButton {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2DownButton", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2Triangle {
+        public static string Ps2InputTypeDualshock2Triangle {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2Triangle", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2Circle {
+        public static string Ps2InputTypeDualshock2Circle {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2Circle", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2Cross {
+        public static string Ps2InputTypeDualshock2Cross {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2Cross", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2Square {
+        public static string Ps2InputTypeDualshock2Square {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2Square", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2L2 {
+        public static string Ps2InputTypeDualshock2L2 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2L2", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDualshock2R2 {
+        public static string Ps2InputTypeDualshock2R2 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDualshock2R2", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeMouseLeft {
+        public static string Ps2InputTypeMouseLeft {
             get {
                 return ResourceManager.GetString("Ps2InputTypeMouseLeft", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeMouseRight {
+        public static string Ps2InputTypeMouseRight {
             get {
                 return ResourceManager.GetString("Ps2InputTypeMouseRight", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeNegConA {
+        public static string Ps2InputTypeNegConA {
             get {
                 return ResourceManager.GetString("Ps2InputTypeNegConA", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeNegConB {
+        public static string Ps2InputTypeNegConB {
             get {
                 return ResourceManager.GetString("Ps2InputTypeNegConB", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeNegConStart {
+        public static string Ps2InputTypeNegConStart {
             get {
                 return ResourceManager.GetString("Ps2InputTypeNegConStart", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeNegConR {
+        public static string Ps2InputTypeNegConR {
             get {
                 return ResourceManager.GetString("Ps2InputTypeNegConR", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarGreen {
+        public static string Ps2InputTypeGuitarGreen {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarGreen", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarRed {
+        public static string Ps2InputTypeGuitarRed {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarRed", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarYellow {
+        public static string Ps2InputTypeGuitarYellow {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarYellow", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarBlue {
+        public static string Ps2InputTypeGuitarBlue {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarBlue", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarOrange {
+        public static string Ps2InputTypeGuitarOrange {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarOrange", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarStrumUp {
+        public static string Ps2InputTypeGuitarStrumUp {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarStrumUp", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarStrumDown {
+        public static string Ps2InputTypeGuitarStrumDown {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarStrumDown", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarSelect {
+        public static string Ps2InputTypeGuitarSelect {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarSelect", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarStart {
+        public static string Ps2InputTypeGuitarStart {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarStart", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeGuitarTilt {
+        public static string Ps2InputTypeGuitarTilt {
             get {
                 return ResourceManager.GetString("Ps2InputTypeGuitarTilt", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeSelect {
+        public static string Ps2InputTypeSelect {
             get {
                 return ResourceManager.GetString("Ps2InputTypeSelect", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeL3 {
+        public static string Ps2InputTypeL3 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeL3", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeR3 {
+        public static string Ps2InputTypeR3 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeR3", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeStart {
+        public static string Ps2InputTypeStart {
             get {
                 return ResourceManager.GetString("Ps2InputTypeStart", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDpadUp {
+        public static string Ps2InputTypeDpadUp {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDpadUp", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDpadRight {
+        public static string Ps2InputTypeDpadRight {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDpadRight", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDpadDown {
+        public static string Ps2InputTypeDpadDown {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDpadDown", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeDpadLeft {
+        public static string Ps2InputTypeDpadLeft {
             get {
                 return ResourceManager.GetString("Ps2InputTypeDpadLeft", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeL2 {
+        public static string Ps2InputTypeL2 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeL2", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeR2 {
+        public static string Ps2InputTypeR2 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeR2", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeL1 {
+        public static string Ps2InputTypeL1 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeL1", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeR1 {
+        public static string Ps2InputTypeR1 {
             get {
                 return ResourceManager.GetString("Ps2InputTypeR1", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeTriangle {
+        public static string Ps2InputTypeTriangle {
             get {
                 return ResourceManager.GetString("Ps2InputTypeTriangle", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeCircle {
+        public static string Ps2InputTypeCircle {
             get {
                 return ResourceManager.GetString("Ps2InputTypeCircle", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeCross {
+        public static string Ps2InputTypeCross {
             get {
                 return ResourceManager.GetString("Ps2InputTypeCross", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeSquare {
+        public static string Ps2InputTypeSquare {
             get {
                 return ResourceManager.GetString("Ps2InputTypeSquare", resourceCulture);
             }
         }
         
-        internal static string Ps2InputTypeJoystickToDpad {
+        public static string Ps2InputTypeJoystickToDpad {
             get {
                 return ResourceManager.GetString("Ps2InputTypeJoystickToDpad", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureDpadUp {
+        public static string Ps3AxisTypePressureDpadUp {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureDpadUp", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureDpadRight {
+        public static string Ps3AxisTypePressureDpadRight {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureDpadRight", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureDpadLeft {
+        public static string Ps3AxisTypePressureDpadLeft {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureDpadLeft", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureDpadDown {
+        public static string Ps3AxisTypePressureDpadDown {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureDpadDown", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureL1 {
+        public static string Ps3AxisTypePressureL1 {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureL1", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureR1 {
+        public static string Ps3AxisTypePressureR1 {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureR1", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureTriangle {
+        public static string Ps3AxisTypePressureTriangle {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureTriangle", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureCircle {
+        public static string Ps3AxisTypePressureCircle {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureCircle", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureCross {
+        public static string Ps3AxisTypePressureCross {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureCross", resourceCulture);
             }
         }
         
-        internal static string Ps3AxisTypePressureSquare {
+        public static string Ps3AxisTypePressureSquare {
             get {
                 return ResourceManager.GetString("Ps3AxisTypePressureSquare", resourceCulture);
             }
         }
         
-        internal static string RumbleMotorTypeLeft {
+        public static string RumbleMotorTypeLeft {
             get {
                 return ResourceManager.GetString("RumbleMotorTypeLeft", resourceCulture);
             }
         }
         
-        internal static string RumbleMotorTypeRight {
+        public static string RumbleMotorTypeRight {
             get {
                 return ResourceManager.GetString("RumbleMotorTypeRight", resourceCulture);
             }
         }
         
-        internal static string SimpleTypeWiiInputSimple {
+        public static string SimpleTypeWiiInputSimple {
             get {
                 return ResourceManager.GetString("SimpleTypeWiiInputSimple", resourceCulture);
             }
         }
         
-        internal static string SimpleTypePs2InputSimple {
+        public static string SimpleTypePs2InputSimple {
             get {
                 return ResourceManager.GetString("SimpleTypePs2InputSimple", resourceCulture);
             }
         }
         
-        internal static string SimpleTypeWtNeckSimple {
+        public static string SimpleTypeWtNeckSimple {
             get {
                 return ResourceManager.GetString("SimpleTypeWtNeckSimple", resourceCulture);
             }
         }
         
-        internal static string SimpleTypeGh5NeckSimple {
+        public static string SimpleTypeGh5NeckSimple {
             get {
                 return ResourceManager.GetString("SimpleTypeGh5NeckSimple", resourceCulture);
             }
         }
         
-        internal static string SimpleTypeDjTurntableSimple {
+        public static string SimpleTypeDjTurntableSimple {
             get {
                 return ResourceManager.GetString("SimpleTypeDjTurntableSimple", resourceCulture);
             }
         }
         
-        internal static string SimpleTypeUsbHost {
+        public static string SimpleTypeUsbHost {
             get {
                 return ResourceManager.GetString("SimpleTypeUsbHost", resourceCulture);
             }
         }
         
-        internal static string SimpleTypeBluetooth {
+        public static string SimpleTypeBluetooth {
             get {
                 return ResourceManager.GetString("SimpleTypeBluetooth", resourceCulture);
             }
         }
         
-        internal static string SimpleTypeLed {
+        public static string SimpleTypeLed {
             get {
                 return ResourceManager.GetString("SimpleTypeLed", resourceCulture);
             }
         }
         
-        internal static string SimpleTypeRumble {
+        public static string SimpleTypeRumble {
             get {
                 return ResourceManager.GetString("SimpleTypeRumble", resourceCulture);
             }
         }
         
-        internal static string SimpleTypeConsoleMode {
+        public static string SimpleTypeConsoleMode {
             get {
                 return ResourceManager.GetString("SimpleTypeConsoleMode", resourceCulture);
             }
         }
         
-        internal static string AnalogToDigitalTypeJoyLow {
+        public static string AnalogToDigitalTypeJoyLow {
             get {
                 return ResourceManager.GetString("AnalogToDigitalTypeJoyLow", resourceCulture);
             }
         }
         
-        internal static string AnalogToDigitalTypeJoyHigh {
+        public static string AnalogToDigitalTypeJoyHigh {
             get {
                 return ResourceManager.GetString("AnalogToDigitalTypeJoyHigh", resourceCulture);
             }
         }
         
-        internal static string AnalogToDigitalTypeTrigger {
+        public static string AnalogToDigitalTypeTrigger {
             get {
                 return ResourceManager.GetString("AnalogToDigitalTypeTrigger", resourceCulture);
             }
         }
         
-        internal static string Arduino32U4TypeProMicro {
+        public static string Arduino32U4TypeProMicro {
             get {
                 return ResourceManager.GetString("Arduino32U4TypeProMicro", resourceCulture);
             }
         }
         
-        internal static string Arduino32U4TypeLeonardo {
+        public static string Arduino32U4TypeLeonardo {
             get {
                 return ResourceManager.GetString("Arduino32U4TypeLeonardo", resourceCulture);
             }
         }
         
-        internal static string Arduino32U4TypeMicro {
+        public static string Arduino32U4TypeMicro {
             get {
                 return ResourceManager.GetString("Arduino32U4TypeMicro", resourceCulture);
             }
         }
         
-        internal static string UnoMegaTypeUno {
+        public static string UnoMegaTypeUno {
             get {
                 return ResourceManager.GetString("UnoMegaTypeUno", resourceCulture);
             }
         }
         
-        internal static string UnoMegaTypeMegaAdk {
+        public static string UnoMegaTypeMegaAdk {
             get {
                 return ResourceManager.GetString("UnoMegaTypeMegaAdk", resourceCulture);
             }
         }
         
-        internal static string UnoMegaTypeMega {
+        public static string UnoMegaTypeMega {
             get {
                 return ResourceManager.GetString("UnoMegaTypeMega", resourceCulture);
             }
         }
         
-        internal static string AvrTypeMini {
+        public static string AvrTypeMini {
             get {
                 return ResourceManager.GetString("AvrTypeMini", resourceCulture);
             }
         }
         
-        internal static string AvrTypeProMicro {
+        public static string AvrTypeProMicro {
             get {
                 return ResourceManager.GetString("AvrTypeProMicro", resourceCulture);
             }
         }
         
-        internal static string AvrTypeLeonardo {
+        public static string AvrTypeLeonardo {
             get {
                 return ResourceManager.GetString("AvrTypeLeonardo", resourceCulture);
             }
         }
         
-        internal static string AvrTypeMicro {
+        public static string AvrTypeMicro {
             get {
                 return ResourceManager.GetString("AvrTypeMicro", resourceCulture);
             }
         }
         
-        internal static string AvrTypeUno {
+        public static string AvrTypeUno {
             get {
                 return ResourceManager.GetString("AvrTypeUno", resourceCulture);
             }
         }
         
-        internal static string AvrTypeMegaAdk {
+        public static string AvrTypeMegaAdk {
             get {
                 return ResourceManager.GetString("AvrTypeMegaAdk", resourceCulture);
             }
         }
         
-        internal static string AvrTypeMega {
+        public static string AvrTypeMega {
             get {
                 return ResourceManager.GetString("AvrTypeMega", resourceCulture);
             }
         }
         
-        internal static string MegaTypeMegaAdk {
+        public static string MegaTypeMegaAdk {
             get {
                 return ResourceManager.GetString("MegaTypeMegaAdk", resourceCulture);
             }
         }
         
-        internal static string MegaTypeMega {
+        public static string MegaTypeMega {
             get {
                 return ResourceManager.GetString("MegaTypeMega", resourceCulture);
             }
         }
         
-        internal static string DeviceInputTypeDirect {
+        public static string DeviceInputTypeDirect {
             get {
                 return ResourceManager.GetString("DeviceInputTypeDirect", resourceCulture);
             }
         }
         
-        internal static string DeviceInputTypeWii {
+        public static string DeviceInputTypeWii {
             get {
                 return ResourceManager.GetString("DeviceInputTypeWii", resourceCulture);
             }
         }
         
-        internal static string DeviceInputTypePs2 {
+        public static string DeviceInputTypePs2 {
             get {
                 return ResourceManager.GetString("DeviceInputTypePs2", resourceCulture);
             }
         }
         
-        internal static string DeviceInputTypeUsb {
+        public static string DeviceInputTypeUsb {
             get {
                 return ResourceManager.GetString("DeviceInputTypeUsb", resourceCulture);
             }
         }
         
-        internal static string DeviceInputTypeBluetooth {
+        public static string DeviceInputTypeBluetooth {
             get {
                 return ResourceManager.GetString("DeviceInputTypeBluetooth", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeKeyboardNumLock {
+        public static string LedCommandTypeKeyboardNumLock {
             get {
                 return ResourceManager.GetString("LedCommandTypeKeyboardNumLock", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeKeyboardCapsLock {
+        public static string LedCommandTypeKeyboardCapsLock {
             get {
                 return ResourceManager.GetString("LedCommandTypeKeyboardCapsLock", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeKeyboardScrollLock {
+        public static string LedCommandTypeKeyboardScrollLock {
             get {
                 return ResourceManager.GetString("LedCommandTypeKeyboardScrollLock", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeAuth {
+        public static string LedCommandTypeAuth {
             get {
                 return ResourceManager.GetString("LedCommandTypeAuth", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypePlayer {
+        public static string LedCommandTypePlayer {
             get {
                 return ResourceManager.GetString("LedCommandTypePlayer", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeCombo {
+        public static string LedCommandTypeCombo {
             get {
                 return ResourceManager.GetString("LedCommandTypeCombo", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeInputReactive {
+        public static string LedCommandTypeInputReactive {
             get {
                 return ResourceManager.GetString("LedCommandTypeInputReactive", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeStarPowerInactive {
+        public static string LedCommandTypeStarPowerInactive {
             get {
                 return ResourceManager.GetString("LedCommandTypeStarPowerInactive", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeStarPowerActive {
+        public static string LedCommandTypeStarPowerActive {
             get {
                 return ResourceManager.GetString("LedCommandTypeStarPowerActive", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeDjEuphoria {
+        public static string LedCommandTypeDjEuphoria {
             get {
                 return ResourceManager.GetString("LedCommandTypeDjEuphoria", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypeStageKitLed {
+        public static string LedCommandTypeStageKitLed {
             get {
                 return ResourceManager.GetString("LedCommandTypeStageKitLed", resourceCulture);
             }
         }
         
-        internal static string LedCommandTypePs4LightBar {
+        public static string LedCommandTypePs4LightBar {
             get {
                 return ResourceManager.GetString("LedCommandTypePs4LightBar", resourceCulture);
             }
         }
         
-        internal static string StageKitCommandFog {
+        public static string StageKitCommandFog {
             get {
                 return ResourceManager.GetString("StageKitCommandFog", resourceCulture);
             }
         }
         
-        internal static string StageKitCommandStrobe {
+        public static string StageKitCommandStrobe {
             get {
                 return ResourceManager.GetString("StageKitCommandStrobe", resourceCulture);
             }
         }
         
-        internal static string StageKitCommandLedGreen {
+        public static string StageKitCommandLedGreen {
             get {
                 return ResourceManager.GetString("StageKitCommandLedGreen", resourceCulture);
             }
         }
         
-        internal static string StageKitCommandLedRed {
+        public static string StageKitCommandLedRed {
             get {
                 return ResourceManager.GetString("StageKitCommandLedRed", resourceCulture);
             }
         }
         
-        internal static string StageKitCommandLedYellow {
+        public static string StageKitCommandLedYellow {
             get {
                 return ResourceManager.GetString("StageKitCommandLedYellow", resourceCulture);
             }
         }
         
-        internal static string StageKitCommandLedBlue {
+        public static string StageKitCommandLedBlue {
             get {
                 return ResourceManager.GetString("StageKitCommandLedBlue", resourceCulture);
             }
         }
         
-        internal static string StageKitStrobeSpeedSlow {
+        public static string StageKitStrobeSpeedSlow {
             get {
                 return ResourceManager.GetString("StageKitStrobeSpeedSlow", resourceCulture);
             }
         }
         
-        internal static string StageKitStrobeSpeedMedium {
+        public static string StageKitStrobeSpeedMedium {
             get {
                 return ResourceManager.GetString("StageKitStrobeSpeedMedium", resourceCulture);
             }
         }
         
-        internal static string StageKitStrobeSpeedFast {
+        public static string StageKitStrobeSpeedFast {
             get {
                 return ResourceManager.GetString("StageKitStrobeSpeedFast", resourceCulture);
             }
         }
         
-        internal static string StageKitStrobeSpeedFastest {
+        public static string StageKitStrobeSpeedFastest {
             get {
                 return ResourceManager.GetString("StageKitStrobeSpeedFastest", resourceCulture);
             }
         }
         
-        internal static string FiveFretGuitarOpen {
+        public static string FiveFretGuitarOpen {
             get {
                 return ResourceManager.GetString("FiveFretGuitarOpen", resourceCulture);
             }
         }
         
-        internal static string FiveFretGuitarGreen {
+        public static string FiveFretGuitarGreen {
             get {
                 return ResourceManager.GetString("FiveFretGuitarGreen", resourceCulture);
             }
         }
         
-        internal static string FiveFretGuitarRed {
+        public static string FiveFretGuitarRed {
             get {
                 return ResourceManager.GetString("FiveFretGuitarRed", resourceCulture);
             }
         }
         
-        internal static string FiveFretGuitarYellow {
+        public static string FiveFretGuitarYellow {
             get {
                 return ResourceManager.GetString("FiveFretGuitarYellow", resourceCulture);
             }
         }
         
-        internal static string FiveFretGuitarBlue {
+        public static string FiveFretGuitarBlue {
             get {
                 return ResourceManager.GetString("FiveFretGuitarBlue", resourceCulture);
             }
         }
         
-        internal static string FiveFretGuitarOrange {
+        public static string FiveFretGuitarOrange {
             get {
                 return ResourceManager.GetString("FiveFretGuitarOrange", resourceCulture);
             }
         }
         
-        internal static string SixFretGuitarOpen {
+        public static string SixFretGuitarOpen {
             get {
                 return ResourceManager.GetString("SixFretGuitarOpen", resourceCulture);
             }
         }
         
-        internal static string SixFretGuitarBlack1 {
+        public static string SixFretGuitarBlack1 {
             get {
                 return ResourceManager.GetString("SixFretGuitarBlack1", resourceCulture);
             }
         }
         
-        internal static string SixFretGuitarBlack2 {
+        public static string SixFretGuitarBlack2 {
             get {
                 return ResourceManager.GetString("SixFretGuitarBlack2", resourceCulture);
             }
         }
         
-        internal static string SixFretGuitarBlack3 {
+        public static string SixFretGuitarBlack3 {
             get {
                 return ResourceManager.GetString("SixFretGuitarBlack3", resourceCulture);
             }
         }
         
-        internal static string SixFretGuitarWhite1 {
+        public static string SixFretGuitarWhite1 {
             get {
                 return ResourceManager.GetString("SixFretGuitarWhite1", resourceCulture);
             }
         }
         
-        internal static string SixFretGuitarWhite2 {
+        public static string SixFretGuitarWhite2 {
             get {
                 return ResourceManager.GetString("SixFretGuitarWhite2", resourceCulture);
             }
         }
         
-        internal static string SixFretGuitarWhite3 {
+        public static string SixFretGuitarWhite3 {
             get {
                 return ResourceManager.GetString("SixFretGuitarWhite3", resourceCulture);
             }
         }
         
-        internal static string RockBandDrumKickPedal {
+        public static string RockBandDrumKickPedal {
             get {
                 return ResourceManager.GetString("RockBandDrumKickPedal", resourceCulture);
             }
         }
         
-        internal static string RockBandDrumRedPad {
+        public static string RockBandDrumRedPad {
             get {
                 return ResourceManager.GetString("RockBandDrumRedPad", resourceCulture);
             }
         }
         
-        internal static string RockBandDrumYellowPad {
+        public static string RockBandDrumYellowPad {
             get {
                 return ResourceManager.GetString("RockBandDrumYellowPad", resourceCulture);
             }
         }
         
-        internal static string RockBandDrumBluePad {
+        public static string RockBandDrumBluePad {
             get {
                 return ResourceManager.GetString("RockBandDrumBluePad", resourceCulture);
             }
         }
         
-        internal static string RockBandDrumGreenPad {
+        public static string RockBandDrumGreenPad {
             get {
                 return ResourceManager.GetString("RockBandDrumGreenPad", resourceCulture);
             }
         }
         
-        internal static string RockBandDrumYellowCymbal {
+        public static string RockBandDrumYellowCymbal {
             get {
                 return ResourceManager.GetString("RockBandDrumYellowCymbal", resourceCulture);
             }
         }
         
-        internal static string RockBandDrumBlueCymbal {
+        public static string RockBandDrumBlueCymbal {
             get {
                 return ResourceManager.GetString("RockBandDrumBlueCymbal", resourceCulture);
             }
         }
         
-        internal static string RockBandDrumGreenCymbal {
+        public static string RockBandDrumGreenCymbal {
             get {
                 return ResourceManager.GetString("RockBandDrumGreenCymbal", resourceCulture);
             }
         }
         
-        internal static string GuitarHeroDrumKickPedal {
+        public static string GuitarHeroDrumKickPedal {
             get {
                 return ResourceManager.GetString("GuitarHeroDrumKickPedal", resourceCulture);
             }
         }
         
-        internal static string GuitarHeroDrumRedPad {
+        public static string GuitarHeroDrumRedPad {
             get {
                 return ResourceManager.GetString("GuitarHeroDrumRedPad", resourceCulture);
             }
         }
         
-        internal static string GuitarHeroDrumYellowCymbal {
+        public static string GuitarHeroDrumYellowCymbal {
             get {
                 return ResourceManager.GetString("GuitarHeroDrumYellowCymbal", resourceCulture);
             }
         }
         
-        internal static string GuitarHeroDrumBluePad {
+        public static string GuitarHeroDrumBluePad {
             get {
                 return ResourceManager.GetString("GuitarHeroDrumBluePad", resourceCulture);
             }
         }
         
-        internal static string GuitarHeroDrumOrangeCymbal {
+        public static string GuitarHeroDrumOrangeCymbal {
             get {
                 return ResourceManager.GetString("GuitarHeroDrumOrangeCymbal", resourceCulture);
             }
         }
         
-        internal static string GuitarHeroDrumGreenPad {
+        public static string GuitarHeroDrumGreenPad {
             get {
                 return ResourceManager.GetString("GuitarHeroDrumGreenPad", resourceCulture);
             }
         }
         
-        internal static string TurntableScratchLeft {
+        public static string TurntableScratchLeft {
             get {
                 return ResourceManager.GetString("TurntableScratchLeft", resourceCulture);
             }
         }
         
-        internal static string TurntableGreenNoteLeft {
+        public static string TurntableGreenNoteLeft {
             get {
                 return ResourceManager.GetString("TurntableGreenNoteLeft", resourceCulture);
             }
         }
         
-        internal static string TurntableRedNoteLeft {
+        public static string TurntableRedNoteLeft {
             get {
                 return ResourceManager.GetString("TurntableRedNoteLeft", resourceCulture);
             }
         }
         
-        internal static string TurntableBlueNoteLeft {
+        public static string TurntableBlueNoteLeft {
             get {
                 return ResourceManager.GetString("TurntableBlueNoteLeft", resourceCulture);
             }
         }
         
-        internal static string TurntableScratchRight {
+        public static string TurntableScratchRight {
             get {
                 return ResourceManager.GetString("TurntableScratchRight", resourceCulture);
             }
         }
         
-        internal static string TurntableGreenNoteRight {
+        public static string TurntableGreenNoteRight {
             get {
                 return ResourceManager.GetString("TurntableGreenNoteRight", resourceCulture);
             }
         }
         
-        internal static string TurntableRedNoteRight {
+        public static string TurntableRedNoteRight {
             get {
                 return ResourceManager.GetString("TurntableRedNoteRight", resourceCulture);
             }
         }
         
-        internal static string TurntableBlueNoteRight {
+        public static string TurntableBlueNoteRight {
             get {
                 return ResourceManager.GetString("TurntableBlueNoteRight", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelCross {
+        public static string ButtonLabelCross {
             get {
                 return ResourceManager.GetString("ButtonLabelCross", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelCircle {
+        public static string ButtonLabelCircle {
             get {
                 return ResourceManager.GetString("ButtonLabelCircle", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelSquare {
+        public static string ButtonLabelSquare {
             get {
                 return ResourceManager.GetString("ButtonLabelSquare", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelTriangle {
+        public static string ButtonLabelTriangle {
             get {
                 return ResourceManager.GetString("ButtonLabelTriangle", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelPlayStation {
+        public static string ButtonLabelPlayStation {
             get {
                 return ResourceManager.GetString("ButtonLabelPlayStation", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelGuide {
+        public static string ButtonLabelGuide {
             get {
                 return ResourceManager.GetString("ButtonLabelGuide", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelBack {
+        public static string ButtonLabelBack {
             get {
                 return ResourceManager.GetString("ButtonLabelBack", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelHeroPower {
+        public static string ButtonLabelHeroPower {
             get {
                 return ResourceManager.GetString("ButtonLabelHeroPower", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelGHTV {
+        public static string ButtonLabelGHTV {
             get {
                 return ResourceManager.GetString("ButtonLabelGHTV", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelPause {
+        public static string ButtonLabelPause {
             get {
                 return ResourceManager.GetString("ButtonLabelPause", resourceCulture);
             }
         }
         
-        internal static string ButtonLabelEuphoria {
+        public static string ButtonLabelEuphoria {
             get {
                 return ResourceManager.GetString("ButtonLabelEuphoria", resourceCulture);
+            }
+        }
+        
+        public static string Label_Content {
+            get {
+                return ResourceManager.GetString("Label.Content", resourceCulture);
+            }
+        }
+        
+        public static string RawValueLabel {
+            get {
+                return ResourceManager.GetString("RawValueLabel", resourceCulture);
+            }
+        }
+        
+        public static string ToolName {
+            get {
+                return ResourceManager.GetString("ToolName", resourceCulture);
             }
         }
     }

@@ -2446,4 +2446,13 @@
     <data name="ButtonLabelEuphoria" xml:space="preserve">
         <value>/ Euphoria Button</value>
     </data>
+    <data name="RawValueLabel" xml:space="preserve">
+        <value>Raw Value</value>
+    </data>
+    <data name="ToolName" xml:space="preserve">
+        <value>Santroller Configurator</value>
+    </data>
+    <data name="RawValue" xml:space="preserve">
+        <value>Raw Value</value>
+    </data>
 </root>
