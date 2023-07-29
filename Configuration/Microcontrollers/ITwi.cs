@@ -1,4 +1,4 @@
-namespace GuitarConfigurator.NetCore.Configuration.Inputs;
+namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 
 public interface ITwi
 {
