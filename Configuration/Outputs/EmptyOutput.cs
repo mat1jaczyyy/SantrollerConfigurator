@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
 using DynamicData;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Exceptions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -98,7 +99,7 @@ public class EmptyOutput : Output
 
     public IEnumerable<MouseButtonType> MouseButtonTypes => Enum.GetValues<MouseButtonType>();
 
-    public override string ErrorText => "Input is not bound!";
+    public override string ErrorText => Resources.ErrorInputUnbound;
 
     public override string LedOnLabel => "";
     public override string LedOffLabel => "";
@@ -251,6 +252,6 @@ public class EmptyOutput : Output
         string combinedExtra,
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
-        throw new IncompleteConfigurationException("Unconfigured output");
+        throw new IncompleteConfigurationException(ErrorText);
     }
 }

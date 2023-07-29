@@ -1,20 +1,17 @@
-using System.ComponentModel;
-
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum ConsoleType
 {
     Universal = 0,
-    [Description("Xbox 360")] Xbox360,
-    [Description("PS3")] Ps3,
-    [Description("Wii Rock Band")] Wii,
+    Xbox360,
+    Ps3,
+    Wii,
     Switch,
-    [Description("PS4")] Ps4,
-    [Description("Xbox One / Series S / Series X")]
+    Ps4,
     XboxOne,
-    [Description("PS3")] Ps32,
-    [Description("Windows")] WindowsXb1,
-    [Description("Windows")] Windows,
+    Ps32,
+    WindowsXb1,
+    Windows,
     KeyboardMouse,
     Midi,
     Unknown = 0xFF

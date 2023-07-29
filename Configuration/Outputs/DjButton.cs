@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -28,8 +29,8 @@ public class DjButton : OutputButton
         UpdateDetails();
     }
 
-    public override string LedOnLabel => "Pressed LED Colour";
-    public override string LedOffLabel => "Released LED Colour";
+    public override string LedOnLabel => Resources.LedColourActiveButtonColour;
+    public override string LedOffLabel => Resources.LedColourInactiveButtonColour;
 
     public override bool IsKeyboard => false;
     public override bool IsStrum => false;

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using DynamicData;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -78,7 +79,7 @@ public class EmulationMode : Output
     public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
         bool swapSwitchFaceButtons)
     {
-        return EnumToStringConverter.Convert(Type) + " Console Mode Binding";
+        return $"{EnumToStringConverter.Convert(Type)} {Resources.ConsoleModeBindingTitle}";
     }
 
     public override Enum GetOutputType()

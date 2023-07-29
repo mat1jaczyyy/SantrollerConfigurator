@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Avalonia.Media;
 using DynamicData;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -154,7 +155,7 @@ public class Ardwiino : ConfigurableUsbDevice
 
     public override string ToString()
     {
-        if (_failed) return "An ardwiino device had issues reading, please unplug and replug it.";
+        if (_failed) return Resources.ErrorArdwiinoReading;
 
         return $"Ardwiino - {Board.Name} - {Version}";
     }

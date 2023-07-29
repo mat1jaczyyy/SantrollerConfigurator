@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -66,7 +67,7 @@ public class Rumble : Output
     public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
         bool swapSwitchFaceButtons)
     {
-        return "Rumble Motor - " + EnumToStringConverter.Convert(RumbleMotorType);
+        return string.Format(Resources.RumbleCommandTitle, EnumToStringConverter.Convert(RumbleMotorType));
     }
 
     protected override IEnumerable<PinConfig> GetOwnPinConfigs()

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using DynamicData;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -180,7 +181,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
     public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
         bool swapSwitchFaceButtons)
     {
-        return "PS2 Controller Inputs";
+        return Resources.Ps2CombinedTitle;
     }
 
     public override Enum GetOutputType()
@@ -280,6 +281,31 @@ public class Ps2CombinedOutput : CombinedSpiOutput
 
     public override void UpdateBindings()
     {
+        if (Model.DeviceControllerType == DeviceControllerType.DancePad)
+        {
+            Outputs.RemoveMany(Outputs.Items.Where(s => s is OutputAxis));
+        }
+        else
+        {
+            if (!Outputs.Items.Any(s => s is OutputAxis))
+            {
+                foreach (var pair in Axis)
+                    if (pair.Value is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger ||
+                        pair.Key is Ps2InputType.GuitarWhammy)
+                        Outputs.Add(new ControllerAxis(Model,
+                            new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
+                            Colors.Black,
+                            Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue, 0, ushort.MaxValue,
+                            pair.Value, true));
+                    else
+                        Outputs.Add(new ControllerAxis(Model,
+                            new Ps2Input(pair.Key, Model, Miso, Mosi, Sck, Att, Ack, true),
+                            Colors.Black,
+                            Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0, ushort.MaxValue,
+                            pair.Value, true));
+            }
+        }
+
         if (Model.DeviceControllerType.IsGuitar())
         {
             if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using DynamicData;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -386,7 +387,7 @@ public class Santroller : ConfigurableUsbDevice
 
     public override string ToString()
     {
-        if (InvalidDevice) return "Santroller - please disconnect and reconnect in PC mode";
+        if (InvalidDevice) return Resources.ErrorNotPCMode;
 
         var ret = $"Santroller - {Board.Name}";
         ret += $" - {EnumToStringConverter.Convert(_deviceControllerType)}";

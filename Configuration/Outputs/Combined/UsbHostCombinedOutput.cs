@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
 using DynamicData;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -139,7 +140,7 @@ public class UsbHostCombinedOutput : CombinedOutput
     public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
         bool swapSwitchFaceButtons)
     {
-        return "Usb Host Inputs";
+        return Resources.UsbHostCombinedTitle;
     }
 
     public override Enum GetOutputType()

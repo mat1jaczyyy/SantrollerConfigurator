@@ -1,4 +1,5 @@
 using System.Linq;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -21,15 +22,15 @@ public class PicoSpiConfig : SpiConfig
         if (ret != null) return ret;
         if (IncludesMiso && Pico.SpiIndexByPin[Mosi] != Pico.SpiIndexByPin[Miso])
         {
-            return "Selected pins are not from the same SPI group";
+            return Resources.DifferentSPIGroup;
         }
         if (Pico.SpiIndexByPin[Mosi] != Pico.SpiIndexByPin[Sck])
         {
-            return "Selected pins are not from the same SPI group";
+            return Resources.DifferentSPIGroup;
         }
         var ret2 = Model.Bindings.Items
             .Where(output => output.GetPinConfigs().OfType<PicoSpiConfig>().Any(s => s != this && s.Index == Index))
-            .Select(output => $"{output.LocalisedName}: SPI Group {Index}").ToList();
+            .Select(output => string.Format(Resources.SPIGroup, output.LocalisedName, Index)).ToList();
         return ret2.Any() ? string.Join(", ", ret2) : null;
     }
 }

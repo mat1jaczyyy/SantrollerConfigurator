@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using Avalonia.Data.Converters;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
 
@@ -49,16 +48,16 @@ public class ControllerEnumConverter : IMultiValueConverter
 
     private static readonly Dictionary<StandardButtonType, string> PlaystationLabels = new()
     {
-        {StandardButtonType.A, "Cross Button"},
-        {StandardButtonType.B, "Circle Button"},
-        {StandardButtonType.X, "Square Button"},
-        {StandardButtonType.Y, "Triangle Button"},
-        {StandardButtonType.Guide, "PlayStation Button"}
+        {StandardButtonType.A, Resources.ButtonLabelCross},
+        {StandardButtonType.B, Resources.ButtonLabelCircle},
+        {StandardButtonType.X, Resources.ButtonLabelSquare},
+        {StandardButtonType.Y, Resources.ButtonLabelTriangle},
+        {StandardButtonType.Guide, Resources.ButtonLabelPlayStation}
     };
     private static readonly Dictionary<StandardButtonType, string> XboxLabels = new()
     {
-        {StandardButtonType.Guide, "Guide Button"},
-        {StandardButtonType.Back, "Back Button"},
+        {StandardButtonType.Guide, Resources.ButtonLabelGuide},
+        {StandardButtonType.Back, Resources.ButtonLabelBack},
     };
 
     private static readonly Dictionary<(DeviceControllerType, StandardButtonType), string>
@@ -67,19 +66,19 @@ public class ControllerEnumConverter : IMultiValueConverter
             {
                 {
                     (DeviceControllerType.LiveGuitar, StandardButtonType.Start),
-                    "/ Hero Power Button"
+                    Resources.ButtonLabelHeroPower
                 },
                 {
                     (DeviceControllerType.LiveGuitar, StandardButtonType.LeftThumbClick),
-                    "GHTV Button"
+                    Resources.ButtonLabelGHTV
                 },
                 {
                     (DeviceControllerType.LiveGuitar, StandardButtonType.Back),
-                    "/ Pause Button"
+                    Resources.ButtonLabelPause
                 },
                 {
                     (DeviceControllerType.Turntable, StandardButtonType.Y),
-                    "/ Euphoria Button"
+                    Resources.ButtonLabelEuphoria
                 },
             };
 
@@ -97,12 +96,7 @@ public class ControllerEnumConverter : IMultiValueConverter
             };
         }
 
-        // Maybe we just change out all this nice description stuff for something else
-        var valueType = value.GetType();
-        var fieldInfo = valueType.GetField(value.ToString()!, BindingFlags.Static | BindingFlags.Public)!;
-        var attributes = (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-        var ret = attributes.Length > 0 ? attributes[0].Description : fieldInfo.Name;
+        var ret = EnumToStringConverter.Convert(value);
         if (value is StandardButtonType button)
         {
             
@@ -219,6 +213,7 @@ public class ControllerEnumConverter : IMultiValueConverter
                     .GetTypeFor(deviceType)
                     .Cast<object>()
                     .Concat(InstrumentButtonTypeExtensions.GetButtons(deviceType).Cast<object>()),
+            DeviceControllerType.DancePad => Array.Empty<object>(),
             _ => Enum.GetValues<StandardAxisType>().Cast<object>()
         };
         return Enum.GetValues<SimpleType>().Cast<object>()

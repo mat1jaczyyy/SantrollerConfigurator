@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -23,7 +24,7 @@ public class FixedInput : Input
     public override IList<DevicePin> Pins => Array.Empty<DevicePin>();
     public override IList<PinConfig> PinConfigs => Array.Empty<PinConfig>();
     public override InputType? InputType => Types.InputType.ConstantInput;
-    public override string Title => "Fixed";
+    public override string Title => Resources.FixedInputTitle;
 
     public override IReadOnlyList<string> RequiredDefines()
     {

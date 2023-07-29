@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -36,13 +37,13 @@ public class ControllerAxis : OutputAxis
             {
                 case StandardAxisType.LeftStickX:
                 case StandardAxisType.RightStickX:
-                    return "Right LED Colour";
+                    return Resources.LedColourActiveAxisX;
                 case StandardAxisType.LeftStickY:
                 case StandardAxisType.RightStickY:
-                    return "Highest LED Colour";
+                    return Resources.LedColourActiveAxisY;
                 case StandardAxisType.LeftTrigger:
                 case StandardAxisType.RightTrigger:
-                    return "Pressed LED Color";
+                    return Resources.LedColourActiveAxisTrigger;
                 default:
                     return "";
             }
@@ -57,13 +58,13 @@ public class ControllerAxis : OutputAxis
             {
                 case StandardAxisType.LeftStickX:
                 case StandardAxisType.RightStickX:
-                    return "Left LED Colour";
+                    return Resources.LedColourInactiveAxisX;
                 case StandardAxisType.LeftStickY:
                 case StandardAxisType.RightStickY:
-                    return "Lowest LED Colour";
+                    return Resources.LedColourInactiveAxisY;
                 case StandardAxisType.LeftTrigger:
                 case StandardAxisType.RightTrigger:
-                    return "Released LED Color";
+                    return Resources.LedColourInactiveAxisTrigger;
                 default:
                     return "";
             }
@@ -101,13 +102,13 @@ public class ControllerAxis : OutputAxis
         {
             case StandardAxisType.LeftStickX:
             case StandardAxisType.RightStickX:
-                return "Move axis to the leftmost position";
+                return Resources.AxisCalibrationMinX;
             case StandardAxisType.LeftStickY:
             case StandardAxisType.RightStickY:
-                return "Move axis to the lowest position";
+                return Resources.AxisCalibrationMinY;
             case StandardAxisType.LeftTrigger:
             case StandardAxisType.RightTrigger:
-                return "Release the trigger";
+                return Resources.AxisCalibrationTrigger;
             default:
                 return "";
         }
@@ -119,13 +120,13 @@ public class ControllerAxis : OutputAxis
         {
             case StandardAxisType.LeftStickX:
             case StandardAxisType.RightStickX:
-                return "Move axis to the rightmost position";
+                return Resources.AxisCalibrationMaxX;
             case StandardAxisType.LeftStickY:
             case StandardAxisType.RightStickY:
-                return "Move axis to the highest position";
+                return Resources.AxisCalibrationMaxY;
             case StandardAxisType.LeftTrigger:
             case StandardAxisType.RightTrigger:
-                return "Push the trigger all the way in";
+                return Resources.AxisCalibraitonMaxTrigger;
             default:
                 return "";
         }

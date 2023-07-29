@@ -1,7 +1,7 @@
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
-public enum MouseMovementType
+public enum TwiPinType
 {
-    Absolute,
-    Relative
+    Sda,
+    Scl
 }

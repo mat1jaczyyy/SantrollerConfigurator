@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
+using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 
-public abstract class CombinedTwiOutput : CombinedOutput, ITwi
+public abstract class CombinedTwiOutput : CombinedOutput
 {
     private readonly TwiConfig _twiConfig;
 

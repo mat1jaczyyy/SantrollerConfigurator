@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using DynamicData;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -92,26 +93,18 @@ public enum Turntable
 
 public enum LedCommandType
 {
-    [Description("Num Lock LED")] KeyboardNumLock,
-    [Description("Caps Lock LED")] KeyboardCapsLock,
-    [Description("Scroll Lock LED")] KeyboardScrollLock,
-
-    [Description("Authenticated with console LED")]
+    KeyboardNumLock,
+    KeyboardCapsLock,
+    KeyboardScrollLock,
     Auth,
-    [Description("Player LEDs")] Player,
-    [Description("Combo LEDs")] Combo,
-    [Description("Input Reactive LEDs")] InputReactive,
-
-    [Description("Star Power Percentage (When not active) LED")]
+    Player,
+    Combo,
+    InputReactive,
     StarPowerInactive,
-
-    [Description("Star Power Percentage (When active) LED")]
     StarPowerActive,
-    [Description("DJ Hero Euphoria LED")] DjEuphoria,
-
-    [Description("Stage Kit")] StageKitLed,
-
-    [Description("PS4 Light Bar")] Ps4LightBar
+    DjEuphoria,
+    StageKitLed,
+    Ps4LightBar
 }
 
 public enum RumbleCommand
@@ -365,20 +358,20 @@ public class Led : Output
 
     public override string LedOnLabel => Command switch
     {
-        LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => "Fog Active LED Colour",
-        LedCommandType.Player or LedCommandType.Auth => "LED Colour",
-        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Star Power Full Colour",
-        LedCommandType.DjEuphoria => "Euphoria Full Colour",
-        _ => "Active LED Colour"
+        LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => Resources.LEDColourActiveFog,
+        LedCommandType.Player or LedCommandType.Auth => Resources.LedColour,
+        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => Resources.LedColourActiveStarPower,
+        LedCommandType.DjEuphoria => Resources.LedColourActiveDjEuphoria,
+        _ => Resources.LedColourActive
     };
 
     public override string LedOffLabel => Command switch
     {
-        LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => "Fog Inactive LED Colour",
-        LedCommandType.Player or LedCommandType.Auth => "LED Colour",
-        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => "Star Power Empty Colour",
-        LedCommandType.DjEuphoria => "Euphoria Empty Colour",
-        _ => "Inactive LED Colour"
+        LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => Resources.LedColourInactiveFog,
+        LedCommandType.Player or LedCommandType.Auth => Resources.LedColour,
+        LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => Resources.LedColourInactiveStarPower,
+        LedCommandType.DjEuphoria => Resources.LedColourInactiveDjEuphoria,
+        _ => Resources.LedColourInactive
     };
 
     public override bool SupportsLedOff => Command is not LedCommandType.Auth or LedCommandType.Player;
@@ -389,7 +382,7 @@ public class Led : Output
     public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
         bool swapSwitchFaceButtons)
     {
-        return "Led Command - " + EnumToStringConverter.Convert(Command);
+        return string.Format(Resources.LedCommandTitle, EnumToStringConverter.Convert(Command));
     }
 
     protected override IEnumerable<PinConfig> GetOwnPinConfigs()
@@ -596,10 +589,11 @@ public class Led : Output
             {
                 var santrollerCmd = Model.DeviceControllerType switch
                 {
-                    DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.RockBandGuitar => (int) FiveFretGuitar,
+                    DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.RockBandGuitar =>
+                        (int) FiveFretGuitar,
                     DeviceControllerType.LiveGuitar => (int) SixFretGuitar,
                     DeviceControllerType.GuitarHeroDrums => (int) GuitarHeroDrum,
-                    DeviceControllerType.RockBandDrums=> (int) RockBandDrum,
+                    DeviceControllerType.RockBandDrums => (int) RockBandDrum,
                     DeviceControllerType.Turntable => (int) Turntable,
                     _ => 0
                 };

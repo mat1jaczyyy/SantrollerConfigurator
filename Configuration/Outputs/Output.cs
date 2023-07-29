@@ -11,6 +11,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
@@ -68,7 +69,7 @@ public abstract partial class Output : ReactiveObject
         bool childOfCombined)
     {
         ChildOfCombined = childOfCombined;
-        ButtonText = "Click to assign";
+        ButtonText = Resources.Assign;
         Model = model;
         Input = input;
         LedIndices = new ObservableCollection<byte>(ledIndices);
@@ -220,7 +221,7 @@ public abstract partial class Output : ReactiveObject
     public IEnumerable<UsbHostInputType> UsbInputTypes => Enum.GetValues<UsbHostInputType>();
 
     public IEnumerable<object> KeyOrMouseInputs => Enum.GetValues<MouseButtonType>().Cast<object>()
-        .Concat(Enum.GetValues<MouseAxisType>().Cast<object>()).Concat(KeyboardButton.Keys.Keys.Cast<object>());
+        .Concat(Enum.GetValues<MouseAxisType>().Cast<object>()).Concat(KeyboardButton.Keys.Cast<object>());
 
     public IEnumerable<Ps2InputType> Ps2InputTypes => Enum.GetValues<Ps2InputType>();
 
@@ -310,8 +311,8 @@ public abstract partial class Output : ReactiveObject
         {
             var text = string.Join(", ",
                 GetPinConfigs().Select(s => s.ErrorText).Distinct().Where(s => !string.IsNullOrEmpty(s)));
-            if (text.Contains("missing")) return "Pin configuration missing!";
-            return string.IsNullOrEmpty(text) ? "" : $"* Error: Conflicting pins: {text}!";
+            if (text.Contains("missing")) return Resources.ErrorPinConfigurationMissing;
+            return string.IsNullOrEmpty(text) ? "" : string.Format(Resources.ErrorPinConflicting, text);
         }
     }
 
@@ -390,7 +391,7 @@ public abstract partial class Output : ReactiveObject
     [RelayCommand]
     private async Task FindAndAssignAsync()
     {
-        ButtonText = "Move the mouse or click / press any key to use that input";
+        ButtonText = Resources.AssignMouseKeyboard;
         var lastEvent = await Model.KeyOrPointerEvent.Take(1).ToTask();
         switch (lastEvent)
         {
@@ -434,7 +435,7 @@ public abstract partial class Output : ReactiveObject
                 break;
         }
 
-        ButtonText = "Click to assign";
+        ButtonText = Resources.Assign;
     }
 
     private void SetInput(InputType? inputType, WiiInputType? wiiInput, Ps2InputType? ps2InputType,

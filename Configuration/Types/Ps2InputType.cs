@@ -1,123 +1,64 @@
-using System.ComponentModel;
-
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum Ps2InputType
 {
-    [Description("GunCon - Horizontal Sync")]
     GunConHSync,
-
-    [Description("GunCon - Vertical Sync")]
     GunConVSync,
-    [Description("Mouse - X Axis")] MouseX,
-    [Description("Mouse - Y Axis")] MouseY,
-    [Description("NegCon - Twist Axis")] NegConTwist,
-
-    [Description("NegCon - I Button Pressure")]
+    MouseX,
+    MouseY,
+    NegConTwist,
     NegConI,
-
-    [Description("NegCon - II Button Pressure")]
     NegConIi,
-
-    [Description("NegCon - L Button Pressure")]
     NegConL,
-    [Description("JogCon - Wheel Axis")] JogConWheel,
-    [Description("Guitar - Whammy Axis")] GuitarWhammy,
-
-    [Description("Gamepad - Left Stick X")]
+    JogConWheel,
+    GuitarWhammy,
     LeftStickX,
-
-    [Description("Gamepad - Left Stick Y")]
     LeftStickY,
-
-    [Description("Gamepad - Right Stick X")]
     RightStickX,
-
-    [Description("Gamepad - Right Stick Y")]
     RightStickY,
-
-    [Description("DualShock 2 - L1 Pressure")]
     Dualshock2L1,
-
-    [Description("DualShock 2 - R1 Pressure")]
     Dualshock2R1,
-
-    [Description("DualShock 2 - D-Pad Right Pressure")]
     Dualshock2RightButton,
-
-    [Description("DualShock 2 - D-Pad Left Pressure")]
     Dualshock2LeftButton,
-
-    [Description("DualShock 2 - D-Pad Up Pressure")]
     Dualshock2UpButton,
-
-    [Description("DualShock 2 - D-Pad Down Pressure")]
     Dualshock2DownButton,
-
-    [Description("DualShock 2 - Triangle Pressure")]
     Dualshock2Triangle,
-
-    [Description("DualShock 2 - Circle Pressure")]
     Dualshock2Circle,
-
-    [Description("DualShock 2 - Cross Pressure")]
     Dualshock2Cross,
-
-    [Description("DualShock 2 - Square Pressure")]
     Dualshock2Square,
-
-    [Description("DualShock 2 - L2 Pressure")]
     Dualshock2L2,
-
-    [Description("DualShock 2 - R2 Pressure")]
     Dualshock2R2,
-    [Description("Mouse - Left Button")] MouseLeft,
-    [Description("Mouse - Right Button")] MouseRight,
-    [Description("NegCon - A Button")] NegConA,
-    [Description("NegCon - B Button")] NegConB,
-    [Description("NegCon - Start Button")] NegConStart,
-    [Description("NegCon - R Button")] NegConR,
-    [Description("Guitar - Green Fret")] GuitarGreen,
-    [Description("Guitar - Red Fret")] GuitarRed,
-    [Description("Guitar - Yellow Fret")] GuitarYellow,
-    [Description("Guitar - Blue Fret")] GuitarBlue,
-    [Description("Guitar - Orange Fret")] GuitarOrange,
-    [Description("Guitar - Strum Up")] GuitarStrumUp,
-    [Description("Guitar - Strum Down")] GuitarStrumDown,
-
-    [Description("Guitar - Select Button")]
+    MouseLeft,
+    MouseRight,
+    NegConA,
+    NegConB,
+    NegConStart,
+    NegConR,
+    GuitarGreen,
+    GuitarRed,
+    GuitarYellow,
+    GuitarBlue,
+    GuitarOrange,
+    GuitarStrumUp,
+    GuitarStrumDown,
     GuitarSelect,
-    [Description("Guitar - Start Button")] GuitarStart,
-    [Description("Guitar - Tilt")] GuitarTilt,
-
-    [Description("Gamepad - Select Button")]
+    GuitarStart,
+    GuitarTilt,
     Select,
-    [Description("Gamepad - L3 Button")] L3,
-    [Description("Gamepad - R3 Button")] R3,
-
-    [Description("Gamepad - Start Button")]
+    L3,
+    R3,
     Start,
-    [Description("Gamepad - D-Pad Up")] DpadUp,
-    [Description("Gamepad - D-Pad Right")] DpadRight,
-    [Description("Gamepad - D-Pad Down")] DpadDown,
-    [Description("Gamepad - D-Pad Left")] DpadLeft,
-    [Description("Gamepad - L2 Button")] L2,
-    [Description("Gamepad - R2 Button")] R2,
-    [Description("Gamepad - L1 Button")] L1,
-    [Description("Gamepad - R1 Button")] R1,
-
-    [Description("Gamepad - Triangle Button")]
+    DpadUp,
+    DpadRight,
+    DpadDown,
+    DpadLeft,
+    L2,
+    R2,
+    L1,
+    R1,
     Triangle,
-
-    [Description("Gamepad - Circle Button")]
     Circle,
-
-    [Description("Gamepad - Cross Button")]
     Cross,
-
-    [Description("Gamepad - Square Button")]
     Square,
-
-    [Description("All - Map Joystick To Dpad")]
     JoystickToDpad
 }

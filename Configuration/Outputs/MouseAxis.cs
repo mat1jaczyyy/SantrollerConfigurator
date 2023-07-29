@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -34,10 +35,10 @@ public class MouseAxis : OutputAxis
             {
                 case MouseAxisType.X:
                 case MouseAxisType.ScrollX:
-                    return "Right Movement LED";
+                    return Resources.LedColourActiveMouseX;
                 case MouseAxisType.Y:
                 case MouseAxisType.ScrollY:
-                    return "Up Movement LED";
+                    return Resources.LedColourActiveMouseY;
                 default:
                     return "";
             }
@@ -52,10 +53,10 @@ public class MouseAxis : OutputAxis
             {
                 case MouseAxisType.X:
                 case MouseAxisType.ScrollX:
-                    return "Left Movement LED";
+                    return Resources.LedColourInactiveMouseX;
                 case MouseAxisType.Y:
                 case MouseAxisType.ScrollY:
-                    return "Down Movement LED";
+                    return Resources.LedColourInactiveMouseY;
                 default:
                     return "";
             }
@@ -83,10 +84,10 @@ public class MouseAxis : OutputAxis
         {
             case MouseAxisType.X:
             case MouseAxisType.ScrollX:
-                return "Move axis to the leftmost position";
+                return Resources.AxisCalibrationMinMouseX;
             case MouseAxisType.Y:
             case MouseAxisType.ScrollY:
-                return "Move axis to the lowest position";
+                return Resources.AxisCalibrationMinMouseY;
             default:
                 return "";
         }
@@ -98,10 +99,10 @@ public class MouseAxis : OutputAxis
         {
             case MouseAxisType.X:
             case MouseAxisType.ScrollX:
-                return "Move axis to the rightmost position";
+                return Resources.AxisCalibrationMaxMouseX;
             case MouseAxisType.Y:
             case MouseAxisType.ScrollY:
-                return "Move axis to the highest position";
+                return Resources.AxisCalibrationMaxMouseY;
             default:
                 return "";
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -59,10 +60,10 @@ public class GuitarAxis : OutputAxis
         {
             return Type switch
             {
-                GuitarAxisType.Tilt => "Highest Tilt LED Colour",
-                GuitarAxisType.Whammy => "Whammy Pressed LED Colour",
-                GuitarAxisType.Pickup => "Lowest Position LED Colour",
-                GuitarAxisType.Slider => "Lowest Position LED Colour",
+                GuitarAxisType.Tilt => Resources.LEDColourActiveTilt,
+                GuitarAxisType.Whammy => Resources.LEDColourActiveWhammy,
+                GuitarAxisType.Pickup => Resources.LEDColourActivePickup,
+                GuitarAxisType.Slider => Resources.LEDColourActiveSlider,
                 _ => ""
             };
         }
@@ -74,10 +75,10 @@ public class GuitarAxis : OutputAxis
         {
             return Type switch
             {
-                GuitarAxisType.Tilt => "Lowest Tilt LED Colour",
-                GuitarAxisType.Whammy => "Whammy Released LED Colour",
-                GuitarAxisType.Pickup => "Lowest Position LED Colour",
-                GuitarAxisType.Slider => "Lowest Position LED Colour",
+                GuitarAxisType.Tilt => Resources.LEDColourInctiveTilt,
+                GuitarAxisType.Whammy => Resources.LEDColourInctiveWhammy,
+                GuitarAxisType.Pickup => Resources.LEDColourInctivePickup,
+                GuitarAxisType.Slider => Resources.LEDColourInctiveSlider,
                 _ => ""
             };
         }
@@ -104,20 +105,20 @@ public class GuitarAxis : OutputAxis
             return EnumToStringConverter.Convert(GetPickupSelectorValue(val));
         }
 
-        if (Type is not GuitarAxisType.Slider || !Gh5NeckInput.Gh5Mappings.ContainsKey(val))
-            return ChildOfCombined ? "None" : "Current Frets: None";
-        var info = Gh5NeckInput.Gh5Mappings[val];
         var ret = "";
         if (!ChildOfCombined)
         {
-            ret = "Current Frets: ";
+            ret = Resources.TapBarCurrentFrets;
         }
 
-        if (info.HasFlag(BarButton.Green)) ret += "Green ";
-        if (info.HasFlag(BarButton.Red)) ret += "Red ";
-        if (info.HasFlag(BarButton.Yellow)) ret += "Yellow ";
-        if (info.HasFlag(BarButton.Blue)) ret += "Blue ";
-        if (info.HasFlag(BarButton.Orange)) ret += "Orange";
+        if (Type is not GuitarAxisType.Slider || !Gh5NeckInput.Gh5Mappings.ContainsKey(val))
+            return ret + Resources.TapBarCurrentFretsNone;
+        var info = Gh5NeckInput.Gh5Mappings[val];
+        if (info.HasFlag(BarButton.Green)) ret += Resources.TapBarCurrentFretsGreen;
+        if (info.HasFlag(BarButton.Red)) ret += Resources.TapBarCurrentFretsRed;
+        if (info.HasFlag(BarButton.Yellow)) ret += Resources.TapBarCurrentFretsYellow;
+        if (info.HasFlag(BarButton.Blue)) ret += Resources.TapBarCurrentFretsBlue;
+        if (info.HasFlag(BarButton.Orange)) ret += Resources.TapBarCurrentFretsOrange;
         return ret.Trim();
     }
 
@@ -317,8 +318,8 @@ public class GuitarAxis : OutputAxis
     {
         return Type switch
         {
-            GuitarAxisType.Tilt => "Tilt the guitar down",
-            GuitarAxisType.Whammy => "Release the whammy",
+            GuitarAxisType.Tilt => Resources.AxisMinCalibrationTilt,
+            GuitarAxisType.Whammy => Resources.AxisMinCalibrationWhammy,
             _ => ""
         };
     }
@@ -327,8 +328,8 @@ public class GuitarAxis : OutputAxis
     {
         return Type switch
         {
-            GuitarAxisType.Tilt => "Tilt the guitar up",
-            GuitarAxisType.Whammy => "Push the whammy all the way in",
+            GuitarAxisType.Tilt => Resources.AxisMaxCalibrationTilt,
+            GuitarAxisType.Whammy => Resources.AxisMaxCalibrationWhammy,
             _ => ""
         };
     }

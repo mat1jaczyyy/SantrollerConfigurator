@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -18,7 +19,7 @@ public class JoystickToDpadInput : FixedInput
     {
     }
 
-    public override string Title => "Map joystick to Dpad";
+    public override string Title => Resources.JoystickToDpadTitle;
 }
 
 public class JoystickToDpad : Output
@@ -124,8 +125,8 @@ public class JoystickToDpad : Output
         bool swapSwitchFaceButtons)
     {
         return deviceControllerType is DeviceControllerType.Gamepad
-            ? "Map Left joystick to Dpad"
-            : "Map Joystick to Dpad";
+            ? Resources.LeftJoystickToDpadTitle
+            : Resources.JoystickToDpadTitle;
     }
 
     public override Enum GetOutputType()

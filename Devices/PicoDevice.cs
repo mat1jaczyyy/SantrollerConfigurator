@@ -107,6 +107,6 @@ public class PicoDevice : IConfigurableDevice
 
     public override string ToString()
     {
-        return $"Pico ({_path})";
+        return $"Raspberry Pi Pico ({_path})";
     }
 }

@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
+using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Devices;
 using Nefarius.Utilities.DeviceManagement.Drivers;
 using ReactiveUI;

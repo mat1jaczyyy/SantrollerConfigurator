@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using DynamicData;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Other;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -263,7 +264,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
     public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
         bool swapSwitchFaceButtons)
     {
-        return "Wii Extension Inputs";
+        return Resources.WiiCombinedTitle;
     }
 
     public void CreateDefaults()
@@ -380,6 +381,32 @@ public class WiiCombinedOutput : CombinedTwiOutput
 
     public override void UpdateBindings()
     {
+        
+        if (Model.DeviceControllerType == DeviceControllerType.DancePad)
+        {
+            Outputs.RemoveMany(Outputs.Items.Where(s => s is OutputAxis));
+        }
+        else
+        {
+            if (!Outputs.Items.Any(s => s is OutputAxis))
+            {
+                foreach (var pair in Axis)
+                {
+                    if (UIntInputs.Contains(pair.Key))
+                    {
+                        Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
+                            Colors.Black,
+                            Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 8000, ushort.MaxValue, pair.Value, true));
+                    }
+                    else
+                    {
+                        Outputs.Add(new ControllerAxis(Model, new WiiInput(pair.Key, Model, Sda, Scl, true),
+                            Colors.Black,
+                            Colors.Black, Array.Empty<byte>(), -30000, 30000, 4000, ushort.MaxValue, pair.Value, true));
+                    }
+                }
+            }
+        }
         // Drum Specific mappings
         if (Model.DeviceControllerType.IsDrum())
         {

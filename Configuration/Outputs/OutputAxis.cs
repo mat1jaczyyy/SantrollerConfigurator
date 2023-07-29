@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -292,23 +293,23 @@ public abstract partial class OutputAxis : Output
         {
             OutputAxisCalibrationState.Min => MinCalibrationText(),
             OutputAxisCalibrationState.Max => MaxCalibrationText(),
-            OutputAxisCalibrationState.DeadZone => "Set Deadzone",
+            OutputAxisCalibrationState.DeadZone => Resources.AxisCalibrationSetDeadzone,
             _ => null
         };
     }
 
     private string GetCalibrationButtonText()
     {
-        return _calibrationState == OutputAxisCalibrationState.None ? "Calibrate" : "Next";
+        return _calibrationState == OutputAxisCalibrationState.None ? Resources.AxisCalibrationCalibrate : Resources.AxisCalibrationNext;
     }
 
     private string? GetCalibrationStatus()
     {
         return _calibrationState switch
         {
-            OutputAxisCalibrationState.Min => "Step 1/3",
-            OutputAxisCalibrationState.Max => "Step 2/3",
-            OutputAxisCalibrationState.DeadZone => "Step 3/3",
+            OutputAxisCalibrationState.Min => Resources.AxisCalibrationMinStatus,
+            OutputAxisCalibrationState.Max => Resources.AxisCalibrationMaxStatus,
+            OutputAxisCalibrationState.DeadZone => Resources.AxisCalibrationDeadzoneStatus,
             _ => null
         };
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
@@ -51,7 +52,7 @@ public abstract class InputWithPin : Input
 
     public override IList<PinConfig> PinConfigs => new List<PinConfig> {PinConfig};
 
-    public string PinConfigText { get; private set; } = "Find Pin";
+    public string PinConfigText { get; private set; } = Resources.FindPin;
 
     protected abstract string DetectionText { get; }
     public ICommand DetectPinCommand { get; }
@@ -63,7 +64,7 @@ public abstract class InputWithPin : Input
             PinConfigText = DetectionText;
             this.RaisePropertyChanged(nameof(PinConfigText));
             Pin = await santroller.DetectPinAsync(IsAnalog, Pin, Model.Microcontroller);
-            PinConfigText = "Find Pin";
+            PinConfigText = Resources.FindPin;
             this.RaisePropertyChanged(nameof(PinConfigText));
         }
     }

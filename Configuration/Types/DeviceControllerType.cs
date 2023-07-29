@@ -1,23 +1,16 @@
-using System;
-using System.ComponentModel;
-
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum DeviceControllerType
 {
     Gamepad = 1,
     DancePad,
-    [Description("Guitar Hero Guitar")]
     GuitarHeroGuitar,
-    [Description("Rock Band Guitar")]
     RockBandGuitar,
-    [Description("Guitar Hero Drums")]
     GuitarHeroDrums,
-    [Description("Rock Band Drums")]
     RockBandDrums,
     LiveGuitar,
     Turntable,
-    [Description("Rock Band Stage Kit")] StageKit
+    StageKit
 }
 
 public static class DeviceControllerRhythmTypeExtensions {

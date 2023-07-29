@@ -1,7 +1,9 @@
 namespace GuitarConfigurator.NetCore.Configuration.Types;
 
-public enum MouseMovementType
+public enum SpiPinType
 {
-    Absolute,
-    Relative
+    CSn,
+    Sck,
+    Mosi,
+    Miso
 }

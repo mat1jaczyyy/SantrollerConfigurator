@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 
@@ -32,7 +33,7 @@ public abstract class PinConfig : ReactiveObject
     {
         if (Pins.Any(x => x == -1) && Reassignable)
         {
-            return "Pin configuration missing!";
+            return Resources.ErrorPinConfigurationMissing;
         }
         var configs = Model.GetPins(Type);
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -70,10 +71,10 @@ public partial class DjAxis : OutputAxis
         {
             return Type switch
             {
-                DjAxisType.Crossfader => "Rightmost LED Colour",
-                DjAxisType.EffectsKnob => "Rightmost LED Colour",
-                DjAxisType.LeftTableVelocity => "Positive Spin Velocity Colour",
-                DjAxisType.RightTableVelocity => "Positive Spin Velocity Colour",
+                DjAxisType.Crossfader => Resources.LedColourActiveAxisX,
+                DjAxisType.EffectsKnob => Resources.LedColourActiveAxisX,
+                DjAxisType.LeftTableVelocity => Resources.LedColourActiveDjVelocity,
+                DjAxisType.RightTableVelocity => Resources.LedColourActiveDjVelocity,
                 _ => ""
             };
         }
@@ -85,10 +86,10 @@ public partial class DjAxis : OutputAxis
         {
             return Type switch
             {
-                DjAxisType.Crossfader => "Leftmost LED Colour",
-                DjAxisType.EffectsKnob => "Leftmost LED Colour",
-                DjAxisType.LeftTableVelocity => "Negative Spin Velocity Colour",
-                DjAxisType.RightTableVelocity => "Negative Spin Velocity Colour",
+                DjAxisType.Crossfader => Resources.LedColourInactiveAxisX,
+                DjAxisType.EffectsKnob => Resources.LedColourInactiveAxisX,
+                DjAxisType.LeftTableVelocity => Resources.LedColourInactiveDjVelocity,
+                DjAxisType.RightTableVelocity => Resources.LedColourInactiveDjVelocity,
                 _ => ""
             };
         }
@@ -187,10 +188,10 @@ public partial class DjAxis : OutputAxis
     {
         return Type switch
         {
-            DjAxisType.Crossfader => "Move fader to the leftmost position",
-            DjAxisType.EffectsKnob => "Turn knob until the bar is at the leftmost position",
-            DjAxisType.LeftTableVelocity => "Spin the left table the fastest you can to the left",
-            DjAxisType.RightTableVelocity => "Spin the right table the fastest you can to the left",
+            DjAxisType.Crossfader => Resources.AxisCalibraitonMinDjCrossfader,
+            DjAxisType.EffectsKnob => Resources.AxisCalibrationMinEffectsKnob,
+            DjAxisType.LeftTableVelocity => Resources.AxisCalibrationMinDjVelocityLeft,
+            DjAxisType.RightTableVelocity => Resources.AxisCalibrationMinDjVelocityRight,
             _ => ""
         };
     }
@@ -199,10 +200,10 @@ public partial class DjAxis : OutputAxis
     {
         return Type switch
         {
-            DjAxisType.Crossfader => "Move fader to the rightmost position",
-            DjAxisType.EffectsKnob => "Turn knob until the bar is at the rightmost position",
-            DjAxisType.LeftTableVelocity => "Spin the left table the fastest you can to the right",
-            DjAxisType.RightTableVelocity => "Spin the right table the fastest you can to the right",
+            DjAxisType.Crossfader => Resources.AxisCalibrationMaxDjCrossfader,
+            DjAxisType.EffectsKnob => Resources.AxisCalibrationMaxDjEffectsKnob,
+            DjAxisType.LeftTableVelocity => Resources.AxisCalibrationMaxDjVelocityLeft,
+            DjAxisType.RightTableVelocity => Resources.AxisCalibrationMaxDjVelocityRight,
             _ => ""
         };
     }

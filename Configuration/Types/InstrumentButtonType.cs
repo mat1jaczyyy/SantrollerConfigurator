@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -9,25 +8,25 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 
 public enum InstrumentButtonType
 {
-    [Description("Green Fret")] Green,
-    [Description("Red Fret")] Red,
-    [Description("Yellow Fret")] Yellow,
-    [Description("Blue Fret")] Blue,
-    [Description("Orange Fret")] Orange,
-    [Description("Solo Green Fret")] SoloGreen,
-    [Description("Solo Red Fret")] SoloRed,
-    [Description("Solo Yellow Fret")] SoloYellow,
-    [Description("Solo Blue Fret")] SoloBlue,
-    [Description("Solo Orange Fret")] SoloOrange,
+    Green,
+    Red,
+    Yellow,
+    Blue,
+    Orange,
+    SoloGreen,
+    SoloRed,
+    SoloYellow,
+    SoloBlue,
+    SoloOrange,
     Black1,
     Black2,
     Black3,
     White1,
     White2,
     White3,
-    [Description("Strum Up")] StrumUp,
-    [Description("Strum Down")] StrumDown,
-    [Description("Slider To Frets")] SliderToFrets
+    StrumUp,
+    StrumDown,
+    SliderToFrets
 }
 
 public static class InstrumentButtonTypeExtensions

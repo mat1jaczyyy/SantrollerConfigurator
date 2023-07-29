@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using Avalonia.Media;
 
@@ -9,12 +8,12 @@ namespace GuitarConfigurator.NetCore.Configuration.Types;
 public enum LedType
 {
     None,
-    [Description("APA102 - RGB")] Apa102Rgb,
-    [Description("APA102 - RBG")] Apa102Rbg,
-    [Description("APA102 - GRB")] Apa102Grb,
-    [Description("APA102 - GBR")] Apa102Gbr,
-    [Description("APA102 - BRG")] Apa102Brg,
-    [Description("APA102 - BGR")] Apa102Bgr
+    Apa102Rgb,
+    Apa102Rbg,
+    Apa102Grb,
+    Apa102Gbr,
+    Apa102Brg,
+    Apa102Bgr
 }
 
 public static class LedTypeMethods
@@ -70,7 +69,9 @@ public static class LedTypeMethods
         var mulStrings = GetLedStrings(type, rScale.ToString(), gScale.ToString(), bScale.ToString());
         // If the scale is zero (aka the on and off rgb values for a channel are the same) we can shortcut the lerp.
         return string.Join("\n",
-            new[] {'r', 'g', 'b'}.Zip(offBytes, mulStrings).Select(pair => 
-                pair.Third == "0" ? $"ledState[{index - 1}].{pair.First} = {pair.Second};" : $"ledState[{index - 1}].{pair.First} = ({var} * {pair.Third} / 255) + {pair.Second};"));
+            new[] {'r', 'g', 'b'}.Zip(offBytes, mulStrings).Select(pair =>
+                pair.Third == "0"
+                    ? $"ledState[{index - 1}].{pair.First} = {pair.Second};"
+                    : $"ledState[{index - 1}].{pair.First} = ({var} * {pair.Third} / 255) + {pair.Second};"));
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
@@ -27,7 +28,7 @@ public class DirectInput : InputWithPin
 
     public override InputType? InputType => IsAnalog ? Types.InputType.AnalogPinInput : Types.InputType.DigitalPinInput;
 
-    protected override string DetectionText => IsAnalog ? "Move the axis to detect" : "Press the button to detect";
+    protected override string DetectionText => IsAnalog ? Resources.DetectAxis : Resources.DetectButton;
 
     public override IList<DevicePin> Pins => new List<DevicePin>
     {

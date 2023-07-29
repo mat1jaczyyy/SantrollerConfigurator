@@ -345,12 +345,12 @@ public partial class DrumAxis : OutputAxis
 
     protected override string MinCalibrationText()
     {
-        return "Do nothing";
+        return "";
     }
 
     protected override string MaxCalibrationText()
     {
-        return "Hit the drum";
+        return "";
     }
 
 
