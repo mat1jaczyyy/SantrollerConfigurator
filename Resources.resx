@@ -2752,9 +2752,14 @@
     <data name="ArduinoType" xml:space="preserve">
         <value>Arduino Type</value>
     </data>
-    <data name="RaiseIssueDesc">
-        <value>Unfortunately an error has occurred while programming your microcontroller.<br/>Feel free to use the
-            below button to raise this issue and we will try to fix this problem.<br/><br/>Included Information</value>
+    <data name="RaiseIssueDesc1">
+        <value>Unfortunately an error has occurred while programming your microcontroller.</value>
+    </data>
+    <data name="RaiseIssueDesc2">
+        <value>Feel free to use the below button to raise this issue and we will try to fix this problem.</value>
+    </data>
+    <data name="RaiseIssueDesc3">
+        <value>Included Information</value>
     </data>
     <data name="RaiseIssueLabel" xml:space="preserve">
         <value>Raise Issue on GitHub</value>

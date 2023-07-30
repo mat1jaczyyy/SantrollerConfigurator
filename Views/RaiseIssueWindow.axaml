@@ -38,7 +38,10 @@
                 </StackPanel>
                 <ScrollViewer>
                     <StackPanel>
-                        <Label Content="{x:Static netCore:Resources.RaiseIssueDesc}"></Label>
+                        <Label Content="{x:Static netCore:Resources.RaiseIssueDesc1}"></Label>
+                        <Label Content="{x:Static netCore:Resources.RaiseIssueDesc2}"></Label>
+                        <Label />
+                        <Label Content="{x:Static netCore:Resources.RaiseIssueDesc3}"></Label>
                         <Label Content="{Binding IncludedInfo}" />
                         <TextBox IsReadOnly="True" Text="{Binding Text}" />
                     </StackPanel>

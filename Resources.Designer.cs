@@ -5271,9 +5271,21 @@ namespace GuitarConfigurator.NetCore {
             }
         }
         
-        public static string RaiseIssueDesc {
+        public static string RaiseIssueDesc1 {
             get {
-                return ResourceManager.GetString("RaiseIssueDesc", resourceCulture);
+                return ResourceManager.GetString("RaiseIssueDesc1", resourceCulture);
+            }
+        }
+        
+        public static string RaiseIssueDesc2 {
+            get {
+                return ResourceManager.GetString("RaiseIssueDesc2", resourceCulture);
+            }
+        }
+        
+        public static string RaiseIssueDesc3 {
+            get {
+                return ResourceManager.GetString("RaiseIssueDesc3", resourceCulture);
             }
         }
         
