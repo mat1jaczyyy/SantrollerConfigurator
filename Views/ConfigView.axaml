@@ -392,8 +392,7 @@
                                            VerticalAlignment="Center"
                                            Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal"
-                                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                        <StackPanel Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300" Content="{x:Static netCore:Resources.SliderAnalogInputPin}" />
@@ -403,8 +402,7 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
                                       Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal"
-                                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                        <StackPanel Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300" Content="{x:Static netCore:Resources.SliderS0Pin}" />
@@ -414,8 +412,7 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
                                       Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal"
-                                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                        <StackPanel Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300" Content="{x:Static netCore:Resources.SliderS1Pin}" />
@@ -425,8 +422,7 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
                                       Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal"
-                                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                        <StackPanel Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300" Content="{x:Static netCore:Resources.SliderS2Pin}" />
@@ -440,8 +436,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:Gh5NeckInput}">
-                <StackPanel Orientation="Vertical"
-                            IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel Orientation="Vertical">
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -465,8 +460,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type other:Led}">
-                <StackPanel
-                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel>
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding IsLed}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -600,8 +594,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type other:Rumble}">
-                <StackPanel
-                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -624,8 +617,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:DjInput}">
                 <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Vertical"
-                                IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                    <StackPanel Orientation="Vertical">
                         <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
@@ -706,8 +698,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:Ps2Input}">
-                <StackPanel Orientation="Vertical"
-                            IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel Orientation="Vertical">
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -776,8 +767,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:WiiInput}">
-                <StackPanel Orientation="Vertical"
-                            IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel Orientation="Vertical">
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -801,8 +791,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:MultiplexerInput}">
-                <StackPanel Orientation="Vertical"
-                            IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center" Width="300"
                                Content="{x:Static netCore:Resources.AnalogPinLabel}" />
@@ -856,8 +845,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:DirectInput}">
-                <StackPanel Orientation="Vertical"
-                            IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel Orientation="Vertical">
                     <StackPanel
                         IsVisible="{Binding $parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsAdvancedMode}">
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
@@ -1770,8 +1758,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:DjCombinedOutput}">
                 <StackPanel>
-                    <StackPanel
-                        IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                    <StackPanel>
                         <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
@@ -1803,8 +1790,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:WiiCombinedOutput}">
-                <StackPanel
-                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -1838,8 +1824,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:CombinedTwiOutput}">
-                <StackPanel
-                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel>
                     <StackPanel IsVisible="{Binding BindableTwi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -1872,8 +1857,7 @@
                                        VerticalAlignment="Center"
                                        Width="200" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal"
-                                IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                    <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.SliderAnalogInputPin}" />
@@ -1883,8 +1867,7 @@
                                   ItemTemplate="{StaticResource PinToStringTemplate}"
                                   Width="200" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal"
-                                IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                    <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.SliderS0Pin}" />
@@ -1894,8 +1877,7 @@
                                   ItemTemplate="{StaticResource PinToStringTemplate}"
                                   Width="200" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal"
-                                IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                    <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.SliderS1Pin}" />
@@ -1905,8 +1887,7 @@
                                   ItemTemplate="{StaticResource PinToStringTemplate}"
                                   Width="200" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal"
-                                IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                    <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.SliderS2Pin}" />
@@ -1920,8 +1901,7 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type output:BluetoothOutput}">
-                <StackPanel
-                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel>
                     <Button Content="{Binding ScanText}" IsEnabled="{Binding !Scanning}"
                             Command="{Binding ScanCommand}" />
                     <StackPanel Orientation="Horizontal">
@@ -1936,8 +1916,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type combined:Ps2CombinedOutput}">
-                <StackPanel
-                    IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode}">
+                <StackPanel>
                     <StackPanel IsVisible="{Binding BindableSpi}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -2280,8 +2259,6 @@
                                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                     <Binding Path="!IsCombined" />
                                                     <Binding Path="ConfigurableInput" />
-                                                    <Binding
-                                                        Path="!$parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsRetailMode" />
                                                 </MultiBinding>
                                             </StackPanel.IsVisible>
                                             <Label VerticalAlignment="Center"

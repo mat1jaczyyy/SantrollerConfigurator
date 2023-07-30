@@ -53,7 +53,7 @@
     <Panel>
         <ScrollViewer VerticalAlignment="Center">
             <StackPanel Margin="0 0 0 40">
-                <StackPanel IsVisible="{Binding !IsRetailMode}">
+                <StackPanel>
                     <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.EmulationTypeLabel}"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
@@ -167,7 +167,7 @@
                                       OffContent="{x:Static netCore:Resources.StrumIndividualLabel}" />
                     </DockPanel>
                 </StackPanel>
-                <StackPanel IsVisible="{Binding !IsRetailMode}">
+                <StackPanel>
                     <StackPanel>
                         <TextBlock IsVisible="{Binding !IsApa102}" HorizontalAlignment="Stretch" Margin="20 5 20 0"
                                    Text="{x:Static netCore:Resources.LEDTypeLabel}"
@@ -238,7 +238,7 @@
                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0" Content="{x:Static netCore:Resources.ImportConfigLabel}" />
                 </StackPanel>
 
-                <StackPanel IsVisible="{Binding !IsRetailMode}">
+                <StackPanel>
                     <Button Command="{Binding ResetWithConfirmationCommand}"
                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0" Content="{x:Static netCore:Resources.LoadDefaultsLabel}" />
                     <Button Command="{Binding ClearOutputsCommand}"

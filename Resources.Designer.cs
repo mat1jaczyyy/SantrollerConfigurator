@@ -3459,12 +3459,6 @@ namespace GuitarConfigurator.NetCore {
             }
         }
         
-        public static string ModeTypeCore {
-            get {
-                return ResourceManager.GetString("ModeTypeCore", resourceCulture);
-            }
-        }
-        
         public static string MouseAxisTypeX {
             get {
                 return ResourceManager.GetString("MouseAxisTypeX", resourceCulture);

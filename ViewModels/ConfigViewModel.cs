@@ -90,8 +90,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .ToPropertyEx(this, x => x.IsAdvancedMode);
         this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Standard)
             .ToPropertyEx(this, x => x.IsStandardMode);
-        this.WhenAnyValue(x => x.Mode).Select(x => x is ModeType.Core)
-            .ToPropertyEx(this, x => x.IsRetailMode);
         this.WhenAnyValue(x => x.EmulationType)
             .Select(x => x is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
             .ToPropertyEx(this, x => x.IsBluetooth);
@@ -386,7 +384,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     } // ReSharper disable UnassignedGetOnlyAutoProperty
     [ObservableAsProperty] public bool IsStandardMode { get; }
     [ObservableAsProperty] public bool IsAdvancedMode { get; }
-    [ObservableAsProperty] public bool IsRetailMode { get; }
     [ObservableAsProperty] public bool IsGuitar { get; }
     [ObservableAsProperty] public bool IsStageKit { get; }
     [ObservableAsProperty] public bool IsController { get; }

@@ -1811,9 +1811,6 @@
     <data name="ModeTypeAdvanced" xml:space="preserve">
         <value>Advanced</value>
     </data>
-    <data name="ModeTypeCore" xml:space="preserve">
-        <value>Core</value>
-    </data>
     <data name="MouseAxisTypeX" xml:space="preserve">
         <value>Mouse X Axis</value>
     </data>
