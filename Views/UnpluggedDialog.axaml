@@ -3,12 +3,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:GuitarConfigurator.NetCore.ViewModels"
+        xmlns:netCore="clr-namespace:GuitarConfigurator.NetCore"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GuitarConfigurator.NetCore.Views.UnpluggedWindow"
         TransparencyLevelHint="AcrylicBlur"
         WindowStartupLocation="CenterOwner"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Santroller Configurator"
+        Title="{x:Static netCore:Resources.ToolName}"
         Background="Transparent"
         Width="800"
         Height="600"
@@ -32,13 +33,13 @@
         <Panel Margin="40">
             <DockPanel HorizontalAlignment="Stretch">
                 <StackPanel Height="50" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
-                    <Button Margin="0 0 5 0" Command="{Binding YesCommand}" Content="Return to main menu"
+                    <Button Margin="0 0 5 0" Command="{Binding YesCommand}" Content="{x:Static netCore:Resources.ReturnButtonLabel}"
                             Classes="accent" />
                 </StackPanel>
                 <ScrollViewer>
                     <StackPanel>
                         <Label
-                            Content="The device you are configuring was unplugged. Click to return to the main menu." />
+                            Content="{x:Static netCore:Resources.UnpluggedDesc}" />
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>

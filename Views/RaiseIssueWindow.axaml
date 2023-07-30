@@ -3,12 +3,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:GuitarConfigurator.NetCore.ViewModels"
+        xmlns:netCore="clr-namespace:GuitarConfigurator.NetCore"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GuitarConfigurator.NetCore.Views.RaiseIssueWindow"
         TransparencyLevelHint="AcrylicBlur"
         WindowStartupLocation="CenterOwner"
         Icon="/Assets/avalonia-logo.ico"
-        Title="An error has occurred while programming"
+        Title="{x:Static netCore:Resources.ToolName}"
         Background="Transparent"
         Width="800"
         Height="600"
@@ -32,15 +33,12 @@
         <Panel Margin="40">
             <DockPanel HorizontalAlignment="Stretch">
                 <StackPanel Height="50" Orientation="Horizontal" DockPanel.Dock="Bottom">
-                    <Button Command="{Binding RaiseIssueCommand}">Raise Issue on GitHub</Button>
-                    <Button Command="{Binding CloseWindowCommand}">Close</Button>
+                    <Button Command="{Binding RaiseIssueCommand}" Content="{x:Static netCore:Resources.RaiseIssueLabel}"></Button>
+                    <Button Command="{Binding CloseWindowCommand}" Content="{x:Static netCore:Resources.CloseLabel}"></Button>
                 </StackPanel>
                 <ScrollViewer>
                     <StackPanel>
-                        <Label>Unfortunately an error has occurred while programming your microcontroller.</Label>
-                        <Label>Feel free to use the below button to raise this issue and we will try to fix this problem.</Label>
-                        <Label />
-                        <Label>Included Information</Label>
+                        <Label Content="{x:Static netCore:Resources.RaiseIssueDesc}"></Label>
                         <Label Content="{Binding IncludedInfo}" />
                         <TextBox IsReadOnly="True" Text="{Binding Text}" />
                     </StackPanel>

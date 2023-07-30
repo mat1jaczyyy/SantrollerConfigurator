@@ -7,14 +7,14 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace GuitarConfigurator.NetCore.Assets {
+namespace GuitarConfigurator.NetCore {
     using System;
     
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static System.Resources.ResourceManager resourceMan;
         
@@ -28,7 +28,7 @@ namespace GuitarConfigurator.NetCore.Assets {
         public static System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.Equals(null, resourceMan)) {
-                    System.Resources.ResourceManager temp = new System.Resources.ResourceManager("GuitarConfigurator.NetCore.Assets.Resources", typeof(Resources).Assembly);
+                    System.Resources.ResourceManager temp = new System.Resources.ResourceManager("GuitarConfigurator.NetCore.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -4659,12 +4659,6 @@ namespace GuitarConfigurator.NetCore.Assets {
             }
         }
         
-        public static string Label_Content {
-            get {
-                return ResourceManager.GetString("Label.Content", resourceCulture);
-            }
-        }
-        
         public static string RawValueLabel {
             get {
                 return ResourceManager.GetString("RawValueLabel", resourceCulture);
@@ -4674,6 +4668,792 @@ namespace GuitarConfigurator.NetCore.Assets {
         public static string ToolName {
             get {
                 return ResourceManager.GetString("ToolName", resourceCulture);
+            }
+        }
+        
+        public static string RawValue {
+            get {
+                return ResourceManager.GetString("RawValue", resourceCulture);
+            }
+        }
+        
+        public static string LeftTurntableFound {
+            get {
+                return ResourceManager.GetString("LeftTurntableFound", resourceCulture);
+            }
+        }
+        
+        public static string RightTurntableFound {
+            get {
+                return ResourceManager.GetString("RightTurntableFound", resourceCulture);
+            }
+        }
+        
+        public static string ContinueLabel {
+            get {
+                return ResourceManager.GetString("ContinueLabel", resourceCulture);
+            }
+        }
+        
+        public static string AbortLabel {
+            get {
+                return ResourceManager.GetString("AbortLabel", resourceCulture);
+            }
+        }
+        
+        public static string EmulationModeLabel {
+            get {
+                return ResourceManager.GetString("EmulationModeLabel", resourceCulture);
+            }
+        }
+        
+        public static string DevicesConnectedLabel {
+            get {
+                return ResourceManager.GetString("DevicesConnectedLabel", resourceCulture);
+            }
+        }
+        
+        public static string RevertArduinoLabel {
+            get {
+                return ResourceManager.GetString("RevertArduinoLabel", resourceCulture);
+            }
+        }
+        
+        public static string SaveConfigurationLabel {
+            get {
+                return ResourceManager.GetString("SaveConfigurationLabel", resourceCulture);
+            }
+        }
+        
+        public static string GoBackLabel {
+            get {
+                return ResourceManager.GetString("GoBackLabel", resourceCulture);
+            }
+        }
+        
+        public static string StatusLabel {
+            get {
+                return ResourceManager.GetString("StatusLabel", resourceCulture);
+            }
+        }
+        
+        public static string RemoveLabel {
+            get {
+                return ResourceManager.GetString("RemoveLabel", resourceCulture);
+            }
+        }
+        
+        public static string OutputTypeLabel {
+            get {
+                return ResourceManager.GetString("OutputTypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string InputTypeLabel {
+            get {
+                return ResourceManager.GetString("InputTypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string InputLabel {
+            get {
+                return ResourceManager.GetString("InputLabel", resourceCulture);
+            }
+        }
+        
+        public static string CollapseAllLabel {
+            get {
+                return ResourceManager.GetString("CollapseAllLabel", resourceCulture);
+            }
+        }
+        
+        public static string ExpandAllLabel {
+            get {
+                return ResourceManager.GetString("ExpandAllLabel", resourceCulture);
+            }
+        }
+        
+        public static string SelectedLEDsLabel {
+            get {
+                return ResourceManager.GetString("SelectedLEDsLabel", resourceCulture);
+            }
+        }
+        
+        public static string EnabledLabel {
+            get {
+                return ResourceManager.GetString("EnabledLabel", resourceCulture);
+            }
+        }
+        
+        public static string DisabledLabel {
+            get {
+                return ResourceManager.GetString("DisabledLabel", resourceCulture);
+            }
+        }
+        
+        public static string PS2InputFilterLabel {
+            get {
+                return ResourceManager.GetString("PS2InputFilterLabel", resourceCulture);
+            }
+        }
+        
+        public static string AttentionLabel {
+            get {
+                return ResourceManager.GetString("AttentionLabel", resourceCulture);
+            }
+        }
+        
+        public static string AckLabel {
+            get {
+                return ResourceManager.GetString("AckLabel", resourceCulture);
+            }
+        }
+        
+        public static string SckLabel {
+            get {
+                return ResourceManager.GetString("SckLabel", resourceCulture);
+            }
+        }
+        
+        public static string MisoLabel {
+            get {
+                return ResourceManager.GetString("MisoLabel", resourceCulture);
+            }
+        }
+        
+        public static string MosiLabel {
+            get {
+                return ResourceManager.GetString("MosiLabel", resourceCulture);
+            }
+        }
+        
+        public static string SelectedDeviceLabel {
+            get {
+                return ResourceManager.GetString("SelectedDeviceLabel", resourceCulture);
+            }
+        }
+        
+        public static string DetectedLabel {
+            get {
+                return ResourceManager.GetString("DetectedLabel", resourceCulture);
+            }
+        }
+        
+        public static string ConnectedToTransmitterLabel {
+            get {
+                return ResourceManager.GetString("ConnectedToTransmitterLabel", resourceCulture);
+            }
+        }
+        
+        public static string LocalAddressLabel {
+            get {
+                return ResourceManager.GetString("LocalAddressLabel", resourceCulture);
+            }
+        }
+        
+        public static string CurrentControllerTypeLabel {
+            get {
+                return ResourceManager.GetString("CurrentControllerTypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string NoControllerFoundLabel {
+            get {
+                return ResourceManager.GetString("NoControllerFoundLabel", resourceCulture);
+            }
+        }
+        
+        public static string CurrentExtensionLabel {
+            get {
+                return ResourceManager.GetString("CurrentExtensionLabel", resourceCulture);
+            }
+        }
+        
+        public static string NoExtensionFoundLabel {
+            get {
+                return ResourceManager.GetString("NoExtensionFoundLabel", resourceCulture);
+            }
+        }
+        
+        public static string ConnectedDevicesLabel {
+            get {
+                return ResourceManager.GetString("ConnectedDevicesLabel", resourceCulture);
+            }
+        }
+        
+        public static string DPlusLabel {
+            get {
+                return ResourceManager.GetString("DPlusLabel", resourceCulture);
+            }
+        }
+        
+        public static string DMinusLabel {
+            get {
+                return ResourceManager.GetString("DMinusLabel", resourceCulture);
+            }
+        }
+        
+        public static string SliderBarSensitivityLabel {
+            get {
+                return ResourceManager.GetString("SliderBarSensitivityLabel", resourceCulture);
+            }
+        }
+        
+        public static string SliderAnalogInputPin {
+            get {
+                return ResourceManager.GetString("SliderAnalogInputPin", resourceCulture);
+            }
+        }
+        
+        public static string SliderS0Pin {
+            get {
+                return ResourceManager.GetString("SliderS0Pin", resourceCulture);
+            }
+        }
+        
+        public static string SliderS1Pin {
+            get {
+                return ResourceManager.GetString("SliderS1Pin", resourceCulture);
+            }
+        }
+        
+        public static string SliderS2Pin {
+            get {
+                return ResourceManager.GetString("SliderS2Pin", resourceCulture);
+            }
+        }
+        
+        public static string SclGh5Label {
+            get {
+                return ResourceManager.GetString("SclGh5Label", resourceCulture);
+            }
+        }
+        
+        public static string SdaGh5Label {
+            get {
+                return ResourceManager.GetString("SdaGh5Label", resourceCulture);
+            }
+        }
+        
+        public static string LEDTitle {
+            get {
+                return ResourceManager.GetString("LEDTitle", resourceCulture);
+            }
+        }
+        
+        public static string StageKitCommandTitle {
+            get {
+                return ResourceManager.GetString("StageKitCommandTitle", resourceCulture);
+            }
+        }
+        
+        public static string GuitarInputLabel {
+            get {
+                return ResourceManager.GetString("GuitarInputLabel", resourceCulture);
+            }
+        }
+        
+        public static string LiveGuitarInputLabel {
+            get {
+                return ResourceManager.GetString("LiveGuitarInputLabel", resourceCulture);
+            }
+        }
+        
+        public static string DrumInputLabel {
+            get {
+                return ResourceManager.GetString("DrumInputLabel", resourceCulture);
+            }
+        }
+        
+        public static string TurntableInputLabel {
+            get {
+                return ResourceManager.GetString("TurntableInputLabel", resourceCulture);
+            }
+        }
+        
+        public static string StrobeSpeedLabel {
+            get {
+                return ResourceManager.GetString("StrobeSpeedLabel", resourceCulture);
+            }
+        }
+        
+        public static string PlayerTitle {
+            get {
+                return ResourceManager.GetString("PlayerTitle", resourceCulture);
+            }
+        }
+        
+        public static string ComboTitle {
+            get {
+                return ResourceManager.GetString("ComboTitle", resourceCulture);
+            }
+        }
+        
+        public static string EnableDigitalOutputTitle {
+            get {
+                return ResourceManager.GetString("EnableDigitalOutputTitle", resourceCulture);
+            }
+        }
+        
+        public static string InvertLabel {
+            get {
+                return ResourceManager.GetString("InvertLabel", resourceCulture);
+            }
+        }
+        
+        public static string AnalogOutputPinLabel {
+            get {
+                return ResourceManager.GetString("AnalogOutputPinLabel", resourceCulture);
+            }
+        }
+        
+        public static string DigitalOutputPinLabel {
+            get {
+                return ResourceManager.GetString("DigitalOutputPinLabel", resourceCulture);
+            }
+        }
+        
+        public static string MotorLabel {
+            get {
+                return ResourceManager.GetString("MotorLabel", resourceCulture);
+            }
+        }
+        
+        public static string MotorDriverPinLabel {
+            get {
+                return ResourceManager.GetString("MotorDriverPinLabel", resourceCulture);
+            }
+        }
+        
+        public static string SclLabel {
+            get {
+                return ResourceManager.GetString("SclLabel", resourceCulture);
+            }
+        }
+        
+        public static string SdaLabel {
+            get {
+                return ResourceManager.GetString("SdaLabel", resourceCulture);
+            }
+        }
+        
+        public static string TurntableSmoothingLabel {
+            get {
+                return ResourceManager.GetString("TurntableSmoothingLabel", resourceCulture);
+            }
+        }
+        
+        public static string DualTurntableSmoothingLabel {
+            get {
+                return ResourceManager.GetString("DualTurntableSmoothingLabel", resourceCulture);
+            }
+        }
+        
+        public static string TurntablePollRateLabel {
+            get {
+                return ResourceManager.GetString("TurntablePollRateLabel", resourceCulture);
+            }
+        }
+        
+        public static string ThresholdLabel {
+            get {
+                return ResourceManager.GetString("ThresholdLabel", resourceCulture);
+            }
+        }
+        
+        public static string AnalogPinLabel {
+            get {
+                return ResourceManager.GetString("AnalogPinLabel", resourceCulture);
+            }
+        }
+        
+        public static string ChannelLabel {
+            get {
+                return ResourceManager.GetString("ChannelLabel", resourceCulture);
+            }
+        }
+        
+        public static string MultiplexerTypeLabel {
+            get {
+                return ResourceManager.GetString("MultiplexerTypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string S0Pin {
+            get {
+                return ResourceManager.GetString("S0Pin", resourceCulture);
+            }
+        }
+        
+        public static string S1Pin {
+            get {
+                return ResourceManager.GetString("S1Pin", resourceCulture);
+            }
+        }
+        
+        public static string S2Pin {
+            get {
+                return ResourceManager.GetString("S2Pin", resourceCulture);
+            }
+        }
+        
+        public static string S3Pin {
+            get {
+                return ResourceManager.GetString("S3Pin", resourceCulture);
+            }
+        }
+        
+        public static string PinModeText {
+            get {
+                return ResourceManager.GetString("PinModeText", resourceCulture);
+            }
+        }
+        
+        public static string PinLabel {
+            get {
+                return ResourceManager.GetString("PinLabel", resourceCulture);
+            }
+        }
+        
+        public static string CurrentValueLabel {
+            get {
+                return ResourceManager.GetString("CurrentValueLabel", resourceCulture);
+            }
+        }
+        
+        public static string CalibratedValueLabel {
+            get {
+                return ResourceManager.GetString("CalibratedValueLabel", resourceCulture);
+            }
+        }
+        
+        public static string OriginalValueLabel {
+            get {
+                return ResourceManager.GetString("OriginalValueLabel", resourceCulture);
+            }
+        }
+        
+        public static string CalibrateLabel {
+            get {
+                return ResourceManager.GetString("CalibrateLabel", resourceCulture);
+            }
+        }
+        
+        public static string MinLabel {
+            get {
+                return ResourceManager.GetString("MinLabel", resourceCulture);
+            }
+        }
+        
+        public static string MaxLabel {
+            get {
+                return ResourceManager.GetString("MaxLabel", resourceCulture);
+            }
+        }
+        
+        public static string DeadzoneLabel {
+            get {
+                return ResourceManager.GetString("DeadzoneLabel", resourceCulture);
+            }
+        }
+        
+        public static string CurrentFretsLabel {
+            get {
+                return ResourceManager.GetString("CurrentFretsLabel", resourceCulture);
+            }
+        }
+        
+        public static string DigitalThresholdLabel {
+            get {
+                return ResourceManager.GetString("DigitalThresholdLabel", resourceCulture);
+            }
+        }
+        
+        public static string DebounceLabel {
+            get {
+                return ResourceManager.GetString("DebounceLabel", resourceCulture);
+            }
+        }
+        
+        public static string ValueLabel {
+            get {
+                return ResourceManager.GetString("ValueLabel", resourceCulture);
+            }
+        }
+        
+        public static string TypeLabel {
+            get {
+                return ResourceManager.GetString("TypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string Input1InputLabel {
+            get {
+                return ResourceManager.GetString("Input1InputLabel", resourceCulture);
+            }
+        }
+        
+        public static string Input2InputLabel {
+            get {
+                return ResourceManager.GetString("Input2InputLabel", resourceCulture);
+            }
+        }
+        
+        public static string WiiInputFilterLabel {
+            get {
+                return ResourceManager.GetString("WiiInputFilterLabel", resourceCulture);
+            }
+        }
+        
+        public static string InitialConfigDesc {
+            get {
+                return ResourceManager.GetString("InitialConfigDesc", resourceCulture);
+            }
+        }
+        
+        public static string UnoBridgeDesc {
+            get {
+                return ResourceManager.GetString("UnoBridgeDesc", resourceCulture);
+            }
+        }
+        
+        public static string ConfigureButtonLabel {
+            get {
+                return ResourceManager.GetString("ConfigureButtonLabel", resourceCulture);
+            }
+        }
+        
+        public static string WelcomeDesc {
+            get {
+                return ResourceManager.GetString("WelcomeDesc", resourceCulture);
+            }
+        }
+        
+        public static string UpdateDesc {
+            get {
+                return ResourceManager.GetString("UpdateDesc", resourceCulture);
+            }
+        }
+        
+        public static string FirmwareTooOldDesc {
+            get {
+                return ResourceManager.GetString("FirmwareTooOldDesc", resourceCulture);
+            }
+        }
+        
+        public static string UnknownBoardDesc {
+            get {
+                return ResourceManager.GetString("UnknownBoardDesc", resourceCulture);
+            }
+        }
+        
+        public static string NoSupportedDeviceFoundLabel {
+            get {
+                return ResourceManager.GetString("NoSupportedDeviceFoundLabel", resourceCulture);
+            }
+        }
+        
+        public static string ArduinoUnoMegaType {
+            get {
+                return ResourceManager.GetString("ArduinoUnoMegaType", resourceCulture);
+            }
+        }
+        
+        public static string Atmega32U4Type {
+            get {
+                return ResourceManager.GetString("Atmega32U4Type", resourceCulture);
+            }
+        }
+        
+        public static string ArduinoType {
+            get {
+                return ResourceManager.GetString("ArduinoType", resourceCulture);
+            }
+        }
+        
+        public static string RaiseIssueDesc {
+            get {
+                return ResourceManager.GetString("RaiseIssueDesc", resourceCulture);
+            }
+        }
+        
+        public static string RaiseIssueLabel {
+            get {
+                return ResourceManager.GetString("RaiseIssueLabel", resourceCulture);
+            }
+        }
+        
+        public static string CloseLabel {
+            get {
+                return ResourceManager.GetString("CloseLabel", resourceCulture);
+            }
+        }
+        
+        public static string RestoringLabel {
+            get {
+                return ResourceManager.GetString("RestoringLabel", resourceCulture);
+            }
+        }
+        
+        public static string ReturnButtonLabel {
+            get {
+                return ResourceManager.GetString("ReturnButtonLabel", resourceCulture);
+            }
+        }
+        
+        public static string UnpluggedDesc {
+            get {
+                return ResourceManager.GetString("UnpluggedDesc", resourceCulture);
+            }
+        }
+        
+        public static string EmulationTypeLabel {
+            get {
+                return ResourceManager.GetString("EmulationTypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string ModeLabel {
+            get {
+                return ResourceManager.GetString("ModeLabel", resourceCulture);
+            }
+        }
+        
+        public static string ConnectedToReceiverLabel {
+            get {
+                return ResourceManager.GetString("ConnectedToReceiverLabel", resourceCulture);
+            }
+        }
+        
+        public static string MouseMovementTypeLabel {
+            get {
+                return ResourceManager.GetString("MouseMovementTypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string ControllerViewTypeLabel {
+            get {
+                return ResourceManager.GetString("ControllerViewTypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string ControllerTypeLabel {
+            get {
+                return ResourceManager.GetString("ControllerTypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string WindowsControllerModeLabel {
+            get {
+                return ResourceManager.GetString("WindowsControllerModeLabel", resourceCulture);
+            }
+        }
+        
+        public static string HIDGameControllerLabel {
+            get {
+                return ResourceManager.GetString("HIDGameControllerLabel", resourceCulture);
+            }
+        }
+        
+        public static string XInputLabel {
+            get {
+                return ResourceManager.GetString("XInputLabel", resourceCulture);
+            }
+        }
+        
+        public static string QueueBasedInputsLabel {
+            get {
+                return ResourceManager.GetString("QueueBasedInputsLabel", resourceCulture);
+            }
+        }
+        
+        public static string DebounceExtraLabel {
+            get {
+                return ResourceManager.GetString("DebounceExtraLabel", resourceCulture);
+            }
+        }
+        
+        public static string StrumDebounceLabel {
+            get {
+                return ResourceManager.GetString("StrumDebounceLabel", resourceCulture);
+            }
+        }
+        
+        public static string StrumCombinedLabel {
+            get {
+                return ResourceManager.GetString("StrumCombinedLabel", resourceCulture);
+            }
+        }
+        
+        public static string StrumIndividualLabel {
+            get {
+                return ResourceManager.GetString("StrumIndividualLabel", resourceCulture);
+            }
+        }
+        
+        public static string LEDTypeLabel {
+            get {
+                return ResourceManager.GetString("LEDTypeLabel", resourceCulture);
+            }
+        }
+        
+        public static string LEDTypeCountLabel {
+            get {
+                return ResourceManager.GetString("LEDTypeCountLabel", resourceCulture);
+            }
+        }
+        
+        public static string APA102SCKLabel {
+            get {
+                return ResourceManager.GetString("APA102SCKLabel", resourceCulture);
+            }
+        }
+        
+        public static string APA102MOSILabel {
+            get {
+                return ResourceManager.GetString("APA102MOSILabel", resourceCulture);
+            }
+        }
+        
+        public static string SwapSwitchFaceButtonLabel {
+            get {
+                return ResourceManager.GetString("SwapSwitchFaceButtonLabel", resourceCulture);
+            }
+        }
+        
+        public static string AddBindingLabel {
+            get {
+                return ResourceManager.GetString("AddBindingLabel", resourceCulture);
+            }
+        }
+        
+        public static string ExportConfigLabel {
+            get {
+                return ResourceManager.GetString("ExportConfigLabel", resourceCulture);
+            }
+        }
+        
+        public static string ImportConfigLabel {
+            get {
+                return ResourceManager.GetString("ImportConfigLabel", resourceCulture);
+            }
+        }
+        
+        public static string ConfigureAllInputsLabel {
+            get {
+                return ResourceManager.GetString("ConfigureAllInputsLabel", resourceCulture);
+            }
+        }
+        
+        public static string LoadDefaultsLabel {
+            get {
+                return ResourceManager.GetString("LoadDefaultsLabel", resourceCulture);
+            }
+        }
+        
+        public static string ClearAllLabel {
+            get {
+                return ResourceManager.GetString("ClearAllLabel", resourceCulture);
             }
         }
     }

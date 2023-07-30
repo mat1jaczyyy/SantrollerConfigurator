@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.ViewModels;
 using ReactiveUI;
 

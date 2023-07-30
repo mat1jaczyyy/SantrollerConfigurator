@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using Avalonia.Data.Converters;
-using GuitarConfigurator.NetCore.Assets;
 
 namespace GuitarConfigurator.NetCore;
 

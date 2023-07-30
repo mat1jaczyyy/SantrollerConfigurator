@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Avalonia.Media;
 using DynamicData;
-using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;

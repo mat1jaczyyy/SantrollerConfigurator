@@ -234,16 +234,16 @@
         <value>None</value>
     </data>
     <data name="TapBarCurrentFretsGreen" xml:space="preserve">
-        <value>Green </value>
+        <value>Green</value>
     </data>
     <data name="TapBarCurrentFretsRed" xml:space="preserve">
-        <value>Red </value>
+        <value>Red</value>
     </data>
     <data name="TapBarCurrentFretsYellow" xml:space="preserve">
-        <value>Yellow </value>
+        <value>Yellow</value>
     </data>
     <data name="TapBarCurrentFretsBlue" xml:space="preserve">
-        <value>Blue </value>
+        <value>Blue</value>
     </data>
     <data name="TapBarCurrentFretsOrange" xml:space="preserve">
         <value>Orange</value>
@@ -1427,10 +1427,10 @@
         <value>Drums</value>
     </data>
     <data name="XInputSubTypeStageKit" xml:space="preserve">
-        <value>StageKit</value>
+        <value>Stage Kit</value>
     </data>
     <data name="XInputSubTypeArcadePad" xml:space="preserve">
-        <value>ArcadePad</value>
+        <value>Arcade Pad</value>
     </data>
     <data name="XInputSubTypeTurntable" xml:space="preserve">
         <value>Turntable</value>
@@ -2285,16 +2285,16 @@
         <value>Strobe</value>
     </data>
     <data name="StageKitCommandLedGreen" xml:space="preserve">
-        <value>LedGreen</value>
+        <value>Led Green</value>
     </data>
     <data name="StageKitCommandLedRed" xml:space="preserve">
-        <value>LedRed</value>
+        <value>Led Red</value>
     </data>
     <data name="StageKitCommandLedYellow" xml:space="preserve">
-        <value>LedYellow</value>
+        <value>Led Yellow</value>
     </data>
     <data name="StageKitCommandLedBlue" xml:space="preserve">
-        <value>LedBlue</value>
+        <value>Led Blue</value>
     </data>
     <data name="StageKitStrobeSpeedSlow" xml:space="preserve">
         <value>Slow</value>
@@ -2454,5 +2454,396 @@
     </data>
     <data name="RawValue" xml:space="preserve">
         <value>Raw Value</value>
+    </data>
+    <data name="LeftTurntableFound" xml:space="preserve">
+        <value>Left Turntable Found</value>
+    </data>
+    <data name="RightTurntableFound" xml:space="preserve">
+        <value>Right Turntable Found</value>
+    </data>
+    <data name="ContinueLabel" xml:space="preserve">
+        <value>Continue</value>
+    </data>
+    <data name="AbortLabel" xml:space="preserve">
+        <value>Abort</value>
+    </data>
+    <data name="EmulationModeLabel" xml:space="preserve">
+        <value>Emulation Mode</value>
+    </data>
+    <data name="DevicesConnectedLabel" xml:space="preserve">
+        <value>Devices connected</value>
+    </data>
+    <data name="RevertArduinoLabel" xml:space="preserve">
+        <value>Revert device to Arduino</value>
+    </data>
+    <data name="SaveConfigurationLabel" xml:space="preserve">
+        <value>Save Configuration</value>
+    </data>
+    <data name="GoBackLabel" xml:space="preserve">
+        <value>Configure another device</value>
+    </data>
+    <data name="StatusLabel" xml:space="preserve">
+        <value>Status: </value>
+    </data>
+    <data name="RemoveLabel" xml:space="preserve">
+        <value>Remove</value>
+    </data>
+    <data name="OutputTypeLabel" xml:space="preserve">
+        <value>Output Type</value>
+    </data>
+    <data name="InputTypeLabel" xml:space="preserve">
+        <value>Input Type</value>
+    </data>
+    <data name="InputLabel" xml:space="preserve">
+        <value>Input</value>
+    </data>
+    <data name="CollapseAllLabel" xml:space="preserve">
+        <value>Collapse All</value>
+    </data>
+    <data name="ExpandAllLabel" xml:space="preserve">
+        <value>Expand All</value>
+    </data>
+    <data name="SelectedLEDsLabel" xml:space="preserve">
+        <value>Selected LEDs</value>
+    </data>
+    <data name="EnabledLabel" xml:space="preserve">
+        <value>Enabled</value>
+    </data>
+    <data name="DisabledLabel" xml:space="preserve">
+        <value>Disabled</value>
+    </data>
+    <data name="PS2InputFilterLabel" xml:space="preserve">
+        <value>PS2 Controller Input Filter</value>
+    </data>
+    <data name="AttentionLabel" xml:space="preserve">
+        <value>Attention (Yellow) Pin</value>
+    </data>
+    <data name="AckLabel" xml:space="preserve">
+        <value>Acknowledge (Green) Pin</value>
+    </data>
+    <data name="SckLabel" xml:space="preserve">
+        <value>Sck / Clock (Blue) Pin</value>
+    </data>
+    <data name="MisoLabel" xml:space="preserve">
+        <value>MISO / Data (Brown) Pin</value>
+    </data>
+    <data name="MosiLabel" xml:space="preserve">
+        <value>MOSI / Command (Orange) Pin</value>
+    </data>
+    <data name="SelectedDeviceLabel" xml:space="preserve">
+        <value>Selected Device</value>
+    </data>
+    <data name="DetectedLabel" xml:space="preserve">
+        <value>Detected</value>
+    </data>
+    <data name="ConnectedToTransmitterLabel" xml:space="preserve">
+        <value>Connected to Transmitter</value>
+    </data>
+    <data name="LocalAddressLabel" xml:space="preserve">
+        <value>Local Address</value>
+    </data>
+    <data name="CurrentControllerTypeLabel" xml:space="preserve">
+        <value>Current Controller Type: </value>
+    </data>
+    <data name="NoControllerFoundLabel" xml:space="preserve">
+        <value>No Controller Found</value>
+    </data>
+    <data name="CurrentExtensionLabel" xml:space="preserve">
+        <value>Current Extension: </value>
+    </data>
+    <data name="NoExtensionFoundLabel" xml:space="preserve">
+        <value>No Extension Found</value>
+    </data>
+    <data name="ConnectedDevicesLabel" xml:space="preserve">
+        <value>Connected devices</value>
+    </data>
+    <data name="DPlusLabel" xml:space="preserve">
+        <value>D+ (Green) Pin</value>
+    </data>
+    <data name="DMinusLabel" xml:space="preserve">
+        <value>D- (White) Pin</value>
+    </data>
+    <data name="SliderBarSensitivityLabel" xml:space="preserve">
+        <value>Slider Bar Sensitivity</value>
+    </data>
+    <data name="SliderAnalogInputPin" xml:space="preserve">
+        <value>Slider Analog Input Pin</value>
+    </data>
+    <data name="SliderS0Pin" xml:space="preserve">
+        <value>Slider S0 Pin</value>
+    </data>
+    <data name="SliderS1Pin" xml:space="preserve">
+        <value>Slider S1 Pin</value>
+    </data>
+    <data name="SliderS2Pin" xml:space="preserve">
+        <value>Slider S2 Pin</value>
+    </data>
+    <data name="SclGh5Label" xml:space="preserve">
+        <value>SCL (Labelled as CLK or C) Pin</value>
+    </data>
+    <data name="SdaGh5Label" xml:space="preserve">
+        <value>SDA (Labelled as Data or D) Pin</value>
+    </data>
+    <data name="LEDTitle" xml:space="preserve">
+        <value>LED</value>
+    </data>
+    <data name="StageKitCommandTitle" xml:space="preserve">
+        <value>Stage Kit Command</value>
+    </data>
+    <data name="GuitarInputLabel" xml:space="preserve">
+        <value>Guitar Input</value>
+    </data>
+    <data name="LiveGuitarInputLabel" xml:space="preserve">
+        <value>Live Guitar Input</value>
+    </data>
+    <data name="DrumInputLabel" xml:space="preserve">
+        <value>Drum Input</value>
+    </data>
+    <data name="TurntableInputLabel" xml:space="preserve">
+        <value>Turntable Input</value>
+    </data>
+    <data name="StrobeSpeedLabel" xml:space="preserve">
+        <value>Strobe Speed</value>
+    </data>
+    <data name="PlayerTitle" xml:space="preserve">
+        <value>Player</value>
+    </data>
+    <data name="ComboTitle" xml:space="preserve">
+        <value>Combo</value>
+    </data>
+    <data name="EnableDigitalOutputTitle" xml:space="preserve">
+        <value>Enable Digital Output</value>
+    </data>
+    <data name="InvertLabel" xml:space="preserve">
+        <value>Invert</value>
+    </data>
+    <data name="AnalogOutputPinLabel" xml:space="preserve">
+        <value>Analog Output Pin</value>
+    </data>
+    <data name="DigitalOutputPinLabel" xml:space="preserve">
+        <value>Digital Output Pin</value>
+    </data>
+    <data name="MotorLabel" xml:space="preserve">
+        <value>Motor</value>
+    </data>
+    <data name="MotorDriverPinLabel" xml:space="preserve">
+        <value>Motor Driver Pin</value>
+    </data>
+    <data name="SclLabel" xml:space="preserve">
+        <value>SCL Pin</value>
+    </data>
+    <data name="SdaLabel" xml:space="preserve">
+        <value>SDA Pin</value>
+    </data>
+    <data name="TurntableSmoothingLabel" xml:space="preserve">
+        <value>Turntable Smoothing</value>
+    </data>
+    <data name="DualTurntableSmoothingLabel" xml:space="preserve">
+        <value>Dual Turntable Smoothing</value>
+    </data>
+    <data name="TurntablePollRateLabel" xml:space="preserve">
+        <value>Turntable Poll Rate</value>
+    </data>
+    <data name="ThresholdLabel" xml:space="preserve">
+        <value>Threshold</value>
+    </data>
+    <data name="AnalogPinLabel" xml:space="preserve">
+        <value>Analog Pin</value>
+    </data>
+    <data name="ChannelLabel" xml:space="preserve">
+        <value>Channel</value>
+    </data>
+    <data name="MultiplexerTypeLabel" xml:space="preserve">
+        <value>Multiplexer Type</value>
+    </data>
+    <data name="S0Pin" xml:space="preserve">
+        <value>S0 Pin</value>
+    </data>
+    <data name="S1Pin" xml:space="preserve">
+        <value>S1 Pin</value>
+    </data>
+    <data name="S2Pin" xml:space="preserve">
+        <value>S2 Pin</value>
+    </data>
+    <data name="S3Pin" xml:space="preserve">
+        <value>S3 Pin</value>
+    </data>
+    <data name="PinModeText" xml:space="preserve">
+        <value>Pin Mode</value>
+    </data>
+    <data name="PinLabel" xml:space="preserve">
+        <value>Pin</value>
+    </data>
+    <data name="CurrentValueLabel" xml:space="preserve">
+        <value>Current Value</value>
+    </data>
+    <data name="CalibratedValueLabel" xml:space="preserve">
+        <value>Calibrated Value</value>
+    </data>
+    <data name="OriginalValueLabel" xml:space="preserve">
+        <value>Original Value</value>
+    </data>
+    <data name="CalibrateLabel" xml:space="preserve">
+        <value>Calibrate</value>
+    </data>
+    <data name="MinLabel" xml:space="preserve">
+        <value>Minimum</value>
+    </data>
+    <data name="MaxLabel" xml:space="preserve">
+        <value>Maximum</value>
+    </data>
+    <data name="DeadzoneLabel" xml:space="preserve">
+        <value>Deadzone</value>
+    </data>
+    <data name="CurrentFretsLabel" xml:space="preserve">
+        <value>Current Frets</value>
+    </data>
+    <data name="DigitalThresholdLabel" xml:space="preserve">
+        <value>Digital Threshold</value>
+    </data>
+    <data name="DebounceLabel" xml:space="preserve">
+        <value>Debounce</value>
+    </data>
+    <data name="ValueLabel" xml:space="preserve">
+        <value>Value</value>
+    </data>
+    <data name="TypeLabel" xml:space="preserve">
+        <value>Type</value>
+    </data>
+    <data name="Input1InputLabel" xml:space="preserve">
+        <value>Input 1 Input</value>
+    </data>
+    <data name="Input2InputLabel" xml:space="preserve">
+        <value>Input 2 Input</value>
+    </data>
+    <data name="WiiInputFilterLabel" xml:space="preserve">
+        <value>Wii Input Filter</value>
+    </data>
+    <data name="InitialConfigDesc" xml:space="preserve">
+        <value>Programming initial configuration, please wait.</value>
+    </data>
+    <data name="UnoBridgeDesc" xml:space="preserve">
+        <value>Please bridge the reset and ground pins shown below</value>
+    </data>
+    <data name="ConfigureButtonLabel" xml:space="preserve">
+        <value>Configure</value>
+    </data>
+    <data name="WelcomeDesc" xml:space="preserve">
+        <value>Welcome to the Santroller Configuration Tool!</value>
+    </data>
+    <data name="UpdateDesc" xml:space="preserve">
+        <value>Update</value>
+    </data>
+    <data name="FirmwareTooOldDesc" xml:space="preserve">
+        <value>The firmware on this device is too old, it's configuration will be erased when upgrading.</value>
+    </data>
+    <data name="UnknownBoardDesc" xml:space="preserve">
+        <value>Unknown board detected. Please pick the closest board to the type of Arduino you have plugged in.</value>
+    </data>
+    <data name="NoSupportedDeviceFoundLabel" xml:space="preserve">
+        <value>No supported device found</value>
+    </data>
+    <data name="ArduinoUnoMegaType" xml:space="preserve">
+        <value>Arduino Uno / Mega Type</value>
+    </data>
+    <data name="Atmega32U4Type" xml:space="preserve">
+        <value>Atmega32U4 Based Board Type</value>
+    </data>
+    <data name="ArduinoType" xml:space="preserve">
+        <value>Arduino Type</value>
+    </data>
+    <data name="RaiseIssueDesc">
+        <value>Unfortunately an error has occurred while programming your microcontroller.<br/>Feel free to use the
+            below button to raise this issue and we will try to fix this problem.<br/><br/>Included Information</value>
+    </data>
+    <data name="RaiseIssueLabel" xml:space="preserve">
+        <value>Raise Issue on GitHub</value>
+    </data>
+    <data name="CloseLabel" xml:space="preserve">
+        <value>Close</value>
+    </data>
+    <data name="RestoringLabel" xml:space="preserve">
+        <value>Restoring</value>
+    </data>
+    <data name="ReturnButtonLabel" xml:space="preserve">
+        <value>Return to main menu</value>
+    </data>
+    <data name="UnpluggedDesc" xml:space="preserve">
+        <value>The device you are configuring was unplugged. Click to return to the main menu.</value>
+    </data>
+    <data name="EmulationTypeLabel" xml:space="preserve">
+        <value>Emulation Type</value>
+    </data>
+    <data name="ModeLabel" xml:space="preserve">
+        <value>Mode</value>
+    </data>
+    <data name="ConnectedToReceiverLabel" xml:space="preserve">
+        <value>Connected to Receiver</value>
+    </data>
+    <data name="MouseMovementTypeLabel" xml:space="preserve">
+        <value>Mouse Movement Type</value>
+    </data>
+    <data name="ControllerViewTypeLabel" xml:space="preserve">
+        <value>Controller View Type</value>
+    </data>
+    <data name="ControllerTypeLabel" xml:space="preserve">
+        <value>Controller Type</value>
+    </data>
+    <data name="WindowsControllerModeLabel" xml:space="preserve">
+        <value>Windows Controller Mode</value>
+    </data>
+    <data name="HIDGameControllerLabel" xml:space="preserve">
+        <value>HID Game Controller</value>
+    </data>
+    <data name="XInputLabel" xml:space="preserve">
+        <value>XInput</value>
+    </data>
+    <data name="QueueBasedInputsLabel" xml:space="preserve">
+        <value>Queue Based Inputs</value>
+    </data>
+    <data name="DebounceExtraLabel" xml:space="preserve">
+        <value>Debounce (0 to disable)</value>
+    </data>
+    <data name="StrumDebounceLabel" xml:space="preserve">
+        <value>Strum Debounce (0 to disable)</value>
+    </data>
+    <data name="StrumCombinedLabel" xml:space="preserve">
+        <value>Combined</value>
+    </data>
+    <data name="StrumIndividualLabel" xml:space="preserve">
+        <value>Individual</value>
+    </data>
+    <data name="LEDTypeLabel" xml:space="preserve">
+        <value>LED Type</value>
+    </data>
+    <data name="LEDTypeCountLabel" xml:space="preserve">
+        <value>LED Type / Count</value>
+    </data>
+    <data name="APA102SCKLabel" xml:space="preserve">
+        <value>APA102 CI / SCK Pin</value>
+    </data>
+    <data name="APA102MOSILabel" xml:space="preserve">
+        <value>APA102 DI / MOSI Pin</value>
+    </data>
+    <data name="SwapSwitchFaceButtonLabel" xml:space="preserve">
+        <value>Swap Switch Face Buttons</value>
+    </data>
+    <data name="AddBindingLabel" xml:space="preserve">
+        <value>Add Binding</value>
+    </data>
+    <data name="ExportConfigLabel" xml:space="preserve">
+        <value>Export Config</value>
+    </data>
+    <data name="ImportConfigLabel" xml:space="preserve">
+        <value>Import Config</value>
+    </data>
+    <data name="ConfigureAllInputsLabel" xml:space="preserve">
+        <value>Configure all inputs</value>
+    </data>
+    <data name="LoadDefaultsLabel" xml:space="preserve">
+        <value>Load Defaults</value>
+    </data>
+    <data name="ClearAllLabel" xml:space="preserve">
+        <value>Clear All</value>
     </data>
 </root>

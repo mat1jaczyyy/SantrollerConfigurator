@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
-using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
@@ -114,11 +113,11 @@ public class GuitarAxis : OutputAxis
         if (Type is not GuitarAxisType.Slider || !Gh5NeckInput.Gh5Mappings.ContainsKey(val))
             return ret + Resources.TapBarCurrentFretsNone;
         var info = Gh5NeckInput.Gh5Mappings[val];
-        if (info.HasFlag(BarButton.Green)) ret += Resources.TapBarCurrentFretsGreen;
-        if (info.HasFlag(BarButton.Red)) ret += Resources.TapBarCurrentFretsRed;
-        if (info.HasFlag(BarButton.Yellow)) ret += Resources.TapBarCurrentFretsYellow;
-        if (info.HasFlag(BarButton.Blue)) ret += Resources.TapBarCurrentFretsBlue;
-        if (info.HasFlag(BarButton.Orange)) ret += Resources.TapBarCurrentFretsOrange;
+        if (info.HasFlag(BarButton.Green)) ret += $"{Resources.TapBarCurrentFretsGreen} ";
+        if (info.HasFlag(BarButton.Red)) ret += $"{Resources.TapBarCurrentFretsRed} ";
+        if (info.HasFlag(BarButton.Yellow)) ret += $"{Resources.TapBarCurrentFretsYellow} ";
+        if (info.HasFlag(BarButton.Blue)) ret += $"{Resources.TapBarCurrentFretsBlue} ";
+        if (info.HasFlag(BarButton.Orange)) ret += $"{Resources.TapBarCurrentFretsOrange} ";
         return ret.Trim();
     }
 

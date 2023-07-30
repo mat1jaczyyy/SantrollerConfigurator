@@ -36,11 +36,11 @@
 
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock HorizontalAlignment="Center"
-                           Text="Programming initial configuration, please wait." Margin="0 0 0 20" />
+                           Text="{x:Static netCore:Resources.InitialConfigDesc}" Margin="0 0 0 20" />
                 <TextBlock IsVisible="{Binding HasDfuImage}" HorizontalAlignment="Center"
-                           Text="Please bridge the reset and ground pins shown below" Margin="0 0 0 20" />
+                           Text="{x:Static netCore:Resources.UnoBridgeDesc}" Margin="0 0 0 20" />
                 <Image IsVisible="{Binding HasDfuImage}" Source="{Binding DfuImage}" Margin="0 0 0 20" MaxHeight="500" />
-                <Button Content="Configure" Command="{Binding ConfigureCommand}"
+                <Button Content="{x:Static netCore:Resources.ConfigureButtonLabel}" Command="{Binding ConfigureCommand}"
                         HorizontalAlignment="Center"
                         Margin="0 20 0 0" />
             </StackPanel>

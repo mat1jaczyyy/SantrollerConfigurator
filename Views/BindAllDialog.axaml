@@ -6,13 +6,12 @@
         xmlns:viewModels="clr-namespace:GuitarConfigurator.NetCore.ViewModels"
         xmlns:netCore="clr-namespace:GuitarConfigurator.NetCore"
         xmlns:views="clr-namespace:GuitarConfigurator.NetCore.Views"
-        xmlns:assets="clr-namespace:GuitarConfigurator.NetCore.Assets"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GuitarConfigurator.NetCore.Views.BindAllWindow"
         TransparencyLevelHint="AcrylicBlur"
         WindowStartupLocation="CenterOwner"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Santroller Configurator"
+        Title="{x:Static netCore:Resources.ToolName}"
         Background="Transparent"
         SystemDecorations="BorderOnly"
         CanResize="False"
@@ -54,8 +53,8 @@
         <Panel Margin="40">
             <DockPanel HorizontalAlignment="Stretch">
                 <StackPanel Height="50" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
-                    <Button Margin="0 0 5 0" Command="{Binding ContinueCommand}" Content="Continue" Classes="accent" />
-                    <Button Command="{Binding AbortCommand}" Content="Abort" />
+                    <Button Margin="0 0 5 0" Command="{Binding ContinueCommand}" Content="{x:Static netCore:Resources.ContinueLabel}" Classes="accent" />
+                    <Button Command="{Binding AbortCommand}" Content="{x:Static netCore:Resources.AbortLabel}" />
                 </StackPanel>
                 <ScrollViewer>
                     <StackPanel>
@@ -84,9 +83,9 @@
                         <ComboBox VerticalAlignment="Center" SelectedItem="{Binding Input.Pin}"
                                   ItemsSource="{Binding Input.AvailablePins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
-                        <Label IsVisible="{Binding IsAnalog}" Content="{x:Static assets:Resources.DetectAxis}" />
-                        <Label IsVisible="{Binding !IsAnalog}" Content="{x:Static assets:Resources.DetectButton}" />
-                        <Label Content="{x:Static assets:Resources.RawValueLabel}"></Label>
+                        <Label IsVisible="{Binding IsAnalog}" Content="{x:Static netCore:Resources.DetectAxis}" />
+                        <Label IsVisible="{Binding !IsAnalog}" Content="{x:Static netCore:Resources.DetectButton}" />
+                        <Label Content="{x:Static netCore:Resources.RawValueLabel}"></Label>
                         <StackPanel Orientation="Horizontal">
                             <ProgressBar Opacity="0.6"
                                          Value="{Binding RawValue}"

@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using DynamicData;
-using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Outputs;

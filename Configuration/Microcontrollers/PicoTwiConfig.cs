@@ -1,5 +1,4 @@
 using System.Linq;
-using GuitarConfigurator.NetCore.Assets;
 using GuitarConfigurator.NetCore.ViewModels;
 
 namespace GuitarConfigurator.NetCore.Configuration.Microcontrollers;

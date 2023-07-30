@@ -54,7 +54,7 @@
         <ScrollViewer VerticalAlignment="Center">
             <StackPanel Margin="0 0 0 40">
                 <StackPanel IsVisible="{Binding !IsRetailMode}">
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Emulation Type"
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.EmulationTypeLabel}"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
                               SelectedItem="{Binding EmulationType}"
@@ -62,7 +62,7 @@
                               ItemsSource="{Binding EmulationTypes}" />
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Mode"
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.ModeLabel}"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
                               SelectedItem="{Binding Mode}"
@@ -72,18 +72,16 @@
                
                 <StackPanel IsVisible="{Binding IsBluetooth}" Orientation="Vertical">
                     <CheckBox HorizontalAlignment="Stretch" Margin="40 5 40 0" IsChecked="{Binding Connected}"
-                              IsEnabled="False">
-                        Connected to Receiver
-                    </CheckBox>
+                              IsEnabled="False" Content="{x:Static netCore:Resources.ConnectedToReceiverLabel}" />
                     <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Local Address"
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.LocalAddressLabel}"
                                    TextAlignment="Center" />
                         <TextBlock Margin="20 5 20 0" Text="{Binding LocalAddress}" HorizontalAlignment="Stretch" />
                     </StackPanel>
                 </StackPanel>
                 
                 <StackPanel IsVisible="{Binding IsKeyboard}">
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Mouse Movement Type"
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.MouseMovementTypeLabel}"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
                               SelectedItem="{Binding MouseMovementType}"
@@ -91,7 +89,7 @@
                               ItemsSource="{Binding MouseMovementTypes}" />
                 </StackPanel>
                 <StackPanel IsVisible="{Binding IsController}">
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Controller View Type"
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.ControllerViewTypeLabel}"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
                               SelectedItem="{Binding LegendType}"
@@ -99,7 +97,7 @@
                               ItemsSource="{Binding LegendTypes}" />
                 </StackPanel>
                 <StackPanel IsVisible="{Binding IsController}">
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Controller Type"
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.ControllerTypeLabel}"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
                               SelectedItem="{Binding DeviceControllerType}"
@@ -108,12 +106,12 @@
                 </StackPanel>
 
                 <StackPanel>
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Windows Controller Mode"
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.WindowsControllerModeLabel}"
                                TextAlignment="Center" />
                     <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
                               SelectedIndex="{Binding XInputOnWindows}">
-                        <ComboBoxItem>HID Game Controller</ComboBoxItem>
-                        <ComboBoxItem>XInput</ComboBoxItem>
+                        <ComboBoxItem Content="{x:Static netCore:Resources.HIDGameControllerLabel}" />
+                        <ComboBoxItem Content="{x:Static netCore:Resources.XInputLabel}" />
                     </ComboBox>
 
                 </StackPanel>
@@ -133,18 +131,18 @@
                 </StackPanel>
                 <StackPanel IsVisible="{Binding !IsAdvancedMode}">
                     <StackPanel IsVisible="{Binding IsGuitar}">
-                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Queue Based Inputs"
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.QueueBasedInputsLabel}"
                                    TextAlignment="Center" />
                         <ToggleSwitch HorizontalAlignment="Center" Margin="20 5 20 0"
                                       HorizontalContentAlignment="Center" IsChecked="{Binding Deque}"
-                                      OnContent="Enabled"
-                                      OffContent="Disabled" />
+                                      OnContent="{x:Static netCore:Resources.EnabledLabel}"
+                                      OffContent="{x:Static netCore:Resources.DisabledLabel}" />
                     </StackPanel>
                     <TextBlock IsVisible="{Binding !Deque}" HorizontalAlignment="Stretch" Margin="40 5 40 0"
-                               Text="Debounce (0 to disable)"
+                               Text="{x:Static netCore:Resources.DebounceExtraLabel}"
                                TextAlignment="Center" />
                     <TextBlock IsVisible="{Binding Deque}" HorizontalAlignment="Stretch" Margin="40 5 40 0"
-                               Text="Debounce"
+                               Text="{x:Static netCore:Resources.DebounceLabel}"
                                TextAlignment="Center" />
                     <NumericUpDown IsVisible="{Binding Deque}" Margin="20 5 20 0" Value="{Binding DebounceDisplay}"
                                    Minimum="0.5"
@@ -157,7 +155,7 @@
                                    Maximum="25" HorizontalAlignment="Stretch" />
                 </StackPanel>
                 <StackPanel IsVisible="{Binding IsGuitar}">
-                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Strum Debounce (0 to disable)"
+                    <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.StrumDebounceLabel}"
                                TextAlignment="Center" />
                     <DockPanel Margin="20 5 20 0">
                         <NumericUpDown Width="110" FormatString="{}{0:#,0}" Value="{Binding StrumDebounceDisplay}"
@@ -165,17 +163,17 @@
                                        Maximum="25" HorizontalAlignment="Stretch" />
                         <ToggleSwitch HorizontalAlignment="Right"
                                       HorizontalContentAlignment="Right" IsChecked="{Binding CombinedStrumDebounce}"
-                                      OnContent="Combined"
-                                      OffContent="Individual" />
+                                      OnContent="{x:Static netCore:Resources.StrumCombinedLabel}"
+                                      OffContent="{x:Static netCore:Resources.StrumIndividualLabel}" />
                     </DockPanel>
                 </StackPanel>
                 <StackPanel IsVisible="{Binding !IsRetailMode}">
                     <StackPanel>
                         <TextBlock IsVisible="{Binding !IsApa102}" HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                                   Text="LED Type"
+                                   Text="{x:Static netCore:Resources.LEDTypeLabel}"
                                    TextAlignment="Center" />
                         <TextBlock IsVisible="{Binding IsApa102}" HorizontalAlignment="Stretch" Margin="20 5 20 0"
-                                   Text="LED Type / Count"
+                                   Text="{x:Static netCore:Resources.LEDTypeCountLabel}"
                                    TextAlignment="Center" />
 
                         <DockPanel HorizontalAlignment="Stretch" Margin="20 5 20 0" IsVisible="{Binding IsApa102}">
@@ -202,14 +200,14 @@
                                 <Binding Path="IsApa102" />
                             </MultiBinding>
                         </StackPanel.IsVisible>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="APA102 CI / SCK Pin"
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.APA102SCKLabel}"
                                    TextAlignment="Center" />
                         <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
                                   SelectedItem="{Binding Apa102Sck}"
                                   ItemsSource="{Binding AvailableApaSckPins}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                         <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0"
-                                   Text="APA102 DI / MOSI Pin"
+                                   Text="{x:Static netCore:Resources.APA102MOSILabel}"
                                    TextAlignment="Center" />
                         <ComboBox HorizontalAlignment="Stretch" Margin="20 5 20 0"
                                   SelectedItem="{Binding Apa102Mosi}"
@@ -223,40 +221,28 @@
                                IsVisible="{Binding Apa102ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}" />
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="Swap Switch Face Buttons"
+                        <TextBlock HorizontalAlignment="Stretch" Margin="40 5 40 0" Text="{x:Static netCore:Resources.SwapSwitchFaceButtonLabel}"
                                    TextAlignment="Center" />
                         <ToggleSwitch HorizontalAlignment="Center" Margin="20 5 20 0"
                                       HorizontalContentAlignment="Center" IsChecked="{Binding SwapSwitchFaceButtons}"
-                                      OnContent="Enabled"
-                                      OffContent="Disabled" />
+                                      OnContent="{x:Static netCore:Resources.EnabledLabel}"
+                                      OffContent="{x:Static netCore:Resources.DisabledLabel}" />
                     </StackPanel>
                     <Button Command="{Binding AddOutputCommand}" HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center" Margin="20 5 20 0">
-                        Add Binding
-                    </Button>
-                    <Button Command="{Binding SaveConfigCommand}"
-                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0">
-                        Export Config
-                    </Button>
-                    <Button Command="{Binding LoadConfigCommand}"
-                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0">
-                        Import Config
-                    </Button>
+                            HorizontalContentAlignment="Center" Margin="20 5 20 0" Content="{x:Static netCore:Resources.AddBindingLabel}" />
                     <Button Command="{Binding BindAllCommand}" HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center" Margin="20 5 20 0">
-                        Configure all inputs
-                    </Button>
+                            HorizontalContentAlignment="Center" Margin="20 5 20 0" Content="{x:Static netCore:Resources.ConfigureAllInputsLabel}" />
+                    <Button Command="{Binding SaveConfigCommand}"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0" Content="{x:Static netCore:Resources.ExportConfigLabel}" />
+                    <Button Command="{Binding LoadConfigCommand}"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0" Content="{x:Static netCore:Resources.ImportConfigLabel}" />
                 </StackPanel>
 
                 <StackPanel IsVisible="{Binding !IsRetailMode}">
                     <Button Command="{Binding ResetWithConfirmationCommand}"
-                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0">
-                        Load Defaults
-                    </Button>
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0" Content="{x:Static netCore:Resources.LoadDefaultsLabel}" />
                     <Button Command="{Binding ClearOutputsCommand}"
-                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0">
-                        Clear All
-                    </Button>
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="20 5 20 0" Content="{x:Static netCore:Resources.ClearAllLabel}" />
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
