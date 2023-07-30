@@ -2004,6 +2004,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate />
         </netCore:OutputTemplateSelector>
         <DataTemplate DataType="output:Output" x:Key="OutputTemplate">
             <StackPanel Opacity="{Binding CombinedOpacity}">
@@ -2086,7 +2087,6 @@
                             ContentTemplate="{StaticResource OutputTemplate}" Background="{Binding CombinedBackground}"
                             Padding="10" Margin="0 5 10 5" Width="720" />
         </DataTemplate>
-        <DataTemplate />
     </UserControl.Resources>
     <Panel>
         <DockPanel HorizontalAlignment="Stretch">

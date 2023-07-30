@@ -2001,15 +2001,15 @@ namespace GuitarConfigurator.NetCore {
             }
         }
         
-        public static string UsbHostInputTypeAccelZ {
-            get {
-                return ResourceManager.GetString("UsbHostInputTypeAccelZ", resourceCulture);
-            }
-        }
-        
         public static string UsbHostInputTypeAccelY {
             get {
                 return ResourceManager.GetString("UsbHostInputTypeAccelY", resourceCulture);
+            }
+        }
+        
+        public static string UsbHostInputTypeAccelZ {
+            get {
+                return ResourceManager.GetString("UsbHostInputTypeAccelZ", resourceCulture);
             }
         }
         

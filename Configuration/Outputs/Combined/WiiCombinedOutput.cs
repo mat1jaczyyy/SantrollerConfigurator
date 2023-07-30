@@ -141,6 +141,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
         WiiInputType.GuitarTapBar,
         WiiInputType.UDrawPenPressure,
         WiiInputType.DrawsomePenPressure,
+        WiiInputType.DjTurntableLeft,
+        WiiInputType.DjTurntableRight
     };
 
     private static readonly Dictionary<DjAxisType, StandardAxisType> DjToStandard = new()
@@ -381,7 +383,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
     public override void UpdateBindings()
     {
         
-        if (Model.DeviceControllerType == DeviceControllerType.DancePad)
+        if (Model.DeviceControllerType is not DeviceControllerType.Gamepad)
         {
             Outputs.RemoveMany(Outputs.Items.Where(s => s is OutputAxis));
         }
@@ -471,29 +473,18 @@ public class WiiCombinedOutput : CombinedTwiOutput
             }
         }
 
-        // Map the Whammy axis to right stick x on anything that isnt a guitar, and whammy on a guitar
         if (Model.DeviceControllerType.IsGuitar())
         {
             if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}))
             {
-                var items = Outputs.Items.Where(s => s is ControllerAxis {Type: StandardAxisType.RightStickX}).ToList();
-                Outputs.RemoveMany(items);
-                Outputs.AddRange(items.Cast<ControllerAxis>().Select(item => new GuitarAxis(Model, item.Input,
-                    item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
-                    GuitarAxisType.Whammy, true)));
+                Outputs.Add(new GuitarAxis(Model, new WiiInput(WiiInputType.GuitarWhammy, Model, Sda, Scl, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 8000,  GuitarAxisType.Whammy, true));
             }
         }
         else
         {
-            var items2 = Outputs.Items.Where(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}).ToList();
-            if (items2.Any())
-            {
-                Outputs.RemoveMany(items2);
-                Outputs.AddRange(items2.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input,
-                    item.LedOn,
-                    item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
-                    ushort.MaxValue,StandardAxisType.RightStickX, true)));
-            }
+            Outputs.RemoveMany(Outputs.Items.Where(s => s is GuitarAxis {Type: GuitarAxisType.Whammy}));
         }
 
         // Map Slider on guitars to Slider, and to RightStickY on anything else
@@ -501,24 +492,14 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {
             if (!Outputs.Items.Any(s => s is GuitarAxis {Type: GuitarAxisType.Slider}))
             {
-                var items = Outputs.Items.Where(s => s is ControllerAxis {Type: StandardAxisType.RightStickY}).ToList();
-                Outputs.RemoveMany(items);
-                Outputs.AddRange(items.Cast<ControllerAxis>().Select(item => new GuitarAxis(Model, item.Input,
-                    item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
-                    GuitarAxisType.Slider, true)));
+                Outputs.Add(new GuitarAxis(Model, new WiiInput(WiiInputType.GuitarTapBar, Model, Sda, Scl, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 0,  GuitarAxisType.Slider, true));
             }
         }
         else
         {
-            var items2 = Outputs.Items.Where(s => s is GuitarAxis {Type: GuitarAxisType.Slider}).ToList();
-            if (items2.Any())
-            {
-                Outputs.RemoveMany(items2);
-                Outputs.AddRange(items2.Cast<GuitarAxis>().Select(item => new ControllerAxis(Model, item.Input,
-                    item.LedOn,
-                    item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
-                    ushort.MaxValue,StandardAxisType.RightStickY, true)));
-            }
+            Outputs.RemoveMany(Outputs.Items.Where(s => s is GuitarAxis {Type: GuitarAxisType.Slider}));
         }
 
         InstrumentButtonTypeExtensions.ConvertBindings(Outputs, Model, true);
@@ -536,28 +517,33 @@ public class WiiCombinedOutput : CombinedTwiOutput
                 Outputs.AddRange(items.Select(item => new DjButton(Model, item.Input,
                     item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Debounce, djInputType, true)));
             }
-
-            foreach (var (dj, standard) in DjToStandard)
+            if (!Outputs.Items.Any(s => s is DjAxis {Type: DjAxisType.Crossfader}))
             {
-                var items = currentAxisStandard.Where(s => s.Type == standard).ToList();
-                Outputs.RemoveMany(items);
-                if (dj is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity or DjAxisType.EffectsKnob)
-                {
-                    Outputs.AddRange(items.Select(item => new DjAxis(Model, item.Input,
-                        item.LedOn, item.LedOff, item.LedIndices.ToArray(), 1,
-                        dj, true)));
-                }
-                else
-                {
-                    Outputs.AddRange(items.Select(item => new DjAxis(Model, item.Input,
-                        item.LedOn, item.LedOff, item.LedIndices.ToArray(), item.Min, item.Max, item.DeadZone,
-                        dj, true)));
-                }
+                Outputs.Add(new DjAxis(Model, new WiiInput(WiiInputType.DjCrossfadeSlider, Model, Sda, Scl, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 0,  DjAxisType.Crossfader, true));
+            }
+            if (!Outputs.Items.Any(s => s is DjAxis {Type: DjAxisType.EffectsKnob}))
+            {
+                Outputs.Add(new DjAxis(Model, new WiiInput(WiiInputType.DjEffectDial, Model, Sda, Scl, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), 0, ushort.MaxValue, 0,  DjAxisType.EffectsKnob, true));
+            }
+            if (!Outputs.Items.Any(s => s is DjAxis {Type: DjAxisType.LeftTableVelocity}))
+            {
+                Outputs.Add(new DjAxis(Model, new WiiInput(WiiInputType.DjTurntableLeft, Model, Sda, Scl, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,  DjAxisType.LeftTableVelocity, true));
+            }
+            if (!Outputs.Items.Any(s => s is DjAxis {Type: DjAxisType.RightTableVelocity}))
+            {
+                Outputs.Add(new DjAxis(Model, new WiiInput(WiiInputType.DjTurntableRight, Model, Sda, Scl, true),
+                    Colors.Black,
+                    Colors.Black, Array.Empty<byte>(), short.MinValue, short.MaxValue, 0,  DjAxisType.RightTableVelocity, true));
             }
         }
         else
         {
-            var currentAxisDj = Outputs.Items.OfType<DjAxis>();
             var currentButtonDj = Outputs.Items.OfType<DjButton>();
             foreach (var djButton in currentButtonDj)
             {
@@ -566,14 +552,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
                     djButton.LedOn, djButton.LedOff, djButton.LedIndices.ToArray(), djButton.Debounce,
                     Buttons[DjToWiiButton[djButton.Type]], true));
             }
-
-            foreach (var djAxis in currentAxisDj)
-            {
-                Outputs.Remove(djAxis);
-                Outputs.Add(new ControllerAxis(Model, djAxis.Input,
-                    djAxis.LedOn, djAxis.LedOff, djAxis.LedIndices.ToArray(), djAxis.Min, djAxis.Max, djAxis.DeadZone,
-                    ushort.MaxValue,DjToStandard[djAxis.Type], true));
-            }
+            Outputs.RemoveMany(Outputs.Items.Where(s => s is DjAxis));
         }
     }
 

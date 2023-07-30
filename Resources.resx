@@ -714,22 +714,22 @@
         <value>Rock Band Stage Kit</value>
     </data>
     <data name="TwiPinTypeSda" xml:space="preserve">
-        <value>Sda</value>
+        <value>SDA</value>
     </data>
     <data name="TwiPinTypeScl" xml:space="preserve">
-        <value>Scl</value>
+        <value>SCL</value>
     </data>
     <data name="SpiPinTypeCSn" xml:space="preserve">
         <value>CSn</value>
     </data>
     <data name="SpiPinTypeSck" xml:space="preserve">
-        <value>Sck</value>
+        <value>SCK</value>
     </data>
     <data name="SpiPinTypeMosi" xml:space="preserve">
-        <value>Mosi</value>
+        <value>MOSI</value>
     </data>
     <data name="SpiPinTypeMiso" xml:space="preserve">
-        <value>Miso</value>
+        <value>MISO</value>
     </data>
     <data name="StandardAxisTypeLeftStickX" xml:space="preserve">
         <value>Left Joystick X Axis</value>
@@ -1009,13 +1009,13 @@
         <value>Crossfader</value>
     </data>
     <data name="UsbHostInputTypeAccelX" xml:space="preserve">
-        <value>AccelX</value>
-    </data>
-    <data name="UsbHostInputTypeAccelZ" xml:space="preserve">
-        <value>AccelZ</value>
+        <value>Acceleration X</value>
     </data>
     <data name="UsbHostInputTypeAccelY" xml:space="preserve">
-        <value>AccelY</value>
+        <value>Acceleration Y</value>
+    </data>
+    <data name="UsbHostInputTypeAccelZ" xml:space="preserve">
+        <value>Acceleration Z</value>
     </data>
     <data name="UsbHostInputTypeGyro" xml:space="preserve">
         <value>Gyro</value>
@@ -1484,10 +1484,10 @@
         <value>Crossfader</value>
     </data>
     <data name="DjAxisTypeLeftTableVelocity" xml:space="preserve">
-        <value>LeftTableVelocity</value>
+        <value>Left Turntable Spin</value>
     </data>
     <data name="DjAxisTypeRightTableVelocity" xml:space="preserve">
-        <value>RightTableVelocity</value>
+        <value>Right Turntable Spin</value>
     </data>
     <data name="DjInputTypeLeftTurntable" xml:space="preserve">
         <value>Left Turntable Spin</value>
