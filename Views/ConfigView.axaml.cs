@@ -7,7 +7,6 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
-using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Devices;
@@ -40,10 +39,15 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
             disposables(
                 ViewModel!.WhenAnyValue(x => x.Device).OfType<Santroller>()
                     .ObserveOn(RxApp.MainThreadScheduler).Subscribe(s => s.StartTicking(ViewModel)));
-            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.KeyDown += (sender, args) => ViewModel!.OnKeyEvent(args);
-            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerMoved += (sender, args) => ViewModel!.OnMouseEvent(args.GetCurrentPoint(GetValue(VisualParentProperty)).Position);
-            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerPressed += (sender, args) => ViewModel!.OnMouseEvent(args.GetCurrentPoint(GetValue(VisualParentProperty)).Properties.PointerUpdateKind);
-            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerWheelChanged += (sender, args) => ViewModel!.OnMouseEvent(args);
+            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.KeyDown +=
+                (sender, args) => ViewModel!.OnKeyEvent(args);
+            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerMoved += (sender, args) =>
+                ViewModel!.OnMouseEvent(args.GetCurrentPoint(GetValue(VisualParentProperty)).Position);
+            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerPressed += (sender, args) =>
+                ViewModel!.OnMouseEvent(args.GetCurrentPoint(GetValue(VisualParentProperty)).Properties
+                    .PointerUpdateKind);
+            TopLevel.GetTopLevel(GetValue(VisualParentProperty))!.PointerWheelChanged +=
+                (sender, args) => ViewModel!.OnMouseEvent(args);
         });
         AvaloniaXamlLoader.Load(this);
     }
