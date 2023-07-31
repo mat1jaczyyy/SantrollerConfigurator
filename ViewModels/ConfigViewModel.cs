@@ -120,7 +120,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Subscribe();
         Outputs = outputs;
         SupportsReset = !device.IsMini() && !device.IsEsp32();
-
         _usbHostDm = new DirectPinConfig(this, UsbHostPinTypeDm, -1, DevicePinMode.Skip);
         _usbHostDp = new DirectPinConfig(this, UsbHostPinTypeDp, -1, DevicePinMode.Skip);
         if (!device.LoadConfiguration(this))
