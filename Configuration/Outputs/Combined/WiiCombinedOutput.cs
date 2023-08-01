@@ -143,8 +143,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
         WiiInputType.GuitarTapBar,
         WiiInputType.UDrawPenPressure,
         WiiInputType.DrawsomePenPressure,
-        WiiInputType.DjTurntableLeft,
-        WiiInputType.DjTurntableRight
+        WiiInputType.DjCrossfadeSlider,
+        WiiInputType.DjEffectDial
     };
 
     private static readonly Dictionary<DjAxisType, StandardAxisType> DjToStandard = new()
