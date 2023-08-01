@@ -481,8 +481,8 @@ public class WiiInput : TwiInput
                     WiiInputType.DjHeroRightRed => wiiButtonsLow & (1 << 1),
                     WiiInputType.DjHeroRightBlue => wiiButtonsHigh & (1 << 2),
                     WiiInputType.DjHeroEuphoria => wiiButtonsHigh & (1 << 4),
-                    WiiInputType.DjCrossfadeSlider => (wiiData[2] & 0x1E) >> 1,
-                    WiiInputType.DjEffectDial => ((wiiData[3] & 0xE0) >> 5) | ((wiiData[2] & 0x60) >> 2),
+                    WiiInputType.DjCrossfadeSlider => ((wiiData[2] & 0x1E) >> 1) << 12,
+                    WiiInputType.DjEffectDial => (((wiiData[3] & 0xE0) >> 5) | ((wiiData[2] & 0x60) >> 2)) << 11,
                     WiiInputType.DjStickX => ((wiiData[0] & 0x3F) - 0x20) << 10,
                     WiiInputType.DjStickY => ((wiiData[1] & 0x3F) - 0x20) << 10,
                     WiiInputType.DjTurntableLeft =>
