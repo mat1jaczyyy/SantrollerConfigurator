@@ -154,23 +154,24 @@ public partial class DjAxis : OutputAxis
         // So convert to the right method for that console, and then shift for ps3
         var generated = $"({Input.Generate()})";
         var generatedPs3 = generated;
-        var generatedTable = $"({generated} * {-Multiplier << 8})";
-        var generatedTablePs3 = $"({generated} * {Multiplier})";
         
         if (InputIsUint)
         {
+            // 360 needs int, uint -> int
             generated = $"({generated} - INT16_MAX)";
-            generatedTable = generated;
         }
         else
         {
+            // ps3 needs uint, int -> uint
             generatedPs3 = $"({generated} + INT16_MAX)";
-            generatedTablePs3 = $"({generated} + 128)";
         }
+        // Table just applies a multiplier to the value
+        var generatedTable = $"({generated} * {Multiplier})";
+        var generatedTablePs3 = $"(({generatedPs3} >> 8) * {Multiplier})";
 
         var gen = Type switch
         {
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Universal
                 => generatedTablePs3,
             DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity
                 => generatedTable,
