@@ -38,6 +38,8 @@ public class WiiCombinedOutput : CombinedTwiOutput
         {WiiInputType.DjHeroRightRed, StandardButtonType.B},
         {WiiInputType.DjHeroRightBlue, StandardButtonType.X},
         {WiiInputType.DjHeroEuphoria, StandardButtonType.Y},
+        {WiiInputType.DjHeroPlus, StandardButtonType.Start},
+        {WiiInputType.DjHeroMinus, StandardButtonType.Back},
         {WiiInputType.NunchukC, StandardButtonType.A},
         {WiiInputType.NunchukZ, StandardButtonType.B},
         {WiiInputType.GuitarGreen, StandardButtonType.A},
