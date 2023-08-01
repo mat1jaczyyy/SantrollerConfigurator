@@ -524,6 +524,7 @@ public class WiiInput : TwiInput
         }
 
         var ret = "";
+
         if (mappedBindings.ContainsKey(WiiControllerType.ClassicController))
         {
             var mappings = mappedBindings[WiiControllerType.ClassicController];
