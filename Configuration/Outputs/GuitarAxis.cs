@@ -170,7 +170,7 @@ public class GuitarAxis : OutputAxis
                           }}";
             case ConfigField.XboxOne when Type is GuitarAxisType.Tilt :
                 // XB1 tilt is similar enough to ps3 that we can just use it
-                return $"{GenerateOutput(mode)} = {GenerateAssignment(ConfigField.Ps3, false, false, false)};";
+                return $"{GenerateOutput(mode)} = {GenerateAssignment(GenerateOutput(mode), ConfigField.Ps3, false, false, false)};";
             case ConfigField.Xbox360 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
                 // x360 slider is actually a int16_t BUT there is a mechanism to convert the uint8 value to its uint16_t version
                 if (analogOn > 0x80)
@@ -220,7 +220,7 @@ public class GuitarAxis : OutputAxis
                      } &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 return $@"if ({Input.Generate()}) {{
-                            {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
+                            {GenerateOutput(mode)} = {GenerateAssignment(GenerateOutput(mode), mode, true, false, false)};
                           }}";
             // PS3 GHL expects tilt on accelerometer AND right stick x
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
@@ -244,8 +244,8 @@ public class GuitarAxis : OutputAxis
 
                 // GHL expects right stick x to go to 0xFF or 0x00 to signify tilt being active
                 return $@"if ({Input.Generate()}) {{
-                            {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
-                            uint8_t tilt_test = {GenerateAssignment(mode, false, false, false)};
+                            {GenerateOutput(mode)} = {GenerateAssignment(GenerateOutput(mode), mode, true, false, false)};
+                            uint8_t tilt_test = {GenerateAssignment(GenerateOutput(mode), mode, false, false, false)};
                             if (tilt_test > 0xF0) {{
                                 report->tilt2 = 0xFF;
                             }}
@@ -258,9 +258,6 @@ public class GuitarAxis : OutputAxis
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
                 // PS3 rb uses a digital bit, so just map the bit right across and skip the analog conversion
                 return $@"if ({Input.Generate()}) {{
-                            if (output_console_type != PS3 && output_console_type != REAL_PS3) {{
-                                {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
-                            }}
                             report->tiltDigital = true;
                           }}";
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
@@ -268,10 +265,7 @@ public class GuitarAxis : OutputAxis
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 // PS3 RB expects tilt as a digital bit, so map that here. Still map a ps3 variant of the tilt though
                 return $@"if ({Input.Generate()}) {{
-                            if (output_console_type != PS3 && output_console_type != REAL_PS3) {{
-                                {GenerateOutput(mode)} = {GenerateAssignment(mode, true, false, false)};
-                            }}
-                            report->tiltDigital = {GenerateAssignment(mode, false, false, false)} == 0xFF;
+                            report->tiltDigital = {GenerateAssignment(GenerateOutput(mode), mode, false, false, false)} == 0xFF;
                           }}";
             // Xbox 360 Pickup Selector is actually on one of the triggers.
             case ConfigField.Xbox360
@@ -286,7 +280,7 @@ public class GuitarAxis : OutputAxis
             case ConfigField.Xbox360
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
-                return $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, true, false)};";
+                return $"{GenerateOutput(mode)} = {GenerateAssignment(GenerateOutput(mode), mode, false, true, false)};";
             // Xbox One pickup selector ranges from 0 - 64, so we need to map it correctly.
             case ConfigField.XboxOne
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
@@ -298,12 +292,12 @@ public class GuitarAxis : OutputAxis
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
                 return
-                    $"{GenerateOutput(mode)} = (((({GenerateAssignment(mode, false, true, false)}) >> 10) + 1) & 0xF0);";
+                    $"{GenerateOutput(mode)} = (((({GenerateAssignment(GenerateOutput(mode), mode, false, true, false)}) >> 10) + 1) & 0xF0);";
             default:
                 if (Input is DigitalToAnalog)
                     return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
                 return
-                    $"{GenerateOutput(mode)} = {GenerateAssignment(mode, false, false, Type is GuitarAxisType.Whammy)};";
+                    $"{GenerateOutput(mode)} = {GenerateAssignment(GenerateOutput(mode), mode, false, false, Type is GuitarAxisType.Whammy)};";
         }
     }
 

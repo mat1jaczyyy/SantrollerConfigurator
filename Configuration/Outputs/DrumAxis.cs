@@ -333,7 +333,7 @@ public partial class DrumAxis : OutputAxis
         // and then convert them to their expected output format, before writing to the output report.
         return $@"
         {{
-            uint16_t val_real = {GenerateAssignment(mode, false, false, false)};
+            uint16_t val_real = {GenerateAssignment(GenerateOutput(mode), mode, false, false, false)};
             if (val_real) {{
                 {reset}
                 {GenerateOutput(mode)} = {assignedVal};

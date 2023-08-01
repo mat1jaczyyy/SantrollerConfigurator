@@ -313,7 +313,7 @@ public abstract partial class OutputAxis : Output
         };
     }
 
-    public string GenerateAssignment(ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
+    public string GenerateAssignment(string prev, ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
     {
         if (Input is FixedInput or DigitalToAnalog) return Input.Generate();
 
@@ -448,8 +448,8 @@ public abstract partial class OutputAxis : Output
         var mulInt = (short) (multiplier * 512);
 
         return intBased
-            ? $"{function}({generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
-            : $"{function}({generated}, {min}, {mulInt}, {DeadZone})";
+            ? $"{function}({prev}, {generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
+            : $"{function}({prev}, {generated}, {min}, {mulInt}, {DeadZone})";
     }
 
 
@@ -480,7 +480,7 @@ public abstract partial class OutputAxis : Output
                 }
             }
 
-            return $"{output} = {GenerateAssignment(mode, false, false, false)};{extraTrigger}";
+            return $"{output} = {GenerateAssignment(output, mode, false, false, false)};{extraTrigger}";
         }
 
         // Digital to Analog stores values based on uint16_t for trigger, and int16_t for sticks

@@ -146,15 +146,17 @@ public partial class DjAxis : OutputAxis
     {
         if (mode == ConfigField.Shared)
             return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
-        if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.XboxOne or ConfigField.Xbox360 or ConfigField.Universal)) return "";
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.XboxOne or ConfigField.Xbox360
+            or ConfigField.Universal)) return "";
 
         // The crossfader and effects knob on ps3 controllers are shoved into the accelerometer data
-        var accelerometer = mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture && Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
+        var accelerometer = mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture &&
+                            Type is DjAxisType.Crossfader or DjAxisType.EffectsKnob;
         // PS3 needs uint, xb360 needs int
         // So convert to the right method for that console, and then shift for ps3
         var generated = $"({Input.Generate()})";
         var generatedPs3 = generated;
-        
+
         if (InputIsUint)
         {
             // 360 needs int, uint -> int
@@ -165,23 +167,30 @@ public partial class DjAxis : OutputAxis
             // ps3 needs uint, int -> uint
             generatedPs3 = $"({generated} + INT16_MAX)";
         }
+
         // Table just applies a multiplier to the value
         var generatedTable = $"({generated} * {Multiplier})";
         var generatedTablePs3 = $"(({generatedPs3} >> 8) * {Multiplier})";
 
         var gen = Type switch
         {
-            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Universal
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity when mode is ConfigField.Ps3
+                    or ConfigField.Ps3WithoutCapture or ConfigField.Universal
                 => generatedTablePs3,
             DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity
                 => generatedTable,
             DjAxisType.EffectsKnob when mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 => $"(({generatedPs3} >> 6))",
             DjAxisType.EffectsKnob => generated,
-            _ => GenerateAssignment(mode, accelerometer, false, false)
+            _ => GenerateAssignment(GenerateOutput(mode), mode, accelerometer, false, false)
         };
-
-        return $"{GenerateOutput(mode)} = {gen};";
+        return Type switch
+        {
+            DjAxisType.Crossfader => $"{GenerateOutput(mode)} = {gen};",
+            DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity =>
+                $"dj_temp={gen}; if (abs(dj_temp) > abs({GenerateOutput(mode)})){{{GenerateOutput(mode)} = dj_temp;}}",
+            _ => $"dj_temp={gen}; if (dj_temp > {GenerateOutput(mode)}){{{GenerateOutput(mode)} = dj_temp;}}"
+        };
     }
 
     protected override string MinCalibrationText()
