@@ -62,6 +62,7 @@ public class ConfigurableUsbDeviceManager
                     WinUsbDevice.Open(path, out var dev);
                     if (dev == null) return;
                     var revision = (ushort)dev.Info.Descriptor.BcdDevice;
+                    serial = dev.Info.SerialString;
                     _model.AvailableDevices.Add(new Santroller(path, dev, serial, revision));
                 }
                 else if (guid == Ardwiino.DeviceGuid)
