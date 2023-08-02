@@ -71,6 +71,7 @@ public class Santroller : ConfigurableUsbDevice
     private bool _picking;
     private readonly DispatcherTimer _timer;
     private ReadOnlyObservableCollection<Output>? _bindings;
+    private ConsoleType? _currentMode;
 
     public Santroller(string path, UsbDevice device, string serial,
         ushort version) : base(
@@ -79,8 +80,13 @@ public class Santroller : ConfigurableUsbDevice
         _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
         _microcontroller = new Pico(Board.Generic);
         _deviceControllerType = (DeviceControllerType)(version >> 8);
+        _currentMode = (ConsoleType) (serial[^3] - '0');
         if (device is IUsbDevice usbDevice) usbDevice.ClaimInterface(2);
-
+        if (_currentMode is not (ConsoleType.Universal or ConsoleType.Windows))
+        {
+            InvalidDevice = true;
+            return;
+        }
         Load();
         if (Board.Name == Board.Generic.Name)
         {
@@ -386,7 +392,16 @@ public class Santroller : ConfigurableUsbDevice
 
     public override string ToString()
     {
-        if (InvalidDevice) return Resources.ErrorNotPCMode;
+        if (InvalidDevice)
+        {
+            var ret2 = Resources.ErrorNotPCMode;
+            if (_currentMode != null)
+            {
+                ret2 += $" (Currently {EnumToStringConverter.Convert(_currentMode)})";
+            }
+
+            return ret2;
+        }
 
         var ret = $"Santroller - {Board.Name}";
         ret += $" - {EnumToStringConverter.Convert(_deviceControllerType)}";
