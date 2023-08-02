@@ -479,7 +479,6 @@ public abstract partial class OutputAxis : Output
                         }}";
                 }
             }
-
             return $"{output} = {GenerateAssignment(output, mode, false, false, false)};{extraTrigger}";
         }
 
