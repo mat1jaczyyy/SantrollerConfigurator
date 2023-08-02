@@ -404,7 +404,7 @@ public class Santroller : ConfigurableUsbDevice
         if (InvalidDevice)
         {
             var ret2 = Resources.ErrorNotPCMode;
-            if (_currentMode != null)
+            if (_currentMode is not (ConsoleType.Universal or ConsoleType.Windows))
             {
                 ret2 += $" (Currently {EnumToStringConverter.Convert(_currentMode)})";
             }
