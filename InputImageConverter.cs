@@ -68,6 +68,7 @@ public class InputImageConverter : IMultiValueConverter
                 SimpleType.Led => "Led",
                 SimpleType.Rumble => "Rumble",
                 SimpleType.ConsoleMode => "Console",
+                SimpleType.Reset => "Reset",
                 _ => null
             },
             

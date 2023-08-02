@@ -4083,6 +4083,12 @@ namespace GuitarConfigurator.NetCore {
             }
         }
         
+        public static string SimpleTypeReset {
+            get {
+                return ResourceManager.GetString("SimpleTypeReset", resourceCulture);
+            }
+        }
+        
         public static string SimpleTypeBluetooth {
             get {
                 return ResourceManager.GetString("SimpleTypeBluetooth", resourceCulture);

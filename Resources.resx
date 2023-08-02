@@ -2153,6 +2153,9 @@
     <data name="SimpleTypeUsbHost" xml:space="preserve">
         <value>USB Host Inputs</value>
     </data>
+    <data name="SimpleTypeReset" xml:space="preserve">
+        <value>Controller Reset</value>
+    </data>
     <data name="SimpleTypeBluetooth" xml:space="preserve">
         <value>Bluetooth Inputs</value>
     </data>

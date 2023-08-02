@@ -11,5 +11,6 @@ public enum SimpleType
     Bluetooth,
     Led,
     Rumble,
-    ConsoleMode
+    ConsoleMode,
+    Reset
 }
