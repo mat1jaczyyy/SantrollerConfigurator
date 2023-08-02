@@ -360,7 +360,7 @@ public abstract partial class OutputAxis : Output
                 function = "handle_calibration_ps3_360_trigger";
                 if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
                 break;
-            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Shared or ConfigField.Universal when whammy:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture when whammy:
                 function = "handle_calibration_ps3_whammy";
                 if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
                 break;
