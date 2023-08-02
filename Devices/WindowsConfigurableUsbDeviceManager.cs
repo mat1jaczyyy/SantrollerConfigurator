@@ -63,6 +63,12 @@ public class ConfigurableUsbDeviceManager
                     if (dev == null) return;
                     var revision = (ushort)dev.Info.Descriptor.BcdDevice;
                     serial = dev.Info.SerialString;
+                    // If a device gets disconnected just after connection (aka when swapping to xinput)
+                    // Then we dont get a serial string.
+                    if (string.IsNullOrEmpty(serial))
+                    {
+                        return;
+                    }
                     _model.AvailableDevices.Add(new Santroller(path, dev, serial, revision));
                 }
                 else if (guid == Ardwiino.DeviceGuid)
