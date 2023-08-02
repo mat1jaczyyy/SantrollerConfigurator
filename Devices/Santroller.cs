@@ -79,14 +79,23 @@ public class Santroller : ConfigurableUsbDevice
     {
         _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
         _microcontroller = new Pico(Board.Generic);
-        _deviceControllerType = (DeviceControllerType)(version >> 8);
+        _deviceControllerType = (DeviceControllerType) (version >> 8);
         _currentMode = (ConsoleType) (serial[^3] - '0');
         if (device is IUsbDevice usbDevice) usbDevice.ClaimInterface(2);
+#if Windows
+        var isXinput = (serial[^1] - '0') != 0;
+        if (isXinput && _currentMode != ConsoleType.Windows)
+        {
+            InvalidDevice = true;
+            return;
+        }
+#endif
         if (_currentMode is not (ConsoleType.Universal or ConsoleType.Windows))
         {
             InvalidDevice = true;
             return;
         }
+
         Load();
         if (Board.Name == Board.Generic.Name)
         {
@@ -266,7 +275,8 @@ public class Santroller : ConfigurableUsbDevice
 
     private void Diff()
     {
-        if (_model == null || _currentConfig == null || _lastConfig == null || _currentConfigData == null || _bindings == null) return;
+        if (_model == null || _currentConfig == null || _lastConfig == null || _currentConfigData == null ||
+            _bindings == null) return;
         _currentConfig.Update(_model, _bindings, false);
         using var outputStream = new MemoryStream(_currentConfigData);
         try
@@ -278,13 +288,12 @@ public class Santroller : ConfigurableUsbDevice
         {
             _model.Main.SetDifference(true);
         }
-
     }
 
     public void StartTicking(ConfigViewModel model)
     {
         _model = model;
-        
+
         model.Bindings.Connect().Bind(out var allOutputs).Subscribe();
         _bindings = allOutputs;
         _timer.Start();
