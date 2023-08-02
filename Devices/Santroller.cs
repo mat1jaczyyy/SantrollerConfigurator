@@ -71,7 +71,7 @@ public class Santroller : ConfigurableUsbDevice
     private bool _picking;
     private readonly DispatcherTimer _timer;
     private ReadOnlyObservableCollection<Output>? _bindings;
-    private ConsoleType? _currentMode;
+    private readonly ConsoleType _currentMode;
 
     public Santroller(string path, UsbDevice device, string serial,
         ushort version) : base(
