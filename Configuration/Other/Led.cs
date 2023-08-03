@@ -484,7 +484,7 @@ public class Led : Output
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
     {
         if (mode is not (ConfigField.StrobeLed or ConfigField.AuthLed or ConfigField.PlayerLed or ConfigField.RumbleLed
-            or ConfigField.KeyboardLed or ConfigField.LightBarLed or ConfigField.OffLed)) return "";
+            or ConfigField.KeyboardLed or ConfigField.LightBarLed or ConfigField.OffLed or ConfigField.InitLed)) return "";
         var on = "";
         var off = "";
         var between = "";
@@ -526,15 +526,20 @@ public class Led : Output
                 return on;
         }
 
-        if (mode is ConfigField.KeyboardLed && Command is LedCommandType.KeyboardCapsLock
+        switch (mode)
+        {
+            case ConfigField.InitLed:
+                return off;
+            case ConfigField.KeyboardLed when Command is LedCommandType.KeyboardCapsLock
                 or LedCommandType.KeyboardNumLock
-                or LedCommandType.KeyboardScrollLock)
-            return
-                $@"if (leds & {1 << (Command - LedCommandType.KeyboardCapsLock)}) {{
+                or LedCommandType.KeyboardScrollLock:
+                return
+                    $@"if (leds & {1 << (Command - LedCommandType.KeyboardCapsLock)}) {{
                     {on}
                 }} else {{
                     {off}
                 }}";
+        }
 
         switch (Command)
         {

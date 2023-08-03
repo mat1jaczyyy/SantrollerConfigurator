@@ -807,6 +807,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             // And also store a count
             lines.Add($"#define ADC_COUNT {analogPins.Count}");
             lines.Add($"#define PIN_INIT {GenerateInit()}");
+            lines.Add($"#define LED_INIT {GenerateTick(ConfigField.InitLed)}");
 
             // Copy in any specific config for the different pin configs (like spi and twi config on the pico)
             lines.Add(GetPinConfigs().Distinct().Aggregate("", (current, config) => current + config.Generate()));
@@ -851,6 +852,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             lines.Add("#define ADC_PINS {}");
             lines.Add($"#define ADC_COUNT 0");
             lines.Add($"#define PIN_INIT");
+            lines.Add($"#define LED_INIT");
         }
 
         File.WriteAllLines(configFile, lines);

@@ -19,5 +19,6 @@ public enum ConfigField
     KeyboardLed,
     StrobeLed,
     LightBarLed,
+    InitLed,
     Detection
 }
