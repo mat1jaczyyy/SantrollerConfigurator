@@ -123,12 +123,6 @@ namespace GuitarConfigurator.NetCore {
             }
         }
         
-        public static string LedColour {
-            get {
-                return ResourceManager.GetString("LedColour", resourceCulture);
-            }
-        }
-        
         public static string LedColourActiveStarPower {
             get {
                 return ResourceManager.GetString("LedColourActiveStarPower", resourceCulture);

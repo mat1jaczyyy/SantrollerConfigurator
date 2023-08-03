@@ -62,9 +62,6 @@
     <data name="LEDColourActiveFog" xml:space="preserve">
         <value>Fog Active LED Colour</value>
     </data>
-    <data name="LedColour" xml:space="preserve">
-        <value>LED Colour</value>
-    </data>
     <data name="LedColourActiveStarPower" xml:space="preserve">
         <value>Star Power Full Colour</value>
     </data>

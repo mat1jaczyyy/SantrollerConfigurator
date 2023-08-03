@@ -358,7 +358,7 @@ public class Led : Output
     public override string LedOnLabel => Command switch
     {
         LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => Resources.LEDColourActiveFog,
-        LedCommandType.Player or LedCommandType.Auth => Resources.LedColour,
+        LedCommandType.Player or LedCommandType.Auth => Resources.LedColourActive,
         LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => Resources.LedColourActiveStarPower,
         LedCommandType.DjEuphoria => Resources.LedColourActiveDjEuphoria,
         _ => Resources.LedColourActive
@@ -367,13 +367,13 @@ public class Led : Output
     public override string LedOffLabel => Command switch
     {
         LedCommandType.StageKitLed when StageKitCommand is StageKitCommand.Fog => Resources.LedColourInactiveFog,
-        LedCommandType.Player or LedCommandType.Auth => Resources.LedColour,
+        LedCommandType.Player or LedCommandType.Auth => Resources.LedColourInactive,
         LedCommandType.StarPowerActive or LedCommandType.StarPowerInactive => Resources.LedColourInactiveStarPower,
         LedCommandType.DjEuphoria => Resources.LedColourInactiveDjEuphoria,
         _ => Resources.LedColourInactive
     };
 
-    public override bool SupportsLedOff => Command is not LedCommandType.Auth or LedCommandType.Player;
+    public override bool SupportsLedOff => Command is not (LedCommandType.Auth or LedCommandType.Player);
 
     public override bool IsKeyboard => false;
     public virtual bool IsController => false;
