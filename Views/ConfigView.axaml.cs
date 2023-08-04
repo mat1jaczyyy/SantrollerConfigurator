@@ -62,7 +62,7 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
         });
         if (file == null) return;
         await using var stream = await file.OpenWriteAsync();
-        Serializer.SerializeWithLengthPrefix(stream, new SerializedConfiguration(obj.Input), PrefixStyle.Base128);
+        Serializer.Serialize(stream, new SerializedConfiguration(obj.Input));
     }
 
     private async void DoLoadConfigAsync(InteractionContext<ConfigViewModel, Unit> obj)
@@ -75,7 +75,7 @@ public partial class ConfigView : ReactiveUserControl<ConfigViewModel>
         });
         if (!file.Any()) return;
         await using var stream = await file[0].OpenReadAsync();
-        Serializer.DeserializeWithLengthPrefix<SerializedConfiguration>(stream, PrefixStyle.Base128).LoadConfiguration(obj.Input);
+        Serializer.Deserialize<SerializedConfiguration>(stream).LoadConfiguration(obj.Input);
     }
 
     private async Task DoShowDialogAsync(

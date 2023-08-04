@@ -253,11 +253,11 @@ public class Santroller : ConfigurableUsbDevice
         await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
         try
         {
-            var lastConfig = Serializer.DeserializeWithLengthPrefix<SerializedConfiguration>(decompressor, PrefixStyle.Base128);
+            var lastConfig = Serializer.Deserialize<SerializedConfiguration>(decompressor);
             lastConfig.LoadConfiguration(model);
             lastConfig = new SerializedConfiguration(model);
             using var outputStream = new MemoryStream();
-            Serializer.SerializeWithLengthPrefix(outputStream, lastConfig, PrefixStyle.Base128);
+            Serializer.Serialize(outputStream, lastConfig);
             _lastConfig = outputStream.ToArray();
             _currentConfig = new SerializedConfiguration(model);
             _currentConfigData = new byte[_lastConfig.Length];
@@ -283,7 +283,7 @@ public class Santroller : ConfigurableUsbDevice
         using var outputStream = new MemoryStream(_currentConfigData);
         try
         {
-            Serializer.SerializeWithLengthPrefix(outputStream, _currentConfig, PrefixStyle.Base128);
+            Serializer.Serialize(outputStream, _currentConfig);
             _model.Main.SetDifference(!_currentConfigData.AsSpan().SequenceEqual(_lastConfig.AsSpan()));
         }
         catch (Exception)
