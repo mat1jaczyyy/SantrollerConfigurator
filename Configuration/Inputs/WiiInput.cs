@@ -540,33 +540,39 @@ public class WiiInput : TwiInput
             }
 
             var analogMappings = mappings.Any()
-                ? $@"if (hiRes) {{
-    {string.Join("\n", mappings2)}
-}} else {{
-    {string.Join("\n", mappings)}
-}}"
+                ? $$"""
+                    if (hiRes) {
+                        {{string.Join("\n", mappings2)}}
+                    } else {
+                        {{string.Join("\n", mappings)}}
+                    }
+                    """
                 : "";
-            ret += @$"
-case WII_CLASSIC_CONTROLLER:
-case WII_CLASSIC_CONTROLLER_PRO:
-{string.Join("\n", mappingsDigital)}
-{analogMappings}
-break;
-";
+            ret += $"""
+                    case WII_CLASSIC_CONTROLLER:
+                    case WII_CLASSIC_CONTROLLER_PRO:
+                    {string.Join("\n", mappingsDigital)}
+                    {analogMappings}
+                    break;
+                    """;
         }
 
 
         foreach (var (input, mappings) in mappedBindings)
-            ret += @$"case {CType[input]}:
-    {string.Join("\n", mappings)};
-    break;";
-        return (!ret.Any()
+            ret += $"""
+                    case {CType[input]}:
+                        {string.Join("\n", mappings)};
+                        break;
+                    """;
+        return !ret.Any()
             ? ""
-            : @$"if (wiiValid) {{
-                   switch(wiiControllerType) {{
-                       {ret} 
-                   }}
-                }}");
+            : $$"""
+                if (wiiValid) {
+                   switch(wiiControllerType) {
+                       {{ret}}
+                   }
+                }
+                """;
     }
 
     public override IReadOnlyList<string> RequiredDefines()

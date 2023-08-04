@@ -47,10 +47,10 @@ public abstract class TwiConfig : PinConfig
 
     public override string Generate()
     {
-        return $@"
-#define {Definition}_SDA {_sda}
-#define {Definition}_SCL {_scl}
-#define {Definition}_CLOCK {_clock}
-";
+        return $"""
+                #define {Definition}_SDA {_sda}
+                #define {Definition}_SCL {_scl}
+                #define {Definition}_CLOCK {_clock}
+                """;
     }
 }

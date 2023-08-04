@@ -83,10 +83,12 @@ public abstract class OutputButton : Output
             }
             var outputVar = GenerateOutput(mode);
             return outputVar.Any()
-                ? @$"if ({ifStatement}) {{ 
-                    {outputVar} = true; 
-                    {extra}
-                }}"
+                ? $$"""
+                    if ({{ifStatement}}) {
+                                        {{outputVar}} = true;
+                                        {{extra}}
+                                    }
+                    """
                 : "";
         }
         

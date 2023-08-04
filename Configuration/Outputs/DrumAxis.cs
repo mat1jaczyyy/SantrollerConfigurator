@@ -1,16 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Media;
-using CommunityToolkit.Mvvm.Input;
 using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.ViewModels;
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -221,9 +218,11 @@ public partial class DrumAxis : OutputAxis
 
         if (Model.DeviceControllerType.IsRb() && Type is DrumAxisType.Kick or DrumAxisType.Kick2)
         {
-            return $@"if ({ifStatement}) {{
-                {outputButtons}
-            }}";
+            return $$"""
+                     if ({{ifStatement}}) {
+                         {{outputButtons}}
+                     }
+                     """;
         }
 
         if (Model.DeviceControllerType.IsRb() && mode != ConfigField.XboxOne && mode != ConfigField.Universal)
@@ -253,9 +252,11 @@ public partial class DrumAxis : OutputAxis
 
         if (outputButtons.Any())
         {
-            outputButtons = @$"if ({ifStatement}) {{
-                {outputButtons}
-            }}";
+            outputButtons = $$"""
+                              if ({{ifStatement}}) {
+                                  {{outputButtons}}
+                              }
+                              """;
         }
         // If someone specified a digital input, then we need to take the value they have specified and convert it to the target consoles expected output
         var dtaVal = 0;
@@ -311,35 +312,38 @@ public partial class DrumAxis : OutputAxis
         // If someone has mapped digital inputs to the drums, then we can shortcut a bunch of the tests, and just need to use the calculated value from above
         if (input is DigitalToAnalog)
         {
-            return $@"
-            {{
-                if ({input.Generate()}) {{
-                    {reset}
-                    {GenerateOutput(mode)} = {dtaVal};
-                }}
-                {outputButtons}
-            }}";
+            return $$"""
+                     {
+                         if ({{input.Generate()}}) {
+                             {{reset}}
+                             {{GenerateOutput(mode)}} = {{dtaVal}};
+                         }
+                         {{outputButtons}}
+                     }
+                     """;
         }
 
         if (reset.Any())
         {
-            reset = $@"
-                if (val_real > {Min}) {{
-                    {reset}
-                }}";
+            reset = $$"""
+                      if (val_real > {{Min}}) {
+                          {{reset}}
+                      }
+                      """;
         }
 
         // Drum axis' are weird. Translate the value to a uint16_t like any axis, do tests against threshold for hits
         // and then convert them to their expected output format, before writing to the output report.
-        return $@"
-        {{
-            uint16_t val_real = {GenerateAssignment(GenerateOutput(mode), mode, false, false, false)};
-            if (val_real) {{
-                {reset}
-                {GenerateOutput(mode)} = {assignedVal};
-            }}
-            {outputButtons}
-        }}";
+        return $$"""
+                 {
+                     uint16_t val_real = {{GenerateAssignment(GenerateOutput(mode), mode, false, false, false)}};
+                     if (val_real) {
+                         {{reset}}
+                         {{GenerateOutput(mode)}} = {{assignedVal}};
+                     }
+                     {{outputButtons}}
+                 }
+                 """;
     }
 
 

@@ -92,10 +92,11 @@ public class EmulationMode : Output
     {
         return mode != ConfigField.Detection
             ? ""
-            : $@"
-            if ({Input.Generate()}) {{
-                set_console_type({GetDefinition()});
-            }}";
+            : $$"""
+                if ({{Input.Generate()}}) {
+                    set_console_type({{GetDefinition()}});
+                }
+                """;
     }
 
     public override void UpdateBindings()

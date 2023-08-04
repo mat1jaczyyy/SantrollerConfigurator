@@ -118,13 +118,15 @@ public partial class DjInput : TwiInput
         {
             dual = bindings.Where(binding =>  (binding.Item1 as DjInput)!.Input == DjInputType.LeftTurntable).Select(binding => binding.Item2).FirstOrDefault("");
         }
-        return $@"if (djLeftValid) {{
-                    {left}
-                  }} 
-                  if (djRightValid) {{
-                    {right}
-                  }}
-                  {dual}";
+        return $$"""
+                 if (djLeftValid) {
+                     {{left}}
+                 }
+                 if (djRightValid) {
+                     {{right}}
+                 }
+                 {{dual}}
+                 """;
                 
                   
     }

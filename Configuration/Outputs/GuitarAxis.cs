@@ -165,9 +165,11 @@ public class GuitarAxis : OutputAxis
             case ConfigField.XboxOne when Model.DeviceControllerType is DeviceControllerType.LiveGuitar:
                 return "";
             case ConfigField.XboxOne when Type is GuitarAxisType.Tilt && Input is DigitalToAnalog:
-                return $@"if ({Input.Generate()}) {{
-                                  {GenerateOutput(mode)} = {analogOn};
-                          }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                             {{GenerateOutput(mode)}} = {{analogOn}};
+                         }
+                         """;
             case ConfigField.XboxOne when Type is GuitarAxisType.Tilt :
                 // XB1 tilt is similar enough to ps3 that we can just use it
                 return $"{GenerateOutput(mode)} = {GenerateAssignment(GenerateOutput(mode), ConfigField.Ps3, false, false, false)};";
@@ -178,23 +180,27 @@ public class GuitarAxis : OutputAxis
                 else
                     analogOn |= analogOn << 8;
 
-                return $@"if ({Input.Generate()}) {{
-                                  {GenerateOutput(mode)} = {analogOn};
-                          }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                             {{GenerateOutput(mode)}} = {{analogOn}};
+                         }
+                         """;
             case ConfigField.Xbox360 when Type == GuitarAxisType.Slider && Input is not DigitalToAnalog:
                 // x360 slider is actually a int16_t BUT there is a mechanism to convert the uint8 value to its uint16_t version
-                return $@"
-                        {GenerateOutput(mode)} = {Input.Generate()};
-                        if ({GenerateOutput(mode)} > 0x80) {{
-                            {GenerateOutput(mode)} |= ({GenerateOutput(mode)}-1) << 8;
-                        }} else {{
-                            {GenerateOutput(mode)} |= ({GenerateOutput(mode)}) << 8;
-                        }}
-                    ";
+                return $$"""
+                         {{GenerateOutput(mode)}} = {{Input.Generate()}};
+                         if ({{GenerateOutput(mode)}} > 0x80) {
+                             {{GenerateOutput(mode)}} |= ({{GenerateOutput(mode)}}-1) << 8;
+                         } else {
+                             {{GenerateOutput(mode)}} |= ({{GenerateOutput(mode)}}) << 8;
+                         }
+                         """;
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 when Type == GuitarAxisType.Slider && Input is DigitalToAnalog:
-                return $@"if ({Input.Generate()}) {{
-                                  {GenerateOutput(mode)} = {analogOn & 0xFF};
-                              }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                                                           {{GenerateOutput(mode)}} = {{analogOn & 0xFF}};
+                                                       }
+                         """;
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 when Type == GuitarAxisType.Slider && Input is not DigitalToAnalog:
                 return $"{GenerateOutput(mode)} = {Input.Generate()} >> 8;";
             // Xb1 is RB only, so no slider
@@ -209,9 +215,11 @@ public class GuitarAxis : OutputAxis
                      } &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
             {
-                return $@"if ({Input.Generate()}) {{
-                            report->tilt = 0x180;
-                          }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                             report->tilt = 0x180;
+                         }
+                         """;
             }
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is
@@ -219,9 +227,11 @@ public class GuitarAxis : OutputAxis
                          DeviceControllerType: DeviceControllerType.GuitarHeroGuitar
                      } &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
-                return $@"if ({Input.Generate()}) {{
-                            {GenerateOutput(mode)} = {GenerateAssignment(GenerateOutput(mode), mode, true, false, false)};
-                          }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                             {{GenerateOutput(mode)}} = {{GenerateAssignment(GenerateOutput(mode), mode, true, false, false)}};
+                         }
+                         """;
             // PS3 GHL expects tilt on accelerometer AND right stick x
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is
@@ -230,10 +240,12 @@ public class GuitarAxis : OutputAxis
                      } &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
             {
-                return $@"if ({Input.Generate()}) {{
-                            report->tilt = 0x180;
-                            report->tilt2 = 0xFF;
-                          }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                             report->tilt = 0x180;
+                             report->tilt2 = 0xFF;
+                         }
+                         """;
             }
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is
@@ -243,30 +255,36 @@ public class GuitarAxis : OutputAxis
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
 
                 // GHL expects right stick x to go to 0xFF or 0x00 to signify tilt being active
-                return $@"if ({Input.Generate()}) {{
-                            {GenerateOutput(mode)} = {GenerateAssignment(GenerateOutput(mode), mode, true, false, false)};
-                            uint8_t tilt_test = {GenerateAssignment(GenerateOutput(mode), mode, false, false, false)};
-                            if (tilt_test > 0xF0) {{
-                                report->tilt2 = 0xFF;
-                            }}
-                            if (tilt_test < 0x10) {{
-                                report->tilt2 = 0x00;
-                            }}
-                          }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                             {{GenerateOutput(mode)}} = {{GenerateAssignment(GenerateOutput(mode), mode, true, false, false)}};
+                             uint8_t tilt_test = {{GenerateAssignment(GenerateOutput(mode), mode, false, false, false)}};
+                             if (tilt_test > 0xF0) {
+                                 report->tilt2 = 0xFF;
+                             }
+                             if (tilt_test < 0x10) {
+                                 report->tilt2 = 0x00;
+                             }
+                         }
+                         """;
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Tilt && Input is DigitalToAnalog:
                 // PS3 rb uses a digital bit, so just map the bit right across and skip the analog conversion
-                return $@"if ({Input.Generate()}) {{
-                            report->tiltDigital = true;
-                          }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                             report->tiltDigital = true;
+                         }
+                         """;
             case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Tilt && Input is not DigitalToAnalog:
                 // PS3 RB expects tilt as a digital bit, so map that here. Still map a ps3 variant of the tilt though
-                return $@"if ({Input.Generate()}) {{
-                            report->tiltDigital = {GenerateAssignment(GenerateOutput(mode), mode, false, false, false)} == 0xFF;
-                          }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                             report->tiltDigital = {{GenerateAssignment(GenerateOutput(mode), mode, false, false, false)}} == 0xFF;
+                         }
+                         """;
             // Xbox 360 Pickup Selector is actually on one of the triggers.
             case ConfigField.Xbox360
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
@@ -274,9 +292,11 @@ public class GuitarAxis : OutputAxis
                 // Was int16_t (axis), needs to become uint8_t (trigger)
                 var val = analogOn;
                 val = (val >> 8) + 128;
-                return $@"if ({Input.Generate()}) {{
-                                  {GenerateOutput(mode)} = {val};
-                              }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                             {{GenerateOutput(mode)}} = {{val}};
+                         }
+                         """;
             case ConfigField.Xbox360
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:
@@ -285,9 +305,11 @@ public class GuitarAxis : OutputAxis
             case ConfigField.XboxOne
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is DigitalToAnalog:
-                return $@"if ({Input.Generate()}) {{
-                                  {GenerateOutput(mode)} = {PickupSelectorRangesXb1[GetPickupSelectorValue(analogOn)]};
-                              }}";
+                return $$"""
+                         if ({{Input.Generate()}}) {
+                                                           {{GenerateOutput(mode)}} = {{PickupSelectorRangesXb1[GetPickupSelectorValue(analogOn)]}};
+                                                       }
+                         """;
             case ConfigField.XboxOne
                 when Model is {DeviceControllerType: DeviceControllerType.RockBandGuitar} &&
                      Type == GuitarAxisType.Pickup && Input is not DigitalToAnalog:

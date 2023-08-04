@@ -22,17 +22,19 @@ public class RaiseIssueWindowViewModel : ReactiveObject
         RaiseIssueCommand = ReactiveCommand.CreateFromTask(RaiseIssueAsync);
         CloseWindowCommand = ReactiveCommand.CreateFromObservable(() => CloseWindowInteraction.Handle(new Unit()));
         var os = Environment.OSVersion;
-        IncludedInfo = @$"OS Version: {os.Version}
-OS Platform: {os.Platform}
-OS Service Pack: {os.ServicePack}
-OS VersionString: {os.VersionString}
+        IncludedInfo = $"""
+                        OS Version: {os.Version}
+                        OS Platform: {os.Platform}
+                        OS Service Pack: {os.ServicePack}
+                        OS VersionString: {os.VersionString}
 
-Device Type: {_model.DeviceControllerType}
-Emulation Type: {_model.EmulationType}
-Led Type: {_model.LedType}
+                        Device Type: {_model.DeviceControllerType}
+                        Emulation Type: {_model.EmulationType}
+                        Led Type: {_model.LedType}
 
-Microcontroller Type: {_model.Microcontroller.Board.Name}
-Microcontroller Frequency: {_model.Microcontroller.Board.CpuFreq / 1000}mhz";
+                        Microcontroller Type: {_model.Microcontroller.Board.Name}
+                        Microcontroller Frequency: {_model.Microcontroller.Board.CpuFreq / 1000}mhz
+                        """;
     }
 
     public string Text { get; }
@@ -47,19 +49,21 @@ Microcontroller Frequency: {_model.Microcontroller.Board.CpuFreq / 1000}mhz";
         var postResponse = await wc.PostAsync(uri, new StringContent(Text));
         var paste = JsonNode.Parse(await postResponse.Content.ReadAsStreamAsync())?.AsObject()["key"];
         var os = Environment.OSVersion;
-        var body = $@"OS Version: {os.Version}
-OS Platform: {os.Platform}
-OS Service Pack: {os.ServicePack}
-OS VersionString: {os.VersionString}
+        var body = $"""
+                    OS Version: {os.Version}
+                    OS Platform: {os.Platform}
+                    OS Service Pack: {os.ServicePack}
+                    OS VersionString: {os.VersionString}
 
-Device Type: {_model.DeviceControllerType}
-Emulation Type: {_model.EmulationType}
-Led Type: {_model.LedType}
+                    Device Type: {_model.DeviceControllerType}
+                    Emulation Type: {_model.EmulationType}
+                    Led Type: {_model.LedType}
 
-Microcontroller Type: {_model.Microcontroller.Board.Name}
-Microcontroller Frequency: {_model.Microcontroller.Board.CpuFreq / 1000}mhz
+                    Microcontroller Type: {_model.Microcontroller.Board.Name}
+                    Microcontroller Frequency: {_model.Microcontroller.Board.CpuFreq / 1000}mhz
 
-Compilation Log: https://hastebin.com/{paste}";
+                    Compilation Log: https://hastebin.com/{paste}
+                    """;
         var title = "Error building";
         body = HttpUtility.UrlEncode(body);
         title = HttpUtility.UrlEncode(title);

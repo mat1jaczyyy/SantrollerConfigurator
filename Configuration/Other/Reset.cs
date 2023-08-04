@@ -38,7 +38,7 @@ public class Reset : Output
     public override string GetName(DeviceControllerType deviceControllerType, LegendType legendType,
         bool swapSwitchFaceButtons)
     {
-        return $"Reset";
+        return "Reset";
     }
 
     public override Enum GetOutputType()
@@ -52,10 +52,11 @@ public class Reset : Output
     {
         return mode != ConfigField.Detection
             ? ""
-            : $@"
-            if ({Input.Generate()}) {{
-                set_console_type(UNIVERSAL);
-            }}";
+            : $$"""
+                if ({{Input.Generate()}}) {
+                    set_console_type(UNIVERSAL);
+                }
+                """;
     }
 
     public override void UpdateBindings()

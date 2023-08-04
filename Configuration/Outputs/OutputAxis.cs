@@ -102,7 +102,7 @@ public abstract partial class OutputAxis : Output
     public string? CalibrationText => GetCalibrationText();
     public string? CalibrationStatus => GetCalibrationStatus();
 
-    private Thickness ComputeDeadZoneMargin((int min, int max, bool trigger, bool inputIsUint, int deadZone) s)
+    private static Thickness ComputeDeadZoneMargin((int min, int max, bool trigger, bool inputIsUint, int deadZone) s)
     {
         float min = Math.Min(s.min, s.max);
         float max = Math.Max(s.min, s.max);
@@ -154,7 +154,7 @@ public abstract partial class OutputAxis : Output
         return new Thickness(left, 0, right, 0);
     }
 
-    public virtual void ApplyCalibration(int rawValue)
+    private void ApplyCalibration(int rawValue)
     {
         switch (_calibrationState)
         {
@@ -299,7 +299,9 @@ public abstract partial class OutputAxis : Output
 
     private string GetCalibrationButtonText()
     {
-        return _calibrationState == OutputAxisCalibrationState.None ? Resources.AxisCalibrationCalibrate : Resources.AxisCalibrationNext;
+        return _calibrationState == OutputAxisCalibrationState.None
+            ? Resources.AxisCalibrationCalibrate
+            : Resources.AxisCalibrationNext;
     }
 
     private string? GetCalibrationStatus()
@@ -361,11 +363,13 @@ public abstract partial class OutputAxis : Output
                 function = "handle_calibration_ps3_whammy";
                 if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
                 break;
-            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Shared or ConfigField.Universal when trigger:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Shared
+                or ConfigField.Universal when trigger:
                 function = "handle_calibration_ps3_360_trigger";
                 if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
                 break;
-            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Shared or ConfigField.Universal:
+            case ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Shared
+                or ConfigField.Universal:
                 intBased = true;
                 function = "handle_calibration_ps3";
                 if (ShouldFlip(mode)) function = "UINT8_MAX -" + function;
@@ -467,15 +471,18 @@ public abstract partial class OutputAxis : Output
             var extraTrigger = "";
             if (this is ControllerAxis axis)
             {
-                if (mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 && axis.Type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger)
+                if (mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 &&
+                    axis.Type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger)
                 {
                     var trigger = axis.Type == StandardAxisType.LeftTrigger ? "l2" : "r2";
-                    extraTrigger = $@"
-                        if ({Input.Generate()} > {axis.Threshold}) {{
-                            report->{trigger} = true;
-                        }}";
+                    extraTrigger = $$"""
+                                     if ({{Input.Generate()}} > {{axis.Threshold}}) {
+                                         report->{{trigger}} = true;
+                                     }
+                                     """;
                 }
             }
+
             return $"{output} = {GenerateAssignment(output, mode, false, false, false)};{extraTrigger}";
         }
 
@@ -491,7 +498,8 @@ public abstract partial class OutputAxis : Output
             case ConfigField.XboxOne:
                 break;
             // 360 triggers, and ps3 and ps4 triggers are uint8_t
-            case ConfigField.Xbox360 or ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 when Trigger:
+            case ConfigField.Xbox360 or ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4
+                when Trigger:
                 val >>= 8;
                 break;
             // ps3 and ps4 axis are uint8_t, so we both need to shift and add 128
@@ -513,10 +521,12 @@ public abstract partial class OutputAxis : Output
             })
         {
             var trigger = this is ControllerAxis {Type: StandardAxisType.LeftTrigger} ? "l2" : "r2";
-            return $@"if ({Input.Generate()}) {{
-                        {output} = {val};
-                        report->{trigger} = true;
-                   }}";
+            return $$"""
+                     if ({{Input.Generate()}}) {
+                         {{output}} = {{val}};
+                         report->{{trigger}} = true;
+                     }
+                     """;
         }
 
         return $"if ({Input.Generate()}) {{{output} = {val};}}";

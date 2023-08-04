@@ -437,17 +437,19 @@ public class Ps2Input : SpiInput
 
         var ret = "";
         foreach (var (input, mappings) in mappedBindings)
-            ret += @$"case {CType[input]}:
+            ret += $"""
+                    case {CType[input]}:
                         {string.Join("\n", mappings)};
-                        break;";
+                        break;
+                    """;
 
-        if (ret == "") return "";
-        return @$"if (ps2Valid) {{ 
-                    switch (ps2ControllerType) {{
-                        {ret}
-                    }}
-                 }}
-        ";
+        return ret == "" ? "" : $$"""
+                                  if (ps2Valid) {
+                                     switch (ps2ControllerType) {
+                                         {{ret}}
+                                     }
+                                  }
+                                  """;
     }
 
     public override IReadOnlyList<string> RequiredDefines()

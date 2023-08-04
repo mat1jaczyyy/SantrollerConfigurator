@@ -94,7 +94,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Select(x => x is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
             .ToPropertyEx(this, x => x.IsBluetooth);
         this.WhenAnyValue(x => x.DeviceControllerType)
-            .Select(x => x is DeviceControllerType.LiveGuitar or DeviceControllerType.GuitarHeroGuitar or DeviceControllerType.RockBandGuitar)
+            .Select(x => x is DeviceControllerType.LiveGuitar or DeviceControllerType.GuitarHeroGuitar
+                or DeviceControllerType.RockBandGuitar)
             .ToPropertyEx(this, x => x.IsGuitar);
         this.WhenAnyValue(x => x.DeviceControllerType)
             .Select(x => x is DeviceControllerType.StageKit)
@@ -160,7 +161,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _strumDebounceDisplay.Value;
         set => StrumDebounce = (int) (value * 10);
     }
-    
+
     [Reactive] public bool SwapSwitchFaceButtons { get; set; }
 
     [Reactive] public bool CombinedStrumDebounce { get; set; }
@@ -341,7 +342,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public bool XInputOnWindows { get; set; }
 
     [Reactive] public LegendType LegendType { get; set; } = LegendType.Xbox;
-    
+
 
     public DeviceControllerType DeviceControllerType
     {
@@ -359,6 +360,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         get => _emulationType;
         set => _ = SetDefaultBindingsAsync(value);
     }
+
     public Microcontroller Microcontroller { get; private set; }
 
     public SourceList<Output> Bindings { get; } = new();
@@ -394,7 +396,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     [ObservableAsProperty] public string? PollRateLabel { get; }
 
-    public bool UsbHostEnabled => Bindings.Items.Any(x => x is UsbHostCombinedOutput || x.Outputs.Items.Any(x2 => x2.Input.InnermostInput().InputType is InputType.UsbHostInput));
+    public bool UsbHostEnabled => Bindings.Items.Any(x =>
+        x is UsbHostCombinedOutput ||
+        x.Outputs.Items.Any(x2 => x2.Input.InnermostInput().InputType is InputType.UsbHostInput));
 
     // ReSharper enable UnassignedGetOnlyAutoProperty
 
@@ -406,7 +410,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             .Concat(Enum.GetValues<GuitarAxisType>().Cast<object>())
             .Concat(Enum.GetValues<DjAxisType>().Cast<object>())
             .Concat(Enum.GetValues<Ps3AxisType>().Cast<object>())
-            .Concat(Enum.GetValues<StandardAxisType>().Cast<object>()).Select((s, index) => new { s, index })
+            .Concat(Enum.GetValues<StandardAxisType>().Cast<object>()).Select((s, index) => new {s, index})
             .ToDictionary(x => x.s, x => x.index);
 
     public List<int> AvailableApaMosiPins => Microcontroller.SpiPins(Apa102SpiType)
@@ -481,7 +485,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         if (_deviceControllerType.IsDrum())
         {
-            IEnumerable<DrumAxisType> difference = DrumAxisTypeMethods.GetDifferenceFor(_deviceControllerType).ToHashSet();
+            IEnumerable<DrumAxisType> difference =
+                DrumAxisTypeMethods.GetDifferenceFor(_deviceControllerType).ToHashSet();
             Bindings.RemoveMany(Bindings.Items.Where(s => s is DrumAxis axis && difference.Contains(axis.Type)));
         }
         else
@@ -523,7 +528,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                     Bindings.Add(new ControllerAxis(this,
                         new DirectInput(-1, false, DevicePinMode.Analog, this),
                         Colors.Black, Colors.Black, Array.Empty<byte>(), ushort.MinValue, ushort.MaxValue,
-                        0, ushort.MaxValue,axisType, false));
+                        0, ushort.MaxValue, axisType, false));
                     break;
                 case GuitarAxisType.Slider:
                     Bindings.Add(new GuitarAxis(this, new GhWtTapInput(GhWtInputType.TapAll, this,
@@ -559,7 +564,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         false));
                     break;
             }
-        
+
         Bindings.Edit(s =>
         {
             var sorted = s.OrderBy(s2 => TypeOrder.GetValueOrDefault(s2.GetOutputType())).ToList();
@@ -671,18 +676,20 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         foreach (var type in Enum.GetValues<StandardAxisType>())
         {
-            if (!ControllerEnumConverter.Convert(type, _deviceControllerType, LegendType, SwapSwitchFaceButtons).Any()) continue;
+            if (!ControllerEnumConverter.Convert(type, _deviceControllerType, LegendType, SwapSwitchFaceButtons)
+                    .Any()) continue;
             var isTrigger = type is StandardAxisType.LeftTrigger or StandardAxisType.RightTrigger;
             Bindings.Add(new ControllerAxis(this,
                 new DirectInput(-1, false, DevicePinMode.Analog, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), isTrigger ? ushort.MinValue : short.MinValue,
                 isTrigger ? ushort.MaxValue : short.MaxValue, 0,
-                ushort.MaxValue,type, false));
+                ushort.MaxValue, type, false));
         }
 
         foreach (var type in Enum.GetValues<StandardButtonType>())
         {
-            if (!ControllerEnumConverter.Convert(type, _deviceControllerType, LegendType, SwapSwitchFaceButtons).Any()) continue;
+            if (!ControllerEnumConverter.Convert(type, _deviceControllerType, LegendType, SwapSwitchFaceButtons)
+                    .Any()) continue;
             Bindings.Add(new ControllerButton(this,
                 new DirectInput(-1, false, DevicePinMode.PullUp, this),
                 Colors.Black, Colors.Black, Array.Empty<byte>(), 1, type, false));
@@ -817,7 +824,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         else
         {
             // Write an empty config - the config at this point is likely invalid and won't compile
-            
+
             lines.Add($"#define USB_HOST_STACK false");
             lines.Add($"#define USB_HOST_DP_PIN 0");
 
@@ -1147,12 +1154,14 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                         // Now we have the value, calibrated as a uint8_t
                         // Only apply analog colours if non zero when conflicting with digital, so that the digital off states override
                         analog +=
-                            @$"led_tmp = {ledRead};
-                                   if(led_tmp) {{
-                                        {LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}
-                                   }} else {{
-                                        {LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led)}
-                                   }}";
+                            $$"""
+                              led_tmp = {{ledRead}};
+                              if(led_tmp) {
+                                  {{LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}}
+                              } else {
+                                  {{LedType.GetLedAssignment(relatedOutputs.First().Item1.LedOff, led)}}
+                              }
+                              """;
                     }
                 }
 
@@ -1165,14 +1174,18 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 ret += string.Join(" else ", relatedOutputs.Select(tuple =>
                 {
                     var ifStatement = $"debounce[{tuple.Item2}]";
-                    return @$"if ({ifStatement}) {{
-                                        {LedType.GetLedAssignment(tuple.Item1.LedOn, led)}
-                                       }}";
+                    return $$"""
+                             if ({{ifStatement}}) {
+                                 {{LedType.GetLedAssignment(tuple.Item1.LedOn, led)}}
+                             }
+                             """;
                 }));
-                ret += $@" else {{
-                        {analog}
-                    }}
-                }}";
+                ret += $$"""
+                             else {
+                                 {{analog}}
+                             }
+                         }
+                         """;
             }
 
             foreach (var (led, analogLedOutputs) in analogRelatedToLed)
