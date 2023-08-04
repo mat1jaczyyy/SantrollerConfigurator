@@ -54,14 +54,10 @@ public class ConfigurableUsbDeviceManager
                 {
                     var info = dev.Info;
                     var revision = (ushort) info.Descriptor.BcdDevice;
-                    var product = info.ProductString?.Split(new[] {'\0'}, 2)[0];
-                    var serial = info.SerialString?.Split(new[] {'\0'}, 2)[0] ?? "";
+                    var product = info.ProductString?.Split("\0", 2)[0] ?? "Santroller";
+                    var serial = info.SerialString?.Split("\0", 2)[0] ?? "";
                     switch (product)
                     {
-                        case "Santroller":
-                            _model.AvailableDevices.Add(new Santroller(e.Device.Name, dev, serial,
-                                revision));
-                            break;
                         case "Ardwiino" when _model.Programming:
                         case "Ardwiino" when revision == Ardwiino.SerialArdwiinoRevision:
                             return;
@@ -70,7 +66,9 @@ public class ConfigurableUsbDeviceManager
                                 revision));
                             break;
                         default:
-                            dev.Close();
+                            // Branded devices can have any name.
+                            _model.AvailableDevices.Add(new Santroller(e.Device.Name, dev, serial,
+                                revision, product));
                             break;
                     }
                 }

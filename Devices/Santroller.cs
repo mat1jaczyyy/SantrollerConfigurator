@@ -72,15 +72,17 @@ public class Santroller : ConfigurableUsbDevice
     private readonly DispatcherTimer _timer;
     private ReadOnlyObservableCollection<Output>? _bindings;
     private readonly ConsoleType _currentMode;
+    private string _brand;
 
     public Santroller(string path, UsbDevice device, string serial,
-        ushort version) : base(
+        ushort version, string brand) : base(
         device, path, serial, version)
     {
         _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(50), DispatcherPriority.Background, Tick);
         _microcontroller = new Pico(Board.Generic);
         _deviceControllerType = (DeviceControllerType) (version >> 8);
         _currentMode = (ConsoleType) (serial[^3] - '0');
+        _brand = brand;
         if (device is IUsbDevice usbDevice) usbDevice.ClaimInterface(2);
 #if Windows
         var isXinput = (serial[^1] - '0') != 0;
@@ -412,7 +414,7 @@ public class Santroller : ConfigurableUsbDevice
             return ret2;
         }
 
-        var ret = $"Santroller - {Board.Name}";
+        var ret = $"{_brand} - {Board.Name}";
         ret += $" - {EnumToStringConverter.Convert(_deviceControllerType)}";
 
         return ret;

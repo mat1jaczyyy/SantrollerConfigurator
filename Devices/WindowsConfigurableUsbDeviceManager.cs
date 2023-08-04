@@ -69,7 +69,7 @@ public class ConfigurableUsbDeviceManager
                     {
                         return;
                     }
-                    _model.AvailableDevices.Add(new Santroller(path, dev, serial, revision));
+                    _model.AvailableDevices.Add(new Santroller(path, dev, serial, revision, dev.Info.ProductString));
                 }
                 else if (guid == Ardwiino.DeviceGuid)
                 {

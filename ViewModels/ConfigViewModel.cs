@@ -785,11 +785,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
             lines.Add($"#define HANDLE_LIGHTBAR_LED {GenerateTick(ConfigField.LightBarLed)}");
 
-            if (Deque)
-            {
-                lines.Add("#define INPUT_QUEUE");
-            }
-
+            lines.Add($"#define INPUT_QUEUE {Deque.ToString().ToLower()}");
             lines.Add($"#define HANDLE_RUMBLE {GenerateTick(ConfigField.RumbleLed)}");
 
             lines.Add($"#define HANDLE_KEYBOARD_LED {GenerateTick(ConfigField.KeyboardLed)}");
@@ -846,6 +842,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             lines.Add($"#define WT_SENSITIVITY {WtSensitivity}");
 
             lines.Add($"#define LED_TYPE 0");
+            lines.Add($"#define INPUT_QUEUE false");
 
             lines.Add($"#define HANDLE_AUTH_LED");
 
