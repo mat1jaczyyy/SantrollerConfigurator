@@ -32,7 +32,7 @@ public class PlatformIo
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             _pythonExecutable = Path.Combine(appdataFolder, "python", "python.exe");
 
-        FirmwareDir = Path.Combine(appdataFolder, "Ardwiino");
+        FirmwareDir = Path.Combine(appdataFolder, "Santroller");
 
         _portProcess = new Process();
         _portProcess.EnableRaisingEvents = true;

@@ -17,13 +17,13 @@ public class Builder : Task
         var platform = "linux";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) platform = "windows";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) platform = "macos";
-        const string firmwareUrl = "https://github.com/sanjay900/Ardwiino/releases/download/latest/firmware.tar.xz";
+        const string firmwareUrl = "https://github.com/sanjay900/Santroller/releases/download/latest/firmware.tar.xz";
         var platformIoUrl =
-            $"https://github.com/sanjay900/santroller-libs/releases/download/latest/platformio-{platform}.tar.xz";
+            $"https://github.com/sanjay900/SantrollerLibs/releases/download/latest/platformio-{platform}.tar.xz";
         var firmwareFileLoc = Path.Combine(Parameter2, "Assets", "firmware.version");
         var platformioFileLoc = Path.Combine(Parameter2, "Assets", "platformio.version");
-        var firmwareCommit = GetCommit("Ardwiino");
-        var platformIoCommit = GetCommit("santroller-libs");
+        var firmwareCommit = GetCommit("Santroller");
+        var platformIoCommit = GetCommit("SantrollerLibs");
         var firmwareChanged =
             !File.Exists(firmwareFileLoc) || !File.ReadAllText(firmwareFileLoc).Equals(firmwareCommit);
         var platformioChanged = !File.Exists(platformioFileLoc) ||
