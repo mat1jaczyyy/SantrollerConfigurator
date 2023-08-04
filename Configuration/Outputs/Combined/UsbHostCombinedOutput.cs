@@ -163,7 +163,7 @@ public class UsbHostCombinedOutput : CombinedOutput
             if (!valid.Contains(key))
             {
                 continue;
-            }
+            } 
 
             var input = new UsbHostInput(value, Model, true);
             int min = input.IsUint ? ushort.MinValue : short.MinValue;
