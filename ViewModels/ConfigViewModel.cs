@@ -715,7 +715,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
             {
-                Serializer.Serialize(compressStream, new SerializedConfiguration(this));
+                Serializer.SerializeWithLengthPrefix(compressStream, new SerializedConfiguration(this), PrefixStyle.Base128);
             }
 
             lines.Add(
