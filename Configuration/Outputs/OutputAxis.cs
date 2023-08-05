@@ -449,27 +449,26 @@ public abstract partial class OutputAxis : Output
             _ => ")"
         };
         var mulInt = (short) (multiplier * 512);
-        if (writer != null)
+        if (writer == null)
+            return intBased
+                ? $"{function}({prev}, {generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
+                : $"{function}({prev}, {generated}, {min}, {mulInt}, {DeadZone})";
+        
+        var i = writer.BaseStream.Length / 2;
+        if (intBased)
         {
-            var i = writer.BaseStream.Length / 2;
-            if (intBased)
-            {
-                writer.Write((ushort) ((max + min) / 2 + short.MaxValue));
-                writer.Write((ushort) (min + short.MaxValue));
-                writer.Write((ushort) (mulInt + short.MaxValue));
-                writer.Write((ushort) (DeadZone + short.MaxValue));
-                return $"{function}({prev}, {generated}, (config_blobs[{i}] - INT16_MAX), (config_blobs[{i+1}] - INT16_MAX), (config_blobs[{i+2}] - INT16_MAX), (config_blobs[{i+2}] - INT16_MAX))";
-            }
-
-            writer.Write((ushort) min);
+            writer.Write((ushort) ((max + min) / 2 + short.MaxValue));
+            writer.Write((ushort) (min + short.MaxValue));
             writer.Write((ushort) (mulInt + short.MaxValue));
-            writer.Write((ushort) DeadZone);
-            return $"{function}({prev}, {generated},  config_blobs[{i}], (config_blobs[{i+1}] - INT16_MAX), config_blobs[{i+2}])";
+            writer.Write((ushort) (DeadZone + short.MaxValue));
+            return $"{function}({prev}, {generated}, (config_blobs[{i}] - INT16_MAX), (config_blobs[{i+1}] - INT16_MAX), (config_blobs[{i+2}] - INT16_MAX), (config_blobs[{i+2}] - INT16_MAX))";
         }
 
-        return intBased
-            ? $"{function}({prev}, {generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
-            : $"{function}({prev}, {generated}, {min}, {mulInt}, {DeadZone})";
+        writer.Write((ushort) min);
+        writer.Write((ushort) (mulInt + short.MaxValue));
+        writer.Write((ushort) DeadZone);
+        return $"{function}({prev}, {generated},  config_blobs[{i}], (config_blobs[{i+1}] - INT16_MAX), config_blobs[{i+2}])";
+
     }
 
 
