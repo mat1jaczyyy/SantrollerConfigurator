@@ -699,7 +699,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    public void Generate(PlatformIo pio, MemoryStream? blobStream, string? variant)
+    public void Generate(PlatformIo pio, MemoryStream? blobStream, string? variant, string? extra)
     {
         if (Device is Santroller santroller)
         {
@@ -712,7 +712,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
         string config;
         BinaryWriter? writer = null;
-        if (variant != null && blobStream != null)
+        if (variant != null && blobStream != null && extra != null)
         {
             writer = new BinaryWriter(blobStream);
             writer.Write((ushort) (SwapSwitchFaceButtons ? 1 : 0));
@@ -734,6 +734,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                        #define INPUT_DJ_TURNTABLE_POLL_RATE config_blobs[5]
                        #define INPUT_DJ_TURNTABLE_SMOOTHING config_blobs[6]
                        #define INPUT_DJ_TURNTABLE_SMOOTHING_DUAL config_blobs[7]
+                       {{extra}}
                        """;
         }
         else
@@ -843,6 +844,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             config += "\n";
             // Copy in any specific config for the different pin configs (like spi and twi config on the pico)
             config += GetPinConfigs().Distinct().Aggregate("", (current, pinConfig) => current + pinConfig.Generate());
+            config += "\n";
             config += string.Join("\n",
                 inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}"));
         }
@@ -1231,7 +1233,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
         }
 
-        return ret.Replace('\r', ' ').Replace('\n', ' ').Trim();
+        return ret.Replace('\r', ' ').Replace("\n", "\\\n").Trim();
     }
 
     private int CalculateDebounceTicks()

@@ -551,8 +551,8 @@ public class WiiInput : TwiInput
             ret += $"""
                     case WII_CLASSIC_CONTROLLER:
                     case WII_CLASSIC_CONTROLLER_PRO:
-                    {string.Join("\n", mappingsDigital)}
-                    {analogMappings}
+                        {string.Join("\n", mappingsDigital)}
+                        {analogMappings}
                     break;
                     """;
         }

@@ -248,7 +248,6 @@ public class Santroller : ConfigurableUsbDevice
             data.AddRange(chunk);
             start += 64;
         }
-
         using var inputStream = new MemoryStream(data.ToArray());
         await using var decompressor = new BrotliStream(inputStream, CompressionMode.Decompress);
         try

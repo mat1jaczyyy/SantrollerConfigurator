@@ -87,9 +87,9 @@ public abstract class OutputButton : Output
             return outputVar.Any()
                 ? $$"""
                     if ({{ifStatement}}) {
-                                        {{outputVar}} = true;
-                                        {{extra}}
-                                    }
+                        {{outputVar}} = true;
+                        {{extra}}
+                    }
                     """
                 : "";
         }
@@ -105,7 +105,7 @@ public abstract class OutputButton : Output
                 if (!macros.TryGetValue(gen2, out var inputs2)) continue;
                 if (Input.InnermostInput() is WiiInput wiiInput)
                 {
-                    extra += string.Join("\n",
+                    extra += string.Join("\n    ",
                         inputs2.Where((s) =>
                                 s.Item2 is WiiInput wiiInput2 &&
                                 wiiInput2.WiiControllerType == wiiInput.WiiControllerType)
@@ -113,17 +113,26 @@ public abstract class OutputButton : Output
                 }
                 else
                 {
-                    extra += string.Join("\n", inputs2.Select(s => $"debounce[{s.Item1}]=0;"));
+                    extra += string.Join("\n    ", inputs2.Select(s => $"debounce[{s.Item1}]=0;"));
                 }
             }
         }
 
         var queue = "";
         if (Model.Deque && this is GuitarButton {IsStrum: false}) {
-            queue = $"if ({ifStatement}) {{{GenerateOutput(ConfigField.Shared).Replace("report->", "current_queue_report.")} = true;}}";
+            queue = $$"""
+                      if ({{ifStatement}}) {
+                          {{GenerateOutput(ConfigField.Shared).Replace("report->", "current_queue_report.")}} = true;
+                      }
+                      """;
         }
 
-        return $"if (({gen} {extraStatement})) {{ {reset} {extra} }} {queue}";
+        return $$"""
+                 if (({{gen}} {{extraStatement}})) {
+                     {{reset}} {{extra}}
+                 }
+                 {{queue}}
+                 """;
     }
 
     public override void UpdateBindings()

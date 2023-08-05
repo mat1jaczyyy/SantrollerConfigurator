@@ -419,13 +419,11 @@ public class Ps2Input : SpiInput
                 }
             }
 
-        var i = 5;
         var retDs2 = "";
         foreach (var binding in Dualshock2Order)
             if (ds2Axis.TryGetValue(binding, out var axi))
             {
-                retDs2 += axi.Replace("generated", i.ToString()) + "\n";
-                i++;
+                retDs2 += axi + "\n";
             }
 
         if (!string.IsNullOrEmpty(retDs2))
