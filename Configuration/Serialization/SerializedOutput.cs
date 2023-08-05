@@ -1,4 +1,5 @@
 using System.Collections;
+using System.IO;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
@@ -32,7 +33,6 @@ namespace GuitarConfigurator.NetCore.Configuration.Serialization;
 public abstract class SerializedOutput
 {
     public abstract Output Generate(ConfigViewModel model);
-
     protected static byte[] GetBytes(BitArray bits)
     {
         var ret = new byte[(bits.Length - 1) / 8 + 1];

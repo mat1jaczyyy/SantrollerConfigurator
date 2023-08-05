@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -322,6 +323,8 @@ public abstract partial class Output : ReactiveObject
 
     public virtual bool SupportsLedOff => true;
     public bool ConfigurableInput => Input is not (FixedInput or MacroInput);
+    
+    public abstract void WriteBlobsToWriter(BinaryWriter writer);
 
     private object? GetKey()
     {
