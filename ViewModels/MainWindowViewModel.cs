@@ -328,7 +328,8 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
     internal IObservable<PlatformIo.PlatformIoState> Write(ConfigViewModel config)
     {
         StartWorking();
-        config.Generate(Pio, null, null, null);
+        var configFile = Path.Combine(Pio.FirmwareDir, "include", "config_data.h");
+        File.WriteAllText(configFile, config.Generate(null, null));
         var environment = config.Microcontroller.Board.Environment;
         if (config.UsingBluetooth() && config.IsPico) environment = "picow";
 

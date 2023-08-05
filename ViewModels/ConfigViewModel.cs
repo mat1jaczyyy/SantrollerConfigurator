@@ -699,7 +699,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    public void Generate(PlatformIo pio, MemoryStream? blobStream, string? variant, string? extra)
+    public string Generate(MemoryStream? blobStream, string? variant)
     {
         if (Device is Santroller santroller)
         {
@@ -709,10 +709,9 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var outputs = Bindings.Items.SelectMany(binding => binding.Outputs.Items).ToList();
         var inputs = outputs.Select(binding => binding.Input.InnermostInput()).ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
-        var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
         string config;
         BinaryWriter? writer = null;
-        if (variant != null && blobStream != null && extra != null)
+        if (variant != null && blobStream != null)
         {
             writer = new BinaryWriter(blobStream);
             writer.Write((ushort) (SwapSwitchFaceButtons ? 1 : 0));
@@ -734,7 +733,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                        #define INPUT_DJ_TURNTABLE_POLL_RATE config_blobs[5]
                        #define INPUT_DJ_TURNTABLE_SMOOTHING config_blobs[6]
                        #define INPUT_DJ_TURNTABLE_SMOOTHING_DUAL config_blobs[7]
-                       {{extra}}
                        """;
         }
         else
@@ -890,7 +888,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                       """;
         }
 
-        File.WriteAllText(configFile, config);
+        return config;
     }
 
     private string GenerateInit()
