@@ -706,14 +706,26 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             santroller.StopTicking();
         }
 
+        BinaryWriter? writer = null;
         var outputs = Bindings.Items.SelectMany(binding => binding.Outputs.Items).ToList();
         var inputs = outputs.Select(binding => binding.Input.InnermostInput()).ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
         string config;
-        BinaryWriter? writer = null;
+        int configLength;
+        using (var outputStream = new MemoryStream())
+        {
+            using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
+            {
+                Serializer.Serialize(compressStream, new SerializedConfiguration(this));
+            }
+            config = $"#define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}";
+            config += "\n";
+            configLength = outputStream.ToArray().Length;
+        }
         if (blobStream != null)
         {
             writer = new BinaryWriter(blobStream);
+            writer.Write((ushort) configLength);
             writer.Write((ushort) (SwapSwitchFaceButtons ? 1 : 0));
             writer.Write((ushort) (XInputOnWindows ? 1 : 0));
             writer.Write((ushort) (Deque ? 1 : 0));
@@ -722,34 +734,22 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             writer.Write((ushort) Debounce);
             writer.Write((ushort) StrumDebounce);
             writer.Write((ushort) WtSensitivity);
-            config = $"""
-                       #define CONFIGURATION_LEN config_blocks[0]
-                       #define SWAP_SWITCH_FACE_BUTTONS config_blobs[1]
-                       #define WINDOWS_USES_XINPUT config_blobs[2]
-                       #define INPUT_QUEUE config_blobs[3]
-                       #define POLL_RATE config_blobs[4]
-                       #define WT_SENSITIVITY config_blobs[5]
-                       #define INPUT_DJ_TURNTABLE_POLL_RATE config_blobs[6]
-                       #define INPUT_DJ_TURNTABLE_SMOOTHING config_blobs[7]
-                       #define INPUT_DJ_TURNTABLE_SMOOTHING_DUAL config_blobs[8]
-                       """;
+            config += """
+                      #define CONFIGURATION_LEN config_blocks[0]
+                      #define SWAP_SWITCH_FACE_BUTTONS config_blobs[1]
+                      #define WINDOWS_USES_XINPUT config_blobs[2]
+                      #define INPUT_QUEUE config_blobs[3]
+                      #define POLL_RATE config_blobs[4]
+                      #define WT_SENSITIVITY config_blobs[5]
+                      #define INPUT_DJ_TURNTABLE_POLL_RATE config_blobs[6]
+                      #define INPUT_DJ_TURNTABLE_SMOOTHING config_blobs[7]
+                      #define INPUT_DJ_TURNTABLE_SMOOTHING_DUAL config_blobs[8]
+                      """;
         }
         else
         {
-            using (var outputStream = new MemoryStream())
-            {
-                using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
-                {
-                    Serializer.Serialize(compressStream, new SerializedConfiguration(this));
-                }
-
-                config = $$"""
-                           #define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}
-                           #define CONFIGURATION_LEN {{outputStream.ToArray().Length}}
-                           """;
-            }
-            config += "\n";
             config += $"""
+                       #define CONFIGURATION_LEN {configLength}
                        #define SWAP_SWITCH_FACE_BUTTONS {(!SwapSwitchFaceButtons).ToString().ToLower()}
                        #define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}
                        #define INPUT_QUEUE {Deque.ToString().ToLower()}
