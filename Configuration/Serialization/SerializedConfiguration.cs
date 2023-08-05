@@ -40,6 +40,7 @@ public class SerializedConfiguration
         DjDual = model.DjDual;
         DjSmooth = model.DjSmoothing;
         SwapSwitchFaceButtons = model.SwapSwitchFaceButtons;
+        Variant = model.Variant;
     }
 
     [ProtoMember(1)] public LedType LedType { get; private set; }
@@ -63,6 +64,7 @@ public class SerializedConfiguration
     [ProtoMember(30)] public bool DjDual { get; private set; }
     [ProtoMember(31)] public bool SwapSwitchFaceButtons { get; private set; }
     [ProtoMember(32)] public bool DjSmooth { get; private set; }
+    [ProtoMember(33)] public string Variant { get; private set; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
@@ -78,6 +80,7 @@ public class SerializedConfiguration
         model.DjDual = DjDual;
         model.DjSmoothing = DjSmooth;
         model.SwapSwitchFaceButtons = SwapSwitchFaceButtons;
+        model.Variant = Variant;
         if (DjPollRate == 0)
         {
             model.DjPollRate = 1;

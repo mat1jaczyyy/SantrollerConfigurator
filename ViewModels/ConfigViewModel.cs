@@ -162,6 +162,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => StrumDebounce = (int) (value * 10);
     }
 
+    [Reactive] public string Variant { get; set; }
     [Reactive] public bool SwapSwitchFaceButtons { get; set; }
 
     [Reactive] public bool CombinedStrumDebounce { get; set; }
@@ -735,6 +736,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             writer.Write((ushort) StrumDebounce);
             writer.Write((ushort) WtSensitivity);
             config += """
+                      #define CONFIGURABLE_BLOBS
                       #define CONFIGURATION_LEN config_blocks[0]
                       #define SWAP_SWITCH_FACE_BUTTONS config_blobs[1]
                       #define WINDOWS_USES_XINPUT config_blobs[2]
