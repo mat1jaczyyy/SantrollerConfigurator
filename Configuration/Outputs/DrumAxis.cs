@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Avalonia;
 using Avalonia.Media;
@@ -153,7 +154,7 @@ public partial class DrumAxis : OutputAxis
 
     public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros, BinaryWriter? writer)
     {
         if (mode == ConfigField.Shared)
         {
@@ -161,9 +162,9 @@ public partial class DrumAxis : OutputAxis
             {
                 return new ControllerButton(Model, Input, LedOn, LedOff, LedIndices.ToArray(), (byte) Debounce, StandardButtonType.A,
                         false)
-                    .Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
+                    .Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros, writer);
             }
-            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
+            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros, writer);
         }
         
 
@@ -336,7 +337,7 @@ public partial class DrumAxis : OutputAxis
         // and then convert them to their expected output format, before writing to the output report.
         return $$"""
                  {
-                     uint16_t val_real = {{GenerateAssignment(GenerateOutput(mode), mode, false, false, false)}};
+                     uint16_t val_real = {{GenerateAssignment(GenerateOutput(mode), mode, false, false, false, writer)}};
                      if (val_real) {
                          {{reset}}
                          {{GenerateOutput(mode)}} = {{assignedVal}};

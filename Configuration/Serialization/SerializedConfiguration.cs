@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using DynamicData;
 using GuitarConfigurator.NetCore.Configuration.Outputs;
@@ -40,6 +38,7 @@ public class SerializedConfiguration
         QueueBasedInputs = model.Deque;
         DjPollRate = model.DjPollRate;
         DjDual = model.DjDual;
+        DjSmooth = model.DjSmoothing;
         SwapSwitchFaceButtons = model.SwapSwitchFaceButtons;
     }
 
@@ -63,6 +62,7 @@ public class SerializedConfiguration
     [ProtoMember(29)] public int DjPollRate { get; private set; }
     [ProtoMember(30)] public bool DjDual { get; private set; }
     [ProtoMember(31)] public bool SwapSwitchFaceButtons { get; private set; }
+    [ProtoMember(32)] public bool DjSmooth { get; private set; }
 
     public void LoadConfiguration(ConfigViewModel model)
     {
@@ -76,6 +76,7 @@ public class SerializedConfiguration
         model.Deque = QueueBasedInputs;
         model.DjPollRate = DjPollRate;
         model.DjDual = DjDual;
+        model.DjSmoothing = DjSmooth;
         model.SwapSwitchFaceButtons = SwapSwitchFaceButtons;
         if (DjPollRate == 0)
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
@@ -142,10 +143,10 @@ public partial class DjAxis : OutputAxis
 
     public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros, BinaryWriter? writer)
     {
         if (mode == ConfigField.Shared)
-            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
+            return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros, writer);
         if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.XboxOne or ConfigField.Xbox360
             or ConfigField.Universal)) return "";
 
@@ -171,6 +172,13 @@ public partial class DjAxis : OutputAxis
         // Table just applies a multiplier to the value
         var generatedTable = $"({generated} * {Multiplier})";
         var generatedTablePs3 = $"(({generatedPs3} >> 8) * {Multiplier})";
+        if (writer != null && Type is DjAxisType.LeftTableVelocity or DjAxisType.RightTableVelocity)
+        {
+            var i = writer.BaseStream.Length / 2;
+            writer.Write((ushort)(Multiplier + short.MaxValue));
+            generatedTable = $"({generated} * (config_blobs[{i}] - INT16_MAX))";
+            generatedTablePs3 = $"(({generatedPs3} >> 8) * (config_blobs[{i}] - INT16_MAX))";
+        }
 
         var gen = Type switch
         {
@@ -182,7 +190,7 @@ public partial class DjAxis : OutputAxis
             DjAxisType.EffectsKnob when mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture
                 => $"(({generatedPs3} >> 6))",
             DjAxisType.EffectsKnob => generated,
-            _ => GenerateAssignment(GenerateOutput(mode), mode, accelerometer, false, false)
+            _ => GenerateAssignment(GenerateOutput(mode), mode, accelerometer, false, false, writer)
         };
         return Type switch
         {

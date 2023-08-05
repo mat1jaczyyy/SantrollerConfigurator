@@ -323,8 +323,18 @@ public abstract partial class Output : ReactiveObject
 
     public virtual bool SupportsLedOff => true;
     public bool ConfigurableInput => Input is not (FixedInput or MacroInput);
-    
-    public abstract void WriteBlobsToWriter(BinaryWriter writer);
+
+    public virtual void WriteBlobsToWriter(BinaryWriter writer)
+    {
+        Model.LedType.WriteToWriter(LedOn, writer);
+        Model.LedType.WriteToWriter(LedOff, writer);
+    }
+
+    public virtual void ReadBlobsFromReader(BinaryReader reader)
+    {
+        LedOn = Model.LedType.ReadFromReader(reader);
+        LedOff = Model.LedType.ReadFromReader(reader);
+    }
 
     private object? GetKey()
     {
@@ -590,7 +600,7 @@ public abstract partial class Output : ReactiveObject
 
     public abstract string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros);
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros, BinaryWriter? writer);
 
     public virtual IEnumerable<Output> ValidOutputs()
     {

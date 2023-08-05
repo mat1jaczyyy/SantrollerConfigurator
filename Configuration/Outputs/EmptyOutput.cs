@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Input;
@@ -251,7 +252,7 @@ public class EmptyOutput : Output
 
     public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros, BinaryWriter? writer)
     {
         throw new IncompleteConfigurationException(ErrorText);
     }

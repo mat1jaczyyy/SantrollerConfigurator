@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Avalonia.Media;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
@@ -82,7 +83,7 @@ public class GuitarButton : OutputButton
 
     public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros, BinaryWriter? writer)
     {
         if (mode is not (ConfigField.Shared or ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Xbox360
             or ConfigField.Universal
@@ -97,10 +98,10 @@ public class GuitarButton : OutputButton
             mode is ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Ps4 or ConfigField.Xbox360)
             return base.Generate(mode, debounceIndex,
                 $"report->strumBar={(Type is InstrumentButtonType.StrumDown ? "0xFF" : "0x00")};", combinedExtra,
-                combinedDebounce, macros);
+                combinedDebounce, macros, writer);
 
         if (Model is not {DeviceControllerType: DeviceControllerType.RockBandGuitar})
-            return base.Generate(mode, debounceIndex, "", combinedExtra, combinedDebounce, macros);
+            return base.Generate(mode, debounceIndex, "", combinedExtra, combinedDebounce, macros, writer);
 
         //This stuff is only relevant for rock band guitars
         // Set solo flag (not relevant for universal)
@@ -113,7 +114,7 @@ public class GuitarButton : OutputButton
             extra += $"{GenerateOutput(ConfigField.Ps3)}=true;";
 
 
-        return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros);
+        return base.Generate(mode, debounceIndex, extra, combinedExtra, combinedDebounce, macros, writer);
     }
 
     public override SerializedOutput Serialize()

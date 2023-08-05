@@ -26,6 +26,7 @@ public partial class DjInput : TwiInput
         IsAnalog = Input <= DjInputType.RightTurntable;
         this.WhenAnyValue(x => x.Model.DjPollRate).Subscribe(_ => this.RaisePropertyChanged(nameof(PollRate)));
         this.WhenAnyValue(x => x.Model.DjDual).Subscribe(_ => this.RaisePropertyChanged(nameof(Dual)));
+        this.WhenAnyValue(x => x.Model.DjSmoothing).Subscribe(_ => this.RaisePropertyChanged(nameof(Smoothing)));
     }
 
     public int PollRate
@@ -35,7 +36,12 @@ public partial class DjInput : TwiInput
     }
 
     public bool Combined { get; }
-    [Reactive] public bool Smoothing { get; set; }
+
+    public bool Smoothing
+    {
+        get => Model.DjSmoothing;
+        set => Model.DjSmoothing = value;
+    }
 
     public bool Dual
     {
@@ -104,20 +110,25 @@ public partial class DjInput : TwiInput
     public override string GenerateAll(List<Tuple<Input, string>> bindings,
         ConfigField mode)
     {
-        if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Shared or ConfigField.XboxOne or ConfigField.Xbox360
+        if (mode is not (ConfigField.Ps3 or ConfigField.Ps3WithoutCapture or ConfigField.Shared or ConfigField.XboxOne
+            or ConfigField.Xbox360
             or ConfigField.Ps4))
             return "";
         var left = string.Join(";",
-            bindings.Where(binding => (!Dual || (binding.Item1 as DjInput)!.Input != DjInputType.LeftTurntable) && (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
+            bindings.Where(binding => (!Dual || (binding.Item1 as DjInput)!.Input != DjInputType.LeftTurntable) &&
+                                      (binding.Item1 as DjInput)!.Input.ToString().Contains("Left"))
                 .Select(binding => binding.Item2));
         var right = string.Join(";",
-            bindings.Where(binding => (!Dual || (binding.Item1 as DjInput)!.Input != DjInputType.RightTurntable) && (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
+            bindings.Where(binding => (!Dual || (binding.Item1 as DjInput)!.Input != DjInputType.RightTurntable) &&
+                                      (binding.Item1 as DjInput)!.Input.ToString().Contains("Right"))
                 .Select(binding => binding.Item2));
         var dual = "";
         if (Dual)
         {
-            dual = bindings.Where(binding =>  (binding.Item1 as DjInput)!.Input == DjInputType.LeftTurntable).Select(binding => binding.Item2).FirstOrDefault("");
+            dual = bindings.Where(binding => (binding.Item1 as DjInput)!.Input == DjInputType.LeftTurntable)
+                .Select(binding => binding.Item2).FirstOrDefault("");
         }
+
         return $$"""
                  if (djLeftValid) {
                      {{left}}
@@ -127,32 +138,11 @@ public partial class DjInput : TwiInput
                  }
                  {{dual}}
                  """;
-                
-                  
     }
 
     public override IReadOnlyList<string> RequiredDefines()
     {
-        var list = new List<string>(base.RequiredDefines()) {"INPUT_DJ_TURNTABLE"};
-        if (Smoothing)
-        {
-            switch (Input)
-            {
-                case DjInputType.LeftTurntable or DjInputType.RightTurntable when Dual:
-                    list.Add("INPUT_DJ_TURNTABLE_SMOOTHING_DUAL");
-                    break;
-                case DjInputType.LeftTurntable:
-                    list.Add("INPUT_DJ_TURNTABLE_SMOOTHING_LEFT");
-                    break;
-                case DjInputType.RightTurntable:
-                    list.Add("INPUT_DJ_TURNTABLE_SMOOTHING_RIGHT");
-                    break;
-            }
-        }
-
-        list.Add($"INPUT_DJ_TURNTABLE_POLL_RATE {Model.DjPollRate * 1000}");
-
-        return list;
+        return new List<string>(base.RequiredDefines()) {"INPUT_DJ_TURNTABLE"};
     }
 
     public override SerializedInput Serialise()

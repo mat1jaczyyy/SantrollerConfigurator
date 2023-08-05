@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
@@ -46,11 +47,12 @@ public abstract class OutputButton : Output
     /// <param name="combinedExtra"></param>
     /// <param name="combinedDebounce"></param>
     /// <param name="macros"></param>
+    /// <param name="writer"></param>
     /// <returns></returns>
     /// <exception cref="IncompleteConfigurationException"></exception>
     public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros, BinaryWriter? writer)
     {
         var ifStatement = $"debounce[{debounceIndex}]";
         var extraStatement = "";

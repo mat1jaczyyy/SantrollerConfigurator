@@ -267,6 +267,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     [Reactive] public int PollRate { get; set; }
     [Reactive] public int DjPollRate { get; set; }
     [Reactive] public bool DjDual { get; set; }
+    [Reactive] public bool DjSmoothing { get; set; }
 
     public int Apa102Mosi
     {
@@ -698,7 +699,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    public void Generate(PlatformIo pio)
+    public void Generate(PlatformIo pio, MemoryStream? blobStream, string? variant)
     {
         if (Device is Santroller santroller)
         {
@@ -709,21 +710,66 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var inputs = outputs.Select(binding => binding.Input.InnermostInput()).ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
         var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
-        // Always include the current config - even if its invalid (aka, in the case of initial configs for wii and such)
-        using var outputStream = new MemoryStream();
-        using var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize);
-        Serializer.Serialize(compressStream, new SerializedConfiguration(this));
-        var config = $$"""
-                     #define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}
-                     #define CONFIGURATION_LEN {{outputStream.ToArray().Length}}
-                     #define WINDOWS_USES_XINPUT {{XInputOnWindows.ToString().ToLower()}}
-                     #define ABSOLUTE_MOUSE_COORDS {{(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}}
-                     #define ARDWIINO_BOARD "{{Microcontroller.Board.ArdwiinoName}}"
-                     #define CONSOLE_TYPE {{GetEmulationType()}}
-                     #define DEVICE_TYPE {{(byte) DeviceControllerType}}
-                     #define POLL_RATE {{PollRate}}
-                     #define SWAP_SWITCH_FACE_BUTTONS {{(!SwapSwitchFaceButtons).ToString().ToLower()}}
-                     """;
+        string config;
+        BinaryWriter? writer = null;
+        if (variant != null && blobStream != null)
+        {
+            writer = new BinaryWriter(blobStream);
+            writer.Write((ushort) (SwapSwitchFaceButtons ? 1 : 0));
+            writer.Write((ushort) (XInputOnWindows ? 1 : 0));
+            writer.Write((ushort) (Deque ? 1 : 0));
+            writer.Write((ushort) PollRate);
+            writer.Write((ushort) DjPollRate);
+            writer.Write((ushort) Debounce);
+            writer.Write((ushort) StrumDebounce);
+            writer.Write((ushort) WtSensitivity);
+            config = $$"""
+                       #define CONFIGURATION {{{variant.ToArray().Select(b => "0x" + ((byte)b).ToString("X"))}}}
+                       #define CONFIGURATION_LEN {{variant.Length}}
+                       #define SWAP_SWITCH_FACE_BUTTONS config_blobs[0]
+                       #define WINDOWS_USES_XINPUT config_blobs[1]
+                       #define INPUT_QUEUE config_blobs[2]
+                       #define POLL_RATE config_blobs[3]
+                       #define WT_SENSITIVITY config_blobs[4]
+                       #define INPUT_DJ_TURNTABLE_POLL_RATE config_blobs[5]
+                       #define INPUT_DJ_TURNTABLE_SMOOTHING config_blobs[6]
+                       #define INPUT_DJ_TURNTABLE_SMOOTHING_DUAL config_blobs[7]
+                       """;
+        }
+        else
+        {
+            using (var outputStream = new MemoryStream())
+            {
+                using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
+                {
+                    Serializer.Serialize(compressStream, new SerializedConfiguration(this));
+                }
+
+                config = $$"""
+                           #define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}
+                           #define CONFIGURATION_LEN {{outputStream.ToArray().Length}}
+                           """;
+            }
+            config += "\n";
+            config += $"""
+                       #define SWAP_SWITCH_FACE_BUTTONS {(!SwapSwitchFaceButtons).ToString().ToLower()}
+                       #define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}
+                       #define INPUT_QUEUE {Deque.ToString().ToLower()}
+                       #define POLL_RATE {PollRate}
+                       #define WT_SENSITIVITY {WtSensitivity}
+                       #define INPUT_DJ_TURNTABLE_POLL_RATE {DjPollRate * 1000}
+                       #define INPUT_DJ_TURNTABLE_SMOOTHING {DjSmoothing.ToString().ToLower()}
+                       #define INPUT_DJ_TURNTABLE_SMOOTHING_DUAL {DjDual.ToString().ToLower()}
+                       """;
+        }
+
+        config += "\n";
+        config += $"""
+                  #define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}
+                  #define ARDWIINO_BOARD "{Microcontroller.Board.ArdwiinoName}"
+                  #define CONSOLE_TYPE {GetEmulationType()}
+                  #define DEVICE_TYPE {(byte) DeviceControllerType}
+                  """;
 
         // Actually write the config as configured
         if (!HasError)
@@ -731,44 +777,44 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             // Sort by pin index, and then map to adc number and turn into an array
             var analogPins = directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin)
                 .Select(s => Microcontroller.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct().ToList();
+            config += "\n";
             config += $$"""
-                      #define USB_HOST_STACK {{UsbHostEnabled.ToString().ToLower()}}
-                      #define USB_HOST_DP_PIN {{UsbHostDp}}
-                      #define TICK_SHARED {{GenerateTick(ConfigField.Shared)}}
-                      #define TICK_DETECTION {{GenerateTick(ConfigField.Detection)}}
-                      #define TICK_PS3 {{GenerateTick(ConfigField.Ps3)}}
-                      #define TICK_PS3_WITHOUT_CAPTURE {{GenerateTick(ConfigField.Ps3WithoutCapture)}}
-                      #define TICK_PC {{GenerateTick(ConfigField.Universal)}}
-                      #define TICK_PS4 {{GenerateTick(ConfigField.Ps4)}}
-                      #define TICK_XINPUT {{GenerateTick(ConfigField.Xbox360)}}
-                      #define TICK_XBOX_ONE {{GenerateTick(ConfigField.XboxOne)}}
-                      #define DIGITAL_COUNT {{CalculateDebounceTicks()}}
-                      #define LED_COUNT {{LedCount}}
-                      #define WT_SENSITIVITY {{WtSensitivity}}
-                      #define LED_TYPE {{GetLedType()}}
-                      #define HANDLE_AUTH_LED {{GenerateTick(ConfigField.AuthLed)}}
-                      #define HANDLE_PLAYER_LED {{GenerateTick(ConfigField.PlayerLed)}}
-                      #define HANDLE_LIGHTBAR_LED {{GenerateTick(ConfigField.LightBarLed)}}
-                      #define INPUT_QUEUE {{Deque.ToString().ToLower()}}
-                      #define HANDLE_RUMBLE {{GenerateTick(ConfigField.RumbleLed)}}
-                      #define HANDLE_KEYBOARD_LED {{GenerateTick(ConfigField.KeyboardLed)}}
-                      #define ADC_PINS {{{string.Join(",", analogPins)}}}
-                      #define ADC_COUNT {{analogPins.Count}}
-                      #define PIN_INIT {{GenerateInit()}}
-                      #define LED_INIT {{GenerateTick(ConfigField.InitLed)}}
-                      """;
+                        #define USB_HOST_STACK {{UsbHostEnabled.ToString().ToLower()}}
+                        #define USB_HOST_DP_PIN {{UsbHostDp}}
+                        #define TICK_SHARED {{GenerateTick(ConfigField.Shared, writer)}}
+                        #define TICK_DETECTION {{GenerateTick(ConfigField.Detection, writer)}}
+                        #define TICK_PS3 {{GenerateTick(ConfigField.Ps3, writer)}}
+                        #define TICK_PS3_WITHOUT_CAPTURE {{GenerateTick(ConfigField.Ps3WithoutCapture, writer)}}
+                        #define TICK_PC {{GenerateTick(ConfigField.Universal, writer)}}
+                        #define TICK_PS4 {{GenerateTick(ConfigField.Ps4, writer)}}
+                        #define TICK_XINPUT {{GenerateTick(ConfigField.Xbox360, writer)}}
+                        #define TICK_XBOX_ONE {{GenerateTick(ConfigField.XboxOne, writer)}}
+                        #define DIGITAL_COUNT {{CalculateDebounceTicks()}}
+                        #define LED_COUNT {{LedCount}}
+                        #define LED_TYPE {{GetLedType()}}
+                        #define HANDLE_AUTH_LED {{GenerateTick(ConfigField.AuthLed, writer)}}
+                        #define HANDLE_PLAYER_LED {{GenerateTick(ConfigField.PlayerLed, writer)}}
+                        #define HANDLE_LIGHTBAR_LED {{GenerateTick(ConfigField.LightBarLed, writer)}}
+                        #define HANDLE_RUMBLE {{GenerateTick(ConfigField.RumbleLed, writer)}}
+                        #define HANDLE_KEYBOARD_LED {{GenerateTick(ConfigField.KeyboardLed, writer)}}
+                        #define ADC_PINS {{{string.Join(",", analogPins)}}}
+                        #define ADC_COUNT {{analogPins.Count}}
+                        #define PIN_INIT {{GenerateInit()}}
+                        #define LED_INIT {{GenerateTick(ConfigField.InitLed, writer)}}
+                        """;
 
-            var nkroTick = GenerateTick(ConfigField.Keyboard);
-            if (nkroTick.Any()) config += $"#define TICK_NKRO {nkroTick}";
+            var nkroTick = GenerateTick(ConfigField.Keyboard, writer);
+            if (nkroTick.Any()) config += $"#\ndefine TICK_NKRO {nkroTick}";
 
-            var consumerTick = GenerateTick(ConfigField.Consumer);
-            if (consumerTick.Any()) config += $"#define TICK_CONSUMER {consumerTick}";
+            var consumerTick = GenerateTick(ConfigField.Consumer, writer);
+            if (consumerTick.Any()) config += $"\n#define TICK_CONSUMER {consumerTick}";
 
-            var mouseTick = GenerateTick(ConfigField.Mouse);
-            if (mouseTick.Any()) config += $"#define TICK_MOUSE {mouseTick}";
+            var mouseTick = GenerateTick(ConfigField.Mouse, writer);
+            if (mouseTick.Any()) config += $"\n#define TICK_MOUSE {mouseTick}";
 
             if (IsApa102)
             {
+                config += "\n";
                 config += $"""
                            #define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}
                            #define TICK_LED {GenerateLedTick()}
@@ -776,20 +822,25 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
 
 
-            var offLed = GenerateTick(ConfigField.OffLed);
+            var offLed = GenerateTick(ConfigField.OffLed, writer);
             if (offLed.Any()) config += $"#define HANDLE_LED_RUMBLE_OFF {offLed}";
             if (EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
+            {
+                config += "\n";
                 config +=
                     $"#define BLUETOOTH_TX {(EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse).ToString().ToLower()}";
+            }
 
             if (KvEnabled)
             {
+                config += "\n";
                 config += $$"""
-                          #define KV_KEY_1 {{{string.Join(",", KvKey1.ToArray().Select(b => "0x" + b.ToString("X")))}}}
-                          #define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}
-                          """;
+                            #define KV_KEY_1 {{{string.Join(",", KvKey1.ToArray().Select(b => "0x" + b.ToString("X")))}}}
+                            #define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}
+                            """;
             }
 
+            config += "\n";
             // Copy in any specific config for the different pin configs (like spi and twi config on the pico)
             config += GetPinConfigs().Distinct().Aggregate("", (current, pinConfig) => current + pinConfig.Generate());
             config += string.Join("\n",
@@ -797,6 +848,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         }
         else
         {
+            config += "\n";
             // Write an empty config - the config at this point is likely invalid and won't compile
             config += """
                       #define USB_HOST_STACK false
@@ -811,7 +863,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                       #define TICK_XBOX_ONE
                       #define DIGITAL_COUNT 0
                       #define LED_COUNT 0
-                      #define WT_SENSITIVITY 0
                       #define LED_TYPE 0
                       #define INPUT_QUEUE false
                       #define HANDLE_AUTH_LED
@@ -824,7 +875,17 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                       #define PIN_INIT
                       #define LED_INIT
                       """;
-            
+        }
+
+        if (blobStream != null)
+        {
+            blobStream.Seek(0, SeekOrigin.Begin);
+            var blobLength = blobStream.Length;
+            config += "\n";
+            config += $$"""
+                      #define CONFIGURABLE_BLOBS {{{blobStream.ToArray().Select(b => "0x" + b.ToString("X"))}}}
+                      #define CONFIGURABLE_BLOBS_LEN {{blobLength}}
+                      """;
         }
 
         File.WriteAllText(configFile, config);
@@ -996,10 +1057,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         for (var i = 0; i <= ledMax; i += 16) ret += "spi_transfer(APA102_SPI_PORT, 0xff);";
 
-        return GenerateTick(ConfigField.StrobeLed) + ret.Replace('\r', ' ').Replace('\n', ' ');
+        return GenerateTick(ConfigField.StrobeLed, null) + ret.Replace('\r', ' ').Replace('\n', ' ');
     }
 
-    private string GenerateTick(ConfigField mode)
+    private string GenerateTick(ConfigField mode, BinaryWriter? writer)
     {
         var outputs = Bindings.Items.SelectMany(binding => binding.ValidOutputs()).ToList();
         var outputsByType = outputs
@@ -1099,7 +1160,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                                 }
                             }
 
-                            var generated = output.Generate(mode, index, "", "", strumIndices, macros);
+                            var generated = output.Generate(mode, index, "", "", strumIndices, macros, writer);
                             return new Tuple<Input, string>(input, generated);
                         })
                         .Where(s => !string.IsNullOrEmpty(s.Item2))
@@ -1115,7 +1176,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 {
                     foreach (var analogLedOutput in analogLedOutputs)
                     {
-                        var ledRead = analogLedOutput.GenerateAssignment("0", ConfigField.Ps3, false, true, false);
+                        var ledRead =
+                            analogLedOutput.GenerateAssignment("0", ConfigField.Ps3, false, true, false, null);
                         // Now we have the value, calibrated as a uint8_t
                         // Only apply analog colours if non zero when conflicting with digital, so that the digital off states override
                         analog +=
@@ -1159,7 +1221,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 ret += $"if (ledState[{led - 1}].select == 0) {{";
                 foreach (var analogLedOutput in analogLedOutputs)
                 {
-                    var ledRead = analogLedOutput.GenerateAssignment("0", ConfigField.Ps3, false, true, false);
+                    var ledRead = analogLedOutput.GenerateAssignment("0", ConfigField.Ps3, false, true, false, writer);
                     // Now we have the value, calibrated as a uint8_t
                     ret +=
                         $"led_tmp = {ledRead};{LedType.GetLedAssignment(led, analogLedOutput.LedOn, analogLedOutput.LedOff, "led_tmp")}";

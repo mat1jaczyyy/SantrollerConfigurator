@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Avalonia.Media;
 
@@ -28,6 +29,64 @@ public static class LedTypeMethods
             LedType.Apa102Gbr => new[] {color.G, color.B, color.R},
             LedType.Apa102Brg => new[] {color.B, color.R, color.G},
             LedType.Apa102Bgr => new[] {color.B, color.G, color.R},
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+    
+    public static void WriteToWriter(this LedType type, Color color, BinaryWriter writer)
+    {
+        switch (type)
+        {
+            case LedType.None:
+                break;
+            case LedType.Apa102Rgb:
+                writer.Write((ushort)color.R);
+                writer.Write((ushort)color.G);
+                writer.Write((ushort)color.B);
+                break;
+            case LedType.Apa102Rbg:
+                writer.Write((ushort)color.R);
+                writer.Write((ushort)color.B);
+                writer.Write((ushort)color.G);
+                break;
+            case LedType.Apa102Grb:
+                writer.Write((ushort)color.G);
+                writer.Write((ushort)color.R);
+                writer.Write((ushort)color.B);
+                break;
+            case LedType.Apa102Gbr:
+                writer.Write((ushort)color.G);
+                writer.Write((ushort)color.B);
+                writer.Write((ushort)color.R);
+                break;
+            case LedType.Apa102Brg:
+                writer.Write((ushort)color.B);
+                writer.Write((ushort)color.R);
+                writer.Write((ushort)color.G);
+                break;
+            case LedType.Apa102Bgr:
+                writer.Write((ushort)color.B);
+                writer.Write((ushort)color.G);
+                writer.Write((ushort)color.R);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
+    public static Color ReadFromReader(this LedType type, BinaryReader reader)
+    {
+        if (type is LedType.None) return Colors.Black;
+        var first = (byte)reader.ReadUInt16();
+        var second = (byte)reader.ReadUInt16();
+        var third = (byte)reader.ReadUInt16();
+        return type switch
+        {
+            LedType.Apa102Rgb => new Color(0xFF, first, second, third),
+            LedType.Apa102Rbg => new Color(0xFF, first, third, second),
+            LedType.Apa102Grb => new Color(0xFF, second, first, third),
+            LedType.Apa102Gbr => new Color(0xFF, third, first, second),
+            LedType.Apa102Brg => new Color(0xFF, second, third, first),
+            LedType.Apa102Bgr => new Color(0xFF, third, second, first),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

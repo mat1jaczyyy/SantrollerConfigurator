@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
@@ -315,7 +316,8 @@ public abstract partial class OutputAxis : Output
         };
     }
 
-    public string GenerateAssignment(string prev, ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy)
+    public string GenerateAssignment(string prev, ConfigField mode, bool forceAccel, bool forceTrigger, bool whammy,
+        BinaryWriter? writer)
     {
         if (Input is FixedInput or DigitalToAnalog) return Input.Generate();
 
@@ -447,6 +449,23 @@ public abstract partial class OutputAxis : Output
             _ => ")"
         };
         var mulInt = (short) (multiplier * 512);
+        if (writer != null)
+        {
+            var i = writer.BaseStream.Length / 2;
+            if (intBased)
+            {
+                writer.Write((ushort) ((max + min) / 2 + short.MaxValue));
+                writer.Write((ushort) (min + short.MaxValue));
+                writer.Write((ushort) (mulInt + short.MaxValue));
+                writer.Write((ushort) (DeadZone + short.MaxValue));
+                return $"{function}({prev}, {generated}, (config_blobs[{i}] - INT16_MAX), (config_blobs[{i+1}] - INT16_MAX), (config_blobs[{i+2}] - INT16_MAX), (config_blobs[{i+2}] - INT16_MAX))";
+            }
+
+            writer.Write((ushort) min);
+            writer.Write((ushort) (mulInt + short.MaxValue));
+            writer.Write((ushort) DeadZone);
+            return $"{function}({prev}, {generated},  config_blobs[{i}], (config_blobs[{i+1}] - INT16_MAX), config_blobs[{i+2}])";
+        }
 
         return intBased
             ? $"{function}({prev}, {generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
@@ -456,7 +475,7 @@ public abstract partial class OutputAxis : Output
 
     public override string Generate(ConfigField mode, int debounceIndex, string extra,
         string combinedExtra,
-        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros)
+        List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros, BinaryWriter? writer)
     {
         if (mode == ConfigField.Shared)
         {
@@ -483,7 +502,7 @@ public abstract partial class OutputAxis : Output
                 }
             }
 
-            return $"{output} = {GenerateAssignment(output, mode, false, false, false)};{extraTrigger}";
+            return $"{output} = {GenerateAssignment(output, mode, false, false, false, writer)};{extraTrigger}";
         }
 
         // Digital to Analog stores values based on uint16_t for trigger, and int16_t for sticks
