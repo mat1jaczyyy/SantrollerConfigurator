@@ -26,7 +26,7 @@ public class BrandedConfigurationStore
     public string HelpText { get; private set; }
     public List<BrandedConfiguration> Configurations { get; private set; }
 
-    public static BrandedConfigurationStore LoadFromBranding(ConfigViewModel model)
+    public static BrandedConfigurationStore LoadBranding(ConfigViewModel model)
     {
 #if SINGLE_FILE
         var stream = File.OpenRead(Environment.ProcessPath!);
@@ -41,7 +41,7 @@ public class BrandedConfigurationStore
         return new BrandedConfigurationStore(Serializer.Deserialize<SerialisedBrandedConfigurationStore>(stream), model);
     }
 
-    public void WriteToExecutable(string baseExecutable, string outputExecutable)
+    public void WriteBranding(string baseExecutable, string outputExecutable)
     {
         File.Copy(baseExecutable, outputExecutable);
 #if SINGLE_FILE
