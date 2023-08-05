@@ -709,157 +709,125 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var inputs = outputs.Select(binding => binding.Input.InnermostInput()).ToList();
         var directInputs = inputs.OfType<DirectInput>().ToList();
         var configFile = Path.Combine(pio.FirmwareDir, "include", "config_data.h");
-        var lines = new List<string>();
         // Always include the current config - even if its invalid (aka, in the case of initial configs for wii and such)
-        using (var outputStream = new MemoryStream())
-        {
-            using (var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize))
-            {
-                Serializer.Serialize(compressStream, new SerializedConfiguration(this));
-            }
-
-            lines.Add(
-                $"#define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
-            lines.Add($"#define CONFIGURATION_LEN {outputStream.ToArray().Length}");
-        }
-
-        // Settings that are always written
-        lines.Add($"#define WINDOWS_USES_XINPUT {XInputOnWindows.ToString().ToLower()}");
-        lines.Add(
-            $"#define ABSOLUTE_MOUSE_COORDS {(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}");
-        lines.Add($"#define ARDWIINO_BOARD \"{Microcontroller.Board.ArdwiinoName}\"");
-        lines.Add($"#define CONSOLE_TYPE {GetEmulationType()}");
-        lines.Add($"#define DEVICE_TYPE {(byte) DeviceControllerType}");
-        lines.Add($"#define POLL_RATE {PollRate}");
-        lines.Add($"#define SWAP_SWITCH_FACE_BUTTONS {(!SwapSwitchFaceButtons).ToString().ToLower()}");
+        using var outputStream = new MemoryStream();
+        using var compressStream = new BrotliStream(outputStream, CompressionLevel.SmallestSize);
+        Serializer.Serialize(compressStream, new SerializedConfiguration(this));
+        var config = $$"""
+                     #define CONFIGURATION {{{string.Join(",", outputStream.ToArray().Select(b => "0x" + b.ToString("X")))}}}
+                     #define CONFIGURATION_LEN {{outputStream.ToArray().Length}}
+                     #define WINDOWS_USES_XINPUT {{XInputOnWindows.ToString().ToLower()}}
+                     #define ABSOLUTE_MOUSE_COORDS {{(MouseMovementType == MouseMovementType.Absolute).ToString().ToLower()}}
+                     #define ARDWIINO_BOARD "{{Microcontroller.Board.ArdwiinoName}}"
+                     #define CONSOLE_TYPE {{GetEmulationType()}}
+                     #define DEVICE_TYPE {{(byte) DeviceControllerType}}
+                     #define POLL_RATE {{PollRate}}
+                     #define SWAP_SWITCH_FACE_BUTTONS {{(!SwapSwitchFaceButtons).ToString().ToLower()}}
+                     """;
 
         // Actually write the config as configured
         if (!HasError)
         {
-            lines.Add($"#define USB_HOST_STACK {UsbHostEnabled.ToString().ToLower()}");
-            lines.Add($"#define USB_HOST_DP_PIN {UsbHostDp}");
-
-            lines.Add($"#define TICK_SHARED {GenerateTick(ConfigField.Shared)}");
-            lines.Add($"#define TICK_DETECTION {GenerateTick(ConfigField.Detection)}");
-
-            lines.Add($"#define TICK_PS3 {GenerateTick(ConfigField.Ps3)}");
-            lines.Add($"#define TICK_PS3_WITHOUT_CAPTURE {GenerateTick(ConfigField.Ps3WithoutCapture)}");
-
-            lines.Add($"#define TICK_PC {GenerateTick(ConfigField.Universal)}");
-
-            lines.Add($"#define TICK_PS4 {GenerateTick(ConfigField.Ps4)}");
-
-            lines.Add($"#define TICK_XINPUT {GenerateTick(ConfigField.Xbox360)}");
-
-            lines.Add($"#define TICK_XBOX_ONE {GenerateTick(ConfigField.XboxOne)}");
-
-            var nkroTick = GenerateTick(ConfigField.Keyboard);
-            if (nkroTick.Any()) lines.Add($"#define TICK_NKRO {nkroTick}");
-
-            var consumerTick = GenerateTick(ConfigField.Consumer);
-            if (consumerTick.Any()) lines.Add($"#define TICK_CONSUMER {consumerTick}");
-
-            var mouseTick = GenerateTick(ConfigField.Mouse);
-            if (mouseTick.Any()) lines.Add($"#define TICK_MOUSE {mouseTick}");
-
-
-            lines.Add($"#define DIGITAL_COUNT {CalculateDebounceTicks()}");
-            lines.Add($"#define LED_COUNT {LedCount}");
-            lines.Add($"#define WT_SENSITIVITY {WtSensitivity}");
-
-            lines.Add($"#define LED_TYPE {GetLedType()}");
-
-            if (IsApa102)
-            {
-                lines.Add($"#define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}");
-
-                lines.Add($"#define TICK_LED {GenerateLedTick()}");
-            }
-
-            lines.Add($"#define HANDLE_AUTH_LED {GenerateTick(ConfigField.AuthLed)}");
-
-            var offLed = GenerateTick(ConfigField.OffLed);
-            if (offLed.Any()) lines.Add($"#define HANDLE_LED_RUMBLE_OFF {offLed}");
-
-            lines.Add($"#define HANDLE_PLAYER_LED {GenerateTick(ConfigField.PlayerLed)}");
-
-            lines.Add($"#define HANDLE_LIGHTBAR_LED {GenerateTick(ConfigField.LightBarLed)}");
-
-            lines.Add($"#define INPUT_QUEUE {Deque.ToString().ToLower()}");
-            lines.Add($"#define HANDLE_RUMBLE {GenerateTick(ConfigField.RumbleLed)}");
-
-            lines.Add($"#define HANDLE_KEYBOARD_LED {GenerateTick(ConfigField.KeyboardLed)}");
-            if (EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
-                lines.Add(
-                    $"#define BLUETOOTH_TX {(EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse).ToString().ToLower()}");
-
-            if (KvEnabled)
-            {
-                lines.Add(
-                    $"#define KV_KEY_1 {{{string.Join(",", KvKey1.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
-                lines.Add(
-                    $"#define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}");
-            }
-
             // Sort by pin index, and then map to adc number and turn into an array
             var analogPins = directInputs.Where(s => s.IsAnalog).OrderBy(s => s.PinConfig.Pin)
                 .Select(s => Microcontroller.GetChannel(s.PinConfig.Pin, false).ToString()).Distinct().ToList();
-            // Format as a c array
-            lines.Add($"#define ADC_PINS {{{string.Join(",", analogPins)}}}");
+            config += $$"""
+                      #define USB_HOST_STACK {{UsbHostEnabled.ToString().ToLower()}}
+                      #define USB_HOST_DP_PIN {{UsbHostDp}}
+                      #define TICK_SHARED {{GenerateTick(ConfigField.Shared)}}
+                      #define TICK_DETECTION {{GenerateTick(ConfigField.Detection)}}
+                      #define TICK_PS3 {{GenerateTick(ConfigField.Ps3)}}
+                      #define TICK_PS3_WITHOUT_CAPTURE {{GenerateTick(ConfigField.Ps3WithoutCapture)}}
+                      #define TICK_PC {{GenerateTick(ConfigField.Universal)}}
+                      #define TICK_PS4 {{GenerateTick(ConfigField.Ps4)}}
+                      #define TICK_XINPUT {{GenerateTick(ConfigField.Xbox360)}}
+                      #define TICK_XBOX_ONE {{GenerateTick(ConfigField.XboxOne)}}
+                      #define DIGITAL_COUNT {{CalculateDebounceTicks()}}
+                      #define LED_COUNT {{LedCount}}
+                      #define WT_SENSITIVITY {{WtSensitivity}}
+                      #define LED_TYPE {{GetLedType()}}
+                      #define HANDLE_AUTH_LED {{GenerateTick(ConfigField.AuthLed)}}
+                      #define HANDLE_PLAYER_LED {{GenerateTick(ConfigField.PlayerLed)}}
+                      #define HANDLE_LIGHTBAR_LED {{GenerateTick(ConfigField.LightBarLed)}}
+                      #define INPUT_QUEUE {{Deque.ToString().ToLower()}}
+                      #define HANDLE_RUMBLE {{GenerateTick(ConfigField.RumbleLed)}}
+                      #define HANDLE_KEYBOARD_LED {{GenerateTick(ConfigField.KeyboardLed)}}
+                      #define ADC_PINS {{{string.Join(",", analogPins)}}}
+                      #define ADC_COUNT {{analogPins.Count}}
+                      #define PIN_INIT {{GenerateInit()}}
+                      #define LED_INIT {{GenerateTick(ConfigField.InitLed)}}
+                      """;
 
-            // And also store a count
-            lines.Add($"#define ADC_COUNT {analogPins.Count}");
-            lines.Add($"#define PIN_INIT {GenerateInit()}");
-            lines.Add($"#define LED_INIT {GenerateTick(ConfigField.InitLed)}");
+            var nkroTick = GenerateTick(ConfigField.Keyboard);
+            if (nkroTick.Any()) config += $"#define TICK_NKRO {nkroTick}";
+
+            var consumerTick = GenerateTick(ConfigField.Consumer);
+            if (consumerTick.Any()) config += $"#define TICK_CONSUMER {consumerTick}";
+
+            var mouseTick = GenerateTick(ConfigField.Mouse);
+            if (mouseTick.Any()) config += $"#define TICK_MOUSE {mouseTick}";
+
+            if (IsApa102)
+            {
+                config += $"""
+                           #define {Apa102SpiType.ToUpper()}_SPI_PORT {_apa102SpiConfig!.Definition}
+                           #define TICK_LED {GenerateLedTick()}
+                           """;
+            }
+
+
+            var offLed = GenerateTick(ConfigField.OffLed);
+            if (offLed.Any()) config += $"#define HANDLE_LED_RUMBLE_OFF {offLed}";
+            if (EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse)
+                config +=
+                    $"#define BLUETOOTH_TX {(EmulationType is EmulationType.Bluetooth or EmulationType.BluetoothKeyboardMouse).ToString().ToLower()}";
+
+            if (KvEnabled)
+            {
+                config += $$"""
+                          #define KV_KEY_1 {{{string.Join(",", KvKey1.ToArray().Select(b => "0x" + b.ToString("X")))}}}
+                          #define KV_KEY_2 {{{string.Join(",", KvKey2.ToArray().Select(b => "0x" + b.ToString("X")))}}}
+                          """;
+            }
 
             // Copy in any specific config for the different pin configs (like spi and twi config on the pico)
-            lines.Add(GetPinConfigs().Distinct().Aggregate("", (current, config) => current + config.Generate()));
-            lines.Add(string.Join("\n",
-                inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}")));
+            config += GetPinConfigs().Distinct().Aggregate("", (current, pinConfig) => current + pinConfig.Generate());
+            config += string.Join("\n",
+                inputs.SelectMany(input => input.RequiredDefines()).Distinct().Select(define => $"#define {define}"));
         }
         else
         {
             // Write an empty config - the config at this point is likely invalid and won't compile
-
-            lines.Add($"#define USB_HOST_STACK false");
-            lines.Add($"#define USB_HOST_DP_PIN 0");
-
-            lines.Add($"#define TICK_SHARED");
-            lines.Add($"#define TICK_DETECTION");
-
-            lines.Add($"#define TICK_PC");
-            lines.Add($"#define TICK_PS3");
-            lines.Add($"#define TICK_PS3_WITHOUT_CAPTURE");
-
-            lines.Add($"#define TICK_PS4");
-
-            lines.Add($"#define TICK_XINPUT");
-
-            lines.Add($"#define TICK_XBOX_ONE");
-
-            lines.Add($"#define DIGITAL_COUNT 0");
-            lines.Add($"#define LED_COUNT 0");
-            lines.Add($"#define WT_SENSITIVITY {WtSensitivity}");
-
-            lines.Add($"#define LED_TYPE 0");
-            lines.Add($"#define INPUT_QUEUE false");
-
-            lines.Add($"#define HANDLE_AUTH_LED");
-
-            lines.Add($"#define HANDLE_PLAYER_LED");
-
-            lines.Add($"#define HANDLE_LIGHTBAR_LED");
-
-            lines.Add($"#define HANDLE_RUMBLE");
-
-            lines.Add($"#define HANDLE_KEYBOARD_LED");
-            lines.Add("#define ADC_PINS {}");
-            lines.Add($"#define ADC_COUNT 0");
-            lines.Add($"#define PIN_INIT");
-            lines.Add($"#define LED_INIT");
+            config += """
+                      #define USB_HOST_STACK false
+                      #define USB_HOST_DP_PIN 0
+                      #define TICK_SHARED
+                      #define TICK_DETECTION
+                      #define TICK_PC
+                      #define TICK_PS3
+                      #define TICK_PS3_WITHOUT_CAPTURE
+                      #define TICK_PS4
+                      #define TICK_XINPUT
+                      #define TICK_XBOX_ONE
+                      #define DIGITAL_COUNT 0
+                      #define LED_COUNT 0
+                      #define WT_SENSITIVITY 0
+                      #define LED_TYPE 0
+                      #define INPUT_QUEUE false
+                      #define HANDLE_AUTH_LED
+                      #define HANDLE_PLAYER_LED
+                      #define HANDLE_LIGHTBAR_LED
+                      #define HANDLE_RUMBLE
+                      #define HANDLE_KEYBOARD_LED
+                      #define ADC_PINS {}
+                      #define ADC_COUNT 0
+                      #define PIN_INIT
+                      #define LED_INIT
+                      """;
+            
         }
 
-        File.WriteAllLines(configFile, lines);
+        File.WriteAllText(configFile, config);
     }
 
     private string GenerateInit()
