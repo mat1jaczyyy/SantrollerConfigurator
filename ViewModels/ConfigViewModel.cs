@@ -699,7 +699,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         UpdateErrors();
     }
 
-    public string Generate(MemoryStream? blobStream, string? variant)
+    public string Generate(MemoryStream? blobStream)
     {
         if (Device is Santroller santroller)
         {
@@ -711,7 +711,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         var directInputs = inputs.OfType<DirectInput>().ToList();
         string config;
         BinaryWriter? writer = null;
-        if (variant != null && blobStream != null)
+        if (blobStream != null)
         {
             writer = new BinaryWriter(blobStream);
             writer.Write((ushort) (SwapSwitchFaceButtons ? 1 : 0));
@@ -722,17 +722,16 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             writer.Write((ushort) Debounce);
             writer.Write((ushort) StrumDebounce);
             writer.Write((ushort) WtSensitivity);
-            config = $$"""
-                       #define CONFIGURATION {{{variant.ToArray().Select(b => "0x" + ((byte)b).ToString("X"))}}}
-                       #define CONFIGURATION_LEN {{variant.Length}}
-                       #define SWAP_SWITCH_FACE_BUTTONS config_blobs[0]
-                       #define WINDOWS_USES_XINPUT config_blobs[1]
-                       #define INPUT_QUEUE config_blobs[2]
-                       #define POLL_RATE config_blobs[3]
-                       #define WT_SENSITIVITY config_blobs[4]
-                       #define INPUT_DJ_TURNTABLE_POLL_RATE config_blobs[5]
-                       #define INPUT_DJ_TURNTABLE_SMOOTHING config_blobs[6]
-                       #define INPUT_DJ_TURNTABLE_SMOOTHING_DUAL config_blobs[7]
+            config = $"""
+                       #define CONFIGURATION_LEN config_blocks[0]
+                       #define SWAP_SWITCH_FACE_BUTTONS config_blobs[1]
+                       #define WINDOWS_USES_XINPUT config_blobs[2]
+                       #define INPUT_QUEUE config_blobs[3]
+                       #define POLL_RATE config_blobs[4]
+                       #define WT_SENSITIVITY config_blobs[5]
+                       #define INPUT_DJ_TURNTABLE_POLL_RATE config_blobs[6]
+                       #define INPUT_DJ_TURNTABLE_SMOOTHING config_blobs[7]
+                       #define INPUT_DJ_TURNTABLE_SMOOTHING_DUAL config_blobs[8]
                        """;
         }
         else
