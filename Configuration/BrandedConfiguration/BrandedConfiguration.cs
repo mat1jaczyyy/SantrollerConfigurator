@@ -19,13 +19,20 @@ public class BrandedConfiguration
     public string ProductName { get; private set; }
     public Uf2Block[] Uf2 { get; private set; }
     public ConfigViewModel Model { get; }
-    public BrandedConfiguration(SerialisedBrandedConfiguration configuration, ConfigViewModel model)
+    public BrandedConfiguration(SerialisedBrandedConfiguration configuration, bool branded, MainWindowViewModel screen)
     {
-        Model = model;
+        Model = new ConfigViewModel(screen, new EmptyDevice(), branded);
         configuration.Configuration.LoadConfiguration(Model);
         VendorName = configuration.VendorName;
         ProductName = configuration.ProductName;
         Uf2 = configuration.Uf2;
+    }
+
+    public BrandedConfiguration(string vendorName, string productName, MainWindowViewModel screen)
+    {
+        Model = new ConfigViewModel(screen, new EmptyDevice(), false);
+        VendorName = vendorName;
+        ProductName = productName;
     }
 
     public string BuildConfig()

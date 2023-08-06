@@ -9,25 +9,25 @@ using ProtoBuf;
 namespace GuitarConfigurator.NetCore.Configuration.BrandedConfiguration;
 public class BrandedConfigurationStore
 {
-    public BrandedConfigurationStore(string toolName, string vendorName, string helpText, string productName)
+    public BrandedConfigurationStore(string toolName, string helpText)
     {
         ToolName = toolName;
         HelpText = helpText;
         Configurations = new List<BrandedConfiguration>();
     }
     
-    public BrandedConfigurationStore(SerialisedBrandedConfigurationStore store, bool branded)
+    public BrandedConfigurationStore(SerialisedBrandedConfigurationStore store, bool branded, MainWindowViewModel screen)
     {
         ToolName = store.ToolName;
         HelpText = store.HelpText;
-        Configurations = store.Configurations.Select(s => new BrandedConfiguration(s, new ConfigViewModel(new MainWindowViewModel(), new EmptyDevice(), branded))).ToList();
+        Configurations = store.Configurations.Select(s => new BrandedConfiguration(s, branded, screen)).ToList();
     }
 
     public string ToolName { get; private set; }
     public string HelpText { get; private set; }
     public List<BrandedConfiguration> Configurations { get; private set; }
 
-    public static BrandedConfigurationStore LoadBranding()
+    public static BrandedConfigurationStore LoadBranding(MainWindowViewModel model)
     {
 #if SINGLE_FILE
         var stream = File.OpenRead(Environment.ProcessPath!);
@@ -39,7 +39,7 @@ public class BrandedConfigurationStore
         var path = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "branding.bin");
         var stream = File.OpenRead(path);
 #endif
-        return new BrandedConfigurationStore(Serializer.Deserialize<SerialisedBrandedConfigurationStore>(stream), true);
+        return new BrandedConfigurationStore(Serializer.Deserialize<SerialisedBrandedConfigurationStore>(stream), true, model);
     }
 
     public void WriteBranding(string baseExecutable, string outputExecutable)
