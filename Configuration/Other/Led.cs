@@ -484,31 +484,46 @@ public class Led : Output
         List<int> combinedDebounce, Dictionary<string, List<(int, Input)>> macros, BinaryWriter? writer)
     {
         if (mode is not (ConfigField.StrobeLed or ConfigField.AuthLed or ConfigField.PlayerLed or ConfigField.RumbleLed
-            or ConfigField.KeyboardLed or ConfigField.LightBarLed or ConfigField.OffLed or ConfigField.InitLed)) return "";
+            or ConfigField.KeyboardLed or ConfigField.LightBarLed or ConfigField.OffLed
+            or ConfigField.InitLed)) return "";
         var on = "";
         var off = "";
         var between = "";
         var starPowerBetween = "";
         if (PinConfig != null)
         {
-            on = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, !Inverted) + ";";
-            off = Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, Inverted) + ";";
+            on = $"{Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, !Inverted)};";
+            off = $"{Model.Microcontroller.GenerateDigitalWrite(PinConfig.Pin, Inverted)};";
             between =
-                Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, (Inverted ? "(255-" : "(") + "rumble_left)") +
-                ";";
+                $"{Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, $"{(Inverted ? "(255-" : "(")}rumble_left)")};";
             starPowerBetween =
-                Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin,
-                    (Inverted ? "(255-" : "(") + "last_star_power)") + ";";
+                $"{Model.Microcontroller.GenerateAnalogWrite(PinConfig.Pin, (Inverted ? "(255-" : "(") + "last_star_power)")};";
         }
 
         foreach (var index in LedIndices)
         {
-            on += $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(LedOn, index)}";
-            off += $@"ledState[{index - 1}].select = 0;{Model.LedType.GetLedAssignment(LedOff, index)}";
+            on += $"""
+
+                   ledState[{index - 1}].select = 1;
+                   {Model.LedType.GetLedAssignment(LedOn, index)}
+                   """;
+            off += $"""
+
+                    ledState[{index - 1}].select = 0;
+                    {Model.LedType.GetLedAssignment(LedOff, index)}
+                    """;
             between +=
-                $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(index, LedOn, LedOff, "rumble_left")}";
+                $"""
+
+                 ledState[{index - 1}].select = 1;
+                 {Model.LedType.GetLedAssignment(index, LedOn, LedOff, "rumble_left")}
+                 """;
             starPowerBetween +=
-                $@"ledState[{index - 1}].select = 1;{Model.LedType.GetLedAssignment(index, LedOn, LedOff, "last_star_power")}";
+                $"""
+
+                 ledState[{index - 1}].select = 1;
+                 {Model.LedType.GetLedAssignment(index, LedOn, LedOff, "last_star_power")}
+                 """;
         }
 
         switch (Command)

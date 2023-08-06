@@ -74,14 +74,15 @@ public abstract class SpiConfig : PinConfig
     {
         // On apa102, miso isn't used.
         var miso = IncludesMiso ? $"#define {Definition}_MISO {_miso}" : "";
-        return $@"
-{miso}
-#define {Definition}_MOSI {_mosi}
-#define {Definition}_SCK {_sck}
-#define {Definition}_CPOL {(_cpol ? 1 : 0)}
-#define {Definition}_CPHA {(_cpha ? 1 : 0)}
-#define {Definition}_MSBFIRST {(_msbfirst ? 1 : 0)}
-#define {Definition}_CLOCK {_clock}
-";
+        return $"""
+
+                {miso}
+                #define {Definition}_MOSI {_mosi}
+                #define {Definition}_SCK {_sck}
+                #define {Definition}_CPOL {(_cpol ? 1 : 0)}
+                #define {Definition}_CPHA {(_cpha ? 1 : 0)}
+                #define {Definition}_MSBFIRST {(_msbfirst ? 1 : 0)}
+                #define {Definition}_CLOCK {_clock}
+                """;
     }
 }

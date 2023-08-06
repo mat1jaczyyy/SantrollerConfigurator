@@ -117,22 +117,20 @@ public abstract class OutputButton : Output
                 }
             }
         }
-
-        var queue = "";
+        var ret = $$"""
+                 if (({{gen}} {{extraStatement}})) {
+                     {{reset}} {{extra}}
+                 }
+                 """;
         if (Model.Deque && this is GuitarButton {IsStrum: false}) {
-            queue = $$"""
+            ret += $$"""
+
                       if ({{ifStatement}}) {
                           {{GenerateOutput(ConfigField.Shared).Replace("report->", "current_queue_report.")}} = true;
                       }
                       """;
         }
-
-        return $$"""
-                 if (({{gen}} {{extraStatement}})) {
-                     {{reset}} {{extra}}
-                 }
-                 {{queue}}
-                 """;
+        return ret;
     }
 
     public override void UpdateBindings()

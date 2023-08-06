@@ -527,52 +527,49 @@ public class WiiInput : TwiInput
 
         if (mappedBindings.ContainsKey(WiiControllerType.ClassicController))
         {
-            var mappings = mappedBindings[WiiControllerType.ClassicController];
+            var mappings = mappedBindings[WiiControllerType.ClassicController].Select(s => s.Replace("\n","\n          ")).ToList();
             mappedBindings.Remove(WiiControllerType.ClassicController);
-            var mappings2 = new List<string>();
             var mappingsDigital = mappings.Where(m => m.Contains("wiiButtons") || m.Contains("debounce"));
-            mappings = mappings.Where(m => !m.Contains("wiiButtons") && !m.Contains("debounce")).ToList();
-            foreach (var mapping in mappings)
-            {
-                var val = HiResMapOrder.Aggregate(mapping, (current, key) => current.Replace(key, HiResMap[key]));
-
-                mappings2.Add(val);
-            }
+            mappings = mappings.Where(m => !m.Contains("wiiButtons") && !m.Contains("debounce")).Select(s => s.Replace("\n","\n   ")).ToList().ToList();
+            var mappings2 = mappings.Select(mapping => HiResMapOrder.Aggregate(mapping, (current, key) => current.Replace(key, HiResMap[key]))).ToList();
 
             var analogMappings = mappings.Any()
                 ? $$"""
-                    if (hiRes) {
-                        {{string.Join("\n", mappings2)}}
-                    } else {
-                        {{string.Join("\n", mappings)}}
-                    }
+                              if (hiRes) {
+                                 {{string.Join("\n             ", mappings2)}}
+                              } else {
+                                 {{string.Join("\n             ", mappings)}}
+                              }
                     """
                 : "";
             ret += $"""
-                    case WII_CLASSIC_CONTROLLER:
-                    case WII_CLASSIC_CONTROLLER_PRO:
-                        {string.Join("\n", mappingsDigital)}
-                        {analogMappings}
-                    break;
+                    
+                           case WII_CLASSIC_CONTROLLER:
+                           case WII_CLASSIC_CONTROLLER_PRO:
+                              {string.Join("\n          ", mappingsDigital)}
+                              {analogMappings.Trim()}
+                           break;
                     """;
         }
 
 
         foreach (var (input, mappings) in mappedBindings)
+        {
             ret += $"""
+
                     case {CType[input]}:
-                        {string.Join("\n", mappings)};
+                        {string.Join("\n    ", mappings.Select(s => s.Replace("\n","\n    ")))};
                         break;
                     """;
-        return !ret.Any()
-            ? ""
-            : $$"""
-                if (wiiValid) {
-                   switch(wiiControllerType) {
-                       {{ret}}
-                   }
-                }
-                """;
+        }
+
+        return ret.Any() ? $$"""
+                             if (wiiValid) {
+                                switch(wiiControllerType) {
+                                    {{ret}}
+                                }
+                             }
+                             """ : "";
     }
 
     public override IReadOnlyList<string> RequiredDefines()

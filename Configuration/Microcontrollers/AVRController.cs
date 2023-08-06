@@ -171,13 +171,13 @@ public abstract class AvrController : Microcontroller
             ddrByPort[port] = currentDdr;
         }
 
-        var ret = "uint8_t oldSREG = SREG;cli();";
-
-        foreach (var port in ddrByPort) ret += $"DDR{port.Key} = {port.Value};";
-        foreach (var port in portByPort) ret += $"PORT{port.Key} = {port.Value};";
-
-        ret += "SREG = oldSREG;";
-        return ret;
+        return $"""
+               uint8_t oldSREG = SREG;
+               cli();
+               {string.Join("\n", ddrByPort.Select(port => $"DDR{port.Key} = {port.Value};"))}
+               {string.Join("\n", portByPort.Select(port => $"PORT{port.Key} = {port.Value};"))}
+               SREG = oldSREG;
+               """;
     }
 
     public override string GenerateAnalogRead(int pin, ConfigViewModel model)

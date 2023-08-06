@@ -453,7 +453,7 @@ public abstract partial class OutputAxis : Output
             return intBased
                 ? $"{function}({prev}, {generated}, {(max + min) / 2}, {min}, {mulInt}, {DeadZone})"
                 : $"{function}({prev}, {generated}, {min}, {mulInt}, {DeadZone})";
-        
+
         var i = writer.BaseStream.Length / 2;
         if (intBased)
         {
@@ -461,14 +461,15 @@ public abstract partial class OutputAxis : Output
             writer.Write((ushort) (min + short.MaxValue));
             writer.Write((ushort) (mulInt + short.MaxValue));
             writer.Write((ushort) (DeadZone + short.MaxValue));
-            return $"{function}({prev}, {generated}, (config_blobs[{i}] - INT16_MAX), (config_blobs[{i+1}] - INT16_MAX), (config_blobs[{i+2}] - INT16_MAX), (config_blobs[{i+2}] - INT16_MAX))";
+            return
+                $"{function}({prev}, {generated}, (config_blobs[{i}] - INT16_MAX), (config_blobs[{i + 1}] - INT16_MAX), (config_blobs[{i + 2}] - INT16_MAX), (config_blobs[{i + 2}] - INT16_MAX))";
         }
 
         writer.Write((ushort) min);
         writer.Write((ushort) (mulInt + short.MaxValue));
         writer.Write((ushort) DeadZone);
-        return $"{function}({prev}, {generated},  config_blobs[{i}], (config_blobs[{i+1}] - INT16_MAX), config_blobs[{i+2}])";
-
+        return
+            $"{function}({prev}, {generated},  config_blobs[{i}], (config_blobs[{i + 1}] - INT16_MAX), config_blobs[{i + 2}])";
     }
 
 
@@ -501,7 +502,10 @@ public abstract partial class OutputAxis : Output
                 }
             }
 
-            return $"{output} = {GenerateAssignment(output, mode, false, false, false, writer)};{extraTrigger}";
+            return $"""
+                   {output} = {GenerateAssignment(output, mode, false, false, false, writer)};
+                   {extraTrigger}
+                   """;
         }
 
         // Digital to Analog stores values based on uint16_t for trigger, and int16_t for sticks
@@ -547,7 +551,11 @@ public abstract partial class OutputAxis : Output
                      """;
         }
 
-        return $"if ({Input.Generate()}) {{{output} = {val};}}";
+        return $$"""
+                 if ({{Input.Generate()}}) {
+                    {{output}} = {{val}};
+                 }
+                 """;
     }
 
     public override void UpdateBindings()

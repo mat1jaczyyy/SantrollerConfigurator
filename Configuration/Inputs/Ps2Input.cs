@@ -91,7 +91,7 @@ public class Ps2Input : SpiInput
         {Ps2InputType.LeftStickX, "(ps2Data[7] - 128) << 8"},
         {Ps2InputType.LeftStickY, "-(ps2Data[8] - 127) << 8"},
         {Ps2InputType.MouseLeft, "(~ps2Data[3]) & (1 << 3)"},
-        {Ps2InputType.MouseRight, "(~ps2Data[3]) & (1 << 2)"}, 
+        {Ps2InputType.MouseRight, "(~ps2Data[3]) & (1 << 2)"},
         {Ps2InputType.MouseX, "(ps2Data[5] - 128) << 8"},
         {Ps2InputType.MouseY, "-(ps2Data[6] - 127) << 8"},
         {Ps2InputType.RightStickX, "(ps2Data[5] - 128) << 8"},
@@ -187,7 +187,8 @@ public class Ps2Input : SpiInput
     private static readonly Dictionary<Ps2InputType, Ps2ControllerType> ControllerTypes = Enum.GetValues<Ps2InputType>()
         .ToDictionary(s => s,
             ps2InputType => Enum.GetValues<Ps2ControllerType>()
-                .FirstOrDefault(ps2ControllerType => ps2InputType.ToString().StartsWith(ps2ControllerType.ToString()), Ps2ControllerType.Digital));
+                .FirstOrDefault(ps2ControllerType => ps2InputType.ToString().StartsWith(ps2ControllerType.ToString()),
+                    Ps2ControllerType.Digital));
 
     private readonly DirectPinConfig _ackConfig;
     private readonly DirectPinConfig _attConfig;
@@ -369,6 +370,7 @@ public class Ps2Input : SpiInput
             types.Add(Ps2ControllerType.Dualshock);
             types.Add(Ps2ControllerType.FlightStick);
         }
+
         return types.Contains(type);
     }
 
@@ -435,19 +437,24 @@ public class Ps2Input : SpiInput
 
         var ret = "";
         foreach (var (input, mappings) in mappedBindings)
+        {
             ret += $"""
-                    case {CType[input]}:
-                        {string.Join("\n", mappings)};
-                        break;
-                    """;
 
-        return ret == "" ? "" : $$"""
-                                  if (ps2Valid) {
-                                     switch (ps2ControllerType) {
-                                         {{ret}}
-                                     }
-                                  }
-                                  """;
+                           case {CType[input]}:
+                              {string.Join("\n          ", mappings.Select(s => s.Replace("\n","\n          ")))}
+                              break;
+                    """;
+        }
+
+        return ret == ""
+            ? ""
+            : $$"""
+                if (ps2Valid) {
+                   switch (ps2ControllerType) {
+                       {{ret}}
+                   }
+                }
+                """;
     }
 
     public override IReadOnlyList<string> RequiredDefines()

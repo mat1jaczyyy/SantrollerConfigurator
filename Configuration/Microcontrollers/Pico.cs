@@ -201,15 +201,17 @@ public class Pico : Microcontroller
                 case DevicePinMode.Skip:
                     continue;
                 case DevicePinMode.Analog:
-                    ret += $"adc_gpio_init({devicePin.Pin});";
+                    ret += $"\nadc_gpio_init({devicePin.Pin});";
                     continue;
                 default:
                     var up = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullUp;
                     var down = devicePin.PinMode is DevicePinMode.BusKeep or DevicePinMode.PullDown;
-                    ret += $"gpio_init({devicePin.Pin});";
-                    ret +=
-                        $"gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});";
-                    ret += $"gpio_set_pulls({devicePin.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});";
+                    ret += "\n";
+                    ret += $"""
+                           gpio_init({devicePin.Pin});
+                           gpio_set_dir({devicePin.Pin},{(devicePin.PinMode == DevicePinMode.Output).ToString().ToLower()});
+                           gpio_set_pulls({devicePin.Pin},{up.ToString().ToLower()},{down.ToString().ToLower()});
+                           """;
                     continue;
             }
 
