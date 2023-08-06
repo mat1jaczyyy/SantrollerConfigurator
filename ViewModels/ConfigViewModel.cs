@@ -1232,7 +1232,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
             }
         }
 
-        return ret.Replace('\r', ' ').Replace("\n", "\\\n").Trim();
+        return ret.Replace('\r', ' ').Trim().Replace("\n", "\\\n");
     }
 
     private int CalculateDebounceTicks()
