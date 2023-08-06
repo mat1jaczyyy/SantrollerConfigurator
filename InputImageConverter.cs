@@ -52,11 +52,6 @@ public class InputImageConverter : IMultiValueConverter
         var name = values[0]!.GetType().Name + values[0] + deviceControllerType + legendType + swapSwitchFaceButtons;
         if (Icons.TryGetValue(name, out var image)) return image;
 
-        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
-        if (assemblyName != "SantrollerConfigurator")
-        {
-            assemblyName += "/santroller-configurator";
-        }
         var path = values[0] switch
         {
             EmptyType.Empty => "Generic",
@@ -119,14 +114,14 @@ public class InputImageConverter : IMultiValueConverter
         };
         try
         {
-            var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/{path}.png"));
+            var asset = AssetLoader.Open(new Uri($"avares://SantrollerConfigurator/Assets/Icons/{path}.png"));
             var bitmap = new Bitmap(asset);
             Icons.Add(name, bitmap);
             return bitmap;
         }
         catch (FileNotFoundException)
         {
-            var asset = AssetLoader.Open(new Uri($"avares://{assemblyName}/Assets/Icons/Generic.png"));
+            var asset = AssetLoader.Open(new Uri($"avares://SantrollerConfigurator/Assets/Icons/Generic.png"));
             var bitmap = new Bitmap(asset);
             Icons.Add(name, bitmap);
             return bitmap;
