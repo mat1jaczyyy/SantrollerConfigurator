@@ -43,6 +43,7 @@ public class InputImageConverter : IMultiValueConverter
 
         return "";
     }
+    
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
         if (values[0] is not Enum) return null;
