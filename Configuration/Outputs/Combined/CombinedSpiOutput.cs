@@ -18,7 +18,7 @@ public abstract class CombinedSpiOutput : CombinedOutput, ISpi
         bool cpha, bool msbFirst, string name, int miso = -1, int mosi = -1, int sck = -1) : base(model)
     {
         SpiType = spiType;
-        BindableSpi = Model.Microcontroller.SpiAssignable;
+        BindableSpi = Model.Microcontroller.SpiAssignable && !model.Branded;
         var config = Model.GetSpiForType(SpiType);
         SpiConfig = config ?? Model.Microcontroller.AssignSpiPins(model, SpiType, true, mosi, miso, sck, cpol, cpha,
             msbFirst, spiFreq);

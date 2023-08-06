@@ -360,7 +360,7 @@
                                VerticalContentAlignment="Center"
                                Width="200" Content="{Binding UsbHostInfo}" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).Branded}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.DPlusLabel}" />
@@ -369,7 +369,7 @@
                                   ItemsSource="{Binding AvailablePinsDp}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).Branded}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.DMinusLabel}" />
@@ -392,7 +392,7 @@
                                            VerticalAlignment="Center"
                                            Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !Model.Branded}">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300" Content="{x:Static netCore:Resources.SliderAnalogInputPin}" />
@@ -402,7 +402,7 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
                                       Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !Model.Branded}">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300" Content="{x:Static netCore:Resources.SliderS0Pin}" />
@@ -412,7 +412,7 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
                                       Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !Model.Branded}">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300" Content="{x:Static netCore:Resources.SliderS1Pin}" />
@@ -422,7 +422,7 @@
                                       ItemTemplate="{StaticResource PinToStringTemplate}"
                                       Width="200" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !Model.Branded}">
                             <Label VerticalAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="300" Content="{x:Static netCore:Resources.SliderS2Pin}" />
@@ -676,7 +676,7 @@
                                VerticalContentAlignment="Center"
                                Width="200" Content="{Binding UsbHostInfo}" />
                     </StackPanel>
-                    <StackPanel IsVisible="{Binding !Combined}" Orientation="Horizontal">
+                    <StackPanel IsVisible="{Binding ShouldShowPins}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.DPlusLabel}" />
@@ -685,7 +685,7 @@
                                   ItemsSource="{Binding AvailablePinsDp}"
                                   ItemTemplate="{StaticResource PinToStringTemplate}" />
                     </StackPanel>
-                    <StackPanel IsVisible="{Binding !Combined}" Orientation="Horizontal">
+                    <StackPanel IsVisible="{Binding ShouldShowPins}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.DMinusLabel}" />
@@ -732,7 +732,7 @@
                                   Width="200" />
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding !Combined}" Orientation="Horizontal">
+                    <StackPanel IsVisible="{Binding ShouldShowPins}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.AckLabel}" />
@@ -743,7 +743,7 @@
                                   Width="200" />
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding !Combined}" Orientation="Horizontal">
+                    <StackPanel IsVisible="{Binding ShouldShowPins}" Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.AttentionLabel}" />
@@ -791,7 +791,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:MultiplexerInput}">
-                <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Vertical" IsVisible="{Binding !Model.Branded}">
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center" Width="300"
                                Content="{x:Static netCore:Resources.AnalogPinLabel}" />
@@ -845,7 +845,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:DirectInput}">
-                <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Vertical" IsVisible="{Binding !$parent[UserControl].((viewModels:ConfigViewModel)DataContext).Branded}">
                     <StackPanel
                         IsVisible="{Binding $parent[UserControl].((viewModels:ConfigViewModel)DataContext).IsAdvancedMode}">
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding !IsAnalog}">
@@ -1551,7 +1551,7 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type inputs:ConstantInput}">
-                <StackPanel>
+                <StackPanel IsVisible="{Binding !$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).Branded}">
                     <StackPanel Orientation="Horizontal" IsVisible="{Binding Normal}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -1662,7 +1662,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type inputs:MacroInput}">
-                <StackPanel>
+                <StackPanel IsVisible="{Binding !$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).Branded}">
                     <StackPanel Orientation="Horizontal">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
@@ -1950,7 +1950,7 @@
                                   Width="200" />
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).Branded}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.AckLabel}" />
@@ -1961,7 +1961,7 @@
                                   Width="200" />
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding !$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).Branded}">
                         <Label VerticalAlignment="Center"
                                VerticalContentAlignment="Center"
                                Width="300" Content="{x:Static netCore:Resources.AttentionLabel}" />
@@ -1998,7 +1998,7 @@
                                             Content="{Binding }" />
                         </StackPanel>
                     </StackPanel>
-                    <ToggleSwitch HorizontalAlignment="Right" IsVisible="{Binding ChildOfCombined}"
+                    <ToggleSwitch HorizontalAlignment="Right" IsVisible="{Binding ShouldShowEnabled}"
                                   IsChecked="{Binding Enabled}" OnContent="{x:Static netCore:Resources.EnabledLabel}"
                                   OffContent="{x:Static netCore:Resources.DisabledLabel}" />
                 </Panel>
@@ -2143,6 +2143,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <StackPanel.IsVisible>
                                             <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="!$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).Branded" />
                                                 <Binding Path="!IsCombined" />
                                                 <Binding Path="ConfigurableInput" />
                                             </MultiBinding>
@@ -2159,6 +2160,7 @@
                                         <StackPanel.IsVisible>
                                             <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                 <Binding Path="ConfigurableInput" />
+                                                <Binding Path="!$parent[views:ConfigView].((viewModels:ConfigViewModel)DataContext).Branded" />
                                                 <Binding Path="!IsCombined" />
                                                 <MultiBinding Converter="{x:Static BoolConverters.Or}">
                                                     <Binding Path="IsWii" />

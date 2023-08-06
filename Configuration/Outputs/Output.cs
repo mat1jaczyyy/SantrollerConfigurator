@@ -16,6 +16,7 @@ using GuitarConfigurator.NetCore.Configuration.Conversions;
 using GuitarConfigurator.NetCore.Configuration.Inputs;
 using GuitarConfigurator.NetCore.Configuration.Microcontrollers;
 using GuitarConfigurator.NetCore.Configuration.Other;
+using GuitarConfigurator.NetCore.Configuration.Outputs.Combined;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Configuration.Types;
 using GuitarConfigurator.NetCore.Devices;
@@ -96,12 +97,14 @@ public abstract partial class Output : ReactiveObject
         this.WhenAnyValue(x => x.Input)
             .Select(x => x.InnermostInput() is GhWtTapInput && this is not GuitarAxis)
             .ToPropertyEx(this, x => x.IsWt);
-        this.WhenAnyValue(x => x.Input.Title, x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails, x => x.Model.LegendType, x => x.Model.SwapSwitchFaceButtons)
+        this.WhenAnyValue(x => x.Input.Title, x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails,
+                x => x.Model.LegendType, x => x.Model.SwapSwitchFaceButtons)
             .Select(x => $"{x.Item1} ({GetName(x.Item2, x.Item4, x.Item5)})")
             .ToPropertyEx(this, x => x.Title);
         this.WhenAnyValue(x => x.Model.LedType).Select(x => x is not LedType.None)
             .ToPropertyEx(this, x => x.AreLedsEnabled);
-        this.WhenAnyValue(x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails, x => x.Model.LegendType, x => x.Model.SwapSwitchFaceButtons)
+        this.WhenAnyValue(x => x.Model.DeviceControllerType, x => x.ShouldUpdateDetails, x => x.Model.LegendType,
+                x => x.Model.SwapSwitchFaceButtons)
             .Select(x => GetName(x.Item1, x.Item3, x.Item4))
             .ToPropertyEx(this, x => x.LocalisedName);
         this.WhenAnyValue(x => x.Input.RawValue, x => x.Enabled).Select(x => x.Item2 ? x.Item1 : 0)
@@ -126,6 +129,7 @@ public abstract partial class Output : ReactiveObject
         Outputs.Connect().Bind(out var allOutputs).Subscribe();
         AllOutputs = allOutputs;
         _configured = true;
+        IsVisible = !Model.Branded || LedIndices.Any() || this is Led || this is BluetoothOutput || this is CombinedOutput || this is OutputAxis {Input: not DigitalToAnalog};
     }
 
 
@@ -235,7 +239,7 @@ public abstract partial class Output : ReactiveObject
             (this is not GuitarAxis {Type: GuitarAxisType.Slider} ||
              s is InputType.Gh5NeckInput or InputType.WtNeckInput or InputType.ConstantInput) &&
             (s is not InputType.MultiplexerInput || Model.IsPico) &&
-            (s is not InputType.MacroInput || this is OutputButton) 
+            (s is not InputType.MacroInput || this is OutputButton)
             && s is not InputType.BluetoothInput &&
             (s is not InputType.UsbHostInput || Model.IsPico));
 
@@ -301,6 +305,8 @@ public abstract partial class Output : ReactiveObject
     public bool IsLed => this is Led;
 
     public bool ChildOfCombined { get; }
+
+    public bool ShouldShowEnabled => ChildOfCombined && !Model.Branded;
     public bool IsEmpty => this is EmptyOutput;
 
     [Reactive] public string ButtonText { get; set; }
@@ -323,6 +329,7 @@ public abstract partial class Output : ReactiveObject
 
     public virtual bool SupportsLedOff => true;
     public bool ConfigurableInput => Input is not (FixedInput or MacroInput);
+    public bool IsVisible { get; }
 
     public virtual void WriteBlobsToWriter(BinaryWriter writer)
     {

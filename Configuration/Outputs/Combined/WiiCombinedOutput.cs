@@ -200,6 +200,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
         this.WhenAnyValue(x => x.DetectedType).Select(s => s is WiiControllerType.Guitar)
             .ToPropertyEx(this, x => x.IsGuitar);
         Outputs.Connect().Filter(x => x is OutputAxis)
+            .Filter(s => s.IsVisible)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, X => X.SelectedType)
@@ -207,6 +208,7 @@ public class WiiCombinedOutput : CombinedTwiOutput
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
+            .Filter(s => s.IsVisible)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, X => X.SelectedType)

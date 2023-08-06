@@ -19,7 +19,7 @@ public abstract class CombinedTwiOutput : CombinedOutput
         int twiFreq, string name, int sda = -1, int scl = -1) : base(model)
 
     {
-        BindableTwi = Model.Microcontroller.TwiAssignable;
+        BindableTwi = Model.Microcontroller.TwiAssignable && !model.Branded;
         _twiType = twiType;
         var config = Model.GetTwiForType(_twiType);
         _twiConfig = config ?? Model.Microcontroller.AssignTwiPins(model, _twiType, sda, scl, twiFreq);

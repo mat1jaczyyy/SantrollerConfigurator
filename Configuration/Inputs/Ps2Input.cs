@@ -201,7 +201,7 @@ public class Ps2Input : SpiInput
         Ps2SpiCpha, Ps2SpiMsbFirst, miso: miso, mosi: mosi, sck: sck, model: model)
     {
         Combined = combined;
-        BindableSpi = !Combined && Model.Microcontroller.SpiAssignable;
+        BindableSpi = !Combined && Model.Microcontroller.SpiAssignable && !model.Branded;
         Input = input;
         _ackConfig = Model.GetPinForType(Ps2AckType, ack, DevicePinMode.Floating);
         _attConfig = Model.GetPinForType(Ps2AttType, ack, DevicePinMode.Floating);
@@ -225,6 +225,7 @@ public class Ps2Input : SpiInput
     public Ps2InputType Input { get; }
 
     public bool Combined { get; }
+    public bool ShouldShowPins => !Combined && !Model.Branded; 
 
     public bool BindableSpi { get; }
 

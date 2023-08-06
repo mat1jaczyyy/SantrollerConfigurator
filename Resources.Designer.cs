@@ -4785,12 +4785,6 @@ namespace GuitarConfigurator.NetCore {
             }
         }
         
-        public static string PS2InputFilterLabel {
-            get {
-                return ResourceManager.GetString("PS2InputFilterLabel", resourceCulture);
-            }
-        }
-        
         public static string AttentionLabel {
             get {
                 return ResourceManager.GetString("AttentionLabel", resourceCulture);
@@ -5190,6 +5184,12 @@ namespace GuitarConfigurator.NetCore {
         public static string Input2InputLabel {
             get {
                 return ResourceManager.GetString("Input2InputLabel", resourceCulture);
+            }
+        }
+        
+        public static string PS2InputFilterLabel {
+            get {
+                return ResourceManager.GetString("PS2InputFilterLabel", resourceCulture);
             }
         }
         

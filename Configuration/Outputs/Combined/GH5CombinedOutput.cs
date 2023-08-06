@@ -37,9 +37,11 @@ public class Gh5CombinedOutput : CombinedTwiOutput
     {
         Outputs.Clear();
         Outputs.Connect().Filter(x => x is OutputAxis)
+            .Filter(s => s.IsVisible)
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton)
+            .Filter(s => s.IsVisible)
             .Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;

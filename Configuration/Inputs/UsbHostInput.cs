@@ -23,6 +23,7 @@ public class UsbHostInput : Input
     }
 
     public bool Combined { get; }
+    public bool ShouldShowPins => !Combined && !Model.Branded; 
 
     public UsbHostInputType Input { get; }
 

@@ -52,9 +52,11 @@ public class GhwtCombinedOutput : CombinedOutput
         this.WhenAnyValue(x => x._pinConfigS2.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(PinS2)));
         this.WhenAnyValue(x => x.Model.WtSensitivity).Subscribe(_ => this.RaisePropertyChanged(nameof(Sensitivity)));
         Outputs.Connect().Filter(x => x is OutputAxis)
+            .Filter(s => s.IsVisible)
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton)
+            .Filter(s => s.IsVisible)
             .Bind(out var digitalOutputs)
             .Subscribe();
         AnalogOutputs = analogOutputs;

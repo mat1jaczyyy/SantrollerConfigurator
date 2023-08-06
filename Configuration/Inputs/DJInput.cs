@@ -21,7 +21,7 @@ public partial class DjInput : TwiInput
     {
         Smoothing = smoothing;
         Combined = combined;
-        BindableTwi = !combined && Model.Microcontroller.TwiAssignable;
+        BindableTwi = !combined && Model.Microcontroller.TwiAssignable && !model.Branded;
         Input = input;
         IsAnalog = Input <= DjInputType.RightTurntable;
         this.WhenAnyValue(x => x.Model.DjPollRate).Subscribe(_ => this.RaisePropertyChanged(nameof(PollRate)));

@@ -22,11 +22,13 @@ public class UsbHostCombinedOutput : CombinedOutput
         _usbHostDm = model.WhenAnyValue(x => x.UsbHostDm).ToProperty(this, x => x.UsbHostDm);
         _usbHostDp = model.WhenAnyValue(x => x.UsbHostDp).ToProperty(this, x => x.UsbHostDp);
         Outputs.Connect().Filter(x => x is OutputAxis)
+            .Filter(s => s.IsVisible)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
+            .Filter(s => s.IsVisible)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
             .Bind(out var digitalOutputs)

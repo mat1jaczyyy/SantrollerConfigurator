@@ -58,10 +58,11 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     private readonly DirectPinConfig _usbHostDm;
     private readonly DirectPinConfig _usbHostDp;
 
-    public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device)
+    public ConfigViewModel(MainWindowViewModel screen, IConfigurableDevice device, bool branded)
     {
         Device = device;
         Main = screen;
+        Branded = branded;
         if (device is Santroller santroller)
             LocalAddress = santroller.GetBluetoothAddress();
         else
@@ -118,6 +119,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
                 or LedType.Apa102Rbg or LedType.Apa102Rgb)
             .ToPropertyEx(this, x => x.IsApa102);
         Bindings.Connect()
+            .Filter(s => s.IsVisible)
             .Bind(out var outputs)
             .Subscribe();
         Outputs = outputs;
@@ -145,6 +147,8 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
     public ReadOnlyObservableCollection<Output> Outputs { get; }
 
     public bool SupportsReset { get; }
+    
+    public bool Branded { get; }
 
 
     private readonly ObservableAsPropertyHelper<float> _debounceDisplay;
@@ -163,7 +167,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => StrumDebounce = (int) (value * 10);
     }
 
-    [Reactive] public string Variant { get; set; }
+    [Reactive] public string? Variant { get; set; }
     [Reactive] public bool SwapSwitchFaceButtons { get; set; }
 
     [Reactive] public bool CombinedStrumDebounce { get; set; }

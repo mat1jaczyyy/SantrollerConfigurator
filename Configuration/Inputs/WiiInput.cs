@@ -256,7 +256,7 @@ public class WiiInput : TwiInput
     {
         Input = input;
         Combined = combined;
-        BindableTwi = !combined && Model.Microcontroller.TwiAssignable;
+        BindableTwi = !combined && Model.Microcontroller.TwiAssignable && !model.Branded;
         IsAnalog = Input <= WiiInputType.DrawsomePenPressure;
     }
 

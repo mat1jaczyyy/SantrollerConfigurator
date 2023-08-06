@@ -68,7 +68,7 @@ public partial class BluetoothOutput : CombinedOutput
             {
                 "BLUETOOTH_RX"
             };
-            if (!string.IsNullOrEmpty(BluetoothOutput.MacAddress) && BluetoothOutput.MacAddress.Contains(":")) ret.Add($"BT_ADDR \"{BluetoothOutput.MacAddress}\"");
+            if (!string.IsNullOrEmpty(BluetoothOutput.MacAddress) && BluetoothOutput.MacAddress.Contains(':')) ret.Add($"BT_ADDR \"{BluetoothOutput.MacAddress}\"");
 
             return ret;
         }

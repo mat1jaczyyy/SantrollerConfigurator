@@ -98,6 +98,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
         this.WhenAnyValue(x => x._ackConfig.Pin).Subscribe(_ => this.RaisePropertyChanged(nameof(Ack)));
 
         Outputs.Connect().Filter(x => x is OutputAxis)
+            .Filter(s => s.IsVisible)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, x => x.SelectedType)
@@ -105,6 +106,7 @@ public class Ps2CombinedOutput : CombinedSpiOutput
             .Bind(out var analogOutputs)
             .Subscribe();
         Outputs.Connect().Filter(x => x is OutputButton or JoystickToDpad)
+            .Filter(s => s.IsVisible)
             .AutoRefresh(s => s.LocalisedName)
             .Filter(s => s.LocalisedName.Any())
             .Filter(this.WhenAnyValue(x => x.ControllerFound, x => x.DetectedType, x => x.SelectedType)

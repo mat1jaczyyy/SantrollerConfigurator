@@ -60,10 +60,10 @@ public partial class MainWindowViewModel : ReactiveObject, IScreen, IDisposable
         DeviceInputTypes = deviceInputTypes;
         _manager = new ConfigurableUsbDeviceManager(this);
         ConfigureCommand = ReactiveCommand.CreateFromObservable(
-            () => Router.Navigate.Execute(new ConfigViewModel(this, SelectedDevice!))
+            () => Router.Navigate.Execute(new ConfigViewModel(this, SelectedDevice!, false))
         );
         InitialConfigureCommand = ReactiveCommand.CreateFromObservable(
-            () => Router.Navigate.Execute(new InitialConfigViewModel(this, new ConfigViewModel(this, SelectedDevice!)))
+            () => Router.Navigate.Execute(new InitialConfigViewModel(this, new ConfigViewModel(this, SelectedDevice!, false)))
         );
         RevertCommand = ReactiveCommand.CreateFromObservable<Santroller, IRoutableViewModel>(
             device => Router.Navigate.Execute(new RestoreViewModel(this, device))

@@ -2509,9 +2509,6 @@
     <data name="DisabledLabel" xml:space="preserve">
         <value>Disabled</value>
     </data>
-    <data name="PS2InputFilterLabel" xml:space="preserve">
-        <value>PS2 Controller Input Filter</value>
-    </data>
     <data name="AttentionLabel" xml:space="preserve">
         <value>Attention (Yellow) Pin</value>
     </data>
@@ -2713,8 +2710,11 @@
     <data name="Input2InputLabel" xml:space="preserve">
         <value>Input 2 Input</value>
     </data>
+    <data name="PS2InputFilterLabel" xml:space="preserve">
+        <value>PS2 Controller Inputs to display below</value>
+    </data>
     <data name="WiiInputFilterLabel" xml:space="preserve">
-        <value>Wii Input Filter</value>
+        <value>Wii Inputs to display below</value>
     </data>
     <data name="InitialConfigDesc" xml:space="preserve">
         <value>Programming initial configuration, please wait.</value>
