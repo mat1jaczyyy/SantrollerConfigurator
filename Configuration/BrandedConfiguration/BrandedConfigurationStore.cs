@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
 
@@ -15,18 +16,18 @@ public class BrandedConfigurationStore
         Configurations = new List<BrandedConfiguration>();
     }
     
-    public BrandedConfigurationStore(SerialisedBrandedConfigurationStore store, ConfigViewModel model)
+    public BrandedConfigurationStore(SerialisedBrandedConfigurationStore store, bool branded)
     {
         ToolName = store.ToolName;
         HelpText = store.HelpText;
-        Configurations = store.Configurations.Select(s => new BrandedConfiguration(s, model)).ToList();
+        Configurations = store.Configurations.Select(s => new BrandedConfiguration(s, new ConfigViewModel(new MainWindowViewModel(), new EmptyDevice(), branded))).ToList();
     }
 
     public string ToolName { get; private set; }
     public string HelpText { get; private set; }
     public List<BrandedConfiguration> Configurations { get; private set; }
 
-    public static BrandedConfigurationStore LoadBranding(ConfigViewModel model)
+    public static BrandedConfigurationStore LoadBranding()
     {
 #if SINGLE_FILE
         var stream = File.OpenRead(Environment.ProcessPath!);
@@ -38,7 +39,7 @@ public class BrandedConfigurationStore
         var path = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "branding.bin");
         var stream = File.OpenRead(path);
 #endif
-        return new BrandedConfigurationStore(Serializer.Deserialize<SerialisedBrandedConfigurationStore>(stream), model);
+        return new BrandedConfigurationStore(Serializer.Deserialize<SerialisedBrandedConfigurationStore>(stream), true);
     }
 
     public void WriteBranding(string baseExecutable, string outputExecutable)

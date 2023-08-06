@@ -64,7 +64,7 @@ public class SerializedConfiguration
     [ProtoMember(30)] public bool DjDual { get; private set; }
     [ProtoMember(31)] public bool SwapSwitchFaceButtons { get; private set; }
     [ProtoMember(32)] public bool DjSmooth { get; private set; }
-    [ProtoMember(33)] public string Variant { get; private set; }
+    [ProtoMember(33)] public string Variant { get; private set; } = "";
 
     public void LoadConfiguration(ConfigViewModel model)
     {

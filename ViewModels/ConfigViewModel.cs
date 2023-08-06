@@ -167,7 +167,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         set => StrumDebounce = (int) (value * 10);
     }
 
-    [Reactive] public string? Variant { get; set; }
+    [Reactive] public string Variant { get; set; } = "";
     [Reactive] public bool SwapSwitchFaceButtons { get; set; }
 
     [Reactive] public bool CombinedStrumDebounce { get; set; }

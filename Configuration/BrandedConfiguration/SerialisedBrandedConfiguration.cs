@@ -14,5 +14,7 @@ public class SerialisedBrandedConfiguration
     {
         Configuration = new SerializedConfiguration(configuration.Model);
         Uf2 = configuration.Uf2;
+        VendorName = configuration.VendorName;
+        ProductName = configuration.ProductName;
     }
 }
