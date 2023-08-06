@@ -7,16 +7,20 @@ using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using SantrollerConfiguratorBranded.NetCore;
 
 namespace GuitarConfigurator.NetCore.Configuration.BrandedConfiguration;
 
-public class BrandedConfiguration
+public class BrandedConfiguration : ReactiveObject
 {
     private const uint BlobOffset = 0x10282000;
     private const uint ConfigOffset = 0x10283000;
-    public string VendorName { get; private set; }
-    public string ProductName { get; private set; }
+    [Reactive]
+    public string VendorName { get; set; }
+    [Reactive]
+    public string ProductName { get; set; }
     public Uf2Block[] Uf2 { get; private set; }
     public ConfigViewModel Model { get; }
     public BrandedConfiguration(SerialisedBrandedConfiguration configuration, bool branded, MainWindowViewModel screen)
@@ -31,6 +35,7 @@ public class BrandedConfiguration
     public BrandedConfiguration(string vendorName, string productName, MainWindowViewModel screen)
     {
         Model = new ConfigViewModel(screen, new EmptyDevice(), false);
+        Model.SetDefaults();
         VendorName = vendorName;
         ProductName = productName;
     }

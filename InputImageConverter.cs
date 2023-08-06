@@ -53,6 +53,10 @@ public class InputImageConverter : IMultiValueConverter
         if (Icons.TryGetValue(name, out var image)) return image;
 
         var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name!;
+        if (assemblyName != "SantrollerConfigurator")
+        {
+            assemblyName += "/santroller-configurator";
+        }
         var path = values[0] switch
         {
             EmptyType.Empty => "Generic",

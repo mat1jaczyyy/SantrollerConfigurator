@@ -1,31 +1,39 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using DynamicData;
 using GuitarConfigurator.NetCore.Devices;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace GuitarConfigurator.NetCore.Configuration.BrandedConfiguration;
-public class BrandedConfigurationStore
+
+public class BrandedConfigurationStore : ReactiveObject
 {
     public BrandedConfigurationStore(string toolName, string helpText)
     {
         ToolName = toolName;
         HelpText = helpText;
-        Configurations = new List<BrandedConfiguration>();
     }
-    
-    public BrandedConfigurationStore(SerialisedBrandedConfigurationStore store, bool branded, MainWindowViewModel screen)
+
+    public BrandedConfigurationStore(SerialisedBrandedConfigurationStore store, bool branded,
+        MainWindowViewModel screen)
     {
         ToolName = store.ToolName;
         HelpText = store.HelpText;
-        Configurations = store.Configurations.Select(s => new BrandedConfiguration(s, branded, screen)).ToList();
+        Configurations.AddRange(store.Configurations.Select(s => new BrandedConfiguration(s, branded, screen)));
     }
 
-    public string ToolName { get; private set; }
-    public string HelpText { get; private set; }
-    public List<BrandedConfiguration> Configurations { get; private set; }
+    [Reactive]
+    public string ToolName { get; set; }
+    
+    [Reactive]
+    public string HelpText { get; set; }
+    public ObservableCollection<BrandedConfiguration> Configurations { get; } = new();
 
     public static BrandedConfigurationStore LoadBranding(MainWindowViewModel model)
     {
@@ -39,7 +47,8 @@ public class BrandedConfigurationStore
         var path = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "branding.bin");
         var stream = File.OpenRead(path);
 #endif
-        return new BrandedConfigurationStore(Serializer.Deserialize<SerialisedBrandedConfigurationStore>(stream), true, model);
+        return new BrandedConfigurationStore(Serializer.Deserialize<SerialisedBrandedConfigurationStore>(stream), true,
+            model);
     }
 
     public void WriteBranding(string baseExecutable, string outputExecutable)

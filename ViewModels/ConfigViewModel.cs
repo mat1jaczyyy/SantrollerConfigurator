@@ -129,6 +129,10 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         if (!device.LoadConfiguration(this))
         {
             SetDefaults();
+            Main.Message = "Building";
+            Main.Progress = 0;
+            // Write the full config, bluetooth has zero config so we can actually properly write it
+            Main.Write(this);
         }
 
         if (Main is {IsUno: false, IsMega: false}) return;
@@ -582,8 +586,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
     public void SetDefaults()
     {
-        Main.Message = "Building";
-        Main.Progress = 0;
         ClearOutputs();
         Deque = false;
         LedType = LedType.None;
@@ -645,8 +647,6 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
 
         UpdateBindings();
         UpdateErrors();
-        // Write the full config, bluetooth has zero config so we can actually properly write it
-        Main.Write(this);
     }
 
     private async Task SetDefaultBindingsAsync(EmulationType emulationType)
