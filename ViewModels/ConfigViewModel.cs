@@ -146,7 +146,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         return arg.dequeue ? $"Dequeue Rate ({rate}+ fps required)" : $"Poll Rate (0 for fastest speed) ({rate}hz)";
     }
 
-    public IConfigurableDevice Device { get; private set; }
+    public IConfigurableDevice Device { get; set; }
 
     public ReadOnlyObservableCollection<Output> Outputs { get; }
 
@@ -1375,7 +1375,7 @@ public partial class ConfigViewModel : ReactiveObject, IRoutableViewModel
         {
             Trace.WriteLine($"Add called, current device: {Device},  new device: {device}");
             Trace.Flush();
-            if (device is Santroller santroller)
+            if (device is Santroller santroller && Main.Working)
             {
                 Main.Complete(100);
                 Device = device;

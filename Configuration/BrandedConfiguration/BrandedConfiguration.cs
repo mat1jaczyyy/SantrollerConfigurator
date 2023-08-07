@@ -5,11 +5,11 @@ using System.IO.Compression;
 using System.Linq;
 using GuitarConfigurator.NetCore.Configuration.Serialization;
 using GuitarConfigurator.NetCore.Devices;
+using GuitarConfigurator.NetCore.Utils;
 using GuitarConfigurator.NetCore.ViewModels;
 using ProtoBuf;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using SantrollerConfiguratorBranded.NetCore;
 
 namespace GuitarConfigurator.NetCore.Configuration.BrandedConfiguration;
 
@@ -38,6 +38,7 @@ public class BrandedConfiguration : ReactiveObject
         Model.SetDefaults();
         VendorName = vendorName;
         ProductName = productName;
+        Uf2 = Array.Empty<Uf2Block>();
     }
 
     public string BuildConfig()
