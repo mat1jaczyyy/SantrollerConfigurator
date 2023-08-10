@@ -29,14 +29,17 @@ public class Builder : Task
         var platformioChanged = !File.Exists(platformioFileLoc) ||
                                 !File.ReadAllText(platformioFileLoc).Equals(platformIoCommit);
         var webClient = new HttpClient();
+        webClient.Timeout = TimeSpan.FromMinutes(120);
         if (firmwareChanged)
         {
+            Console.WriteLine("Builder: Downloading Santroller firmware...");
             var result = webClient.GetByteArrayAsync(firmwareUrl).Result;
             File.WriteAllBytes(Path.Combine(Parameter2, "Assets", "firmware.tar.xz"), result);
             File.WriteAllText(firmwareFileLoc, firmwareCommit);
         }
 
         if (!platformioChanged) return true;
+        Console.WriteLine("Builder: Downloading SantrollerLibs...");
         var result2 = webClient.GetByteArrayAsync(platformIoUrl).Result;
         File.WriteAllBytes(Path.Combine(Parameter2, "Assets", "platformio.tar.xz"), result2);
         File.WriteAllText(platformioFileLoc, platformIoCommit);
